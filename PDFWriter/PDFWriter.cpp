@@ -98,3 +98,13 @@ EStatusCode PDFWriter::EndPageContentContext(PageContentContext* inPageContext)
 {
 	return mDocumentContext.EndPageContentContext(inPageContext);
 }
+
+PDFFormXObject* PDFWriter::CreateFormXObject()
+{
+	return mDocumentContext.CreateFormXObject();
+}
+
+EStatusCode PDFWriter::WriteFormXObjectAndRelease(PDFFormXObject* inFormXObject)
+{
+	return mDocumentContext.WriteFormXObjectAndRelease(inFormXObject);
+}

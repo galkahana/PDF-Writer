@@ -24,6 +24,7 @@ struct LogConfiguration
 };
 
 class PageContentContext;
+class PDFFormXObject;
 
 class PDFWriter
 {
@@ -47,6 +48,11 @@ public:
 	// Page Writing [create a new Page by creating a new instance of PDFPage. instances may be reused.
 	EStatusCode WritePage(PDFPage* inPage);
 	EStatusCode WritePageAndRelease(PDFPage* inPage);
+
+
+	// Form XObject creating and writing
+	PDFFormXObject* CreateFormXObject();
+	EStatusCode WriteFormXObjectAndRelease(PDFFormXObject* inFormXObject);
 
 	// Extensibility, reaching to lower levels
 	DocumentContext& GetDocumentContext();

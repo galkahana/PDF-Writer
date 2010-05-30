@@ -18,7 +18,7 @@ SimpleContentPageTest::~SimpleContentPageTest(void)
 }
 
 /*
-	Creates a single page PDF with a blue rectangle
+	Creates a single page PDF with some drawings
 */
 
 EStatusCode SimpleContentPageTest::Run()

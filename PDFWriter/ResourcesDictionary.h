@@ -1,8 +1,11 @@
 #pragma once
 
 #include "SingleValueContainerIterator.h"
+#include "MapIterator.h"
+#include "ObjectsBasicTypes.h"
 
 #include <set>
+#include <map>
 #include <string>
 
 using namespace std;
@@ -16,6 +19,7 @@ static const string KProcsetImageI = "ImageI";
 
 
 typedef set<string> StringSet;
+typedef map<ObjectIDType,string> ObjectIDTypeToStringMap;
 
 class ResourcesDictionary
 {
@@ -27,9 +31,22 @@ public:
 	int GetProcsetsCount();
 	SingleValueContainerIterator<StringSet> GetProcesetsIterator();
 
+	// Use AddFormXObjectMapping to use a form XObject in a content stream [page or xobject].
+	// AddFromXObjectMapping(inFormXObjectID) returns a string name that you can use for 'Do' calls
+	string AddFormXObjectMapping(ObjectIDType inFormXObjectID);
+	// AddFormXObjectMapping(inFormXObjectID,inFormXObjectName) should be used when the mechanism
+	// for determining XObject names is external to ResourcesDictionary. it is highly recommended
+	// that if One overload is used, it is used any time the particular resource dictionary is handled - this will avoid
+	// collisions in naming between the internal and external mechanism.
+	void AddFormXObjectMapping(ObjectIDType inFormXObjectID,const string& inFormXObjectName);
+	
+	int GetXObjectsCount();
+	MapIterator<ObjectIDTypeToStringMap> GetFormXObjectsIterator();
+	
 private:
 
 	StringSet mProcsets;
+	ObjectIDTypeToStringMap mFormXObjects;
 	
 };
 

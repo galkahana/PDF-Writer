@@ -24,7 +24,6 @@ public:
 
 	bool MoveNext();
 	bool IsFinished();
-	typename T::value_type GetItem();
 
 private:
 	

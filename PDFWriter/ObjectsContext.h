@@ -71,7 +71,10 @@ public:
 	void EndIndirectObject();
 
 	// Stream writing [assumes that is already in an indirect object context]
-	EStatusCode WritePDFStream(PDFStream* inStream);
+	// Use inStreamDictionary in case this is not just a "stream" but actually a higher level
+	// object that is *also* a stream. in that case creat the dictionary externally, write whatever keys you want,
+	// and Call WritePDFStream to write the common stream keys (such as length and filters) and the stream itself
+	EStatusCode WritePDFStream(PDFStream* inStream,DictionaryContext* inStreamDictionary=NULL);
 
 private:
 	IByteWriterWithPosition* mOutputStream;

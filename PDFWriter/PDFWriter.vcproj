@@ -504,6 +504,14 @@
 			Name="Document Context Level"
 			>
 			<File
+				RelativePath=".\AbstractContentContext.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\AbstractContentContext.h"
+				>
+			</File>
+			<File
 				RelativePath=".\CatalogInformation.cpp"
 				>
 			</File>
@@ -548,6 +556,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PDFFormXObject.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PDFFormXObject.h"
+				>
+			</File>
+			<File
 				RelativePath=".\PDFPage.cpp"
 				>
 			</File>
@@ -569,6 +585,14 @@
 			</File>
 			<File
 				RelativePath=".\TrailerInformation.h"
+				>
+			</File>
+			<File
+				RelativePath=".\XObjectContentContext.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\XObjectContentContext.h"
 				>
 			</File>
 		</Filter>

@@ -212,7 +212,7 @@ void ObjectsContext::EndArray(ETokenSeparator inSeparate)
 static const string scLength = "Length";
 static const string scStream = "stream";
 static const string scEndStream = "endstream";
-EStatusCode ObjectsContext::WritePDFStream(PDFStream* inStream)
+EStatusCode ObjectsContext::WritePDFStream(PDFStream* inStream,DictionaryContext* inStreamDictionary)
 {
 	// move stream from "write to" mode to "read". Should make read stream available. also, now GetLength should provide a valid value
 	EStatusCode status = inStream->FinalizeWriteAndStratRead();
@@ -225,8 +225,8 @@ EStatusCode ObjectsContext::WritePDFStream(PDFStream* inStream)
 			break;
 		}
 
-		// Write Stream Dictionary
-		DictionaryContext* streamDictionaryContext = StartDictionary();
+		// Write Stream Dictionary (note that inStreamDictionary is optionally used)
+		DictionaryContext* streamDictionaryContext = (NULL == inStreamDictionary ? StartDictionary() : inStreamDictionary);
 
 		// Write Length
 		streamDictionaryContext->WriteKey(scLength);

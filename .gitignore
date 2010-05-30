@@ -13,7 +13,7 @@ BuildLog.htm
 *.obj
 *.idb
 
-*_.swp
+_.swp
 
 #Visual Studio unwanted#
 ########################

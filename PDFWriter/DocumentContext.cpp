@@ -12,7 +12,7 @@
 #include "Trace.h"
 #include "IDocumentContextExtender.h"
 #include "PageContentContext.h"
-
+#include "PDFFormXObject.h"
 
 DocumentContext::DocumentContext(void)
 {
@@ -454,10 +454,8 @@ int DocumentContext::WritePageTree(PageTree* inPageTreeToWrite)
 }
 
 static const string scPage = "Page";
-static const string scResources = "Resources";
 static const string scMediaBox = "MediaBox";
 static const string scContents = "Contents";
-static const string scProcesets = "ProcSet";
 
 EStatusCode DocumentContext::WritePage(PDFPage* inPage)
 {
@@ -480,44 +478,12 @@ EStatusCode DocumentContext::WritePage(PDFPage* inPage)
 
 	do
 	{
-		// Resource dict 
-		pageContext->WriteKey(scResources);
-		DictionaryContext* pageResourcesContext = mObjectsContext->StartDictionary();
-
-		if(inPage->GetResourcesDictionary().GetProcsetsCount() > 0)
+		status = WriteResourcesDictionary(inPage->GetResourcesDictionary(),pageContext);
+		if(status != eSuccess)
 		{
-			//	Procsets
-			pageResourcesContext->WriteKey(scProcesets);
-			mObjectsContext->StartArray();
-			SingleValueContainerIterator<StringSet> it = inPage->GetResourcesDictionary().GetProcesetsIterator();
-			while(it.MoveNext())
-				mObjectsContext->WriteName(it.GetItem());
-
-			if(mExtender)
-			{
-				status = mExtender->OnPageResourceProcsetsWrite(inPage,pageResourcesContext,mObjectsContext,this);
-				if(status != eSuccess)
-				{
-					TRACE_LOG("DocumentContext::WritePage, unexpected faiulre. extender declared failure when adding procsets.");
-					break;
-				}
-			}
-
-			mObjectsContext->EndArray();
-			mObjectsContext->EndLine();
+			TRACE_LOG("DocumentContext::WritePage, failed to write resources dictionary");
+			break;
 		}
-
-		if(mExtender)
-		{
-			status = mExtender->OnPageResourcesWrite(inPage,pageResourcesContext,mObjectsContext,this);
-			if(status != eSuccess)
-			{
-				TRACE_LOG("DocumentContext::WritePage, unexpected faiulre. extender declared failure when writing page resources.");
-				break;
-			}
-		}
-
-		mObjectsContext->EndDictionary(pageResourcesContext); 
 
 		// Content
 		if(inPage->GetContentStreamsCount() > 0)
@@ -624,4 +590,152 @@ EStatusCode DocumentContext::EndPageContentContext(PageContentContext* inPageCon
 	EStatusCode status = inPageContext->FinalizeCurrentStream();
 	delete inPageContext;
 	return status;
+}
+
+PDFFormXObject* DocumentContext::CreateFormXObject()
+{
+	return new PDFFormXObject(mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID());
+}
+
+static const string scResources = "Resources";
+static const string scXObjects = "XObject";
+static const string scProcesets = "ProcSet";
+EStatusCode DocumentContext::WriteResourcesDictionary(ResourcesDictionary& inResourcesDictionary,DictionaryContext* inParentDictionaryContext)
+{
+	EStatusCode status = eSuccess;
+
+	do
+	{
+
+		// Resource dict 
+		inParentDictionaryContext->WriteKey(scResources);
+		DictionaryContext* resourcesContext = mObjectsContext->StartDictionary();
+
+		if(inResourcesDictionary.GetProcsetsCount() > 0)
+		{
+			//	Procsets
+			resourcesContext->WriteKey(scProcesets);
+			mObjectsContext->StartArray();
+			SingleValueContainerIterator<StringSet> it = inResourcesDictionary.GetProcesetsIterator();
+			while(it.MoveNext())
+				mObjectsContext->WriteName(it.GetItem());
+
+			mObjectsContext->EndArray();
+			mObjectsContext->EndLine();
+		}
+
+		if(inResourcesDictionary.GetXObjectsCount() >0)
+		{
+			// XObjects
+			resourcesContext->WriteKey(scXObjects);
+			DictionaryContext* xobjectsContext = mObjectsContext->StartDictionary();
+			MapIterator<ObjectIDTypeToStringMap> itXObjects = inResourcesDictionary.GetFormXObjectsIterator();
+			while(itXObjects.MoveNext())
+			{
+				xobjectsContext->WriteKey(itXObjects.GetValue());
+				xobjectsContext->WriteObjectReferenceValue(itXObjects.GetKey());
+			}
+			mObjectsContext->EndDictionary(xobjectsContext);
+		}
+
+		if(mExtender)
+		{
+			status = mExtender->OnResourcesWrite(&(inResourcesDictionary),resourcesContext,mObjectsContext,this);
+			if(status != eSuccess)
+			{
+				TRACE_LOG("DocumentContext::WriteResourcesDictionary, unexpected faiulre. extender declared failure when writing resources.");
+				break;
+			}
+		}
+
+		mObjectsContext->EndDictionary(resourcesContext); 
+	}while(false);
+
+	return status;
+}
+
+static const string scXObject = "XObject";
+static const string scSubType = "Subtype";
+static const string scForm = "Form";
+static const string scBBox = "BBox";
+static const string scFormType = "FormType";
+static const string scMatrix = "Matrix";
+EStatusCode DocumentContext::WriteFormXObjectAndRelease(PDFFormXObject* inFormXObject)
+{
+	EStatusCode status = eSuccess;
+	mObjectsContext->StartNewIndirectObject(inFormXObject->GetObjectID());
+	DictionaryContext* xobjectContext = mObjectsContext->StartDictionary();
+
+	// type
+	xobjectContext->WriteKey(scType);
+	xobjectContext->WriteNameValue(scXObject);
+
+	// subtype
+	xobjectContext->WriteKey(scSubType);
+	xobjectContext->WriteNameValue(scForm);
+
+	// form type
+	xobjectContext->WriteKey(scFormType);
+	xobjectContext->WriteIntegerValue(1);
+
+	// bbox
+	xobjectContext->WriteKey(scBBox);
+	xobjectContext->WriteRectangleValue(inFormXObject->GetBoundingBox());
+
+	// matrix
+	if(!IsIdentityMatrix(inFormXObject->GetMatrix()))
+	{
+		xobjectContext->WriteKey(scMatrix);
+		mObjectsContext->StartArray();
+		for(int i=0;i<6;++i)
+			mObjectsContext->WriteDouble(inFormXObject->GetMatrix()[i]);
+		mObjectsContext->EndArray(eTokenSeparatorEndLine);
+	}
+
+	do
+	{
+		status = WriteResourcesDictionary(inFormXObject->GetResourcesDictionary(),xobjectContext);
+		if(status != eSuccess)
+		{
+			TRACE_LOG("DocumentContext::WriteFormXObjectAndRelease, failed to write resources dictionary");
+			break;
+		}
+
+		if(mExtender)
+		{
+			status = mExtender->OnFormXObjectWrite(inFormXObject,xobjectContext,mObjectsContext,this);
+			if(status != eSuccess)
+			{
+				TRACE_LOG("DocumentContext::WriteFormXObjectAndRelease, unexpected faiulre. extender declared failure when writing form xobject.");
+				break;
+			}
+		}
+
+		status = mObjectsContext->WritePDFStream(inFormXObject->GetContentStream(),xobjectContext);
+		if(status != eSuccess)
+		{
+			TRACE_LOG("DocumentContext::WriteFormXObjectAndRelease, failed to xobject stream");
+			break;
+		}
+		
+		// Important! no need to close the dictionary, because this is being handled by WritePDFStream already (which also wrote the stream later)
+
+		mObjectsContext->EndIndirectObject();
+
+		delete inFormXObject;
+	}while(false);
+	
+	return status;
+}
+
+bool DocumentContext::IsIdentityMatrix(const double* inMatrix)
+{
+	return 
+		inMatrix[0] == 1 &&
+		inMatrix[1] == 0 &&
+		inMatrix[2] == 0 &&
+		inMatrix[3] == 1 &&
+		inMatrix[4] == 0 &&
+		inMatrix[5] == 0;
+
 }

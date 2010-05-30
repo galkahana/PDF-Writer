@@ -5,6 +5,8 @@ class DictionaryContext;
 class ObjectsContext;
 class DocumentContext;
 class CatalogInformation;
+class ResourcesDictionary;
+class PDFFormXObject;
 
 class IDocumentContextExtender
 {
@@ -16,16 +18,16 @@ public:
 							ObjectsContext* inPDFWriterObjectContext,
 							DocumentContext* inPDFWriterDocumentContext) = 0;
 
-	// add items to the page resources dictionary while it's written
-	virtual EStatusCode OnPageResourcesWrite(
-							PDFPage* inPage,
+	// add items to the resources dictionary while it's written (can be either page or xobject resources dictionary)
+	virtual EStatusCode OnResourcesWrite(
+							ResourcesDictionary* inResources,
 							DictionaryContext* inPageResourcesDictionaryContext,
 							ObjectsContext* inPDFWriterObjectContext,
 							DocumentContext* inPDFWriterDocumentContext) = 0;
 
-	// add items to the procset array in the page resource dictionary while it's written
-	virtual EStatusCode OnPageResourceProcsetsWrite(
-							PDFPage* inPage,
+	// add items to the form dictionary while it's written
+	virtual EStatusCode OnFormXObjectWrite(
+							PDFFormXObject* inFormXObject,
 							DictionaryContext* inPageResourcesDictionaryContext,
 							ObjectsContext* inPDFWriterObjectContext,
 							DocumentContext* inPDFWriterDocumentContext) = 0;

@@ -6,7 +6,7 @@
 static const string scStartDictionary = "<<";
 static const string scEndDictionary = ">>";
 
-DictionaryContext::DictionaryContext(ObjectsContext* inObjectsContext,int inIndentLevel)
+DictionaryContext::DictionaryContext(ObjectsContext* inObjectsContext,size_t inIndentLevel)
 {
 	mObjectsContext = inObjectsContext;
 	mIndentLevel= inIndentLevel;
@@ -44,7 +44,7 @@ static const Byte scTab[1] = {'\t'};
 void DictionaryContext::WriteIndents()
 {
 	IByteWriterWithPosition* outputStream = mObjectsContext->StartFreeContext();
-	for(int i=0;i<=mIndentLevel;++i)
+	for(size_t i=0;i<=mIndentLevel;++i)
 		outputStream->Write(scTab,1);
 	mObjectsContext->EndFreeContext();
 }

@@ -15,7 +15,7 @@ class ObjectsContext;
 class DictionaryContext
 {
 public:
-	DictionaryContext(ObjectsContext* inObjectsContext,int inIndentLevel);
+	DictionaryContext(ObjectsContext* inObjectsContext,size_t inIndentLevel);
 	~DictionaryContext(void);
 
 	EStatusCode WriteKey(const string& inKey);
@@ -30,7 +30,7 @@ private:
 
 	ObjectsContext* mObjectsContext;
 	StringSet mKeys;
-	int mIndentLevel;
+	size_t mIndentLevel;
 
 	void WriteIndents();
 

@@ -18,6 +18,8 @@ class PageTree;
 class OutputFile;
 class IDocumentContextExtender;
 class PageContentContext;
+class ResourcesDictionary;
+class PDFFormXObject;
 
 class DocumentContext
 {
@@ -53,6 +55,10 @@ public:
 	EStatusCode WritePageAndRelease(PDFPage* inPage);
 
 
+	// Form XObject creation and writing
+	PDFFormXObject* CreateFormXObject();
+	EStatusCode WriteFormXObjectAndRelease(PDFFormXObject* inFormXObject);
+
 	// Extensibility
 	void SetDocumentContextExtender(IDocumentContextExtender* inExtender);
 
@@ -73,4 +79,6 @@ private:
 	void WritePagesTree();
 	int WritePageTree(PageTree* inPageTreeToWrite);
 	string GenerateMD5IDForFile();
+	EStatusCode WriteResourcesDictionary(ResourcesDictionary& inResourcesDictionary,DictionaryContext* inParentDictionaryContext);
+	bool IsIdentityMatrix(const double* inMatrix);
 };
