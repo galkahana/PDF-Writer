@@ -2,30 +2,30 @@
 
 #include "IByteWriterWithPosition.h"
 
-#define DEFAULT_BUFFER_SIZE 10000
+#define DEFAULT_BUFFER_SIZE 256*1024
 
-class BufferedOutputStream : public IByteWriterWithPosition
+class OutputBufferedStream : public IByteWriterWithPosition
 {
 public:
 	/*
 		default constructor with default buffer size
 	*/
-	BufferedOutputStream(void);
+	OutputBufferedStream(void);
 
 	/*
 		Destroys an owned buffer, flushes the buffer before releasing
 	*/
-	virtual ~BufferedOutputStream(void);
+	virtual ~OutputBufferedStream(void);
 
 	/*
 		consturctor with buffer size setup
 	*/
-	BufferedOutputStream(LongBufferSizeType inBufferSize);
+	OutputBufferedStream(IOBasicTypes::LongBufferSizeType inBufferSize);
 
 	/*
 		Constructor with assigning. see Assign for unassign instructions
 	*/
-	BufferedOutputStream(IByteWriterWithPosition* inTargetWriter,LongBufferSizeType inBufferSize = DEFAULT_BUFFER_SIZE);
+	OutputBufferedStream(IByteWriterWithPosition* inTargetWriter,IOBasicTypes::LongBufferSizeType inBufferSize = DEFAULT_BUFFER_SIZE);
 
 	/*
 		Assigns a writer for buffered writing. from the moment of assigning the
@@ -36,19 +36,19 @@ public:
 	void Assign(IByteWriterWithPosition* inWriter);
 
 	// IByteWriter implementation
-	virtual LongBufferSizeType Write(const Byte* inBuffer,LongBufferSizeType inSize);
+	virtual IOBasicTypes::LongBufferSizeType Write(const IOBasicTypes::Byte* inBuffer,IOBasicTypes::LongBufferSizeType inSize);
 
 	// IByteWriterWithPosition implementation
-	virtual LongFilePositionType GetCurrentPosition();
+	virtual IOBasicTypes::LongFilePositionType GetCurrentPosition();
 
 	// force buffer flush to underlying stream
 	void Flush();
 
 private:
-	Byte* mBuffer;
-	LongBufferSizeType mBufferSize;
-	Byte* mCurrentBufferIndex;
+	IOBasicTypes::Byte* mBuffer;
+	IOBasicTypes::LongBufferSizeType mBufferSize;
+	IOBasicTypes::Byte* mCurrentBufferIndex;
 	IByteWriterWithPosition* mTargetStream;
 
-	void Initiate(IByteWriterWithPosition* inTargetWriter,LongBufferSizeType inBufferSize);
+	void Initiate(IByteWriterWithPosition* inTargetWriter,IOBasicTypes::LongBufferSizeType inBufferSize);
 };

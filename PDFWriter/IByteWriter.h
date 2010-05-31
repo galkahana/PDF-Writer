@@ -6,8 +6,6 @@
 */
 #include "IOBasicTypes.h"
 
-using namespace IOBasicTypes;
-
 class IByteWriter
 {
 public:
@@ -16,5 +14,5 @@ public:
 	/*
 		Write inSize bytes of inBuffer, returning the number of written bytes
 	*/
-	virtual LongBufferSizeType Write(const Byte* inBuffer,LongBufferSizeType inSize) = 0;
+	virtual IOBasicTypes::LongBufferSizeType Write(const IOBasicTypes::Byte* inBuffer,IOBasicTypes::LongBufferSizeType inSize) = 0;
 };

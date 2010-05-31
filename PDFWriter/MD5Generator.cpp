@@ -46,6 +46,8 @@ documentation and/or software.
 #include "OutputStringBufferStream.h"
 #include "SafeBufferMacrosDefs.h"
 
+using namespace IOBasicTypes;
+
 MD5Generator::MD5Generator(void)
 {
 	mIsFinalized = false;

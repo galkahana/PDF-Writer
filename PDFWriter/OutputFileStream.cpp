@@ -1,6 +1,8 @@
 #include "OutputFileStream.h"
 #include "SafeBufferMacrosDefs.h"
 
+using namespace IOBasicTypes;
+
 OutputFileStream::OutputFileStream(void)
 {
 	mStream = NULL;

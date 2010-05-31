@@ -24,3 +24,8 @@ _.swp
 *.dep
 *.manifest
 *.manifest.res
+
+#unwanted zlib sources #
+########################
+zlib-1.2.3
+*.gz

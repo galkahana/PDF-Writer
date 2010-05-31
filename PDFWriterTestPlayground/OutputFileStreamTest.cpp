@@ -4,6 +4,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace IOBasicTypes;
 
 static const std::wstring scOutputFileStreamTest = L"OutputFileStreamTest";
 

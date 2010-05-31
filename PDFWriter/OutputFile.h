@@ -4,7 +4,7 @@
 #include <string>
 
 class IByteWriterWithPosition;
-class BufferedOutputStream;
+class OutputBufferedStream;
 class OutputFileStream;
 
 using namespace std;
@@ -22,6 +22,6 @@ public:
 	const wstring& GetFilePath();
 private:
 	wstring mFilePath;
-	BufferedOutputStream* mOutputStream;
+	OutputBufferedStream* mOutputStream;
 	OutputFileStream* mFileStream;
 };

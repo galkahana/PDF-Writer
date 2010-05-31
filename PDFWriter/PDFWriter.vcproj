@@ -44,6 +44,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="..\zlib"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -106,6 +107,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="..\zlib"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -169,6 +171,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="..\zlib"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -232,6 +235,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="..\zlib"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -331,14 +335,6 @@
 				Name="IO"
 				>
 				<File
-					RelativePath=".\BufferedOutputStream.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\BufferedOutputStream.h"
-					>
-				</File>
-				<File
 					RelativePath=".\IByteReader.h"
 					>
 				</File>
@@ -351,6 +347,22 @@
 					>
 				</File>
 				<File
+					RelativePath=".\InputBufferedStream.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\InputBufferedStream.h"
+					>
+				</File>
+				<File
+					RelativePath=".\InputFileStream.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\InputFileStream.h"
+					>
+				</File>
+				<File
 					RelativePath=".\InputStringBufferStream.cpp"
 					>
 				</File>
@@ -360,6 +372,14 @@
 				</File>
 				<File
 					RelativePath=".\IOBasicTypes.h"
+					>
+				</File>
+				<File
+					RelativePath=".\OutputBufferedStream.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\OutputBufferedStream.h"
 					>
 				</File>
 				<File
@@ -408,6 +428,22 @@
 				</File>
 				<File
 					RelativePath=".\OutputFileStream.h"
+					>
+				</File>
+				<File
+					RelativePath=".\OutputFlateDecodeStream.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\OutputFlateDecodeStream.h"
+					>
+				</File>
+				<File
+					RelativePath=".\OutputFlateEncodeStream.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\OutputFlateEncodeStream.h"
 					>
 				</File>
 				<File

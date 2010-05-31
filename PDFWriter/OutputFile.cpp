@@ -1,5 +1,5 @@
 #include "OutputFile.h"
-#include "BufferedOutputStream.h"
+#include "OutputBufferedStream.h"
 #include "OutputFileStream.h"
 #include "Trace.h"
 
@@ -35,7 +35,7 @@ EStatusCode OutputFile::OpenFile(const wstring& inFilePath,bool inAppend)
 			break;
 		}
 
-		mOutputStream = new BufferedOutputStream(outputFileStream);
+		mOutputStream = new OutputBufferedStream(outputFileStream);
 		mFileStream = outputFileStream;
 		mFilePath = inFilePath;
 	} while(false);

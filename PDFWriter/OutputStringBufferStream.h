@@ -17,10 +17,10 @@ public:
 
 
 	// IByteWriter implementation
-	virtual LongBufferSizeType Write(const Byte* inBuffer,LongBufferSizeType inSize);
+	virtual IOBasicTypes::LongBufferSizeType Write(const IOBasicTypes::Byte* inBuffer,IOBasicTypes::LongBufferSizeType inSize);
 
 	// IByteWriterWithPosition implementation
-	virtual LongFilePositionType GetCurrentPosition();
+	virtual IOBasicTypes::LongFilePositionType GetCurrentPosition();
 
 	string ToString() const;
 

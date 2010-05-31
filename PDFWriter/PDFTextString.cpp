@@ -1,6 +1,8 @@
 #include "PDFTextString.h"
 #include "OutputStringBufferStream.h"
 
+using namespace IOBasicTypes;
+
 PDFTextString::PDFTextString(void)
 {
 }

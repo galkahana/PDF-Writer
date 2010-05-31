@@ -2,6 +2,8 @@
 #include "SafeBufferMacrosDefs.h"
 #include "IByteWriter.h"
 
+using namespace IOBasicTypes;
+
 PrimitiveObjectsWriter::PrimitiveObjectsWriter(IByteWriter* inStreamForWriting)
 {
 	mStreamForWriting = inStreamForWriting;

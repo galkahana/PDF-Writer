@@ -1,13 +1,15 @@
-#include "BufferedOutputStream.h"
+#include "OutputBufferedStream.h"
 
 #include <memory.h>
 
-BufferedOutputStream::BufferedOutputStream(void)
+using namespace IOBasicTypes;
+
+OutputBufferedStream::OutputBufferedStream(void)
 {
 	Initiate(NULL,DEFAULT_BUFFER_SIZE);
 }
 
-void BufferedOutputStream::Initiate(IByteWriterWithPosition* inTargetWriter,LongBufferSizeType inBufferSize)
+void OutputBufferedStream::Initiate(IByteWriterWithPosition* inTargetWriter,LongBufferSizeType inBufferSize)
 {
 	mBufferSize = inBufferSize;
 	mBuffer = new Byte[mBufferSize];
@@ -15,30 +17,30 @@ void BufferedOutputStream::Initiate(IByteWriterWithPosition* inTargetWriter,Long
 	mTargetStream = inTargetWriter;
 }
 
-BufferedOutputStream::~BufferedOutputStream(void)
+OutputBufferedStream::~OutputBufferedStream(void)
 {
 	Flush();
 	delete[] mBuffer;
 	delete mTargetStream;
 }
 
-BufferedOutputStream::BufferedOutputStream(LongBufferSizeType inBufferSize)
+OutputBufferedStream::OutputBufferedStream(LongBufferSizeType inBufferSize)
 {
 	Initiate(NULL,inBufferSize);
 }
 
-BufferedOutputStream::BufferedOutputStream(IByteWriterWithPosition* inTargetWriter,LongBufferSizeType inBufferSize)
+OutputBufferedStream::OutputBufferedStream(IByteWriterWithPosition* inTargetWriter,LongBufferSizeType inBufferSize)
 {
 	Initiate(inTargetWriter,inBufferSize);
 }
 
-void BufferedOutputStream::Assign(IByteWriterWithPosition* inWriter)
+void OutputBufferedStream::Assign(IByteWriterWithPosition* inWriter)
 {
 	Flush();
 	mTargetStream = inWriter;
 }
 
-LongBufferSizeType BufferedOutputStream::Write(const Byte* inBuffer,LongBufferSizeType inSize)
+LongBufferSizeType OutputBufferedStream::Write(const Byte* inBuffer,LongBufferSizeType inSize)
 {
 	if(mTargetStream)
 	{
@@ -76,14 +78,14 @@ LongBufferSizeType BufferedOutputStream::Write(const Byte* inBuffer,LongBufferSi
 }
 
 
-void BufferedOutputStream::Flush()
+void OutputBufferedStream::Flush()
 {
 	if(mTargetStream && mCurrentBufferIndex != mBuffer)
 		mTargetStream->Write(mBuffer,mCurrentBufferIndex - mBuffer);
 	mCurrentBufferIndex = mBuffer;
 }
 
-LongFilePositionType BufferedOutputStream::GetCurrentPosition()
+LongFilePositionType OutputBufferedStream::GetCurrentPosition()
 {
 	return mTargetStream ? mTargetStream->GetCurrentPosition() + (mCurrentBufferIndex - mBuffer):0;
 }

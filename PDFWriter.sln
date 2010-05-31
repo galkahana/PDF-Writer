@@ -2,11 +2,16 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PDFWriter", "PDFWriter\PDFWriter.vcproj", "{0C462D4D-ED79-407F-906B-36B47297C7C2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BF2A88DE-3DCC-4B4E-8F38-B99283AE3325} = {BF2A88DE-3DCC-4B4E-8F38-B99283AE3325}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PDFWriterTestPlayground", "PDFWriterTestPlayground\PDFWriterTestPlayground.vcproj", "{E7D9039C-46FC-4D26-9A8A-1ADF0F8237EE}"
 	ProjectSection(ProjectDependencies) = postProject
 		{0C462D4D-ED79-407F-906B-36B47297C7C2} = {0C462D4D-ED79-407F-906B-36B47297C7C2}
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZLib", "ZLib\ZLib.vcproj", "{BF2A88DE-3DCC-4B4E-8F38-B99283AE3325}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,6 +37,12 @@ Global
 		{E7D9039C-46FC-4D26-9A8A-1ADF0F8237EE}.Release|Win32.Build.0 = Release|Win32
 		{E7D9039C-46FC-4D26-9A8A-1ADF0F8237EE}.Release|x64.ActiveCfg = Release|x64
 		{E7D9039C-46FC-4D26-9A8A-1ADF0F8237EE}.Release|x64.Build.0 = Release|x64
+		{BF2A88DE-3DCC-4B4E-8F38-B99283AE3325}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BF2A88DE-3DCC-4B4E-8F38-B99283AE3325}.Debug|Win32.Build.0 = Debug|Win32
+		{BF2A88DE-3DCC-4B4E-8F38-B99283AE3325}.Debug|x64.ActiveCfg = Debug|x64
+		{BF2A88DE-3DCC-4B4E-8F38-B99283AE3325}.Release|Win32.ActiveCfg = Release|Win32
+		{BF2A88DE-3DCC-4B4E-8F38-B99283AE3325}.Release|Win32.Build.0 = Release|Win32
+		{BF2A88DE-3DCC-4B4E-8F38-B99283AE3325}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

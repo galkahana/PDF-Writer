@@ -1,5 +1,7 @@
 #include "OutputStringBufferStream.h"
 
+using namespace IOBasicTypes;
+
 OutputStringBufferStream::OutputStringBufferStream(void)
 {
 	mBuffer = new stringbuf();
