@@ -21,7 +21,7 @@ class IByteReader;
 class PDFStream
 {
 public:
-	PDFStream(void);
+	PDFStream(bool inCompressStream);
 	~PDFStream(void);
 
 	// Get the output stream of the PDFStream, make sure to use only before calling FinalizeWriteAndStratRead, after which it becomes invalid
@@ -32,10 +32,13 @@ public:
 	LongFilePositionType GetLength();
 	IByteReader* GetReadStream();
 
+	bool IsStreamCompressed();
+
 private:
+	bool mCompressStream;
 	stringbuf mIOString;
 	LongFilePositionType mStreamLength;
 	InputStringBufferStream* mReadStream;
-	OutputStringBufferStream* mWriteStream;
+	IByteWriter* mWriteStream;
 
 };

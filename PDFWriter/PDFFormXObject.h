@@ -6,11 +6,12 @@
 
 class PDFStream;
 class XObjectContentContext;
+class ObjectsContext;
 
 class PDFFormXObject
 {
 public:
-	PDFFormXObject(ObjectIDType inXObjectID);
+	PDFFormXObject(ObjectsContext* inObjectsContext);
 	~PDFFormXObject(void);
 
 	void SetBoundingBox(const PDFRectangle& inBoundingBox);

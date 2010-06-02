@@ -10,11 +10,14 @@
 ObjectsContext::ObjectsContext(void)
 {
 	mOutputStream = NULL;
+	mCompressStreams = true;
 }
 
 ObjectsContext::~ObjectsContext(void)
 {
 }
+
+
 
 
 void ObjectsContext::SetOutputStream(IByteWriterWithPosition* inOutputStream)
@@ -212,6 +215,8 @@ void ObjectsContext::EndArray(ETokenSeparator inSeparate)
 static const string scLength = "Length";
 static const string scStream = "stream";
 static const string scEndStream = "endstream";
+static const string scFilter = "Filter";
+static const string scFlateDecode = "FlateDecode";
 EStatusCode ObjectsContext::WritePDFStream(PDFStream* inStream,DictionaryContext* inStreamDictionary)
 {
 	// move stream from "write to" mode to "read". Should make read stream available. also, now GetLength should provide a valid value
@@ -228,10 +233,17 @@ EStatusCode ObjectsContext::WritePDFStream(PDFStream* inStream,DictionaryContext
 		// Write Stream Dictionary (note that inStreamDictionary is optionally used)
 		DictionaryContext* streamDictionaryContext = (NULL == inStreamDictionary ? StartDictionary() : inStreamDictionary);
 
-		// Write Length
+		// Length
 		streamDictionaryContext->WriteKey(scLength);
 		streamDictionaryContext->WriteIntegerValue(inStream->GetLength());
 		
+		// Compression (if necessary)
+		if(inStream->IsStreamCompressed())
+		{
+			streamDictionaryContext->WriteKey(scFilter);
+			streamDictionaryContext->WriteNameValue(scFlateDecode);
+		}
+
 		EndDictionary(streamDictionaryContext);
 
 		// Write Stream Content
@@ -251,4 +263,14 @@ EStatusCode ObjectsContext::WritePDFStream(PDFStream* inStream,DictionaryContext
 	}while(false);
 
 	return status;
+}
+
+void ObjectsContext::SetCompressStreams(bool inCompressStreams)
+{
+	mCompressStreams = inCompressStreams;
+}
+
+PDFStream* ObjectsContext::CreatePDFStream()
+{
+	return new PDFStream(mCompressStreams);
 }

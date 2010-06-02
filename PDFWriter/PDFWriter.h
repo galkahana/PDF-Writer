@@ -23,6 +23,15 @@ struct LogConfiguration
 	static const LogConfiguration DefaultLogConfiguration;
 };
 
+struct PDFCreationSettings
+{
+	bool CompressStreams;
+
+	PDFCreationSettings(bool inCompressStreams){CompressStreams = inCompressStreams;}
+
+	static const PDFCreationSettings DefaultPDFCreationSettings;
+};
+
 class PageContentContext;
 class PDFFormXObject;
 
@@ -33,7 +42,8 @@ public:
 	~PDFWriter(void);
 
 	EStatusCode InitializePDFWriter(const wstring& inOutputFilePath,
-									const LogConfiguration& inLogConfiguration = LogConfiguration::DefaultLogConfiguration);
+									const LogConfiguration& inLogConfiguration = LogConfiguration::DefaultLogConfiguration,
+									const PDFCreationSettings& inPDFCreationSettings = PDFCreationSettings::DefaultPDFCreationSettings);
 	
 	EStatusCode StartPDF(EPDFVersion inPDFVersion);
 	EStatusCode EndPDF();
@@ -66,6 +76,7 @@ private:
 
 
 	void SetupLog(const LogConfiguration& inLogConfiguration);
+	void SetupObjectsContext(const PDFCreationSettings& inPDFCreationSettings);
 	void ReleaseLog();
 
 };

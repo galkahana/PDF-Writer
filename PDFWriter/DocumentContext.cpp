@@ -594,7 +594,7 @@ EStatusCode DocumentContext::EndPageContentContext(PageContentContext* inPageCon
 
 PDFFormXObject* DocumentContext::CreateFormXObject()
 {
-	return new PDFFormXObject(mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID());
+	return new PDFFormXObject(mObjectsContext);
 }
 
 static const string scResources = "Resources";

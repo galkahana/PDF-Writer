@@ -4,6 +4,7 @@
 
 const LogConfiguration LogConfiguration::DefaultLogConfiguration(false,L"PDFWriterLog.txt");
 
+const PDFCreationSettings PDFCreationSettings::DefaultPDFCreationSettings(true);
 
 PDFWriter::PDFWriter(void)
 {
@@ -14,9 +15,10 @@ PDFWriter::~PDFWriter(void)
 }
 
 
-EStatusCode PDFWriter::InitializePDFWriter(const wstring& inOutputFilePath,const LogConfiguration& inLogConfiguration)
+EStatusCode PDFWriter::InitializePDFWriter(const wstring& inOutputFilePath,const LogConfiguration& inLogConfiguration,const PDFCreationSettings& inPDFCreationSettings)
 {
 	SetupLog(inLogConfiguration);
+	SetupObjectsContext(inPDFCreationSettings);
 	return mOutputFile.OpenFile(inOutputFilePath);
 }
 
@@ -62,6 +64,11 @@ EStatusCode PDFWriter::WritePageAndRelease(PDFPage* inPage)
 void PDFWriter::SetupLog(const LogConfiguration& inLogConfiguration)
 {
 	Singleton<Trace>::GetInstance()->SetLogSettings(inLogConfiguration.LogFileLocation,inLogConfiguration.ShouldLog);
+}
+
+void PDFWriter::SetupObjectsContext(const PDFCreationSettings& inPDFCreationSettings)
+{
+	mObjectsContext.SetCompressStreams(inPDFCreationSettings.CompressStreams);
 }
 
 void PDFWriter::ReleaseLog()

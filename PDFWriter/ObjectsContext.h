@@ -76,10 +76,18 @@ public:
 	// and Call WritePDFStream to write the common stream keys (such as length and filters) and the stream itself
 	EStatusCode WritePDFStream(PDFStream* inStream,DictionaryContext* inStreamDictionary=NULL);
 
+	// Sets whether streams created by the objects context will be compressed (with flate) or not
+	void SetCompressStreams(bool inCompressStreams);
+
+	// Create PDF stream. the difference from creating it by yourself is that these PDF streams will be created
+	// according to configuration settings. for example, what the user chose for compression.
+	PDFStream* CreatePDFStream();
+
 private:
 	IByteWriterWithPosition* mOutputStream;
 	IndirectObjectsReferenceRegistry mReferencesRegistry;
 	PrimitiveObjectsWriter mPrimitiveWriter;
+	bool mCompressStreams;
 
 	DictionaryContextList mDictionaryStack;
 

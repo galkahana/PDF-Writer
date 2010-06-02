@@ -19,7 +19,7 @@ void PageContentContext::StartAStreamIfRequired()
 {
 	if(!mCurrentStream)
 	{
-		mCurrentStream = new PDFStream();
+		mCurrentStream = mObjectsContext->CreatePDFStream();
 		SetPDFStreamForWrite(mCurrentStream);
 	}
 }

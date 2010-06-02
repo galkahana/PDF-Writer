@@ -1,11 +1,15 @@
 #include "PDFStream.h"
 #include "InputStringBufferStream.h"
 #include "OutputStringBufferStream.h"
+#include "OutputFlateEncodeStream.h"
 
-
-PDFStream::PDFStream(void)
+PDFStream::PDFStream(bool inCompressStream)
 {
-	mWriteStream = new OutputStringBufferStream(&mIOString);
+	mCompressStream = inCompressStream;
+	if(mCompressStream)
+		mWriteStream = new OutputFlateEncodeStream(new OutputStringBufferStream(&mIOString));
+	else
+		mWriteStream = new OutputStringBufferStream(&mIOString);
 	mStreamLength = 0;
 	mReadStream = NULL;
 }
@@ -39,4 +43,9 @@ LongFilePositionType PDFStream::GetLength()
 IByteReader* PDFStream::GetReadStream()
 {
 	return mReadStream;
+}
+
+bool PDFStream::IsStreamCompressed()
+{
+	return mCompressStream;
 }

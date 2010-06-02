@@ -1,11 +1,12 @@
 #include "PDFFormXObject.h"
 #include "PDFStream.h"
 #include "XObjectContentContext.h"
+#include "ObjectsContext.h"
 
-PDFFormXObject::PDFFormXObject(ObjectIDType inXObjectID)
+PDFFormXObject::PDFFormXObject(ObjectsContext* inObjectsContext)
 {
-	mXObjectID = inXObjectID;
-	mContentStream = new PDFStream();
+	mXObjectID = inObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
+	mContentStream = inObjectsContext->CreatePDFStream();
 	mContentContext = new XObjectContentContext(this);
 	SetMatrix(1,0,0,1,0,0);
 	

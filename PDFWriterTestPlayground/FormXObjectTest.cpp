@@ -27,6 +27,7 @@ EStatusCode FormXObjectTest::Run()
 	do
 	{
 
+		//status = pdfWriter.InitializePDFWriter(L"C:\\PDFLibTests\\XObjectContent.PDF",LogConfiguration::DefaultLogConfiguration,PDFCreationSettings(false));
 		status = pdfWriter.InitializePDFWriter(L"C:\\PDFLibTests\\XObjectContent.PDF");
 		if(status != eSuccess)
 		{
