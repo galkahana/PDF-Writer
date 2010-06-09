@@ -106,12 +106,12 @@ EStatusCode PDFWriter::EndPageContentContext(PageContentContext* inPageContext)
 	return mDocumentContext.EndPageContentContext(inPageContext);
 }
 
-PDFFormXObject* PDFWriter::CreateFormXObject()
+PDFFormXObject* PDFWriter::StartFormXObject(const PDFRectangle& inBoundingBox,const double* inMatrix)
 {
-	return mDocumentContext.CreateFormXObject();
+	return mDocumentContext.StartFormXObject(inBoundingBox,inMatrix);
 }
 
-EStatusCode PDFWriter::WriteFormXObjectAndRelease(PDFFormXObject* inFormXObject)
+EStatusCode PDFWriter::EndFormXObjectAndRelease(PDFFormXObject* inFormXObject)
 {
-	return mDocumentContext.WriteFormXObjectAndRelease(inFormXObject);
+	return mDocumentContext.EndFormXObjectAndRelease(inFormXObject);
 }

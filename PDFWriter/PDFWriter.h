@@ -9,6 +9,7 @@
 #include "OutputFile.h"
 #include "DocumentContext.h"
 #include "ObjectsContext.h"
+#include "PDFRectangle.h"
 
 #include <string>
 
@@ -61,8 +62,8 @@ public:
 
 
 	// Form XObject creating and writing
-	PDFFormXObject* CreateFormXObject();
-	EStatusCode WriteFormXObjectAndRelease(PDFFormXObject* inFormXObject);
+	PDFFormXObject* StartFormXObject(const PDFRectangle& inBoundingBox,const double* inMatrix = NULL);
+	EStatusCode EndFormXObjectAndRelease(PDFFormXObject* inFormXObject);
 
 	// Extensibility, reaching to lower levels
 	DocumentContext& GetDocumentContext();

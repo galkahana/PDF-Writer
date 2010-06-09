@@ -19,9 +19,16 @@ void PageContentContext::StartAStreamIfRequired()
 {
 	if(!mCurrentStream)
 	{
-		mCurrentStream = mObjectsContext->CreatePDFStream();
+		StartContentStreamDefinition();
+		mCurrentStream = mObjectsContext->StartPDFStream();
 		SetPDFStreamForWrite(mCurrentStream);
 	}
+}
+
+void PageContentContext::StartContentStreamDefinition()
+{
+	ObjectIDType streamObjectID = mObjectsContext->StartNewIndirectObject();
+	mPageOfContext->AddContentStreamReference(streamObjectID);
 }
 
 ResourcesDictionary* PageContentContext::GetResourcesDictionary()
@@ -32,34 +39,18 @@ ResourcesDictionary* PageContentContext::GetResourcesDictionary()
 EStatusCode PageContentContext::FinalizeCurrentStream()
 {
 	if(mCurrentStream)
-		return WriteCurrentStreamToMainStreamAndRelease();
+		return FinalizeStreamWriteAndRelease();
 	else
 		return eSuccess;
 }
 
-EStatusCode PageContentContext::WriteCurrentStreamToMainStreamAndRelease()
+EStatusCode PageContentContext::FinalizeStreamWriteAndRelease()
 {
-	EStatusCode status;
+	mObjectsContext->EndPDFStream(mCurrentStream);
 
-	do
-	{
-		ObjectIDType streamObjectID = mObjectsContext->StartNewIndirectObject();
-		mPageOfContext->AddContentStreamReference(streamObjectID);
-
-		status = mObjectsContext->WritePDFStream(mCurrentStream);
-		if(status != eSuccess)
-		{
-			TRACE_LOG("Failed to write page content stream");
-			break;
-		}
-
-		mObjectsContext->EndIndirectObject();
-		delete mCurrentStream;
-		mCurrentStream = NULL;
-		
-	}while(false);
-
-	return status;
+	delete mCurrentStream;
+	mCurrentStream = NULL;
+	return eSuccess;
 }
 
 PDFStream* PageContentContext::GetCurrentPageContentStream()

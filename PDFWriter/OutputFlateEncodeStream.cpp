@@ -84,6 +84,8 @@ void OutputFlateEncodeStream::StartEncoding()
 
 void OutputFlateEncodeStream::Assign(IByteWriterWithPosition* inWriter,bool inInitiallyOn)
 {	
+	if(mCurrentlyEncoding)
+		FinalizeEncoding();
 	mTargetStream = inWriter;
 	if(inInitiallyOn && mTargetStream)
 		StartEncoding();

@@ -3,13 +3,12 @@
 #include "XObjectContentContext.h"
 #include "ObjectsContext.h"
 
-PDFFormXObject::PDFFormXObject(ObjectsContext* inObjectsContext)
+PDFFormXObject::PDFFormXObject(ObjectIDType inFormXObjectID,PDFStream* inXObjectStream,ObjectIDType inFormXObjectResourcesDictionaryID)
 {
-	mXObjectID = inObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
-	mContentStream = inObjectsContext->CreatePDFStream();
-	mContentContext = new XObjectContentContext(this);
-	SetMatrix(1,0,0,1,0,0);
-	
+	mXObjectID = inFormXObjectID;
+	mResourcesDictionaryID = inFormXObjectResourcesDictionaryID;
+	mContentStream = inXObjectStream;
+	mContentContext = new XObjectContentContext(this);	
 }
 
 PDFFormXObject::~PDFFormXObject(void)
@@ -18,19 +17,14 @@ PDFFormXObject::~PDFFormXObject(void)
 	delete mContentContext;
 }
 
-void PDFFormXObject::SetBoundingBox(const PDFRectangle& inBoundingBox)
-{
-	mBBox = inBoundingBox;
-}
-
-const PDFRectangle& PDFFormXObject::GetBoundingBox() const
-{
-	return mBBox;
-}
-
 ObjectIDType PDFFormXObject::GetObjectID()
 {
 	return mXObjectID;
+}
+
+ObjectIDType PDFFormXObject::GetResourcesDictionaryObjectID()
+{
+	return mResourcesDictionaryID;
 }
 
 ResourcesDictionary& PDFFormXObject::GetResourcesDictionary()
@@ -46,19 +40,4 @@ PDFStream* PDFFormXObject::GetContentStream()
 XObjectContentContext* PDFFormXObject::GetContentContext()
 {
 	return mContentContext;
-}
-
-void PDFFormXObject::SetMatrix(double inA,double inB,double inC,double inD,double inE,double inF)
-{
-	mMatrix[0] = inA;
-	mMatrix[1] = inB;
-	mMatrix[2] = inC;
-	mMatrix[3] = inD;
-	mMatrix[4] = inE;
-	mMatrix[5] = inF;
-}
-
-const double* PDFFormXObject::GetMatrix() const
-{
-	return mMatrix;
 }

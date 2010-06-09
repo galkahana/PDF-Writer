@@ -68,10 +68,9 @@ EStatusCode FormXObjectTest::Run()
 		}
 
 		// define an xobject form to draw a 200X100 points red rectangle
-		PDFFormXObject* xobjectForm = pdfWriter.CreateFormXObject();
+		PDFFormXObject* xobjectForm = pdfWriter.StartFormXObject(PDFRectangle(0,0,200,100));
 		ObjectIDType formObjectID = xobjectForm->GetObjectID();
-		xobjectForm->SetBoundingBox(PDFRectangle(0,0,200,100));
-		
+
 		XObjectContentContext* xobjectContentContext = xobjectForm->GetContentContext();
 		xobjectContentContext->q();
 		xobjectContentContext->k(0,100,100,0);
@@ -79,7 +78,7 @@ EStatusCode FormXObjectTest::Run()
 		xobjectContentContext->f();
 		xobjectContentContext->Q();
 
-		status = pdfWriter.WriteFormXObjectAndRelease(xobjectForm);
+		status = pdfWriter.EndFormXObjectAndRelease(xobjectForm);
 		if(status != eSuccess)
 		{
 			wcout<<"failed to write XObject form\n";

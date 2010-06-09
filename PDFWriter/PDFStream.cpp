@@ -2,21 +2,40 @@
 #include "InputStringBufferStream.h"
 #include "OutputStringBufferStream.h"
 #include "OutputFlateEncodeStream.h"
+#include "IObjectsContextExtender.h"
 
-PDFStream::PDFStream(bool inCompressStream)
+PDFStream::PDFStream(bool inCompressStream,
+					 IByteWriterWithPosition* inOutputStream,
+					 ObjectIDType inExtentObjectID,
+					 IObjectsContextExtender* inObjectsContextExtender)
 {
+	mExtender = inObjectsContextExtender;
 	mCompressStream = inCompressStream;
-	if(mCompressStream)
-		mWriteStream = new OutputFlateEncodeStream(new OutputStringBufferStream(&mIOString));
-	else
-		mWriteStream = new OutputStringBufferStream(&mIOString);
+	mExtendObjectID = inExtentObjectID;	
+	mStreamStartPosition = inOutputStream->GetCurrentPosition();
+	mOutputStream = inOutputStream;
 	mStreamLength = 0;
-	mReadStream = NULL;
+
+
+	if(mCompressStream)
+	{
+		if(mExtender && mExtender->OverridesStreamCompression())
+		{
+			mWriteStream = mExtender->GetCompressionWriteStream(inOutputStream);
+		}
+		else
+		{
+			mFlateEncodingStream.Assign(inOutputStream);
+			mWriteStream = &mFlateEncodingStream;
+		}
+	}
+	else
+		mWriteStream = inOutputStream;
+
 }
 
 PDFStream::~PDFStream(void)
 {
-	delete mReadStream;
 }
 
 IByteWriter* PDFStream::GetWriteStream()
@@ -24,15 +43,15 @@ IByteWriter* PDFStream::GetWriteStream()
 	return mWriteStream;
 }
 
-EStatusCode PDFStream::FinalizeWriteAndStratRead()
+void PDFStream::FinalizeStreamWrite()
 {
-	mReadStream = new InputStringBufferStream(&mIOString);
-	delete mWriteStream;
+	if(mExtender && mExtender->OverridesStreamCompression() && mCompressStream)
+		mExtender->FinalizeCompressedStreamWrite(mWriteStream);
 	mWriteStream = NULL;
-	mStreamLength = mIOString.str().length(); 
-		// Gal 28/5/10: that's the only way to know the string size. in_avail is not good for this, see http://social.msdn.microsoft.com/Forums/en/vclanguage/thread/13009a88-933f-4be7-bf3d-150e425e66a6
-		// Might want to consider a different implementation, then, maybe of the higher level basic_stringstream (although this will still not help)
-	return eSuccess;
+	if(mCompressStream)
+		mFlateEncodingStream.Assign(NULL);  // this both finished encoding any left buffers and releases ownership from mFlateEncodingStream
+	mStreamLength = mOutputStream->GetCurrentPosition()-mStreamStartPosition;
+	mOutputStream = NULL;
 }
 
 LongFilePositionType PDFStream::GetLength()
@@ -40,12 +59,12 @@ LongFilePositionType PDFStream::GetLength()
 	return mStreamLength;
 }
 
-IByteReader* PDFStream::GetReadStream()
-{
-	return mReadStream;
-}
-
 bool PDFStream::IsStreamCompressed()
 {
 	return mCompressStream;
+}
+
+ObjectIDType PDFStream::GetExtentObjectID()
+{
+	return mExtendObjectID;
 }

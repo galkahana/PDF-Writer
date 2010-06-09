@@ -7,38 +7,45 @@
 
 #include "EStatusCode.h"
 #include "IOBasicTypes.h"
+#include "ObjectsBasicTypes.h"
+#include "OutputFlateEncodeStream.h"
 #include <sstream>
 
 
 using namespace IOBasicTypes;
 using namespace std;
 
-class InputStringBufferStream;
-class OutputStringBufferStream;
-class IByteWriter;
-class IByteReader;
+class IByteWriterWithPosition;
+class IObjectsContextExtender;
 
 class PDFStream
 {
 public:
-	PDFStream(bool inCompressStream);
+	PDFStream(
+		bool inCompressStream,
+		IByteWriterWithPosition* inOutputStream,
+		ObjectIDType inExtentObjectID,
+		IObjectsContextExtender* inObjectsContextExtender);
 	~PDFStream(void);
 
-	// Get the output stream of the PDFStream, make sure to use only before calling FinalizeWriteAndStratRead, after which it becomes invalid
+	// Get the output stream of the PDFStream, make sure to use only before calling FinalizeStreamWrite, after which it becomes invalid
 	IByteWriter* GetWriteStream();
 
-	// Internal, used by ObjectsContext to implement the writing of stream to the main PDF stream
-	EStatusCode FinalizeWriteAndStratRead();
-	LongFilePositionType GetLength();
-	IByteReader* GetReadStream();
+	// when done with writing to the stream call FinalizeWriteStream to get all writing resources released and calculate the stream extent
+	void FinalizeStreamWrite();
 
 	bool IsStreamCompressed();
+	ObjectIDType GetExtentObjectID();
+
+	LongFilePositionType GetLength(); // get the stream extent
 
 private:
 	bool mCompressStream;
-	stringbuf mIOString;
+	OutputFlateEncodeStream mFlateEncodingStream;
+	IByteWriterWithPosition* mOutputStream;
+	ObjectIDType mExtendObjectID;	
 	LongFilePositionType mStreamLength;
-	InputStringBufferStream* mReadStream;
+	LongFilePositionType mStreamStartPosition;
 	IByteWriter* mWriteStream;
-
+	IObjectsContextExtender* mExtender;
 };

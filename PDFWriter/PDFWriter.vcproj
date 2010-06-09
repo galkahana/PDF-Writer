@@ -564,6 +564,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DocumentContextExtenderAdapter.h"
+				>
+			</File>
+			<File
 				RelativePath=".\IDocumentContextExtender.h"
 				>
 			</File>
@@ -656,6 +660,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\IObjectsContextExtender.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ObjectsBasicTypes.h"
 				>
 			</File>
@@ -665,6 +673,10 @@
 			</File>
 			<File
 				RelativePath=".\ObjectsContext.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ObjectsContextExtenderAdapter.h"
 				>
 			</File>
 			<File

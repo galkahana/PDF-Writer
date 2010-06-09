@@ -12,6 +12,7 @@ using namespace std;
 class IByteWriterWithPosition;
 class DictionaryContext;
 class PDFStream;
+class IObjectsContextExtender;
 
 typedef list<DictionaryContext*> DictionaryContextList;
 
@@ -70,25 +71,30 @@ public:
 	void StartNewIndirectObject(ObjectIDType inObjectID);
 	void EndIndirectObject();
 
-	// Stream writing [assumes that is already in an indirect object context]
-	// Use inStreamDictionary in case this is not just a "stream" but actually a higher level
-	// object that is *also* a stream. in that case creat the dictionary externally, write whatever keys you want,
-	// and Call WritePDFStream to write the common stream keys (such as length and filters) and the stream itself
-	EStatusCode WritePDFStream(PDFStream* inStream,DictionaryContext* inStreamDictionary=NULL);
 
 	// Sets whether streams created by the objects context will be compressed (with flate) or not
 	void SetCompressStreams(bool inCompressStreams);
 
-	// Create PDF stream. the difference from creating it by yourself is that these PDF streams will be created
-	// according to configuration settings. for example, what the user chose for compression.
-	PDFStream* CreatePDFStream();
+	// Create PDF stream and write it's header. note that stream are written with indirect object for Length, to allow one pass writing.
+	// inStreamDictionary can be passed in order to include stream generic information in an already written stream dictionary
+	// that is type specific.
+	PDFStream* StartPDFStream(DictionaryContext* inStreamDictionary=NULL);
+	void EndPDFStream(PDFStream* inStream);
+
+	// Extensibility
+	void SetObjectsContextExtender(IObjectsContextExtender* inExtender);
+	
 
 private:
+	IObjectsContextExtender* mExtender;
 	IByteWriterWithPosition* mOutputStream;
 	IndirectObjectsReferenceRegistry mReferencesRegistry;
 	PrimitiveObjectsWriter mPrimitiveWriter;
 	bool mCompressStreams;
 
 	DictionaryContextList mDictionaryStack;
+
+	void WritePDFStreamEndWithoutExtent();
+	void WritePDFStreamExtent(PDFStream* inStream);
 
 };

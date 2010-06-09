@@ -20,6 +20,7 @@ class IDocumentContextExtender;
 class PageContentContext;
 class ResourcesDictionary;
 class PDFFormXObject;
+class PDFRectangle;
 
 class DocumentContext
 {
@@ -55,9 +56,9 @@ public:
 	EStatusCode WritePageAndRelease(PDFPage* inPage);
 
 
-	// Form XObject creation and writing
-	PDFFormXObject* CreateFormXObject();
-	EStatusCode WriteFormXObjectAndRelease(PDFFormXObject* inFormXObject);
+	// Form XObject creation and finalization
+	PDFFormXObject* StartFormXObject(const PDFRectangle& inBoundingBox,const double* inMatrix = NULL);
+	EStatusCode EndFormXObjectAndRelease(PDFFormXObject* inFormXObject);
 
 	// Extensibility
 	void SetDocumentContextExtender(IDocumentContextExtender* inExtender);
@@ -79,6 +80,6 @@ private:
 	void WritePagesTree();
 	int WritePageTree(PageTree* inPageTreeToWrite);
 	string GenerateMD5IDForFile();
-	EStatusCode WriteResourcesDictionary(ResourcesDictionary& inResourcesDictionary,DictionaryContext* inParentDictionaryContext);
+	EStatusCode WriteResourcesDictionary(ResourcesDictionary& inResourcesDictionary);
 	bool IsIdentityMatrix(const double* inMatrix);
 };

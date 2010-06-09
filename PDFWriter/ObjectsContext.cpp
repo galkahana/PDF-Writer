@@ -11,6 +11,7 @@ ObjectsContext::ObjectsContext(void)
 {
 	mOutputStream = NULL;
 	mCompressStreams = true;
+	mExtender = NULL;
 }
 
 ObjectsContext::~ObjectsContext(void)
@@ -211,66 +212,70 @@ void ObjectsContext::EndArray(ETokenSeparator inSeparate)
 	mPrimitiveWriter.EndArray(inSeparate);
 }
 
+void ObjectsContext::SetCompressStreams(bool inCompressStreams)
+{
+	mCompressStreams = inCompressStreams;
+}
 
 static const string scLength = "Length";
 static const string scStream = "stream";
 static const string scEndStream = "endstream";
 static const string scFilter = "Filter";
 static const string scFlateDecode = "FlateDecode";
-EStatusCode ObjectsContext::WritePDFStream(PDFStream* inStream,DictionaryContext* inStreamDictionary)
+
+PDFStream* ObjectsContext::StartPDFStream(DictionaryContext* inStreamDictionary)
 {
-	// move stream from "write to" mode to "read". Should make read stream available. also, now GetLength should provide a valid value
-	EStatusCode status = inStream->FinalizeWriteAndStratRead();
+	// write stream header and allocate PDF stream.
+	// PDF stream will take care of maintaining state for the stream till writing is finished
 
-	do
-	{
-		if(status != eSuccess)
-		{
-			TRACE_LOG("ObjectsContext::WriteStream. Error in converting PDF Stream from write mode to read mode");
-			break;
-		}
+	// Write the stream header
+	// Write Stream Dictionary (note that inStreamDictionary is optionally used)
+	DictionaryContext* streamDictionaryContext = (NULL == inStreamDictionary ? StartDictionary() : inStreamDictionary);
 
-		// Write Stream Dictionary (note that inStreamDictionary is optionally used)
-		DictionaryContext* streamDictionaryContext = (NULL == inStreamDictionary ? StartDictionary() : inStreamDictionary);
-
-		// Length
-		streamDictionaryContext->WriteKey(scLength);
-		streamDictionaryContext->WriteIntegerValue(inStream->GetLength());
+	// Length (write as an indirect object)
+	streamDictionaryContext->WriteKey(scLength);
+	ObjectIDType lengthObjectID = mReferencesRegistry.AllocateNewObjectID();
+	streamDictionaryContext->WriteObjectReferenceValue(lengthObjectID);
 		
-		// Compression (if necessary)
-		if(inStream->IsStreamCompressed())
-		{
-			streamDictionaryContext->WriteKey(scFilter);
-			streamDictionaryContext->WriteNameValue(scFlateDecode);
-		}
+	// Compression (if necessary)
+	if(mCompressStreams)
+	{
+		streamDictionaryContext->WriteKey(scFilter);
+		streamDictionaryContext->WriteNameValue(scFlateDecode);
+	}
 
-		EndDictionary(streamDictionaryContext);
+	EndDictionary(streamDictionaryContext);
 
-		// Write Stream Content
-		WriteKeyword(scStream);
+	// Write Stream Content
+	WriteKeyword(scStream);
 
-		OutputStreamTraits copyTraits(mOutputStream);
+	// now begin the stream itself
+	return new PDFStream(mCompressStreams,mOutputStream,lengthObjectID,mExtender);
+}
 
-		status = copyTraits.CopyToOutputStream(inStream->GetReadStream());
-		if(status != eSuccess)
-		{
-			TRACE_LOG("ObjectsContext::WriteStream. Unable to write PDFStream to PDF file");
-			break;
-		}
-
+void ObjectsContext::EndPDFStream(PDFStream* inStream)
+{
+	// finalize the stream write to end stream context and calculate length
+	inStream->FinalizeStreamWrite();
+	WritePDFStreamEndWithoutExtent();
+	EndIndirectObject();
+	WritePDFStreamExtent(inStream);
+}
+	
+void ObjectsContext::WritePDFStreamEndWithoutExtent()
+{
 		EndLine(); // this one just to make sure
 		WriteKeyword(scEndStream);
-	}while(false);
-
-	return status;
 }
 
-void ObjectsContext::SetCompressStreams(bool inCompressStreams)
+void ObjectsContext::WritePDFStreamExtent(PDFStream* inStream)
 {
-	mCompressStreams = inCompressStreams;
+	StartNewIndirectObject(inStream->GetExtentObjectID());
+	WriteInteger(inStream->GetLength(),eTokenSeparatorEndLine);
+	EndIndirectObject();
 }
 
-PDFStream* ObjectsContext::CreatePDFStream()
+void ObjectsContext::SetObjectsContextExtender(IObjectsContextExtender* inExtender)
 {
-	return new PDFStream(mCompressStreams);
+	mExtender = inExtender;
 }
