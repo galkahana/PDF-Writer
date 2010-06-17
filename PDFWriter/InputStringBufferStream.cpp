@@ -19,3 +19,8 @@ bool InputStringBufferStream::NotEnded()
 {
 	return mBufferToReadFrom->in_avail() != 0;
 }
+
+void InputStringBufferStream::Skip(LongBufferSizeType inSkipSize)
+{
+	mBufferToReadFrom->pubseekoff(inSkipSize,ios_base::cur);
+}

@@ -35,6 +35,7 @@ struct PDFCreationSettings
 
 class PageContentContext;
 class PDFFormXObject;
+class PDFImageXObject;
 
 class PDFWriter
 {
@@ -64,6 +65,11 @@ public:
 	// Form XObject creating and writing
 	PDFFormXObject* StartFormXObject(const PDFRectangle& inBoundingBox,const double* inMatrix = NULL);
 	EStatusCode EndFormXObjectAndRelease(PDFFormXObject* inFormXObject);
+
+	// Image XObject creating. 
+	// note that as oppose to other methods, create the image xobject also writes it, so there's no "WriteXXXXAndRelease" for image.
+	// So...release the object yourself [just delete it]
+	PDFImageXObject* CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath);
 
 	// Extensibility, reaching to lower levels
 	DocumentContext& GetDocumentContext();

@@ -253,6 +253,29 @@ PDFStream* ObjectsContext::StartPDFStream(DictionaryContext* inStreamDictionary)
 	return new PDFStream(mCompressStreams,mOutputStream,lengthObjectID,mExtender);
 }
 
+PDFStream* ObjectsContext::StartUnfilteredPDFStream(DictionaryContext* inStreamDictionary)
+{
+	// write stream header and allocate PDF stream.
+	// PDF stream will take care of maintaining state for the stream till writing is finished
+
+	// Write the stream header
+	// Write Stream Dictionary (note that inStreamDictionary is optionally used)
+	DictionaryContext* streamDictionaryContext = (NULL == inStreamDictionary ? StartDictionary() : inStreamDictionary);
+
+	// Length (write as an indirect object)
+	streamDictionaryContext->WriteKey(scLength);
+	ObjectIDType lengthObjectID = mReferencesRegistry.AllocateNewObjectID();
+	streamDictionaryContext->WriteObjectReferenceValue(lengthObjectID);
+		
+	EndDictionary(streamDictionaryContext);
+
+	// Write Stream Content
+	WriteKeyword(scStream);
+
+	// now begin the stream itself
+	return new PDFStream(false,mOutputStream,lengthObjectID,NULL);
+}
+
 void ObjectsContext::EndPDFStream(PDFStream* inStream)
 {
 	// finalize the stream write to end stream context and calculate length

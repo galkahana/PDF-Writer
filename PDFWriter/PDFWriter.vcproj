@@ -355,6 +355,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\InputFile.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\InputFile.h"
+					>
+				</File>
+				<File
 					RelativePath=".\InputFileStream.cpp"
 					>
 				</File>
@@ -604,6 +612,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PDFImageXObject.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PDFImageXObject.h"
+				>
+			</File>
+			<File
 				RelativePath=".\PDFPage.cpp"
 				>
 			</File>
@@ -719,6 +735,30 @@
 				RelativePath=".\PrimitiveObjectsWriter.h"
 				>
 			</File>
+		</Filter>
+		<Filter
+			Name="Images"
+			>
+			<Filter
+				Name="JPG"
+				>
+				<File
+					RelativePath=".\JPEGImageInformation.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\JPEGImageInformation.h"
+					>
+				</File>
+				<File
+					RelativePath=".\JPEGImageParser.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\JPEGImageParser.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath=".\PDFWriter.cpp"

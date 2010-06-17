@@ -31,6 +31,8 @@ public:
 	int GetProcsetsCount();
 	SingleValueContainerIterator<StringSet> GetProcesetsIterator();
 
+	int GetXObjectsCount();
+
 	// Use AddFormXObjectMapping to use a form XObject in a content stream [page or xobject].
 	// AddFromXObjectMapping(inFormXObjectID) returns a string name that you can use for 'Do' calls
 	string AddFormXObjectMapping(ObjectIDType inFormXObjectID);
@@ -40,13 +42,21 @@ public:
 	// collisions in naming between the internal and external mechanism.
 	void AddFormXObjectMapping(ObjectIDType inFormXObjectID,const string& inFormXObjectName);
 	
-	int GetXObjectsCount();
+	int GetFormXObjectsCount();
 	MapIterator<ObjectIDTypeToStringMap> GetFormXObjectsIterator();
+
+	// images. same idea as forms
+	string AddImageXObjectMapping(ObjectIDType inImageXObjectID);
+	void AddImageXObjectMapping(ObjectIDType inImageXObjectID, const string& inImageXObjectName);
+
+	int GetImageXObjectsCount();
+	MapIterator<ObjectIDTypeToStringMap> GetImageXObjectsIterator();
 	
 private:
 
 	StringSet mProcsets;
 	ObjectIDTypeToStringMap mFormXObjects;
+	ObjectIDTypeToStringMap mImageXObjects;
 	
 };
 

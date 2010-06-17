@@ -494,38 +494,54 @@
 			<Filter
 				Name="PDFs"
 				>
-				<File
-					RelativePath=".\EmptyFileTest.cpp"
+				<Filter
+					Name="Images in PDF"
 					>
-				</File>
-				<File
-					RelativePath=".\EmptyFileTest.h"
+					<File
+						RelativePath=".\JPGImageTest.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\JPGImageTest.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="Generic"
 					>
-				</File>
-				<File
-					RelativePath=".\EmptyPagesPDF.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\EmptyPagesPDF.h"
-					>
-				</File>
-				<File
-					RelativePath=".\FormXObjectTest.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\FormXObjectTest.h"
-					>
-				</File>
-				<File
-					RelativePath=".\SimpleContentPageTest.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\SimpleContentPageTest.h"
-					>
-				</File>
+					<File
+						RelativePath=".\EmptyFileTest.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\EmptyFileTest.h"
+						>
+					</File>
+					<File
+						RelativePath=".\EmptyPagesPDF.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\EmptyPagesPDF.h"
+						>
+					</File>
+					<File
+						RelativePath=".\FormXObjectTest.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\FormXObjectTest.h"
+						>
+					</File>
+					<File
+						RelativePath=".\SimpleContentPageTest.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\SimpleContentPageTest.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="Patterns"
@@ -540,6 +556,18 @@
 				</File>
 			</Filter>
 		</Filter>
+		<Filter
+			Name="TestMaterials"
+			>
+			<File
+				RelativePath=".\TestMaterials\otherStage.JPG"
+				>
+			</File>
+		</Filter>
+		<File
+			RelativePath=".\ImportantReadme.txt"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

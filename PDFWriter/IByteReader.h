@@ -22,4 +22,9 @@ public:
 		boolean to determine whether reading will get more content or not. opposite of IsEOF. cause i'm sick of !IsEOF()s
 	*/
 	virtual bool NotEnded() = 0;
+
+	/*
+		Skip inSkipSize bytes. if not enough stop at EOF.
+	*/
+	virtual void Skip(LongBufferSizeType inSkipSize) = 0;
 };

@@ -23,6 +23,8 @@ public:
 	// IByteReader implementation
 	virtual LongBufferSizeType Read(Byte* inBuffer,LongBufferSizeType inBufferSize);
 	virtual bool NotEnded();
+	virtual void Skip(LongBufferSizeType inSkipSize);
+
 private:
 
 	FILE* mStream;

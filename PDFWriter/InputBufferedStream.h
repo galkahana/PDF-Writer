@@ -38,6 +38,7 @@ public:
 	// IByteReader implementation
 	virtual LongBufferSizeType Read(Byte* inBuffer,LongBufferSizeType inBufferSize);
 	virtual bool NotEnded();
+	virtual void Skip(LongBufferSizeType inSkipSize);
 
 private:
 	IOBasicTypes::Byte* mBuffer;
@@ -46,6 +47,6 @@ private:
 	IOBasicTypes::Byte* mLastAvailableIndex;
 	IByteReader* mSourceStream;
 
-	void Initiate(IByteReader* inSourceWriter,IOBasicTypes::LongBufferSizeType inBufferSize);
+	void Initiate(IByteReader* inSourceReader,IOBasicTypes::LongBufferSizeType inBufferSize);
 
 };

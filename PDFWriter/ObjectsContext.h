@@ -79,6 +79,8 @@ public:
 	// inStreamDictionary can be passed in order to include stream generic information in an already written stream dictionary
 	// that is type specific.
 	PDFStream* StartPDFStream(DictionaryContext* inStreamDictionary=NULL);
+	// same as StartPDFStream but forces the stream to create an unfiltered stream
+	PDFStream* StartUnfilteredPDFStream(DictionaryContext* inStreamDictionary=NULL);
 	void EndPDFStream(PDFStream* inStream);
 
 	// Extensibility

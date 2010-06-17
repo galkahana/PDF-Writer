@@ -21,6 +21,8 @@ class PageContentContext;
 class ResourcesDictionary;
 class PDFFormXObject;
 class PDFRectangle;
+class PDFImageXObject;
+struct JPEGImageInformation;
 
 class DocumentContext
 {
@@ -60,6 +62,11 @@ public:
 	PDFFormXObject* StartFormXObject(const PDFRectangle& inBoundingBox,const double* inMatrix = NULL);
 	EStatusCode EndFormXObjectAndRelease(PDFFormXObject* inFormXObject);
 
+	// Image XObject creating. 
+	// note that as oppose to other methods, create the image xobject also writes it, so there's no "WriteXXXXAndRelease" for image.
+	// So...release the object yourself [just delete it]
+	PDFImageXObject* CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath);
+
 	// Extensibility
 	void SetDocumentContextExtender(IDocumentContextExtender* inExtender);
 
@@ -82,4 +89,6 @@ private:
 	string GenerateMD5IDForFile();
 	EStatusCode WriteResourcesDictionary(ResourcesDictionary& inResourcesDictionary);
 	bool IsIdentityMatrix(const double* inMatrix);
+	PDFImageXObject* CreateAndWriteImageXObjectFromJPGInformation(	const wstring& inJPGFilePath,
+																	const JPEGImageInformation& inJPGImageInformation);
 };

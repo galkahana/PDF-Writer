@@ -95,10 +95,24 @@ bool InputBufferedStream::NotEnded()
 	return mSourceStream->NotEnded() || (mCurrentBufferIndex != mLastAvailableIndex);
 }
 
-void InputBufferedStream::Initiate(IByteReader* inSourceWriter,IOBasicTypes::LongBufferSizeType inBufferSize)
+void InputBufferedStream::Initiate(IByteReader* inSourceReader,IOBasicTypes::LongBufferSizeType inBufferSize)
 {
 	mBufferSize = inBufferSize;
 	mBuffer = new Byte[mBufferSize];
 	mLastAvailableIndex = mCurrentBufferIndex = mBuffer;
-	mSourceStream = inSourceWriter;
+	mSourceStream = inSourceReader;
+}
+
+void InputBufferedStream::Skip(LongBufferSizeType inSkipSize)
+{
+	if(inSkipSize <= (LongBufferSizeType)(mLastAvailableIndex - mCurrentBufferIndex))
+	{
+		mCurrentBufferIndex+=inSkipSize;
+	}
+	else
+	{
+		inSkipSize -= (LongBufferSizeType)(mLastAvailableIndex - mCurrentBufferIndex);
+		mCurrentBufferIndex = mLastAvailableIndex;
+		mSourceStream->Skip(inSkipSize);
+	}
 }

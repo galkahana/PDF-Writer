@@ -115,3 +115,8 @@ EStatusCode PDFWriter::EndFormXObjectAndRelease(PDFFormXObject* inFormXObject)
 {
 	return mDocumentContext.EndFormXObjectAndRelease(inFormXObject);
 }
+
+PDFImageXObject* PDFWriter::CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath)
+{
+	return mDocumentContext.CreateImageXObjectFromJPGFile(inJPGFilePath); 
+}
