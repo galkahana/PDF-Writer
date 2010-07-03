@@ -1,6 +1,7 @@
 #include "AbstractContentContext.h"
 #include "PDFStream.h"
 #include "ResourcesDictionary.h"
+#include "PDFImageXObject.h"
 
 AbstractContentContext::AbstractContentContext(void)
 {
@@ -459,4 +460,14 @@ void AbstractContentContext::Do(const string& inXObjectName)
 
 	mPrimitiveWriter.WriteName(inXObjectName);	
 	mPrimitiveWriter.WriteKeyword("Do");	
+}
+
+void AbstractContentContext::Do(const string& inXObjectName,PDFImageXObject* inImageXObject)
+{
+	Do(inXObjectName);
+
+	if(1 == inImageXObject->GetImageInformation().ColorComponentsCount)
+		AssertProcsetAvailable(KProcsetImageB);
+	else
+		AssertProcsetAvailable(KProcsetImageC);
 }

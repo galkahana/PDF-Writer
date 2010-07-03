@@ -77,7 +77,7 @@ EStatusCode JPGImageTest::Run()
 		// continue page drawing, place the image in 10,100, size the image to 500,400
 		pageContentContext->q();
 		pageContentContext->cm(500,0,0,400,10,100);
-		pageContentContext->Do(imageXObjectName);
+		pageContentContext->Do(imageXObjectName,imageXObject);
 		pageContentContext->Q();
 
 		delete imageXObject;
