@@ -743,6 +743,14 @@
 				Name="JPG"
 				>
 				<File
+					RelativePath=".\JPEGImageHandler.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\JPEGImageHandler.h"
+					>
+				</File>
+				<File
 					RelativePath=".\JPEGImageInformation.cpp"
 					>
 				</File>
@@ -756,6 +764,18 @@
 				</File>
 				<File
 					RelativePath=".\JPEGImageParser.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="TIFF"
+				>
+				<File
+					RelativePath=".\TIFFImageHandler.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TIFFImageHandler.h"
 					>
 				</File>
 			</Filter>

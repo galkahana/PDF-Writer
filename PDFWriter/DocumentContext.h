@@ -5,6 +5,8 @@
 #include "IOBasicTypes.h"
 #include "TrailerInformation.h"
 #include "CatalogInformation.h"
+#include "JPEGImageHandler.h"
+#include "TIFFImageHandler.h"
 
 #include <string>
 
@@ -22,7 +24,6 @@ class ResourcesDictionary;
 class PDFFormXObject;
 class PDFRectangle;
 class PDFImageXObject;
-struct JPEGImageInformation;
 
 class DocumentContext
 {
@@ -66,16 +67,23 @@ public:
 	// note that as oppose to other methods, create the image xobject also writes it, so there's no "WriteXXXXAndRelease" for image.
 	// So...release the object yourself [just delete it]
 	PDFImageXObject* CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath);
+	PDFImageXObject* CreateImageXObjectFromTIFFFile(const wstring& inTIFFFilePath); 
 
 	// Extensibility
 	void SetDocumentContextExtender(IDocumentContextExtender* inExtender);
 
+	// JPG images handler for retrieving JPG images information
+	JPEGImageHandler& GetJPEGImageHandler();
+
+	
 private:
 	ObjectsContext* mObjectsContext;
 	TrailerInformation mTrailerInformation;
 	CatalogInformation mCatalogInformation;
 	wstring mOutputFilePath;
 	IDocumentContextExtender* mExtender;
+	JPEGImageHandler mJPEGImageHandler;
+	TIFFImageHandler mTIFFImageHandler;
 	
 	void WriteHeaderComment(EPDFVersion inPDFVersion);
 	void Write4BinaryBytes();
@@ -89,6 +97,4 @@ private:
 	string GenerateMD5IDForFile();
 	EStatusCode WriteResourcesDictionary(ResourcesDictionary& inResourcesDictionary);
 	bool IsIdentityMatrix(const double* inMatrix);
-	PDFImageXObject* CreateAndWriteImageXObjectFromJPGInformation(	const wstring& inJPGFilePath,
-																	const JPEGImageInformation& inJPGImageInformation);
 };

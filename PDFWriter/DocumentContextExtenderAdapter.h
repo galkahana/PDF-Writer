@@ -30,11 +30,11 @@ public:
 							DocumentContext* inPDFWriterDocumentContext){return eSuccess;}
 
 	// add items to the image dictionary while it's written
-	virtual EStatusCode OnImageXObjectWrite(
+	virtual EStatusCode OnJPEGImageXObjectWrite(
 							ObjectIDType inImageXObjectID,
 							DictionaryContext* inImageDictionaryContext,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext){return eSuccess;}
+							JPEGImageHandler* inPDFWriterDocumentContext){return eSuccess;}
 
 	// add items to catalog dictionary while it's written
 	virtual EStatusCode OnCatalogWrite(

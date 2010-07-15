@@ -505,6 +505,14 @@
 						RelativePath=".\JPGImageTest.h"
 						>
 					</File>
+					<File
+						RelativePath=".\TIFFImageTest.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\TIFFImageTest.h"
+						>
+					</File>
 				</Filter>
 				<Filter
 					Name="Generic"

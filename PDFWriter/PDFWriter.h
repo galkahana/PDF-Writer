@@ -66,10 +66,11 @@ public:
 	PDFFormXObject* StartFormXObject(const PDFRectangle& inBoundingBox,const double* inMatrix = NULL);
 	EStatusCode EndFormXObjectAndRelease(PDFFormXObject* inFormXObject);
 
-	// Image XObject creating. 
+	// Image XObject creating [for TIFF nad JPG files]. 
 	// note that as oppose to other methods, create the image xobject also writes it, so there's no "WriteXXXXAndRelease" for image.
 	// So...release the object yourself [just delete it]
 	PDFImageXObject* CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath);
+	PDFImageXObject* CreateImageXObjectFromTIFFFile(const wstring& inTIFFFilePath);
 
 	// Extensibility, reaching to lower levels
 	DocumentContext& GetDocumentContext();

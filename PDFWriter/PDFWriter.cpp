@@ -120,3 +120,8 @@ PDFImageXObject* PDFWriter::CreateImageXObjectFromJPGFile(const wstring& inJPGFi
 {
 	return mDocumentContext.CreateImageXObjectFromJPGFile(inJPGFilePath); 
 }
+
+PDFImageXObject* PDFWriter::CreateImageXObjectFromTIFFFile(const wstring& inTIFFFilePath)
+{
+	return mDocumentContext.CreateImageXObjectFromTIFFFile(inTIFFFilePath); 
+}

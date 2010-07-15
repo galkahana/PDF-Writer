@@ -28,4 +28,5 @@ _.swp
 #unwanted zlib sources #
 ########################
 zlib-1.2.3
+tiff-3.9.4
 *.gz

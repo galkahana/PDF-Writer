@@ -7,6 +7,7 @@ class DocumentContext;
 class CatalogInformation;
 class ResourcesDictionary;
 class PDFFormXObject;
+class JPEGImageHandler;
 
 class IDocumentContextExtender
 {
@@ -35,12 +36,12 @@ public:
 							ObjectsContext* inPDFWriterObjectContext,
 							DocumentContext* inPDFWriterDocumentContext) = 0;
 
-	// add items to the image dictionary while it's written
-	virtual EStatusCode OnImageXObjectWrite(
+	// add items to the image dictionary while it's written for a JPG Image
+	virtual EStatusCode OnJPEGImageXObjectWrite(
 							ObjectIDType inImageXObjectID,
 							DictionaryContext* inImageDictionaryContext,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext) = 0;
+							JPEGImageHandler* inPDFWriterDocumentContext) = 0;
 
 	// add items to catalog dictionary while it's written
 	virtual EStatusCode OnCatalogWrite(
