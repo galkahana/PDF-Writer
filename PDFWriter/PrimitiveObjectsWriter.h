@@ -24,6 +24,7 @@ public:
 	void WriteInteger(long long inIntegerToken,ETokenSeparator inSeparate = eTokenSeparatorSpace);
 	void WriteLiteralString(const string& inString,ETokenSeparator inSeparate = eTokenSeparatorSpace);
 	void WriteDouble(double inDoubleToken,ETokenSeparator inSeparate = eTokenSeparatorSpace);
+	void WriteBoolean(bool inBoolean,ETokenSeparator inSeparate = eTokenSeparatorSpace);
 
 	void StartArray();
 	void EndArray(ETokenSeparator inSeparate = eTokenSepratorNone);

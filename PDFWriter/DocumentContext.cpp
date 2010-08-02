@@ -14,7 +14,7 @@
 #include "PageContentContext.h"
 #include "PDFFormXObject.h"
 
-DocumentContext::DocumentContext(void)
+DocumentContext::DocumentContext()
 {
 	mObjectsContext = NULL;
 	mExtender = NULL;
@@ -27,7 +27,8 @@ DocumentContext::~DocumentContext(void)
 void DocumentContext::SetObjectsContext(ObjectsContext* inObjectsContext)
 {
 	mObjectsContext = inObjectsContext;
-	mJPEGImageHandler.SetObjectsContext(mObjectsContext);
+	mJPEGImageHandler.SetOperationsContexts(this,mObjectsContext);
+	mTIFFImageHandler.SetOperationsContexts(this,mObjectsContext);
 }
 
 void DocumentContext::SetOutputFileInformation(OutputFile* inOutputFile)
@@ -660,7 +661,7 @@ PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBounding
 	return aFormXObject;
 }
 
-EStatusCode DocumentContext::EndFormXObjectAndRelease(PDFFormXObject* inFormXObject)
+EStatusCode DocumentContext::EndFormXObjectNoRelease(PDFFormXObject* inFormXObject)
 {
 	mObjectsContext->EndPDFStream(inFormXObject->GetContentStream());
 
@@ -668,13 +669,21 @@ EStatusCode DocumentContext::EndFormXObjectAndRelease(PDFFormXObject* inFormXObj
 	mObjectsContext->StartNewIndirectObject(inFormXObject->GetResourcesDictionaryObjectID());
 	WriteResourcesDictionary(inFormXObject->GetResourcesDictionary());
 	mObjectsContext->EndIndirectObject();
-
-	delete inFormXObject; // will also delete the stream becuase the form XObject owns it
+	
 	return eSuccess;
+}
+
+EStatusCode DocumentContext::EndFormXObjectAndRelease(PDFFormXObject* inFormXObject)
+{
+	EStatusCode status = EndFormXObjectNoRelease(inFormXObject);
+	delete inFormXObject; // will also delete the stream becuase the form XObject owns it
+	
+	return status;
 }
 
 static const string scXObjects = "XObject";
 static const string scProcesets = "ProcSet";
+static const string scExtGStates = "ExtGState";
 EStatusCode DocumentContext::WriteResourcesDictionary(ResourcesDictionary& inResourcesDictionary)
 {
 	EStatusCode status = eSuccess;
@@ -719,6 +728,20 @@ EStatusCode DocumentContext::WriteResourcesDictionary(ResourcesDictionary& inRes
 			mObjectsContext->EndDictionary(xobjectsContext);
 		}
 
+		if(inResourcesDictionary.GetExtGStatesCount() > 0)
+		{
+			// ExtGStates
+			resourcesContext->WriteKey(scExtGStates);
+			DictionaryContext* extGStatesContext = mObjectsContext->StartDictionary();
+			MapIterator<ObjectIDTypeToStringMap> itExtGStates = inResourcesDictionary.GetExtGStatesIterator();
+			while(itExtGStates.MoveNext())
+			{
+				extGStatesContext->WriteKey(itExtGStates.GetValue());
+				extGStatesContext->WriteObjectReferenceValue(itExtGStates.GetKey());
+			}
+			mObjectsContext->EndDictionary(extGStatesContext);	
+		}
+
 		if(mExtender)
 		{
 			status = mExtender->OnResourcesWrite(&(inResourcesDictionary),resourcesContext,mObjectsContext,this);
@@ -752,12 +775,19 @@ PDFImageXObject* DocumentContext::CreateImageXObjectFromJPGFile(const wstring& i
 	return mJPEGImageHandler.CreateImageXObjectFromJPGFile(inJPGFilePath);
 }
 
+PDFFormXObject* DocumentContext::CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath)
+{
+	return mJPEGImageHandler.CreateFormXObjectFromJPGFile(inJPGFilePath);
+}
+
 JPEGImageHandler& DocumentContext::GetJPEGImageHandler()
 {
 	return mJPEGImageHandler;
 }
 
-PDFImageXObject* DocumentContext::CreateImageXObjectFromTIFFFile(const wstring& inTIFFFilePath)
+PDFFormXObject* DocumentContext::CreateFormXObjectFromTIFFFile(	const wstring& inTIFFFilePath,
+																const TIFFUsageParameters& inTIFFUsageParameters)
 {
-	return mTIFFImageHandler.CreateImageXObjectFromTIFFFile(inTIFFFilePath);
+	
+	return mTIFFImageHandler.CreateFormXObjectFromTIFFFile(inTIFFFilePath,inTIFFUsageParameters);
 }

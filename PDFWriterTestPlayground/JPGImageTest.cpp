@@ -4,6 +4,7 @@
 #include "PDFImageXObject.h"
 #include "PDFPage.h"
 #include "PageContentContext.h"
+#include "PDFFormXObject.h"
 
 #include <iostream>
 
@@ -64,7 +65,8 @@ EStatusCode JPGImageTest::Run()
 			break;
 		}
 
-		PDFImageXObject* imageXObject = pdfWriter.CreateImageXObjectFromJPGFile(L"C:\\PDFLibTests\\TestMaterials\\otherStage.JPG");
+		// Create image xobject from 
+		PDFImageXObject* imageXObject  = pdfWriter.CreateImageXObjectFromJPGFile(L"C:\\PDFLibTests\\TestMaterials\\otherStage.JPG");
 		if(!imageXObject)
 		{
 			wcout<<"failed to create image XObject from file\n";
@@ -72,15 +74,39 @@ EStatusCode JPGImageTest::Run()
 			break;
 		}
 
-		string imageXObjectName = page->GetResourcesDictionary().AddImageXObjectMapping(imageXObject->GetImageObjectID());
-
-		// continue page drawing, place the image in 10,100, size the image to 500,400
+		// continue page drawing size the image to 500,400
 		pageContentContext->q();
-		pageContentContext->cm(500,0,0,400,10,100);
-		pageContentContext->Do(imageXObjectName,imageXObject);
+		pageContentContext->cm(500,0,0,400,0,0);
+		pageContentContext->Do(page->GetResourcesDictionary().AddImageXObjectMapping(imageXObject));
 		pageContentContext->Q();
 
 		delete imageXObject;
+
+		// now do the same with a form xobject
+		// pause stream to start writing the image
+		status = pdfWriter.PausePageContentContext(pageContentContext);
+		if(status != eSuccess)
+		{
+			wcout<<"failed to pause page content context ||\n";
+			break;
+		}
+
+
+		PDFFormXObject*  formXObject = pdfWriter.CreateFormXObjectFromJPGFile(L"C:\\PDFLibTests\\TestMaterials\\otherStage.JPG");
+		if(!formXObject)
+		{
+			wcout<<"failed to create form XObject from file\n";
+			status = eFailure;
+			break;
+		}
+
+		// continue page drawing size the image to 500,400
+		pageContentContext->q();
+		pageContentContext->cm(1,0,0,1,0,400);
+		pageContentContext->Do(page->GetResourcesDictionary().AddFormXObjectMapping(formXObject->GetObjectID()));
+		pageContentContext->Q();
+
+		delete formXObject;
 
 		status = pdfWriter.EndPageContentContext(pageContentContext);
 		if(status != eSuccess)
@@ -95,6 +121,7 @@ EStatusCode JPGImageTest::Run()
 			wcout<<"failed to write page\n";
 			break;
 		}
+
 	
 		status = pdfWriter.EndPDF();
 		if(status != eSuccess)

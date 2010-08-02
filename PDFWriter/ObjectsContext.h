@@ -53,6 +53,7 @@ public:
 	void WriteHexString(const string& inString,ETokenSeparator inSeparate = eTokenSeparatorSpace);
 	void WriteIndirectObjectReference(ObjectIDType inIndirectObjectID,ETokenSeparator inSeparate = eTokenSeparatorSpace);
 	void WriteDouble(double inDoubleToken,ETokenSeparator inSeparate = eTokenSeparatorSpace);
+	void WriteBoolean(bool inBooleanToken,ETokenSeparator inSeparate = eTokenSeparatorSpace);
 
 	// Dictionary writing. StartDictionary starts a context which allows writing.
 	// this context enforces some simple values

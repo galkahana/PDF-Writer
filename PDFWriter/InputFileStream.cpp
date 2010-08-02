@@ -50,5 +50,5 @@ bool InputFileStream::NotEnded()
 void InputFileStream::Skip(LongBufferSizeType inSkipSize)
 {
 	if(mStream)
-		fseek(mStream,inSkipSize,SEEK_CUR);
+		fseek(mStream,(long)inSkipSize,SEEK_CUR);
 }

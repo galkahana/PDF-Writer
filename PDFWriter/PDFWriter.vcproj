@@ -21,8 +21,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="1"
 			>
@@ -44,7 +44,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\zlib"
+				AdditionalIncludeDirectories="..\zlib;..\libtiff"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -107,7 +107,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\zlib"
+				AdditionalIncludeDirectories="..\zlib;..\libtiff"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -146,8 +146,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
@@ -171,7 +171,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\zlib"
+				AdditionalIncludeDirectories="..\zlib;..\libtiff"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -235,7 +235,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\zlib"
+				AdditionalIncludeDirectories="..\zlib;..\libtiff"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -628,6 +628,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ProcsetResourcesConstants.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ResourcesDictionary.cpp"
 				>
 			</File>
@@ -778,8 +782,24 @@
 					RelativePath=".\TIFFImageHandler.h"
 					>
 				</File>
+				<File
+					RelativePath=".\TiffUsageParameters.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TiffUsageParameters.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
+		<File
+			RelativePath=".\CMYKRGBColor.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\CMYKRGBColor.h"
+			>
+		</File>
 		<File
 			RelativePath=".\PDFWriter.cpp"
 			>

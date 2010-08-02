@@ -10,7 +10,7 @@ Trace::Trace(void)
 {
 	mLog = NULL;
 	mLogFilePath = L"Log.txt";
-	mShouldBeSilent = false;
+	mShouldLog = false;
 }
 
 Trace::~Trace(void)
@@ -18,22 +18,22 @@ Trace::~Trace(void)
 	delete mLog;
 }
 
-void Trace::SetLogSettings(const wstring& inLogFilePath,bool inShouldBeSilent)
+void Trace::SetLogSettings(const wstring& inLogFilePath,bool inShouldLog)
 {
-	mShouldBeSilent = inShouldBeSilent;
+	mShouldLog = inShouldLog;
 	mLogFilePath = inLogFilePath;
 	if(mLog != NULL)
 	{
 		delete mLog;
 		mLog = NULL;
-		if(!mShouldBeSilent)
+		if(mShouldLog)
 			mLog = new Log(mLogFilePath);
 	}
 }
 
 void Trace::TraceToLog(const wchar_t* inFormat,...)
 {
-	if(!mShouldBeSilent)
+	if(mShouldLog)
 	{
 		if(NULL == mLog)
 			mLog = new Log(mLogFilePath);
@@ -47,3 +47,18 @@ void Trace::TraceToLog(const wchar_t* inFormat,...)
 		mLog->LogEntry(wstring(mBuffer));
 	}
 }
+
+void Trace::TraceToLog(const wchar_t* inFormat,va_list inList)
+{
+	if(mShouldLog)
+	{
+		if(NULL == mLog)
+			mLog = new Log(mLogFilePath);
+
+		SAFE_VSWPRINTF(mBuffer,5001,inFormat,inList);
+
+		mLog->LogEntry(wstring(mBuffer));
+	}
+
+}
+

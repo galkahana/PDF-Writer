@@ -10,6 +10,7 @@
 #include "DocumentContext.h"
 #include "ObjectsContext.h"
 #include "PDFRectangle.h"
+#include "TIFFUsageParameters.h"
 
 #include <string>
 
@@ -69,8 +70,22 @@ public:
 	// Image XObject creating [for TIFF nad JPG files]. 
 	// note that as oppose to other methods, create the image xobject also writes it, so there's no "WriteXXXXAndRelease" for image.
 	// So...release the object yourself [just delete it]
+	
+	// jpeg - two variants
+	// will return image xobject sized at 1X1
 	PDFImageXObject* CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath);
-	PDFImageXObject* CreateImageXObjectFromTIFFFile(const wstring& inTIFFFilePath);
+
+	// will return form XObject, which will include the xobject at it's size.
+	// size is determined by the following order:
+	// - JFIF resolution information is looked for. if found used to determine the size
+	// - if not found. EXIF resolution information is looked for. if found used to determine the size
+	// - if not found. Photoshop resolution information is looked for. if found used to determine the size
+	// - otherwise aspect ratio is assumed, and so size is determined trivially from the samples width and height.
+	PDFFormXObject* CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath);
+	
+	// tiff
+	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const wstring& inTIFFFilePath,
+													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 
 	// Extensibility, reaching to lower levels
 	DocumentContext& GetDocumentContext();

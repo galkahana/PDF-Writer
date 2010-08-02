@@ -10,16 +10,10 @@
 
 using namespace std;
 
-// Predefined procset names
-static const string KProcsetPDF = "PDF";
-static const string KProcsetText = "Text";
-static const string KProcsetImageB = "ImageB";
-static const string KProcsetImageC = "ImageC";
-static const string KProcsetImageI = "ImageI";
-
-
 typedef set<string> StringSet;
 typedef map<ObjectIDType,string> ObjectIDTypeToStringMap;
+
+class PDFImageXObject;
 
 class ResourcesDictionary
 {
@@ -45,18 +39,29 @@ public:
 	int GetFormXObjectsCount();
 	MapIterator<ObjectIDTypeToStringMap> GetFormXObjectsIterator();
 
-	// images. same idea as forms
-	string AddImageXObjectMapping(ObjectIDType inImageXObjectID);
-	void AddImageXObjectMapping(ObjectIDType inImageXObjectID, const string& inImageXObjectName);
+	// images. same idea as forms. note that image define resources that should
+	// be added to the container resources dictionary
+	string AddImageXObjectMapping(PDFImageXObject* inImageXObject);
+	void AddImageXObjectMapping(PDFImageXObject* inImageXObject, const string& inImageXObjectName);
 
 	int GetImageXObjectsCount();
 	MapIterator<ObjectIDTypeToStringMap> GetImageXObjectsIterator();
-	
+
+	// ExtGStates. 
+	string AddExtGStateMapping(ObjectIDType inExtGStateID);
+	void AddExtGStateMapping(ObjectIDType inExtGStateID, const string& inExtGStateName);
+	int GetExtGStatesCount();
+	MapIterator<ObjectIDTypeToStringMap> GetExtGStatesIterator();
+
 private:
 
 	StringSet mProcsets;
 	ObjectIDTypeToStringMap mFormXObjects;
 	ObjectIDTypeToStringMap mImageXObjects;
+	ObjectIDTypeToStringMap mExtGStates;
 	
+
+	void AddImageXObjectMappingWithName(PDFImageXObject* inImageXObject, const string& inImageXObjectName);
+
 };
 

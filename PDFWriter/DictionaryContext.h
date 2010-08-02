@@ -25,6 +25,8 @@ public:
 	void WriteNameValue(const string& inValue);
 	void WriteObjectReferenceValue(ObjectIDType inObjectReference);
 	void WriteRectangleValue(const PDFRectangle& inRectangle);
+	void WriteDoubleValue(double inValue);
+	void WriteBooleanValue(bool inValue);
 
 private:
 

@@ -1,5 +1,6 @@
 #include "ResourcesDictionary.h"
 #include "BoxingBase.h"
+#include "PDFImageXObject.h"
 
 ResourcesDictionary::ResourcesDictionary(void)
 {
@@ -64,14 +65,14 @@ int ResourcesDictionary::GetFormXObjectsCount()
 }
 
 static const string scIM = "Im";
-string ResourcesDictionary::AddImageXObjectMapping(ObjectIDType inImageXObjectID)
+string ResourcesDictionary::AddImageXObjectMapping(PDFImageXObject* inImageXObject)
 {
-	ObjectIDTypeToStringMap::iterator it = mImageXObjects.find(inImageXObjectID);
+	ObjectIDTypeToStringMap::iterator it = mImageXObjects.find(inImageXObject->GetImageObjectID());
 
 	if(it == mImageXObjects.end())
 	{
 		string newName = scIM + Int((int)mImageXObjects.size()+1).ToString();
-		mImageXObjects.insert(ObjectIDTypeToStringMap::value_type(inImageXObjectID,newName));
+		AddImageXObjectMappingWithName(inImageXObject,newName);
 		return newName;
 	}
 	else
@@ -80,13 +81,25 @@ string ResourcesDictionary::AddImageXObjectMapping(ObjectIDType inImageXObjectID
 	}
 }
 
-
-void ResourcesDictionary::AddImageXObjectMapping(ObjectIDType inImageXObjectID, const string& inImageXObjectName)
+void ResourcesDictionary::AddImageXObjectMappingWithName(PDFImageXObject* inImageXObject, const string& inImageXObjectName)
 {
-	ObjectIDTypeToStringMap::iterator it = mImageXObjects.find(inImageXObjectID);
+	mImageXObjects.insert(ObjectIDTypeToStringMap::value_type(inImageXObject->GetImageObjectID(),inImageXObjectName));
+	
+	StringList::const_iterator it = inImageXObject->GetRequiredProcsetResourceNames().begin();
+	for(; it != inImageXObject->GetRequiredProcsetResourceNames().end();++it)
+	{
+		if(it->size() > 0)
+			AddProcsetResource(*it);
+	}
+}
+
+
+void ResourcesDictionary::AddImageXObjectMapping(PDFImageXObject* inImageXObject, const string& inImageXObjectName)
+{
+	ObjectIDTypeToStringMap::iterator it = mImageXObjects.find(inImageXObject->GetImageObjectID());
 
 	if(it == mImageXObjects.end())
-		mImageXObjects.insert(ObjectIDTypeToStringMap::value_type(inImageXObjectID,inImageXObjectName));
+		AddImageXObjectMappingWithName(inImageXObject,inImageXObjectName);
 	else
 		it->second = inImageXObjectName;
 }
@@ -104,4 +117,40 @@ MapIterator<ObjectIDTypeToStringMap> ResourcesDictionary::GetImageXObjectsIterat
 int ResourcesDictionary::GetXObjectsCount()
 {
 	return int(mImageXObjects.size() + mFormXObjects.size());
+}
+
+static const string scGS = "GS";
+string ResourcesDictionary::AddExtGStateMapping(ObjectIDType inExtGStateID)
+{
+	ObjectIDTypeToStringMap::iterator it = mExtGStates.find(inExtGStateID);
+
+	if(it == mExtGStates.end())
+	{
+		string newName = scGS + Int((int)mExtGStates.size()+1).ToString();
+		return newName;
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
+void ResourcesDictionary::AddExtGStateMapping(ObjectIDType inExtGStateID, const string& inExtGStateName)
+{
+	ObjectIDTypeToStringMap::iterator it = mExtGStates.find(inExtGStateID);
+
+	if(it == mExtGStates.end())
+		mExtGStates.insert(ObjectIDTypeToStringMap::value_type(inExtGStateID,inExtGStateName));
+	else
+		it->second = inExtGStateName;
+}
+
+int ResourcesDictionary::GetExtGStatesCount()
+{
+	return (int)mExtGStates.size();
+}
+
+MapIterator<ObjectIDTypeToStringMap> ResourcesDictionary::GetExtGStatesIterator()
+{
+	return MapIterator<ObjectIDTypeToStringMap>(mExtGStates);
 }

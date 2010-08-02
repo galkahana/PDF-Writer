@@ -2,19 +2,25 @@
 #include "ObjectsBasicTypes.h"
 #include "JPEGImageInformation.h"
 
+#include <string>
+#include <list>
+
+typedef std::list<std::string> StringList;
 
 class PDFImageXObject
 {
 public:
-	PDFImageXObject(ObjectIDType inImageObjectID,const JPEGImageInformation& inImageInformation);
+	PDFImageXObject(ObjectIDType inImageObjectID);
+	PDFImageXObject(ObjectIDType inImageObjectID,const std::string& inRequiredProcsetResourceName);
 	~PDFImageXObject(void);
 
 	ObjectIDType GetImageObjectID();
-	const JPEGImageInformation& GetImageInformation() const;
+	const StringList& GetRequiredProcsetResourceNames() const;
 
+	void AddRequiredProcset(const std::string& inRequiredProcsetResourceName);
 
 private:
 
 	ObjectIDType mImageObjectID;
-	JPEGImageInformation mImageInformation;
+	StringList mRequiredProcsetResourceNames;
 };

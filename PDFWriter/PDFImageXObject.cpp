@@ -1,9 +1,14 @@
 #include "PDFImageXObject.h"
 
-PDFImageXObject::PDFImageXObject(ObjectIDType inImageObjectID,const JPEGImageInformation& inImageInformation)
+PDFImageXObject::PDFImageXObject(ObjectIDType inImageObjectID)
 {
 	mImageObjectID = inImageObjectID;
-	mImageInformation = inImageInformation;
+}
+
+PDFImageXObject::PDFImageXObject(ObjectIDType inImageObjectID,const std::string& inRequiredProcsetResourceName)
+{
+	mImageObjectID = inImageObjectID;
+	AddRequiredProcset(inRequiredProcsetResourceName);
 }
 
 PDFImageXObject::~PDFImageXObject(void)
@@ -15,8 +20,12 @@ ObjectIDType PDFImageXObject::GetImageObjectID()
 	return mImageObjectID;
 }
 
-const JPEGImageInformation& PDFImageXObject::GetImageInformation() const
+const StringList& PDFImageXObject::GetRequiredProcsetResourceNames() const
 {
-	return mImageInformation;
+	return mRequiredProcsetResourceNames;
 }
 
+void PDFImageXObject::AddRequiredProcset(const std::string& inRequiredProcsetResourceName)
+{
+	mRequiredProcsetResourceNames.push_back(inRequiredProcsetResourceName);
+}

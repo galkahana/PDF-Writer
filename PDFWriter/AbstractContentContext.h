@@ -87,11 +87,8 @@ public:
 	void W();
 	void WStar();
 
-	// XObject usage [see comment below RE images]
+	// XObject usage
 	void Do(const string& inXObjectName);
-	// Prefer this overload when using images and aiming to create PDF for postscript implementations.
-	// will make sure to also add the right procset to the context resource dictionary.
-	void Do(const string& inXObjectName,PDFImageXObject* inImageXObject);
 
 protected:
 

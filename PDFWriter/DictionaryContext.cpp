@@ -80,3 +80,12 @@ void DictionaryContext::WriteRectangleValue(const PDFRectangle& inRectangle)
 	mObjectsContext->EndLine();
 }
 
+void DictionaryContext::WriteDoubleValue(double inValue)
+{
+	mObjectsContext->WriteDouble(inValue,eTokenSeparatorEndLine);	
+}
+
+void DictionaryContext::WriteBooleanValue(bool inValue)
+{
+	mObjectsContext->WriteBoolean(inValue,eTokenSeparatorEndLine);
+}

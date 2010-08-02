@@ -87,6 +87,19 @@ size_t PrimitiveObjectsWriter::DetermineDoubleTrimmedLength(const char* inBuffer
 	return result;
 }
 
+static const IOBasicTypes::Byte scTrue[4] = {'t','r','u','e'};
+static const IOBasicTypes::Byte scFalse[5] = {'f','a','l','s','e'};
+
+void PrimitiveObjectsWriter::WriteBoolean(bool inBoolean,ETokenSeparator inSeparate)
+{
+	if(inBoolean)
+		mStreamForWriting->Write(scTrue,4);
+	else
+		mStreamForWriting->Write(scFalse,5);
+	WriteTokenSeparator(inSeparate);
+}
+
+
 void PrimitiveObjectsWriter::SetStreamForWriting(IByteWriter* inStreamForWriting)
 {
 	mStreamForWriting = inStreamForWriting;

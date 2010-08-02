@@ -177,6 +177,11 @@ void ObjectsContext::WriteDouble(double inDoubleToken,ETokenSeparator inSeparate
 	mPrimitiveWriter.WriteDouble(inDoubleToken,inSeparate);
 }
 
+void ObjectsContext::WriteBoolean(bool inBooleanToken,ETokenSeparator inSeparate)
+{
+	mPrimitiveWriter.WriteBoolean(inBooleanToken,inSeparate);
+}
+
 static const std::string scObj = "obj";
 ObjectIDType ObjectsContext::StartNewIndirectObject()
 {

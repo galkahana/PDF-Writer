@@ -10,10 +10,15 @@
 #include "ObjectsContext.h"
 #include "DictionaryContext.h"
 #include "IDocumentContextExtender.h"
+#include "ProcsetResourcesConstants.h"
+#include "DocumentContext.h"
+#include "XObjectContentContext.h"
+#include "PDFFormXObject.h"
 
 JPEGImageHandler::JPEGImageHandler(void)
 {
 	mObjectsContext = NULL;
+	mDocumentContext = NULL;
 	mExtender = NULL;
 }
 
@@ -22,9 +27,10 @@ JPEGImageHandler::~JPEGImageHandler(void)
 }
 
 
-void JPEGImageHandler::SetObjectsContext(ObjectsContext* inObjectsContext)
+void JPEGImageHandler::SetOperationsContexts(DocumentContext* inDocumentContext,ObjectsContext* inObjectsContext)
 {
 	mObjectsContext = inObjectsContext;
+	mDocumentContext = inDocumentContext;
 }
 
 PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath)
@@ -173,7 +179,7 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 		mObjectsContext->EndPDFStream(imageStream);
 		delete imageStream;
 
-		imageXObject = new PDFImageXObject(imageXObjectID,inJPGImageInformation);
+		imageXObject = new PDFImageXObject(imageXObjectID,1 == inJPGImageInformation.ColorComponentsCount ? KProcsetImageB:KProcsetImageC);
 	}while(false);
 	
 
@@ -232,4 +238,150 @@ BoolAndJPEGImageInformation JPEGImageHandler::RetrieveImageInformation(const wst
 void JPEGImageHandler::SetDocumentContextExtender(IDocumentContextExtender* inExtender)
 {
 	mExtender = inExtender;
+}
+
+PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath)
+{
+	PDFImageXObject* imageXObject = NULL;
+	PDFFormXObject* imageFormXObject = NULL;
+
+	do 
+	{
+		// retrieve image information
+		BoolAndJPEGImageInformation imageInformationResult = RetrieveImageInformation(inJPGFilePath);
+		if(!imageInformationResult.first)
+		{
+			TRACE_LOG1("JPEGImageHandler::CreateFormXObjectFromJPGFile, unable to retrieve image information for %s",inJPGFilePath.c_str());
+			break;
+		}
+
+		// Write Image XObject
+		imageXObject = CreateAndWriteImageXObjectFromJPGInformation(inJPGFilePath,imageInformationResult.second);
+		if(!imageXObject)
+		{
+			TRACE_LOG1("JPEGImageHandler::CreateFormXObjectFromJPGFile, unable to create image xobject for %s",inJPGFilePath.c_str());
+			break;
+		}
+
+		// Write Image form XObject
+		imageFormXObject = CreateImageFormXObjectFromImageXObject(imageXObject,imageInformationResult.second);
+		if(!imageFormXObject)
+		{
+			TRACE_LOG1("JPEGImageHandler::CreateFormXObjectFromJPGFile, unable to create form xobject for %s",inJPGFilePath.c_str());
+			break;
+		}
+
+
+	} while(false);
+
+	delete imageXObject;
+	return imageFormXObject;  	
+}
+
+PDFFormXObject* JPEGImageHandler::CreateImageFormXObjectFromImageXObject(PDFImageXObject* inImageXObject, const JPEGImageInformation& inJPGImageInformation)
+{
+	PDFFormXObject* formXObject = NULL;
+	do
+	{
+		if(!mObjectsContext)
+		{
+			TRACE_LOG("JPEGImageHandler::CreateImageFormXObjectFromImageXObject. Unexpected Error, mDocumentContex not initialized with a document context");
+			break;
+		}
+
+		DoubleAndDoublePair dimensions = GetImageDimensions(inJPGImageInformation);
+
+		formXObject = mDocumentContext->StartFormXObject(PDFRectangle(0,0,dimensions.first,dimensions.second));
+		XObjectContentContext* xobjectContentContext = formXObject->GetContentContext();
+
+		xobjectContentContext->q();
+		xobjectContentContext->cm(dimensions.first,0,0,dimensions.second,0,0);
+		xobjectContentContext->Do(formXObject->GetResourcesDictionary().AddImageXObjectMapping(inImageXObject));
+		xobjectContentContext->Q();
+
+		EStatusCode status = mDocumentContext->EndFormXObjectNoRelease(formXObject);
+		if(status != eSuccess)
+		{
+			TRACE_LOG("JPEGImageHandler::CreateImageFormXObjectFromImageXObject. Unexpected Error, could not create form XObject for image");
+			delete formXObject;
+			formXObject = NULL;
+			break;
+		}	
+
+
+	}while(false);
+	return formXObject;
+}
+
+DoubleAndDoublePair JPEGImageHandler::GetImageDimensions(const JPEGImageInformation& inJPGImageInformation)
+{
+	DoubleAndDoublePair returnResult(1,1);
+
+	do
+	{
+		// prefer JFIF determined resolution
+		if(inJPGImageInformation.JFIFInformationExists)
+		{
+			double jfifXDensity = 	(0 == inJPGImageInformation.JFIFXDensity) ? 1:inJPGImageInformation.JFIFXDensity;
+			double jfifYDensity = (0 == inJPGImageInformation.JFIFYDensity) ? 1:inJPGImageInformation.JFIFYDensity;
+
+			switch(inJPGImageInformation.JFIFUnit)
+			{
+				case 1: // INCH
+					returnResult.first = ((double)inJPGImageInformation.SamplesWidth / jfifXDensity) * 72.0;
+					returnResult.second = ((double)inJPGImageInformation.SamplesHeight / jfifYDensity) * 72.0;
+					break;
+				case 2: // CM
+					returnResult.first = ((double)inJPGImageInformation.SamplesWidth / jfifXDensity) * 72.0 / 2.54;
+					returnResult.second = ((double)inJPGImageInformation.SamplesHeight / jfifYDensity) * 72.0 / 2.54;
+					break;
+				default: // 0 - aspect ratio
+					returnResult.first = (double)inJPGImageInformation.SamplesWidth;
+					returnResult.second = (double)inJPGImageInformation.SamplesHeight;
+					break;
+			}
+			break;
+		}
+
+		// if no jfif try exif
+		if(inJPGImageInformation.ExifInformationExists)
+		{
+			double exifXDensity = 	(0 == inJPGImageInformation.ExifXDensity) ? 1:inJPGImageInformation.ExifXDensity;
+			double exifYDensity = (0 == inJPGImageInformation.ExifYDensity) ? 1:inJPGImageInformation.ExifYDensity;
+
+			switch(inJPGImageInformation.ExifUnit)
+			{
+				case 1: // aspect ratio
+					returnResult.first = (double)inJPGImageInformation.SamplesWidth;
+					returnResult.second = (double)inJPGImageInformation.SamplesHeight;
+					break;
+				case 3: // CM
+					returnResult.first = ((double)inJPGImageInformation.SamplesWidth / exifXDensity) * 72.0 / 2.54;
+					returnResult.second = ((double)inJPGImageInformation.SamplesHeight / exifYDensity) * 72.0 / 2.54;
+					break;
+				default: // 2 - Inch
+					returnResult.first = ((double)inJPGImageInformation.SamplesWidth / exifXDensity) * 72.0;
+					returnResult.second = ((double)inJPGImageInformation.SamplesHeight / exifYDensity) * 72.0;
+					break;
+			}
+			break;
+		}
+
+		// if no jfif, try photoshop
+		if(inJPGImageInformation.PhotoshopInformationExists)
+		{
+			double photoshopXDensity = 	(0 == inJPGImageInformation.PhotoshopXDensity) ? 1:inJPGImageInformation.PhotoshopXDensity;
+			double photoshopYDensity = (0 == inJPGImageInformation.PhotoshopYDensity) ? 1:inJPGImageInformation.PhotoshopYDensity;
+
+			returnResult.first = ((double)inJPGImageInformation.SamplesWidth / photoshopXDensity) * 72.0;
+			returnResult.second = ((double)inJPGImageInformation.SamplesHeight / photoshopYDensity) * 72.0;
+			break;
+		}
+
+		// else aspect ratio
+		returnResult.first = (double)inJPGImageInformation.SamplesWidth;
+		returnResult.second = (double)inJPGImageInformation.SamplesHeight;
+	}while(false);
+
+	return returnResult;
 }

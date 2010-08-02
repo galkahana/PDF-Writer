@@ -121,7 +121,12 @@ PDFImageXObject* PDFWriter::CreateImageXObjectFromJPGFile(const wstring& inJPGFi
 	return mDocumentContext.CreateImageXObjectFromJPGFile(inJPGFilePath); 
 }
 
-PDFImageXObject* PDFWriter::CreateImageXObjectFromTIFFFile(const wstring& inTIFFFilePath)
+PDFFormXObject* PDFWriter::CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath)
 {
-	return mDocumentContext.CreateImageXObjectFromTIFFFile(inTIFFFilePath); 
+	return mDocumentContext.CreateFormXObjectFromJPGFile(inJPGFilePath); 
+}
+
+PDFFormXObject* PDFWriter::CreateFormXObjectFromTIFFFile(const wstring& inTIFFFilePath,const TIFFUsageParameters& inTIFFUsageParameters)
+{
+	return mDocumentContext.CreateFormXObjectFromTIFFFile(inTIFFFilePath,inTIFFUsageParameters); 
 }

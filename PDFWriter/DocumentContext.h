@@ -7,6 +7,7 @@
 #include "CatalogInformation.h"
 #include "JPEGImageHandler.h"
 #include "TIFFImageHandler.h"
+#include "TIFFUsageParameters.h"
 
 #include <string>
 
@@ -28,8 +29,8 @@ class PDFImageXObject;
 class DocumentContext
 {
 public:
-	DocumentContext(void);
-	~DocumentContext(void);
+	DocumentContext();
+	~DocumentContext();
 
 	void SetObjectsContext(ObjectsContext* inObjectsContext);
 	void SetOutputFileInformation(OutputFile* inOutputFile);
@@ -63,11 +64,24 @@ public:
 	PDFFormXObject* StartFormXObject(const PDFRectangle& inBoundingBox,const double* inMatrix = NULL);
 	EStatusCode EndFormXObjectAndRelease(PDFFormXObject* inFormXObject);
 
+	// no release version of ending a form XObject. owner should delete it (regular delete...nothin special)
+	EStatusCode EndFormXObjectNoRelease(PDFFormXObject* inFormXObject);
+
 	// Image XObject creating. 
 	// note that as oppose to other methods, create the image xobject also writes it, so there's no "WriteXXXXAndRelease" for image.
 	// So...release the object yourself [just delete it]
+
+	// JPEG - two variants
+	
+	// will return image xobject sized at 1X1
 	PDFImageXObject* CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath);
-	PDFImageXObject* CreateImageXObjectFromTIFFFile(const wstring& inTIFFFilePath); 
+
+	// will return form XObject, which will include the xobject at it's size
+	PDFFormXObject* CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath);
+
+	// TIFF
+	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const wstring& inTIFFFilePath,
+													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 
 	// Extensibility
 	void SetDocumentContextExtender(IDocumentContextExtender* inExtender);

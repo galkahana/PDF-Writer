@@ -15,9 +15,10 @@ public:
 	Trace();
 	~Trace(void);
 
-	void SetLogSettings(const wstring& inLogFilePath,bool inShouldBeSilent);
+	void SetLogSettings(const wstring& inLogFilePath,bool inShouldLog);
 
 	void TraceToLog(const wchar_t* inFormat,...);
+	void TraceToLog(const wchar_t* inFormat,va_list inList);
 
 
 private:
@@ -25,7 +26,7 @@ private:
 	Log* mLog;
 
 	wstring mLogFilePath;
-	bool mShouldBeSilent;
+	bool mShouldLog;
 
 	// use the log
 	// make it lock safe
