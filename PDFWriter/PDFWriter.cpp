@@ -111,6 +111,12 @@ PDFFormXObject* PDFWriter::StartFormXObject(const PDFRectangle& inBoundingBox,co
 	return mDocumentContext.StartFormXObject(inBoundingBox,inMatrix);
 }
 
+PDFFormXObject* PDFWriter::StartFormXObject(const PDFRectangle& inBoundingBox,ObjectIDType inFormXObjectID,const double* inMatrix)
+{
+	return mDocumentContext.StartFormXObject(inBoundingBox,inFormXObjectID,inMatrix);
+}
+
+
 EStatusCode PDFWriter::EndFormXObjectAndRelease(PDFFormXObject* inFormXObject)
 {
 	return mDocumentContext.EndFormXObjectAndRelease(inFormXObject);
@@ -129,4 +135,19 @@ PDFFormXObject* PDFWriter::CreateFormXObjectFromJPGFile(const wstring& inJPGFile
 PDFFormXObject* PDFWriter::CreateFormXObjectFromTIFFFile(const wstring& inTIFFFilePath,const TIFFUsageParameters& inTIFFUsageParameters)
 {
 	return mDocumentContext.CreateFormXObjectFromTIFFFile(inTIFFFilePath,inTIFFUsageParameters); 
+}
+
+PDFImageXObject* PDFWriter::CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inImageXObjectID)
+{
+	return mDocumentContext.CreateImageXObjectFromJPGFile(inJPGFilePath,inImageXObjectID); 
+}
+
+PDFFormXObject* PDFWriter::CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inImageXObjectID)
+{
+	return mDocumentContext.CreateFormXObjectFromJPGFile(inJPGFilePath,inImageXObjectID); 
+}
+
+PDFFormXObject* PDFWriter::CreateFormXObjectFromTIFFFile(const wstring& inTIFFFilePath,ObjectIDType inFormXObjectID, const TIFFUsageParameters& inTIFFUsageParameters)
+{
+	return mDocumentContext.CreateFormXObjectFromTIFFFile(inTIFFFilePath,inFormXObjectID,inTIFFUsageParameters); 
 }

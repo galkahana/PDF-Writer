@@ -1,6 +1,7 @@
 #pragma once
 
 #include "JPEGImageInformation.h"
+#include "ObjectsBasicTypes.h"
 
 #include <map>
 #include <string>
@@ -29,9 +30,11 @@ public:
 
 	// DocumentContext::CreateImageXObjectFromJPGFile are equivelent
 	PDFImageXObject* CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath);
+	PDFImageXObject* CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inImageXObjectID);
 	
 	// will return form XObject, which will include the xobject at it's size
 	PDFFormXObject* CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath);
+	PDFFormXObject* CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inFormXObjectID);
 
 	void SetOperationsContexts(DocumentContext* inDocumentContext,ObjectsContext* inObjectsContext);
 	void SetDocumentContextExtender(IDocumentContextExtender* inExtender);
@@ -43,8 +46,8 @@ private:
 	DocumentContext* mDocumentContext;
 	IDocumentContextExtender* mExtender;
 
-	PDFImageXObject* CreateAndWriteImageXObjectFromJPGInformation(const wstring& inJPGFilePath, const JPEGImageInformation& inJPGImageInformation);
-	PDFFormXObject* CreateImageFormXObjectFromImageXObject(PDFImageXObject* inImageXObject, const JPEGImageInformation& inJPGImageInformation);
+	PDFImageXObject* CreateAndWriteImageXObjectFromJPGInformation(const wstring& inJPGFilePath,ObjectIDType inImageXObjectID, const JPEGImageInformation& inJPGImageInformation);
+	PDFFormXObject* CreateImageFormXObjectFromImageXObject(PDFImageXObject* inImageXObject,ObjectIDType inFormXObjectID, const JPEGImageInformation& inJPGImageInformation);
 	DoubleAndDoublePair GetImageDimensions(const JPEGImageInformation& inJPGImageInformation);
 
 };

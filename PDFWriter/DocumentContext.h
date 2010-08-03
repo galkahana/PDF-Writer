@@ -62,6 +62,7 @@ public:
 
 	// Form XObject creation and finalization
 	PDFFormXObject* StartFormXObject(const PDFRectangle& inBoundingBox,const double* inMatrix = NULL);
+	PDFFormXObject* StartFormXObject(const PDFRectangle& inBoundingBox,ObjectIDType inFormXObjectID,const double* inMatrix = NULL);
 	EStatusCode EndFormXObjectAndRelease(PDFFormXObject* inFormXObject);
 
 	// no release version of ending a form XObject. owner should delete it (regular delete...nothin special)
@@ -75,14 +76,19 @@ public:
 	
 	// will return image xobject sized at 1X1
 	PDFImageXObject* CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath);
+	PDFImageXObject* CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inImageXObjectID);
 
 	// will return form XObject, which will include the xobject at it's size
 	PDFFormXObject* CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath);
+	PDFFormXObject* CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inFormXObjectID);
 
 	// TIFF
 	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const wstring& inTIFFFilePath,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 
+	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const wstring& inTIFFFilePath,
+													ObjectIDType inFormXObjectID,
+													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 	// Extensibility
 	void SetDocumentContextExtender(IDocumentContextExtender* inExtender);
 

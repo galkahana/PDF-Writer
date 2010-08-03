@@ -53,7 +53,7 @@ EStatusCode JPGImageTest::Run()
 		// draw a rectangle
 		pageContentContext->q();
 		pageContentContext->k(100,0,0,0);
-		pageContentContext->re(100,500,100,100);
+		pageContentContext->re(500,0,100,100);
 		pageContentContext->f();
 		pageContentContext->Q();
 

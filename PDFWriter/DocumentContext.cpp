@@ -604,12 +604,12 @@ static const string scForm = "Form";
 static const string scBBox = "BBox";
 static const string scFormType = "FormType";
 static const string scMatrix = "Matrix";
-PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBoundingBox,const double* inMatrix)
+PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBoundingBox,ObjectIDType inFormXObjectID,const double* inMatrix)
 {
 	PDFFormXObject* aFormXObject = NULL;
 	do
 	{
-		ObjectIDType formXObjectID = mObjectsContext->StartNewIndirectObject();
+		mObjectsContext->StartNewIndirectObject(inFormXObjectID);
 		DictionaryContext* xobjectContext = mObjectsContext->StartDictionary();
 
 		// type
@@ -646,7 +646,7 @@ PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBounding
 
 		if(mExtender)
 		{
-			if(mExtender->OnFormXObjectWrite(formXObjectID,formXObjectResourcesDictionaryID,xobjectContext,mObjectsContext,this) != eSuccess)
+			if(mExtender->OnFormXObjectWrite(inFormXObjectID,formXObjectResourcesDictionaryID,xobjectContext,mObjectsContext,this) != eSuccess)
 			{
 				TRACE_LOG("DocumentContext::StartFormXObject, unexpected faiulre. extender declared failure when writing form xobject.");
 				break;
@@ -654,11 +654,18 @@ PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBounding
 		}
 
 		// Now start the stream and the form XObject state
-		aFormXObject =  new PDFFormXObject(formXObjectID,mObjectsContext->StartPDFStream(xobjectContext),formXObjectResourcesDictionaryID);
+		aFormXObject =  new PDFFormXObject(inFormXObjectID,mObjectsContext->StartPDFStream(xobjectContext),formXObjectResourcesDictionaryID);
 	}
 	while(false);
 
-	return aFormXObject;
+	return aFormXObject;	
+}
+
+
+PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBoundingBox,const double* inMatrix)
+{
+	ObjectIDType formXObjectID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
+	return StartFormXObject(inBoundingBox,formXObjectID,inMatrix);
 }
 
 EStatusCode DocumentContext::EndFormXObjectNoRelease(PDFFormXObject* inFormXObject)
@@ -790,4 +797,22 @@ PDFFormXObject* DocumentContext::CreateFormXObjectFromTIFFFile(	const wstring& i
 {
 	
 	return mTIFFImageHandler.CreateFormXObjectFromTIFFFile(inTIFFFilePath,inTIFFUsageParameters);
+}
+
+PDFImageXObject* DocumentContext::CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inImageXObjectID)
+{
+	return mJPEGImageHandler.CreateImageXObjectFromJPGFile(inJPGFilePath,inImageXObjectID);
+}
+
+PDFFormXObject* DocumentContext::CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inFormXObjectID)
+{
+	return mJPEGImageHandler.CreateFormXObjectFromJPGFile(inJPGFilePath,inFormXObjectID);
+}
+
+PDFFormXObject* DocumentContext::CreateFormXObjectFromTIFFFile(	
+												const wstring& inTIFFFilePath,
+												ObjectIDType inFormXObjectID,
+												const TIFFUsageParameters& inTIFFUsageParameters)
+{
+	return mTIFFImageHandler.CreateFormXObjectFromTIFFFile(inTIFFFilePath,inFormXObjectID,inTIFFUsageParameters);
 }

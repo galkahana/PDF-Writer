@@ -154,3 +154,29 @@ MapIterator<ObjectIDTypeToStringMap> ResourcesDictionary::GetExtGStatesIterator(
 {
 	return MapIterator<ObjectIDTypeToStringMap>(mExtGStates);
 }
+
+string ResourcesDictionary::AddImageXObjectMapping(ObjectIDType inImageXObjectID)
+{
+	ObjectIDTypeToStringMap::iterator it = mImageXObjects.find(inImageXObjectID);
+
+	if(it == mImageXObjects.end())
+	{
+		string newName = scIM + Int((int)mImageXObjects.size()+1).ToString();
+		mImageXObjects.insert(ObjectIDTypeToStringMap::value_type(inImageXObjectID,newName));
+		return newName;
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
+void ResourcesDictionary::AddImageXObjectMapping(ObjectIDType inImageXObjectID, const string& inImageXObjectName)
+{
+	ObjectIDTypeToStringMap::iterator it = mImageXObjects.find(inImageXObjectID);
+
+	if(it == mImageXObjects.end())
+		mImageXObjects.insert(ObjectIDTypeToStringMap::value_type(inImageXObjectID,inImageXObjectName));
+	else
+		it->second = inImageXObjectName;
+}

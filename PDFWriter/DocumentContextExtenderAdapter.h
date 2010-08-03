@@ -34,7 +34,17 @@ public:
 							ObjectIDType inImageXObjectID,
 							DictionaryContext* inImageDictionaryContext,
 							ObjectsContext* inPDFWriterObjectContext,
-							JPEGImageHandler* inPDFWriterDocumentContext){return eSuccess;}
+							DocumentContext* inPDFWriterDocumentContext,
+							JPEGImageHandler* inJPGImageHandler){return eSuccess;}
+
+	// add items to the image dictionary while it's writtern for a TIFF image (for tile images there are multiple such images)
+	virtual EStatusCode OnTIFFImageXObjectWrite(
+							ObjectIDType inImageXObjectID,
+							DictionaryContext* inImageDictionaryContext,
+							ObjectsContext* inPDFWriterObjectContext,
+							DocumentContext* inPDFWriterDocumentContext,
+							TIFFImageHandler* inTIFFImageHandler){return eSuccess;}
+
 
 	// add items to catalog dictionary while it's written
 	virtual EStatusCode OnCatalogWrite(

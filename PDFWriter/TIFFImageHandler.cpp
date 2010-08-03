@@ -37,6 +37,7 @@
 #include "XObjectContentContext.h"
 #include "PDFFormXObject.h"
 #include "SafeBufferMacrosDefs.h"
+#include "IDocumentContextExtender.h"
 
 // tiff lib includes
 #include "tif_config.h"
@@ -246,6 +247,7 @@ void ReportError(const char* inModel, const char* inFormat, va_list inParameters
 TIFFImageHandler::TIFFImageHandler():mUserParameters(TIFFUsageParameters::DefaultTIFFUsageParameters)
 {
 	mT2p = NULL;
+	mExtender = NULL;
 }
 
 TIFFImageHandler::~TIFFImageHandler(void)
@@ -260,6 +262,19 @@ void TIFFImageHandler::SetOperationsContexts(DocumentContext* inContainerDocumen
 }
 
 PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFFile(const wstring& inTIFFFilePath,
+																const TIFFUsageParameters& inTIFFUsageParameters)
+{
+	if(!mObjectsContext)
+	{
+		TRACE_LOG("TIFFImageHandler::CreateFormXObjectFromTIFFFile. Unexpected Error, mObjectsContext not initialized with an objects context");
+		return NULL;
+	}
+
+	return CreateFormXObjectFromTIFFFile(inTIFFFilePath,mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID(),inTIFFUsageParameters);
+}
+
+PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFFile(const wstring& inTIFFFilePath,
+																ObjectIDType inFormXObjectID,
 																const TIFFUsageParameters& inTIFFUsageParameters)
 
 {
@@ -290,7 +305,7 @@ PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFFile(const wstring& i
 		mT2p->pdf_page = inTIFFUsageParameters.PageIndex;
 		mUserParameters = inTIFFUsageParameters;
 
-		imageFormXObject = ConvertTiff2PDF();
+		imageFormXObject = ConvertTiff2PDF(inFormXObjectID);
 
 	}while(false);
 
@@ -336,7 +351,7 @@ void TIFFImageHandler::DestroyConversionState()
 }
 
 
-PDFFormXObject* TIFFImageHandler::ConvertTiff2PDF()
+PDFFormXObject* TIFFImageHandler::ConvertTiff2PDF(ObjectIDType inFormXObjectID)
 {
 	PDFFormXObject* imageFormXObject = NULL;
 	EStatusCode status;
@@ -412,7 +427,7 @@ PDFFormXObject* TIFFImageHandler::ConvertTiff2PDF()
 		// now...write the final XObject to posit all images in their right size
 		// as well as setup the graphic state, ICC, Transfer functions...the lots
 		// return this bugger as the image
-		imageFormXObject = WriteImagesFormXObject(imagesImageXObject);
+		imageFormXObject = WriteImagesFormXObject(imagesImageXObject,inFormXObjectID);
 
 	}while(false);
 
@@ -1935,17 +1950,21 @@ PDFImageXObject* TIFFImageHandler::WriteTileImageXObject(int inTileIndex)
 		// filter
 		WriteImageXObjectFilter(imageContext,inTileIndex);
 
+		if(mExtender)
+		{
+			if(mExtender->OnTIFFImageXObjectWrite(imageXObjectID,imageContext,mObjectsContext,mContainerDocumentContext,this) != eSuccess)
+			{
+				TRACE_LOG("TIFFImageHandler::WriteTileImageXObject, unexpected faiulre. extender declared failure when writing image xobject.");
+				break;
+			}
+		}	
+
 		imageStream = mObjectsContext->StartUnfilteredPDFStream(imageContext);
 
 		CalculateTiffTileSize(inTileIndex);
 
 		if(WriteImageTileData(imageStream,inTileIndex) != eSuccess)
 			break;
-/*
-		TODO: is this reuqired??? 
-		t2p_write_advance_directory(t2p, output);
-		if(t2p->t2p_error!=T2P_ERR_OK){return(0);}
-*/
 
 		mObjectsContext->EndPDFStream(imageStream);
 
@@ -2552,17 +2571,22 @@ PDFImageXObject* TIFFImageHandler::WriteUntiledImageXObject()
 		// filter
 		WriteImageXObjectFilter(imageContext,0);
 
+
+		if(mExtender)
+		{
+			if(mExtender->OnTIFFImageXObjectWrite(imageXObjectID,imageContext,mObjectsContext,mContainerDocumentContext,this) != eSuccess)
+			{
+				TRACE_LOG("TIFFImageHandler::WriteTileImageXObject, unexpected faiulre. extender declared failure when writing image xobject.");
+				break;
+			}
+		}	
+
 		imageStream = mObjectsContext->StartUnfilteredPDFStream(imageContext);
 
 		CalculateTiffSizeNoTiles();
 
 		if(WriteImageData(imageStream) != eSuccess)
 			break;
-/*
-		TODO: is this reuqired??? 
-		t2p_write_advance_directory(t2p, output);
-		if(t2p->t2p_error!=T2P_ERR_OK){return(0);}
-*/
 
 		mObjectsContext->EndPDFStream(imageStream);
 
@@ -3046,7 +3070,7 @@ EStatusCode TIFFImageHandler::WriteImageBufferToStream(PDFStream* inPDFStream,
 	return status;
 }
 
-PDFFormXObject* TIFFImageHandler::WriteImagesFormXObject(const PDFImageXObjectList& inImages)
+PDFFormXObject* TIFFImageHandler::WriteImagesFormXObject(const PDFImageXObjectList& inImages,ObjectIDType inFormXObjectID)
 {
 	EStatusCode status = eSuccess;
 	PDFImageXObjectList::const_iterator it = inImages.begin();
@@ -3057,7 +3081,8 @@ PDFFormXObject* TIFFImageHandler::WriteImagesFormXObject(const PDFImageXObjectLi
 																		mT2p->pdf_mediabox.x1,
 																		mT2p->pdf_mediabox.y1,
 																		mT2p->pdf_mediabox.x2,
-																		mT2p->pdf_mediabox.y2));
+																		mT2p->pdf_mediabox.y2),
+																		inFormXObjectID);
 	do
 	{
 
@@ -3230,4 +3255,9 @@ void TIFFImageHandler::WriteIndexedCSForBiLevelColorMap()
 	}
 	mObjectsContext->WriteHexString(mPalleteStream.str());
 	mObjectsContext->EndArray(eTokenSeparatorEndLine);
+}
+
+void TIFFImageHandler::SetDocumentContextExtender(IDocumentContextExtender* inExtender)
+{
+	mExtender = inExtender;
 }

@@ -33,7 +33,7 @@ void JPEGImageHandler::SetOperationsContexts(DocumentContext* inDocumentContext,
 	mDocumentContext = inDocumentContext;
 }
 
-PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath)
+PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inImageXObjectID)
 {
 	PDFImageXObject* imageXObject = NULL;
 
@@ -48,7 +48,7 @@ PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGFile(const wstring& 
 		}
 
 		// Write Image XObject
-		imageXObject = CreateAndWriteImageXObjectFromJPGInformation(inJPGFilePath,imageInformationResult.second);
+		imageXObject = CreateAndWriteImageXObjectFromJPGInformation(inJPGFilePath,inImageXObjectID,imageInformationResult.second);
 
 	} while(false);
 
@@ -72,6 +72,7 @@ static const string scBitsPerComponent = "BitsPerComponent";
 static const string scFilter = "Filter";
 static const string scDCTDecode = "DCTDecode";
 PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(const wstring& inJPGFilePath,
+																				ObjectIDType inImageXObjectID,
 																				const JPEGImageInformation& inJPGImageInformation)
 {
 	PDFImageXObject* imageXObject = NULL;
@@ -85,7 +86,7 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 			break;
 		}
 
-		ObjectIDType imageXObjectID = mObjectsContext->StartNewIndirectObject();
+		mObjectsContext->StartNewIndirectObject(inImageXObjectID);
 		DictionaryContext* imageContext = mObjectsContext->StartDictionary();
 	
 		// type
@@ -148,7 +149,7 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 
 		if(mExtender)
 		{
-			if(mExtender->OnJPEGImageXObjectWrite(imageXObjectID,imageContext,mObjectsContext,this) != eSuccess)
+			if(mExtender->OnJPEGImageXObjectWrite(inImageXObjectID,imageContext,mObjectsContext,mDocumentContext,this) != eSuccess)
 			{
 				TRACE_LOG("JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation, unexpected faiulre. extender declared failure when writing image xobject.");
 				break;
@@ -179,7 +180,7 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 		mObjectsContext->EndPDFStream(imageStream);
 		delete imageStream;
 
-		imageXObject = new PDFImageXObject(imageXObjectID,1 == inJPGImageInformation.ColorComponentsCount ? KProcsetImageB:KProcsetImageC);
+		imageXObject = new PDFImageXObject(inImageXObjectID,1 == inJPGImageInformation.ColorComponentsCount ? KProcsetImageB:KProcsetImageC);
 	}while(false);
 	
 
@@ -240,13 +241,19 @@ void JPEGImageHandler::SetDocumentContextExtender(IDocumentContextExtender* inEx
 	mExtender = inExtender;
 }
 
-PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath)
+PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inFormXObjectID)
 {
 	PDFImageXObject* imageXObject = NULL;
 	PDFFormXObject* imageFormXObject = NULL;
 
 	do 
 	{
+		if(!mObjectsContext)
+		{
+			TRACE_LOG("JPEGImageHandler::CreateFormXObjectFromJPGFile. Unexpected Error, mDocumentContex not initialized with a document context");
+			break;
+		}
+
 		// retrieve image information
 		BoolAndJPEGImageInformation imageInformationResult = RetrieveImageInformation(inJPGFilePath);
 		if(!imageInformationResult.first)
@@ -256,7 +263,7 @@ PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGFile(const wstring& in
 		}
 
 		// Write Image XObject
-		imageXObject = CreateAndWriteImageXObjectFromJPGInformation(inJPGFilePath,imageInformationResult.second);
+		imageXObject = CreateAndWriteImageXObjectFromJPGInformation(inJPGFilePath,mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID(),imageInformationResult.second);
 		if(!imageXObject)
 		{
 			TRACE_LOG1("JPEGImageHandler::CreateFormXObjectFromJPGFile, unable to create image xobject for %s",inJPGFilePath.c_str());
@@ -264,7 +271,7 @@ PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGFile(const wstring& in
 		}
 
 		// Write Image form XObject
-		imageFormXObject = CreateImageFormXObjectFromImageXObject(imageXObject,imageInformationResult.second);
+		imageFormXObject = CreateImageFormXObjectFromImageXObject(imageXObject,inFormXObjectID,imageInformationResult.second);
 		if(!imageFormXObject)
 		{
 			TRACE_LOG1("JPEGImageHandler::CreateFormXObjectFromJPGFile, unable to create form xobject for %s",inJPGFilePath.c_str());
@@ -278,7 +285,7 @@ PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGFile(const wstring& in
 	return imageFormXObject;  	
 }
 
-PDFFormXObject* JPEGImageHandler::CreateImageFormXObjectFromImageXObject(PDFImageXObject* inImageXObject, const JPEGImageInformation& inJPGImageInformation)
+PDFFormXObject* JPEGImageHandler::CreateImageFormXObjectFromImageXObject(PDFImageXObject* inImageXObject,ObjectIDType inFormXObjectID, const JPEGImageInformation& inJPGImageInformation)
 {
 	PDFFormXObject* formXObject = NULL;
 	do
@@ -291,7 +298,7 @@ PDFFormXObject* JPEGImageHandler::CreateImageFormXObjectFromImageXObject(PDFImag
 
 		DoubleAndDoublePair dimensions = GetImageDimensions(inJPGImageInformation);
 
-		formXObject = mDocumentContext->StartFormXObject(PDFRectangle(0,0,dimensions.first,dimensions.second));
+		formXObject = mDocumentContext->StartFormXObject(PDFRectangle(0,0,dimensions.first,dimensions.second),inFormXObjectID);
 		XObjectContentContext* xobjectContentContext = formXObject->GetContentContext();
 
 		xobjectContentContext->q();
@@ -384,4 +391,27 @@ DoubleAndDoublePair JPEGImageHandler::GetImageDimensions(const JPEGImageInformat
 	}while(false);
 
 	return returnResult;
+}
+
+PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath)
+{
+	if(!mObjectsContext)
+	{
+		TRACE_LOG("JPEGImageHandler::CreateImageXObjectFromJPGFile. Unexpected Error, mObjectsContext not initialized with an objects context");
+		return NULL;
+	}
+
+	return CreateImageXObjectFromJPGFile(inJPGFilePath,mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID());
+}
+
+PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath)
+{
+	if(!mObjectsContext)
+	{
+		TRACE_LOG("JPEGImageHandler::CreateFormXObjectFromJPGFile. Unexpected Error, mObjectsContext not initialized with an objects context");
+		return NULL;
+	}
+
+	return CreateFormXObjectFromJPGFile(inJPGFilePath,mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID());
+
 }

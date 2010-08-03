@@ -44,6 +44,11 @@ public:
 	string AddImageXObjectMapping(PDFImageXObject* inImageXObject);
 	void AddImageXObjectMapping(PDFImageXObject* inImageXObject, const string& inImageXObjectName);
 
+	// images registration without the automatic addition of image resources to the container resources dictionary
+	string AddImageXObjectMapping(ObjectIDType inImageXObjectID);
+	void AddImageXObjectMapping(ObjectIDType inImageXObjectID, const string& inImageXObjectName);
+
+
 	int GetImageXObjectsCount();
 	MapIterator<ObjectIDTypeToStringMap> GetImageXObjectsIterator();
 

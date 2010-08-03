@@ -498,6 +498,14 @@
 					Name="Images in PDF"
 					>
 					<File
+						RelativePath=".\ImagesAndFormsForwardReferenceTest.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ImagesAndFormsForwardReferenceTest.h"
+						>
+					</File>
+					<File
 						RelativePath=".\JPGImageTest.cpp"
 						>
 					</File>
