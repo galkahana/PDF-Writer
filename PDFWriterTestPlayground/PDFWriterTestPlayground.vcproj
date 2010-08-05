@@ -579,6 +579,18 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Basics"
+				>
+				<File
+					RelativePath=".\TimerTest.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TimerTest.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath=".\ImportantReadme.txt"

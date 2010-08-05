@@ -170,6 +170,7 @@ EStatusCode TIFFImageTest::Run()
 			break;
 		}
 	}while(false);
+
 	return status;	
 }
 

@@ -475,6 +475,14 @@
 				Name="Basics"
 				>
 				<File
+					RelativePath=".\CMYKRGBColor.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CMYKRGBColor.h"
+					>
+				</File>
+				<File
 					RelativePath=".\EPDFVersion.h"
 					>
 				</File>
@@ -540,6 +548,26 @@
 				</File>
 				<File
 					RelativePath=".\Trace.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Timers"
+				>
+				<File
+					RelativePath=".\Timer.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Timer.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TimersRegistry.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TimersRegistry.h"
 					>
 				</File>
 			</Filter>
@@ -792,14 +820,6 @@
 				</File>
 			</Filter>
 		</Filter>
-		<File
-			RelativePath=".\CMYKRGBColor.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\CMYKRGBColor.h"
-			>
-		</File>
 		<File
 			RelativePath=".\PDFWriter.cpp"
 			>

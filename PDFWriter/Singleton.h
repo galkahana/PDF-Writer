@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef NULL
+#define NULL 0
+#endif
+
 template <class T> 
 class Singleton
 {

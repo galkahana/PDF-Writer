@@ -278,6 +278,7 @@ PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFFile(const wstring& i
 																const TIFFUsageParameters& inTIFFUsageParameters)
 
 {
+
 	PDFFormXObject* imageFormXObject = NULL;
 	TIFF* input = NULL;
 
@@ -312,6 +313,7 @@ PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFFile(const wstring& i
 	DestroyConversionState();
 	if(input != NULL)
 		TIFFClose(input);
+
 	return imageFormXObject;
 }
 
