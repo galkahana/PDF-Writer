@@ -137,7 +137,6 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 
 		// define an xobject form to draw a 200X100 points red rectangle
 		PDFFormXObject* xobjectForm = pdfWriter.StartFormXObject(PDFRectangle(0,0,200,100),simpleFormXObjectID);
-		ObjectIDType formObjectID = xobjectForm->GetObjectID();
 
 		XObjectContentContext* xobjectContentContext = xobjectForm->GetContentContext();
 		xobjectContentContext->q();
