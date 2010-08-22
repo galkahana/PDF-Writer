@@ -462,3 +462,194 @@ void AbstractContentContext::Do(const string& inXObjectName)
 	mPrimitiveWriter.WriteName(inXObjectName);	
 	mPrimitiveWriter.WriteKeyword("Do");	
 }
+
+void AbstractContentContext::Tc(double inCharacterSpace)
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+	AssertProcsetAvailable(KProcsetText);
+
+	mPrimitiveWriter.WriteDouble(inCharacterSpace);
+	mPrimitiveWriter.WriteKeyword("Tc");
+}
+
+void AbstractContentContext::Tw(double inWordSpace)
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+	AssertProcsetAvailable(KProcsetText);
+
+	mPrimitiveWriter.WriteDouble(inWordSpace);
+	mPrimitiveWriter.WriteKeyword("Tw");
+}
+
+void AbstractContentContext::Tz(int inHorizontalScaling)
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+	AssertProcsetAvailable(KProcsetText);
+
+	mPrimitiveWriter.WriteInteger(inHorizontalScaling);
+	mPrimitiveWriter.WriteKeyword("Tz");
+}
+
+void AbstractContentContext::TL(double inTextLeading)
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+	AssertProcsetAvailable(KProcsetText);
+
+	mPrimitiveWriter.WriteDouble(inTextLeading);
+	mPrimitiveWriter.WriteKeyword("TL");
+}
+
+void AbstractContentContext::Tf(const string& inFontName,double inFontSize)
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+	AssertProcsetAvailable(KProcsetText);
+
+	mPrimitiveWriter.WriteName(inFontName);
+	mPrimitiveWriter.WriteDouble(inFontSize);
+	mPrimitiveWriter.WriteKeyword("Tf");
+}
+
+void AbstractContentContext::Tr(int inRenderingMode)
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+	AssertProcsetAvailable(KProcsetText);
+
+	mPrimitiveWriter.WriteInteger(inRenderingMode);
+	mPrimitiveWriter.WriteKeyword("Tr");
+}
+
+void AbstractContentContext::Ts(double inFontRise)
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+	AssertProcsetAvailable(KProcsetText);
+
+	mPrimitiveWriter.WriteDouble(inFontRise);
+	mPrimitiveWriter.WriteKeyword("Ts");
+}
+
+void AbstractContentContext::BT()
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+	AssertProcsetAvailable(KProcsetText);
+
+	mPrimitiveWriter.WriteKeyword("BT");
+}
+
+void AbstractContentContext::ET()
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+	AssertProcsetAvailable(KProcsetText);
+
+	mPrimitiveWriter.WriteKeyword("ET");
+}
+
+void AbstractContentContext::Td(double inTx, double inTy)
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+	AssertProcsetAvailable(KProcsetText);
+
+	mPrimitiveWriter.WriteDouble(inTx);
+	mPrimitiveWriter.WriteDouble(inTy);
+	mPrimitiveWriter.WriteKeyword("Td");
+}
+
+void AbstractContentContext::TD(double inTx, double inTy)
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+	AssertProcsetAvailable(KProcsetText);
+
+	mPrimitiveWriter.WriteDouble(inTx);
+	mPrimitiveWriter.WriteDouble(inTy);
+	mPrimitiveWriter.WriteKeyword("TD");
+}
+
+void AbstractContentContext::Tm(double inA, double inB, double inC, double inD, double inE, double inF)
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+	AssertProcsetAvailable(KProcsetText);
+
+	mPrimitiveWriter.WriteDouble(inA);
+	mPrimitiveWriter.WriteDouble(inB);
+	mPrimitiveWriter.WriteDouble(inC);
+	mPrimitiveWriter.WriteDouble(inD);
+	mPrimitiveWriter.WriteDouble(inE);
+	mPrimitiveWriter.WriteDouble(inF);
+	mPrimitiveWriter.WriteKeyword("Tm");
+}
+
+void AbstractContentContext::TStar()
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+	AssertProcsetAvailable(KProcsetText);
+
+	mPrimitiveWriter.WriteKeyword("T*");
+}
+
+
+void AbstractContentContext::Tj(const string& inText)
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+	AssertProcsetAvailable(KProcsetText);
+
+	mPrimitiveWriter.WriteLiteralString(inText);
+	mPrimitiveWriter.WriteKeyword("Tj");
+}
+
+void AbstractContentContext::Quote(const string& inText)
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+	AssertProcsetAvailable(KProcsetText);
+
+	mPrimitiveWriter.WriteLiteralString(inText);
+	mPrimitiveWriter.WriteKeyword("'");
+}
+
+void AbstractContentContext::DoubleQuote(	double inWordSpacing, 
+											double inCharacterSpacing, 
+											const string& inText)
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+	AssertProcsetAvailable(KProcsetText);
+
+	mPrimitiveWriter.WriteDouble(inWordSpacing);
+	mPrimitiveWriter.WriteDouble(inCharacterSpacing);
+	mPrimitiveWriter.WriteLiteralString(inText);
+	mPrimitiveWriter.WriteKeyword("\"");
+}
+void AbstractContentContext::TJ(const StringOrDoubleList& inStringsAndSpacing)
+{
+	StringOrDoubleList::const_iterator it = inStringsAndSpacing.begin();
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+	AssertProcsetAvailable(KProcsetText);
+
+	mPrimitiveWriter.StartArray();
+
+	for(; it != inStringsAndSpacing.end();++it)
+	{
+		if(it->IsString)
+			mPrimitiveWriter.WriteLiteralString(it->StringValue);
+		else
+			mPrimitiveWriter.WriteDouble(it->DoubleValue);
+	}
+	
+	mPrimitiveWriter.EndArray(eTokenSeparatorSpace);
+
+	mPrimitiveWriter.WriteKeyword("TJ");
+}
