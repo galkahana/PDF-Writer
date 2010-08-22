@@ -15,11 +15,27 @@
 #include "EStatusCode.h"
 #include "PrimitiveObjectsWriter.h"
 #include <string>
+#include <list>
+
+using namespace std;
 
 class ObjectsContext;
 class PDFStream;
 class ResourcesDictionary;
 class PDFImageXObject;
+
+struct StringOrDouble
+{
+	string StringValue;
+	double DoubleValue;
+
+	bool IsString; // true - string, false - double
+
+	StringOrDouble(string inString){StringValue = inString;IsString = true;}
+	StringOrDouble(double inDouble){DoubleValue = inDouble;IsString = false;}
+};
+
+typedef list<StringOrDouble> StringOrDoubleList;
 
 class AbstractContentContext
 {
@@ -89,6 +105,33 @@ public:
 
 	// XObject usage
 	void Do(const string& inXObjectName);
+
+	// Text state operators
+	void Tc(double inCharacterSpace);
+	void Tw(double inWordSpace);
+	void Tz(int inHorizontalScaling);
+	void TL(double inTextLeading);
+	void Tf(const string& inFontName,double inFontSize);
+	void Tr(int inRenderingMode);
+	void Ts(double inFontRise);
+
+	// Text object operators
+	void BT();
+	void ET();
+
+	// Text positioning operators
+	void Td(double inTx, double inTy);
+	void TD(double inTx, double inTy);
+	void Tm(double inA, double inB, double inC, double inD, double inE, double inF);
+	void TStar();
+
+	// Text showing operators
+	void Tj(const string& inText);
+	void Quote(const string& inText); // matches the operator '
+	void DoubleQuote(double inWordSpacing, double inCharacterSpacing, const string& inText); // matches the operator "
+	// similar to the TJ PDF command, TJ() recieves an input an array of items which
+	// can be either a string or a double
+	void TJ(const StringOrDoubleList& inStringsAndSpacing); 
 
 protected:
 
