@@ -1,5 +1,7 @@
 #include "OutputFlateDecodeStream.h"
+#ifndef NO_TRACE
 #include "Trace.h"
+#endif
 #include "zlib.h"
 
 #define BUFFER_SIZE 256*1024
@@ -50,10 +52,16 @@ void OutputFlateDecodeStream::StartEncoding()
 	mZLibState->next_in = Z_NULL;
 
     int inflateStatus = inflateInit(mZLibState);
+#ifndef NO_TRACE
     if (inflateStatus != Z_OK)
 		TRACE_LOG1("OutputFlateDecodeStream::StartEncoding, Unexpected failure in initializating flate library. status code = %d",inflateStatus);
 	else
 		mCurrentlyEncoding = true;
+#else
+    if (Z_OK == inflateStatus)
+		mCurrentlyEncoding = true;
+
+#endif
 }
 
 
@@ -96,7 +104,9 @@ LongBufferSizeType OutputFlateDecodeStream::DecodeBufferAndWrite(const IOBasicTy
 		   Z_DATA_ERROR == inflateResult ||
 		   Z_MEM_ERROR == inflateResult)
 		{
+#ifndef NO_TRACE
 			TRACE_LOG1("OutputFlateDecodeStream::DecodeBufferAndWrite, failed to write zlib information. returned error code = %d",inflateResult);
+#endif
 			inflateEnd(mZLibState);
 			break;
 		}
@@ -106,8 +116,10 @@ LongBufferSizeType OutputFlateDecodeStream::DecodeBufferAndWrite(const IOBasicTy
 			writtenBytes = mTargetStream->Write(mBuffer,BUFFER_SIZE-mZLibState->avail_out);
 			if(writtenBytes != BUFFER_SIZE-mZLibState->avail_out)
 			{
+#ifndef NO_TRACE
 				TRACE_LOG2("OutputFlateDecodeStream::DecodeBufferAndWrite, Failed to write the desired amount of zlib bytes to underlying stream. supposed to write %lld, wrote %lld",
 								BUFFER_SIZE-mZLibState->avail_out,writtenBytes);
+#endif
 				inflateEnd(mZLibState);
 				inflateResult = Z_STREAM_ERROR;
 				mCurrentlyEncoding = false;
