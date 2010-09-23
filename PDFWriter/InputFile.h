@@ -1,9 +1,9 @@
 #pragma once
 
 #include "EStatusCode.h"
+#include "IByteReader.h"
 #include <string>
 
-class IByteReader;
 class InputBufferedStream;
 class InputFileStream;
 
@@ -20,6 +20,9 @@ public:
 
 	IByteReader* GetInputStream(); // returns buffered input stream
 	const wstring& GetFilePath();
+	
+	LongFilePositionType GetFileSize();
+
 private:
 	wstring mFilePath;
 	InputBufferedStream* mInputStream;

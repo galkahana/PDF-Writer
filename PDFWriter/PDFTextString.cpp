@@ -1,5 +1,6 @@
 #include "PDFTextString.h"
 #include "OutputStringBufferStream.h"
+#include "BetweenIncluding.h"
 
 using namespace IOBasicTypes;
 
@@ -89,12 +90,6 @@ void PDFTextString::ConvertUTF16ToUTF16BE(const wstring& inStringToConvert,Outpu
 		bigEndian[1] = Byte((*it) & 0xFF);
 		refResult.Write(bigEndian,2);
 	}
-}
-
-template <typename T>
-bool betweenIncluding(T inTest,T inLowerBound,T inHigherBound)
-{
-	return inTest>= inLowerBound && inTest<=inHigherBound;
 }
 
 ConvertToPDFDocEncodingResult PDFTextString::ConvertToPDFDocEncoding(wchar_t inCharacterToConvert)

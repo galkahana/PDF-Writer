@@ -44,7 +44,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\PDFWriter"
+				AdditionalIncludeDirectories="..\PDFWriter;..\FreeType\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -64,7 +64,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(OutDir)&quot;\PDFWriter.lib &quot;$(OutDir)&quot;\ZLib.lib &quot;$(OutDir)&quot;\LibTiff.lib"
+				AdditionalDependencies="&quot;$(OutDir)&quot;\PDFWriter.lib &quot;$(OutDir)&quot;\ZLib.lib &quot;$(OutDir)&quot;\LibTiff.lib ..\FreeType\bin\$(PlatformName)\$(ConfigurationName)\FreeType.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -118,7 +118,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\PDFWriter"
+				AdditionalIncludeDirectories="..\PDFWriter;..\FreeType\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -138,7 +138,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(OutDir)&quot;\PDFWriter.lib &quot;$(OutDir)&quot;\ZLib.lib &quot;$(OutDir)&quot;\LibTiff.lib"
+				AdditionalDependencies="&quot;$(OutDir)&quot;\PDFWriter.lib &quot;$(OutDir)&quot;\ZLib.lib &quot;$(OutDir)&quot;\LibTiff.lib ..\FreeType\bin\$(PlatformName)\$(ConfigurationName)\FreeType.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -193,7 +193,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\PDFWriter"
+				AdditionalIncludeDirectories="..\PDFWriter;..\FreeType\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -212,7 +212,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(OutDir)&quot;\PDFWriter.lib &quot;$(OutDir)&quot;\ZLib.lib &quot;$(OutDir)&quot;\LibTiff.lib"
+				AdditionalDependencies="&quot;$(OutDir)&quot;\PDFWriter.lib &quot;$(OutDir)&quot;\ZLib.lib &quot;$(OutDir)&quot;\LibTiff.lib ..\FreeType\bin\$(PlatformName)\$(ConfigurationName)\FreeType.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -270,7 +270,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\PDFWriter"
+				AdditionalIncludeDirectories="..\PDFWriter;..\FreeType\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -289,7 +289,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="&quot;$(OutDir)&quot;\PDFWriter.lib &quot;$(OutDir)&quot;\ZLib.lib &quot;$(OutDir)&quot;\LibTiff.lib"
+				AdditionalDependencies="&quot;$(OutDir)&quot;\PDFWriter.lib &quot;$(OutDir)&quot;\ZLib.lib &quot;$(OutDir)&quot;\LibTiff.lib ..\FreeType\bin\$(PlatformName)\$(ConfigurationName)\FreeType.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -588,6 +588,18 @@
 				</File>
 				<File
 					RelativePath=".\TimerTest.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="FreeType"
+				>
+				<File
+					RelativePath=".\FreeTypeInitializationTest.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FreeTypeInitializationTest.h"
 					>
 				</File>
 			</Filter>

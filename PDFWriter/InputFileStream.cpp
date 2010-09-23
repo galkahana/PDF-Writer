@@ -50,5 +50,28 @@ bool InputFileStream::NotEnded()
 void InputFileStream::Skip(LongBufferSizeType inSkipSize)
 {
 	if(mStream)
-		fseek(mStream,(long)inSkipSize,SEEK_CUR);
+		_fseeki64(mStream,inSkipSize,SEEK_CUR);
+}
+
+void InputFileStream::SetPosition(LongFilePositionType inOffsetFromStart)
+{
+	if(mStream)
+		_fseeki64(mStream,inOffsetFromStart,SEEK_SET);
+}
+
+LongFilePositionType InputFileStream::GetFileSize()
+{
+	if(mStream)
+	{
+		// very messy...prefer a different means sometime
+		LongFilePositionType currentPosition = _ftelli64(mStream);
+		LongFilePositionType result;
+
+		_fseeki64(mStream,0,SEEK_END);
+		result = _ftelli64(mStream);
+		_fseeki64(mStream,currentPosition,SEEK_SET);
+		return result;
+	}
+	else
+		return 0;
 }

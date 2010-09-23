@@ -24,6 +24,9 @@ public:
 	virtual LongBufferSizeType Read(Byte* inBuffer,LongBufferSizeType inBufferSize);
 	virtual bool NotEnded();
 	virtual void Skip(LongBufferSizeType inSkipSize);
+	virtual void SetPosition(LongFilePositionType inOffsetFromStart);
+
+	LongFilePositionType GetFileSize();
 
 private:
 

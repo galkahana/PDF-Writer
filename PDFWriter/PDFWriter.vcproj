@@ -44,14 +44,14 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\zlib;..\libtiff"
+				AdditionalIncludeDirectories="..\zlib;..\libtiff;..\FreeType\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -107,7 +107,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\zlib;..\libtiff"
+				AdditionalIncludeDirectories="..\zlib;..\libtiff;..\FreeType\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -171,13 +171,13 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\zlib;..\libtiff"
+				AdditionalIncludeDirectories="..\zlib;..\libtiff;..\FreeType\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				DebugInformationFormat="3"
+				DebugInformationFormat="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -235,13 +235,13 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\zlib;..\libtiff"
+				AdditionalIncludeDirectories="..\zlib;..\libtiff;..\FreeType\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				DebugInformationFormat="3"
+				DebugInformationFormat="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -475,6 +475,10 @@
 				Name="Basics"
 				>
 				<File
+					RelativePath=".\BetweenIncluding.h"
+					>
+				</File>
+				<File
 					RelativePath=".\CMYKRGBColor.cpp"
 					>
 				</File>
@@ -492,6 +496,14 @@
 				</File>
 				<File
 					RelativePath=".\SafeBufferMacrosDefs.h"
+					>
+				</File>
+				<File
+					RelativePath=".\StringTraits.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\StringTraits.h"
 					>
 				</File>
 			</Filter>
@@ -816,6 +828,54 @@
 				</File>
 				<File
 					RelativePath=".\TiffUsageParameters.h"
+					>
+				</File>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="Text"
+			>
+			<Filter
+				Name="FreeType"
+				>
+				<File
+					RelativePath=".\EFontStretch.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FreeTypeFaceWrapper.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FreeTypeFaceWrapper.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FreeTypeOpenTypeWrapper.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FreeTypeOpenTypeWrapper.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FreeTypeType1Wrapper.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FreeTypeType1Wrapper.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FreeTypeWrapper.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FreeTypeWrapper.h"
+					>
+				</File>
+				<File
+					RelativePath=".\IFreeTypeFaceExtender.h"
 					>
 				</File>
 			</Filter>

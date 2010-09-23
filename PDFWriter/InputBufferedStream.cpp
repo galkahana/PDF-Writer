@@ -116,3 +116,14 @@ void InputBufferedStream::Skip(LongBufferSizeType inSkipSize)
 		mSourceStream->Skip(inSkipSize);
 	}
 }
+
+void InputBufferedStream::SetPosition(LongFilePositionType inOffsetFromStart)
+{
+	mLastAvailableIndex = mCurrentBufferIndex = mBuffer;
+	mSourceStream->SetPosition(inOffsetFromStart);
+}
+
+IByteReader* InputBufferedStream::GetSourceStream()
+{
+	return mSourceStream;
+}

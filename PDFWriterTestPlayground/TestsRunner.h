@@ -8,6 +8,7 @@
 #include <list>
 #include <utility>
 #include <map>
+#include <set>
 
 using namespace std;
 
@@ -17,6 +18,7 @@ typedef pair<wstring,ITestUnit*> WStringAndTestUnit;
 typedef map<wstring,ITestUnit*> WStringToTestUnitMap;
 typedef list<WStringAndTestUnit> WStringAndTestUnitList;
 typedef map<wstring,WStringAndTestUnitList> WStringToWStringAndTestUnitListMap;
+typedef set<wstring> WStringSet;
 
 typedef list<wstring> WStringList;
 
@@ -32,6 +34,9 @@ public:
 	EStatusCode RunTests(const WStringList& inTestsLabels);
 	EStatusCode RunCategory(const wstring& inCategory);
 	EStatusCode RunCategories(const WStringList& inCategories);
+	EStatusCode RunCategories(const WStringList& inCategories, const WStringSet& inTestsToExclude);
+	EStatusCode RunExcludeCategories(const WStringSet& inCategories);
+	EStatusCode RunExcludeTests(const WStringSet& inTests);
 
 	void AddTest(const wstring& inTestLabel,ITestUnit* inTest);
 	void AddTest(const std::wstring& inTestLabel,const std::wstring& inCategory,ITestUnit* inTest);
@@ -40,6 +45,8 @@ private:
 	WStringToWStringAndTestUnitListMap mTests;
 	WStringToTestUnitMap mTestsByName;
 
+	EStatusCode RunTestsInList(const WStringAndTestUnitList& inTests);
+	EStatusCode RunSingleTest(const wstring& inTestName,ITestUnit* inTest);
 	void DeleteTests();
 };
 

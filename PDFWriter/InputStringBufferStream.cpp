@@ -24,3 +24,8 @@ void InputStringBufferStream::Skip(LongBufferSizeType inSkipSize)
 {
 	mBufferToReadFrom->pubseekoff(inSkipSize,ios_base::cur);
 }
+
+void InputStringBufferStream::SetPosition(LongFilePositionType inOffsetFromStart)
+{
+	mBufferToReadFrom->pubseekoff(inOffsetFromStart,ios_base::beg);
+}

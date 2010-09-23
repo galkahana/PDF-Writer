@@ -27,45 +27,64 @@ void TestsRunner::DeleteTests()
 
 EStatusCode TestsRunner::RunAll()
 {
-	EStatusCode testsStatus = eSuccess;
-	unsigned long failedCount = 0,succeededCount = 0;
+	WStringAndTestUnitList testsList;
+	WStringToTestUnitMap::iterator it = mTestsByName.begin();
+	for(;it != mTestsByName.end();++it)
+		testsList.push_back(WStringAndTestUnit(it->first,it->second));
+	return RunTestsInList(testsList);
+}
 
-	if(mTests.size() == 0)
+EStatusCode TestsRunner::RunTestsInList(const WStringAndTestUnitList& inTests)
+{
+	EStatusCode testsStatus;
+
+	if(inTests.size() == 0)
 	{
 		wcout<<L"No tests to run\n";
+		testsStatus = eSuccess;
+	}
+	else if(inTests.size() == 1)
+	{
+		testsStatus = RunSingleTest(inTests.front().first,inTests.front().second);
 	}
 	else
 	{
-		WStringToWStringAndTestUnitListMap::iterator it = mTests.begin();
+		unsigned long failedCount = 0,succeededCount = 0;
+		WStringAndTestUnitList::const_iterator it = inTests.begin();
 		EStatusCode testStatus;
+		testsStatus = eSuccess;
 
 		wcout<<L"Start tests run\n";
-
-		for(;it!= mTests.end();++it)
+		for(;it!= inTests.end();++it)
 		{
-			WStringAndTestUnitList::iterator itList = it->second.begin();
-			for(;itList != it->second.end();++itList)
+			testStatus = RunSingleTest(it->first,it->second);
+			if(eFailure == testStatus)
 			{
-				wcout<<L"Running Test "<<itList->first<<L"\n";
-				testStatus = itList->second->Run();
-				if(eFailure == testStatus)
-				{
-					wcout<<L"Test "<<itList->first<<L" Failed\n\n";
-					++failedCount;
-					testsStatus = eFailure;
-				}
-				else
-				{
-					wcout<<L"Test "<<itList->first<<L" Succeeded\n\n";
-					++succeededCount;
-				}
+				++failedCount;
+				testsStatus = eFailure;
+			}
+			else
+			{
+				++succeededCount;
 			}
 		}
 		wcout<<L"--------------------------------------------------------------\n";
 		wcout<<L"Test run ended: "<<succeededCount<<L" tests succeeded, "<<failedCount<<L" tests failed.\n";
-
-	}
+	}	
 	return testsStatus;
+}
+
+EStatusCode TestsRunner::RunSingleTest(const wstring& inTestName,ITestUnit* inTest)
+{
+	EStatusCode testStatus;
+	
+	wcout<<L"Running Test "<<inTestName<<L"\n";
+	testStatus = inTest->Run();
+	if(eFailure == testStatus)
+		wcout<<L"Test "<<inTestName<<L" Failed\n\n";
+	else
+		wcout<<L"Test "<<inTestName<<L" Succeeded\n\n";
+	return testStatus;
 }
 
 void TestsRunner::AddTest(const std::wstring& inTestLabel,const std::wstring& inCategory,ITestUnit* inTest)
@@ -86,29 +105,19 @@ void TestsRunner::AddTest(const wstring& inTestLabel,ITestUnit* inTest)
 
 EStatusCode TestsRunner::RunTest(const wstring& inTestLabel)
 {
-	EStatusCode testStatus = eSuccess;
 	WStringToTestUnitMap::iterator it = mTestsByName.find(inTestLabel);
+
 	if(it == mTestsByName.end())
 	{
 		wcout<<L"Test not found\n";
+		return eSuccess;
 	}
 	else
-	{
-		wcout<<L"Running Test "<<inTestLabel<<L"\n";
-		testStatus = it->second->Run();
-		if(eFailure == testStatus)
-			wcout<<L"Test "<<inTestLabel<<L" Failed\n\n";
-		else
-			wcout<<L"Test "<<inTestLabel<<L" Succeeded\n\n";
-	}
-	return testStatus;
+		return RunSingleTest(it->first,it->second);
 }
 
 EStatusCode TestsRunner::RunTests(const WStringList& inTestsLabels)
 {
-	EStatusCode testsStatus = eSuccess;
-	unsigned long failedCount = 0,succeededCount = 0;
-
 	WStringAndTestUnitList testsList;
 	WStringList::const_iterator it = inTestsLabels.begin();
 	for(; it != inTestsLabels.end(); ++it)
@@ -119,112 +128,81 @@ EStatusCode TestsRunner::RunTests(const WStringList& inTestsLabels)
 		else
 			wcout<<L"Test "<<*it<<" not found\n";
 	}
-
-	wcout<<L"Start tests run\n";
-
-	WStringAndTestUnitList::iterator itList = testsList.begin();
-	EStatusCode testStatus;
-	
-	for(;itList != testsList.end();++itList)
-	{
-		wcout<<L"Running Test "<<itList->first<<L"\n";
-		testStatus = itList->second->Run();
-		if(eFailure == testStatus)
-		{
-			wcout<<L"Test "<<itList->first<<L" Failed\n\n";
-			++failedCount;
-			testsStatus = eFailure;
-		}
-		else
-		{
-			wcout<<L"Test "<<itList->first<<L" Succeeded\n\n";
-			++succeededCount;
-		}
-	}
-	wcout<<L"--------------------------------------------------------------\n";
-	wcout<<L"Test run ended: "<<succeededCount<<L" tests succeeded, "<<failedCount<<L" tests failed.\n";
-
-	return testsStatus;
+	return RunTestsInList(testsList);
 }
 
 EStatusCode TestsRunner::RunCategory(const wstring& inCategory)
 {
-	EStatusCode testsStatus = eSuccess;
-	EStatusCode testStatus;
-	unsigned long failedCount = 0,succeededCount = 0;
 	WStringToWStringAndTestUnitListMap::iterator it = mTests.find(inCategory);
 
 	if(it == mTests.end())
 	{
 		wcout<<L"Category "<<inCategory<<L"not found\n";
+		return eSuccess;
 	}
 	else
-	{
-		wcout<<L"Start tests run\n";
-		WStringAndTestUnitList::iterator itList = it->second.begin();
-
-		for(;itList!= it->second.end();++itList)
-		{
-			wcout<<L"Running Test "<<itList->first<<L"\n";
-			testStatus = itList->second->Run();
-			if(eFailure == testStatus)
-			{
-				wcout<<L"Test "<<itList->first<<L" Failed\n\n";
-				++failedCount;
-			}
-			else
-			{
-				wcout<<L"Test "<<itList->first<<L" Succeeded\n\n";
-				++succeededCount;
-			}
-		}
-		wcout<<L"--------------------------------------------------------------\n";
-		wcout<<L"Test run ended: "<<succeededCount<<L" tests succeeded, "<<failedCount<<L" tests failed.\n";
-	}	
-	return testsStatus;
+		return RunTestsInList(it->second);
 }
 
 EStatusCode TestsRunner::RunCategories(const WStringList& inCategories)
 {
-	EStatusCode testsStatus = eSuccess;
-	unsigned long failedCount = 0,succeededCount = 0;
-
 	WStringAndTestUnitList testsList;
 	WStringList::const_iterator it = inCategories.begin();
+
+	for(; it != inCategories.end(); ++it)
+	{
+		WStringToWStringAndTestUnitListMap::iterator itMap = mTests.find(*it);
+		if(itMap != mTests.end())
+			testsList.insert(testsList.end(),itMap->second.begin(),itMap->second.end());
+		else
+			wcout<<L"Category "<<*it<<" not found\n";
+	}
+
+	return RunTestsInList(testsList);
+}
+
+EStatusCode TestsRunner::RunCategories(const WStringList& inCategories, const WStringSet& inTestsToExclude)
+{
+	WStringAndTestUnitList testsList;
+	WStringList::const_iterator it = inCategories.begin();
+
 	for(; it != inCategories.end(); ++it)
 	{
 		WStringToWStringAndTestUnitListMap::iterator itMap = mTests.find(*it);
 		if(itMap != mTests.end())
 		{
-			testsList.insert(testsList.end(),itMap->second.begin(),itMap->second.end());
+			WStringAndTestUnitList::iterator itCategoryTests = itMap->second.begin();
+			for(;itCategoryTests != itMap->second.end();++itCategoryTests)
+				if(inTestsToExclude.find(itCategoryTests->first) == inTestsToExclude.end())
+					testsList.push_back(WStringAndTestUnit(itCategoryTests->first,itCategoryTests->second));
 		}
 		else
 			wcout<<L"Category "<<*it<<" not found\n";
 	}
 
-	wcout<<L"Start tests run\n";
+	return RunTestsInList(testsList);
+}
 
-	WStringAndTestUnitList::iterator itList = testsList.begin();
-	EStatusCode testStatus;
-	
-	for(;itList != testsList.end();++itList)
-	{
-		wcout<<L"Running Test "<<itList->first<<L"\n";
-		testStatus = itList->second->Run();
-		if(eFailure == testStatus)
-		{
-			wcout<<L"Test "<<itList->first<<L" Failed\n\n";
-			++failedCount;
-			testsStatus = eFailure;
-		}
-		else
-		{
-			wcout<<L"Test "<<itList->first<<L" Succeeded\n\n";
-			++succeededCount;
-		}
-	}
-	wcout<<L"--------------------------------------------------------------\n";
-	wcout<<L"Test run ended: "<<succeededCount<<L" tests succeeded, "<<failedCount<<L" tests failed.\n";
 
-	return testsStatus;	
+EStatusCode TestsRunner::RunExcludeCategories(const WStringSet& inCategories)
+{
+	WStringAndTestUnitList testsList;
+	WStringToWStringAndTestUnitListMap::iterator it = mTests.begin();
+
+	for(; it != mTests.end(); ++it)
+		if(inCategories.find(it->first) == inCategories.end())
+			testsList.insert(testsList.end(),it->second.begin(),it->second.end());
+	return RunTestsInList(testsList);
+}
+
+EStatusCode TestsRunner::RunExcludeTests(const WStringSet& inTests)
+{
+	WStringAndTestUnitList testsList;
+	WStringToTestUnitMap::iterator it = mTestsByName.begin();
+
+	for(; it != mTestsByName.end();++it)
+		if(inTests.find(it->first) == inTests.end())
+			testsList.push_back(WStringAndTestUnit(it->first,it->second));
+
+	return RunTestsInList(testsList);
 }

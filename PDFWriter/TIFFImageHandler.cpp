@@ -64,6 +64,7 @@
 #include "PDFFormXObject.h"
 #include "SafeBufferMacrosDefs.h"
 #include "IDocumentContextExtender.h"
+#include "StringTraits.h"
 
 // tiff lib includes
 #include "tif_config.h"
@@ -233,21 +234,6 @@ static const string scWarningString(": Warning, ");
 static const string scDot(".");
 static const string scErrorString(": Error, ");
 
-wstring WidenString(string inString)
-{
-	wstringstream formatter;
-	string::iterator it=inString.begin();
-	wchar_t aWideChar;
-
-	for(;it != inString.end();++it)
-	{
-		aWideChar = (wchar_t)*it;
-		formatter.put(aWideChar);
-	}
-	return formatter.str();
-	
-}
-
 void ReportWarning(const char* inModel, const char* inFormat, va_list inParametersList)
 {
 	char buffer[5001];
@@ -256,7 +242,7 @@ void ReportWarning(const char* inModel, const char* inFormat, va_list inParamete
 
 	SAFE_VSPRINTF(buffer,5001,formatter.str().c_str(),inParametersList);
 
-	Singleton<Trace>::GetInstance()->TraceToLog(WidenString(buffer).c_str());
+	Singleton<Trace>::GetInstance()->TraceToLog(StringTraits(buffer).WidenString().c_str());
 }
 
 void ReportError(const char* inModel, const char* inFormat, va_list inParametersList)
@@ -267,7 +253,7 @@ void ReportError(const char* inModel, const char* inFormat, va_list inParameters
 
 	SAFE_VSPRINTF(buffer,5001,formatter.str().c_str(),inParametersList);
 
-	Singleton<Trace>::GetInstance()->TraceToLog(WidenString(buffer).c_str());
+	Singleton<Trace>::GetInstance()->TraceToLog(StringTraits(buffer).WidenString().c_str());
 }
 
 TIFFImageHandler::TIFFImageHandler():mUserParameters(TIFFUsageParameters::DefaultTIFFUsageParameters)

@@ -69,3 +69,15 @@ const wstring& InputFile::GetFilePath()
 {
 	return mFilePath;
 }
+
+LongFilePositionType InputFile::GetFileSize()
+{
+	if(mInputStream)
+	{
+		InputFileStream* inputFileStream = (InputFileStream*)mInputStream->GetSourceStream();
+
+		return inputFileStream->GetFileSize();
+	}
+	else
+		return 0;
+}
