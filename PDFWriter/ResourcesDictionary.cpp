@@ -180,3 +180,39 @@ void ResourcesDictionary::AddImageXObjectMapping(ObjectIDType inImageXObjectID, 
 	else
 		it->second = inImageXObjectName;
 }
+
+static const string scFN = "FN";
+string ResourcesDictionary::AddFontMapping(ObjectIDType inFontObjectID)
+{
+	ObjectIDTypeToStringMap::iterator it = mFonts.find(inFontObjectID);
+
+	if(it == mFonts.end())
+	{
+		string newName = scFN + Int((int)mFonts.size()+1).ToString();
+		return newName;
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
+void ResourcesDictionary::AddFontMapping(ObjectIDType inFontObjectID,const string& inFontObjectName)
+{
+	ObjectIDTypeToStringMap::iterator it = mFonts.find(inFontObjectID);
+
+	if(it == mFonts.end())
+		mFonts.insert(ObjectIDTypeToStringMap::value_type(inFontObjectID,inFontObjectName));
+	else
+		it->second = inFontObjectName;
+}
+
+int ResourcesDictionary::GetFontsCount()
+{
+	return (int)mFonts.size();
+}
+
+MapIterator<ObjectIDTypeToStringMap> ResourcesDictionary::GetFontsIterator()
+{
+	return MapIterator<ObjectIDTypeToStringMap>(mFonts);
+}

@@ -45,15 +45,9 @@ void ObjectsContext::WriteLiteralString(const string& inString,ETokenSeparator i
 	mPrimitiveWriter.WriteLiteralString(inString,inSeparate);
 }
 
-static const IOBasicTypes::Byte scLeftAngle[1] = {'<'};
-static const IOBasicTypes::Byte scRightAngle[1] = {'>'};
-
 void ObjectsContext::WriteHexString(const string& inString,ETokenSeparator inSeparate)
 {
-	mOutputStream->Write(scLeftAngle,1);
-	mOutputStream->Write((const IOBasicTypes::Byte *)inString.c_str(),inString.size());
-	mOutputStream->Write(scRightAngle,1);
-	WriteTokenSeparator(inSeparate);
+	mPrimitiveWriter.WriteHexString(inString,inSeparate);
 }
 
 static const IOBasicTypes::Byte scR[1] = {'R'};

@@ -29,6 +29,7 @@ void DocumentContext::SetObjectsContext(ObjectsContext* inObjectsContext)
 	mObjectsContext = inObjectsContext;
 	mJPEGImageHandler.SetOperationsContexts(this,mObjectsContext);
 	mTIFFImageHandler.SetOperationsContexts(this,mObjectsContext);
+	mUsedFontsRepository.SetObjectsContext(mObjectsContext);
 }
 
 void DocumentContext::SetOutputFileInformation(OutputFile* inOutputFile)
@@ -691,6 +692,7 @@ EStatusCode DocumentContext::EndFormXObjectAndRelease(PDFFormXObject* inFormXObj
 static const string scXObjects = "XObject";
 static const string scProcesets = "ProcSet";
 static const string scExtGStates = "ExtGState";
+static const string scFonts = "Font";
 EStatusCode DocumentContext::WriteResourcesDictionary(ResourcesDictionary& inResourcesDictionary)
 {
 	EStatusCode status = eSuccess;
@@ -747,6 +749,20 @@ EStatusCode DocumentContext::WriteResourcesDictionary(ResourcesDictionary& inRes
 				extGStatesContext->WriteObjectReferenceValue(itExtGStates.GetKey());
 			}
 			mObjectsContext->EndDictionary(extGStatesContext);	
+		}
+
+		if(inResourcesDictionary.GetFontsCount() > 0)
+		{
+			// Fonts
+			resourcesContext->WriteKey(scFonts);
+			DictionaryContext* fontsContext = mObjectsContext->StartDictionary();
+			MapIterator<ObjectIDTypeToStringMap> itFonts = inResourcesDictionary.GetFontsIterator();
+			while(itFonts.MoveNext())
+			{
+				fontsContext->WriteKey(itFonts.GetValue());
+				fontsContext->WriteObjectReferenceValue(itFonts.GetKey());
+			}
+			mObjectsContext->EndDictionary(fontsContext);	
 		}
 
 		if(mExtender)
@@ -815,4 +831,10 @@ PDFFormXObject* DocumentContext::CreateFormXObjectFromTIFFFile(
 												const TIFFUsageParameters& inTIFFUsageParameters)
 {
 	return mTIFFImageHandler.CreateFormXObjectFromTIFFFile(inTIFFFilePath,inFormXObjectID,inTIFFUsageParameters);
+}
+
+
+PDFUsedFont* DocumentContext::GetFontForFile(const wstring& inFontFilePath)
+{
+	return mUsedFontsRepository.GetFontForFile(inFontFilePath);
 }

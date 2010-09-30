@@ -566,6 +566,18 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="Text"
+					>
+					<File
+						RelativePath=".\SimpleTextUsage.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\SimpleTextUsage.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="Patterns"

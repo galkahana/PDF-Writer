@@ -117,3 +117,13 @@ void PrimitiveObjectsWriter::EndArray(ETokenSeparator inSeparate)
 	mStreamForWriting->Write(scCloseBracket,1);
 	WriteTokenSeparator(inSeparate);
 }
+
+static const IOBasicTypes::Byte scLeftAngle[1] = {'<'};
+static const IOBasicTypes::Byte scRightAngle[1] = {'>'};
+void PrimitiveObjectsWriter::WriteHexString(const string& inString,ETokenSeparator inSeparate)
+{
+	mStreamForWriting->Write(scLeftAngle,1);
+	mStreamForWriting->Write((const IOBasicTypes::Byte *)inString.c_str(),inString.size());
+	mStreamForWriting->Write(scRightAngle,1);
+	WriteTokenSeparator(inSeparate);
+}

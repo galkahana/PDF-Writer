@@ -40,7 +40,6 @@ private:
 	string mTextString;
 
 	void ConvertFromUTF16(const wstring& inStringToConvert);
-	ConvertToPDFDocEncodingResult ConvertToPDFDocEncoding(wchar_t inCharacterToConvert);
 	bool ConvertUTF16ToPDFDocEncoding(const wstring& inStringToConvert,OutputStringBufferStream& refResult);
 	void ConvertUTF16ToUTF16BE(const wstring& inStringToConvert,OutputStringBufferStream& refResult);
 };

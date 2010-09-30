@@ -5,6 +5,8 @@
 #include "FreeTypeOpenTypeWrapper.h"
 #include "Trace.h"
 #include "BetweenIncluding.h"
+#include "WrittenFontCFF.h"
+#include "WrittenFontTrueType.h"
 
 #include FT_XFREE86_H 
 
@@ -410,3 +412,51 @@ bool FreeTypeFaceWrapper::IsForceBold()
 	return mFormatParticularWrapper ? mFormatParticularWrapper->IsForceBold() : false;
 }
 
+EStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const wstring& inText,UIntList& outGlyphs)
+{
+	if(mFace)
+	{
+		FT_UInt glyphIndex;
+		EStatusCode status = eSuccess;
+		wstring::const_iterator it = inText.begin();
+		outGlyphs.clear();
+
+		for(; it != inText.end(); ++it)
+		{
+			glyphIndex = FT_Get_Char_Index(mFace,*it);
+			outGlyphs.push_back(glyphIndex);
+			if(0 == glyphIndex)
+			{
+				TRACE_LOG1("FreeTypeFaceWrapper::GetGlyphsForUnicodeText, failed to find glyph for charachter 0x%04x",*it);
+				status = eFailure;
+			}
+		}
+
+		return status;
+	}
+	else
+		return eFailure;
+}
+
+IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObjectsContext)
+{
+	if(mFace)
+	{
+		IWrittenFont* result;
+		const char* fontFormat = FT_Get_X11_Font_Format(mFace);
+
+		if(strcmp(fontFormat,scType1) == 0 || strcmp(fontFormat,scCFF) == 0)
+			result = new WrittenFontCFF(inObjectsContext);
+		else if(strcmp(fontFormat,scTrueType) == 0)
+			result = new WrittenFontTrueType(inObjectsContext);
+		else
+		{
+			result = NULL;
+			TRACE_LOG1("Failure in FreeTypeFaceWrapper::CreateWrittenFontObject, could not find font writer implementation for %s",
+				StringTraits(fontFormat).WidenString().c_str());
+		}
+		return result;
+	}
+	else
+		return NULL;	
+}

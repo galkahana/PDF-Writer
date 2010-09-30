@@ -8,6 +8,7 @@
 #include "JPEGImageHandler.h"
 #include "TIFFImageHandler.h"
 #include "TIFFUsageParameters.h"
+#include "UsedFontsRepository.h"
 
 #include <string>
 
@@ -25,6 +26,7 @@ class ResourcesDictionary;
 class PDFFormXObject;
 class PDFRectangle;
 class PDFImageXObject;
+class PDFUsedFont;
 
 class DocumentContext
 {
@@ -89,6 +91,10 @@ public:
 	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const wstring& inTIFFFilePath,
 													ObjectIDType inFormXObjectID,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
+	
+	// Font [Text]
+	PDFUsedFont* GetFontForFile(const wstring& inFontFilePath);
+	
 	// Extensibility
 	void SetDocumentContextExtender(IDocumentContextExtender* inExtender);
 
@@ -104,6 +110,7 @@ private:
 	IDocumentContextExtender* mExtender;
 	JPEGImageHandler mJPEGImageHandler;
 	TIFFImageHandler mTIFFImageHandler;
+	UsedFontsRepository mUsedFontsRepository;
 	
 	void WriteHeaderComment(EPDFVersion inPDFVersion);
 	void Write4BinaryBytes();

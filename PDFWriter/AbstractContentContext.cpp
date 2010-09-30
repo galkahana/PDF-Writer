@@ -3,6 +3,10 @@
 #include "ResourcesDictionary.h"
 #include "PDFImageXObject.h"
 #include "ProcsetResourcesConstants.h"
+#include "PDFUsedFont.h"
+#include "Trace.h"
+#include "OutputStringBufferStream.h"
+#include "SafeBufferMacrosDefs.h"
 
 AbstractContentContext::AbstractContentContext(void)
 {
@@ -193,14 +197,16 @@ void AbstractContentContext::q()
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteKeyword("q");
+	mGraphicStack.Push();
 }
 
-void AbstractContentContext::Q()
+EStatusCode AbstractContentContext::Q()
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteKeyword("Q");
+	return mGraphicStack.Pop();
 }
 
 void AbstractContentContext::cm(double inA, double inB, double inC, double inD, double inE, double inF)
@@ -512,6 +518,9 @@ void AbstractContentContext::Tf(const string& inFontName,double inFontSize)
 	mPrimitiveWriter.WriteName(inFontName);
 	mPrimitiveWriter.WriteDouble(inFontSize);
 	mPrimitiveWriter.WriteKeyword("Tf");
+
+	mGraphicStack.GetCurrentState().mPlacedFontName = inFontName;
+	mGraphicStack.GetCurrentState().mFontSize = inFontSize;
 }
 
 void AbstractContentContext::Tr(int inRenderingMode)
@@ -609,6 +618,16 @@ void AbstractContentContext::Tj(const string& inText)
 	mPrimitiveWriter.WriteKeyword("Tj");
 }
 
+void AbstractContentContext::TjHex(const string& inText)
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+	AssertProcsetAvailable(KProcsetText);
+
+	mPrimitiveWriter.WriteHexString(inText);
+	mPrimitiveWriter.WriteKeyword("Tj");
+}
+
 void AbstractContentContext::Quote(const string& inText)
 {
 	RenewStreamConnection();
@@ -652,4 +671,55 @@ void AbstractContentContext::TJ(const StringOrDoubleList& inStringsAndSpacing)
 	mPrimitiveWriter.EndArray(eTokenSeparatorSpace);
 
 	mPrimitiveWriter.WriteKeyword("TJ");
+}
+
+void AbstractContentContext::Tf(PDFUsedFont* inFontReference,double inFontSize)
+{
+	mGraphicStack.GetCurrentState().mFont = inFontReference;
+	mGraphicStack.GetCurrentState().mFontSize = inFontSize;
+}
+
+EStatusCode AbstractContentContext::Tj(const wstring& inUnicodeText)
+{
+	PDFUsedFont* currentFont = mGraphicStack.GetCurrentState().mFont;
+	if(!currentFont)
+	{
+		TRACE_LOG("AbstractContentContext::Tj, Cannot write text, no current font is defined");
+		return eSuccess;
+	}
+
+	ObjectIDType fontObjectID;
+	UShortList encodedCharachtersList;
+	bool writeAsCID;	
+
+	EStatusCode encodingStatus = currentFont->EncodeStringForShowing(inUnicodeText,fontObjectID,encodedCharachtersList,writeAsCID);
+	
+	// status only returns if strings can be coded or not. so continue with writing regardless
+
+	// Write the font reference
+	Tf(GetResourcesDictionary()->AddFontMapping(fontObjectID),mGraphicStack.GetCurrentState().mFontSize);
+	
+	// Now write the string using Tj
+	OutputStringBufferStream stringStream;
+	char formattingBuffer[5];
+	UShortList::iterator it = encodedCharachtersList.begin();
+	if(writeAsCID)
+	{
+		for(;it!= encodedCharachtersList.end();++it)
+		{
+			SAFE_SPRINTF_2(formattingBuffer,5,"%02x%02x",((*it)>>8) & 0x00ff,(*it) & 0x00ff);
+			stringStream.Write((const Byte*)formattingBuffer,4);
+		}
+		TjHex(stringStream.ToString());
+	}
+	else
+	{
+		for(;it!= encodedCharachtersList.end();++it)
+		{
+			SAFE_SPRINTF_1(formattingBuffer,5,"\\%03o",(*it) & 0x00ff); // TODO : reconsider this. i want to write proper chars at times
+			stringStream.Write((const Byte*)formattingBuffer,4);
+		}
+		Tj(stringStream.ToString());		
+	}
+	return encodingStatus;
 }

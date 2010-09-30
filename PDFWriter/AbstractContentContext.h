@@ -14,6 +14,7 @@
 
 #include "EStatusCode.h"
 #include "PrimitiveObjectsWriter.h"
+#include "GraphicStateStack.h"
 #include <string>
 #include <list>
 
@@ -72,7 +73,7 @@ public:
 
 	// graphic state
 	void q();
-	void Q();
+	EStatusCode Q(); // Status code returned, in case there's inbalance in "q-Q"s
 	void cm(double inA, double inB, double inC, double inD, double inE, double inF);
 	void w(double inLineWidth);
 	void J(int inLineCapStyle);
@@ -111,9 +112,12 @@ public:
 	void Tw(double inWordSpace);
 	void Tz(int inHorizontalScaling);
 	void TL(double inTextLeading);
-	void Tf(const string& inFontName,double inFontSize);
 	void Tr(int inRenderingMode);
 	void Ts(double inFontRise);
+
+	// Low level setting of font. for the high level version, see below
+	void Tf(const string& inFontName,double inFontSize); 
+
 
 	// Text object operators
 	void BT();
@@ -125,13 +129,31 @@ public:
 	void Tm(double inA, double inB, double inC, double inD, double inE, double inF);
 	void TStar();
 
-	// Text showing operators
+	// Text showing operators (low level. for the library high level of handling fonts see below)
+	
+	// first version of Tj writes the string in literal string paranthesis, 
+	// second version of Tj writes the string in hex string angle brackets
 	void Tj(const string& inText);
+	void TjHex(const string& inText); 
+
 	void Quote(const string& inText); // matches the operator '
 	void DoubleQuote(double inWordSpacing, double inCharacterSpacing, const string& inText); // matches the operator "
 	// similar to the TJ PDF command, TJ() recieves an input an array of items which
 	// can be either a string or a double
 	void TJ(const StringOrDoubleList& inStringsAndSpacing); 
+
+	// Text showing operators using the library handling of fonts
+
+	// Set the font for later text writing command to the font in reference.
+	// to create such a font use PDF Writer GetFontForFile.
+	// Note that placing an actual Tf command (and including in resources dictionary) will
+	// only occur when actually placing text.
+	void Tf(PDFUsedFont* inFontReference,double inFontSize);
+
+	// place text to the current set font with Tf
+	// will return error if not font was set, or that one of the glyphs
+	// didn't succeed in encoding.
+	EStatusCode Tj(const wstring& inUnicodeText);
 
 protected:
 
@@ -145,6 +167,9 @@ private:
 	virtual void RenewStreamConnection() {};
 
 	PrimitiveObjectsWriter mPrimitiveWriter;
+
+	// graphic stack to monitor high-level graphic usage (now - fonts)
+	GraphicStateStack mGraphicStack;
 
 	void AssertProcsetAvailable(const string& inProcsetName);
 

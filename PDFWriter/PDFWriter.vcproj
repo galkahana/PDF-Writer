@@ -583,6 +583,26 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Encoding"
+				>
+				<File
+					RelativePath=".\PDFDocEncoding.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PDFDocEncoding.h"
+					>
+				</File>
+				<File
+					RelativePath=".\WinAnsiEncoding.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\WinAnsiEncoding.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Document Context Level"
@@ -613,6 +633,22 @@
 			</File>
 			<File
 				RelativePath=".\DocumentContextExtenderAdapter.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GraphicState.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GraphicState.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GraphicStateStack.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GraphicStateStack.h"
 				>
 			</File>
 			<File
@@ -835,6 +871,50 @@
 		<Filter
 			Name="Text"
 			>
+			<File
+				RelativePath=".\AbstractWrittenFont.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\AbstractWrittenFont.h"
+				>
+			</File>
+			<File
+				RelativePath=".\IWrittenFont.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PDFUsedFont.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PDFUsedFont.h"
+				>
+			</File>
+			<File
+				RelativePath=".\UsedFontsRepository.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\UsedFontsRepository.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WrittenFontCFF.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WrittenFontCFF.h"
+				>
+			</File>
+			<File
+				RelativePath=".\WrittenFontTrueType.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\WrittenFontTrueType.h"
+				>
+			</File>
 			<Filter
 				Name="FreeType"
 				>

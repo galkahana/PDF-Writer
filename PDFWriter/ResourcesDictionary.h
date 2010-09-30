@@ -48,6 +48,9 @@ public:
 	string AddImageXObjectMapping(ObjectIDType inImageXObjectID);
 	void AddImageXObjectMapping(ObjectIDType inImageXObjectID, const string& inImageXObjectName);
 
+	string AddFontMapping(ObjectIDType inFontObjectID);
+	void AddFontMapping(ObjectIDType inFontObjectID,const string& inFontObjectName);
+
 
 	int GetImageXObjectsCount();
 	MapIterator<ObjectIDTypeToStringMap> GetImageXObjectsIterator();
@@ -58,12 +61,18 @@ public:
 	int GetExtGStatesCount();
 	MapIterator<ObjectIDTypeToStringMap> GetExtGStatesIterator();
 
+
+	// Fonts.
+	int GetFontsCount();
+	MapIterator<ObjectIDTypeToStringMap> GetFontsIterator();
+
 private:
 
 	StringSet mProcsets;
 	ObjectIDTypeToStringMap mFormXObjects;
 	ObjectIDTypeToStringMap mImageXObjects;
 	ObjectIDTypeToStringMap mExtGStates;
+	ObjectIDTypeToStringMap mFonts;
 	
 
 	void AddImageXObjectMappingWithName(PDFImageXObject* inImageXObject, const string& inImageXObjectName);

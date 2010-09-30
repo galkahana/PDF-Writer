@@ -1,15 +1,22 @@
 #pragma once
 
 #include "EFontStretch.h"
+#include "EStatusCode.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
 #include <utility>
+#include <list>
 
 class IFreeTypeFaceExtender;
+class IWrittenFont;
+class ObjectsContext;
 
-typedef std::pair<bool,FT_Short> BoolAndFTShort;
+using namespace std;
+
+typedef pair<bool,FT_Short> BoolAndFTShort;
+typedef list<unsigned int> UIntList;
 
 class FreeTypeFaceWrapper
 {
@@ -24,7 +31,8 @@ public:
 
 	bool IsValid();
 
-	// implementation dependent values
+	EStatusCode GetGlyphsForUnicodeText(const wstring& inText,UIntList& outGlyphs);
+
 	double GetItalicAngle();
 	BoolAndFTShort GetCapHeight();
 	BoolAndFTShort GetxHeight();
@@ -33,7 +41,8 @@ public:
 	FT_UShort GetFontWeight();
 	unsigned int GetFontFlags();
 
-
+	// Create the written font object, matching to write this font in the best way.
+	IWrittenFont* CreateWrittenFontObject(ObjectsContext* inObjectsContext);
 
 private:
 

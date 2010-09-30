@@ -51,6 +51,7 @@ EStatusCode SimpleContentPageTest::Run()
 		{
 			status = eFailure;
 			wcout<<"failed to create content context for page\n";
+			break;
 		}
 
 		// draw a 100X100 points cyan square

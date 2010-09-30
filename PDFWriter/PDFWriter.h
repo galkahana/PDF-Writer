@@ -37,6 +37,7 @@ struct PDFCreationSettings
 class PageContentContext;
 class PDFFormXObject;
 class PDFImageXObject;
+class PDFUsedFont;
 
 class PDFWriter
 {
@@ -92,6 +93,10 @@ public:
 	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const wstring& inTIFFFilePath,
 													ObjectIDType inFormXObjectID,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
+
+	// fonts [text]
+	PDFUsedFont* GetFontForFile(const wstring& inFontFilePath);
+
 
 	// Extensibility, reaching to lower levels
 	DocumentContext& GetDocumentContext();

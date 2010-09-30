@@ -151,3 +151,8 @@ PDFFormXObject* PDFWriter::CreateFormXObjectFromTIFFFile(const wstring& inTIFFFi
 {
 	return mDocumentContext.CreateFormXObjectFromTIFFFile(inTIFFFilePath,inFormXObjectID,inTIFFUsageParameters); 
 }
+
+PDFUsedFont* PDFWriter::GetFontForFile(const wstring& inFontFilePath)
+{
+	return mDocumentContext.GetFontForFile(inFontFilePath);
+}

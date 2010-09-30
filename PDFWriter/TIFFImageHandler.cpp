@@ -2241,7 +2241,7 @@ t2p_unmapproc(thandle_t handle, tdata_t data, toff_t offset)
 tsize_t GetSizeFromTIFFOutputStripSize(T2P* inT2p)
 {
 	return inT2p->output ? TIFFStripSize(inT2p->output) : 0;
-	// TODO: TIFFStripSize(output) looks like a bug to me...makes sense that strip size
+	// Bug?: TIFFStripSize(output) looks like a bug to me...makes sense that strip size
 	// is based on input...not output. try to see if i can check this
 
 }
