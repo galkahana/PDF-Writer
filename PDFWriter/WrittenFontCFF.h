@@ -3,13 +3,11 @@
 
 #include <utility>
 #include <list>
-#include <map>
 
 using namespace std;
 
 typedef pair<unsigned char,unsigned char> UCharAndUChar;
 typedef list<UCharAndUChar> UCharAndUCharList;
-typedef map<unsigned int, unsigned char> UIntToUCharMap;
 
 
 class WrittenFontCFF : public AbstractWrittenFont
@@ -17,6 +15,10 @@ class WrittenFontCFF : public AbstractWrittenFont
 public:
 	WrittenFontCFF(ObjectsContext* inObjectsContext);
 	virtual ~WrittenFontCFF(void);
+
+
+	virtual EStatusCode WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo);
+
 
 private:
 	virtual bool AddToANSIRepresentation(const wstring& inText,
@@ -32,6 +34,4 @@ private:
 	unsigned char mAvailablePositionsCount;
 	UCharAndUCharList mFreeList;
 	unsigned int mAssignedPositions[256];
-	UIntToUCharMap mGlyphsInPresentation;
-
 };

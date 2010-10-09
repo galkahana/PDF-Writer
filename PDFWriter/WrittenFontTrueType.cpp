@@ -35,8 +35,32 @@ bool WrittenFontTrueType::AddToANSIRepresentation(	const wstring& inText,
 		if(encodingResult.first)
 			candidates.push_back(encodingResult.second);
 	}
+
 	if(encodingResult.first)
+	{
+		// for the first time, add also 0,0 mapping
+		if(mANSIRepresentation->mGlyphIDToEncodedChar.size() == 0)
+			mANSIRepresentation->mGlyphIDToEncodedChar.insert(UIntToGlyphEncodingInfoMap::value_type(0,GlyphEncodingInfo(0,0)));
+
+
+		UIntList::const_iterator itGlyphs = inGlyphsList.begin();
+		UShortList::iterator itEncoded = candidates.begin();
+		wstring::const_iterator itText = inText.begin(); 
+		for(; itGlyphs != inGlyphsList.end(); ++ itGlyphs,++itEncoded,++itText)
+		{
+			if(mANSIRepresentation->mGlyphIDToEncodedChar.find(*itGlyphs) == mANSIRepresentation->mGlyphIDToEncodedChar.end())
+				mANSIRepresentation->mGlyphIDToEncodedChar.insert(UIntToGlyphEncodingInfoMap::value_type(*itGlyphs,GlyphEncodingInfo(*itEncoded,*itText)));
+		}
+
 		outEncodedCharacters = candidates;
+	}
 
 	return encodingResult.first;
+}
+
+
+EStatusCode WrittenFontTrueType::WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo)
+{
+	// TODO: Writer font definition
+	return eFailure;
 }

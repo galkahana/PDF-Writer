@@ -124,4 +124,5 @@ private:
 	string GenerateMD5IDForFile();
 	EStatusCode WriteResourcesDictionary(ResourcesDictionary& inResourcesDictionary);
 	bool IsIdentityMatrix(const double* inMatrix);
+	EStatusCode WriteUsedFontsDefinitions();
 };

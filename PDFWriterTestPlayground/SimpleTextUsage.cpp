@@ -23,7 +23,7 @@ EStatusCode SimpleTextUsage::Run()
 	do
 	{
 
-		status = pdfWriter.InitializePDFWriter(L"C:\\PDFLibTests\\SimpleTextUsage.PDF");
+		status = pdfWriter.InitializePDFWriter(L"C:\\PDFLibTests\\SimpleTextUsage.PDF",LogConfiguration(true,L"C:\\PDFLibTests\\SimpleTextUsage.log"));
 		if(status != eSuccess)
 		{
 			wcout<<"failed to initialize PDF Writer\n";

@@ -696,8 +696,11 @@ EStatusCode AbstractContentContext::Tj(const wstring& inUnicodeText)
 	
 	// status only returns if strings can be coded or not. so continue with writing regardless
 
-	// Write the font reference
-	Tf(GetResourcesDictionary()->AddFontMapping(fontObjectID),mGraphicStack.GetCurrentState().mFontSize);
+	// Write the font reference (only if required)
+	std::string fontName = GetResourcesDictionary()->AddFontMapping(fontObjectID);
+
+	if(mGraphicStack.GetCurrentState().mPlacedFontName != fontName)
+		Tf(fontName,mGraphicStack.GetCurrentState().mFontSize);
 	
 	// Now write the string using Tj
 	OutputStringBufferStream stringStream;
@@ -716,8 +719,8 @@ EStatusCode AbstractContentContext::Tj(const wstring& inUnicodeText)
 	{
 		for(;it!= encodedCharachtersList.end();++it)
 		{
-			SAFE_SPRINTF_1(formattingBuffer,5,"\\%03o",(*it) & 0x00ff); // TODO : reconsider this. i want to write proper chars at times
-			stringStream.Write((const Byte*)formattingBuffer,4);
+			formattingBuffer[0] = (*it) & 0x00ff;
+			stringStream.Write((const Byte*)formattingBuffer,1);
 		}
 		Tj(stringStream.ToString());		
 	}

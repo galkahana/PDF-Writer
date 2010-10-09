@@ -53,10 +53,41 @@ void PrimitiveObjectsWriter::WriteInteger(long long inIntegerToken,ETokenSeparat
 
 static const IOBasicTypes::Byte scLeftParanthesis[1] = {'('};
 static const IOBasicTypes::Byte scRightParanthesis[1] = {')'};
-void PrimitiveObjectsWriter::WriteLiteralString(const string& inString,ETokenSeparator inSeparate)
+
+void PrimitiveObjectsWriter::WriteUnsafeLiteralString(const string& inString,ETokenSeparator inSeparate)
 {
 	mStreamForWriting->Write(scLeftParanthesis,1);
 	mStreamForWriting->Write((const IOBasicTypes::Byte *)inString.c_str(),inString.size());
+	mStreamForWriting->Write(scRightParanthesis,1);
+	WriteTokenSeparator(inSeparate);
+}
+
+void PrimitiveObjectsWriter::WriteLiteralString(const string& inString,ETokenSeparator inSeparate)
+{
+	mStreamForWriting->Write(scLeftParanthesis,1);
+	// doing some string conversion, so that charachters are written as safe ones.
+	IOBasicTypes::Byte buffer[5];
+	string::const_iterator it = inString.begin();
+	for(;it != inString.end();++it)
+	{
+		if(*it == '(' || *it == ')' || *it == '\\')
+		{
+			buffer[0] = '\\';
+			buffer[1] = *it;
+			mStreamForWriting->Write(buffer,2);
+		}
+		else if (*it < 32 || *it > 126) // grabbing all nonprintable chars
+		{
+			SAFE_SPRINTF_1((char*)buffer,5,"\\%03o",*it); 
+			mStreamForWriting->Write(buffer,4);		
+		}
+		else
+		{
+			buffer[0] = *it;
+			mStreamForWriting->Write(buffer,1);
+		}
+		
+	}
 	mStreamForWriting->Write(scRightParanthesis,1);
 	WriteTokenSeparator(inSeparate);
 }

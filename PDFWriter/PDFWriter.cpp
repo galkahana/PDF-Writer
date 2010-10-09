@@ -39,14 +39,14 @@ EStatusCode PDFWriter::EndPDF()
 		status = mDocumentContext.FinalizePDF();
 		if(status != eSuccess)
 		{
+			mOutputFile.CloseFile();
 			TRACE_LOG("PDFWriter::EndPDF, Could not end PDF");
+			break;
 		}
-
 		status = mOutputFile.CloseFile();
-
-		ReleaseLog();
 	}
 	while(false);
+	ReleaseLog();
 	return status;
 }
 

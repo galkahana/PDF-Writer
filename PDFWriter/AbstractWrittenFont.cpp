@@ -45,7 +45,7 @@ void AbstractWrittenFont::AppendGlyphs(
 	// if a CID representation exists - prefer it over the ANSI.
 	if(mCIDRepresentation)
 	{
-		AddToCIDRepresentation(inGlyphsList,outEncodedCharacters);
+		AddToCIDRepresentation(inText,inGlyphsList,outEncodedCharacters);
 		outFontObjectID = mCIDRepresentation->mWrittenObjectID;
 		outEncodingIsMultiByte = true;
 		return;
@@ -60,6 +60,9 @@ void AbstractWrittenFont::AppendGlyphs(
 	// may be used in an ANSI representation]
 	if(AddToANSIRepresentation(inText,inGlyphsList,outEncodedCharacters))
 	{
+		if(0 == mANSIRepresentation->mWrittenObjectID)
+			mANSIRepresentation->mWrittenObjectID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
+
 		outFontObjectID = mANSIRepresentation->mWrittenObjectID;
 		outEncodingIsMultiByte = false;
 		return;			
@@ -68,7 +71,7 @@ void AbstractWrittenFont::AppendGlyphs(
 	// if not...then create a CID representation and include the chars there. from now one...every time glyphs needs to be added
 	// this algorithm will use the CID representation.
 	mCIDRepresentation = new WrittenFontRepresentation();
-	AddToCIDRepresentation(inGlyphsList,outEncodedCharacters);
+	AddToCIDRepresentation(inText,inGlyphsList,outEncodedCharacters);
 	outFontObjectID = mCIDRepresentation->mWrittenObjectID;
 	outEncodingIsMultiByte = true;
 }
@@ -79,7 +82,7 @@ bool AbstractWrittenFont::CanEncodeWithIncludedChars(WrittenFontRepresentation* 
 {
 	UShortList candidateEncoding;
 	UIntList::const_iterator it=inGlyphsList.begin();
-	UIntToUShortMap::iterator itEncoding;
+	UIntToGlyphEncodingInfoMap::iterator itEncoding;
 	bool allIncluded = true;
 
 	for(; it != inGlyphsList.end() && allIncluded; ++it)
@@ -88,7 +91,7 @@ bool AbstractWrittenFont::CanEncodeWithIncludedChars(WrittenFontRepresentation* 
 		if(itEncoding == inRepresentation->mGlyphIDToEncodedChar.end())
 			allIncluded = false;
 		else
-			candidateEncoding.push_back(itEncoding->second);
+			candidateEncoding.push_back(itEncoding->second.mEncodedCharacter);
 	}
 
 	if(allIncluded)
@@ -96,20 +99,26 @@ bool AbstractWrittenFont::CanEncodeWithIncludedChars(WrittenFontRepresentation* 
 	return allIncluded;
 }
 
-void AbstractWrittenFont::AddToCIDRepresentation(const UIntList& inGlyphsList,UShortList& outEncodedCharacters)
+void AbstractWrittenFont::AddToCIDRepresentation(const std::wstring& inText,const UIntList& inGlyphsList,UShortList& outEncodedCharacters)
 {
 	// Glyph IDs are always used as CIDs, there's a possible @#$@up here if the font will contain too many glyphs...oops.
 	// take care of this sometimes.
 
-	UIntList::const_iterator it=inGlyphsList.begin();
-	UIntToUShortMap::iterator itEncoding;
+	// for the first time, add also 0,0 mapping
+	if(mCIDRepresentation->mGlyphIDToEncodedChar.size() == 0)
+		mCIDRepresentation->mGlyphIDToEncodedChar.insert(UIntToGlyphEncodingInfoMap::value_type(0,GlyphEncodingInfo(0,0)));
 
-	for(; it != inGlyphsList.end(); ++it)
+
+	UIntList::const_iterator it=inGlyphsList.begin();
+	wstring::const_iterator itText = inText.begin();
+	UIntToGlyphEncodingInfoMap::iterator itEncoding;
+
+	for(; it != inGlyphsList.end(); ++it,++itText)
 	{
 		itEncoding = mCIDRepresentation->mGlyphIDToEncodedChar.find(*it);
 		if(itEncoding == mCIDRepresentation->mGlyphIDToEncodedChar.end())
 		{
-			mCIDRepresentation->mGlyphIDToEncodedChar.insert(UIntToUShortMap::value_type(*it,(unsigned short)*it));
+			mCIDRepresentation->mGlyphIDToEncodedChar.insert(UIntToGlyphEncodingInfoMap::value_type(*it,GlyphEncodingInfo((unsigned short)*it,*itText)));
 			if(*it > 0xffff)
 			{
 				// let's see if this is at all possible
@@ -117,7 +126,7 @@ void AbstractWrittenFont::AddToCIDRepresentation(const UIntList& inGlyphsList,US
 					"AbstractWrittenFont::AddToCIDRepresentation, oops. charachter index larger that max unsigned short. charachter will not be encoded properly");
 			}
 		}
-		outEncodedCharacters.push_back(itEncoding->second);
+		outEncodedCharacters.push_back(itEncoding->second.mEncodedCharacter);
 	}
 
 	if(0 == mCIDRepresentation->mWrittenObjectID)

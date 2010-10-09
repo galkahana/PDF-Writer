@@ -4,6 +4,7 @@
 #include "IndirectObjectsReferenceRegistry.h"
 #include "ETokenSeparator.h"
 #include "PrimitiveObjectsWriter.h"
+#include "UppercaseSequance.h"
 #include <string>
 #include <list>
 
@@ -88,12 +89,17 @@ public:
 	void SetObjectsContextExtender(IObjectsContextExtender* inExtender);
 	
 
+	// as the obly common context around...i'm using the objects context to create
+	// subset fonts prefixes. might want to consider a more relevant object...
+	string GenerateSubsetFontPrefix();
+
 private:
 	IObjectsContextExtender* mExtender;
 	IByteWriterWithPosition* mOutputStream;
 	IndirectObjectsReferenceRegistry mReferencesRegistry;
 	PrimitiveObjectsWriter mPrimitiveWriter;
 	bool mCompressStreams;
+	UppercaseSequance mSubsetFontsNamesSequance;
 
 	DictionaryContextList mDictionaryStack;
 

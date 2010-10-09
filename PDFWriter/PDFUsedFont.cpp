@@ -4,6 +4,7 @@
 PDFUsedFont::PDFUsedFont(FT_Face inInputFace,ObjectsContext* inObjectsContext):mFaceWrapper(inInputFace)
 {
 	mObjectsContext = inObjectsContext;
+	mWrittenFont = NULL;
 }
 
 PDFUsedFont::~PDFUsedFont(void)
@@ -32,4 +33,9 @@ EStatusCode PDFUsedFont::EncodeStringForShowing(const wstring& inText,
 	mWrittenFont->AppendGlyphs(glyphs,inText,outCharactersToUse,outTreatCharactersAsCID,outFontObjectToUse);
 
 	return status;
+}
+
+EStatusCode PDFUsedFont::WriteFontDefinition()
+{
+	return mWrittenFont->WriteFontDefinition(mFaceWrapper);
 }

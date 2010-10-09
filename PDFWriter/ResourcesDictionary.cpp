@@ -189,6 +189,7 @@ string ResourcesDictionary::AddFontMapping(ObjectIDType inFontObjectID)
 	if(it == mFonts.end())
 	{
 		string newName = scFN + Int((int)mFonts.size()+1).ToString();
+		mFonts.insert(ObjectIDTypeToStringMap::value_type(inFontObjectID,newName));
 		return newName;
 	}
 	else

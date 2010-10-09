@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EStatusCode.h"
+
 #include <string>
 #include <map>
 
@@ -21,6 +23,7 @@ public:
 
 	PDFUsedFont* GetFontForFile(const wstring& inFontFilePath);
 
+	EStatusCode WriteUsedFontsDefinitions();
 
 private:
 

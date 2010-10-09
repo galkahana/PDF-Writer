@@ -28,12 +28,16 @@ public:
 	void WriteDoubleValue(double inValue);
 	void WriteBooleanValue(bool inValue);
 
+	// use WriteIndents when you are not using the above methods
+	// for writing, but instead using either primitivewriter, or objectscontext to write directly
+	// and you would still like to have the indents (a current example [4/10/2010] would be when writing
+	// multiline arrays)
+	void WriteIndents();
 private:
 
 	ObjectsContext* mObjectsContext;
 	StringSet mKeys;
 	size_t mIndentLevel;
 
-	void WriteIndents();
 
 };

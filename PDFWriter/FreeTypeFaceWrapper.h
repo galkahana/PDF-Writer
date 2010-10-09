@@ -39,10 +39,22 @@ public:
 	FT_UShort GetStemV();
 	EFontStretch GetFontStretch();
 	FT_UShort GetFontWeight();
+	// these would be flags for the font as a whole. if subsetting, match to the character set
 	unsigned int GetFontFlags();
 
 	// Create the written font object, matching to write this font in the best way.
 	IWrittenFont* CreateWrittenFontObject(ObjectsContext* inObjectsContext);
+
+
+	// flags determining values
+	bool IsFixedPitch();
+	bool IsSerif();
+	bool IsScript();
+	bool IsItalic();
+	bool IsForceBold();
+
+	// will be used externally to determine if font is symbolic or not
+	bool IsCharachterCodeAdobeStandard(FT_ULong inCharacterCode);
 
 private:
 
@@ -56,12 +68,6 @@ private:
 	BoolAndFTShort GetYBearingForUnicodeChar(unsigned short unicodeCharCode);
 	EFontStretch StretchFromName();
 	FT_UShort WeightFromName();
-	bool IsFixedPitch();
-	bool IsSerif();
 	bool IsSymbolic();
 	bool IsDefiningCharsNotInAdobeStandardLatin();
-	bool IsCharachterCodeAdobeStandard(FT_ULong inCharacterCode);
-	bool IsScript();
-	bool IsItalic();
-	bool IsForceBold();
 };

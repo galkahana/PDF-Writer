@@ -301,3 +301,8 @@ void ObjectsContext::SetObjectsContextExtender(IObjectsContextExtender* inExtend
 {
 	mExtender = inExtender;
 }
+
+string ObjectsContext::GenerateSubsetFontPrefix()
+{
+	return mSubsetFontsNamesSequance.GetNextValue();
+}

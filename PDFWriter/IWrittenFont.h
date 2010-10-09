@@ -1,5 +1,6 @@
 #pragma once
 
+#include "EStatusCode.h"
 #include "ObjectsBasicTypes.h"
 
 #include <string>
@@ -10,6 +11,7 @@ using namespace std;
 typedef list<unsigned int> UIntList;
 typedef list<unsigned short> UShortList;
 
+class FreeTypeFaceWrapper;
 
 class IWrittenFont
 {
@@ -27,5 +29,7 @@ public:
 					  UShortList& outEncodedCharacters,
 					  bool& outEncodingIsMultiByte,
 					  ObjectIDType &outFontObjectID) = 0;
+
+	virtual EStatusCode WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo) = 0;
 
 };

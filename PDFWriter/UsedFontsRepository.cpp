@@ -58,3 +58,14 @@ PDFUsedFont* UsedFontsRepository::GetFontForFile(const wstring& inFontFilePath)
 	}
 	return it->second;
 }
+
+EStatusCode UsedFontsRepository::WriteUsedFontsDefinitions()
+{
+	WStringToPDFUsedFontMap::iterator it = mUsedFonts.begin();
+	EStatusCode status = eSuccess;
+
+	for(; it != mUsedFonts.end() && eSuccess == status; ++it)
+		status = it->second->WriteFontDefinition();
+
+	return status;	
+}

@@ -1,19 +1,7 @@
 #pragma once
 
 #include "IWrittenFont.h"
-#include <map>
-
-using namespace std;
-
-typedef map<unsigned int, unsigned short> UIntToUShortMap;
-
-struct WrittenFontRepresentation
-{	
-	WrittenFontRepresentation(){mWrittenObjectID = 0;}
-
-	UIntToUShortMap mGlyphIDToEncodedChar;
-	ObjectIDType mWrittenObjectID;
-};
+#include "WrittenFontRepresentation.h"
 
 class ObjectsContext;
 
@@ -29,15 +17,16 @@ public:
 							  bool& outEncodingIsMultiByte,
 							  ObjectIDType &outFontObjectID);
 
-private:
+protected:
 	WrittenFontRepresentation* mCIDRepresentation;
 	WrittenFontRepresentation* mANSIRepresentation;
 	ObjectsContext* mObjectsContext;
 
+private:
 	bool CanEncodeWithIncludedChars(WrittenFontRepresentation* inRepresentation, 
 									const UIntList& inGlyphsList,
 									UShortList& outEncodedCharacters);
-	void AddToCIDRepresentation(const UIntList& inGlyphsList,UShortList& outEncodedCharacters);
+	void AddToCIDRepresentation(const std::wstring& inText,const UIntList& inGlyphsList,UShortList& outEncodedCharacters);
 	
 	// Aha! This method remains virtual for sub implementations to 
 	// override. Adding to an ANSI representation is dependent on the output format,

@@ -1,4 +1,6 @@
 #include "WrittenFontCFF.h"
+#include "Trace.h"
+#include "CFFANSIFontWriter.h"
 
 WrittenFontCFF::WrittenFontCFF(ObjectsContext* inObjectsContext):AbstractWrittenFont(inObjectsContext)
 {
@@ -7,7 +9,6 @@ WrittenFontCFF::WrittenFontCFF(ObjectsContext* inObjectsContext):AbstractWritten
 	// 1st place is reserved for .notdef/0 glyph index. we'll use 0s in the array in all other places as indication for avialability
 	for(int i=0;i<256;++i) 
 		mAssignedPositions[i] = 0;
-	mGlyphsInPresentation.insert(UIntToUCharMap::value_type(0,0));
 }
 
 WrittenFontCFF::~WrittenFontCFF(void)
@@ -38,17 +39,21 @@ bool WrittenFontCFF::HasEnoughSpaceForGlyphs(const UIntList& inGlyphsList)
 	int glyphsToAddCount = 0;
 
 	for(; it != inGlyphsList.end(); ++it)
-		if(mGlyphsInPresentation.find(*it) == mGlyphsInPresentation.end())
+		if(mANSIRepresentation->mGlyphIDToEncodedChar.find(*it) == mANSIRepresentation->mGlyphIDToEncodedChar.end())
 			++glyphsToAddCount;
 
-	return glyphsToAddCount > mAvailablePositionsCount;
+	return glyphsToAddCount <= mAvailablePositionsCount;
 }
 
 unsigned short WrittenFontCFF::EncodeGlyph(unsigned int inGlyph,wchar_t inCharacter)
 {
-	UIntToUCharMap::iterator it = mGlyphsInPresentation.find(inGlyph);
+	// for the first time, add also 0,0 mapping
+	if(mANSIRepresentation->mGlyphIDToEncodedChar.size() == 0)
+		mANSIRepresentation->mGlyphIDToEncodedChar.insert(UIntToGlyphEncodingInfoMap::value_type(0,GlyphEncodingInfo(0,0)));
 
-	if(it == mGlyphsInPresentation.end())
+	UIntToGlyphEncodingInfoMap::iterator it = mANSIRepresentation->mGlyphIDToEncodedChar.find(inGlyph);
+
+	if(it == mANSIRepresentation->mGlyphIDToEncodedChar.end())
 	{
 		// as a default position, i'm grabbing the ansi bits. this should display nice charachters, when possible
 		unsigned char encoding = (unsigned char)(inCharacter & 0xff);
@@ -57,10 +62,11 @@ unsigned short WrittenFontCFF::EncodeGlyph(unsigned int inGlyph,wchar_t inCharac
 		else
 			encoding = AllocateFromFreeList(inGlyph);
 		mAssignedPositions[encoding] = inGlyph;
-		mGlyphsInPresentation.insert(UIntToUCharMap::value_type(inGlyph,encoding));			
+		it = mANSIRepresentation->mGlyphIDToEncodedChar.insert(
+				UIntToGlyphEncodingInfoMap::value_type(inGlyph,GlyphEncodingInfo(encoding,inCharacter))).first;			
 		--mAvailablePositionsCount;
 	}
-	return it->second;
+	return it->second.mEncodedCharacter;
 }
 
 void WrittenFontCFF::RemoveFromFreeList(unsigned char inAllocatedPosition)
@@ -107,4 +113,40 @@ unsigned char WrittenFontCFF::AllocateFromFreeList(unsigned int inGlyph)
 	else
 		++(it->first);
 	return result;
+}
+
+EStatusCode WrittenFontCFF::WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo)
+{
+	EStatusCode status = eSuccess;
+	do
+	{
+		if(mANSIRepresentation)
+		{
+			CFFANSIFontWriter fontWriter;
+
+			status = fontWriter.WriteFont(inFontInfo,mANSIRepresentation,mObjectsContext);
+			if(status != eSuccess)
+			{
+				TRACE_LOG("WrittenFontCFF::WriteFontDefinition, Failed to write Ansi font definition");
+				break;
+
+			}
+		}
+
+		if(mCIDRepresentation)
+		{
+			// TODO: writer CFFCID writer
+			/*CFFCIDFontWriter fontWriter;
+
+			status = fontWriter.WriteFont(inFontInfo,mCIDRepresentation,mObjectsContext);
+			if(status != eSuccess)
+			{
+				TRACE_LOG("WrittenFontCFF::WriteFontDefinition, Failed to write CID font definition");
+				break;
+			}*/
+		}
+
+	} while(false);
+
+	return status;
 }

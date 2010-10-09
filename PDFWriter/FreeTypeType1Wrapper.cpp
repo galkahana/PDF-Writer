@@ -65,8 +65,8 @@ FT_UShort FreeTypeType1Wrapper::GetFontWeight()
 
 bool FreeTypeType1Wrapper::HasSerifs()
 {
-	// TODO - need to read from PFM dfPitchAndFamily and determine with that.
-	// for now default to false
+	// TODO: need to read from PFM dfPitchAndFamily and determine with that.
+	// for now default to false [and then]
 	return false;
 }
 

@@ -14,4 +14,5 @@ public:
 	~PDFDocEncoding(void);
 
 	BoolAndByte Encode(wchar_t inUnicodeCharacter);
+	const char* GetEncodedGlyphName(IOBasicTypes::Byte inEncodedCharacter);
 };

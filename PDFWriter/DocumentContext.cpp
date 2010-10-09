@@ -119,6 +119,10 @@ EStatusCode	DocumentContext::FinalizePDF()
 	// this will finalize writing all renments of the file, like xref, trailer and whatever objects still accumulating
 	do
 	{
+		status = WriteUsedFontsDefinitions();
+		if(status != 0)
+			break;
+
 		WritePagesTree();
 
 		status = WriteCatalogObject();
@@ -837,4 +841,9 @@ PDFFormXObject* DocumentContext::CreateFormXObjectFromTIFFFile(
 PDFUsedFont* DocumentContext::GetFontForFile(const wstring& inFontFilePath)
 {
 	return mUsedFontsRepository.GetFontForFile(inFontFilePath);
+}
+
+EStatusCode DocumentContext::WriteUsedFontsDefinitions()
+{
+	return mUsedFontsRepository.WriteUsedFontsDefinitions();
 }

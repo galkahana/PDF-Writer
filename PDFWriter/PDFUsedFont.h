@@ -34,6 +34,8 @@ public:
 										UShortList& outCharactersToUse,
 										bool& outTreatCharactersAsCID);
 
+	EStatusCode WriteFontDefinition();
+
 private:
 	FreeTypeFaceWrapper mFaceWrapper;
 	IWrittenFont* mWrittenFont;
