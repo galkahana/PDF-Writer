@@ -36,6 +36,9 @@ public:
 	// return a good answer or false if don't know. no fallback here
 	virtual bool HasSerifs() = 0;
 
+	// return a good answer or false if don't know. no fallback here
+	virtual bool IsScript() = 0;
+
 	// return a good answer or false if you don't know. no fallback here
 	virtual bool IsForceBold() = 0;
 };

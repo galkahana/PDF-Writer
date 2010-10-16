@@ -156,3 +156,8 @@ PDFUsedFont* PDFWriter::GetFontForFile(const wstring& inFontFilePath)
 {
 	return mDocumentContext.GetFontForFile(inFontFilePath);
 }
+
+PDFUsedFont* PDFWriter::GetFontForFile(const wstring& inFontFilePath,const wstring& inAdditionalMeticsFilePath)
+{
+	return mDocumentContext.GetFontForFile(inFontFilePath,inAdditionalMeticsFilePath);
+}

@@ -847,3 +847,8 @@ EStatusCode DocumentContext::WriteUsedFontsDefinitions()
 {
 	return mUsedFontsRepository.WriteUsedFontsDefinitions();
 }
+
+PDFUsedFont* DocumentContext::GetFontForFile(const wstring& inFontFilePath,const wstring& inAdditionalMeticsFilePath)
+{
+	return mUsedFontsRepository.GetFontForFile(inFontFilePath,inAdditionalMeticsFilePath);
+}

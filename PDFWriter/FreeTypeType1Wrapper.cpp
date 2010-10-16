@@ -1,7 +1,7 @@
 #include "FreeTypeType1Wrapper.h"
 #include "Trace.h"
 
-FreeTypeType1Wrapper::FreeTypeType1Wrapper(FT_Face inFace)
+FreeTypeType1Wrapper::FreeTypeType1Wrapper(FT_Face inFace,const wstring& inPFMFilePath)
 {
 	if(FT_Get_PS_Font_Info(inFace,&mPSFontInfo) != 0)
 	{
@@ -19,6 +19,9 @@ FreeTypeType1Wrapper::FreeTypeType1Wrapper(FT_Face inFace)
 	}
 	else
 		mPSPrivateAvailable = true; 
+
+	mPFMFileInfoRelevant = 
+		(inPFMFilePath.size() != 0 && mPFMReader.Read(inPFMFilePath) != eFailure);
 }
 
 FreeTypeType1Wrapper::~FreeTypeType1Wrapper(void)
@@ -32,18 +35,18 @@ double FreeTypeType1Wrapper::GetItalicAngle()
 
 BoolAndFTShort FreeTypeType1Wrapper::GetCapHeight()
 {
-	// hmm, free type doesn't have interface for PFM files
-	// so i'll default to no info. now.
-
-	return BoolAndFTShort(false,0);
+	if(mPFMFileInfoRelevant)
+		return BoolAndFTShort(true,mPFMReader.ExtendedFontMetrics.CapHeight);
+	else
+		return BoolAndFTShort(false,0);
 }
 
 BoolAndFTShort FreeTypeType1Wrapper::GetxHeight()
 {
-	// probably in PFM, but no interface from Free type. default to no info
-	return BoolAndFTShort(false,0);
-
-	// yeah...looks like parsing PFM/AFM would be propper
+	if(mPFMFileInfoRelevant)
+		return BoolAndFTShort(true,mPFMReader.ExtendedFontMetrics.XHeight);
+	else
+		return BoolAndFTShort(false,0);
 }
 
 FT_UShort FreeTypeType1Wrapper::GetStemV()
@@ -65,9 +68,19 @@ FT_UShort FreeTypeType1Wrapper::GetFontWeight()
 
 bool FreeTypeType1Wrapper::HasSerifs()
 {
-	// TODO: need to read from PFM dfPitchAndFamily and determine with that.
-	// for now default to false [and then]
-	return false;
+	if(mPFMFileInfoRelevant)
+		return (mPFMReader.Header.PitchAndFamily & 16) != 0;
+	else
+		return false;
+
+}
+
+bool FreeTypeType1Wrapper::IsScript()
+{
+	if(mPFMFileInfoRelevant)
+		return (mPFMReader.Header.PitchAndFamily & 64) != 0;
+	else
+		return false;	
 }
 
 bool FreeTypeType1Wrapper::IsForceBold()

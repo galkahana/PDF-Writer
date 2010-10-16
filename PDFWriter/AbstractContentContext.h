@@ -24,19 +24,28 @@ class ObjectsContext;
 class PDFStream;
 class ResourcesDictionary;
 class PDFImageXObject;
+class ITextCommand;
 
-struct StringOrDouble
+template <typename T>
+struct SomethingOrDouble
 {
-	string StringValue;
+	T SomeValue;
 	double DoubleValue;
 
-	bool IsString; // true - string, false - double
+	bool IsDouble; // true - double, false - other
 
-	StringOrDouble(string inString){StringValue = inString;IsString = true;}
-	StringOrDouble(double inDouble){DoubleValue = inDouble;IsString = false;}
+	SomethingOrDouble(T inSome){SomeValue = inSome;IsDouble = false;}
+	SomethingOrDouble(double inDouble){DoubleValue = inDouble;IsDouble = true;}
 };
 
+typedef SomethingOrDouble<string> StringOrDouble;
+typedef SomethingOrDouble<wstring> WStringOrDouble;
+
+
 typedef list<StringOrDouble> StringOrDoubleList;
+typedef list<WStringOrDouble> WStringOrDoubleList;
+
+typedef list<wstring> WStringList;
 
 class AbstractContentContext
 {
@@ -137,10 +146,15 @@ public:
 	void TjHex(const string& inText); 
 
 	void Quote(const string& inText); // matches the operator '
+	void QuoteHex(const string& inText);
+
 	void DoubleQuote(double inWordSpacing, double inCharacterSpacing, const string& inText); // matches the operator "
+	void DoubleQuoteHex(double inWordSpacing, double inCharacterSpacing, const string& inText); 
+
 	// similar to the TJ PDF command, TJ() recieves an input an array of items which
 	// can be either a string or a double
-	void TJ(const StringOrDoubleList& inStringsAndSpacing); 
+	void TJ(const StringOrDoubleList& inStringsAndSpacing);
+	void TJHex(const StringOrDoubleList& inStringsAndSpacing);
 
 	// Text showing operators using the library handling of fonts
 
@@ -151,9 +165,14 @@ public:
 	void Tf(PDFUsedFont* inFontReference,double inFontSize);
 
 	// place text to the current set font with Tf
-	// will return error if not font was set, or that one of the glyphs
+	// will return error if no font was set, or that one of the glyphs
 	// didn't succeed in encoding.
 	EStatusCode Tj(const wstring& inUnicodeText);
+
+	// The rest of the text operators, handled by the library handing of font. text is in unicode values
+	EStatusCode Quote(const wstring& inText);
+	EStatusCode DoubleQuote(double inWordSpacing, double inCharacterSpacing, const wstring& inText);
+	EStatusCode TJ(const WStringOrDoubleList& inStringsAndSpacing); 
 
 protected:
 
@@ -172,5 +191,7 @@ private:
 	GraphicStateStack mGraphicStack;
 
 	void AssertProcsetAvailable(const string& inProcsetName);
+
+	EStatusCode WriteTextCommandWithEncoding(const wstring& inUnicodeText,ITextCommand* inTextCommand);
 
 };

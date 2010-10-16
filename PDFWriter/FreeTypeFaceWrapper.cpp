@@ -13,8 +13,27 @@
 FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace)
 {
 	mFace = inFace;
-	SetupFormatSpecificExtender();
-	
+	SetupFormatSpecificExtender(L"");	
+}
+
+FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const wstring& inPFMFilePath)
+{
+	mFace = inFace;
+	wstring fileExtension = GetExtension(inPFMFilePath);
+	if(fileExtension == L"PFM" || fileExtension ==  L"pfm") // just don't bother if it's not PFM
+		SetupFormatSpecificExtender(inPFMFilePath);
+	else
+		SetupFormatSpecificExtender(L"");
+}
+
+wstring FreeTypeFaceWrapper::GetExtension(const wstring& inFilePath)
+{
+	wstring::size_type dotPosition = inFilePath.rfind(L".");
+
+	if(inFilePath.npos == dotPosition || (inFilePath.size() - 1) == dotPosition)
+		return L"";
+	else
+		return inFilePath.substr(dotPosition + 1);
 }
 
 FreeTypeFaceWrapper::~FreeTypeFaceWrapper(void)
@@ -26,14 +45,14 @@ static const char* scType1 = "Type 1";
 static const char* scTrueType = "TrueType";
 static const char* scCFF = "CFF";
 
-void FreeTypeFaceWrapper::SetupFormatSpecificExtender()
+void FreeTypeFaceWrapper::SetupFormatSpecificExtender(const wstring& inPFMFilePath /*pass empty if non existant or irrelevant*/)
 {
 	if(mFace)
 	{
 		const char* fontFormat = FT_Get_X11_Font_Format(mFace);
 
 		if(strcmp(fontFormat,scType1) == 0)
-			mFormatParticularWrapper = new FreeTypeType1Wrapper(mFace);
+			mFormatParticularWrapper = new FreeTypeType1Wrapper(mFace,inPFMFilePath);
 		else if(strcmp(fontFormat,scCFF) == 0 || strcmp(fontFormat,scTrueType) == 0)
 			mFormatParticularWrapper = new FreeTypeOpenTypeWrapper(mFace);
 		else
@@ -398,8 +417,7 @@ bool FreeTypeFaceWrapper::IsCharachterCodeAdobeStandard(FT_ULong inCharacterCode
 
 bool FreeTypeFaceWrapper::IsScript()
 {
-	// for true type i'll have false, for type 1 i need to read PFM pitch and family
-	return false;
+	return mFormatParticularWrapper ? mFormatParticularWrapper->IsScript() : false; 
 }
 
 bool FreeTypeFaceWrapper::IsItalic()
@@ -436,6 +454,22 @@ EStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const wstring& inText,U
 	}
 	else
 		return eFailure;
+}
+
+EStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const WStringList& inText,UIntListList& outGlyphs)
+{
+	UIntList glyphs;
+	EStatusCode status = eSuccess;
+	WStringList::const_iterator it = inText.begin();
+
+	for(; it != inText.end(); ++it)
+	{
+		if(eFailure == GetGlyphsForUnicodeText(*it,glyphs))
+			status = eFailure;	
+		outGlyphs.push_back(glyphs);
+	}
+
+	return status;	
 }
 
 IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObjectsContext)

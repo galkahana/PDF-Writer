@@ -638,6 +638,16 @@ void AbstractContentContext::Quote(const string& inText)
 	mPrimitiveWriter.WriteKeyword("'");
 }
 
+void AbstractContentContext::QuoteHex(const string& inText)
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+	AssertProcsetAvailable(KProcsetText);
+
+	mPrimitiveWriter.WriteHexString(inText);
+	mPrimitiveWriter.WriteKeyword("Quote");
+}
+
 void AbstractContentContext::DoubleQuote(	double inWordSpacing, 
 											double inCharacterSpacing, 
 											const string& inText)
@@ -651,6 +661,19 @@ void AbstractContentContext::DoubleQuote(	double inWordSpacing,
 	mPrimitiveWriter.WriteLiteralString(inText);
 	mPrimitiveWriter.WriteKeyword("\"");
 }
+
+void AbstractContentContext::DoubleQuoteHex(double inWordSpacing, double inCharacterSpacing, const string& inText)
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+	AssertProcsetAvailable(KProcsetText);
+
+	mPrimitiveWriter.WriteDouble(inWordSpacing);
+	mPrimitiveWriter.WriteDouble(inCharacterSpacing);
+	mPrimitiveWriter.WriteHexString(inText);
+	mPrimitiveWriter.WriteKeyword("\"");
+}
+
 void AbstractContentContext::TJ(const StringOrDoubleList& inStringsAndSpacing)
 {
 	StringOrDoubleList::const_iterator it = inStringsAndSpacing.begin();
@@ -662,10 +685,32 @@ void AbstractContentContext::TJ(const StringOrDoubleList& inStringsAndSpacing)
 
 	for(; it != inStringsAndSpacing.end();++it)
 	{
-		if(it->IsString)
-			mPrimitiveWriter.WriteLiteralString(it->StringValue);
-		else
+		if(it->IsDouble)
 			mPrimitiveWriter.WriteDouble(it->DoubleValue);
+		else
+			mPrimitiveWriter.WriteLiteralString(it->SomeValue);
+	}
+	
+	mPrimitiveWriter.EndArray(eTokenSeparatorSpace);
+
+	mPrimitiveWriter.WriteKeyword("TJ");
+}
+
+void AbstractContentContext::TJHex(const StringOrDoubleList& inStringsAndSpacing)
+{
+	StringOrDoubleList::const_iterator it = inStringsAndSpacing.begin();
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+	AssertProcsetAvailable(KProcsetText);
+
+	mPrimitiveWriter.StartArray();
+
+	for(; it != inStringsAndSpacing.end();++it)
+	{
+		if(it->IsDouble)
+			mPrimitiveWriter.WriteDouble(it->DoubleValue);
+		else
+			mPrimitiveWriter.WriteHexString(it->SomeValue);
 	}
 	
 	mPrimitiveWriter.EndArray(eTokenSeparatorSpace);
@@ -679,12 +724,20 @@ void AbstractContentContext::Tf(PDFUsedFont* inFontReference,double inFontSize)
 	mGraphicStack.GetCurrentState().mFontSize = inFontSize;
 }
 
-EStatusCode AbstractContentContext::Tj(const wstring& inUnicodeText)
+class ITextCommand
+{
+public:
+
+	virtual void WriteHexStringCommand(const string& inStringToWrite) = 0;
+	virtual void WriteLiteralStringCommand(const string& inStringToWrite) = 0;
+};
+
+EStatusCode AbstractContentContext::WriteTextCommandWithEncoding(const wstring& inUnicodeText,ITextCommand* inTextCommand)
 {
 	PDFUsedFont* currentFont = mGraphicStack.GetCurrentState().mFont;
 	if(!currentFont)
 	{
-		TRACE_LOG("AbstractContentContext::Tj, Cannot write text, no current font is defined");
+		TRACE_LOG("AbstractContentContext::WriteTextCommandWithEncoding, Cannot write text, no current font is defined");
 		return eSuccess;
 	}
 
@@ -702,7 +755,7 @@ EStatusCode AbstractContentContext::Tj(const wstring& inUnicodeText)
 	if(mGraphicStack.GetCurrentState().mPlacedFontName != fontName)
 		Tf(fontName,mGraphicStack.GetCurrentState().mFontSize);
 	
-	// Now write the string using Tj
+	// Now write the string using the text command
 	OutputStringBufferStream stringStream;
 	char formattingBuffer[5];
 	UShortList::iterator it = encodedCharachtersList.begin();
@@ -713,7 +766,7 @@ EStatusCode AbstractContentContext::Tj(const wstring& inUnicodeText)
 			SAFE_SPRINTF_2(formattingBuffer,5,"%02x%02x",((*it)>>8) & 0x00ff,(*it) & 0x00ff);
 			stringStream.Write((const Byte*)formattingBuffer,4);
 		}
-		TjHex(stringStream.ToString());
+		inTextCommand->WriteHexStringCommand(stringStream.ToString());
 	}
 	else
 	{
@@ -722,7 +775,154 @@ EStatusCode AbstractContentContext::Tj(const wstring& inUnicodeText)
 			formattingBuffer[0] = (*it) & 0x00ff;
 			stringStream.Write((const Byte*)formattingBuffer,1);
 		}
-		Tj(stringStream.ToString());		
+		inTextCommand->WriteLiteralStringCommand(stringStream.ToString());	
+	}
+	return encodingStatus;
+}
+
+class TjCommand : public ITextCommand
+{
+public:
+	TjCommand(AbstractContentContext* inContext) {mContext = inContext;}
+
+	virtual void WriteHexStringCommand(const string& inStringToWrite){mContext->TjHex(inStringToWrite);}
+	virtual void WriteLiteralStringCommand(const string& inStringToWrite){mContext->Tj(inStringToWrite);}
+private:
+	AbstractContentContext* mContext;
+};
+
+EStatusCode AbstractContentContext::Tj(const wstring& inUnicodeText)
+{
+	TjCommand command(this);
+	return WriteTextCommandWithEncoding(inUnicodeText,&command);
+}
+
+class QuoteCommand : public ITextCommand
+{
+public:
+	QuoteCommand(AbstractContentContext* inContext) {mContext = inContext;}
+
+	virtual void WriteHexStringCommand(const string& inStringToWrite){mContext->QuoteHex(inStringToWrite);}
+	virtual void WriteLiteralStringCommand(const string& inStringToWrite){mContext->Quote(inStringToWrite);}
+private:
+	AbstractContentContext* mContext;
+};
+
+EStatusCode AbstractContentContext::Quote(const wstring& inText)
+{
+	QuoteCommand command(this);
+	return WriteTextCommandWithEncoding(inText,&command);
+}
+
+class DoubleQuoteCommand : public ITextCommand
+{
+public:
+	DoubleQuoteCommand(AbstractContentContext* inContext,
+						double inWordSpacing,
+						double inCharacterSpacing) {mContext = inContext;mWordSpacing = inWordSpacing;mCharacterSpacing = inCharacterSpacing;}
+
+	virtual void WriteHexStringCommand(const string& inStringToWrite){mContext->DoubleQuoteHex(mWordSpacing,mCharacterSpacing,inStringToWrite);}
+	virtual void WriteLiteralStringCommand(const string& inStringToWrite){mContext->DoubleQuote(mWordSpacing,mCharacterSpacing,inStringToWrite);}
+private:
+	AbstractContentContext* mContext;
+	double mWordSpacing;
+	double mCharacterSpacing;
+};
+
+EStatusCode AbstractContentContext::DoubleQuote(double inWordSpacing, double inCharacterSpacing, const wstring& inText)
+{
+	DoubleQuoteCommand command(this,inWordSpacing,inCharacterSpacing);
+	return WriteTextCommandWithEncoding(inText,&command);
+}
+
+EStatusCode AbstractContentContext::TJ(const WStringOrDoubleList& inStringsAndSpacing)
+{
+	PDFUsedFont* currentFont = mGraphicStack.GetCurrentState().mFont;
+	if(!currentFont)
+	{
+		TRACE_LOG("AbstractContentContext::TJ, Cannot write text, no current font is defined");
+		return eSuccess;
+	}
+
+	// TJ is a bit different. i want to encode all strings in the array to the same font, so that at most a single
+	// Tf is used...and command may be written as is. for that we need to encode all strings at once...which requires
+	// a slightly different algorithm
+
+	// first, list all the strings, so that you can encode them
+	WStringList stringsList;
+	WStringOrDoubleList::const_iterator it = inStringsAndSpacing.begin();
+	
+	for(; it != inStringsAndSpacing.end(); ++it)
+		if(!it->IsDouble)
+			stringsList.push_back(it->SomeValue);
+
+	// now, encode all strings at once
+
+	ObjectIDType fontObjectID;
+	UShortListList encodedCharachtersListsList;
+	bool writeAsCID;	
+
+	EStatusCode encodingStatus = currentFont->EncodeStringsForShowing(stringsList,fontObjectID,encodedCharachtersListsList,writeAsCID);
+	
+	// status only returns if strings can be coded or not. so continue with writing regardless
+
+	// Write the font reference (only if required)
+	std::string fontName = GetResourcesDictionary()->AddFontMapping(fontObjectID);
+
+	if(mGraphicStack.GetCurrentState().mPlacedFontName != fontName)
+		Tf(fontName,mGraphicStack.GetCurrentState().mFontSize);
+	
+	// Now write the string using the text command
+	OutputStringBufferStream stringStream;
+	char formattingBuffer[5];
+	StringOrDoubleList stringOrDoubleList;
+	UShortListList::iterator itEncodedList = encodedCharachtersListsList.begin();
+	UShortList::iterator itEncoded;
+
+	if(writeAsCID)
+	{
+		for(it = inStringsAndSpacing.begin(); it != inStringsAndSpacing.end(); ++it)
+		{
+			if(it->IsDouble)
+			{
+				stringOrDoubleList.push_back(StringOrDouble(it->DoubleValue));
+			}
+			else
+			{
+				for(itEncoded = itEncodedList->begin();itEncoded!= itEncodedList->end();++itEncoded)
+				{
+					SAFE_SPRINTF_2(formattingBuffer,5,"%02x%02x",((*itEncoded)>>8) & 0x00ff,(*itEncoded) & 0x00ff);
+					stringStream.Write((const Byte*)formattingBuffer,4);
+				}
+				stringOrDoubleList.push_back(StringOrDouble(stringStream.ToString()));
+				stringStream.Reset();
+				++itEncodedList;
+			}
+		}
+		TJHex(stringOrDoubleList);
+	}
+	else
+	{
+
+		for(it = inStringsAndSpacing.begin(); it != inStringsAndSpacing.end(); ++it)
+		{
+			if(it->IsDouble)
+			{
+				stringOrDoubleList.push_back(StringOrDouble(it->DoubleValue));
+			}
+			else
+			{
+				for(itEncoded = itEncodedList->begin();itEncoded!= itEncodedList->end();++itEncoded)
+				{
+					formattingBuffer[0] = (*itEncoded) & 0x00ff;
+					stringStream.Write((const Byte*)formattingBuffer,1);
+				}
+				stringOrDoubleList.push_back(StringOrDouble(stringStream.ToString()));
+				stringStream.Reset();
+				++itEncodedList;
+			}
+		}
+		TJ(stringOrDoubleList);
 	}
 	return encodingStatus;
 }

@@ -12,6 +12,8 @@
 using namespace std;
 
 typedef list<unsigned short> UShortList;
+typedef list<UShortList> UShortListList;
+typedef list<wstring> WStringList;
 
 class IWrittenFont;
 class ObjectsContext;
@@ -19,7 +21,7 @@ class ObjectsContext;
 class PDFUsedFont
 {
 public:
-	PDFUsedFont(FT_Face inInputFace,ObjectsContext* inObjectsContext);
+	PDFUsedFont(FT_Face inInputFace,const wstring& inAdditionalMetricsFontFilePath,ObjectsContext* inObjectsContext);
 	virtual ~PDFUsedFont(void);
 
 	bool IsValid();
@@ -32,6 +34,12 @@ public:
 	EStatusCode EncodeStringForShowing(const wstring& inText,
 										ObjectIDType &outFontObjectToUse,
 										UShortList& outCharactersToUse,
+										bool& outTreatCharactersAsCID);
+
+	// encode all strings. make sure that they will use the same font.
+	EStatusCode EncodeStringsForShowing(const WStringList& inText,
+										ObjectIDType &outFontObjectToUse,
+										UShortListList& outCharactersToUse,
 										bool& outTreatCharactersAsCID);
 
 	EStatusCode WriteFontDefinition();

@@ -8,13 +8,11 @@ class FreeTypeFaceWrapper;
 struct WrittenFontRepresentation;
 class ObjectsContext;
 
-
-class CFFANSIFontWriter : public IANSIFontWriterHelper, IFontDescriptorCharsetWriter
+class TrueTypeANSIFontWriter : public IANSIFontWriterHelper, IFontDescriptorCharsetWriter
 {
 public:
-	CFFANSIFontWriter(void);
-	~CFFANSIFontWriter(void);
-
+	TrueTypeANSIFontWriter(void);
+	~TrueTypeANSIFontWriter(void);
 
 	EStatusCode WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 							WrittenFontRepresentation* inFontOccurrence,

@@ -203,12 +203,6 @@ FT_UShort FreeTypeOpenTypeWrapper::GetFontWeightFromPCLTValue(FT_Char inWeightVa
 	return result;
 }
 
-template <typename T>
-static bool betweenIncluding(T inTest,T inLowerBound,T inHigherBound)
-{
-	return inTest>= inLowerBound && inTest<=inHigherBound;
-}
-
 bool FreeTypeOpenTypeWrapper::HasSerifs()
 {
 	// assume that it does, unless PCLT table says otherwise
@@ -218,7 +212,13 @@ bool FreeTypeOpenTypeWrapper::HasSerifs()
 		true;
 }
 
+bool FreeTypeOpenTypeWrapper::IsScript()
+{
+	return false;
+}
+
 bool FreeTypeOpenTypeWrapper::IsForceBold()
 {
 	return false;
 }
+

@@ -14,4 +14,8 @@ private:
 						 const UIntList& inGlyphsList,
 						 UShortList& outEncodedCharacters);
 
+	virtual bool AddToANSIRepresentation(const WStringList& inText,
+							const UIntListList& inGlyphsList,
+							UShortListList& outEncodedCharacters);
+
 };

@@ -21,6 +21,7 @@ public:
 	virtual EFontStretch GetFontStretch();
 	virtual FT_UShort GetFontWeight();
 	virtual bool HasSerifs();
+	virtual bool IsScript();
 	virtual	bool IsForceBold();
 
 

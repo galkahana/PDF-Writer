@@ -25,11 +25,15 @@ private:
 							 const UIntList& inGlyphsList,
 							 UShortList& outEncodedCharacters);
 
+	virtual bool AddToANSIRepresentation(const WStringList& inText,
+							const UIntListList& inGlyphsList,
+							UShortListList& outEncodedCharacters);
 
 	bool HasEnoughSpaceForGlyphs(const UIntList& inGlyphsList);
 	unsigned short EncodeGlyph(unsigned int inGlyph,wchar_t inCharacter);
 	void RemoveFromFreeList(unsigned char inAllocatedPosition);
 	unsigned char AllocateFromFreeList(unsigned int inGlyph);
+	bool HasEnoughSpaceForGlyphs(const UIntListList& inGlyphsList);
 
 	unsigned char mAvailablePositionsCount;
 	UCharAndUCharList mFreeList;

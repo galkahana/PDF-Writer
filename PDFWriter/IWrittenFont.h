@@ -10,6 +10,9 @@ using namespace std;
 
 typedef list<unsigned int> UIntList;
 typedef list<unsigned short> UShortList;
+typedef list<UIntList> UIntListList;
+typedef list<UShortList> UShortListList;
+typedef list<wstring> WStringList;
 
 class FreeTypeFaceWrapper;
 
@@ -30,6 +33,15 @@ public:
 					  bool& outEncodingIsMultiByte,
 					  ObjectIDType &outFontObjectID) = 0;
 
+	virtual void AppendGlyphs(const UIntListList& inGlyphsList,
+					  const WStringList& inText,
+					  UShortListList& outEncodedCharacters,
+					  bool& outEncodingIsMultiByte,
+					  ObjectIDType &outFontObjectID) = 0;
+
+	/*
+		Write a font definition using the glyphs appended.
+	*/
 	virtual EStatusCode WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo) = 0;
 
 };

@@ -1,5 +1,9 @@
 #include "WrittenFontTrueType.h"
 #include "WinAnsiEncoding.h"
+#include "TrueTypeANSIFontWriter.h"
+#include "Trace.h"
+#include "TrueTypeDescendentFontWriter.h"
+#include "CIDFontWriter.h"
 
 WrittenFontTrueType::WrittenFontTrueType(ObjectsContext* inObjectsContext):AbstractWrittenFont(inObjectsContext)
 {
@@ -61,6 +65,95 @@ bool WrittenFontTrueType::AddToANSIRepresentation(	const wstring& inText,
 
 EStatusCode WrittenFontTrueType::WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo)
 {
-	// TODO: Writer font definition
-	return eFailure;
+	EStatusCode status = eSuccess;
+	do
+	{
+		if(mANSIRepresentation)
+		{
+			TrueTypeANSIFontWriter fontWriter;
+
+			status = fontWriter.WriteFont(inFontInfo,mANSIRepresentation,mObjectsContext);
+			if(status != eSuccess)
+			{
+				TRACE_LOG("WrittenFontTrueType::WriteFontDefinition, Failed to write Ansi font definition");
+				break;
+
+			}
+		}
+
+		if(mCIDRepresentation)
+		{
+			CIDFontWriter fontWriter;
+			TrueTypeDescendentFontWriter descendentFontWriter;
+
+			status = fontWriter.WriteFont(inFontInfo,mCIDRepresentation,mObjectsContext,&descendentFontWriter);
+			if(status != eSuccess)
+			{
+				TRACE_LOG("WrittenFontTrueType::WriteFontDefinition, Failed to write CID font definition");
+				break;
+			}
+		}
+
+	} while(false);
+
+	return status;
+}
+
+bool WrittenFontTrueType::AddToANSIRepresentation(	const WStringList& inText,
+													const UIntListList& inGlyphsList,
+													UShortListList& outEncodedCharacters)
+{
+	UShortListList candidatesList;
+	UShortList candidates;
+	BoolAndByte encodingResult(true,0);
+	WinAnsiEncoding winAnsiEncoding;
+	WStringList::const_iterator itList = inText.begin(); 
+	wstring::const_iterator it; 
+
+	for(; itList != inText.end() && encodingResult.first; ++itList)
+	{
+		it = itList->begin();
+		for(; it != itList->end() && encodingResult.first; ++it)
+		{
+			encodingResult = winAnsiEncoding.Encode(*it);
+			if(encodingResult.first)
+				candidates.push_back(encodingResult.second);
+		}
+		if(encodingResult.first)
+		{
+			candidatesList.push_back(candidates);
+			candidates.clear();
+		}
+	}
+
+	if(encodingResult.first)
+	{
+		// for the first time, add also 0,0 mapping
+		if(mANSIRepresentation->mGlyphIDToEncodedChar.size() == 0)
+			mANSIRepresentation->mGlyphIDToEncodedChar.insert(UIntToGlyphEncodingInfoMap::value_type(0,GlyphEncodingInfo(0,0)));
+
+
+		UIntListList::const_iterator itGlyphsList = inGlyphsList.begin();
+		UShortListList::iterator itEncodedList = candidatesList.begin();
+		WStringList::const_iterator itTextList = inText.begin();
+		UIntList::const_iterator itGlyphs;
+		UShortList::iterator itEncoded;
+		wstring::const_iterator itText;
+
+		for(; itGlyphsList != inGlyphsList.end(); ++ itGlyphsList,++itEncodedList,++itTextList)
+		{
+			itGlyphs = itGlyphsList->begin();
+			itEncoded = itEncodedList->begin();
+			itText = itTextList->begin();
+			for(; itGlyphs != itGlyphsList->end(); ++ itGlyphs,++itEncoded,++itText)
+			{
+				if(mANSIRepresentation->mGlyphIDToEncodedChar.find(*itGlyphs) == mANSIRepresentation->mGlyphIDToEncodedChar.end())
+					mANSIRepresentation->mGlyphIDToEncodedChar.insert(UIntToGlyphEncodingInfoMap::value_type(*itGlyphs,GlyphEncodingInfo(*itEncoded,*itText)));
+			}
+		}
+
+		outEncodedCharacters = candidatesList;
+	}
+
+	return encodingResult.first;	
 }

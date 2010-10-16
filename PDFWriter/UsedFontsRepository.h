@@ -22,6 +22,8 @@ public:
 	void SetObjectsContext(ObjectsContext* inObjectsContext);
 
 	PDFUsedFont* GetFontForFile(const wstring& inFontFilePath);
+	// second overload is for type 1, when an additional metrics file is available
+	PDFUsedFont* GetFontForFile(const wstring& inFontFilePath,const wstring& inOptionalMetricsFile);
 
 	EStatusCode WriteUsedFontsDefinitions();
 

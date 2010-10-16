@@ -1,6 +1,8 @@
 #include "WrittenFontCFF.h"
 #include "Trace.h"
 #include "CFFANSIFontWriter.h"
+#include "CIDFontWriter.h"
+#include "CFFDescendentFontWriter.h"
 
 WrittenFontCFF::WrittenFontCFF(ObjectsContext* inObjectsContext):AbstractWrittenFont(inObjectsContext)
 {
@@ -135,18 +137,63 @@ EStatusCode WrittenFontCFF::WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo)
 
 		if(mCIDRepresentation)
 		{
-			// TODO: writer CFFCID writer
-			/*CFFCIDFontWriter fontWriter;
+			CIDFontWriter fontWriter;
+			CFFDescendentFontWriter descendentFontWriter;
 
-			status = fontWriter.WriteFont(inFontInfo,mCIDRepresentation,mObjectsContext);
+			status = fontWriter.WriteFont(inFontInfo,mCIDRepresentation,mObjectsContext,&descendentFontWriter);
 			if(status != eSuccess)
 			{
 				TRACE_LOG("WrittenFontCFF::WriteFontDefinition, Failed to write CID font definition");
 				break;
-			}*/
+			}
 		}
 
 	} while(false);
 
 	return status;
+}
+
+bool WrittenFontCFF::AddToANSIRepresentation(	const WStringList& inText,
+												const UIntListList& inGlyphsList,
+												UShortListList& outEncodedCharacters)
+{
+	if(HasEnoughSpaceForGlyphs(inGlyphsList))
+	{
+		UIntListList::const_iterator itList = inGlyphsList.begin();
+		WStringList::const_iterator itTextList = inText.begin();
+		UIntList::const_iterator it;
+		wstring::const_iterator itText;
+		UShortList encodedCharacters;
+
+		for(; itList != inGlyphsList.end(); ++itList,++itTextList)
+		{
+			it = itList->begin();
+			itText = itTextList->begin();
+			for(; it != itList->end(); ++it,itText)
+				encodedCharacters.push_back(EncodeGlyph(*it,*itText));
+			outEncodedCharacters.push_back(encodedCharacters);
+			encodedCharacters.clear();
+
+		}
+		return true;
+	}
+	else
+		return false;
+}
+
+bool WrittenFontCFF::HasEnoughSpaceForGlyphs(const UIntListList& inGlyphsList)
+{
+	UIntListList::const_iterator itList = inGlyphsList.begin();
+	UIntList::const_iterator it;
+	int glyphsToAddCount = 0;
+
+	for(; itList != inGlyphsList.end(); ++itList)
+	{
+		it = itList->begin();
+		for(; it != itList->end(); ++it)
+			if(mANSIRepresentation->mGlyphIDToEncodedChar.find(*it) == mANSIRepresentation->mGlyphIDToEncodedChar.end())
+				++glyphsToAddCount;
+	}
+
+	return glyphsToAddCount <= mAvailablePositionsCount;
 }

@@ -22,7 +22,7 @@ void UsedFontsRepository::SetObjectsContext(ObjectsContext* inObjectsContext)
 	mObjectsContext = inObjectsContext;
 }
 
-PDFUsedFont* UsedFontsRepository::GetFontForFile(const wstring& inFontFilePath)
+PDFUsedFont* UsedFontsRepository::GetFontForFile(const wstring& inFontFilePath,const wstring& inOptionalMetricsFile)
 {
 	if(!mObjectsContext)
 	{
@@ -37,7 +37,11 @@ PDFUsedFont* UsedFontsRepository::GetFontForFile(const wstring& inFontFilePath)
 			mInputFontsInformation = new FreeTypeWrapper();
 
 
-		FT_Face face = mInputFontsInformation->NewFace(inFontFilePath);
+		FT_Face face;
+		if(inOptionalMetricsFile.size() > 0)
+			face = mInputFontsInformation->NewFace(inFontFilePath,inOptionalMetricsFile);
+		else
+			face = mInputFontsInformation->NewFace(inFontFilePath);
 		if(!face)
 		{
 			TRACE_LOG1("UsedFontsRepository::GetFontForFile, Failed to load font from %s",inFontFilePath);
@@ -45,7 +49,8 @@ PDFUsedFont* UsedFontsRepository::GetFontForFile(const wstring& inFontFilePath)
 		}
 		else
 		{
-			PDFUsedFont* usedFont = new PDFUsedFont(face,mObjectsContext);
+
+			PDFUsedFont* usedFont = new PDFUsedFont(face,inOptionalMetricsFile,mObjectsContext);
 			if(!usedFont->IsValid())
 			{
 				TRACE_LOG1("UsedFontsRepository::GetFontForFile, Unreckognized font format for font in %s",inFontFilePath);
@@ -68,4 +73,9 @@ EStatusCode UsedFontsRepository::WriteUsedFontsDefinitions()
 		status = it->second->WriteFontDefinition();
 
 	return status;	
+}
+
+PDFUsedFont* UsedFontsRepository::GetFontForFile(const wstring& inFontFilePath)
+{
+	return GetFontForFile(inFontFilePath,L"");
 }
