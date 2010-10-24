@@ -27,3 +27,15 @@ EStatusCode OutputStreamTraits::CopyToOutputStream(IByteReader* inInputStream)
 	delete[] buffer;
 	return status;
 }
+
+EStatusCode OutputStreamTraits::CopyToOutputStream(IByteReader* inInputStream,LongBufferSizeType inLength)
+{
+	Byte* buffer = new Byte[inLength];
+	LongBufferSizeType readBytes,writeBytes;
+
+	readBytes = inInputStream->Read(buffer,inLength);
+	writeBytes = mOutputStream->Write(buffer,readBytes);
+	EStatusCode status = (readBytes == writeBytes) ? eSuccess:eFailure;
+	delete[] buffer;
+	return status;
+}

@@ -122,7 +122,7 @@ EStatusCode WrittenFontCFF::WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo)
 	EStatusCode status = eSuccess;
 	do
 	{
-		if(mANSIRepresentation)
+		if(mANSIRepresentation && mANSIRepresentation->mWrittenObjectID != 0)
 		{
 			CFFANSIFontWriter fontWriter;
 
@@ -135,7 +135,7 @@ EStatusCode WrittenFontCFF::WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo)
 			}
 		}
 
-		if(mCIDRepresentation)
+		if(mCIDRepresentation && mCIDRepresentation->mWrittenObjectID != 0)
 		{
 			CIDFontWriter fontWriter;
 			CFFDescendentFontWriter descendentFontWriter;

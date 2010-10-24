@@ -442,6 +442,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\MyStringBuf.h"
+					>
+				</File>
+				<File
 					RelativePath=".\SafeBufferMacrosDefs.h"
 					>
 				</File>
@@ -891,7 +895,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\IFontDescriptorCharsetWriter.h"
+				RelativePath=".\IFontDescriptorHelper.h"
 				>
 			</File>
 			<File
@@ -999,6 +1003,42 @@
 				</File>
 				<File
 					RelativePath=".\PFMFileReader.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="TrueType"
+				>
+				<File
+					RelativePath=".\TrueTypeEmbeddedFontWriter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TrueTypeEmbeddedFontWriter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TrueTypeFileInput.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TrueTypeFileInput.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TrueTypePrimitiveReader.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TrueTypePrimitiveReader.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TrueTypePrimitiveWriter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TrueTypePrimitiveWriter.h"
 					>
 				</File>
 			</Filter>

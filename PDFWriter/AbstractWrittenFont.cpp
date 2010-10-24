@@ -118,7 +118,7 @@ void AbstractWrittenFont::AddToCIDRepresentation(const std::wstring& inText,cons
 		itEncoding = mCIDRepresentation->mGlyphIDToEncodedChar.find(*it);
 		if(itEncoding == mCIDRepresentation->mGlyphIDToEncodedChar.end())
 		{
-			mCIDRepresentation->mGlyphIDToEncodedChar.insert(UIntToGlyphEncodingInfoMap::value_type(*it,GlyphEncodingInfo((unsigned short)*it,*itText)));
+			itEncoding = mCIDRepresentation->mGlyphIDToEncodedChar.insert(UIntToGlyphEncodingInfoMap::value_type(*it,GlyphEncodingInfo((unsigned short)*it,*itText))).first;
 			if(*it > 0xffff)
 			{
 				// let's see if this is at all possible

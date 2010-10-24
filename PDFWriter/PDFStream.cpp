@@ -1,7 +1,4 @@
 #include "PDFStream.h"
-#include "InputStringBufferStream.h"
-#include "OutputStringBufferStream.h"
-#include "OutputFlateEncodeStream.h"
 #include "IObjectsContextExtender.h"
 
 PDFStream::PDFStream(bool inCompressStream,

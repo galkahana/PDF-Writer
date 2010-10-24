@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IByteWriterWithPosition.h"
-#include <sstream>
+#include "MyStringBuf.h"
 #include <string>
 
 using namespace std;
@@ -13,7 +13,9 @@ public:
 	~OutputStringBufferStream(void);
 
 	// override for having the stream control an external buffer. NOT taking ownership
-	OutputStringBufferStream(stringbuf* inControlledBuffer);
+	OutputStringBufferStream(MyStringBuf* inControlledBuffer);
+
+	void Assign(MyStringBuf* inControlledBuffer); // can assign a new one after creation
 
 
 	// IByteWriter implementation
@@ -23,11 +25,12 @@ public:
 	virtual IOBasicTypes::LongFilePositionType GetCurrentPosition();
 
 	string ToString() const;
-
 	void Reset();
+	void SetPosition(IOBasicTypes::LongFilePositionType inOffsetFromStart);
+
 
 private:
-	stringbuf* mBuffer;
+	MyStringBuf* mBuffer;
 	bool mOwnsBuffer;
 
 };

@@ -24,8 +24,8 @@ typedef list<wstring> WStringList;
 class FreeTypeFaceWrapper
 {
 public:
-	// first overload - all but type ones
-	FreeTypeFaceWrapper(FT_Face inFace);
+	// first overload - all but type ones. the file path is just given for storage (later queries may want it)
+	FreeTypeFaceWrapper(FT_Face inFace,const wstring& inFontFilePath);
 
 	// second overload - type 1, to allow passing pfm file path. do not bother
 	// if you don't have a PFM file. no i don't care about the godamn AFM file. just the PFM.
@@ -33,7 +33,7 @@ public:
 	// you see. i need to know if the font is serif, script 'n such. AFM - even if there
 	// does not have that kind of info. so @#$@#$ off.
 	// for any case, i'll check the file extension, and only do something about it if it has a pfm extension
-	FreeTypeFaceWrapper(FT_Face inFace,const wstring& inPFMFilePath);
+	FreeTypeFaceWrapper(FT_Face inFace,const wstring& inFontFilePath,const wstring& inPFMFilePath);
 	~FreeTypeFaceWrapper(void);
 
 	FT_Error DoneFace();
@@ -47,9 +47,9 @@ public:
 	EStatusCode GetGlyphsForUnicodeText(const WStringList& inText,UIntListList& outGlyphs);
 
 	double GetItalicAngle();
-	BoolAndFTShort GetCapHeight();
-	BoolAndFTShort GetxHeight();
-	FT_UShort GetStemV();
+	BoolAndFTShort GetCapHeight(); // aligned to pdf metrics
+	BoolAndFTShort GetxHeight(); // aligned to pdf metrics
+	FT_UShort GetStemV(); // aligned to pdf metrics
 	EFontStretch GetFontStretch();
 	FT_UShort GetFontWeight();
 	// these would be flags for the font as a whole. if subsetting, match to the character set
@@ -69,11 +69,26 @@ public:
 	// will be used externally to determine if font is symbolic or not
 	bool IsCharachterCodeAdobeStandard(FT_ULong inCharacterCode);
 
+	const wstring& GetFontFilePath();
+
+
+	// use this method to align measurements from (remember the dreaded point per EM!!!).
+	// all measurements in this class are already aligned...so no need to align them
+	FT_Short GetInPDFMeasurements(FT_Short inFontMeasurement);
+	FT_UShort GetInPDFMeasurements(FT_UShort inFontMeasurement);
+	FT_Pos GetInPDFMeasurements(FT_Pos inFontMeasurement);
+
 private:
 
 	FT_Face mFace;
 	IFreeTypeFaceExtender* mFormatParticularWrapper;
 	bool mHaslowercase;
+	wstring mFontFilePath;
+
+	BoolAndFTShort GetCapHeightInternal(); 
+	BoolAndFTShort GetxHeightInternal(); 
+	FT_UShort GetStemVInternal(); 
+
 
 	wstring GetExtension(const wstring& inFilePath);
 	void SetupFormatSpecificExtender(const wstring& inPFMFilePath);
@@ -85,3 +100,4 @@ private:
 	bool IsSymbolic();
 	bool IsDefiningCharsNotInAdobeStandardLatin();
 };
+

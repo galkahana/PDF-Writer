@@ -2,7 +2,7 @@
 #include "EStatusCode.h"
 #include "WrittenFontRepresentation.h"
 #include "ObjectsBasicTypes.h"
-#include "IFontDescriptorCharsetWriter.h"
+#include "IFontDescriptorHelper.h"
 #include "IDescendentFontWriter.h"
 
 #include <ft2build.h>
@@ -19,7 +19,7 @@ using namespace std;
 
 typedef list<FT_Pos> FTPosList;
 
-class DescendentFontWriter : public IFontDescriptorCharsetWriter
+class DescendentFontWriter : public IFontDescriptorHelper
 {
 public:
 	DescendentFontWriter(void);
@@ -33,16 +33,19 @@ public:
 									ObjectsContext* inObjectsContext,
 									IDescendentFontWriter* inDescendentFontWriterHelper);
 
-	// IFontDescriptorCharsetWriter implementation [would probably evolve at some point to IDescriptorWriterHelper...
+	// IFontDescriptorHelper implementation [would probably evolve at some point to IDescriptorWriterHelper...
 	virtual void WriteCharSet(	DictionaryContext* inDescriptorContext,
 								ObjectsContext* inObjectsContext,
 								FreeTypeFaceWrapper* inFontInfo,
 								const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs);
+	virtual void WriteFontFileReference(DictionaryContext* inDescriptorContext,
+										ObjectsContext* inObjectsContext);
 private:
 
 	FreeTypeFaceWrapper* mFontInfo;
 	ObjectsContext* mObjectsContext;
 	ObjectIDType mCIDSetObjectID;
+	IDescendentFontWriter* mWriterHelper;
 
 
 	void WriteWidths(	const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,

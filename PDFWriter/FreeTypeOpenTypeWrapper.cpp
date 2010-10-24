@@ -121,7 +121,7 @@ BoolAndFTUShort FreeTypeOpenTypeWrapper::StemVFromLowerLWidth()
 		TRACE_LOG("FreeTypeOpenTypeWrapper::StemVFromLowerLWidth, unable to load glyph for lower l");
 		return BoolAndFTUShort(false,0);
 	}
-	return BoolAndFTUShort(true,(FT_UShort)mFace->glyph->metrics.width);
+	return BoolAndFTUShort(true,(FT_UShort)mFace->glyph->metrics.horiAdvance);
 
 	// hmm. i'm getting large numbers with this...maybe this i should prefer the default?
 }

@@ -2,8 +2,9 @@
 #include "IWrittenFont.h"
 
 PDFUsedFont::PDFUsedFont(FT_Face inInputFace,
+						 const wstring& inFontFilePath,
 						 const wstring& inAdditionalMetricsFontFilePath,
-						 ObjectsContext* inObjectsContext):mFaceWrapper(inInputFace,inAdditionalMetricsFontFilePath)
+						 ObjectsContext* inObjectsContext):mFaceWrapper(inInputFace,inFontFilePath,inAdditionalMetricsFontFilePath)
 {
 	mObjectsContext = inObjectsContext;
 	mWrittenFont = NULL;

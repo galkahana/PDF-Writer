@@ -127,3 +127,10 @@ IByteReader* InputBufferedStream::GetSourceStream()
 {
 	return mSourceStream;
 }
+
+LongFilePositionType InputBufferedStream::GetCurrentPosition()
+{
+	// when reading the current position is the current stream position minus how much is left
+	// to read from the buffer
+	return mSourceStream->GetCurrentPosition() - (mLastAvailableIndex - mCurrentBufferIndex);
+}

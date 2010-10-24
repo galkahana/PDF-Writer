@@ -21,7 +21,10 @@ class ObjectsContext;
 class PDFUsedFont
 {
 public:
-	PDFUsedFont(FT_Face inInputFace,const wstring& inAdditionalMetricsFontFilePath,ObjectsContext* inObjectsContext);
+	PDFUsedFont(FT_Face inInputFace,
+				const wstring& inFontFilePath,
+				const wstring& inAdditionalMetricsFontFilePath,
+				ObjectsContext* inObjectsContext);
 	virtual ~PDFUsedFont(void);
 
 	bool IsValid();

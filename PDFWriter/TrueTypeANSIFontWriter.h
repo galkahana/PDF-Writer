@@ -2,13 +2,14 @@
 
 #include "EStatusCode.h"
 #include "IANSIFontWriterHelper.h"
-#include "IFontDescriptorCharsetWriter.h"
+#include "IFontDescriptorHelper.h"
+#include "ObjectsBasicTypes.h"
 
 class FreeTypeFaceWrapper;
 struct WrittenFontRepresentation;
 class ObjectsContext;
 
-class TrueTypeANSIFontWriter : public IANSIFontWriterHelper, IFontDescriptorCharsetWriter
+class TrueTypeANSIFontWriter : public IANSIFontWriterHelper, IFontDescriptorHelper
 {
 public:
 	TrueTypeANSIFontWriter(void);
@@ -20,11 +21,17 @@ public:
 
 	// IANSIFontWriterHelper implementation
 	virtual void WriteSubTypeValue(DictionaryContext* inDictionary);
-	virtual IFontDescriptorCharsetWriter* GetCharsetWriter();
+	virtual IFontDescriptorHelper* GetCharsetWriter();
 
-	// IFontDescriptorCharsetWriter implementation
+	// IFontDescriptorHelper implementation
 	virtual void WriteCharSet(	DictionaryContext* inDescriptorContext,
 								ObjectsContext* inObjectsContext,
 								FreeTypeFaceWrapper* inFontInfo,
 								const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs);
+	virtual void WriteFontFileReference(DictionaryContext* inDescriptorContext,
+										ObjectsContext* inObjectsContext);
+
+private:
+
+	ObjectIDType mEmbeddedFontFileObjectID;
 };

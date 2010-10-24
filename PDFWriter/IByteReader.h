@@ -32,4 +32,10 @@ public:
 		Set read position.always set from start
 	*/
 	virtual void SetPosition(LongFilePositionType inOffsetFromStart) = 0;
+
+	/*
+		Get the current read position
+	*/
+	virtual LongFilePositionType GetCurrentPosition() = 0;
+
 };

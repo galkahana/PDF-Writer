@@ -10,15 +10,17 @@
 
 #include FT_XFREE86_H 
 
-FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace)
+FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const wstring& inFontFilePath)
 {
 	mFace = inFace;
+	mFontFilePath = inFontFilePath;
 	SetupFormatSpecificExtender(L"");	
 }
 
-FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const wstring& inPFMFilePath)
+FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const wstring& inFontFilePath,const wstring& inPFMFilePath)
 {
 	mFace = inFace;
+	mFontFilePath = inFontFilePath;
 	wstring fileExtension = GetExtension(inPFMFilePath);
 	if(fileExtension == L"PFM" || fileExtension ==  L"pfm") // just don't bother if it's not PFM
 		SetupFormatSpecificExtender(inPFMFilePath);
@@ -100,7 +102,7 @@ double FreeTypeFaceWrapper::GetItalicAngle()
 	return mFormatParticularWrapper ? mFormatParticularWrapper->GetItalicAngle():0;
 }
 
-BoolAndFTShort FreeTypeFaceWrapper::GetCapHeight()
+BoolAndFTShort FreeTypeFaceWrapper::GetCapHeightInternal()
 {
 	if(mFormatParticularWrapper)
 	{
@@ -115,13 +117,21 @@ BoolAndFTShort FreeTypeFaceWrapper::GetCapHeight()
 		return CapHeightFromHHeight();
 }
 
+BoolAndFTShort FreeTypeFaceWrapper::GetCapHeight()
+{
+	BoolAndFTShort result = GetCapHeightInternal();
+	if(result.first)
+		result.second = GetInPDFMeasurements(result.second);
+	return result;
+}
+
 BoolAndFTShort FreeTypeFaceWrapper::CapHeightFromHHeight()
 {
 	// calculate based on Y bearing of the capital H
 	return GetYBearingForUnicodeChar(0x48);
 }
 
-BoolAndFTShort FreeTypeFaceWrapper::GetxHeight()
+BoolAndFTShort FreeTypeFaceWrapper::GetxHeightInternal()
 {
 	if(mFormatParticularWrapper)
 	{
@@ -134,6 +144,14 @@ BoolAndFTShort FreeTypeFaceWrapper::GetxHeight()
 	}
 	else
 		return XHeightFromLowerXHeight();
+}
+
+BoolAndFTShort FreeTypeFaceWrapper::GetxHeight()
+{
+	BoolAndFTShort result = GetxHeightInternal();
+	if(result.first)
+		result.second = GetInPDFMeasurements(result.second);
+	return result;
 }
 
 BoolAndFTShort FreeTypeFaceWrapper::XHeightFromLowerXHeight()
@@ -160,7 +178,7 @@ BoolAndFTShort FreeTypeFaceWrapper::GetYBearingForUnicodeChar(unsigned short uni
 
 FT_UShort FreeTypeFaceWrapper::GetStemV()
 {
-	return mFormatParticularWrapper ? mFormatParticularWrapper->GetStemV():0;
+	return mFormatParticularWrapper ? GetInPDFMeasurements(mFormatParticularWrapper->GetStemV()):0;
 }
 
 EFontStretch FreeTypeFaceWrapper::GetFontStretch()
@@ -493,4 +511,48 @@ IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObj
 	}
 	else
 		return NULL;	
+}
+
+const wstring& FreeTypeFaceWrapper::GetFontFilePath()
+{
+	return mFontFilePath;
+}
+
+FT_Short FreeTypeFaceWrapper::GetInPDFMeasurements(FT_Short inFontMeasurement)
+{
+	if(mFace)
+	{
+		if(1000 == mFace->units_per_EM)
+			return inFontMeasurement;
+		else
+			return FT_Short((double)inFontMeasurement * 1000.0 / mFace->units_per_EM);
+	}
+	else
+		return 0;
+}
+
+FT_UShort FreeTypeFaceWrapper::GetInPDFMeasurements(FT_UShort inFontMeasurement)
+{
+	if(mFace)
+	{
+		if(1000 == mFace->units_per_EM)
+			return inFontMeasurement;
+		else
+			return FT_UShort((double)inFontMeasurement * 1000.0 / mFace->units_per_EM);
+	}
+	else
+		return 0;
+}
+
+FT_Pos FreeTypeFaceWrapper::GetInPDFMeasurements(FT_Pos inFontMeasurement)
+{
+	if(mFace)
+	{
+		if(1000 == mFace->units_per_EM)
+			return inFontMeasurement;
+		else
+			return FT_Pos((double)inFontMeasurement * 1000.0 / mFace->units_per_EM);
+	}
+	else
+		return 0;
 }

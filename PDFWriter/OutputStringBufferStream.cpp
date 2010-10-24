@@ -4,7 +4,7 @@ using namespace IOBasicTypes;
 
 OutputStringBufferStream::OutputStringBufferStream(void)
 {
-	mBuffer = new stringbuf();
+	mBuffer = new MyStringBuf();
 	mOwnsBuffer = true;
 }
 
@@ -14,11 +14,29 @@ OutputStringBufferStream::~OutputStringBufferStream(void)
 		delete mBuffer;
 }
 
-OutputStringBufferStream::OutputStringBufferStream(stringbuf* inControlledBuffer)
+OutputStringBufferStream::OutputStringBufferStream(MyStringBuf* inControlledBuffer)
 {
 	mBuffer = inControlledBuffer;
 	mOwnsBuffer = false;
 }
+
+void OutputStringBufferStream::Assign(MyStringBuf* inControlledBuffer)
+{
+	if(inControlledBuffer)
+	{
+		if(mOwnsBuffer)
+			delete mBuffer;
+		mBuffer = inControlledBuffer;
+		mOwnsBuffer = false;
+	}
+	else // passing null will cause the stream to get to a state of self writing (so as to never leave this stream in a vulnarable position)s
+	{
+		mBuffer = new MyStringBuf();
+		mOwnsBuffer = true;
+	}
+
+}
+
 
 LongBufferSizeType OutputStringBufferStream::Write(const Byte* inBuffer,LongBufferSizeType inSize)
 {
@@ -27,7 +45,7 @@ LongBufferSizeType OutputStringBufferStream::Write(const Byte* inBuffer,LongBuff
 
 LongFilePositionType OutputStringBufferStream::GetCurrentPosition()
 {
-	return mBuffer->in_avail();
+	return mBuffer->GetCurrentWritePosition();
 }
 
 string OutputStringBufferStream::ToString() const
@@ -40,4 +58,9 @@ static const string scEmpty;
 void OutputStringBufferStream::Reset()
 {
 	mBuffer->str(scEmpty);
+}
+
+void OutputStringBufferStream::SetPosition(LongFilePositionType inOffsetFromStart)
+{
+	mBuffer->pubseekoff((long)inOffsetFromStart,ios_base::beg);
 }

@@ -21,13 +21,13 @@ EStatusCode SimpleTextUsage::Run()
 
 	do
 	{
-		status = RunCFFTest();
+		/*status = RunCFFTest();
 		if(status != eSuccess)
 		{
 			wcout<<"Failed CFF Test\n";
 			status = eFailure;
 			break;
-		}
+		}*/
 
 		status = RunTrueTypeTest();
 		if(status != eSuccess)
@@ -37,13 +37,13 @@ EStatusCode SimpleTextUsage::Run()
 			break;
 		}
 
-		status = RunType1Test();
+		/*status = RunType1Test();
 		if(status != eSuccess)
 		{
 			wcout<<"Failed Type 1 Test\n";
 			status = eFailure;
 			break;
-		}
+		}*/
 
 	}while(false);
 

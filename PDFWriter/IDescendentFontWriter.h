@@ -32,4 +32,8 @@ public:
 	// free writing of additional keys
 	virtual void WriteAdditionalKeys(DictionaryContext* inDescendentFontContext) = 0;
 
+	// write reference to font file in the descriptor of the descendend font (expecting that later there'll also be font file writing)
+	virtual void WriteFontFileReference(DictionaryContext* inDescriptorContext,
+										ObjectsContext* inObjectsContext) = 0;
+
 };

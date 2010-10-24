@@ -68,7 +68,7 @@ EStatusCode WrittenFontTrueType::WriteFontDefinition(FreeTypeFaceWrapper& inFont
 	EStatusCode status = eSuccess;
 	do
 	{
-		if(mANSIRepresentation)
+		if(mANSIRepresentation && mANSIRepresentation->mWrittenObjectID != 0)
 		{
 			TrueTypeANSIFontWriter fontWriter;
 
@@ -81,7 +81,7 @@ EStatusCode WrittenFontTrueType::WriteFontDefinition(FreeTypeFaceWrapper& inFont
 			}
 		}
 
-		if(mCIDRepresentation)
+		if(mCIDRepresentation && mCIDRepresentation->mWrittenObjectID != 0)
 		{
 			CIDFontWriter fontWriter;
 			TrueTypeDescendentFontWriter descendentFontWriter;

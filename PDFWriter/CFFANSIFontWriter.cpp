@@ -26,6 +26,9 @@ EStatusCode CFFANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 	ANSIFontWriter fontWriter;
 
 	return fontWriter.WriteFont(inFontInfo,inFontOccurrence,inObjectsContext,this);
+
+
+	// TODO : need to write the CFF font program
 }
 
 static const string scType1 = "Type1";
@@ -35,7 +38,7 @@ void CFFANSIFontWriter::WriteSubTypeValue(DictionaryContext* inDictionary)
 	inDictionary->WriteNameValue(scType1);
 }
 
-IFontDescriptorCharsetWriter* CFFANSIFontWriter::GetCharsetWriter()
+IFontDescriptorHelper* CFFANSIFontWriter::GetCharsetWriter()
 {
 	return this;
 }
@@ -71,4 +74,15 @@ void CFFANSIFontWriter::WriteCharSet(	DictionaryContext* inDescriptorContext,
 	directStream->Write(scRightParanthesis,1);
 	inObjectsContext->EndFreeContext();
 	inObjectsContext->EndLine();
+}
+
+static const string scFontFile3 = "FontFile3";
+void CFFANSIFontWriter::WriteFontFileReference(	
+										DictionaryContext* inDescriptorContext,
+										ObjectsContext* inObjectsContext)
+{
+	// FontFile3
+	inDescriptorContext->WriteNameValue(scFontFile3);
+	mEmbeddedFontFileObjectID = inObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
+	inDescriptorContext->WriteObjectReferenceValue(mEmbeddedFontFileObjectID);
 }

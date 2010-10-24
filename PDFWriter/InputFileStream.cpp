@@ -59,6 +59,14 @@ void InputFileStream::SetPosition(LongFilePositionType inOffsetFromStart)
 		_fseeki64(mStream,inOffsetFromStart,SEEK_SET);
 }
 
+LongFilePositionType InputFileStream::GetCurrentPosition()
+{
+	if(mStream)
+		return _ftelli64(mStream);
+	else
+		return 0;
+}
+
 LongFilePositionType InputFileStream::GetFileSize()
 {
 	if(mStream)

@@ -1,7 +1,12 @@
 #include "InputStringBufferStream.h"
 #include "SafeBufferMacrosDefs.h"
 
-InputStringBufferStream::InputStringBufferStream(stringbuf* inBufferToReadFrom)
+InputStringBufferStream::InputStringBufferStream(MyStringBuf* inBufferToReadFrom)
+{
+	mBufferToReadFrom = inBufferToReadFrom;
+}
+
+void InputStringBufferStream::Assign(MyStringBuf* inBufferToReadFrom)
 {
 	mBufferToReadFrom = inBufferToReadFrom;
 }
@@ -28,4 +33,9 @@ void InputStringBufferStream::Skip(LongBufferSizeType inSkipSize)
 void InputStringBufferStream::SetPosition(LongFilePositionType inOffsetFromStart)
 {
 	mBufferToReadFrom->pubseekoff((long)inOffsetFromStart,ios_base::beg);
+}
+
+LongFilePositionType InputStringBufferStream::GetCurrentPosition()
+{
+	return mBufferToReadFrom->GetCurrentReadPosition();
 }

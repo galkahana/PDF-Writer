@@ -1,9 +1,12 @@
 #pragma once
 
 #include "EStatusCode.h"
+#include "IOBasicTypes.h"
 
 class IByteWriter;
 class IByteReader;
+
+using namespace IOBasicTypes;
 
 class OutputStreamTraits
 {
@@ -13,6 +16,7 @@ public:
 
 
 	EStatusCode CopyToOutputStream(IByteReader* inInputStream);	
+	EStatusCode CopyToOutputStream(IByteReader* inInputStream,LongBufferSizeType inLength);	
 
 private:
 

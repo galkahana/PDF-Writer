@@ -2,7 +2,7 @@
 #include "FreeTypeFaceWrapper.h"
 #include "ObjectsContext.h"
 #include "EFontStretch.h"
-#include "IFontDescriptorCharsetWriter.h"
+#include "IFontDescriptorHelper.h"
 #include "DictionaryContext.h"
 
 FontDescriptorWriter::FontDescriptorWriter(void)
@@ -33,7 +33,7 @@ void FontDescriptorWriter::WriteFontDescriptor(	ObjectIDType inFontDescriptorObj
 												FreeTypeFaceWrapper* inFontInfo,
 												const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
 												ObjectsContext* inObjectsContext,
-												IFontDescriptorCharsetWriter* inCharsetWriter)
+												IFontDescriptorHelper* inDescriptorHelper)
 {
 	DictionaryContext* fontDescriptorDictionary;
 
@@ -60,10 +60,10 @@ void FontDescriptorWriter::WriteFontDescriptor(	ObjectIDType inFontDescriptorObj
 	fontDescriptorDictionary->WriteKey(scFontBBox);
 	fontDescriptorDictionary->WriteRectangleValue(
 											PDFRectangle(
-												(*inFontInfo)->bbox.xMin,
-												(*inFontInfo)->bbox.yMin,
-												(*inFontInfo)->bbox.xMax,
-												(*inFontInfo)->bbox.yMax));
+												inFontInfo->GetInPDFMeasurements((*inFontInfo)->bbox.xMin),
+												inFontInfo->GetInPDFMeasurements((*inFontInfo)->bbox.yMin),
+												inFontInfo->GetInPDFMeasurements((*inFontInfo)->bbox.xMax),
+												inFontInfo->GetInPDFMeasurements((*inFontInfo)->bbox.yMax)));
 
 	// ItalicAngle
 	fontDescriptorDictionary->WriteKey(scItalicAngle);
@@ -71,11 +71,11 @@ void FontDescriptorWriter::WriteFontDescriptor(	ObjectIDType inFontDescriptorObj
 
 	// Ascent
 	fontDescriptorDictionary->WriteKey(scAscent);
-	fontDescriptorDictionary->WriteIntegerValue((*inFontInfo)->ascender);
+	fontDescriptorDictionary->WriteIntegerValue(inFontInfo->GetInPDFMeasurements((*inFontInfo)->ascender));
 
 	// Descent
 	fontDescriptorDictionary->WriteKey(scDescent);
-	fontDescriptorDictionary->WriteIntegerValue((*inFontInfo)->descender);
+	fontDescriptorDictionary->WriteIntegerValue(inFontInfo->GetInPDFMeasurements((*inFontInfo)->descender));
 
 	// CapHeight
 	BoolAndFTShort result =  inFontInfo->GetCapHeight();
@@ -99,14 +99,14 @@ void FontDescriptorWriter::WriteFontDescriptor(	ObjectIDType inFontDescriptorObj
 	fontDescriptorDictionary->WriteIntegerValue(inFontInfo->GetStemV());
 
 	// ChartSet writing (variants according to ANSI/CID)
-	inCharsetWriter->WriteCharSet(fontDescriptorDictionary,inObjectsContext,inFontInfo,inEncodedGlyphs);
+	inDescriptorHelper->WriteCharSet(fontDescriptorDictionary,inObjectsContext,inFontInfo,inEncodedGlyphs);
 
 	// Flags
 	fontDescriptorDictionary->WriteKey(scFlags);
 	fontDescriptorDictionary->WriteIntegerValue(CalculateFlags(inFontInfo,inEncodedGlyphs));
 
-	// FontFile3
-	// TODO :) font embedding
+	// font embedding
+	inDescriptorHelper->WriteFontFileReference(fontDescriptorDictionary,inObjectsContext);
 
 	inObjectsContext->EndDictionary(fontDescriptorDictionary);
 	inObjectsContext->EndIndirectObject();

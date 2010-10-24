@@ -89,7 +89,7 @@ EStatusCode FreeTypeInitializationTest::ShowGlobalFontProperties(FreeTypeWrapper
 {
 	EStatusCode status = eSuccess;
 
-	FreeTypeFaceWrapper face(inFace);
+	FreeTypeFaceWrapper face(inFace,L"");
 
 	wcout<<"Font Family = "<<(face->family_name ? face->family_name : "somefont")<<"\n";
 	wcout<<"Font Style = "<<(face->style_name ? face->style_name : "somestyle")<<"\n";

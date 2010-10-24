@@ -15,4 +15,10 @@ public:
 									ObjectsContext* inObjectsContext);
 	virtual void WriteSubTypeValue(DictionaryContext* inDescendentFontContext);
 	virtual void WriteAdditionalKeys(DictionaryContext* inDescendentFontContext);
+	virtual void WriteFontFileReference(DictionaryContext* inDescriptorContext,
+									ObjectsContext* inObjectsContext);
+
+private:
+	ObjectIDType mEmbeddedFontFileObjectID;
+
 };

@@ -60,6 +60,7 @@ EStatusCode DescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID,
 		// CIDSystemInfo
 		fontContext->WriteKey(scCIDSystemInfo);
 		ObjectIDType cidSystemInfoObjectID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
+		fontContext->WriteObjectReferenceValue(cidSystemInfoObjectID);
 
 		// FontDescriptor
 		fontContext->WriteKey(scFontDescriptor);
@@ -79,6 +80,7 @@ EStatusCode DescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID,
 		inObjectsContext->EndIndirectObject();	
 
 		WriteCIDSystemInfo(cidSystemInfoObjectID); 
+		mWriterHelper = inDescendentFontWriterHelper; // save the helper pointer, to write the font program reference in the descriptor
 		fontDescriptorWriter.WriteFontDescriptor(fontDescriptorObjectID,inFontName,&inFontInfo,inEncodedGlyphs,inObjectsContext,this);
 
 		if(mCIDSetObjectID) // set by descriptor writer callback
@@ -104,7 +106,7 @@ void DescendentFontWriter::WriteWidths(const UIntAndGlyphEncodingInfoVector& inE
 	// DW
 	inFontContext->WriteKey(scDW);
 	FT_Load_Glyph(*mFontInfo,it->first,FT_LOAD_NO_SCALE);
-	defaultWidth = (*mFontInfo)->glyph->metrics.width;
+	defaultWidth = mFontInfo->GetInPDFMeasurements((*mFontInfo)->glyph->metrics.horiAdvance);
 	inFontContext->WriteIntegerValue(defaultWidth);
 
 	++it;
@@ -113,7 +115,7 @@ void DescendentFontWriter::WriteWidths(const UIntAndGlyphEncodingInfoVector& inE
 	for(; it != inEncodedGlyphs.end();++it)
 	{
 		FT_Load_Glyph(*mFontInfo,it->first,FT_LOAD_NO_SCALE);
-		currentWidth = (*mFontInfo)->glyph->metrics.width;
+		currentWidth = mFontInfo->GetInPDFMeasurements((*mFontInfo)->glyph->metrics.horiAdvance);
 		if(currentWidth != defaultWidth)
 		{
 			widthsList.push_back(currentWidth);
@@ -125,6 +127,8 @@ void DescendentFontWriter::WriteWidths(const UIntAndGlyphEncodingInfoVector& inE
 
 	if(widthsList.size() != 0)
 	{
+		++it; // promote the iterator, from the already recorded glyph
+
 		// W
 		inFontContext->WriteKey(scW);
 		mObjectsContext->StartArray();
@@ -132,7 +136,7 @@ void DescendentFontWriter::WriteWidths(const UIntAndGlyphEncodingInfoVector& inE
 		for(; it != inEncodedGlyphs.end();++it)
 		{
 			FT_Load_Glyph(*mFontInfo,it->first,FT_LOAD_NO_SCALE);
-			currentWidth = (*mFontInfo)->glyph->metrics.width;
+			currentWidth = mFontInfo->GetInPDFMeasurements((*mFontInfo)->glyph->metrics.horiAdvance);
 			if(currentWidth != defaultWidth)
 			{
 				if(it->second.mEncodedCharacter == previousCIDInList + 1)
@@ -268,4 +272,11 @@ void DescendentFontWriter::WriteCIDSet(const UIntAndGlyphEncodingInfoVector& inE
 		cidSetWritingContext->Write(&buffer,1);
 	}
 	mObjectsContext->EndPDFStream(pdfStream);
+}
+
+void DescendentFontWriter::WriteFontFileReference(
+										DictionaryContext* inDescriptorContext,
+										ObjectsContext* inObjectsContext)
+{
+	mWriterHelper->WriteFontFileReference(inDescriptorContext,inObjectsContext);
 }

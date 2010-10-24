@@ -13,8 +13,9 @@ class FreeTypeFaceWrapper;
 
 typedef pair<unsigned int, GlyphEncodingInfo> UIntAndGlyphEncodingInfo;
 typedef vector<UIntAndGlyphEncodingInfo> UIntAndGlyphEncodingInfoVector;
+typedef vector<unsigned int> UIntVector;
 
-class IFontDescriptorCharsetWriter
+class IFontDescriptorHelper
 {
 public:
 
@@ -22,4 +23,8 @@ public:
 								ObjectsContext* inObjectsContext,
 								FreeTypeFaceWrapper* inFontInfo,
 								const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs) =0;
+
+
+	virtual void WriteFontFileReference(DictionaryContext* inDescriptorContext,
+										ObjectsContext* inObjectsContext) =0;
 };

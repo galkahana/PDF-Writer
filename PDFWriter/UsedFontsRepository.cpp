@@ -50,7 +50,7 @@ PDFUsedFont* UsedFontsRepository::GetFontForFile(const wstring& inFontFilePath,c
 		else
 		{
 
-			PDFUsedFont* usedFont = new PDFUsedFont(face,inOptionalMetricsFile,mObjectsContext);
+			PDFUsedFont* usedFont = new PDFUsedFont(face,inFontFilePath,inOptionalMetricsFile,mObjectsContext);
 			if(!usedFont->IsValid())
 			{
 				TRACE_LOG1("UsedFontsRepository::GetFontForFile, Unreckognized font format for font in %s",inFontFilePath);

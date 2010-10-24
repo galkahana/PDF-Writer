@@ -163,7 +163,7 @@ void ANSIFontWriter::WriteWidths(DictionaryContext* inFontContext)
 		if(itCharacters->second.mEncodedCharacter == i)
 		{
 			FT_Load_Glyph(*mFontInfo,itCharacters->first,FT_LOAD_NO_SCALE);
-			mObjectsContext->WriteInteger((*mFontInfo)->glyph->metrics.width);
+			mObjectsContext->WriteInteger(mFontInfo->GetInPDFMeasurements((*mFontInfo)->glyph->metrics.horiAdvance));
 			++itCharacters;
 		}
 		else

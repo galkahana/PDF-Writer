@@ -1,7 +1,7 @@
 #pragma once
 
 class DictionaryContext;
-class IFontDescriptorCharsetWriter;
+class IFontDescriptorHelper;
 
 class IANSIFontWriterHelper
 {
@@ -13,5 +13,5 @@ public:
 
 	// Get the relevant CharSet entry writer for the descriptor writing. 
 	// always return something - even if doing nothing
-	virtual IFontDescriptorCharsetWriter* GetCharsetWriter() = 0;
+	virtual IFontDescriptorHelper* GetCharsetWriter() = 0;
 };

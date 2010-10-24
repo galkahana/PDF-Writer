@@ -9,15 +9,12 @@
 
 using namespace std;
 
-
-using namespace std;
-
 typedef pair<unsigned int, GlyphEncodingInfo> UIntAndGlyphEncodingInfo;
 typedef vector<UIntAndGlyphEncodingInfo> UIntAndGlyphEncodingInfoVector;
 
 class FreeTypeFaceWrapper;
 class ObjectsContext;
-class IFontDescriptorCharsetWriter;
+class IFontDescriptorHelper;
 
 class FontDescriptorWriter
 {
@@ -30,7 +27,7 @@ public:
 								FreeTypeFaceWrapper* inFontInfo,
 								const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
 								ObjectsContext* inObjectsContext,
-								IFontDescriptorCharsetWriter* inCharsetWriter);
+								IFontDescriptorHelper* inDescriptorHelper);
 
 private:
 	unsigned int CalculateFlags(FreeTypeFaceWrapper* inFontInfo,

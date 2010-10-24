@@ -40,6 +40,7 @@ public:
 	virtual bool NotEnded();
 	virtual void Skip(LongBufferSizeType inSkipSize);
 	virtual void SetPosition(LongFilePositionType inOffsetFromStart);
+	virtual LongFilePositionType GetCurrentPosition();
 
 	IByteReader* GetSourceStream();
 
