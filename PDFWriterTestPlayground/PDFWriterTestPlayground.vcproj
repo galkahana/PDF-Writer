@@ -635,6 +635,18 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="CFF"
+				>
+				<File
+					RelativePath=".\OpenTypeTest.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\OpenTypeTest.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath=".\ImportantReadme.txt"

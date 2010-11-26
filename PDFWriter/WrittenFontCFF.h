@@ -13,7 +13,7 @@ typedef list<UCharAndUChar> UCharAndUCharList;
 class WrittenFontCFF : public AbstractWrittenFont
 {
 public:
-	WrittenFontCFF(ObjectsContext* inObjectsContext);
+	WrittenFontCFF(ObjectsContext* inObjectsContext,bool inIsCID);
 	virtual ~WrittenFontCFF(void);
 
 
@@ -38,4 +38,5 @@ private:
 	unsigned char mAvailablePositionsCount;
 	UCharAndUCharList mFreeList;
 	unsigned int mAssignedPositions[256];
+	bool mIsCID;
 };

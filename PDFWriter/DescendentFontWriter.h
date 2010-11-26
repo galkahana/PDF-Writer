@@ -9,6 +9,7 @@
 #include FT_FREETYPE_H
 
 #include <list>
+#include <string>
 
 class FreeTypeFaceWrapper;
 class ObjectsContext;
@@ -31,7 +32,8 @@ public:
 									FreeTypeFaceWrapper& inFontInfo,
 									const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
 									ObjectsContext* inObjectsContext,
-									IDescendentFontWriter* inDescendentFontWriterHelper);
+									IDescendentFontWriter* inDescendentFontWriterHelper,
+									string& outSubsetFontName);
 
 	// IFontDescriptorHelper implementation [would probably evolve at some point to IDescriptorWriterHelper...
 	virtual void WriteCharSet(	DictionaryContext* inDescriptorContext,

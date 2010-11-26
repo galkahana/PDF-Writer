@@ -13,7 +13,7 @@ public:
 	TrueTypePrimitiveWriter(OutputStringBufferStream* inTrueTypeFile = NULL);
 	~TrueTypePrimitiveWriter(void);
 
-	void SetTrueTypeStream(OutputStringBufferStream* inTrueTypeFile);
+	void SetOpenTypeStream(OutputStringBufferStream* inTrueTypeFile);
 	
 	EStatusCode GetInternalState();
 

@@ -546,6 +546,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\StandardEncoding.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\StandardEncoding.h"
+					>
+				</File>
+				<File
 					RelativePath=".\WinAnsiEncoding.cpp"
 					>
 				</File>
@@ -1018,27 +1026,103 @@
 					>
 				</File>
 				<File
-					RelativePath=".\TrueTypeFileInput.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\TrueTypeFileInput.h"
-					>
-				</File>
-				<File
-					RelativePath=".\TrueTypePrimitiveReader.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\TrueTypePrimitiveReader.h"
-					>
-				</File>
-				<File
 					RelativePath=".\TrueTypePrimitiveWriter.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\TrueTypePrimitiveWriter.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="OpenType"
+				>
+				<File
+					RelativePath=".\OpenTypeFileInput.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\OpenTypeFileInput.h"
+					>
+				</File>
+				<File
+					RelativePath=".\OpenTypePrimitiveReader.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\OpenTypePrimitiveReader.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="CFF"
+				>
+				<File
+					RelativePath=".\CFFEmbeddedFontWriter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CFFEmbeddedFontWriter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CFFFileInput.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CFFFileInput.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CFFPrimitiveReader.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CFFPrimitiveReader.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CFFPrimitiveWriter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CFFPrimitiveWriter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CharStringDefinitions.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CharStringType2Flattener.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CharStringType2Flattener.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CharStringType2Interpreter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CharStringType2Interpreter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CharStringType2Tracer.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CharStringType2Tracer.h"
+					>
+				</File>
+				<File
+					RelativePath=".\DictOperand.h"
+					>
+				</File>
+				<File
+					RelativePath=".\IType2InterpreterImplementation.h"
 					>
 				</File>
 			</Filter>

@@ -1,20 +1,20 @@
-#include "TrueTypePrimitiveReader.h"
+#include "OpenTypePrimitiveReader.h"
 
-TrueTypePrimitiveReader::TrueTypePrimitiveReader(IByteReader* inTrueTypeFile)
+OpenTypePrimitiveReader::OpenTypePrimitiveReader(IByteReader* inOpenTypeFile)
 {
-	SetTrueTypeStream(inTrueTypeFile);
+	SetOpenTypeStream(inOpenTypeFile);
 }
 
-TrueTypePrimitiveReader::~TrueTypePrimitiveReader(void)
+OpenTypePrimitiveReader::~OpenTypePrimitiveReader(void)
 {
 }
 
-void TrueTypePrimitiveReader::SetTrueTypeStream(IByteReader* inTrueTypeFile)
+void OpenTypePrimitiveReader::SetOpenTypeStream(IByteReader* inOpenTypeFile)
 {
-	mTrueTypeFile = inTrueTypeFile;
-	if(inTrueTypeFile)
+	mOpenTypeFile = inOpenTypeFile;
+	if(inOpenTypeFile)
 	{
-		mInitialPosition = inTrueTypeFile->GetCurrentPosition();
+		mInitialPosition = inOpenTypeFile->GetCurrentPosition();
 		mInternalState = eSuccess;
 	}
 	else
@@ -23,13 +23,13 @@ void TrueTypePrimitiveReader::SetTrueTypeStream(IByteReader* inTrueTypeFile)
 	}
 }
 
-EStatusCode TrueTypePrimitiveReader::ReadBYTE(unsigned char& outValue)
+EStatusCode OpenTypePrimitiveReader::ReadBYTE(unsigned char& outValue)
 {
 	if(eFailure == mInternalState)
 		return eFailure;
 
 	Byte buffer;
-	EStatusCode status = (mTrueTypeFile->Read(&buffer,1) == 1 ? eSuccess : eFailure);
+	EStatusCode status = (mOpenTypeFile->Read(&buffer,1) == 1 ? eSuccess : eFailure);
 
 	if(eFailure == status)
 		mInternalState = eFailure;
@@ -37,7 +37,7 @@ EStatusCode TrueTypePrimitiveReader::ReadBYTE(unsigned char& outValue)
 	return status;
 }
 
-EStatusCode TrueTypePrimitiveReader::ReadCHAR(char& outValue)
+EStatusCode OpenTypePrimitiveReader::ReadCHAR(char& outValue)
 {
 	Byte buffer;
 
@@ -48,7 +48,7 @@ EStatusCode TrueTypePrimitiveReader::ReadCHAR(char& outValue)
 	return eSuccess;
 }
 
-EStatusCode TrueTypePrimitiveReader::ReadUSHORT(unsigned short& outValue)
+EStatusCode OpenTypePrimitiveReader::ReadUSHORT(unsigned short& outValue)
 {
 	Byte byte1,byte2;
 
@@ -65,7 +65,7 @@ EStatusCode TrueTypePrimitiveReader::ReadUSHORT(unsigned short& outValue)
 
 }
 
-EStatusCode TrueTypePrimitiveReader::ReadSHORT(short& outValue)
+EStatusCode OpenTypePrimitiveReader::ReadSHORT(short& outValue)
 {
 	unsigned short buffer;
 
@@ -77,7 +77,7 @@ EStatusCode TrueTypePrimitiveReader::ReadSHORT(short& outValue)
 
 }
 
-EStatusCode TrueTypePrimitiveReader::ReadULONG(unsigned long& outValue)
+EStatusCode OpenTypePrimitiveReader::ReadULONG(unsigned long& outValue)
 {
 	Byte byte1,byte2,byte3,byte4;
 
@@ -99,7 +99,7 @@ EStatusCode TrueTypePrimitiveReader::ReadULONG(unsigned long& outValue)
 	return eSuccess;
 }
 
-EStatusCode TrueTypePrimitiveReader::ReadLONG(long& outValue)
+EStatusCode OpenTypePrimitiveReader::ReadLONG(long& outValue)
 {
 	unsigned long buffer;
 
@@ -110,7 +110,7 @@ EStatusCode TrueTypePrimitiveReader::ReadLONG(long& outValue)
 	return eSuccess;
 }
 
-EStatusCode TrueTypePrimitiveReader::ReadLongDateTime(long long& outValue)
+EStatusCode OpenTypePrimitiveReader::ReadLongDateTime(long long& outValue)
 {
 	Byte byte1,byte2,byte3,byte4,byte5,byte6,byte7,byte8;
 
@@ -145,24 +145,24 @@ EStatusCode TrueTypePrimitiveReader::ReadLongDateTime(long long& outValue)
 	return eSuccess;	
 }
 
-void TrueTypePrimitiveReader::SetOffset(LongFilePositionType inNewOffset)
+void OpenTypePrimitiveReader::SetOffset(LongFilePositionType inNewOffset)
 {
 	if(mInternalState != eFailure)
-		mTrueTypeFile->SetPosition(mInitialPosition + inNewOffset);
+		mOpenTypeFile->SetPosition(mInitialPosition + inNewOffset);
 }	
 
-void TrueTypePrimitiveReader::Skip(LongBufferSizeType inToSkip)
+void OpenTypePrimitiveReader::Skip(LongBufferSizeType inToSkip)
 {
 	if(mInternalState != eFailure)
-		mTrueTypeFile->Skip(inToSkip);
+		mOpenTypeFile->Skip(inToSkip);
 }
 
-EStatusCode TrueTypePrimitiveReader::GetInternalState()
+EStatusCode OpenTypePrimitiveReader::GetInternalState()
 {
 	return mInternalState;
 }
 
-EStatusCode TrueTypePrimitiveReader::ReadFixed(double& outValue)
+EStatusCode OpenTypePrimitiveReader::ReadFixed(double& outValue)
 {
 	unsigned short integer,fraction;
 
@@ -177,22 +177,27 @@ EStatusCode TrueTypePrimitiveReader::ReadFixed(double& outValue)
 	return eSuccess;
 }
 
-LongFilePositionType TrueTypePrimitiveReader::GetCurrentPosition()
+LongFilePositionType OpenTypePrimitiveReader::GetCurrentPosition()
 {
 	if(mInternalState != eFailure)
-		return mTrueTypeFile->GetCurrentPosition() - mInitialPosition;	
+		return mOpenTypeFile->GetCurrentPosition() - mInitialPosition;	
 	else
 		return 0;
 }
 
-EStatusCode TrueTypePrimitiveReader::Read(Byte* inBuffer,LongBufferSizeType inBufferSize)
+EStatusCode OpenTypePrimitiveReader::Read(Byte* inBuffer,LongBufferSizeType inBufferSize)
 {
 	if(eFailure == mInternalState)
 		return eFailure;
 
-	EStatusCode status = (mTrueTypeFile->Read(inBuffer,inBufferSize) == inBufferSize ? eSuccess : eFailure);
+	EStatusCode status = (mOpenTypeFile->Read(inBuffer,inBufferSize) == inBufferSize ? eSuccess : eFailure);
 
 	if(eFailure == status)
 		mInternalState = eFailure;
 	return status;	
+}
+
+IByteReader* OpenTypePrimitiveReader::GetReadStream()
+{
+	return mOpenTypeFile;
 }

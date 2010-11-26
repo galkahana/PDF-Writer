@@ -154,6 +154,7 @@ void CIDFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 	PrimitiveObjectsWriter primitiveWriter(cmapWriteContext);
 	unsigned long i = 1;
 	UIntAndGlyphEncodingInfoVector::iterator it = mCharactersVector.begin() + 1; // skip 0 glyph
+	unsigned long vectorSize = (unsigned long)mCharactersVector.size() - 1; // cause 0 is not there
 	char formattingBuffer[15];
 
 	cmapWriteContext->Write((const Byte*)scCmapHeader,strlen(scCmapHeader));
@@ -161,8 +162,8 @@ void CIDFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 	primitiveWriter.WriteHexString(scFourByteRangeEnd,eTokenSeparatorEndLine);
 	cmapWriteContext->Write((const Byte*)scEndCodeSpaceRange,strlen(scEndCodeSpaceRange));
 
-	if(mCharactersVector.size() < 100)
-		primitiveWriter.WriteInteger(mCharactersVector.size());
+	if(vectorSize < 100)
+		primitiveWriter.WriteInteger(vectorSize);
 	else
 		primitiveWriter.WriteInteger(100);
 	primitiveWriter.WriteKeyword(scBeginBFChar);
@@ -174,8 +175,8 @@ void CIDFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 		if(i % 100 == 0)
 		{
 			primitiveWriter.WriteKeyword(scEndBFChar);
-			if(mCharactersVector.size() - i < 100)
-				primitiveWriter.WriteInteger(mCharactersVector.size() - i);
+			if(vectorSize - i < 100)
+				primitiveWriter.WriteInteger(vectorSize - i);
 			else
 				primitiveWriter.WriteInteger(100);
 			primitiveWriter.WriteKeyword(scBeginBFChar);

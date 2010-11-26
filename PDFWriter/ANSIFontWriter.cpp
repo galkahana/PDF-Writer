@@ -37,7 +37,8 @@ static const string scFontDescriptor = "FontDescriptor";
 EStatusCode ANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 											WrittenFontRepresentation* inFontOccurrence,
 											ObjectsContext* inObjectsContext,
-											IANSIFontWriterHelper* inANSIFontWriterHelper)
+											IANSIFontWriterHelper* inANSIFontWriterHelper,
+											std::string& outWrittenFontName)
 {
 	EStatusCode status = eSuccess;
 	FontDescriptorWriter fontDescriptorWriter;
@@ -71,6 +72,7 @@ EStatusCode ANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 		}
 		std::string subsetFontName = inObjectsContext->GenerateSubsetFontPrefix() + scPlus + postscriptFontName;
 		fontContext->WriteNameValue(subsetFontName);
+		outWrittenFontName = subsetFontName;
 
 
 		/*
@@ -286,6 +288,7 @@ void ANSIFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 	PrimitiveObjectsWriter primitiveWriter(cmapWriteContext);
 	unsigned long i = 1;
 	UIntAndGlyphEncodingInfoVector::iterator it = mCharactersVector.begin() + 1; // skip 0 glyph
+	unsigned long vectorSize = (unsigned long)mCharactersVector.size() - 1; // cause 0 is not there
 	char formattingBuffer[13];
 
 	cmapWriteContext->Write((const Byte*)scCmapHeader,strlen(scCmapHeader));
@@ -293,8 +296,8 @@ void ANSIFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 	primitiveWriter.WriteHexString(scTwoByteRangeEnd,eTokenSeparatorEndLine);
 	cmapWriteContext->Write((const Byte*)scEndCodeSpaceRange,strlen(scEndCodeSpaceRange));
 
-	if(mCharactersVector.size() < 100)
-		primitiveWriter.WriteInteger(mCharactersVector.size());
+	if(vectorSize < 100)
+		primitiveWriter.WriteInteger(vectorSize);
 	else
 		primitiveWriter.WriteInteger(100);
 	primitiveWriter.WriteKeyword(scBeginBFChar);
@@ -306,8 +309,8 @@ void ANSIFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 		if(i % 100 == 0)
 		{
 			primitiveWriter.WriteKeyword(scEndBFChar);
-			if(mCharactersVector.size() - i < 100)
-				primitiveWriter.WriteInteger(mCharactersVector.size() - i);
+			if(vectorSize - i < 100)
+				primitiveWriter.WriteInteger(vectorSize - i);
 			else
 				primitiveWriter.WriteInteger(100);
 			primitiveWriter.WriteKeyword(scBeginBFChar);

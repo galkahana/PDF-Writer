@@ -1,5 +1,5 @@
 #include "TrueTypeTest.h"
-#include "TrueTypeFileInput.h"
+#include "OpenTypeFileInput.h"
 #include "InputFile.h"
 #include "TestsRunner.h"
 
@@ -53,9 +53,9 @@ EStatusCode TrueTypeTest::Run()
 			break;
 		}
 
-		TrueTypeFileInput trueTypeReader;
+		OpenTypeFileInput trueTypeReader;
 
-		status = trueTypeReader.ReadTrueTypeFile(ttfFile.GetInputStream());
+		status = trueTypeReader.ReadOpenTypeFile(ttfFile.GetInputStream());
 		if(status != eSuccess)
 		{
 			wcout<<"could not read true type file\n";

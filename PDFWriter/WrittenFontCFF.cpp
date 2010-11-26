@@ -4,13 +4,14 @@
 #include "CIDFontWriter.h"
 #include "CFFDescendentFontWriter.h"
 
-WrittenFontCFF::WrittenFontCFF(ObjectsContext* inObjectsContext):AbstractWrittenFont(inObjectsContext)
+WrittenFontCFF::WrittenFontCFF(ObjectsContext* inObjectsContext,bool inIsCID):AbstractWrittenFont(inObjectsContext)
 {
 	mAvailablePositionsCount = 255;
 	mFreeList.push_back(UCharAndUChar(1,255)); 
 	// 1st place is reserved for .notdef/0 glyph index. we'll use 0s in the array in all other places as indication for avialability
 	for(int i=0;i<256;++i) 
 		mAssignedPositions[i] = 0;
+	mIsCID = inIsCID;
 }
 
 WrittenFontCFF::~WrittenFontCFF(void)
@@ -22,7 +23,8 @@ bool WrittenFontCFF::AddToANSIRepresentation(
 						const UIntList& inGlyphsList,
 						UShortList& outEncodedCharacters)
 {
-	if(HasEnoughSpaceForGlyphs(inGlyphsList))
+	// categorically do not allow an ANSI representation if the font is CID
+	if(!mIsCID && HasEnoughSpaceForGlyphs(inGlyphsList))
 	{
 		UIntList::const_iterator it = inGlyphsList.begin();
 		wstring::const_iterator itText = inText.begin(); // assuming 1-1 match for now
@@ -157,7 +159,8 @@ bool WrittenFontCFF::AddToANSIRepresentation(	const WStringList& inText,
 												const UIntListList& inGlyphsList,
 												UShortListList& outEncodedCharacters)
 {
-	if(HasEnoughSpaceForGlyphs(inGlyphsList))
+	// categorically do not allow an ANSI representation if the font is CID
+	if(!mIsCID && HasEnoughSpaceForGlyphs(inGlyphsList))
 	{
 		UIntListList::const_iterator itList = inGlyphsList.begin();
 		WStringList::const_iterator itTextList = inText.begin();

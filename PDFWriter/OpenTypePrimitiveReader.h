@@ -3,16 +3,17 @@
 #include "EStatusCode.h"
 #include "IByteReader.h"
 
-class TrueTypePrimitiveReader
+class OpenTypePrimitiveReader
 {
 public:
-	TrueTypePrimitiveReader(IByteReader* inTrueTypeFile = NULL);
-	~TrueTypePrimitiveReader(void);
+	OpenTypePrimitiveReader(IByteReader* inTrueTypeFile = NULL);
+	~OpenTypePrimitiveReader(void);
 
-	void SetTrueTypeStream(IByteReader* inTrueTypeFile);
-
+	void SetOpenTypeStream(IByteReader* inOpenTypeFile);
 	void SetOffset(LongFilePositionType inNewOffset);
 	void Skip(LongBufferSizeType inToSkip);
+	LongFilePositionType GetCurrentPosition();
+	EStatusCode GetInternalState();
 
 	EStatusCode ReadBYTE(unsigned char& outValue);
 	EStatusCode ReadCHAR(char& outValue);
@@ -24,13 +25,10 @@ public:
 	EStatusCode ReadFixed(double& outValue);
 	EStatusCode Read(Byte* inBuffer,LongBufferSizeType inBufferSize);
 
-
-	LongFilePositionType GetCurrentPosition();
-
-	EStatusCode GetInternalState();
+	IByteReader* GetReadStream();
 private:
 
-	IByteReader* mTrueTypeFile;
+	IByteReader* mOpenTypeFile;
 	LongFilePositionType mInitialPosition;
 	EStatusCode mInternalState;
 

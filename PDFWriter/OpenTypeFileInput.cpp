@@ -1,8 +1,8 @@
-#include "TrueTypeFileInput.h"
+#include "OpenTypeFileInput.h"
 #include "Trace.h"
 #include "InputFile.h"
 
-TrueTypeFileInput::TrueTypeFileInput(void)
+OpenTypeFileInput::OpenTypeFileInput(void)
 {
 	mHMtx = NULL;
 	mName.mNameEntries = NULL;
@@ -10,12 +10,12 @@ TrueTypeFileInput::TrueTypeFileInput(void)
 	mGlyf = NULL;
 }
 
-TrueTypeFileInput::~TrueTypeFileInput(void)
+OpenTypeFileInput::~OpenTypeFileInput(void)
 {
 	FreeTables();
 }
 
-void TrueTypeFileInput::FreeTables()
+void OpenTypeFileInput::FreeTables()
 {
 	delete[] mHMtx;
 	mHMtx = NULL;
@@ -37,23 +37,23 @@ void TrueTypeFileInput::FreeTables()
 	mActualGlyphs.clear();
 }
 
-EStatusCode TrueTypeFileInput::ReadTrueTypeFile(const wstring& inFontFilePath)
+EStatusCode OpenTypeFileInput::ReadOpenTypeFile(const wstring& inFontFilePath)
 {
 	InputFile fontFile;
 
 	EStatusCode status = fontFile.OpenFile(inFontFilePath);
 	if(status != eSuccess)
 	{
-		TRACE_LOG1("TrueTypeFileInput::ReadTrueTypeFile, cannot open true type font file at %s",inFontFilePath.c_str());
+		TRACE_LOG1("OpenTypeFileInput::ReadOpenTypeFile, cannot open true type font file at %s",inFontFilePath.c_str());
 		return status;
 	}
 
-	status = ReadTrueTypeFile(fontFile.GetInputStream());
+	status = ReadOpenTypeFile(fontFile.GetInputStream());
 	fontFile.CloseFile();
 	return status;
 }
 
-EStatusCode TrueTypeFileInput::ReadTrueTypeFile(IByteReader* inTrueTypeFile)
+EStatusCode OpenTypeFileInput::ReadOpenTypeFile(IByteReader* inTrueTypeFile)
 {
 	EStatusCode status;
 
@@ -61,82 +61,102 @@ EStatusCode TrueTypeFileInput::ReadTrueTypeFile(IByteReader* inTrueTypeFile)
 	{
 		FreeTables();
 
-		mPrimitivesReader.SetTrueTypeStream(inTrueTypeFile);
+		mPrimitivesReader.SetOpenTypeStream(inTrueTypeFile);
 
-		status = ReadTrueTypeHeader();
+		status = ReadOpenTypeHeader();
 		if(status != eSuccess)
 		{
-			TRACE_LOG("TrueTypeFileInput::ReadTrueTypeFile, failed to read true type header");
+			TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read true type header");
 			break;
 		}
 		
 		status = ReadHead();
 		if(status != eSuccess)
 		{
-			TRACE_LOG("TrueTypeFileInput::ReadTrueTypeFile, failed to read head table");
+			TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read head table");
 			break;
 		}
 		
 		status = ReadMaxP();
 		if(status != eSuccess)
 		{
-			TRACE_LOG("TrueTypeFileInput::ReadTrueTypeFile, failed to read maxp table");
+			TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read maxp table");
 			break;
 		}
 
 		status = ReadHHea();
 		if(status != eSuccess)
 		{
-			TRACE_LOG("TrueTypeFileInput::ReadTrueTypeFile, failed to read hhea table");
+			TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read hhea table");
 			break;
 		}
 
 		status = ReadHMtx();
 		if(status != eSuccess)
 		{
-			TRACE_LOG("TrueTypeFileInput::ReadTrueTypeFile, failed to read hmtx table");
+			TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read hmtx table");
 			break;
 		}
 
 		status = ReadOS2();
 		if(status != eSuccess)
 		{
-			TRACE_LOG("TrueTypeFileInput::ReadTrueTypeFile, failed to read os2 table");
+			TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read os2 table");
 			break;
 		}
 
 		status = ReadName();
 		if(status != eSuccess)
 		{
-			TRACE_LOG("TrueTypeFileInput::ReadTrueTypeFile, failed to read name table");
+			TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read name table");
 			break;
 		}
 
-		// true type specifics
-
-		status = ReadLoca();
-		if(status != eSuccess)
+		if(EOpenTypeTrueType == mFontType)
 		{
-			TRACE_LOG("TrueTypeFileInput::ReadTrueTypeFile, failed to read loca table");
-			break;
-		}
+			// true type specifics
+			status = ReadLoca();
+			if(status != eSuccess)
+			{
+				TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read loca table");
+				break;
+			}
 
-		status = ReadGlyfForDependencies();
-		if(status != eSuccess)
+			status = ReadGlyfForDependencies();
+			if(status != eSuccess)
+			{
+				TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read glyf table");
+				break;
+			}
+			mCVTExists = mTables.find(GetTag("cvt ")) != mTables.end();
+			mFPGMExists = mTables.find(GetTag("fpgm")) != mTables.end();
+			mPREPExists = mTables.find(GetTag("prep")) != mTables.end();
+
+			// zero cff items
+			mCFF.Reset();
+		}
+		else
 		{
-			TRACE_LOG("TrueTypeFileInput::ReadTrueTypeFile, failed to read glyf table");
-			break;
-		}
-		mCVTExists = mTables.find(GetTag("cvt ")) != mTables.end();
-		mFPGMExists = mTables.find(GetTag("fpgm")) != mTables.end();
-		mPREPExists = mTables.find(GetTag("prep")) != mTables.end();
+			// CFF specifics
+			status = ReadCFF();
+			if(status != eSuccess)
+			{
+				TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read CFF table");
+			}
 
+			// zero true type items
+			mCVTExists = false;
+			mFPGMExists = false;
+			mPREPExists = false;
+			mGlyf = NULL;
+			mLoca = NULL;
+		}
 	}while(false);
 
 	return status;
 }
 
-EStatusCode TrueTypeFileInput::ReadTrueTypeHeader()
+EStatusCode OpenTypeFileInput::ReadOpenTypeHeader()
 {
 	EStatusCode status;
 	TableEntry tableEntry;
@@ -144,10 +164,10 @@ EStatusCode TrueTypeFileInput::ReadTrueTypeHeader()
 
 	do
 	{
-		status = VerifyTrueTypeSFNT();
+		status = ReadOpenTypeSFNT();
 		if(status != eSuccess)
 		{
-			TRACE_LOG("TrueTypeFileInput::ReaderTrueTypeHeader, SFNT header not true type");
+			TRACE_LOG("OpenTypeFileInput::ReaderTrueTypeHeader, SFNT header not open type");
 			break;
 		}
 
@@ -170,19 +190,30 @@ EStatusCode TrueTypeFileInput::ReadTrueTypeHeader()
 	return status;
 }
 
-EStatusCode TrueTypeFileInput::VerifyTrueTypeSFNT()
+EStatusCode OpenTypeFileInput::ReadOpenTypeSFNT()
 {
 	unsigned long sfntVersion;
 
 	mPrimitivesReader.ReadULONG(sfntVersion);
 
-	return ((0x10000 == sfntVersion) || (0x74727565 /* true */ == sfntVersion)) ? eSuccess : eFailure;
+	if((0x10000 == sfntVersion) || (0x74727565 /* true */ == sfntVersion))
+	{
+		mFontType = EOpenTypeTrueType;
+		return eSuccess;
+	}
+	else if(0x4F54544F /* OTTO */ == sfntVersion)
+	{
+		mFontType = EOpenTypeCFF;
+		return eSuccess;
+	}
+	else
+		return eFailure;
 }
 
-unsigned long TrueTypeFileInput::GetTag(const char* inTagName)
+unsigned long OpenTypeFileInput::GetTag(const char* inTagName)
 {
 	Byte buffer[4];
-	int i=0;
+	unsigned short i=0;
 
 	for(; i<strlen(inTagName);++i)
 		buffer[i] = (Byte)inTagName[i];
@@ -193,12 +224,12 @@ unsigned long TrueTypeFileInput::GetTag(const char* inTagName)
 			((unsigned long)buffer[2]<<8) + buffer[3];
 }
 
-EStatusCode TrueTypeFileInput::ReadHead()
+EStatusCode OpenTypeFileInput::ReadHead()
 {
 	ULongToTableEntryMap::iterator it = mTables.find(GetTag("head"));
 	if(it == mTables.end())
 	{
-		TRACE_LOG("TrueTypeFileInput::ReadHead, could not find head table");
+		TRACE_LOG("OpenTypeFileInput::ReadHead, could not find head table");
 		return eFailure;
 	}
 
@@ -224,12 +255,12 @@ EStatusCode TrueTypeFileInput::ReadHead()
 	return mPrimitivesReader.GetInternalState();	
 }
 
-EStatusCode TrueTypeFileInput::ReadMaxP()
+EStatusCode OpenTypeFileInput::ReadMaxP()
 {
 	ULongToTableEntryMap::iterator it = mTables.find(GetTag("maxp"));
 	if(it == mTables.end())
 	{
-		TRACE_LOG("TrueTypeFileInput::ReadMaxP, could not find maxp table");
+		TRACE_LOG("OpenTypeFileInput::ReadMaxP, could not find maxp table");
 		return eFailure;
 	}
 	mPrimitivesReader.SetOffset(it->second.Offset);
@@ -259,12 +290,12 @@ EStatusCode TrueTypeFileInput::ReadMaxP()
 
 }
 
-EStatusCode TrueTypeFileInput::ReadHHea()
+EStatusCode OpenTypeFileInput::ReadHHea()
 {
 	ULongToTableEntryMap::iterator it = mTables.find(GetTag("hhea"));
 	if(it == mTables.end())
 	{
-		TRACE_LOG("TrueTypeFileInput::ReadHHea, could not find hhea table");
+		TRACE_LOG("OpenTypeFileInput::ReadHHea, could not find hhea table");
 		return eFailure;
 	}
 
@@ -288,12 +319,12 @@ EStatusCode TrueTypeFileInput::ReadHHea()
 	return mPrimitivesReader.GetInternalState();	
 }
 
-EStatusCode TrueTypeFileInput::ReadHMtx()
+EStatusCode OpenTypeFileInput::ReadHMtx()
 {
 	ULongToTableEntryMap::iterator it = mTables.find(GetTag("hmtx"));
 	if(it == mTables.end())
 	{
-		TRACE_LOG("TrueTypeFileInput::ReadHMtx, could not find hmtx table");
+		TRACE_LOG("OpenTypeFileInput::ReadHMtx, could not find hmtx table");
 		return eFailure;
 	}
 
@@ -318,12 +349,12 @@ EStatusCode TrueTypeFileInput::ReadHMtx()
 	return mPrimitivesReader.GetInternalState();	
 }
 
-EStatusCode TrueTypeFileInput::ReadOS2()
+EStatusCode OpenTypeFileInput::ReadOS2()
 {
 	ULongToTableEntryMap::iterator it = mTables.find(GetTag("OS/2"));
 	if(it == mTables.end())
 	{
-		TRACE_LOG("TrueTypeFileInput::ReadOS2, could not find os2 table");
+		TRACE_LOG("OpenTypeFileInput::ReadOS2, could not find os2 table");
 		return eFailure;
 	}
 
@@ -379,12 +410,12 @@ EStatusCode TrueTypeFileInput::ReadOS2()
 	return mPrimitivesReader.GetInternalState();	
 }
 
-EStatusCode TrueTypeFileInput::ReadName()
+EStatusCode OpenTypeFileInput::ReadName()
 {
 	ULongToTableEntryMap::iterator it = mTables.find(GetTag("name"));
 	if(it == mTables.end())
 	{
-		TRACE_LOG("TrueTypeFileInput::ReadName, could not find name table");
+		TRACE_LOG("OpenTypeFileInput::ReadName, could not find name table");
 		return eFailure;
 	}
 
@@ -417,12 +448,12 @@ EStatusCode TrueTypeFileInput::ReadName()
 	return mPrimitivesReader.GetInternalState();	
 }
 
-EStatusCode TrueTypeFileInput::ReadLoca()
+EStatusCode OpenTypeFileInput::ReadLoca()
 {
 	ULongToTableEntryMap::iterator it = mTables.find(GetTag("loca"));
 	if(it == mTables.end())
 	{
-		TRACE_LOG("TrueTypeFileInput::ReadLoca, could not find loca table");
+		TRACE_LOG("OpenTypeFileInput::ReadLoca, could not find loca table");
 		return eFailure;
 	}
 	mPrimitivesReader.SetOffset(it->second.Offset);	
@@ -446,12 +477,12 @@ EStatusCode TrueTypeFileInput::ReadLoca()
 	return mPrimitivesReader.GetInternalState();	
 }
 
-EStatusCode TrueTypeFileInput::ReadGlyfForDependencies()
+EStatusCode OpenTypeFileInput::ReadGlyfForDependencies()
 {
 	ULongToTableEntryMap::iterator it = mTables.find(GetTag("glyf"));
 	if(it == mTables.end())
 	{
-		TRACE_LOG("TrueTypeFileInput::ReadGlyfForDependencies, could not find glyf table");
+		TRACE_LOG("OpenTypeFileInput::ReadGlyfForDependencies, could not find glyf table");
 		return eFailure;
 	}
 
@@ -512,12 +543,12 @@ EStatusCode TrueTypeFileInput::ReadGlyfForDependencies()
 	return mPrimitivesReader.GetInternalState();	
 }
 
-unsigned short TrueTypeFileInput::GetGlyphsCount()
+unsigned short OpenTypeFileInput::GetGlyphsCount()
 {
 	return mMaxp.NumGlyphs;
 }
 
-TableEntry* TrueTypeFileInput::GetTableEntry(const char* inTagName)
+TableEntry* OpenTypeFileInput::GetTableEntry(const char* inTagName)
 {
 	ULongToTableEntryMap::iterator it = mTables.find(GetTag(inTagName));
 	
@@ -525,4 +556,23 @@ TableEntry* TrueTypeFileInput::GetTableEntry(const char* inTagName)
 		return NULL;
 	else
 		return &(it->second);
+}
+
+EStatusCode OpenTypeFileInput::ReadCFF()
+{
+	ULongToTableEntryMap::iterator it = mTables.find(GetTag("CFF "));
+	if(it == mTables.end())
+	{
+		TRACE_LOG("OpenTypeFileInput::ReadCFF, could not find cff table entry");
+		return eFailure;
+	}
+
+	mPrimitivesReader.SetOffset(it->second.Offset);
+
+	return mCFF.ReadCFFFile(mPrimitivesReader.GetReadStream());
+}
+
+EOpenTypeInputType OpenTypeFileInput::GetOpenTypeFontType()
+{
+	return mFontType;
 }

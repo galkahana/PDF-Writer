@@ -1,7 +1,7 @@
 #include "PDFDocEncoding.h"
 #include "BetweenIncluding.h"
 
-static const char* mGlyphNames[256] =
+static const char* scGlyphNames[256] =
 {
 		".notdef", ".notdef", ".notdef", ".notdef",".notdef", ".notdef", ".notdef", ".notdef",
 		".notdef", ".notdef", ".notdef", ".notdef",".notdef", ".notdef", ".notdef", ".notdef",
@@ -189,5 +189,5 @@ BoolAndByte PDFDocEncoding::Encode(wchar_t inUnicodeCharacter)
 
 const char* PDFDocEncoding::GetEncodedGlyphName(IOBasicTypes::Byte inEncodedCharacter)
 {
-	return mGlyphNames[inEncodedCharacter];
+	return scGlyphNames[inEncodedCharacter];
 }

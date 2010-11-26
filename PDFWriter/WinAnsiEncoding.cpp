@@ -1,7 +1,7 @@
 #include "WinAnsiEncoding.h"
 #include "BetweenIncluding.h"
 
-static const char* mGlyphNames[256] = 
+static const char* scGlyphNames[256] = 
 {
 		".notdef", ".notdef", ".notdef", ".notdef",".notdef", ".notdef", ".notdef", ".notdef",
 		".notdef", ".notdef", ".notdef", ".notdef",".notdef", ".notdef", ".notdef", ".notdef",
@@ -150,5 +150,5 @@ BoolAndByte WinAnsiEncoding::Encode(wchar_t inUnicodeCharacter)
 
 const char* WinAnsiEncoding::GetEncodedGlyphName(IOBasicTypes::Byte inEncodedCharacter)
 {
-	return mGlyphNames[inEncodedCharacter];
+	return scGlyphNames[inEncodedCharacter];
 }

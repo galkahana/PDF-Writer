@@ -14,6 +14,10 @@ UsedFontsRepository::UsedFontsRepository(void)
 
 UsedFontsRepository::~UsedFontsRepository(void)
 {
+	WStringToPDFUsedFontMap::iterator it = mUsedFonts.begin();
+	for(; it != mUsedFonts.end();++it)
+		delete (it->second);
+	mUsedFonts.clear(); 
 	delete mInputFontsInformation;
 }
 

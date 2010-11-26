@@ -18,8 +18,9 @@ EStatusCode TrueTypeANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 											ObjectsContext* inObjectsContext)
 {
 	ANSIFontWriter fontWriter;
+	string subsetFontName;
 
-	EStatusCode status = fontWriter.WriteFont(inFontInfo,inFontOccurrence,inObjectsContext,this);
+	EStatusCode status = fontWriter.WriteFont(inFontInfo,inFontOccurrence,inObjectsContext,this,subsetFontName);
 
 	if(eFailure == status)
 		return status;
@@ -57,7 +58,7 @@ void TrueTypeANSIFontWriter::WriteFontFileReference(
 										ObjectsContext* inObjectsContext)
 {
 	// FontFile2
-	inDescriptorContext->WriteNameValue(scFontFile2);
+	inDescriptorContext->WriteKey(scFontFile2);
 	mEmbeddedFontFileObjectID = inObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
 	inDescriptorContext->WriteObjectReferenceValue(mEmbeddedFontFileObjectID);
 }

@@ -30,8 +30,9 @@ EStatusCode TrueTypeDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObj
 														ObjectsContext* inObjectsContext)
 {
 	DescendentFontWriter descendentFontWriter;
+	string subsetFontName;
 
-	EStatusCode status = descendentFontWriter.WriteFont(inDecendentObjectID,inFontName,inFontInfo,inEncodedGlyphs,inObjectsContext,this);
+	EStatusCode status = descendentFontWriter.WriteFont(inDecendentObjectID,inFontName,inFontInfo,inEncodedGlyphs,inObjectsContext,this,subsetFontName);
 
 	if(eFailure == status)
 		return status;
@@ -64,7 +65,7 @@ void TrueTypeDescendentFontWriter::WriteFontFileReference(
 										ObjectsContext* inObjectsContext)
 {
 	// FontFile2
-	inDescriptorContext->WriteNameValue(scFontFile2);
+	inDescriptorContext->WriteKey(scFontFile2);
 	mEmbeddedFontFileObjectID = inObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
 	inDescriptorContext->WriteObjectReferenceValue(mEmbeddedFontFileObjectID);
 }

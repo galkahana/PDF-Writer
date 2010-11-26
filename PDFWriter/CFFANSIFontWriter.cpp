@@ -7,6 +7,7 @@
 #include "SafeBufferMacrosDefs.h"
 #include "ObjectsContext.h"
 #include "FreeTypeFaceWrapper.h"
+#include "CFFEmbeddedFontWriter.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -19,16 +20,22 @@ CFFANSIFontWriter::~CFFANSIFontWriter(void)
 {
 }
 
+static const string scType1C = "Type1C";
 EStatusCode CFFANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 											WrittenFontRepresentation* inFontOccurrence,
 											ObjectsContext* inObjectsContext)
 {
 	ANSIFontWriter fontWriter;
+	string subsetFontName;
 
-	return fontWriter.WriteFont(inFontInfo,inFontOccurrence,inObjectsContext,this);
+	EStatusCode status = fontWriter.WriteFont(inFontInfo,inFontOccurrence,inObjectsContext,this,subsetFontName);
 
+	if(eFailure == status)
+		return status;
 
-	// TODO : need to write the CFF font program
+	CFFEmbeddedFontWriter embeddedFontWriter;
+
+	return embeddedFontWriter.WriteEmbeddedFont(inFontInfo,inFontOccurrence->GetGlyphIDsAsOrderedVector(),scType1C,mEmbeddedFontFileObjectID,subsetFontName, inObjectsContext);
 }
 
 static const string scType1 = "Type1";
@@ -82,7 +89,7 @@ void CFFANSIFontWriter::WriteFontFileReference(
 										ObjectsContext* inObjectsContext)
 {
 	// FontFile3
-	inDescriptorContext->WriteNameValue(scFontFile3);
+	inDescriptorContext->WriteKey(scFontFile3);
 	mEmbeddedFontFileObjectID = inObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
 	inDescriptorContext->WriteObjectReferenceValue(mEmbeddedFontFileObjectID);
 }

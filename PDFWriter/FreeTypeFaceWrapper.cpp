@@ -9,15 +9,17 @@
 #include "WrittenFontTrueType.h"
 
 #include FT_XFREE86_H 
+#include FT_CID_H 
 
-FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const wstring& inFontFilePath)
+FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const wstring& inFontFilePath,bool inDoOwn)
 {
 	mFace = inFace;
 	mFontFilePath = inFontFilePath;
 	SetupFormatSpecificExtender(L"");	
+	mDoesOwn = inDoOwn;
 }
 
-FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const wstring& inFontFilePath,const wstring& inPFMFilePath)
+FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const wstring& inFontFilePath,const wstring& inPFMFilePath, bool inDoOwn)
 {
 	mFace = inFace;
 	mFontFilePath = inFontFilePath;
@@ -26,6 +28,7 @@ FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const wstring& inFontFil
 		SetupFormatSpecificExtender(inPFMFilePath);
 	else
 		SetupFormatSpecificExtender(L"");
+	mDoesOwn = inDoOwn;
 }
 
 wstring FreeTypeFaceWrapper::GetExtension(const wstring& inFilePath)
@@ -40,6 +43,8 @@ wstring FreeTypeFaceWrapper::GetExtension(const wstring& inFilePath)
 
 FreeTypeFaceWrapper::~FreeTypeFaceWrapper(void)
 {
+	if(mDoesOwn)
+		DoneFace();
 	delete mFormatParticularWrapper;
 }
 
@@ -498,9 +503,19 @@ IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObj
 		const char* fontFormat = FT_Get_X11_Font_Format(mFace);
 
 		if(strcmp(fontFormat,scType1) == 0 || strcmp(fontFormat,scCFF) == 0)
-			result = new WrittenFontCFF(inObjectsContext);
+		{
+			FT_Bool isCID = false;
+			
+			// CFF written fonts needs to know if the font is originally CID in order to disallow ANSI form in this case
+			if(FT_Get_CID_Is_Internally_CID_Keyed(mFace,&isCID) != 0)
+				isCID = false;	
+
+			result = new WrittenFontCFF(inObjectsContext,(bool)isCID);
+		}
 		else if(strcmp(fontFormat,scTrueType) == 0)
+		{
 			result = new WrittenFontTrueType(inObjectsContext);
+		}
 		else
 		{
 			result = NULL;

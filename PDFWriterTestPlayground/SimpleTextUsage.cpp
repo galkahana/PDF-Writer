@@ -15,19 +15,22 @@ SimpleTextUsage::~SimpleTextUsage(void)
 {
 }
 
+
+
+#include "Trace.h"
 EStatusCode SimpleTextUsage::Run()
 {
 	EStatusCode status;
 
 	do
 	{
-		/*status = RunCFFTest();
+		status = RunCFFTest();
 		if(status != eSuccess)
 		{
 			wcout<<"Failed CFF Test\n";
 			status = eFailure;
 			break;
-		}*/
+		}
 
 		status = RunTrueTypeTest();
 		if(status != eSuccess)
@@ -91,7 +94,6 @@ EStatusCode SimpleTextUsage::RunCFFTest()
 			break;
 		}
 
-
 		// Draw some text
 		contentContext->BT();
 		contentContext->k(0,0,0,1);
@@ -102,7 +104,30 @@ EStatusCode SimpleTextUsage::RunCFFTest()
 
 		EStatusCode encodingStatus = contentContext->Tj(L"abcd");
 		if(encodingStatus != eSuccess)
-			wcout<<"Could not find some of the glyphs for this font";
+			wcout<<"Could not find some of the glyphs for this font (BrushScriptStd)";
+
+		// continue even if failed...want to see how it looks like
+		contentContext->ET();
+
+		// now write some more text with kozuka font
+		contentContext->BT();
+		contentContext->k(0,0,0,1);
+
+		PDFUsedFont* fontK = pdfWriter.GetFontForFile(L"C:\\PDFLibTests\\TestMaterials\\fonts\\KozGoPro-Regular.otf");
+		if(!fontK)
+		{
+			status = eFailure;
+			wcout<<"Failed to create font object for KozGoPro-Regular.otf\n";
+			break;
+		}
+
+		contentContext->Tf(fontK,1);
+
+		contentContext->Tm(30,0,0,30,78.4252,400.8997);
+
+		encodingStatus = contentContext->Tj(L"abcd");
+		if(encodingStatus != eSuccess)
+			wcout<<"Could not find some of the glyphs for this font (Kozuka)";
 
 		// continue even if failed...want to see how it looks like
 		contentContext->ET();
@@ -182,7 +207,7 @@ EStatusCode SimpleTextUsage::RunTrueTypeTest()
 
 		contentContext->Tm(30,0,0,30,78.4252,662.8997);
 
-		EStatusCode encodingStatus = contentContext->Tj(L"abcd");
+		EStatusCode encodingStatus = contentContext->Tj(L"hello world");
 		if(encodingStatus != eSuccess)
 			wcout<<"Could not find some of the glyphs for this font";
 

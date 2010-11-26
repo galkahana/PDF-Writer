@@ -6,7 +6,7 @@
 #include "PDFStream.h"
 #include "OutputStreamTraits.h"
 #include "InputStringBufferStream.h"
-#include "TrueTypeFileInput.h"
+#include "OpenTypeFileInput.h"
 
 #include <sstream>
 #include <algorithm>
@@ -45,10 +45,10 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteEmbeddedFont(
 		DictionaryContext* fontProgramDictionaryContext = inObjectsContext->StartDictionary();
 
 		// Length1 (decompressed true type program length)
-		rawFontProgram.pubseekoff(0,ios_base::beg);
 
 		fontProgramDictionaryContext->WriteKey(scLength1);
-		fontProgramDictionaryContext->WriteIntegerValue(rawFontProgram.GetReadSize());
+		fontProgramDictionaryContext->WriteIntegerValue(rawFontProgram.GetCurrentWritePosition());
+		rawFontProgram.pubseekoff(0,ios_base::beg);
 		PDFStream* pdfStream = inObjectsContext->StartPDFStream(fontProgramDictionaryContext);
 
 
@@ -87,10 +87,16 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 			break;
 		}
 
-		status = mTrueTypeInput.ReadTrueTypeFile(mTrueTypeFile.GetInputStream());
+		status = mTrueTypeInput.ReadOpenTypeFile(mTrueTypeFile.GetInputStream());
 		if(status != eSuccess)
 		{
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to read true type file");
+			break;
+		}
+
+		if(mTrueTypeInput.GetOpenTypeFontType() != EOpenTypeTrueType)
+		{
+			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, font file is not true type, so there is an exceptions here. expecting true types only");
 			break;
 		}
 		
@@ -109,11 +115,11 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 		mSubsetFontGlyphsCount = subsetGlyphIDs.back() + 1;
 		
 		mFontFileStream.Assign(&outFontProgram);
-		mPrimitivesWriter.SetTrueTypeStream(&mFontFileStream);
+		mPrimitivesWriter.SetOpenTypeStream(&mFontFileStream);
 
 		// assign also to some reader streams, so i can read items for checksums calculations
 		mFontFileReaderStream.Assign(&outFontProgram);
-		mPrimitivesReader.SetTrueTypeStream(&mFontFileReaderStream);
+		mPrimitivesReader.SetOpenTypeStream(&mFontFileReaderStream);
 
 
 		status = WriteTrueTypeHeader();
@@ -340,7 +346,7 @@ void TrueTypeEmbeddedFontWriter::WriteEmptyTableEntry(const char* inTag,LongFile
 unsigned long TrueTypeEmbeddedFontWriter::GetTag(const char* inTagName)
 {
 	Byte buffer[4];
-	int i=0;
+	unsigned short i=0;
 
 	for(; i<strlen(inTagName);++i)
 		buffer[i] = (Byte)inTagName[i];
@@ -525,80 +531,17 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteMaxp()
 
 EStatusCode TrueTypeEmbeddedFontWriter::WriteCVT()
 {
-	// copy as is, no adjustments required
-
-	TableEntry* tableEntry = mTrueTypeInput.GetTableEntry("cvt ");
-	LongFilePositionType startTableOffset;
-	OutputStreamTraits streamCopier(&mFontFileStream);
-	LongFilePositionType endOfStream;
-
-	startTableOffset = mFontFileStream.GetCurrentPosition();
-
-	// copy and save the current position
-	mTrueTypeFile.GetInputStream()->SetPosition(tableEntry->Offset);
-	streamCopier.CopyToOutputStream(mTrueTypeFile.GetInputStream(),tableEntry->Length);
-	mPrimitivesWriter.PadTo4();
-	endOfStream = mFontFileStream.GetCurrentPosition();
-
-	// write table entry data, which includes movement
-	WriteTableEntryData(mCVTEntryWritingOffset,startTableOffset,tableEntry->Length);
-
-	// restore position to end of stream
-	mFontFileStream.SetPosition(endOfStream); 
-
-	return mPrimitivesWriter.GetInternalState();
+	return CreateTableCopy("cvt ",mCVTEntryWritingOffset);
 }
 
 EStatusCode TrueTypeEmbeddedFontWriter::WriteFPGM()
 {
-	// copy as is, no adjustments required
-
-	TableEntry* tableEntry = mTrueTypeInput.GetTableEntry("fpgm");
-	LongFilePositionType startTableOffset;
-	OutputStreamTraits streamCopier(&mFontFileStream);
-	LongFilePositionType endOfStream;
-
-	startTableOffset = mFontFileStream.GetCurrentPosition();
-
-	// copy and save the current position
-	mTrueTypeFile.GetInputStream()->SetPosition(tableEntry->Offset);
-	streamCopier.CopyToOutputStream(mTrueTypeFile.GetInputStream(),tableEntry->Length);
-	mPrimitivesWriter.PadTo4();
-	endOfStream = mFontFileStream.GetCurrentPosition();
-
-	// write table entry data, which includes movement
-	WriteTableEntryData(mFPGMEntryWritingOffset,startTableOffset,tableEntry->Length);
-
-	// restore position to end of stream
-	mFontFileStream.SetPosition(endOfStream); 
-
-	return mPrimitivesWriter.GetInternalState();
+	return CreateTableCopy("fpgm",mFPGMEntryWritingOffset);
 }
 
 EStatusCode TrueTypeEmbeddedFontWriter::WritePREP()
 {
-	// copy as is, no adjustments required
-
-	TableEntry* tableEntry = mTrueTypeInput.GetTableEntry("prep");
-	LongFilePositionType startTableOffset;
-	OutputStreamTraits streamCopier(&mFontFileStream);
-	LongFilePositionType endOfStream;
-
-	startTableOffset = mFontFileStream.GetCurrentPosition();
-
-	// copy and save the current position
-	mTrueTypeFile.GetInputStream()->SetPosition(tableEntry->Offset);
-	streamCopier.CopyToOutputStream(mTrueTypeFile.GetInputStream(),tableEntry->Length);
-	mPrimitivesWriter.PadTo4();
-	endOfStream = mFontFileStream.GetCurrentPosition();
-
-	// write table entry data, which includes movement
-	WriteTableEntryData(mPREPEntryWritingOffset,startTableOffset,tableEntry->Length);
-
-	// restore position to end of stream
-	mFontFileStream.SetPosition(endOfStream); 
-
-	return mPrimitivesWriter.GetInternalState();
+	return CreateTableCopy("prep",mPREPEntryWritingOffset);
 }
 
 EStatusCode TrueTypeEmbeddedFontWriter::WriteGlyf(const UIntVector& inSubsetGlyphIDs,unsigned long* inLocaTable)
@@ -684,62 +627,25 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateHeadTableCheckSumAdjustment()
 
 EStatusCode TrueTypeEmbeddedFontWriter::WriteNAME()
 {
-	// copy as is, no adjustments required
-
-	TableEntry* tableEntry = mTrueTypeInput.GetTableEntry("name");
-	LongFilePositionType startTableOffset;
-	OutputStreamTraits streamCopier(&mFontFileStream);
-	LongFilePositionType endOfStream;
-
-	startTableOffset = mFontFileStream.GetCurrentPosition();
-
-	// copy and save the current position
-	mTrueTypeFile.GetInputStream()->SetPosition(tableEntry->Offset);
-	streamCopier.CopyToOutputStream(mTrueTypeFile.GetInputStream(),tableEntry->Length);
-	mPrimitivesWriter.PadTo4();
-	endOfStream = mFontFileStream.GetCurrentPosition();
-
-	// write table entry data, which includes movement
-	WriteTableEntryData(mNAMEEntryWritingOffset,startTableOffset,tableEntry->Length);
-
-	// restore position to end of stream
-	mFontFileStream.SetPosition(endOfStream); 
-
-	return mPrimitivesWriter.GetInternalState();
+	return CreateTableCopy("name",mNAMEEntryWritingOffset);
 }
 
 EStatusCode TrueTypeEmbeddedFontWriter::WriteOS2()
 {
-	// copy as is, no adjustments required
-
-	TableEntry* tableEntry = mTrueTypeInput.GetTableEntry("OS/2");
-	LongFilePositionType startTableOffset;
-	OutputStreamTraits streamCopier(&mFontFileStream);
-	LongFilePositionType endOfStream;
-
-	startTableOffset = mFontFileStream.GetCurrentPosition();
-
-	// copy and save the current position
-	mTrueTypeFile.GetInputStream()->SetPosition(tableEntry->Offset);
-	streamCopier.CopyToOutputStream(mTrueTypeFile.GetInputStream(),tableEntry->Length);
-	mPrimitivesWriter.PadTo4();
-	endOfStream = mFontFileStream.GetCurrentPosition();
-
-	// write table entry data, which includes movement
-	WriteTableEntryData(mOS2EntryWritingOffset,startTableOffset,tableEntry->Length);
-
-	// restore position to end of stream
-	mFontFileStream.SetPosition(endOfStream); 
-
-	return mPrimitivesWriter.GetInternalState();
+	return CreateTableCopy("OS/2",mOS2EntryWritingOffset);
 }
 
 
 EStatusCode TrueTypeEmbeddedFontWriter::WriteCMAP()
 {
+	return CreateTableCopy("cmap",mCMAPEntryWritingOffset);
+}
+
+EStatusCode TrueTypeEmbeddedFontWriter::CreateTableCopy(const char* inTableName,LongFilePositionType inTableEntryLocation)
+{
 	// copy as is, no adjustments required
 
-	TableEntry* tableEntry = mTrueTypeInput.GetTableEntry("cmap");
+	TableEntry* tableEntry = mTrueTypeInput.GetTableEntry(inTableName);
 	LongFilePositionType startTableOffset;
 	OutputStreamTraits streamCopier(&mFontFileStream);
 	LongFilePositionType endOfStream;
@@ -753,10 +659,11 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteCMAP()
 	endOfStream = mFontFileStream.GetCurrentPosition();
 
 	// write table entry data, which includes movement
-	WriteTableEntryData(mCMAPEntryWritingOffset,startTableOffset,tableEntry->Length);
+	WriteTableEntryData(inTableEntryLocation,startTableOffset,tableEntry->Length);
 
 	// restore position to end of stream
 	mFontFileStream.SetPosition(endOfStream); 
 
 	return mPrimitivesWriter.GetInternalState();
+
 }

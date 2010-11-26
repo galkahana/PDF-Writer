@@ -1,6 +1,8 @@
 #pragma once
 #include "ITestUnit.h"
 
+class CFFFileInput;
+
 class SimpleTextUsage : public ITestUnit
 {
 public:

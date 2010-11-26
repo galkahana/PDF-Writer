@@ -29,7 +29,8 @@ EStatusCode DescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID,
 												FreeTypeFaceWrapper& inFontInfo,
 												const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
 												ObjectsContext* inObjectsContext,
-												IDescendentFontWriter* inDescendentFontWriterHelper)
+												IDescendentFontWriter* inDescendentFontWriterHelper,
+												string& outSubsetFontName)
 {
 	EStatusCode status = eSuccess;
 	FontDescriptorWriter fontDescriptorWriter;
@@ -54,6 +55,7 @@ EStatusCode DescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID,
 		// BaseFont
 		fontContext->WriteKey(scBaseFont);
 		fontContext->WriteNameValue(inFontName);
+		outSubsetFontName = inFontName;
 
 		WriteWidths(inEncodedGlyphs,fontContext);
 

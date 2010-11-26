@@ -2,12 +2,12 @@
 
 #include "EStatusCode.h"
 #include "ObjectsBasicTypes.h"
-#include "TrueTypeFileInput.h"
+#include "OpenTypeFileInput.h"
 #include "OutputStringBufferStream.h"
 #include "InputFile.h"
 #include "TrueTypePrimitiveWriter.h"
 #include "InputStringBufferStream.h"
-#include "TrueTypePrimitiveReader.h"
+#include "OpenTypePrimitiveReader.h"
 #include "MyStringBuf.h"
 
 #include <vector>
@@ -33,13 +33,13 @@ public:
 									ObjectsContext* inObjectsContext);
 
 private:
-	TrueTypeFileInput mTrueTypeInput;
+	OpenTypeFileInput mTrueTypeInput;
 	InputFile mTrueTypeFile;
 	OutputStringBufferStream mFontFileStream;
 	TrueTypePrimitiveWriter mPrimitivesWriter;
 	InputStringBufferStream mFontFileReaderStream; // now this might be confusing - i'm using a reader
 											 // to my output buffer, so i can calculate checksums 'n such
-	TrueTypePrimitiveReader mPrimitivesReader; // same here...
+	OpenTypePrimitiveReader mPrimitivesReader; // same here...
 	unsigned short mSubsetFontGlyphsCount;
 
 	LongFilePositionType mCVTEntryWritingOffset;
@@ -87,4 +87,5 @@ private:
 	EStatusCode WriteCMAP();
 	unsigned long GetCheckSum(LongFilePositionType inOffset,unsigned long inLength);
 	EStatusCode CreateHeadTableCheckSumAdjustment();
+	EStatusCode CreateTableCopy(const char* inTableName,LongFilePositionType inTableEntryLocation);
 };

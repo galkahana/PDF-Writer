@@ -32,7 +32,8 @@ public:
 	EStatusCode WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 							WrittenFontRepresentation* inFontOccurrence,
 							ObjectsContext* inObjectsContext,
-							IANSIFontWriterHelper* inANSIFontWriterHelper);
+							IANSIFontWriterHelper* inANSIFontWriterHelper,
+							std::string& outWrittenFontName);
 
 private:
 

@@ -1,8 +1,9 @@
 #pragma once
 
 #include "EStatusCode.h"
-#include "TrueTypePrimitiveReader.h"
+#include "OpenTypePrimitiveReader.h"
 #include "IByteReader.h"
+#include "CFFFileInput.h"
 
 #include <string>
 #include <map>
@@ -163,16 +164,25 @@ typedef GlyphEntry** GlyfTable;
 
 typedef map<unsigned short,GlyphEntry*> UShortToGlyphEntryMap;
 
-class TrueTypeFileInput
+
+enum EOpenTypeInputType
+{
+	EOpenTypeTrueType,
+	EOpenTypeCFF
+};
+
+class OpenTypeFileInput
 {
 public:
-	TrueTypeFileInput(void);
-	~TrueTypeFileInput(void);
+	OpenTypeFileInput(void);
+	~OpenTypeFileInput(void);
 
 
-	EStatusCode ReadTrueTypeFile(const wstring& inFontFilePath);
-	EStatusCode ReadTrueTypeFile(IByteReader* inTrueTypeFile);
+	EStatusCode ReadOpenTypeFile(const wstring& inFontFilePath);
+	EStatusCode ReadOpenTypeFile(IByteReader* inTrueTypeFile);
 
+
+	EOpenTypeInputType GetOpenTypeFontType();
 
 	unsigned short GetGlyphsCount();
 
@@ -192,9 +202,12 @@ public:
 	bool mPREPExists;
 
 	TableEntry* GetTableEntry(const char* inTagName);
+
+	CFFFileInput mCFF;
 	
 private:
-	TrueTypePrimitiveReader mPrimitivesReader;
+	OpenTypePrimitiveReader mPrimitivesReader;
+	EOpenTypeInputType mFontType;
 	unsigned short mTablesCount;
 	ULongToTableEntryMap mTables;
 	UShortToGlyphEntryMap mActualGlyphs; // using actual glyphs to map the glyphs that are not empty 
@@ -202,8 +215,8 @@ private:
 										 // be empty, to avoid having to change the glyphs indices. some
 										 // technique some producers use
 
-	EStatusCode ReadTrueTypeHeader();
-	EStatusCode VerifyTrueTypeSFNT();
+	EStatusCode ReadOpenTypeHeader();
+	EStatusCode ReadOpenTypeSFNT();
 	EStatusCode ReadHead();
 	EStatusCode ReadMaxP();
 	EStatusCode ReadHHea();
@@ -214,5 +227,6 @@ private:
 	EStatusCode ReadGlyfForDependencies();
 	unsigned long GetTag(const char* inTagName);
 	void FreeTables();
+	EStatusCode ReadCFF();
 
 };

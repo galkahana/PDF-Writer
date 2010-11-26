@@ -2,6 +2,7 @@
 #include "DescendentFontWriter.h"
 #include "DictionaryContext.h"
 #include "ObjectsContext.h"
+#include "CFFEmbeddedFontWriter.h"
 
 CFFDescendentFontWriter::CFFDescendentFontWriter(void)
 {
@@ -11,6 +12,12 @@ CFFDescendentFontWriter::~CFFDescendentFontWriter(void)
 {
 }
 
+static bool sEncodedGlypsSort(const UIntAndGlyphEncodingInfo& inLeft, const UIntAndGlyphEncodingInfo& inRight)
+{
+	return inLeft.first < inRight.first;
+}
+
+static const string scCIDFontType0C = "CIDFontType0C";
 EStatusCode CFFDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID, 
 														const string& inFontName,
 														FreeTypeFaceWrapper& inFontInfo,
@@ -18,10 +25,34 @@ EStatusCode CFFDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID
 														ObjectsContext* inObjectsContext)
 {
 	DescendentFontWriter descendentFontWriter;
+	string subsetFontName;
 
-	return descendentFontWriter.WriteFont(inDecendentObjectID,inFontName,inFontInfo,inEncodedGlyphs,inObjectsContext,this);
+	EStatusCode status = descendentFontWriter.WriteFont(inDecendentObjectID,inFontName,inFontInfo,inEncodedGlyphs,inObjectsContext,this,subsetFontName);
 
-	// TODO : write font program
+	if(eFailure == status)
+		return status;
+
+	CFFEmbeddedFontWriter embeddedFontWriter;
+	UIntAndGlyphEncodingInfoVector encodedGlyphs = inEncodedGlyphs;
+	UIntVector orderedGlyphs;
+	UShortVector cidMapping;
+	
+	sort(encodedGlyphs.begin(),encodedGlyphs.end(),sEncodedGlypsSort);	
+
+	for(UIntAndGlyphEncodingInfoVector::const_iterator it = encodedGlyphs.begin(); 
+		it != encodedGlyphs.end(); 
+		++it)
+	{
+		orderedGlyphs.push_back(it->first);
+		cidMapping.push_back(it->second.mEncodedCharacter);
+	}
+	return embeddedFontWriter.WriteEmbeddedFont(inFontInfo,
+												orderedGlyphs,
+												scCIDFontType0C,
+												mEmbeddedFontFileObjectID,
+												subsetFontName,
+												inObjectsContext,
+												&cidMapping);
 }
 
 static const string scCIDFontType0 = "CIDFontType0";
@@ -41,7 +72,7 @@ void CFFDescendentFontWriter::WriteFontFileReference(DictionaryContext* inDescri
 													ObjectsContext* inObjectsContext)
 {
 	// FontFile3
-	inDescriptorContext->WriteNameValue(scFontFile3);
+	inDescriptorContext->WriteKey(scFontFile3);
 	mEmbeddedFontFileObjectID = inObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
 	inDescriptorContext->WriteObjectReferenceValue(mEmbeddedFontFileObjectID);	
 }

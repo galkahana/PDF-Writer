@@ -3,14 +3,14 @@
 
 TrueTypePrimitiveWriter::TrueTypePrimitiveWriter(OutputStringBufferStream* inTrueTypeFile)
 {
-	SetTrueTypeStream(inTrueTypeFile);
+	SetOpenTypeStream(inTrueTypeFile);
 }
 
 TrueTypePrimitiveWriter::~TrueTypePrimitiveWriter(void)
 {
 }
 
-void TrueTypePrimitiveWriter::SetTrueTypeStream(OutputStringBufferStream* inTrueTypeFile)
+void TrueTypePrimitiveWriter::SetOpenTypeStream(OutputStringBufferStream* inTrueTypeFile)
 {
 	mTrueTypeFile = inTrueTypeFile;
 	mInternalState = (inTrueTypeFile ? eSuccess:eFailure);
