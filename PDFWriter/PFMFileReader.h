@@ -87,7 +87,7 @@ struct PFMExtendedFontMetrics
 	WORD KernTracks;
 };
 
-class IByteReader;
+class IByteReaderWithPosition;
 
 class PFMFileReader
 {
@@ -105,7 +105,7 @@ public:
 
 private:
 
-	IByteReader* mReaderStream;
+	IByteReaderWithPosition* mReaderStream;
 	EStatusCode mInternalReadStatus;
 
 	EStatusCode ReadByte(BYTE& outByte);

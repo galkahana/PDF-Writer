@@ -1,6 +1,6 @@
 #include "OutputStreamTraits.h"
 #include "IByteWriter.h"
-#include "IByteReader.h"
+#include "IByteReaderWithPosition.h"
 
 OutputStreamTraits::OutputStreamTraits(IByteWriter* inOutputStream)
 {

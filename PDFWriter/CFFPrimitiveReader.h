@@ -1,16 +1,16 @@
 #pragma once
 #include "EStatusCode.h"
-#include "IByteReader.h"
+#include "IByteReaderWithPosition.h"
 #include "DictOperand.h"
 
 class CFFPrimitiveReader
 {
 public:
-	CFFPrimitiveReader(IByteReader* inCFFFile = NULL);
+	CFFPrimitiveReader(IByteReaderWithPosition* inCFFFile = NULL);
 	~CFFPrimitiveReader(void);
 
 
-	void SetStream(IByteReader* inCFFFile);
+	void SetStream(IByteReaderWithPosition* inCFFFile);
 	void SetOffset(LongFilePositionType inNewOffset);
 	void Skip(LongBufferSizeType inToSkip);
 	LongFilePositionType GetCurrentPosition();
@@ -34,7 +34,7 @@ public:
 	EStatusCode ReadDictOperand(Byte inFirstByte,DictOperand& outOperand);
 
 private:
-	IByteReader* mCFFFile;
+	IByteReaderWithPosition* mCFFFile;
 	LongFilePositionType mInitialPosition;
 	EStatusCode mInternalState;
 	Byte mCurrentOffsize;

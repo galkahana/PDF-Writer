@@ -1,11 +1,11 @@
 #pragma once
 
 #include "EStatusCode.h"
-#include "IByteReader.h"
+#include "IByteReaderWithPosition.h"
 
 #define DEFAULT_BUFFER_SIZE 256*1024
 
-class InputBufferedStream : public IByteReader
+class InputBufferedStream : public IByteReaderWithPosition
 {
 public:
 	/*
@@ -26,31 +26,31 @@ public:
 	/*
 		Constructor with assigning. see Assign for unassign instructions
 	*/
-	InputBufferedStream(IByteReader* inSourceReader,IOBasicTypes::LongBufferSizeType inBufferSize = DEFAULT_BUFFER_SIZE);
+	InputBufferedStream(IByteReaderWithPosition* inSourceReader,IOBasicTypes::LongBufferSizeType inBufferSize = DEFAULT_BUFFER_SIZE);
 
 	/*
 		Assigns a reader stream for buffered reading. from the moment of assigning the
 		buffer assumes control of the stream.
 		Assign a NULL or a different reader to release ownership.
 	*/
-	void Assign(IByteReader* inReader);
+	void Assign(IByteReaderWithPosition* inReader);
 
-	// IByteReader implementation
+	// IByteReaderWithPosition implementation
 	virtual LongBufferSizeType Read(Byte* inBuffer,LongBufferSizeType inBufferSize);
 	virtual bool NotEnded();
 	virtual void Skip(LongBufferSizeType inSkipSize);
 	virtual void SetPosition(LongFilePositionType inOffsetFromStart);
 	virtual LongFilePositionType GetCurrentPosition();
 
-	IByteReader* GetSourceStream();
+	IByteReaderWithPosition* GetSourceStream();
 
 private:
 	IOBasicTypes::Byte* mBuffer;
 	IOBasicTypes::LongBufferSizeType mBufferSize;
 	IOBasicTypes::Byte* mCurrentBufferIndex;
 	IOBasicTypes::Byte* mLastAvailableIndex;
-	IByteReader* mSourceStream;
+	IByteReaderWithPosition* mSourceStream;
 
-	void Initiate(IByteReader* inSourceReader,IOBasicTypes::LongBufferSizeType inBufferSize);
+	void Initiate(IByteReaderWithPosition* inSourceReader,IOBasicTypes::LongBufferSizeType inBufferSize);
 
 };

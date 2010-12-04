@@ -1,6 +1,6 @@
 #include "JPEGImageParser.h"
 #include "JPEGImageInformation.h"
-#include "IByteReader.h"
+#include "IByteReaderWithPosition.h"
 
 #include <memory.h>
 
@@ -40,7 +40,7 @@ const unsigned int scAPP1xResolutionTagID = 0x011a;
 const unsigned int scAPP1yResolutionTagID = 0x011b;
 const unsigned int scAPP1ResolutionUnitTagID = 0x0128;
 
-EStatusCode JPEGImageParser::Parse(IByteReader* inImageStream,JPEGImageInformation& outImageInformation)
+EStatusCode JPEGImageParser::Parse(IByteReaderWithPosition* inImageStream,JPEGImageInformation& outImageInformation)
 {
 	EStatusCode status = eFailure;
 	unsigned int tagID;

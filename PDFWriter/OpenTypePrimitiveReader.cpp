@@ -1,6 +1,6 @@
 #include "OpenTypePrimitiveReader.h"
 
-OpenTypePrimitiveReader::OpenTypePrimitiveReader(IByteReader* inOpenTypeFile)
+OpenTypePrimitiveReader::OpenTypePrimitiveReader(IByteReaderWithPosition* inOpenTypeFile)
 {
 	SetOpenTypeStream(inOpenTypeFile);
 }
@@ -9,7 +9,7 @@ OpenTypePrimitiveReader::~OpenTypePrimitiveReader(void)
 {
 }
 
-void OpenTypePrimitiveReader::SetOpenTypeStream(IByteReader* inOpenTypeFile)
+void OpenTypePrimitiveReader::SetOpenTypeStream(IByteReaderWithPosition* inOpenTypeFile)
 {
 	mOpenTypeFile = inOpenTypeFile;
 	if(inOpenTypeFile)
@@ -197,7 +197,7 @@ EStatusCode OpenTypePrimitiveReader::Read(Byte* inBuffer,LongBufferSizeType inBu
 	return status;	
 }
 
-IByteReader* OpenTypePrimitiveReader::GetReadStream()
+IByteReaderWithPosition* OpenTypePrimitiveReader::GetReadStream()
 {
 	return mOpenTypeFile;
 }

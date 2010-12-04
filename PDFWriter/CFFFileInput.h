@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EStatusCode.h"
-#include "IByteReader.h"
+#include "IByteReaderWithPosition.h"
 #include "CFFPrimitiveReader.h"
 #include "IType2InterpreterImplementation.h"
 
@@ -158,12 +158,12 @@ public:
 	~CFFFileInput(void);
 
 	// parses the whole CFF file, with all contained fonts
-	EStatusCode ReadCFFFile(IByteReader* inCFFFile);
+	EStatusCode ReadCFFFile(IByteReaderWithPosition* inCFFFile);
 	// parses the CFF file just for the particular font according to index. Index should be 
 	// according to how it appears in the CFF
-	EStatusCode ReadCFFFile(IByteReader* inCFFFile,unsigned short inFontIndex);
+	EStatusCode ReadCFFFile(IByteReaderWithPosition* inCFFFile,unsigned short inFontIndex);
 	// parses the CFF file just for the particular named font
-	EStatusCode ReadCFFFile(IByteReader* inCFFFile,const string& inFontName);
+	EStatusCode ReadCFFFile(IByteReaderWithPosition* inCFFFile,const string& inFontName);
 
 	// call only <i> after </i> calling the read method...got it?
 	// calculate dependencies for a given charstring [it can be char, gsubr or localsubr].
@@ -286,6 +286,6 @@ private:
 	void ReadEncoding(EncodingsInfo* inEncoding,LongFilePositionType inEncodingPosition);
 	EStatusCode ReadEncodings(unsigned short inFontIndex);
 	EStatusCode ReadCIDInformation(unsigned short inFontIndex);
-	EStatusCode ReadCFFFileByIndexOrName(IByteReader* inCFFFile,const string& inFontName,unsigned short inFontIndex);
+	EStatusCode ReadCFFFileByIndexOrName(IByteReaderWithPosition* inCFFFile,const string& inFontName,unsigned short inFontIndex);
 };
 

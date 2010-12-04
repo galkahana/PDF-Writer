@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IByteReader.h"
+#include "IByteReaderWithPosition.h"
 #include "MyStringBuf.h"
 
 #include <sstream>
@@ -8,7 +8,7 @@
 
 using namespace std;
 
-class InputStringBufferStream : public IByteReader
+class InputStringBufferStream : public IByteReaderWithPosition
 {
 public:
 	InputStringBufferStream(MyStringBuf* inBufferToReadFrom);
@@ -16,7 +16,7 @@ public:
 
 	void Assign(MyStringBuf* inBufferToReadFrom);
 
-	// IByteReader implementation
+	// IByteReaderWithPosition implementation
 	virtual LongBufferSizeType Read(Byte* inBuffer,LongBufferSizeType inBufferSize);
 	virtual bool NotEnded();
 	virtual void Skip(LongBufferSizeType inSkipSize);

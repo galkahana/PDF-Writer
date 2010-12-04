@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EStatusCode.h"
-#include "IByteReader.h"
+#include "IByteReaderWithPosition.h"
 
 #include <string>
 #include <stdio.h>
@@ -9,7 +9,7 @@
 using namespace std;
 
 
-class InputFileStream : public IByteReader
+class InputFileStream : public IByteReaderWithPosition
 {
 public:
 	InputFileStream(void);
@@ -20,7 +20,7 @@ public:
 	EStatusCode Open(const wstring& inFilePath);
 	EStatusCode Close();
 
-	// IByteReader implementation
+	// IByteReaderWithPosition implementation
 	virtual LongBufferSizeType Read(Byte* inBuffer,LongBufferSizeType inBufferSize);
 	virtual bool NotEnded();
 	virtual void Skip(LongBufferSizeType inSkipSize);

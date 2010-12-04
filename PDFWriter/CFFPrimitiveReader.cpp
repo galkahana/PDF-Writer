@@ -1,7 +1,7 @@
 #include "CFFPrimitiveReader.h"
 #include <math.h>
 
-CFFPrimitiveReader::CFFPrimitiveReader(IByteReader* inCFFFile)
+CFFPrimitiveReader::CFFPrimitiveReader(IByteReaderWithPosition* inCFFFile)
 {
 	SetStream(inCFFFile);
 }
@@ -10,7 +10,7 @@ CFFPrimitiveReader::~CFFPrimitiveReader(void)
 {
 }
 
-void CFFPrimitiveReader::SetStream(IByteReader* inCFFFile)
+void CFFPrimitiveReader::SetStream(IByteReaderWithPosition* inCFFFile)
 {
 	mCFFFile = inCFFFile;
 	if(inCFFFile)

@@ -1,7 +1,7 @@
 #include "PFMFileReader.h"
 #include "Trace.h"
 #include "InputFile.h"
-#include "IByteReader.h"
+#include "IByteReaderWithPosition.h"
 
 PFMFileReader::PFMFileReader(void)
 {

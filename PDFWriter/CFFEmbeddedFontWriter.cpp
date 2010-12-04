@@ -6,7 +6,7 @@
 #include "Trace.h"
 #include "FreeTypeFaceWrapper.h"
 #include "DictionaryContext.h"
-#include "IByteReader.h"
+#include "IByteReaderWithPosition.h"
 #include "CharStringType2Flattener.h"
 
 #include <algorithm>

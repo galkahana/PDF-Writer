@@ -60,7 +60,7 @@ EStatusCode InputFile::CloseFile()
 }
 
 
-IByteReader* InputFile::GetInputStream()
+IByteReaderWithPosition* InputFile::GetInputStream()
 {
 	return mInputStream;
 }

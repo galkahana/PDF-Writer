@@ -4,7 +4,7 @@
 #include "IOBasicTypes.h"
 
 struct JPEGImageInformation;
-class IByteReader;
+class IByteReaderWithPosition;
 
 class JPEGImageParser
 {
@@ -12,11 +12,11 @@ public:
 	JPEGImageParser(void);
 	~JPEGImageParser(void);
 
-	EStatusCode Parse(IByteReader* inImageStream,JPEGImageInformation& outImageInformation);
+	EStatusCode Parse(IByteReaderWithPosition* inImageStream,JPEGImageInformation& outImageInformation);
 
 private:
 
-	IByteReader* mImageStream;
+	IByteReaderWithPosition* mImageStream;
 	IOBasicTypes::Byte mReadBuffer[500];
 
 	EStatusCode ReadJPEGID();

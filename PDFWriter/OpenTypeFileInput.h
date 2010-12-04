@@ -2,7 +2,7 @@
 
 #include "EStatusCode.h"
 #include "OpenTypePrimitiveReader.h"
-#include "IByteReader.h"
+#include "IByteReaderWithPosition.h"
 #include "CFFFileInput.h"
 
 #include <string>
@@ -179,7 +179,7 @@ public:
 
 
 	EStatusCode ReadOpenTypeFile(const wstring& inFontFilePath);
-	EStatusCode ReadOpenTypeFile(IByteReader* inTrueTypeFile);
+	EStatusCode ReadOpenTypeFile(IByteReaderWithPosition* inTrueTypeFile);
 
 
 	EOpenTypeInputType GetOpenTypeFontType();

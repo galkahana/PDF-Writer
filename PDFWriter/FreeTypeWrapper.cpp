@@ -2,7 +2,7 @@
 #include "Trace.h"
 #include "StringTraits.h"
 #include "InputFile.h"
-#include "IByteReader.h"
+#include "IByteReaderWithPosition.h"
 
 #undef __FTERRORS_H__                                           
 #define FT_ERRORDEF( e, v, s )  { e, s },                       
@@ -177,7 +177,7 @@ static unsigned long InputFileReadSeek(	   FT_Stream	   stream,
 										   unsigned char*  buffer,
 										   unsigned long   count)
 {
-	IByteReader* inputFileStream = ((InputFile*)(stream->descriptor.pointer))->GetInputStream();	
+	IByteReaderWithPosition* inputFileStream = ((InputFile*)(stream->descriptor.pointer))->GetInputStream();	
 	unsigned long readBytes = 0;
 	
 	inputFileStream->SetPosition(offset);

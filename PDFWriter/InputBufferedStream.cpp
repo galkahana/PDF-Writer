@@ -21,12 +21,12 @@ InputBufferedStream::InputBufferedStream(IOBasicTypes::LongBufferSizeType inBuff
 	Initiate(NULL,inBufferSize);
 }
 
-InputBufferedStream::InputBufferedStream(IByteReader* inSourceReader,IOBasicTypes::LongBufferSizeType inBufferSize)
+InputBufferedStream::InputBufferedStream(IByteReaderWithPosition* inSourceReader,IOBasicTypes::LongBufferSizeType inBufferSize)
 {
 	Initiate(inSourceReader,inBufferSize);
 }
 
-void InputBufferedStream::Assign(IByteReader* inReader)
+void InputBufferedStream::Assign(IByteReaderWithPosition* inReader)
 {
 	mSourceStream = inReader;
 	mCurrentBufferIndex = mBuffer;
@@ -95,7 +95,7 @@ bool InputBufferedStream::NotEnded()
 	return mSourceStream->NotEnded() || (mCurrentBufferIndex != mLastAvailableIndex);
 }
 
-void InputBufferedStream::Initiate(IByteReader* inSourceReader,IOBasicTypes::LongBufferSizeType inBufferSize)
+void InputBufferedStream::Initiate(IByteReaderWithPosition* inSourceReader,IOBasicTypes::LongBufferSizeType inBufferSize)
 {
 	mBufferSize = inBufferSize;
 	mBuffer = new Byte[mBufferSize];
@@ -123,7 +123,7 @@ void InputBufferedStream::SetPosition(LongFilePositionType inOffsetFromStart)
 	mSourceStream->SetPosition(inOffsetFromStart);
 }
 
-IByteReader* InputBufferedStream::GetSourceStream()
+IByteReaderWithPosition* InputBufferedStream::GetSourceStream()
 {
 	return mSourceStream;
 }

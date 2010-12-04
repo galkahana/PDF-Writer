@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EStatusCode.h"
-#include "IByteReader.h"
+#include "IByteReaderWithPosition.h"
 #include <string>
 
 class InputBufferedStream;
@@ -18,7 +18,7 @@ public:
 	EStatusCode OpenFile(const wstring& inFilePath);
 	EStatusCode CloseFile();
 
-	IByteReader* GetInputStream(); // returns buffered input stream
+	IByteReaderWithPosition* GetInputStream(); // returns buffered input stream
 	const wstring& GetFilePath();
 	
 	LongFilePositionType GetFileSize();

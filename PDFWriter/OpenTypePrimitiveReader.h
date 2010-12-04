@@ -1,15 +1,15 @@
 #pragma once
 
 #include "EStatusCode.h"
-#include "IByteReader.h"
+#include "IByteReaderWithPosition.h"
 
 class OpenTypePrimitiveReader
 {
 public:
-	OpenTypePrimitiveReader(IByteReader* inTrueTypeFile = NULL);
+	OpenTypePrimitiveReader(IByteReaderWithPosition* inTrueTypeFile = NULL);
 	~OpenTypePrimitiveReader(void);
 
-	void SetOpenTypeStream(IByteReader* inOpenTypeFile);
+	void SetOpenTypeStream(IByteReaderWithPosition* inOpenTypeFile);
 	void SetOffset(LongFilePositionType inNewOffset);
 	void Skip(LongBufferSizeType inToSkip);
 	LongFilePositionType GetCurrentPosition();
@@ -25,10 +25,10 @@ public:
 	EStatusCode ReadFixed(double& outValue);
 	EStatusCode Read(Byte* inBuffer,LongBufferSizeType inBufferSize);
 
-	IByteReader* GetReadStream();
+	IByteReaderWithPosition* GetReadStream();
 private:
 
-	IByteReader* mOpenTypeFile;
+	IByteReaderWithPosition* mOpenTypeFile;
 	LongFilePositionType mInitialPosition;
 	EStatusCode mInternalState;
 

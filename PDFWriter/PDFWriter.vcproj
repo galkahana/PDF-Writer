@@ -286,6 +286,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\IByteReaderWithPosition.h"
+					>
+				</File>
+				<File
 					RelativePath=".\IByteWriter.h"
 					>
 				</File>
@@ -1123,6 +1127,26 @@
 				</File>
 				<File
 					RelativePath=".\IType2InterpreterImplementation.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Type1"
+				>
+				<File
+					RelativePath=".\InputPFBDecodeStream.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\InputPFBDecodeStream.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Type1Input.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Type1Input.h"
 					>
 				</File>
 			</Filter>

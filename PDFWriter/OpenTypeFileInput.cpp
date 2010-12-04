@@ -53,7 +53,7 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeFile(const wstring& inFontFilePath)
 	return status;
 }
 
-EStatusCode OpenTypeFileInput::ReadOpenTypeFile(IByteReader* inTrueTypeFile)
+EStatusCode OpenTypeFileInput::ReadOpenTypeFile(IByteReaderWithPosition* inTrueTypeFile)
 {
 	EStatusCode status;
 

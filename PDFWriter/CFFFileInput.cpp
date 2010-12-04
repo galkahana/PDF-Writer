@@ -170,7 +170,7 @@ void CFFFileInput::Reset()
 	FreeData();
 }
 
-EStatusCode CFFFileInput::ReadCFFFile(IByteReader* inCFFFile)
+EStatusCode CFFFileInput::ReadCFFFile(IByteReaderWithPosition* inCFFFile)
 {
 	EStatusCode status;
 
@@ -1327,7 +1327,7 @@ LongFilePositionType CFFFileInput::GetFDSelectPosition(unsigned short inFontInde
 }
 
 
-EStatusCode CFFFileInput::ReadCFFFileByIndexOrName(IByteReader* inCFFFile,const string& inFontName,unsigned short inFontIndex)
+EStatusCode CFFFileInput::ReadCFFFileByIndexOrName(IByteReaderWithPosition* inCFFFile,const string& inFontName,unsigned short inFontIndex)
 {
 	// read either by font name or index. read by font name if not empty, otherwise by index
 	EStatusCode status;
@@ -1607,12 +1607,12 @@ EStatusCode CFFFileInput::ReadCIDInformation(unsigned short inFontIndex)
 }
 
 
-EStatusCode CFFFileInput::ReadCFFFile(IByteReader* inCFFFile,unsigned short inFontIndex)
+EStatusCode CFFFileInput::ReadCFFFile(IByteReaderWithPosition* inCFFFile,unsigned short inFontIndex)
 {
 	return ReadCFFFileByIndexOrName(inCFFFile,"",inFontIndex);
 }
 
-EStatusCode CFFFileInput::ReadCFFFile(IByteReader* inCFFFile,const string& inFontName)
+EStatusCode CFFFileInput::ReadCFFFile(IByteReaderWithPosition* inCFFFile,const string& inFontName)
 {
 	return ReadCFFFileByIndexOrName(inCFFFile,inFontName,0);
 }

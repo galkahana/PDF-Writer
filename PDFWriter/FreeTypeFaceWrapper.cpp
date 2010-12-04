@@ -510,7 +510,7 @@ IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObj
 			if(FT_Get_CID_Is_Internally_CID_Keyed(mFace,&isCID) != 0)
 				isCID = false;	
 
-			result = new WrittenFontCFF(inObjectsContext,(bool)isCID);
+			result = new WrittenFontCFF(inObjectsContext,isCID != 0);
 		}
 		else if(strcmp(fontFormat,scTrueType) == 0)
 		{
