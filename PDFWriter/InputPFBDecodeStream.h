@@ -22,7 +22,7 @@ typedef EStatusCode (*DecodeMethod)(
 
 typedef pair<bool,string> BoolAndString;
 
-class InputPFBDecodeStream : IByteReader
+class InputPFBDecodeStream : public IByteReader
 {
 public:
 	InputPFBDecodeStream(void);
@@ -47,6 +47,7 @@ public:
 	// will stop tokenizer as well
 	void SkipTillToken();
 
+	EStatusCode GetInternalState();
 
 	// internal usage.
 	EStatusCode ReadDecodedByte(Byte& outByte);

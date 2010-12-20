@@ -59,12 +59,6 @@ public:
 	virtual EStatusCode Type2Index(const CharStringOperandList& inOperandList)=0;
 	virtual EStatusCode Type2Roll(const CharStringOperandList& inOperandList)=0;
 	
-	
-	
-	
-	
-	
-	
 	virtual CharString* GetLocalSubr(long inSubrIndex) = 0; // you should bias the index !!
 	virtual CharString* GetGlobalSubr(long inSubrIndex) = 0;// you should bias the index !!
 	

@@ -306,6 +306,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\InputByteArrayStream.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\InputByteArrayStream.h"
+					>
+				</File>
+				<File
 					RelativePath=".\InputFile.cpp"
 					>
 				</File>
@@ -1134,11 +1142,43 @@
 				Name="Type1"
 				>
 				<File
+					RelativePath=".\CharStringType1Interpreter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CharStringType1Interpreter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CharStringType1Tracer.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CharStringType1Tracer.h"
+					>
+				</File>
+				<File
+					RelativePath=".\InputCharStringDecodeStream.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\InputCharStringDecodeStream.h"
+					>
+				</File>
+				<File
 					RelativePath=".\InputPFBDecodeStream.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\InputPFBDecodeStream.h"
+					>
+				</File>
+				<File
+					RelativePath=".\IType1InterpreterImplementation.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PSBool.h"
 					>
 				</File>
 				<File

@@ -37,7 +37,7 @@ void InputPFBDecodeStream::ResetReadStatus()
 	mSegmentSize = 0;
 	mCurrentType = 0;
 	mHasTokenBuffer = false;
-	mFoundEOF = true;
+	mFoundEOF = false;
 	mInternalState = (mStreamToDecode != NULL) ? eSuccess:eFailure;
 }
 
@@ -111,7 +111,7 @@ EStatusCode InputPFBDecodeStream::InitializeStreamSegment()
 
 						// flushing might lead us to section end...to save another call
 						// check if done here and reread
-						if(0 == mInSegmentReadIndex)
+						if(mSegmentSize <= mInSegmentReadIndex)
 							requireSegmentReread = true;
 					}
 					break;
@@ -279,7 +279,7 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 						result.first = false;
 						break;
 					}
-					if(0x0C == buffer|| 0x0A == buffer)
+					if(0xD == buffer|| 0xA == buffer)
 						break;
 					tokenBuffer.Write(&buffer,1);
 				}
@@ -303,18 +303,18 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 					if(backSlashEncountered)
 					{
 						backSlashEncountered = false;
-						if(0x0A == buffer || 0x0D == buffer)
+						if(0xA == buffer || 0xD == buffer)
 						{
 							// ignore backslash and newline. might also need to read extra
 							// for cr-ln
-							if(0x0D == buffer && IsSegmentNotEnded())
+							if(0xD == buffer && IsSegmentNotEnded())
 							{
 								if(GetNextByteForToken(buffer) != eSuccess)
 								{
 									result.first = false;
 									break;
 								}
-								if(buffer != 0x0A)
+								if(buffer != 0xA)
 									SaveTokenBuffer(buffer);
 							}
 						}
@@ -410,6 +410,12 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 				}
 				break;
 			}
+			case '[': // for all array or executable tokanizers, the tokanizer is just the mark
+			case ']':
+			case '{':
+			case '}':
+				result.second = tokenBuffer.ToString();
+				break;
 
 			default: // regular token. read till next breaker or whitespace
 			{
@@ -482,7 +488,10 @@ void InputPFBDecodeStream::SkipTillToken()
 			break;
 
 		if(!IsPostScriptWhiteSpace(buffer))
+		{
+			SaveTokenBuffer(buffer);
 			break;
+		}
 	}
 }
 
@@ -542,6 +551,13 @@ LongBufferSizeType InputPFBDecodeStream::Read(Byte* inBuffer,LongBufferSizeType 
 {
 	LongBufferSizeType bufferIndex = 0;
 
+	if(mHasTokenBuffer && inBufferSize > 0)
+	{
+		inBuffer[0] = mTokenBuffer;
+		mHasTokenBuffer = false;
+		++bufferIndex;
+	}
+
 	while(NotEnded() && inBufferSize > bufferIndex && eSuccess == mInternalState)
 	{
 		while(mSegmentSize > mInSegmentReadIndex && 
@@ -565,3 +581,8 @@ bool InputPFBDecodeStream::NotEnded()
 	return mStreamToDecode && mStreamToDecode->NotEnded() && !mFoundEOF;
 }
 
+
+EStatusCode InputPFBDecodeStream::GetInternalState()
+{
+	return mInternalState;
+}

@@ -472,8 +472,8 @@ EStatusCode CFFEmbeddedFontWriter::WriteStringIndex()
 	OutputStreamTraits streamCopier(&mFontFileStream);
 	mOpenTypeFile.GetInputStream()->SetPosition(mOpenTypeInput.mCFF.mCFFOffset + mOpenTypeInput.mCFF.mStringIndexPosition);
 	return streamCopier.CopyToOutputStream(mOpenTypeFile.GetInputStream(),
-											mOpenTypeInput.mCFF.mGlobalSubrsPosition -
-											mOpenTypeInput.mCFF.mStringIndexPosition);
+											(LongBufferSizeType)(mOpenTypeInput.mCFF.mGlobalSubrsPosition -
+											mOpenTypeInput.mCFF.mStringIndexPosition));
 }
 
 EStatusCode CFFEmbeddedFontWriter::WriteGlobalSubrsIndex()

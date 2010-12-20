@@ -647,6 +647,26 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Type1"
+				>
+				<File
+					RelativePath=".\PFBStreamTest.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PFBStreamTest.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Type1Test.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Type1Test.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath=".\ImportantReadme.txt"
