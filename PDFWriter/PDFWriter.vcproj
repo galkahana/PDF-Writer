@@ -1178,6 +1178,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\PSBool.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\PSBool.h"
 					>
 				</File>
@@ -1187,6 +1191,14 @@
 				</File>
 				<File
 					RelativePath=".\Type1Input.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Type1ToCFFEmbeddedFontWriter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Type1ToCFFEmbeddedFontWriter.h"
 					>
 				</File>
 			</Filter>

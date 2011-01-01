@@ -244,6 +244,8 @@ EStatusCode CharStringType2Flattener::Type2Hstemhm(const CharStringOperandList& 
 
 EStatusCode CharStringType2Flattener::Type2Hintmask(const CharStringOperandList& inOperandList,Byte* inProgramCounter)
 {
+	mStemsCount+= (unsigned short)(inOperandList.size() / 2);
+
 	if(WriteRegularOperator(19) != eSuccess)
 		return eFailure;
 

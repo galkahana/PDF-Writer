@@ -2,7 +2,6 @@
 #include "OpenTypeFileInput.h"
 #include "InputFile.h"
 #include "TestsRunner.h"
-#include "CFFFileInput.h"
 
 #include "BoxingBase.h"
 #include "OutputFile.h"
@@ -21,11 +20,201 @@ OpenTypeTest::~OpenTypeTest(void)
 }
 
 
+#define FONT_OBJECT_START 13742 + 68
+#define FONT_OBJECT_STREAM_LENGTH 10727
+
+#include "OutputFlateDecodeStream.h"
+#include "OutputStreamTraits.h"
+
+EStatusCode OpenTypeTest::ExtractFontSegment()
+{
+	InputFile sourcePdfFile;
+	OutputFlateDecodeStream decoderStream;
+
+	EStatusCode status = sourcePdfFile.OpenFile(L"c:\\pdflibtests\\TestMaterials\\fonts\\Type1EmbeddedComplete.pdf");
+	do
+	{
+		if(status != eSuccess)
+			break;
+
+		OutputFile outputFile;
+
+		status = outputFile.OpenFile(L"c:\\pdflibtests\\TestMaterials\\fonts\\Type1Segment.cff");
+		decoderStream.Assign(outputFile.GetOutputStream());
+
+		OutputStreamTraits traits(&decoderStream);
+
+		sourcePdfFile.GetInputStream()->SetPosition(FONT_OBJECT_START);
+
+		status = traits.CopyToOutputStream(sourcePdfFile.GetInputStream(),FONT_OBJECT_STREAM_LENGTH);
+		if(status != eSuccess)
+			break;
+		decoderStream.Assign(NULL);
+	}
+	while(false);
+
+	return status;
+}
+
+#include "StringTraits.h"
+
+EStatusCode OpenTypeTest::DisplayFontSegmentInformation()
+{
+	InputFile inputFile;
+
+	EStatusCode status = inputFile.OpenFile(L"c:\\pdflibtests\\TestMaterials\\fonts\\Type1Segment.cff");
+		
+	do
+	{
+		if(status != eSuccess)
+			break;
+
+		CFFFileInput cffFileInput;
+
+		status = cffFileInput.ReadCFFFile(inputFile.GetInputStream(),0);
+		if(status != eSuccess)
+			break;
+
+
+		// dumping font dictionary information
+		wcout<<"Dumping font information for "<<StringTraits(cffFileInput.mName.front()).WidenString().c_str()<<"\n";
+		wcout<<"Top Dict:\n";
+		DumpDictionary(cffFileInput.mTopDictIndex[0].mTopDict);
+
+		wcout<<"\nPrivate Dict:\n";
+		DumpDictionary(cffFileInput.mPrivateDicts[0].mPrivateDict);
+
+		wcout<<"\nSaving Glyph programs for a,b,c,d and .notdef now...\n";
+		// a,b,c,d and .notdef
+		status = SaveCharstringCode(0,0,&cffFileInput);
+		for(unsigned short i=66; i < 70 && eSuccess == status; ++i)
+			status = SaveCharstringCode(0,i,&cffFileInput);
+		wcout<<"Done\n";
+	}while(false);
+
+	return status;
+}
+
+void OpenTypeTest::DumpDictionary(const UShortToDictOperandListMap& inDict)
+{
+	UShortToDictOperandListMap::const_iterator it = inDict.begin();
+
+	for(; it != inDict.end(); ++it)
+	{
+		wcout<<FormatDictionaryKey(it->first).c_str()<<L" = ";
+		if(it->second.size() == 1)
+		{
+			wcout<<(it->second.front().IsInteger ? 
+					Long(it->second.front().IntegerValue).ToWString() : 
+					Double(it->second.front().RealValue).ToWString())
+				 <<L"\n";
+		}
+		else
+		{
+			wcout<<L"[ ";
+			DictOperandList::const_iterator itOperands = it->second.begin();
+			for(; itOperands != it->second.end(); ++itOperands)
+			{
+				wcout<<(itOperands->IsInteger ? 
+					Long(itOperands->IntegerValue).ToWString() : 
+					Double(itOperands->RealValue).ToWString())<<L" ";
+			}
+			wcout<<L"]\n";
+		}
+	}
+}
+
+static const wchar_t* scLowBytesOperands[22] =
+{
+	L"version",
+	L"Notice",
+	L"FullName",
+	L"FamilyName",
+	L"Weight",	
+	L"FontBBox",
+	L"BlueValues",
+	L"OtherBlues",
+	L"FamilyBlues",
+	L"FamilyOtherBlues",
+	L"StdHW",
+	L"StdVW",
+	L"Escape",
+	L"UniqueID",
+	L"XUID",
+	L"charset",
+	L"Encoding",
+	L"CharStrings",
+	L"Private",
+	L"Subrs",
+	L"defaultWidthX",
+	L"nominalWidthX"
+};
+
+static const wchar_t* scHighBytesOperands[23] =
+{
+	L"Copyright",
+	L"isFixedPitch",
+	L"ItalicAngle",
+	L"UnderlinePosition",
+	L"UnderlineThickness",
+	L"PaintType",
+	L"CharstringType",
+	L"FontMatrix",
+	L"StrokeWidth",
+	L"BlueScale",
+	L"BlueShift",
+	L"BlueFuzz",
+	L"StemSnapH",
+	L"StemSnapV",
+	L"ForceBold",
+	L"ForceBoldThreshold",
+	L"lenIV",
+	L"LanguageGroup",
+	L"ExpansionFactor",
+	L"initialRandomSeed",
+	L"SyntheticBase",
+	L"PostScript",
+	L"BaseFontName"
+};
+
+#include "SafeBufferMacrosDefs.h"
+
+wstring OpenTypeTest::FormatDictionaryKey(unsigned short inDictionaryKey)
+{
+	Byte highByte = (Byte)((inDictionaryKey >> 8) & 0xff);
+	Byte lowByte = (Byte)(inDictionaryKey & 0xff);
+	wstring result;
+
+	if(0 == highByte)
+	{
+		if(lowByte < 22)
+			result = scLowBytesOperands[lowByte];
+		else
+			result = Int(inDictionaryKey).ToWString();
+	}
+	else if(12 == highByte)
+	{
+		if(lowByte < 23)
+			result = scHighBytesOperands[lowByte];
+		else
+		{
+			wchar_t buffer[10];
+			result = SAFE_SWPRINTF_1(buffer,10,L"12 %d",lowByte);
+		}
+	}
+	else
+	{
+		result = L"Error";
+	}
+	return result;
+}
+
+
 EStatusCode OpenTypeTest::SaveCharstringCode(unsigned short inFontIndex,unsigned short inGlyphIndex,CFFFileInput* inCFFFileInput)
 {
 	OutputFile glyphFile;
 
-	EStatusCode status = glyphFile.OpenFile(wstring(L"C:\\PDFLibTests\\glyph")  + Long(inFontIndex).ToWString() + L"_" + Long(inGlyphIndex).ToWString() + L".txt");
+	EStatusCode status = glyphFile.OpenFile(wstring(L"C:\\PDFLibTests\\glyphCFF")  + Long(inFontIndex).ToWString() + L"_" + StringTraits(inCFFFileInput->GetGlyphName(0,inGlyphIndex)).WidenString() + L".txt");
 
 	do
 	{
@@ -45,7 +234,8 @@ EStatusCode OpenTypeTest::SaveCharstringCode(unsigned short inFontIndex,unsigned
 
 EStatusCode OpenTypeTest::Run()
 {
-	return TestFont();
+	return DisplayFontSegmentInformation();
+	//return TestFont();
 }
 
 EStatusCode OpenTypeTest::TestFont()

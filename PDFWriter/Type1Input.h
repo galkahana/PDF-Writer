@@ -99,7 +99,14 @@ public:
 	void Reset();
 	Type1CharString* GetGlyphCharString(const string& inCharStringName);
 	Type1CharString* GetGlyphCharString(Byte inCharStringIndex);
+	string GetGlyphCharStringName(Byte inCharStringIndex);
+	bool IsValidGlyphIndex(Byte inCharStringIndex);
 	
+	// some structs for you all laddies and lasses
+	Type1FontDictionary mFontDictionary;
+	Type1FontInfoDictionary mFontInfoDictionary;
+	Type1PrivateDictionary mPrivateDictionary;
+
 
 	// IType1InterpreterImplementation overrides
 	virtual Type1CharString* GetSubr(long inSubrIndex);
@@ -108,10 +115,7 @@ public:
 	virtual unsigned long GetLenIV();
 
 private:
-	Type1FontDictionary mFontDictionary;
 	Type1Encoding mEncoding;
-	Type1FontInfoDictionary mFontInfoDictionary;
-	Type1PrivateDictionary mPrivateDictionary;
 	Byte mSubrsCount;
 	Type1CharString* mSubrs;
 	StringToType1CharStringMap mCharStrings;

@@ -565,8 +565,8 @@ EStatusCode CFFEmbeddedFontWriter::WriteEncodings(const UIntVector& inSubsetGlyp
 EStatusCode CFFEmbeddedFontWriter::WriteCharsets(const UIntVector& inSubsetGlyphIDs,
 													UShortVector* inCIDMapping)
 {
-	// since this is a subset the chances that i'll get a defult charstring are 0.
-	// hence i'll always do some charstring. and using format 0 !!1
+	// since this is a subset the chances that i'll get a defult charset are 0.
+	// hence i'll always do some charset. and using format 0 !!1
 	UIntVector::const_iterator it = inSubsetGlyphIDs.begin();
 	++it; // skip the 0
 
@@ -877,4 +877,3 @@ EStatusCode CFFEmbeddedFontWriter::UpdateIndexesAtTopDict()
 
 	return mPrimitivesWriter.GetInternalState();
 }
-

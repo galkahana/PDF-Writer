@@ -22,6 +22,7 @@ typedef set<unsigned int> UIntSet;
 typedef vector<unsigned short> UShortVector;
 typedef map<FontDictInfo*,Byte> FontDictInfoToByteMap;
 
+
 class FreeTypeFaceWrapper;
 class ObjectsContext;
 
@@ -103,4 +104,5 @@ private:
 	EStatusCode UpdateIndexesAtTopDict();
 
 	void DetermineFDArrayIndexes(const UIntVector& inSubsetGlyphIDs,FontDictInfoToByteMap& outNewFontDictsIndexes);
+	
 };

@@ -136,6 +136,8 @@ EStatusCode CharStringType2Tracer::Type2Hstemhm(const CharStringOperandList& inO
 
 EStatusCode CharStringType2Tracer::Type2Hintmask(const CharStringOperandList& inOperandList,Byte* inProgramCounter)
 {
+	mStemsCount+= (unsigned short)(inOperandList.size() / 2);
+
 	WriteStemMask(inProgramCounter);
 	mPrimitiveWriter.WriteKeyword("hintmask");
 	return eSuccess;

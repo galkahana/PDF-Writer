@@ -54,6 +54,7 @@ public:
 	FT_UShort GetFontWeight();
 	// these would be flags for the font as a whole. if subsetting, match to the character set
 	unsigned int GetFontFlags();
+	const char* GetTypeString();
 
 	// Create the written font object, matching to write this font in the best way.
 	IWrittenFont* CreateWrittenFontObject(ObjectsContext* inObjectsContext);

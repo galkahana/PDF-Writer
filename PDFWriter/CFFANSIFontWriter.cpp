@@ -8,6 +8,8 @@
 #include "ObjectsContext.h"
 #include "FreeTypeFaceWrapper.h"
 #include "CFFEmbeddedFontWriter.h"
+#include "Type1ToCFFEmbeddedFontWriter.h"
+#include "Trace.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -21,6 +23,8 @@ CFFANSIFontWriter::~CFFANSIFontWriter(void)
 }
 
 static const string scType1C = "Type1C";
+static const char* scType1 = "Type 1";
+static const char* scCFF = "CFF";
 EStatusCode CFFANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 											WrittenFontRepresentation* inFontOccurrence,
 											ObjectsContext* inObjectsContext)
@@ -33,12 +37,26 @@ EStatusCode CFFANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 	if(eFailure == status)
 		return status;
 
-	CFFEmbeddedFontWriter embeddedFontWriter;
+	const char* fontType = inFontInfo.GetTypeString();
+	if(strcmp(scType1,fontType) == 0)
+	{
+		Type1ToCFFEmbeddedFontWriter embeddedFontWriter;
 
-	return embeddedFontWriter.WriteEmbeddedFont(inFontInfo,inFontOccurrence->GetGlyphIDsAsOrderedVector(),scType1C,mEmbeddedFontFileObjectID,subsetFontName, inObjectsContext);
+		return embeddedFontWriter.WriteEmbeddedFont(inFontInfo,inFontOccurrence->GetGlyphIDsAsOrderedVector(),scType1C,mEmbeddedFontFileObjectID,subsetFontName, inObjectsContext);
+	}
+	else if(strcmp(scCFF,fontType) == 0)
+	{
+		CFFEmbeddedFontWriter embeddedFontWriter;
+
+		return embeddedFontWriter.WriteEmbeddedFont(inFontInfo,inFontOccurrence->GetGlyphIDsAsOrderedVector(),scType1C,mEmbeddedFontFileObjectID,subsetFontName, inObjectsContext);
+	}
+	else
+	{
+
+		TRACE_LOG("CFFANSIFontWriter::WriteFont, Exception, unfamilar font type for embedding representation");
+		return eFailure;
+	}
 }
-
-static const string scType1 = "Type1";
 
 void CFFANSIFontWriter::WriteSubTypeValue(DictionaryContext* inDictionary)
 {

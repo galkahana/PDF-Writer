@@ -33,6 +33,7 @@ public:
 	EStatusCode WriteDictItems(unsigned short inOperator,const DictOperandList& inOperands);
 	EStatusCode WriteIntegerOperand(long inValue);
 	EStatusCode Write5ByteDictInteger(long inValue);
+	EStatusCode WriteRealOperand(double inValue,long inFractalLength=10);
 
 	EStatusCode Pad5Bytes();
 	EStatusCode PadNBytes(unsigned short inBytesToPad);
@@ -42,7 +43,6 @@ private:
 	EStatusCode mInternalState;
 	Byte mCurrentOffsize;
 
-	EStatusCode WriteRealOperand(double inValue,long inFractalLength);
 	EStatusCode Write3ByteUnsigned(unsigned long inValue);
 	EStatusCode Write4ByteUnsigned(unsigned long inValue);
 	EStatusCode WriteIntegerOfReal(double inIntegerValue,Byte& ioBuffer,bool& ioUsedFirst);

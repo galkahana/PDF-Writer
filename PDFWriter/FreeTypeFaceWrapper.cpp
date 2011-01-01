@@ -73,6 +73,21 @@ void FreeTypeFaceWrapper::SetupFormatSpecificExtender(const wstring& inPFMFilePa
 		
 }
 
+static const char* scEmpty="";
+const char* FreeTypeFaceWrapper::GetTypeString()
+{
+	if(mFace)
+	{
+		const char* fontFormat = FT_Get_X11_Font_Format(mFace);
+		return fontFormat;
+	}
+	else
+	{
+		return scEmpty;
+	}
+}
+
+
 FT_Face FreeTypeFaceWrapper::operator->()
 {
 	return mFace;

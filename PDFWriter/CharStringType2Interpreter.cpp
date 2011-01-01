@@ -492,6 +492,8 @@ Byte* CharStringType2Interpreter::InterpretHStemHM(Byte* inProgramCounter)
 
 Byte* CharStringType2Interpreter::InterpretHintMask(Byte* inProgramCounter)
 {
+	mStemsCount+= (unsigned short)(mOperandStack.size() / 2);
+
 	EStatusCode status = mImplementationHelper->Type2Hintmask(mOperandStack,inProgramCounter);
 	if(status != eSuccess)
 		return NULL;

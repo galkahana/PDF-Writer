@@ -1,11 +1,12 @@
 #include "Type1Test.h"
 #include "TestsRunner.h"
 #include "InputFile.h"
-#include "Type1Input.h"
 #include "OutputFile.h"
 #include "CharStringType1Tracer.h"
 #include "StringTraits.h"
 #include "IByteWriterWithPosition.h"
+#include "Type1Input.h"
+#include "PSBool.h"
 
 #include <iostream>
 
@@ -39,6 +40,12 @@ EStatusCode Type1Test::Run()
 			break;
 		}
 
+		// dump Font dictionary values
+		ShowFontDictionary(type1Input.mFontDictionary);
+		ShowFontInfoDictionary(type1Input.mFontInfoDictionary);
+		ShowPrivateInfoDictionary(type1Input.mPrivateDictionary);
+
+
 		// calculate dependencies for a,b,c,d and trace their code
 		status = ShowDependencies("a",&type1Input);
 		if(status != eSuccess)
@@ -54,6 +61,9 @@ EStatusCode Type1Test::Run()
 			break;
 		// show just abcd and notdef
 
+		status = SaveCharstringCode(".notdef",&type1Input);
+		if(status != eSuccess)
+			break;
 		status = SaveCharstringCode("a",&type1Input);
 		if(status != eSuccess)
 			break;
@@ -66,14 +76,98 @@ EStatusCode Type1Test::Run()
 		status = SaveCharstringCode("d",&type1Input);
 		if(status != eSuccess)
 			break;
-		
-	}while(false);
 
+	}while(false);
 
 	type1File.CloseFile();
 	return  status;
 }
 
+void Type1Test::ShowFontDictionary(const Type1FontDictionary& inFontDictionary)
+{
+	wcout<<	L"\nShowing Font Dictionary:\n" <<
+			L"FontName = "<< StringTraits(inFontDictionary.FontName).WidenString().c_str()<<L"\n"<<
+			L"PaintType = "<<inFontDictionary.PaintType<<L"\n"<<
+			L"FontType = "<<inFontDictionary.FontType<<L"\n"<<
+			L"FontBBox = ";
+	ShowDoubleArray(inFontDictionary.FontBBox,4);
+	wcout<< L"\nFontMatrix = ";
+	ShowDoubleArray(inFontDictionary.FontMatrix,6);
+	wcout<< L"\nUniqueID = "<< inFontDictionary.UniqueID<<L"\n"<<
+			L"StrokeWidth = "<< inFontDictionary.StrokeWidth<<L"\n";
+
+}
+
+void Type1Test::ShowDoubleArray(const double inDoubleArray[],int inSize)
+{
+	wcout<<L"[ ";
+	for(int i=0;i<inSize;++i)
+		wcout<<Double(inDoubleArray[i])<<L" ";
+	wcout<<L"]";
+}
+
+
+void Type1Test::ShowFontInfoDictionary(const Type1FontInfoDictionary& inFontInfoDictionary)
+{
+	wcout<< L"\nShowing Font Info Dictionary:\n"<<
+			L"version = "<<StringTraits(inFontInfoDictionary.version).WidenString().c_str()<<L"\n"<<
+			L"Notice = "<<StringTraits(inFontInfoDictionary.Notice).WidenString().c_str()<<L"\n"<<
+			L"Copyright = "<<StringTraits(inFontInfoDictionary.Copyright).WidenString().c_str()<<L"\n"<<
+			L"FullName = "<<StringTraits(inFontInfoDictionary.FullName).WidenString().c_str()<<L"\n"<<
+			L"FamilyName = "<<StringTraits(inFontInfoDictionary.FamilyName).WidenString().c_str()<<L"\n"<<
+			L"Weight = "<<StringTraits(inFontInfoDictionary.Weight).WidenString().c_str()<<L"\n"<<
+			L"ItalicAngle = "<<Double(inFontInfoDictionary.ItalicAngle).ToWString().c_str()<<L"\n"<<
+			L"isFixedPitch = "<<PSBool(inFontInfoDictionary.isFixedPitch).ToWString().c_str()<<L"\n"<<
+			L"UnderlinePosition = "<<Double(inFontInfoDictionary.UnderlinePosition).ToWString().c_str()<<L"\n"<<
+			L"UndelineThickness = "<<Double(inFontInfoDictionary.UnderlineThickness).ToWString().c_str()<<L"\n";
+}
+
+void Type1Test::ShowPrivateInfoDictionary(const Type1PrivateDictionary& inPrivateDictionary)
+{
+	wcout<< L"\nShowing Private Dictionary:\n"<<
+			L"UniqueID = "<<inPrivateDictionary.UniqueID<<L"\n"<<
+			L"BlueValues = ";
+	ShowIntVector(inPrivateDictionary.BlueValues);
+	wcout<< L"\nOtherBlues = ";
+	ShowIntVector(inPrivateDictionary.OtherBlues);
+	wcout<< L"\nFamilyBlues = ";
+	ShowIntVector(inPrivateDictionary.FamilyBlues);
+	wcout<< L"\nFamilyOtherBlues = ";
+	ShowIntVector(inPrivateDictionary.FamilyOtherBlues);
+	wcout<< L"\nBlueScale = "<<Double(inPrivateDictionary.BlueScale).ToWString().c_str()<<L"\n"<<
+			L"BlueShift = "<<inPrivateDictionary.BlueShift<<L"\n"<<
+			L"BlueFuzz = "<<inPrivateDictionary.BlueFuzz<<L"\n"<<
+			L"StdHW = "<<Double(inPrivateDictionary.StdHW).ToWString().c_str()<<L"\n"<<
+			L"StdVW = "<<Double(inPrivateDictionary.StdVW).ToWString().c_str()<<L"\n"<<
+			L"StemSnapH = ";
+	ShowDoubleVector(inPrivateDictionary.StemSnapH);
+	wcout<< L"\nStemSnapW = ";
+	ShowDoubleVector(inPrivateDictionary.StemSnapV);
+	wcout<< L"\nForceBold = "<<PSBool(inPrivateDictionary.ForceBold).ToWString().c_str()<<L"\n"<<
+			L"LanguageGrup = "<<inPrivateDictionary.LanguageGroup<<L"\n"<<
+			L"lenIV = "<<inPrivateDictionary.lenIV<<L"\n"<<
+			L"RndStemUp = "<<PSBool(inPrivateDictionary.RndStemUp).ToWString().c_str()<<L"\n";
+}
+
+void Type1Test::ShowIntVector(const vector<int>& inVector)
+{
+	vector<int>::const_iterator it = inVector.begin();
+
+	wcout<<L"[ ";
+	for(;it != inVector.end();++it)
+		wcout<<*it<<L" ";
+	wcout<<L"]";	
+}
+
+void Type1Test::ShowDoubleVector(const vector<double>& inVector)
+{
+	vector<double>::const_iterator it = inVector.begin();
+
+	wcout<<L"[ ";
+	for(;it != inVector.end();++it)
+		wcout<<Double(*it).ToWString().c_str()<<L" ";
+	wcout<<L"]";	
+}
 
 EStatusCode Type1Test::ShowDependencies(const string& inCharStringName,Type1Input* inType1Input)
 {

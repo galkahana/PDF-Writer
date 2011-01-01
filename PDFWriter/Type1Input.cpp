@@ -40,7 +40,7 @@ void Type1Input::Reset()
 	FreeTables();
 
 	mFontDictionary.FontMatrix[1] = mFontDictionary.FontMatrix[2] = mFontDictionary.FontMatrix[4] = mFontDictionary.FontMatrix[5] = 0;
-	mFontDictionary.FontMatrix[0] = mFontDictionary.FontMatrix[3] = 1;
+	mFontDictionary.FontMatrix[0] = mFontDictionary.FontMatrix[3] = 0.001;
 	mFontDictionary.UniqueID = -1;
 	for(int i=0;i<256;++i)
 		mEncoding.mCustomEncoding[i].clear();
@@ -654,10 +654,9 @@ EStatusCode Type1Input::ParseCharstrings()
 
 Type1CharString* Type1Input::GetGlyphCharString(Byte inCharStringIndex)
 {
-	if(mCharStrings.size() <= inCharStringIndex)
+	if(256 <= inCharStringIndex)
 	{
-		TRACE_LOG2("Type1Input::GetGlyphCharString, inCharStringIndex = %d is invalid. there are %d charsringd in the Type1 segment for the requested font",
-																														inCharStringIndex,mCharStrings.size());
+		TRACE_LOG1("Type1Input::GetGlyphCharString, inCharStringIndex = %d is invalid",inCharStringIndex);
 		return NULL;
 	}
 	string characterName;
@@ -766,5 +765,41 @@ unsigned long Type1Input::GetLenIV()
 	return mPrivateDictionary.lenIV;
 }
 
+bool Type1Input::IsValidGlyphIndex(Byte inCharStringIndex)
+{
+	string characterName;
 
+	if(eType1EncodingTypeCustom == mEncoding.EncodingType)
+	{
+		if(mEncoding.mCustomEncoding[inCharStringIndex].size() == 0)
+			characterName = ".notdef";
+		else
+			characterName = mEncoding.mCustomEncoding[inCharStringIndex];
+			
+	}
+	else
+	{
+		StandardEncoding standardEncoding;
+		
+		characterName = standardEncoding.GetEncodedGlyphName(inCharStringIndex);
+	}
+	
+	return mCharStrings.find(characterName) != mCharStrings.end();
+}
 
+string Type1Input::GetGlyphCharStringName(Byte inCharStringIndex)
+{
+	if(eType1EncodingTypeCustom == mEncoding.EncodingType)
+	{
+		if(mEncoding.mCustomEncoding[inCharStringIndex].size() == 0)
+			return ".notdef";
+		else
+			return mEncoding.mCustomEncoding[inCharStringIndex];
+	}
+	else
+	{
+		StandardEncoding standardEncoding;
+
+		return standardEncoding.GetEncodedGlyphName(inCharStringIndex);
+	}
+}

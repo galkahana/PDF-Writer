@@ -1645,10 +1645,18 @@ unsigned short CFFFileInput::GetGlyphSID(unsigned short inFontIndex,unsigned sho
 	else
 	{
 		unsigned short sid;
-		if(eCharSetCustom == mTopDictIndex[inFontIndex].mCharSet->mType)
-			sid = mTopDictIndex[inFontIndex].mCharSet->mSIDs[inGlyphIndex];
+		if(0 == inGlyphIndex)
+		{
+			sid = 0;
+		}
 		else
-			sid = scDefaultCharsets[(Byte)mTopDictIndex[inFontIndex].mCharSet->mType][inGlyphIndex];
+		{
+			// remember that 0 is omitted!
+			if(eCharSetCustom == mTopDictIndex[inFontIndex].mCharSet->mType)
+				sid = mTopDictIndex[inFontIndex].mCharSet->mSIDs[inGlyphIndex-1];
+			else
+				sid = scDefaultCharsets[(Byte)mTopDictIndex[inFontIndex].mCharSet->mType][inGlyphIndex-1];
+		}
 		return sid;
 	}
 

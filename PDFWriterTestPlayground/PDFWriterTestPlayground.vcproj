@@ -651,6 +651,14 @@
 				Name="Type1"
 				>
 				<File
+					RelativePath=".\MyTest.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\MyTest.h"
+					>
+				</File>
+				<File
 					RelativePath=".\PFBStreamTest.cpp"
 					>
 				</File>

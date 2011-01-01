@@ -29,7 +29,10 @@ LongBufferSizeType InputByteArrayStream::Read(Byte* inBuffer,LongBufferSizeType 
 	if(!mByteArray)
 		return 0;
 
-	LongBufferSizeType amountToRead = inBufferSize < (LongBufferSizeType)(mArrayLength-mCurrentPosition) ? inBufferSize : mArrayLength-mCurrentPosition;
+	LongBufferSizeType amountToRead = 
+		inBufferSize < (LongBufferSizeType)(mArrayLength-mCurrentPosition) ? 
+		inBufferSize : 
+		(LongBufferSizeType)(mArrayLength-mCurrentPosition);
 
 	if(amountToRead>0)
 		memcpy(inBuffer,mByteArray+mCurrentPosition,amountToRead);
