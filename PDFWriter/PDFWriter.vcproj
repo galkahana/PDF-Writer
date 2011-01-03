@@ -851,78 +851,6 @@
 			Name="Text"
 			>
 			<File
-				RelativePath=".\AbstractWrittenFont.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\AbstractWrittenFont.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ANSIFontWriter.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ANSIFontWriter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\CFFANSIFontWriter.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\CFFANSIFontWriter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\CFFDescendentFontWriter.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\CFFDescendentFontWriter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\CIDFontWriter.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\CIDFontWriter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\DescendentFontWriter.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\DescendentFontWriter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\FontDescriptorWriter.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\FontDescriptorWriter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IANSIFontWriterHelper.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IDescendentFontWriter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IFontDescriptorHelper.h"
-				>
-			</File>
-			<File
-				RelativePath=".\IWrittenFont.h"
-				>
-			</File>
-			<File
 				RelativePath=".\PDFUsedFont.cpp"
 				>
 			</File>
@@ -931,47 +859,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\TrueTypeANSIFontWriter.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TrueTypeANSIFontWriter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TrueTypeDescendentFontWriter.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TrueTypeDescendentFontWriter.h"
-				>
-			</File>
-			<File
 				RelativePath=".\UsedFontsRepository.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\UsedFontsRepository.h"
-				>
-			</File>
-			<File
-				RelativePath=".\WrittenFontCFF.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\WrittenFontCFF.h"
-				>
-			</File>
-			<File
-				RelativePath=".\WrittenFontRepresentation.h"
-				>
-			</File>
-			<File
-				RelativePath=".\WrittenFontTrueType.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\WrittenFontTrueType.h"
 				>
 			</File>
 			<Filter
@@ -1199,6 +1091,118 @@
 				</File>
 				<File
 					RelativePath=".\Type1ToCFFEmbeddedFontWriter.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="PDF Font Definitions"
+				>
+				<File
+					RelativePath=".\AbstractWrittenFont.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\AbstractWrittenFont.h"
+					>
+				</File>
+				<File
+					RelativePath=".\ANSIFontWriter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\ANSIFontWriter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CFFANSIFontWriter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CFFANSIFontWriter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CFFDescendentFontWriter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CFFDescendentFontWriter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\CIDFontWriter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\CIDFontWriter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\DescendentFontWriter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\DescendentFontWriter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\FontDescriptorWriter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FontDescriptorWriter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\IANSIFontWriterHelper.h"
+					>
+				</File>
+				<File
+					RelativePath=".\IDescendentFontWriter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\IFontDescriptorHelper.h"
+					>
+				</File>
+				<File
+					RelativePath=".\IWrittenFont.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TrueTypeANSIFontWriter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TrueTypeANSIFontWriter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\TrueTypeDescendentFontWriter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\TrueTypeDescendentFontWriter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\WrittenFontCFF.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\WrittenFontCFF.h"
+					>
+				</File>
+				<File
+					RelativePath=".\WrittenFontRepresentation.h"
+					>
+				</File>
+				<File
+					RelativePath=".\WrittenFontTrueType.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\WrittenFontTrueType.h"
 					>
 				</File>
 			</Filter>
