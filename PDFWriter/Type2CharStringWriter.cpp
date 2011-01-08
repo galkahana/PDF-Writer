@@ -61,6 +61,7 @@ EStatusCode Type2CharStringWriter::WriteIntegerOperand(long inOperand)
 
 		if(WriteByte(byte1) != eSuccess)
 			return eFailure;
+		return eSuccess;
 	}
 	else if(-1131 <= value && value <= -108)
 	{
@@ -76,6 +77,7 @@ EStatusCode Type2CharStringWriter::WriteIntegerOperand(long inOperand)
 
 		if(WriteByte(byte1) != eSuccess)
 			return eFailure;
+		return eSuccess;
 	}
 	else if(-32768 <= value && value<= 32767)
 	{
@@ -92,6 +94,7 @@ EStatusCode Type2CharStringWriter::WriteIntegerOperand(long inOperand)
 
 		if(WriteByte(byte2) != eSuccess)
 			return eFailure;
+		return eSuccess;
 	}
 	else
 		return eFailure;
