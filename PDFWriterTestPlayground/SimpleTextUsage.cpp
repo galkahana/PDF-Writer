@@ -32,21 +32,22 @@ EStatusCode SimpleTextUsage::Run()
 			break;
 		}
 
+		/*
 		status = RunTrueTypeTest();
 		if(status != eSuccess)
 		{
 			wcout<<"Failed True Type Test\n";
 			status = eFailure;
 			break;
-		}
+		}*/
 
-		/*status = RunType1Test();
+		status = RunType1Test();
 		if(status != eSuccess)
 		{
 			wcout<<"Failed Type 1 Test\n";
 			status = eFailure;
 			break;
-		}*/
+		}
 
 	}while(false);
 

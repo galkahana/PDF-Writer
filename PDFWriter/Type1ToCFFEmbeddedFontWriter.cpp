@@ -6,6 +6,7 @@
 #include "OutputStreamTraits.h"
 #include "PDFStream.h"
 #include "Trace.h"
+#include "Type1ToType2Converter.h"
 
 #include <algorithm>
 
@@ -558,7 +559,7 @@ unsigned short Type1ToCFFEmbeddedFontWriter::AddStringToStringsArray(const strin
 	StringToUShortMap::iterator it = mNonStandardStringToIndex.find(inString);
 	if(it == mNonStandardStringToIndex.end())
 	{
-		mNonStandardStringToIndex.insert(StringToUShortMap::value_type(inString,(unsigned short)mStrings.size()));
+		it = mNonStandardStringToIndex.insert(StringToUShortMap::value_type(inString,(unsigned short)mStrings.size())).first;
 		mStrings.push_back(inString);
 	}
 	return it->second + N_STD_STRINGS;
@@ -656,7 +657,7 @@ void Type1ToCFFEmbeddedFontWriter::PrepareCharSetArray(const UIntVector& inSubse
 {
 	mCharset = new unsigned short[inSubsetGlyphIDs.size()-1]; // no need to have the 0 glyphs
 
-	for(int i=1; i < inSubsetGlyphIDs.size();++i)
+	for(size_t i=1; i < inSubsetGlyphIDs.size();++i)
 	{
 		mCharset[i-1] = AddStringToStringsArray(mType1Input.GetGlyphCharStringName((Byte)inSubsetGlyphIDs[i]));
 	}
@@ -668,7 +669,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteCharsets(const UIntVector& inSubs
 
 	mPrimitivesWriter.WriteCard8(0);
 
-	for(int i=0;i < inSubsetGlyphIDs.size()-1;++i)
+	for(size_t i=0;i < inSubsetGlyphIDs.size()-1;++i)
 		mPrimitivesWriter.WriteSID(mCharset[i]);
 	return mPrimitivesWriter.GetInternalState();	
 }
@@ -686,7 +687,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteCharStrings(const UIntVector& inS
 	unsigned long* offsets = new unsigned long[inSubsetGlyphIDs.size() + 1];
 	MyStringBuf charStringsData;
 	OutputStringBufferStream charStringsDataWriteStream(&charStringsData);
-	//Type1ToType2Converter charStringConverter;
+	Type1ToType2Converter charStringConverter;
 	UIntVector::const_iterator itGlyphs = inSubsetGlyphIDs.begin();
 	EStatusCode status = eSuccess;
 
@@ -696,9 +697,9 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteCharStrings(const UIntVector& inS
 		for(; itGlyphs != inSubsetGlyphIDs.end() && eSuccess == status; ++itGlyphs,++i)
 		{
 			offsets[i] = (unsigned long)charStringsDataWriteStream.GetCurrentPosition();
-			/*status = charStringConverter.WriteConvertedFontProgram(itGlyphs,
+			status = charStringConverter.WriteConvertedFontProgram(*itGlyphs,
 																   &(mType1Input),
-																   &charStringsDataWriteStream);*/
+																   &charStringsDataWriteStream);
 		}
 		if(status != eSuccess)
 			break;

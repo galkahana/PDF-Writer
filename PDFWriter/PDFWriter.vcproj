@@ -1093,6 +1093,22 @@
 					RelativePath=".\Type1ToCFFEmbeddedFontWriter.h"
 					>
 				</File>
+				<File
+					RelativePath=".\Type1ToType2Converter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Type1ToType2Converter.h"
+					>
+				</File>
+				<File
+					RelativePath=".\Type2CharStringWriter.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Type2CharStringWriter.h"
+					>
+				</File>
 			</Filter>
 			<Filter
 				Name="PDF Font Definitions"

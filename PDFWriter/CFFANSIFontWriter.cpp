@@ -23,7 +23,7 @@ CFFANSIFontWriter::~CFFANSIFontWriter(void)
 }
 
 static const string scType1C = "Type1C";
-static const char* scType1 = "Type 1";
+static const char* scType1Type = "Type 1";
 static const char* scCFF = "CFF";
 EStatusCode CFFANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 											WrittenFontRepresentation* inFontOccurrence,
@@ -38,7 +38,7 @@ EStatusCode CFFANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 		return status;
 
 	const char* fontType = inFontInfo.GetTypeString();
-	if(strcmp(scType1,fontType) == 0)
+	if(strcmp(scType1Type,fontType) == 0)
 	{
 		Type1ToCFFEmbeddedFontWriter embeddedFontWriter;
 
@@ -58,6 +58,7 @@ EStatusCode CFFANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 	}
 }
 
+static const char* scType1 = "Type1";
 void CFFANSIFontWriter::WriteSubTypeValue(DictionaryContext* inDictionary)
 {
 	inDictionary->WriteNameValue(scType1);
