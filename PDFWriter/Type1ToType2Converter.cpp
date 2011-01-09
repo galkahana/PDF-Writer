@@ -15,7 +15,7 @@ Type1ToType2Converter::~Type1ToType2Converter(void)
 {
 }
 
-EStatusCode Type1ToType2Converter::WriteConvertedFontProgram(unsigned int inGlyphIndex,
+EStatusCode Type1ToType2Converter::WriteConvertedFontProgram(const string& inGlyphName,
 															 Type1Input* inType1Input,
 															 IByteWriter* inByteWriter)
 {
@@ -33,10 +33,10 @@ EStatusCode Type1ToType2Converter::WriteConvertedFontProgram(unsigned int inGlyp
 		mCurrentHints.clear();
 		mFlexParameters.clear();
 
-		Type1CharString* charString = inType1Input->GetGlyphCharString((Byte)inGlyphIndex);
+		Type1CharString* charString = inType1Input->GetGlyphCharString(inGlyphName);
 		if(!charString)
 		{
-			TRACE_LOG("Type1ToType2Converter::WriteConvertedFontProgram, Exception, cannot find glyph name");
+			TRACE_LOG1("Type1ToType2Converter::WriteConvertedFontProgram, Exception, cannot find glyph name %s",inGlyphName.c_str());
 			status = eFailure;
 			break;
 		}
@@ -241,7 +241,7 @@ EStatusCode Type1ToType2Converter::Type1Vstem(const LongList& inOperandList)
 	AddVStem(origin,extent);
 	if(mFirstPathConstructionEncountered)
 		mHintAdditionEncountered = true;
-	return RecordOperatorWithParameters(2,inOperandList);
+	return RecordOperatorWithParameters(3,inOperandList);
 }
 
 EStatusCode Type1ToType2Converter::Type1VStem3(const LongList& inOperandList)
@@ -615,9 +615,10 @@ long Type1ToType2Converter::GenerateHintMaskFromCollectedHints()
 	unsigned long hintMask = 0;
 	size_t totalHints = mHStems.size() + mVStems.size();
 	SizeTSet::iterator it = mCurrentHints.begin();
-	
+	unsigned long maskByteSize = totalHints/8 + (totalHints % 8 != 0 ? 1:0);
+
 	for(; it != mCurrentHints.end();++it)
-		hintMask = hintMask | (1 << (totalHints - *it));
+		hintMask = hintMask | (1 << (maskByteSize*8 - 1  - *it));
 
 	return (long)hintMask;
 }
@@ -767,6 +768,13 @@ void Type1ToType2Converter::ConvertPathConsturction()
 								++itOperands;
 								itStarter->mOperands.insert(itStarter->mOperands.end(),*(it->mOperands.begin()));
 								itStarter->mOperands.insert(itStarter->mOperands.end(),itOperands,it->mOperands.end());
+								// need to switch the last two
+								long dyf = itStarter->mOperands.back();
+								itStarter->mOperands.pop_back();
+								long dxf = itStarter->mOperands.back();
+								itStarter->mOperands.pop_back();
+								itStarter->mOperands.push_back(dyf);
+								itStarter->mOperands.push_back(dxf);
 								it = mConversionProgram.erase(it);
 							}
 						}
@@ -793,6 +801,13 @@ void Type1ToType2Converter::ConvertPathConsturction()
 								++itOperands;
 								itStarter->mOperands.insert(itStarter->mOperands.end(),*(it->mOperands.begin()));
 								itStarter->mOperands.insert(itStarter->mOperands.end(),itOperands,it->mOperands.end());
+								// need to switch the last two
+								long dyf = itStarter->mOperands.back();
+								itStarter->mOperands.pop_back();
+								long dxf = itStarter->mOperands.back();
+								itStarter->mOperands.pop_back();
+								itStarter->mOperands.push_back(dyf);
+								itStarter->mOperands.push_back(dxf);
 								it = mConversionProgram.erase(it);
 							}
 						}

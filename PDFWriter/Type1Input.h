@@ -82,6 +82,7 @@ struct CharString1Dependencies
 
 typedef vector<Type1CharString> Type1CharStringVector;
 typedef map<string,Type1CharString> StringToType1CharStringMap;
+typedef map<string,Byte> StringToByteMap;
 
 class IByteReaderWithPosition;
 
@@ -101,6 +102,7 @@ public:
 	Type1CharString* GetGlyphCharString(Byte inCharStringIndex);
 	string GetGlyphCharStringName(Byte inCharStringIndex);
 	bool IsValidGlyphIndex(Byte inCharStringIndex);
+	Byte GetEncoding(const string& inCharStringName);
 	
 	// some structs for you all laddies and lasses
 	Type1FontDictionary mFontDictionary;
@@ -116,6 +118,7 @@ public:
 
 private:
 	Type1Encoding mEncoding;
+	StringToByteMap mReverseEncoding;
 	Byte mSubrsCount;
 	Type1CharString* mSubrs;
 	StringToType1CharStringMap mCharStrings;
@@ -137,4 +140,6 @@ private:
 	EStatusCode ParseSubrs();
 	EStatusCode ParseCharstrings();
 	EStatusCode ParseDoubleArray(double* inArray,int inArraySize);
+	string FromPSString(const string& inPSString);
+	void CalculateReverseEncoding();
 };

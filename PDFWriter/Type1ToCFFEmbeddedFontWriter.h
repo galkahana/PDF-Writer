@@ -22,6 +22,7 @@ typedef set<unsigned int> UIntSet;
 typedef vector<string> StringVector;
 typedef map<string,unsigned short> StringToUShortMap;
 typedef pair<bool,unsigned short> BoolAndUShort;
+typedef set<string> StringSet;
 
 class FreeTypeFaceWrapper;
 class ObjectsContext;
@@ -66,8 +67,8 @@ private:
 								const UIntVector& inSubsetGlyphIDs,
 								const string& inSubsetFontName,
 								MyStringBuf& outFontProgram);
-	EStatusCode AddDependentGlyphs(UIntVector& ioSubsetGlyphIDs);
-	EStatusCode AddComponentGlyphs(unsigned int inGlyphID,UIntSet& ioComponents,bool &outFoundComponents);
+	EStatusCode AddDependentGlyphs(StringVector& ioSubsetGlyphIDs);
+	EStatusCode AddComponentGlyphs(const string& inGlyphID,StringSet& ioComponents,bool &outFoundComponents);
 	EStatusCode WriteCFFHeader();
 	EStatusCode WriteName(const string& inSubsetFontName);
 	Byte GetMostCompressedOffsetSize(unsigned long inOffset);
@@ -82,12 +83,15 @@ private:
 	void AddDeltaVectorIfNotEmpty(CFFPrimitiveWriter& inWriter,const vector<double>& inArray,unsigned short inOperator);
 	EStatusCode WriteStringIndex();
 	EStatusCode WriteGlobalSubrsIndex();
-	EStatusCode WriteEncodings(const UIntVector& inSubsetGlyphIDs);
+	EStatusCode WriteEncodings(const StringVector& inSubsetGlyphIDs);
 	void FreeTemporaryStructs();
-	void PrepareCharSetArray(const UIntVector& inSubsetGlyphIDs);
-	EStatusCode WriteCharsets(const UIntVector& inSubsetGlyphIDs);
-	EStatusCode WriteCharStrings(const UIntVector& inSubsetGlyphIDs);
+	void PrepareCharSetArray(const StringVector& inSubsetGlyphIDs);
+	EStatusCode WriteCharsets(const StringVector& inSubsetGlyphIDs);
+	EStatusCode WriteCharStrings(const StringVector& inSubsetGlyphIDs);
 	EStatusCode WritePrivateDictionary();
 	EStatusCode UpdateIndexesAtTopDict();
+	void TranslateFromFreeTypeToType1(FreeTypeFaceWrapper& inFontInfo,
+									  const UIntVector& inSubsetGlyphIDs,
+									  StringVector& outGlyphNames);
 
 };

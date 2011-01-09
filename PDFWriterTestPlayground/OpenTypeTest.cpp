@@ -20,8 +20,8 @@ OpenTypeTest::~OpenTypeTest(void)
 }
 
 
-#define FONT_OBJECT_START 13742 + 68
-#define FONT_OBJECT_STREAM_LENGTH 10727
+#define FONT_OBJECT_START 1276 + 84
+#define FONT_OBJECT_STREAM_LENGTH 1021
 
 #include "OutputFlateDecodeStream.h"
 #include "OutputStreamTraits.h"
@@ -31,7 +31,7 @@ EStatusCode OpenTypeTest::ExtractFontSegment()
 	InputFile sourcePdfFile;
 	OutputFlateDecodeStream decoderStream;
 
-	EStatusCode status = sourcePdfFile.OpenFile(L"c:\\pdflibtests\\TestMaterials\\fonts\\Type1EmbeddedComplete.pdf");
+	EStatusCode status = sourcePdfFile.OpenFile(L"c:\\pdflibtests\\SimpleTextUsageType1.PDF");
 	do
 	{
 		if(status != eSuccess)
@@ -39,7 +39,7 @@ EStatusCode OpenTypeTest::ExtractFontSegment()
 
 		OutputFile outputFile;
 
-		status = outputFile.OpenFile(L"c:\\pdflibtests\\TestMaterials\\fonts\\Type1Segment.cff");
+		status = outputFile.OpenFile(L"c:\\pdflibtests\\SimpleType1Segment.cff");
 		decoderStream.Assign(outputFile.GetOutputStream());
 
 		OutputStreamTraits traits(&decoderStream);
@@ -47,9 +47,9 @@ EStatusCode OpenTypeTest::ExtractFontSegment()
 		sourcePdfFile.GetInputStream()->SetPosition(FONT_OBJECT_START);
 
 		status = traits.CopyToOutputStream(sourcePdfFile.GetInputStream(),FONT_OBJECT_STREAM_LENGTH);
+		decoderStream.Assign(NULL);
 		if(status != eSuccess)
 			break;
-		decoderStream.Assign(NULL);
 	}
 	while(false);
 
@@ -62,7 +62,7 @@ EStatusCode OpenTypeTest::DisplayFontSegmentInformation()
 {
 	InputFile inputFile;
 
-	EStatusCode status = inputFile.OpenFile(L"c:\\pdflibtests\\TestMaterials\\fonts\\Type1Segment.cff");
+	EStatusCode status = inputFile.OpenFile(L"c:\\pdflibtests\\SimpleType1Segment.cff");
 		
 	do
 	{
@@ -86,8 +86,7 @@ EStatusCode OpenTypeTest::DisplayFontSegmentInformation()
 
 		wcout<<"\nSaving Glyph programs for a,b,c,d and .notdef now...\n";
 		// a,b,c,d and .notdef
-		status = SaveCharstringCode(0,0,&cffFileInput);
-		for(unsigned short i=66; i < 70 && eSuccess == status; ++i)
+		for(unsigned short i=0; i < 5 && eSuccess == status; ++i)
 			status = SaveCharstringCode(0,i,&cffFileInput);
 		wcout<<"Done\n";
 	}while(false);
@@ -234,8 +233,9 @@ EStatusCode OpenTypeTest::SaveCharstringCode(unsigned short inFontIndex,unsigned
 
 EStatusCode OpenTypeTest::Run()
 {
-	return DisplayFontSegmentInformation();
-	//return TestFont();
+	//return ExtractFontSegment();
+	//return DisplayFontSegmentInformation();
+	return TestFont();
 }
 
 EStatusCode OpenTypeTest::TestFont()

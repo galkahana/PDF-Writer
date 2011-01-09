@@ -173,6 +173,8 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::CreateCFFSubset(
 	do
 	{
 		UIntVector subsetGlyphIDs = inSubsetGlyphIDs;
+		StringVector subsetGlyphNames;
+
 		if(subsetGlyphIDs.front() != 0) // make sure 0 glyph is in
 			subsetGlyphIDs.insert(subsetGlyphIDs.begin(),0);
 
@@ -190,7 +192,11 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::CreateCFFSubset(
 			break;
 		}
 
-		status = AddDependentGlyphs(subsetGlyphIDs);
+		// Found big gap between FreeType indexing and the way it's in the Type 1. obvioulsy due to encoding differences.
+		// So i'm replacing the indexes of free type, with names...should be safer
+		TranslateFromFreeTypeToType1(inFontInfo,subsetGlyphIDs,subsetGlyphNames);
+
+		status = AddDependentGlyphs(subsetGlyphNames);
 		if(status != eSuccess)
 		{
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, failed to add dependent glyphs");
@@ -223,7 +229,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::CreateCFFSubset(
 
 		// prepraring charset happens here, so that any added strings to the string index will happen...before 
 		// the index is written
-		PrepareCharSetArray(inSubsetGlyphIDs);
+		PrepareCharSetArray(subsetGlyphNames);
 
 		status = WriteStringIndex();
 		if(status != eSuccess)
@@ -239,21 +245,21 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::CreateCFFSubset(
 			break;
 		}
 
-		status = WriteEncodings(inSubsetGlyphIDs);
+		status = WriteEncodings(subsetGlyphNames);
 		if(status != eSuccess)
 		{
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, failed to write encodings");
 			break;
 		}
 
-		status = WriteCharsets(inSubsetGlyphIDs);
+		status = WriteCharsets(subsetGlyphNames);
 		if(status != eSuccess)
 		{
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, failed to write charstring");
 			break;
 		}
 
-		status = WriteCharStrings(inSubsetGlyphIDs);
+		status = WriteCharStrings(subsetGlyphNames);
 		if(status != eSuccess)
 		{
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, failed to write charstring");
@@ -287,11 +293,11 @@ void Type1ToCFFEmbeddedFontWriter::FreeTemporaryStructs()
 	delete[] mCharset;
 }
 
-EStatusCode Type1ToCFFEmbeddedFontWriter::AddDependentGlyphs(UIntVector& ioSubsetGlyphIDs)
+EStatusCode Type1ToCFFEmbeddedFontWriter::AddDependentGlyphs(StringVector& ioSubsetGlyphIDs)
 {
 	EStatusCode status = eSuccess;
-	UIntSet glyphsSet;
-	UIntVector::iterator it = ioSubsetGlyphIDs.begin();
+	StringSet glyphsSet;
+	StringVector::iterator it = ioSubsetGlyphIDs.begin();
 	bool hasCompositeGlyphs = false;
 
 	for(;it != ioSubsetGlyphIDs.end() && eSuccess == status; ++it)
@@ -303,7 +309,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::AddDependentGlyphs(UIntVector& ioSubse
 
 	if(hasCompositeGlyphs)
 	{
-		UIntSet::iterator itNewGlyphs;
+		StringSet::iterator itNewGlyphs;
 
 		for(it = ioSubsetGlyphIDs.begin();it != ioSubsetGlyphIDs.end(); ++it)
 			glyphsSet.insert(*it);
@@ -317,7 +323,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::AddDependentGlyphs(UIntVector& ioSubse
 	return status;	
 }
 
-EStatusCode Type1ToCFFEmbeddedFontWriter::AddComponentGlyphs(unsigned int inGlyphID,UIntSet& ioComponents,bool &outFoundComponents)
+EStatusCode Type1ToCFFEmbeddedFontWriter::AddComponentGlyphs(const string& inGlyphID,StringSet& ioComponents,bool &outFoundComponents)
 {
 	CharString1Dependencies dependencies;
 	EStatusCode status = mType1Input.CalculateDependenciesForCharIndex(inGlyphID,dependencies);
@@ -328,8 +334,9 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::AddComponentGlyphs(unsigned int inGlyp
 		for(; it != dependencies.mCharCodes.end() && eSuccess == status; ++it)
 		{
 			bool dummyFound;
-			ioComponents.insert(*it);
-			status = AddComponentGlyphs(*it,ioComponents,dummyFound);
+			string glyphName = mType1Input.GetGlyphCharStringName(*it);
+			ioComponents.insert(glyphName);
+			status = AddComponentGlyphs(glyphName,ioComponents,dummyFound);
 		}
 		outFoundComponents = true;
 	}
@@ -581,11 +588,11 @@ BoolAndUShort Type1ToCFFEmbeddedFontWriter::FindStandardString(const string& inS
 	}
 
 	if(strcmp(inStringToFind.c_str(),scSortedStandardStrings[lowerBound]) == 0)
-		return BoolAndUShort(true,lowerBound);
+		return BoolAndUShort(true,scSortedStandardStringsPositions[lowerBound]);
 	else if(strcmp(inStringToFind.c_str(),scSortedStandardStrings[upperBound]) == 0)
-		return BoolAndUShort(true,upperBound);
+		return BoolAndUShort(true,scSortedStandardStringsPositions[upperBound]);
 	else
-		return BoolAndUShort(false,0);
+		return BoolAndUShort(false,scSortedStandardStringsPositions[0]);
 		
 }
 
@@ -630,13 +637,9 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteGlobalSubrsIndex()
 	return mPrimitivesWriter.WriteCard16(0);	
 }
 
-EStatusCode Type1ToCFFEmbeddedFontWriter::WriteEncodings(const UIntVector& inSubsetGlyphIDs)
+EStatusCode Type1ToCFFEmbeddedFontWriter::WriteEncodings(const StringVector& inSubsetGlyphIDs)
 {
-	// since in type 1, the encoding is what determines the glyph IDs, we can
-	// assume that the input glyph IDs marks the original font encoding. no supplementals are
-	// required. hmm. not sure that this statement is true for non-custom encodings. couldn't it be
-	// that the font will just not have glyphs for them? [bottom line - not sure i know what controls
-	// the glyph IDs.
+	// k. get the encoding for the input glyphs
 
 	mEncodingPosition = mFontFileStream.GetCurrentPosition();
 
@@ -648,22 +651,22 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteEncodings(const UIntVector& inSub
 
 	mPrimitivesWriter.WriteCard8(encodingGlyphsCount);
 	for(Byte i=1; i < encodingGlyphsCount+1;++i)
-		mPrimitivesWriter.WriteCard8((Byte)inSubsetGlyphIDs[i]);
+		mPrimitivesWriter.WriteCard8(mType1Input.GetEncoding(inSubsetGlyphIDs[i]));
 
 	return mPrimitivesWriter.GetInternalState();
 }
 
-void Type1ToCFFEmbeddedFontWriter::PrepareCharSetArray(const UIntVector& inSubsetGlyphIDs)
+void Type1ToCFFEmbeddedFontWriter::PrepareCharSetArray(const StringVector& inSubsetGlyphIDs)
 {
 	mCharset = new unsigned short[inSubsetGlyphIDs.size()-1]; // no need to have the 0 glyphs
 
 	for(size_t i=1; i < inSubsetGlyphIDs.size();++i)
 	{
-		mCharset[i-1] = AddStringToStringsArray(mType1Input.GetGlyphCharStringName((Byte)inSubsetGlyphIDs[i]));
+		mCharset[i-1] = AddStringToStringsArray(inSubsetGlyphIDs[i]);
 	}
 }
 
-EStatusCode Type1ToCFFEmbeddedFontWriter::WriteCharsets(const UIntVector& inSubsetGlyphIDs)
+EStatusCode Type1ToCFFEmbeddedFontWriter::WriteCharsets(const StringVector& inSubsetGlyphIDs)
 {
 	mCharsetPosition = mFontFileStream.GetCurrentPosition();
 
@@ -674,7 +677,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteCharsets(const UIntVector& inSubs
 	return mPrimitivesWriter.GetInternalState();	
 }
 
-EStatusCode Type1ToCFFEmbeddedFontWriter::WriteCharStrings(const UIntVector& inSubsetGlyphIDs)
+EStatusCode Type1ToCFFEmbeddedFontWriter::WriteCharStrings(const StringVector& inSubsetGlyphIDs)
 {
 	/*
 		1. build the charstrings data, looping the glyphs charstrings and writing a flattened
@@ -688,7 +691,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteCharStrings(const UIntVector& inS
 	MyStringBuf charStringsData;
 	OutputStringBufferStream charStringsDataWriteStream(&charStringsData);
 	Type1ToType2Converter charStringConverter;
-	UIntVector::const_iterator itGlyphs = inSubsetGlyphIDs.begin();
+	StringVector::const_iterator itGlyphs = inSubsetGlyphIDs.begin();
 	EStatusCode status = eSuccess;
 
 	do
@@ -769,6 +772,7 @@ void Type1ToCFFEmbeddedFontWriter::AddDeltaVectorIfNotEmpty(CFFPrimitiveWriter& 
 		inWriter.WriteIntegerOperand(*it - currentValue);
 		currentValue = *it;
 	}
+	inWriter.WriteDictOperator(inOperator);
 }
 
 void Type1ToCFFEmbeddedFontWriter::AddDeltaVectorIfNotEmpty(CFFPrimitiveWriter& inWriter,const vector<double>& inArray,unsigned short inOperator)
@@ -784,6 +788,7 @@ void Type1ToCFFEmbeddedFontWriter::AddDeltaVectorIfNotEmpty(CFFPrimitiveWriter& 
 		inWriter.WriteRealOperand(*it - currentValue);
 		currentValue = *it;
 	}
+	inWriter.WriteDictOperator(inOperator);
 }
 
 EStatusCode Type1ToCFFEmbeddedFontWriter::UpdateIndexesAtTopDict()
@@ -804,4 +809,19 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::UpdateIndexesAtTopDict()
 	mPrimitivesWriter.Write5ByteDictInteger((long)mEncodingPosition);
 
 	return mPrimitivesWriter.GetInternalState();
+}
+
+void Type1ToCFFEmbeddedFontWriter::TranslateFromFreeTypeToType1(FreeTypeFaceWrapper& inFontInfo,
+																const UIntVector& inSubsetGlyphIDs,
+																StringVector& outGlyphNames)
+{
+	UIntVector::const_iterator it = inSubsetGlyphIDs.begin();
+	char buffer[100];
+
+	for(; it != inSubsetGlyphIDs.end(); ++it)
+	{
+		FT_Get_Glyph_Name(inFontInfo,*it,buffer,100);
+		string aName(buffer,strlen(buffer));
+		outGlyphNames.push_back(aName);
+	}
 }

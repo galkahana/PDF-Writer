@@ -6,6 +6,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -52,7 +53,7 @@ public:
 	Type1ToType2Converter(void);
 	~Type1ToType2Converter(void);
 
-	EStatusCode WriteConvertedFontProgram(unsigned int inGlyphIndex,
+	EStatusCode WriteConvertedFontProgram(const string& inGlyphName,
 										  Type1Input* inType1Input,
 										  IByteWriter* inByteWriter);
 

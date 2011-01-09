@@ -5,6 +5,7 @@
 #include "StandardEncoding.h"
 #include "Trace.h"
 #include "CharStringType1Interpreter.h"
+#include <sstream>
 
 Type1Input::Type1Input(void)
 {
@@ -44,6 +45,7 @@ void Type1Input::Reset()
 	mFontDictionary.UniqueID = -1;
 	for(int i=0;i<256;++i)
 		mEncoding.mCustomEncoding[i].clear();
+	mReverseEncoding.clear();
 	mFontDictionary.StrokeWidth = 1;
 
 	mFontInfoDictionary.isFixedPitch = false;
@@ -204,6 +206,8 @@ EStatusCode Type1Input::ReadFontDictionary()
 		if(token.second.compare("/Encoding") == 0)
 		{
 			status = ParseEncoding();
+			if(eSuccess == status)
+				CalculateReverseEncoding();
 			continue;
 		}
 	}
@@ -232,32 +236,32 @@ EStatusCode Type1Input::ReadFontInfoDictionary()
 
 		if(token.second.compare("/version") == 0)
 		{
-			mFontInfoDictionary.version = mPFBDecoder.GetNextToken().second;
+			mFontInfoDictionary.version = FromPSString(mPFBDecoder.GetNextToken().second);
 			continue;
 		}
 		if(token.second.compare("/Notice") == 0)
 		{
-			mFontInfoDictionary.Notice = mPFBDecoder.GetNextToken().second;
+			mFontInfoDictionary.Notice = FromPSString(mPFBDecoder.GetNextToken().second);
 			continue;
 		}
 		if(token.second.compare("/Copyright") == 0)
 		{
-			mFontInfoDictionary.Copyright = mPFBDecoder.GetNextToken().second;
+			mFontInfoDictionary.Copyright = FromPSString(mPFBDecoder.GetNextToken().second);
 			continue;
 		}
 		if(token.second.compare("/FullName") == 0)
 		{
-			mFontInfoDictionary.FullName = mPFBDecoder.GetNextToken().second;
+			mFontInfoDictionary.FullName = FromPSString(mPFBDecoder.GetNextToken().second);
 			continue;
 		}
 		if(token.second.compare("/FamilyName") == 0)
 		{
-			mFontInfoDictionary.FamilyName = mPFBDecoder.GetNextToken().second;
+			mFontInfoDictionary.FamilyName = FromPSString(mPFBDecoder.GetNextToken().second);
 			continue;
 		}
 		if(token.second.compare("/Weight") == 0)
 		{
-			mFontInfoDictionary.Weight = mPFBDecoder.GetNextToken().second;
+			mFontInfoDictionary.Weight = FromPSString(mPFBDecoder.GetNextToken().second);
 			continue;
 		}
 		if(token.second.compare("/ItalicAngle") == 0)
@@ -388,6 +392,36 @@ EStatusCode Type1Input::ParseEncoding()
 		return eFailure;
 
 	return status;
+}
+
+void Type1Input::CalculateReverseEncoding()
+{
+	StringToByteMap::iterator it;
+
+	mReverseEncoding.insert(StringToByteMap::value_type("",0));
+	mReverseEncoding.insert(StringToByteMap::value_type(".notdef",0));
+	if(eType1EncodingTypeCustom == mEncoding.EncodingType)
+	{
+		for(int i=1; i <256;++i)
+		{
+			it = mReverseEncoding.find(mEncoding.mCustomEncoding[i]);
+			if(it == mReverseEncoding.end())
+				mReverseEncoding.insert(StringToByteMap::value_type(mEncoding.mCustomEncoding[i],i));
+			
+		}
+	}
+	else
+	{
+		StandardEncoding standardEncoding;
+
+		for(int i=1; i <256;++i)
+		{
+			it = mReverseEncoding.find(standardEncoding.GetEncodedGlyphName(i));
+			if(it == mReverseEncoding.end())
+				mReverseEncoding.insert(StringToByteMap::value_type(standardEncoding.GetEncodedGlyphName(i),i));
+			
+		}
+	}
 }
 
 EStatusCode Type1Input::ReadPrivateDictionary()
@@ -802,4 +836,78 @@ string Type1Input::GetGlyphCharStringName(Byte inCharStringIndex)
 
 		return standardEncoding.GetEncodedGlyphName(inCharStringIndex);
 	}
+}
+
+string Type1Input::FromPSString(const string& inPSString)
+{
+	stringbuf stringBuffer;
+	Byte buffer;
+	string::const_iterator it = inPSString.begin();
+	size_t i=1;
+	++it; // skip first paranthesis
+	
+	for(; i < inPSString.size()-1;++it,++i)
+	{
+		if(*it == '\\')
+		{
+			++it;
+			if('0' <= *it && *it <= '7')
+			{
+				buffer = (*it - '0') * 64;
+				++it;
+				buffer += (*it - '0') * 8;
+				++it;
+				buffer += (*it - '0');
+			}
+			else
+			{
+				switch(*it)
+				{
+					case 'n':
+						buffer = '\n';
+						break;
+					case 'r':
+						buffer = '\r';
+						break;
+					case 't':
+						buffer = '\t';
+						break;
+					case 'b':
+						buffer = '\b';
+						break;
+					case 'f':
+						buffer = '\f';
+						break;
+					case '\\':
+						buffer = '\\';
+						break;
+					case '(':
+						buffer = '(';
+						break;
+					case ')':
+						buffer = ')';
+						break;
+					default:
+						// error!
+						buffer = 0;
+						break;
+				}
+			}
+		}
+		else
+		{
+			buffer = *it;
+		}
+		stringBuffer.sputn((const char*)&buffer,1);
+	}
+	return stringBuffer.str();
+}
+
+Byte Type1Input::GetEncoding(const string& inCharStringName)
+{	
+	StringToByteMap::iterator it = mReverseEncoding.find(inCharStringName);
+	if(it == mReverseEncoding.end())
+		return 0;
+	else
+		return it->second;
 }

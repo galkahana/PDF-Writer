@@ -18,6 +18,10 @@ void Type2CharStringWriter::Assign(IByteWriter* inTargetStream)
 EStatusCode Type2CharStringWriter::WriteHintMask(unsigned long inMask,unsigned long inMaskSize)
 {
 	unsigned long maskByteSize = inMaskSize/8 + (inMaskSize % 8 != 0 ? 1:0);	
+	
+	EStatusCode status = WriteOperator(19);
+	if(status != eSuccess)
+		return status;
 
 	return WriteMaskBytes(inMask,maskByteSize);
 }
