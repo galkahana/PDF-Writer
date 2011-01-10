@@ -10,6 +10,7 @@
 #include "SafeBufferMacrosDefs.h"
 #include "FontDescriptorWriter.h"
 #include "IANSIFontWriterHelper.h"
+#include "UnicodeEncoding.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -289,7 +290,8 @@ void ANSIFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 	unsigned long i = 1;
 	UIntAndGlyphEncodingInfoVector::iterator it = mCharactersVector.begin() + 1; // skip 0 glyph
 	unsigned long vectorSize = (unsigned long)mCharactersVector.size() - 1; // cause 0 is not there
-	char formattingBuffer[13];
+	char formattingBuffer[17];
+	UnicodeEncoding unicode;
 
 	cmapWriteContext->Write((const Byte*)scCmapHeader,strlen(scCmapHeader));
 	primitiveWriter.WriteHexString(scTwoByteRangeStart);
@@ -301,8 +303,20 @@ void ANSIFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 	else
 		primitiveWriter.WriteInteger(100);
 	primitiveWriter.WriteKeyword(scBeginBFChar);
-	SAFE_SPRINTF_2(formattingBuffer,13,"<%02x> <%04x>\n",it->second.mEncodedCharacter,it->second.mUnicodeCharacter);
-	cmapWriteContext->Write((const Byte*)formattingBuffer,12);
+
+	if(unicode.IsSupplementary(it->second.mUnicodeCharacter))
+	{
+		UTF16Encoding highAndLow = unicode.EncodeCharater(it->second.mUnicodeCharacter);
+		SAFE_SPRINTF_3(formattingBuffer,17,"<%02x> <%04x%04x>\n",it->second.mEncodedCharacter,
+																highAndLow.HighSurrogate,
+																highAndLow.LowSurrogate);
+		cmapWriteContext->Write((const Byte*)formattingBuffer,16);
+	}
+	else
+	{
+		SAFE_SPRINTF_2(formattingBuffer,13,"<%02x> <%04x>\n",it->second.mEncodedCharacter,it->second.mUnicodeCharacter);
+		cmapWriteContext->Write((const Byte*)formattingBuffer,12);
+	}
 	++it;
 	for(; it != mCharactersVector.end(); ++it,++i)
 	{

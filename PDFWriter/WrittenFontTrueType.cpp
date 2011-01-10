@@ -20,7 +20,7 @@ here's what i'm deciding on:
 2. While encoding use WinAnsiEncoding values, of course. This will necasserily work
 3. While writing the font description simply write the WinAnsiEncoding glyph name, and pray.*/
 
-bool WrittenFontTrueType::AddToANSIRepresentation(	const wstring& inText,
+bool WrittenFontTrueType::AddToANSIRepresentation(	const ULongVector& inUnicodeCharacters,
 													const UIntList& inGlyphsList,
 													UShortList& outEncodedCharacters)
 {
@@ -31,11 +31,11 @@ bool WrittenFontTrueType::AddToANSIRepresentation(	const wstring& inText,
 	UShortList candidates;
 	BoolAndByte encodingResult(true,0);
 	WinAnsiEncoding winAnsiEncoding;
-	wstring::const_iterator it = inText.begin(); 
+	ULongVector::const_iterator it = inUnicodeCharacters.begin(); 
 
-	for(; it != inText.end() && encodingResult.first; ++it)
+	for(; it != inUnicodeCharacters.end() && encodingResult.first; ++it)
 	{
-		encodingResult = winAnsiEncoding.Encode(*it);
+		encodingResult = winAnsiEncoding.Encode((wchar_t)*it);
 		if(encodingResult.first)
 			candidates.push_back(encodingResult.second);
 	}
@@ -49,7 +49,7 @@ bool WrittenFontTrueType::AddToANSIRepresentation(	const wstring& inText,
 
 		UIntList::const_iterator itGlyphs = inGlyphsList.begin();
 		UShortList::iterator itEncoded = candidates.begin();
-		wstring::const_iterator itText = inText.begin(); 
+		ULongVector::const_iterator itText = inUnicodeCharacters.begin(); 
 		for(; itGlyphs != inGlyphsList.end(); ++ itGlyphs,++itEncoded,++itText)
 		{
 			if(mANSIRepresentation->mGlyphIDToEncodedChar.find(*itGlyphs) == mANSIRepresentation->mGlyphIDToEncodedChar.end())
@@ -99,7 +99,7 @@ EStatusCode WrittenFontTrueType::WriteFontDefinition(FreeTypeFaceWrapper& inFont
 	return status;
 }
 
-bool WrittenFontTrueType::AddToANSIRepresentation(	const WStringList& inText,
+bool WrittenFontTrueType::AddToANSIRepresentation(	const ULongVectorList& inUnicodeCharacters,
 													const UIntListList& inGlyphsList,
 													UShortListList& outEncodedCharacters)
 {
@@ -107,15 +107,15 @@ bool WrittenFontTrueType::AddToANSIRepresentation(	const WStringList& inText,
 	UShortList candidates;
 	BoolAndByte encodingResult(true,0);
 	WinAnsiEncoding winAnsiEncoding;
-	WStringList::const_iterator itList = inText.begin(); 
-	wstring::const_iterator it; 
+	ULongVectorList::const_iterator itList = inUnicodeCharacters.begin(); 
+	ULongVector::const_iterator it; 
 
-	for(; itList != inText.end() && encodingResult.first; ++itList)
+	for(; itList != inUnicodeCharacters.end() && encodingResult.first; ++itList)
 	{
 		it = itList->begin();
 		for(; it != itList->end() && encodingResult.first; ++it)
 		{
-			encodingResult = winAnsiEncoding.Encode(*it);
+			encodingResult = winAnsiEncoding.Encode((wchar_t)*it);
 			if(encodingResult.first)
 				candidates.push_back(encodingResult.second);
 		}
@@ -135,10 +135,10 @@ bool WrittenFontTrueType::AddToANSIRepresentation(	const WStringList& inText,
 
 		UIntListList::const_iterator itGlyphsList = inGlyphsList.begin();
 		UShortListList::iterator itEncodedList = candidatesList.begin();
-		WStringList::const_iterator itTextList = inText.begin();
+		ULongVectorList::const_iterator itTextList = inUnicodeCharacters.begin();
 		UIntList::const_iterator itGlyphs;
 		UShortList::iterator itEncoded;
-		wstring::const_iterator itText;
+		ULongVector::const_iterator itText;
 
 		for(; itGlyphsList != inGlyphsList.end(); ++ itGlyphsList,++itEncodedList,++itTextList)
 		{

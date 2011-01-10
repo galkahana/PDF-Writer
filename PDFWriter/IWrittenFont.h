@@ -5,6 +5,7 @@
 
 #include <string>
 #include <list>
+#include <vector>
 
 using namespace std;
 
@@ -13,6 +14,8 @@ typedef list<unsigned short> UShortList;
 typedef list<UIntList> UIntListList;
 typedef list<UShortList> UShortListList;
 typedef list<wstring> WStringList;
+typedef vector<unsigned long> ULongVector;
+typedef list<ULongVector> ULongVectorList;
 
 class FreeTypeFaceWrapper;
 
@@ -28,13 +31,13 @@ public:
 		the using content can refer to it
 	*/
 	virtual void AppendGlyphs(const UIntList& inGlyphsList,
-					  const wstring& inText,
+					  const ULongVector& inUnicodeCharacters,
 					  UShortList& outEncodedCharacters,
 					  bool& outEncodingIsMultiByte,
 					  ObjectIDType &outFontObjectID) = 0;
 
 	virtual void AppendGlyphs(const UIntListList& inGlyphsList,
-					  const WStringList& inText,
+					  const ULongVectorList& inUnicodeCharacters,
 					  UShortListList& outEncodedCharacters,
 					  bool& outEncodingIsMultiByte,
 					  ObjectIDType &outFontObjectID) = 0;

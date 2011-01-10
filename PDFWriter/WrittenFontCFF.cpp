@@ -19,7 +19,7 @@ WrittenFontCFF::~WrittenFontCFF(void)
 }
 
 bool WrittenFontCFF::AddToANSIRepresentation(
-						const wstring& inText,
+						const ULongVector& inUnicodeCharacters,
 						const UIntList& inGlyphsList,
 						UShortList& outEncodedCharacters)
 {
@@ -27,7 +27,7 @@ bool WrittenFontCFF::AddToANSIRepresentation(
 	if(!mIsCID && HasEnoughSpaceForGlyphs(inGlyphsList))
 	{
 		UIntList::const_iterator it = inGlyphsList.begin();
-		wstring::const_iterator itText = inText.begin(); // assuming 1-1 match for now
+		ULongVector::const_iterator itText = inUnicodeCharacters.begin(); // assuming 1-1 match for now
 
 		for(; it != inGlyphsList.end(); ++it,++itText)
 			outEncodedCharacters.push_back(EncodeGlyph(*it,*itText));
@@ -49,7 +49,7 @@ bool WrittenFontCFF::HasEnoughSpaceForGlyphs(const UIntList& inGlyphsList)
 	return glyphsToAddCount <= mAvailablePositionsCount;
 }
 
-unsigned short WrittenFontCFF::EncodeGlyph(unsigned int inGlyph,wchar_t inCharacter)
+unsigned short WrittenFontCFF::EncodeGlyph(unsigned int inGlyph,unsigned long inCharacter)
 {
 	// for the first time, add also 0,0 mapping
 	if(mANSIRepresentation->mGlyphIDToEncodedChar.size() == 0)
@@ -155,7 +155,7 @@ EStatusCode WrittenFontCFF::WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo)
 	return status;
 }
 
-bool WrittenFontCFF::AddToANSIRepresentation(	const WStringList& inText,
+bool WrittenFontCFF::AddToANSIRepresentation(	const ULongVectorList& inUnicodeCharacters,
 												const UIntListList& inGlyphsList,
 												UShortListList& outEncodedCharacters)
 {
@@ -163,9 +163,9 @@ bool WrittenFontCFF::AddToANSIRepresentation(	const WStringList& inText,
 	if(!mIsCID && HasEnoughSpaceForGlyphs(inGlyphsList))
 	{
 		UIntListList::const_iterator itList = inGlyphsList.begin();
-		WStringList::const_iterator itTextList = inText.begin();
+		ULongVectorList::const_iterator itTextList = inUnicodeCharacters.begin();
 		UIntList::const_iterator it;
-		wstring::const_iterator itText;
+		ULongVector::const_iterator itText;
 		UShortList encodedCharacters;
 
 		for(; itList != inGlyphsList.end(); ++itList,++itTextList)

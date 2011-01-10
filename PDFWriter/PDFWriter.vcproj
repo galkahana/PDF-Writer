@@ -1202,6 +1202,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\UnicodeEncoding.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\UnicodeEncoding.h"
+					>
+				</File>
+				<File
 					RelativePath=".\WrittenFontCFF.cpp"
 					>
 				</File>

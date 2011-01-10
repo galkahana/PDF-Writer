@@ -12,12 +12,12 @@ public:
 	virtual ~AbstractWrittenFont(void);
 
 	virtual void AppendGlyphs(const UIntList& inGlyphsList,
-							  const wstring& inText,
+							  const ULongVector& inUnicodeCharacters,
 							  UShortList& outEncodedCharacters,
 							  bool& outEncodingIsMultiByte,
 							  ObjectIDType &outFontObjectID);
 	virtual void AppendGlyphs(const UIntListList& inGlyphsList,
-							  const WStringList& inText,
+							  const ULongVectorList& inUnicodeCharacters,
 							  UShortListList& outEncodedCharacters,
 							  bool& outEncodingIsMultiByte,
 							  ObjectIDType &outFontObjectID);
@@ -34,16 +34,16 @@ private:
 									const UIntListList& inGlyphsList,
 									UShortListList& outEncodedCharacters);
 
-	void AddToCIDRepresentation(const std::wstring& inText,const UIntList& inGlyphsList,UShortList& outEncodedCharacters);
-	void AddToCIDRepresentation(const WStringList& inText,const UIntListList& inGlyphsList,UShortListList& outEncodedCharacters);
+	void AddToCIDRepresentation(const ULongVector& inUnicodeCharacters,const UIntList& inGlyphsList,UShortList& outEncodedCharacters);
+	void AddToCIDRepresentation(const ULongVectorList& inUnicodeCharacters,const UIntListList& inGlyphsList,UShortListList& outEncodedCharacters);
 	
 	// Aha! This method remains virtual for sub implementations to 
 	// override. Adding to an ANSI representation is dependent on the output format,
 	// where True Type has some different ruling from OpenType(CFF)/Type1
-	virtual bool AddToANSIRepresentation(const wstring& inText,
+	virtual bool AddToANSIRepresentation(const ULongVector& inUnicodeCharacters,
 								 const UIntList& inGlyphsList,
 								 UShortList& outEncodedCharacters) = 0;
-	virtual bool AddToANSIRepresentation(const WStringList& inText,
+	virtual bool AddToANSIRepresentation(const ULongVectorList& inUnicodeCharacters,
 								 const UIntListList& inGlyphsList,
 								 UShortListList& outEncodedCharacters) = 0;
 };

@@ -13,9 +13,9 @@ using namespace std;
 struct GlyphEncodingInfo
 {
 	unsigned short mEncodedCharacter;
-	unsigned short mUnicodeCharacter;
+	unsigned long mUnicodeCharacter;
 
-	GlyphEncodingInfo(unsigned short inEncodedCharacter,unsigned short inUnicodeCharacter)
+	GlyphEncodingInfo(unsigned short inEncodedCharacter,unsigned long inUnicodeCharacter)
 	{mEncodedCharacter = inEncodedCharacter; mUnicodeCharacter = inUnicodeCharacter;}
 };
 

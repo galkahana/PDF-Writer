@@ -468,16 +468,17 @@ bool FreeTypeFaceWrapper::IsForceBold()
 	return mFormatParticularWrapper ? mFormatParticularWrapper->IsForceBold() : false;
 }
 
-EStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const wstring& inText,UIntList& outGlyphs)
+EStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const ULongVector& inUnicodeCharacters,UIntList& outGlyphs)
 {
 	if(mFace)
 	{
 		FT_UInt glyphIndex;
 		EStatusCode status = eSuccess;
-		wstring::const_iterator it = inText.begin();
+
 		outGlyphs.clear();
 
-		for(; it != inText.end(); ++it)
+		ULongVector::const_iterator it = inUnicodeCharacters.begin();
+		for(; it != inUnicodeCharacters.end() && eSuccess == status; ++it)
 		{
 			glyphIndex = FT_Get_Char_Index(mFace,*it);
 			outGlyphs.push_back(glyphIndex);
@@ -494,13 +495,13 @@ EStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const wstring& inText,U
 		return eFailure;
 }
 
-EStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const WStringList& inText,UIntListList& outGlyphs)
+EStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const ULongVectorList& inUnicodeCharacters,UIntListList& outGlyphs)
 {
 	UIntList glyphs;
 	EStatusCode status = eSuccess;
-	WStringList::const_iterator it = inText.begin();
+	ULongVectorList::const_iterator it = inUnicodeCharacters.begin();
 
-	for(; it != inText.end(); ++it)
+	for(; it != inUnicodeCharacters.end(); ++it)
 	{
 		if(eFailure == GetGlyphsForUnicodeText(*it,glyphs))
 			status = eFailure;	

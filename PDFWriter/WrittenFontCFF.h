@@ -21,16 +21,16 @@ public:
 
 
 private:
-	virtual bool AddToANSIRepresentation(const wstring& inText,
+	virtual bool AddToANSIRepresentation(const ULongVector& inUnicodeCharacters,
 							 const UIntList& inGlyphsList,
 							 UShortList& outEncodedCharacters);
 
-	virtual bool AddToANSIRepresentation(const WStringList& inText,
+	virtual bool AddToANSIRepresentation(const ULongVectorList& inUnicodeCharacters,
 							const UIntListList& inGlyphsList,
 							UShortListList& outEncodedCharacters);
 
 	bool HasEnoughSpaceForGlyphs(const UIntList& inGlyphsList);
-	unsigned short EncodeGlyph(unsigned int inGlyph,wchar_t inCharacter);
+	unsigned short EncodeGlyph(unsigned int inGlyph,unsigned long inCharacter);
 	void RemoveFromFreeList(unsigned char inAllocatedPosition);
 	unsigned char AllocateFromFreeList(unsigned int inGlyph);
 	bool HasEnoughSpaceForGlyphs(const UIntListList& inGlyphsList);

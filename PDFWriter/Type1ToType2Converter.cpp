@@ -615,7 +615,7 @@ long Type1ToType2Converter::GenerateHintMaskFromCollectedHints()
 	unsigned long hintMask = 0;
 	size_t totalHints = mHStems.size() + mVStems.size();
 	SizeTSet::iterator it = mCurrentHints.begin();
-	unsigned long maskByteSize = totalHints/8 + (totalHints % 8 != 0 ? 1:0);
+	unsigned long maskByteSize = (unsigned long)(totalHints/8 + (totalHints % 8 != 0 ? 1:0));
 
 	for(; it != mCurrentHints.end();++it)
 		hintMask = hintMask | (1 << (maskByteSize*8 - 1  - *it));
@@ -905,7 +905,7 @@ EStatusCode Type1ToType2Converter::WriteProgramToStream(IByteWriter* inByteWrite
 		
 		if(19 == it->mMarkerType) // hintmask
 		{
-			status = commandWriter.WriteHintMask((unsigned long)(*itOperands),mHStems.size() + mVStems.size());
+			status = commandWriter.WriteHintMask((unsigned long)(*itOperands),(unsigned long)(mHStems.size() + mVStems.size()));
 		}
 		else
 		{

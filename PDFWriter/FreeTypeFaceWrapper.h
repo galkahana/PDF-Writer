@@ -9,6 +9,7 @@
 #include <utility>
 #include <list>
 #include <string>
+#include <vector>
 
 class IFreeTypeFaceExtender;
 class IWrittenFont;
@@ -20,6 +21,8 @@ typedef pair<bool,FT_Short> BoolAndFTShort;
 typedef list<unsigned int> UIntList;
 typedef list<UIntList> UIntListList;
 typedef list<wstring> WStringList;
+typedef vector<unsigned long> ULongVector;
+typedef list<ULongVector> ULongVectorList;
 
 class FreeTypeFaceWrapper
 {
@@ -43,8 +46,8 @@ public:
 
 	bool IsValid();
 
-	EStatusCode GetGlyphsForUnicodeText(const wstring& inText,UIntList& outGlyphs);
-	EStatusCode GetGlyphsForUnicodeText(const WStringList& inText,UIntListList& outGlyphs);
+	EStatusCode GetGlyphsForUnicodeText(const ULongVector& inUnicodeCharacters,UIntList& outGlyphs);
+	EStatusCode GetGlyphsForUnicodeText(const ULongVectorList& inUnicodeCharacters,UIntListList& outGlyphs);
 
 	double GetItalicAngle();
 	BoolAndFTShort GetCapHeight(); // aligned to pdf metrics

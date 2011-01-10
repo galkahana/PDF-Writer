@@ -8,6 +8,7 @@
 #include "SafeBufferMacrosDefs.h"
 #include "CFFDescendentFontWriter.h"
 #include "IDescendentFontWriter.h"
+#include "UnicodeEncoding.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -155,7 +156,8 @@ void CIDFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 	unsigned long i = 1;
 	UIntAndGlyphEncodingInfoVector::iterator it = mCharactersVector.begin() + 1; // skip 0 glyph
 	unsigned long vectorSize = (unsigned long)mCharactersVector.size() - 1; // cause 0 is not there
-	char formattingBuffer[15];
+	char formattingBuffer[19];
+	UnicodeEncoding unicode;
 
 	cmapWriteContext->Write((const Byte*)scCmapHeader,strlen(scCmapHeader));
 	primitiveWriter.WriteHexString(scFourByteRangeStart);
@@ -167,8 +169,20 @@ void CIDFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 	else
 		primitiveWriter.WriteInteger(100);
 	primitiveWriter.WriteKeyword(scBeginBFChar);
-	SAFE_SPRINTF_2(formattingBuffer,15,"<%04x> <%04x>\n",it->second.mEncodedCharacter,it->second.mUnicodeCharacter);
-	cmapWriteContext->Write((const Byte*)formattingBuffer,14);
+	
+	if(unicode.IsSupplementary(it->second.mUnicodeCharacter))
+	{
+		UTF16Encoding highAndLow = unicode.EncodeCharater(it->second.mUnicodeCharacter);
+		SAFE_SPRINTF_3(formattingBuffer,19,"<%04x> <%04x%04x>\n",it->second.mEncodedCharacter,
+																highAndLow.HighSurrogate,
+																highAndLow.LowSurrogate);
+		cmapWriteContext->Write((const Byte*)formattingBuffer,18);
+	}
+	else
+	{
+		SAFE_SPRINTF_2(formattingBuffer,15,"<%04x> <%04x>\n",it->second.mEncodedCharacter,it->second.mUnicodeCharacter);
+		cmapWriteContext->Write((const Byte*)formattingBuffer,14);
+	}
 	++it;
 	for(; it != mCharactersVector.end(); ++it,++i)
 	{
@@ -181,8 +195,19 @@ void CIDFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 				primitiveWriter.WriteInteger(100);
 			primitiveWriter.WriteKeyword(scBeginBFChar);
 		}
-		SAFE_SPRINTF_2(formattingBuffer,15,"<%04x> <%04x>\n",it->second.mEncodedCharacter,it->second.mUnicodeCharacter);
-		cmapWriteContext->Write((const Byte*)formattingBuffer,14);
+		if(unicode.IsSupplementary(it->second.mUnicodeCharacter))
+		{
+			UTF16Encoding highAndLow = unicode.EncodeCharater(it->second.mUnicodeCharacter);
+			SAFE_SPRINTF_3(formattingBuffer,19,"<%04x> <%04x%04x>\n",it->second.mEncodedCharacter,
+																	highAndLow.HighSurrogate,
+																	highAndLow.LowSurrogate);
+			cmapWriteContext->Write((const Byte*)formattingBuffer,18);
+		}
+		else
+		{
+			SAFE_SPRINTF_2(formattingBuffer,15,"<%04x> <%04x>\n",it->second.mEncodedCharacter,it->second.mUnicodeCharacter);
+			cmapWriteContext->Write((const Byte*)formattingBuffer,14);
+		}
 	}
 	primitiveWriter.WriteKeyword(scEndBFChar);
 	cmapWriteContext->Write((const Byte*)scCmapFooter,strlen(scCmapFooter));
