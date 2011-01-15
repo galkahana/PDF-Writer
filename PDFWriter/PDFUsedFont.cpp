@@ -21,13 +21,21 @@ bool PDFUsedFont::IsValid()
 	return mFaceWrapper.IsValid();
 }
 
-EStatusCode PDFUsedFont::EncodeStringForShowing(const wstring& inText,
+EStatusCode PDFUsedFont::EncodeStringForShowing(const GlyphUnicodeMappingList& inText,
 												ObjectIDType &outFontObjectToUse,
 												UShortList& outCharactersToUse,
 												bool& outTreatCharactersAsCID)
 {
-	// K. let's assume that arrive here after validating that all is well. m'k? getting tired of making
-	// all these theoretical validations that all is well. if you really must do this - add check that written font is non null after Creation.
+	if(!mWrittenFont)
+		mWrittenFont = mFaceWrapper.CreateWrittenFontObject(mObjectsContext);
+
+	mWrittenFont->AppendGlyphs(inText,outCharactersToUse,outTreatCharactersAsCID,outFontObjectToUse);
+
+	return eSuccess;
+}
+
+EStatusCode PDFUsedFont::TranslateStringToGlyphs(const wstring& inText,GlyphUnicodeMappingList& outGlyphsUnicodeMapping)
+{
 	UIntList glyphs;
 	UnicodeEncoding unicode;
 	ULongVector unicodeCharacters;
@@ -38,45 +46,26 @@ EStatusCode PDFUsedFont::EncodeStringForShowing(const wstring& inText,
 
 	status = mFaceWrapper.GetGlyphsForUnicodeText(unicodeCharacters,glyphs);
 
-	if(!mWrittenFont)
-		mWrittenFont = mFaceWrapper.CreateWrittenFontObject(mObjectsContext);
+	ULongVector::iterator itUnicode = unicodeCharacters.begin();
+	UIntList::iterator itGlyphs = glyphs.begin();
 
-	mWrittenFont->AppendGlyphs(glyphs,unicodeCharacters,outCharactersToUse,outTreatCharactersAsCID,outFontObjectToUse);
+	for(; itUnicode != unicodeCharacters.end(); ++itUnicode,++itGlyphs)
+		outGlyphsUnicodeMapping.push_back(GlyphUnicodeMapping(*itGlyphs,*itUnicode));
 
 	return status;
 }
 
-EStatusCode PDFUsedFont::EncodeStringsForShowing(const WStringList& inText,
-									ObjectIDType &outFontObjectToUse,
-									UShortListList& outCharactersToUse,
-									bool& outTreatCharactersAsCID)
+EStatusCode PDFUsedFont::EncodeStringsForShowing(const GlyphUnicodeMappingListList& inText,
+												ObjectIDType &outFontObjectToUse,
+												UShortListList& outCharactersToUse,
+												bool& outTreatCharactersAsCID)
 {
-	UIntListList glyphs;
-
-	UnicodeEncoding unicode;
-	ULongVector unicodeCharacters;
-	ULongVectorList unicodeCharactersList;
-
-	EStatusCode status = eSuccess;
-	WStringList::const_iterator it = inText.begin();
-
-	for(; it != inText.end() && eSuccess == status;++it)
-	{
-		status = unicode.UTF16ToUnicode(*it,unicodeCharacters);
-		unicodeCharactersList.push_back(unicodeCharacters);
-	}
-	if(status != eSuccess)
-		return status;
-
-
-	status = mFaceWrapper.GetGlyphsForUnicodeText(unicodeCharactersList,glyphs);
-
 	if(!mWrittenFont)
 		mWrittenFont = mFaceWrapper.CreateWrittenFontObject(mObjectsContext);
 
-	mWrittenFont->AppendGlyphs(glyphs,unicodeCharactersList,outCharactersToUse,outTreatCharactersAsCID,outFontObjectToUse);
+	mWrittenFont->AppendGlyphs(inText,outCharactersToUse,outTreatCharactersAsCID,outFontObjectToUse);
 
-	return status;
+	return eSuccess;
 }
 
 EStatusCode PDFUsedFont::WriteFontDefinition()

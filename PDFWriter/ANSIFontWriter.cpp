@@ -290,8 +290,6 @@ void ANSIFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 	unsigned long i = 1;
 	UIntAndGlyphEncodingInfoVector::iterator it = mCharactersVector.begin() + 1; // skip 0 glyph
 	unsigned long vectorSize = (unsigned long)mCharactersVector.size() - 1; // cause 0 is not there
-	char formattingBuffer[17];
-	UnicodeEncoding unicode;
 
 	cmapWriteContext->Write((const Byte*)scCmapHeader,strlen(scCmapHeader));
 	primitiveWriter.WriteHexString(scTwoByteRangeStart);
@@ -304,20 +302,9 @@ void ANSIFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 		primitiveWriter.WriteInteger(100);
 	primitiveWriter.WriteKeyword(scBeginBFChar);
 
-	if(unicode.IsSupplementary(it->second.mUnicodeCharacter))
-	{
-		UTF16Encoding highAndLow = unicode.EncodeCharater(it->second.mUnicodeCharacter);
-		SAFE_SPRINTF_3(formattingBuffer,17,"<%02x> <%04x%04x>\n",it->second.mEncodedCharacter,
-																highAndLow.HighSurrogate,
-																highAndLow.LowSurrogate);
-		cmapWriteContext->Write((const Byte*)formattingBuffer,16);
-	}
-	else
-	{
-		SAFE_SPRINTF_2(formattingBuffer,13,"<%02x> <%04x>\n",it->second.mEncodedCharacter,it->second.mUnicodeCharacter);
-		cmapWriteContext->Write((const Byte*)formattingBuffer,12);
-	}
+	WriteGlyphEntry(cmapWriteContext,it->second.mEncodedCharacter,it->second.mUnicodeCharacters);
 	++it;
+
 	for(; it != mCharactersVector.end(); ++it,++i)
 	{
 		if(i % 100 == 0)
@@ -329,10 +316,38 @@ void ANSIFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 				primitiveWriter.WriteInteger(100);
 			primitiveWriter.WriteKeyword(scBeginBFChar);
 		}
-		SAFE_SPRINTF_2(formattingBuffer,13,"<%02x> <%04x>\n",it->second.mEncodedCharacter,it->second.mUnicodeCharacter);
-		cmapWriteContext->Write((const Byte*)formattingBuffer,12);
+		WriteGlyphEntry(cmapWriteContext,it->second.mEncodedCharacter,it->second.mUnicodeCharacters);
 	}
 	primitiveWriter.WriteKeyword(scEndBFChar);
 	cmapWriteContext->Write((const Byte*)scCmapFooter,strlen(scCmapFooter));
 	mObjectsContext->EndPDFStream(pdfStream);
+}
+
+static const Byte scEntryEnding[2] = {'>','\n'};
+void ANSIFontWriter::WriteGlyphEntry(IByteWriter* inWriter,unsigned short inEncodedCharacter,const ULongVector& inUnicodeValues)
+{
+	UnicodeEncoding unicode;
+	char formattingBuffer[17];
+	ULongVector::const_iterator it = inUnicodeValues.begin();
+
+	SAFE_SPRINTF_1(formattingBuffer,17,"<%02x> <",inEncodedCharacter);
+	inWriter->Write((const Byte*)formattingBuffer,6);
+	
+	for(; it != inUnicodeValues.end(); ++it)
+	{
+		if(unicode.IsSupplementary(*it))
+		{
+			UTF16Encoding highAndLow = unicode.EncodeCharater(*it);
+			SAFE_SPRINTF_2(formattingBuffer,17,"%04x%04x",
+															highAndLow.HighSurrogate,
+															highAndLow.LowSurrogate);
+			inWriter->Write((const Byte*)formattingBuffer,8);
+		}
+		else
+		{
+			SAFE_SPRINTF_1(formattingBuffer,17,"%04x",*it);
+			inWriter->Write((const Byte*)formattingBuffer,4);
+		}
+	}
+	inWriter->Write(scEntryEnding,2);
 }

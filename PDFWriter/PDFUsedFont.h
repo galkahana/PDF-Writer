@@ -3,6 +3,7 @@
 #include "FreeTypeFaceWrapper.h"
 #include "ObjectsBasicTypes.h"
 #include "EStatusCode.h"
+#include "GlyphUnicodeMapping.h"
 #include <string>
 #include <list>
 
@@ -14,6 +15,7 @@ using namespace std;
 typedef list<unsigned short> UShortList;
 typedef list<UShortList> UShortListList;
 typedef list<wstring> WStringList;
+typedef list<GlyphUnicodeMappingList> GlyphUnicodeMappingListList;
 
 class IWrittenFont;
 class ObjectsContext;
@@ -29,23 +31,29 @@ public:
 
 	bool IsValid();
 
+	// a String in the following two implementations is represented here by a list of glyphs, with each mapped to the matching
+	// unicode values. to move from a wide string to such a structure, use other class methods
+
 	/*
 		This function does the work of encoding a text string to a matching font instance name, and an encoded array
 		of characters. the encoded array is a list of short values (double byte for CID, one byte for regular), and an extra
 		boolean value indicates whether they are CID or regular.
 	*/
-	EStatusCode EncodeStringForShowing(const wstring& inText,
+	EStatusCode EncodeStringForShowing(const GlyphUnicodeMappingList& inText,
 										ObjectIDType &outFontObjectToUse,
 										UShortList& outCharactersToUse,
 										bool& outTreatCharactersAsCID);
 
 	// encode all strings. make sure that they will use the same font.
-	EStatusCode EncodeStringsForShowing(const WStringList& inText,
+	EStatusCode EncodeStringsForShowing(const GlyphUnicodeMappingListList& inText,
 										ObjectIDType &outFontObjectToUse,
 										UShortListList& outCharactersToUse,
 										bool& outTreatCharactersAsCID);
 
 	EStatusCode WriteFontDefinition();
+
+	// use this method to translate text to glyphs and unicode mapping, to be later used for EncodeStringForShowing
+	EStatusCode TranslateStringToGlyphs(const wstring& inText,GlyphUnicodeMappingList& outGlyphsUnicodeMapping);
 
 private:
 	FreeTypeFaceWrapper mFaceWrapper;

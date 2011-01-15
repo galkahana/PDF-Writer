@@ -146,6 +146,10 @@ bool FontDescriptorWriter::IsSymbolic(	FreeTypeFaceWrapper* inFontInfo,
 	UIntAndGlyphEncodingInfoVector::const_iterator it = inEncodedGlyphs.begin()+1; // skip 0 character
 	
 	for(; it != inEncodedGlyphs.end() && hasOnlyAdobeStandard; ++it)
-		hasOnlyAdobeStandard = inFontInfo->IsCharachterCodeAdobeStandard(it->second.mUnicodeCharacter);
+	{
+		ULongVector::const_iterator itCharacters = it->second.mUnicodeCharacters.begin();
+		for(; itCharacters != it->second.mUnicodeCharacters.end() && hasOnlyAdobeStandard;++itCharacters)
+			hasOnlyAdobeStandard = inFontInfo->IsCharachterCodeAdobeStandard(*itCharacters);
+	}
 	return !hasOnlyAdobeStandard;
 }

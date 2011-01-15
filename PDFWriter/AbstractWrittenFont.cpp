@@ -15,8 +15,7 @@ AbstractWrittenFont::~AbstractWrittenFont(void)
 }
 
 void AbstractWrittenFont::AppendGlyphs(
-						  const UIntList& inGlyphsList,
-						  const ULongVector& inUnicodeCharacters,
+						  const GlyphUnicodeMappingList& inGlyphsList,
 						  UShortList& outEncodedCharacters,
 						  bool& outEncodingIsMultiByte,
 						  ObjectIDType &outFontObjectID)
@@ -45,7 +44,7 @@ void AbstractWrittenFont::AppendGlyphs(
 	// if a CID representation exists - prefer it over the ANSI.
 	if(mCIDRepresentation)
 	{
-		AddToCIDRepresentation(inUnicodeCharacters,inGlyphsList,outEncodedCharacters);
+		AddToCIDRepresentation(inGlyphsList,outEncodedCharacters);
 		outFontObjectID = mCIDRepresentation->mWrittenObjectID;
 		outEncodingIsMultiByte = true;
 		return;
@@ -58,7 +57,7 @@ void AbstractWrittenFont::AppendGlyphs(
 
 	// [note that each font type will have a different set of rules as to whether the glyphs
 	// may be used in an ANSI representation]
-	if(AddToANSIRepresentation(inUnicodeCharacters,inGlyphsList,outEncodedCharacters))
+	if(AddToANSIRepresentation(inGlyphsList,outEncodedCharacters))
 	{
 		if(0 == mANSIRepresentation->mWrittenObjectID)
 			mANSIRepresentation->mWrittenObjectID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
@@ -71,23 +70,23 @@ void AbstractWrittenFont::AppendGlyphs(
 	// if not...then create a CID representation and include the chars there. from now one...every time glyphs needs to be added
 	// this algorithm will use the CID representation.
 	mCIDRepresentation = new WrittenFontRepresentation();
-	AddToCIDRepresentation(inUnicodeCharacters,inGlyphsList,outEncodedCharacters);
+	AddToCIDRepresentation(inGlyphsList,outEncodedCharacters);
 	outFontObjectID = mCIDRepresentation->mWrittenObjectID;
 	outEncodingIsMultiByte = true;
 }
 
 bool AbstractWrittenFont::CanEncodeWithIncludedChars(WrittenFontRepresentation* inRepresentation, 
-													 const UIntList& inGlyphsList,
+													 const GlyphUnicodeMappingList& inGlyphsList,
 													 UShortList& outEncodedCharacters)
 {
 	UShortList candidateEncoding;
-	UIntList::const_iterator it=inGlyphsList.begin();
+	GlyphUnicodeMappingList::const_iterator it=inGlyphsList.begin();
 	UIntToGlyphEncodingInfoMap::iterator itEncoding;
 	bool allIncluded = true;
 
 	for(; it != inGlyphsList.end() && allIncluded; ++it)
 	{
-		itEncoding = inRepresentation->mGlyphIDToEncodedChar.find(*it);
+		itEncoding = inRepresentation->mGlyphIDToEncodedChar.find(it->mGlyphCode);
 		if(itEncoding == inRepresentation->mGlyphIDToEncodedChar.end())
 			allIncluded = false;
 		else
@@ -99,7 +98,8 @@ bool AbstractWrittenFont::CanEncodeWithIncludedChars(WrittenFontRepresentation* 
 	return allIncluded;
 }
 
-void AbstractWrittenFont::AddToCIDRepresentation(const ULongVector& inUnicodeCharacters,const UIntList& inGlyphsList,UShortList& outEncodedCharacters)
+void AbstractWrittenFont::AddToCIDRepresentation(const GlyphUnicodeMappingList& inGlyphsList,
+												 UShortList& outEncodedCharacters)
 {
 	// Glyph IDs are always used as CIDs, there's a possible @#$@up here if the font will contain too many glyphs...oops.
 	// take care of this sometimes.
@@ -109,22 +109,17 @@ void AbstractWrittenFont::AddToCIDRepresentation(const ULongVector& inUnicodeCha
 		mCIDRepresentation->mGlyphIDToEncodedChar.insert(UIntToGlyphEncodingInfoMap::value_type(0,GlyphEncodingInfo(0,0)));
 
 
-	UIntList::const_iterator it=inGlyphsList.begin();
-	ULongVector::const_iterator itText = inUnicodeCharacters.begin();
+	GlyphUnicodeMappingList::const_iterator it=inGlyphsList.begin();
 	UIntToGlyphEncodingInfoMap::iterator itEncoding;
 
-	for(; it != inGlyphsList.end(); ++it,++itText)
+	for(; it != inGlyphsList.end(); ++it)
 	{
-		itEncoding = mCIDRepresentation->mGlyphIDToEncodedChar.find(*it);
+		itEncoding = mCIDRepresentation->mGlyphIDToEncodedChar.find(it->mGlyphCode);
 		if(itEncoding == mCIDRepresentation->mGlyphIDToEncodedChar.end())
 		{
-			itEncoding = mCIDRepresentation->mGlyphIDToEncodedChar.insert(UIntToGlyphEncodingInfoMap::value_type(*it,GlyphEncodingInfo((unsigned short)*it,*itText))).first;
-			if(*it > 0xffff)
-			{
-				// let's see if this is at all possible
-				TRACE_LOG(
-					"AbstractWrittenFont::AddToCIDRepresentation, oops. charachter index larger that max unsigned short. charachter will not be encoded properly");
-			}
+			itEncoding = mCIDRepresentation->mGlyphIDToEncodedChar.insert(
+				UIntToGlyphEncodingInfoMap::value_type(it->mGlyphCode,GlyphEncodingInfo(it->mGlyphCode,it->mUnicodeValues))).first;
+
 		}
 		outEncodedCharacters.push_back(itEncoding->second.mEncodedCharacter);
 	}
@@ -150,8 +145,7 @@ True Type:
 3. While writing the font description simply write the WinAnsiEncoding glyph name, and pray.
 */
 
-void AbstractWrittenFont::AppendGlyphs(	const UIntListList& inGlyphsList,
-										const ULongVectorList& inUnicodeCharacters,
+void AbstractWrittenFont::AppendGlyphs(	const GlyphUnicodeMappingListList& inGlyphsList,
 										UShortListList& outEncodedCharacters,
 										bool& outEncodingIsMultiByte,
 										ObjectIDType &outFontObjectID)
@@ -174,7 +168,7 @@ void AbstractWrittenFont::AppendGlyphs(	const UIntListList& inGlyphsList,
 
 	if(mCIDRepresentation)
 	{
-		AddToCIDRepresentation(inUnicodeCharacters,inGlyphsList,outEncodedCharacters);
+		AddToCIDRepresentation(inGlyphsList,outEncodedCharacters);
 		outFontObjectID = mCIDRepresentation->mWrittenObjectID;
 		outEncodingIsMultiByte = true;
 		return;
@@ -183,7 +177,7 @@ void AbstractWrittenFont::AppendGlyphs(	const UIntListList& inGlyphsList,
 	if(!mANSIRepresentation)
 		mANSIRepresentation = new WrittenFontRepresentation();
 
-	if(AddToANSIRepresentation(inUnicodeCharacters,inGlyphsList,outEncodedCharacters))
+	if(AddToANSIRepresentation(inGlyphsList,outEncodedCharacters))
 	{
 		if(0 == mANSIRepresentation->mWrittenObjectID)
 			mANSIRepresentation->mWrittenObjectID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
@@ -194,19 +188,19 @@ void AbstractWrittenFont::AppendGlyphs(	const UIntListList& inGlyphsList,
 	}
 
 	mCIDRepresentation = new WrittenFontRepresentation();
-	AddToCIDRepresentation(inUnicodeCharacters,inGlyphsList,outEncodedCharacters);
+	AddToCIDRepresentation(inGlyphsList,outEncodedCharacters);
 	outFontObjectID = mCIDRepresentation->mWrittenObjectID;
 	outEncodingIsMultiByte = true;
 }
 
 bool AbstractWrittenFont::CanEncodeWithIncludedChars(	WrittenFontRepresentation* inRepresentation, 
-														const UIntListList& inGlyphsList,
+														const GlyphUnicodeMappingListList& inGlyphsList,
 														UShortListList& outEncodedCharacters)
 {
 	UShortListList candidateEncodingList;
 	UShortList candidateEncoding;
-	UIntListList::const_iterator it=inGlyphsList.begin();
-	UIntList::const_iterator itGlyphs;
+	GlyphUnicodeMappingListList::const_iterator it=inGlyphsList.begin();
+	GlyphUnicodeMappingList::const_iterator itGlyphs;
 	UIntToGlyphEncodingInfoMap::iterator itEncoding;
 	bool allIncluded = true;
 
@@ -215,7 +209,7 @@ bool AbstractWrittenFont::CanEncodeWithIncludedChars(	WrittenFontRepresentation*
 		itGlyphs = it->begin();
 		for(; itGlyphs != it->end() && allIncluded; ++itGlyphs)
 		{
-			itEncoding = inRepresentation->mGlyphIDToEncodedChar.find(*itGlyphs);
+			itEncoding = inRepresentation->mGlyphIDToEncodedChar.find(itGlyphs->mGlyphCode);
 			if(itEncoding == inRepresentation->mGlyphIDToEncodedChar.end())
 				allIncluded = false;
 			else
@@ -230,7 +224,8 @@ bool AbstractWrittenFont::CanEncodeWithIncludedChars(	WrittenFontRepresentation*
 	return allIncluded;
 }
 
-void AbstractWrittenFont::AddToCIDRepresentation(const ULongVectorList& inUnicodeCharacters,const UIntListList& inGlyphsList,UShortListList& outEncodedCharacters)
+void AbstractWrittenFont::AddToCIDRepresentation(	const GlyphUnicodeMappingListList& inGlyphsList,
+													UShortListList& outEncodedCharacters)
 {
 	// Glyph IDs are always used as CIDs, there's a possible @#$@up here if the font will contain too many glyphs...oops.
 	// take care of this sometimes.
@@ -240,30 +235,21 @@ void AbstractWrittenFont::AddToCIDRepresentation(const ULongVectorList& inUnicod
 		mCIDRepresentation->mGlyphIDToEncodedChar.insert(UIntToGlyphEncodingInfoMap::value_type(0,GlyphEncodingInfo(0,0)));
 
 
-	UIntListList::const_iterator itList = inGlyphsList.begin();
-	ULongVectorList::const_iterator itTextList = inUnicodeCharacters.begin();
-	UIntList::const_iterator it ;
-	ULongVector::const_iterator itText;
+	GlyphUnicodeMappingListList::const_iterator itList = inGlyphsList.begin();
+	GlyphUnicodeMappingList::const_iterator it;
 	UIntToGlyphEncodingInfoMap::iterator itEncoding;
 	UShortList encodedCharacters;
 
-	for(; itList != inGlyphsList.end(); ++itList,itTextList)
+	for(; itList != inGlyphsList.end(); ++itList)
 	{
 		it = itList->begin();
-		itText = itTextList->begin();
-
-		for(; it != itList->end(); ++it,++itText)
+		for(; it != itList->end(); ++it)
 		{
-			itEncoding = mCIDRepresentation->mGlyphIDToEncodedChar.find(*it);
+			itEncoding = mCIDRepresentation->mGlyphIDToEncodedChar.find(it->mGlyphCode);
 			if(itEncoding == mCIDRepresentation->mGlyphIDToEncodedChar.end())
 			{
-				mCIDRepresentation->mGlyphIDToEncodedChar.insert(UIntToGlyphEncodingInfoMap::value_type(*it,GlyphEncodingInfo((unsigned short)*it,*itText)));
-				if(*it > 0xffff)
-				{
-					// let's see if this is at all possible
-					TRACE_LOG(
-						"AbstractWrittenFont::AddToCIDRepresentation, oops. charachter index larger that max unsigned short. charachter will not be encoded properly");
-				}
+				itEncoding = mCIDRepresentation->mGlyphIDToEncodedChar.insert(
+					UIntToGlyphEncodingInfoMap::value_type(it->mGlyphCode,GlyphEncodingInfo(it->mGlyphCode,it->mUnicodeValues))).first;
 			}
 			encodedCharacters.push_back(itEncoding->second.mEncodedCharacter);
 		}

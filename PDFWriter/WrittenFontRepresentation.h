@@ -8,15 +8,18 @@
 
 using namespace std;
 
-
+typedef vector<unsigned long> ULongVector;
 
 struct GlyphEncodingInfo
 {
 	unsigned short mEncodedCharacter;
-	unsigned long mUnicodeCharacter;
+	ULongVector mUnicodeCharacters;
 
 	GlyphEncodingInfo(unsigned short inEncodedCharacter,unsigned long inUnicodeCharacter)
-	{mEncodedCharacter = inEncodedCharacter; mUnicodeCharacter = inUnicodeCharacter;}
+	{mEncodedCharacter = inEncodedCharacter; mUnicodeCharacters.push_back(inUnicodeCharacter);}
+		
+	GlyphEncodingInfo(unsigned short inEncodedCharacter,ULongVector inUnicodeCharacters)
+	{mEncodedCharacter = inEncodedCharacter; mUnicodeCharacters = inUnicodeCharacters;}
 };
 
 typedef map<unsigned int, GlyphEncodingInfo> UIntToGlyphEncodingInfoMap;

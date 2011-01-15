@@ -19,37 +19,35 @@ WrittenFontCFF::~WrittenFontCFF(void)
 }
 
 bool WrittenFontCFF::AddToANSIRepresentation(
-						const ULongVector& inUnicodeCharacters,
-						const UIntList& inGlyphsList,
+						const GlyphUnicodeMappingList& inGlyphsList,
 						UShortList& outEncodedCharacters)
 {
 	// categorically do not allow an ANSI representation if the font is CID
 	if(!mIsCID && HasEnoughSpaceForGlyphs(inGlyphsList))
 	{
-		UIntList::const_iterator it = inGlyphsList.begin();
-		ULongVector::const_iterator itText = inUnicodeCharacters.begin(); // assuming 1-1 match for now
+		GlyphUnicodeMappingList::const_iterator it = inGlyphsList.begin();
 
-		for(; it != inGlyphsList.end(); ++it,++itText)
-			outEncodedCharacters.push_back(EncodeGlyph(*it,*itText));
+		for(; it != inGlyphsList.end(); ++it)
+			outEncodedCharacters.push_back(EncodeGlyph(it->mGlyphCode,it->mUnicodeValues));
 		return true;
 	}
 	else
 		return false;
 }
 
-bool WrittenFontCFF::HasEnoughSpaceForGlyphs(const UIntList& inGlyphsList)
+bool WrittenFontCFF::HasEnoughSpaceForGlyphs(const GlyphUnicodeMappingList& inGlyphsList)
 {
-	UIntList::const_iterator it = inGlyphsList.begin();
+	GlyphUnicodeMappingList::const_iterator it = inGlyphsList.begin();
 	int glyphsToAddCount = 0;
 
 	for(; it != inGlyphsList.end(); ++it)
-		if(mANSIRepresentation->mGlyphIDToEncodedChar.find(*it) == mANSIRepresentation->mGlyphIDToEncodedChar.end())
+		if(mANSIRepresentation->mGlyphIDToEncodedChar.find(it->mGlyphCode) == mANSIRepresentation->mGlyphIDToEncodedChar.end())
 			++glyphsToAddCount;
 
 	return glyphsToAddCount <= mAvailablePositionsCount;
 }
 
-unsigned short WrittenFontCFF::EncodeGlyph(unsigned int inGlyph,unsigned long inCharacter)
+unsigned short WrittenFontCFF::EncodeGlyph(unsigned int inGlyph,const ULongVector& inCharacters)
 {
 	// for the first time, add also 0,0 mapping
 	if(mANSIRepresentation->mGlyphIDToEncodedChar.size() == 0)
@@ -60,14 +58,18 @@ unsigned short WrittenFontCFF::EncodeGlyph(unsigned int inGlyph,unsigned long in
 	if(it == mANSIRepresentation->mGlyphIDToEncodedChar.end())
 	{
 		// as a default position, i'm grabbing the ansi bits. this should display nice charachters, when possible
-		unsigned char encoding = (unsigned char)(inCharacter & 0xff);
+		unsigned char encoding;
+		if(inCharacters.size() > 0)
+			encoding = (unsigned char)(inCharacters.back() & 0xff);
+		else
+			encoding = (unsigned char)(inGlyph & 0xff);
 		if(mAssignedPositions[encoding] == 0)
 			RemoveFromFreeList(encoding);
 		else
 			encoding = AllocateFromFreeList(inGlyph);
 		mAssignedPositions[encoding] = inGlyph;
 		it = mANSIRepresentation->mGlyphIDToEncodedChar.insert(
-				UIntToGlyphEncodingInfoMap::value_type(inGlyph,GlyphEncodingInfo(encoding,inCharacter))).first;			
+				UIntToGlyphEncodingInfoMap::value_type(inGlyph,GlyphEncodingInfo(encoding,inCharacters))).first;			
 		--mAvailablePositionsCount;
 	}
 	return it->second.mEncodedCharacter;
@@ -155,25 +157,21 @@ EStatusCode WrittenFontCFF::WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo)
 	return status;
 }
 
-bool WrittenFontCFF::AddToANSIRepresentation(	const ULongVectorList& inUnicodeCharacters,
-												const UIntListList& inGlyphsList,
+bool WrittenFontCFF::AddToANSIRepresentation(	const GlyphUnicodeMappingListList& inGlyphsList,
 												UShortListList& outEncodedCharacters)
 {
 	// categorically do not allow an ANSI representation if the font is CID
 	if(!mIsCID && HasEnoughSpaceForGlyphs(inGlyphsList))
 	{
-		UIntListList::const_iterator itList = inGlyphsList.begin();
-		ULongVectorList::const_iterator itTextList = inUnicodeCharacters.begin();
-		UIntList::const_iterator it;
-		ULongVector::const_iterator itText;
+		GlyphUnicodeMappingListList::const_iterator itList = inGlyphsList.begin();
+		GlyphUnicodeMappingList::const_iterator it;
 		UShortList encodedCharacters;
 
-		for(; itList != inGlyphsList.end(); ++itList,++itTextList)
+		for(; itList != inGlyphsList.end(); ++itList)
 		{
 			it = itList->begin();
-			itText = itTextList->begin();
-			for(; it != itList->end(); ++it,itText)
-				encodedCharacters.push_back(EncodeGlyph(*it,*itText));
+			for(; it != itList->end(); ++it)
+				encodedCharacters.push_back(EncodeGlyph(it->mGlyphCode,it->mUnicodeValues));
 			outEncodedCharacters.push_back(encodedCharacters);
 			encodedCharacters.clear();
 
@@ -184,17 +182,17 @@ bool WrittenFontCFF::AddToANSIRepresentation(	const ULongVectorList& inUnicodeCh
 		return false;
 }
 
-bool WrittenFontCFF::HasEnoughSpaceForGlyphs(const UIntListList& inGlyphsList)
+bool WrittenFontCFF::HasEnoughSpaceForGlyphs(const GlyphUnicodeMappingListList& inGlyphsList)
 {
-	UIntListList::const_iterator itList = inGlyphsList.begin();
-	UIntList::const_iterator it;
+	GlyphUnicodeMappingListList::const_iterator itList = inGlyphsList.begin();
+	GlyphUnicodeMappingList::const_iterator it;
 	int glyphsToAddCount = 0;
 
 	for(; itList != inGlyphsList.end(); ++itList)
 	{
 		it = itList->begin();
 		for(; it != itList->end(); ++it)
-			if(mANSIRepresentation->mGlyphIDToEncodedChar.find(*it) == mANSIRepresentation->mGlyphIDToEncodedChar.end())
+			if(mANSIRepresentation->mGlyphIDToEncodedChar.find(it->mGlyphCode) == mANSIRepresentation->mGlyphIDToEncodedChar.end())
 				++glyphsToAddCount;
 	}
 

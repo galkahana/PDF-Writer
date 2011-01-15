@@ -26,16 +26,7 @@ EStatusCode FormXObjectTest::Run()
 
 	do
 	{
-
-		//status = pdfWriter.InitializePDFWriter(L"C:\\PDFLibTests\\XObjectContent.PDF",LogConfiguration::DefaultLogConfiguration,PDFCreationSettings(false));
-		status = pdfWriter.InitializePDFWriter(L"C:\\PDFLibTests\\XObjectContent.PDF");
-		if(status != eSuccess)
-		{
-			wcout<<"failed to initialize PDF Writer\n";
-			break;
-		}
-
-		status = pdfWriter.StartPDF(ePDFVersion13);
+		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\XObjectContent.PDF",ePDFVersion13);
 		if(status != eSuccess)
 		{
 			wcout<<"failed to start PDF\n";

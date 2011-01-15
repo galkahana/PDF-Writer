@@ -14,16 +14,18 @@ PDFWriter::~PDFWriter(void)
 {
 }
 
-
-EStatusCode PDFWriter::InitializePDFWriter(const wstring& inOutputFilePath,const LogConfiguration& inLogConfiguration,const PDFCreationSettings& inPDFCreationSettings)
+EStatusCode PDFWriter::StartPDF(
+							const wstring& inOutputFilePath,
+							EPDFVersion inPDFVersion,
+							const LogConfiguration& inLogConfiguration,
+							const PDFCreationSettings& inPDFCreationSettings)
 {
 	SetupLog(inLogConfiguration);
 	SetupObjectsContext(inPDFCreationSettings);
-	return mOutputFile.OpenFile(inOutputFilePath);
-}
+	EStatusCode status = mOutputFile.OpenFile(inOutputFilePath);
+	if(status != eSuccess)
+		return status;
 
-EStatusCode PDFWriter::StartPDF(EPDFVersion inPDFVersion)
-{
 	mObjectsContext.SetOutputStream(mOutputFile.GetOutputStream());
 	mDocumentContext.SetObjectsContext(&mObjectsContext);
 	mDocumentContext.SetOutputFileInformation(&mOutputFile);

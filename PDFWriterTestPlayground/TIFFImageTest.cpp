@@ -25,15 +25,7 @@ EStatusCode TIFFImageTest::Run()
 
 	do
 	{
-
-		status = pdfWriter.InitializePDFWriter(L"C:\\PDFLibTests\\BasicTIFFImagesTest.PDF",LogConfiguration(true,L"C:\\PDFLibTests\\TiffImageTestLog.txt"));
-		if(status != eSuccess)
-		{
-			wcout<<"failed to initialize PDF Writer\n";
-			break;
-		}
-
-		status = pdfWriter.StartPDF(ePDFVersion13);
+		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\BasicTIFFImagesTest.PDF",ePDFVersion13,LogConfiguration(true,L"C:\\PDFLibTests\\TiffImageTestLog.txt"));
 		if(status != eSuccess)
 		{
 			wcout<<"failed to start PDF\n";

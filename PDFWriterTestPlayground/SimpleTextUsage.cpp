@@ -60,15 +60,7 @@ EStatusCode SimpleTextUsage::RunCFFTest()
 
 	do
 	{
-
-		status = pdfWriter.InitializePDFWriter(L"C:\\PDFLibTests\\SimpleTextUsageCFF.PDF",LogConfiguration(true,L"C:\\PDFLibTests\\SimpleTextUsage.log"));
-		if(status != eSuccess)
-		{
-			wcout<<"failed to initialize PDF Writer\n";
-			break;
-		}
-
-		status = pdfWriter.StartPDF(ePDFVersion13);
+		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\SimpleTextUsageCFF.PDF",ePDFVersion13,LogConfiguration(true,L"C:\\PDFLibTests\\SimpleTextUsage.log"));
 		if(status != eSuccess)
 		{
 			wcout<<"failed to start PDF\n";
@@ -164,15 +156,7 @@ EStatusCode SimpleTextUsage::RunTrueTypeTest()
 
 	do
 	{
-
-		status = pdfWriter.InitializePDFWriter(L"C:\\PDFLibTests\\SimpleTextUsageTrueType.PDF",LogConfiguration(true,L"C:\\PDFLibTests\\SimpleTextUsage.log"));
-		if(status != eSuccess)
-		{
-			wcout<<"failed to initialize PDF Writer\n";
-			break;
-		}
-
-		status = pdfWriter.StartPDF(ePDFVersion13);
+		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\SimpleTextUsageTrueType.PDF",ePDFVersion13,LogConfiguration(true,L"C:\\PDFLibTests\\SimpleTextUsage.log"));
 		if(status != eSuccess)
 		{
 			wcout<<"failed to start PDF\n";
@@ -245,15 +229,7 @@ EStatusCode SimpleTextUsage::RunType1Test()
 
 	do
 	{
-
-		status = pdfWriter.InitializePDFWriter(L"C:\\PDFLibTests\\SimpleTextUsageType1.PDF",LogConfiguration(true,L"C:\\PDFLibTests\\SimpleTextUsage.log"));
-		if(status != eSuccess)
-		{
-			wcout<<"failed to initialize PDF Writer\n";
-			break;
-		}
-
-		status = pdfWriter.StartPDF(ePDFVersion13);
+		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\SimpleTextUsageType1.PDF",ePDFVersion13,LogConfiguration(true,L"C:\\PDFLibTests\\SimpleTextUsage.log"));
 		if(status != eSuccess)
 		{
 			wcout<<"failed to start PDF\n";

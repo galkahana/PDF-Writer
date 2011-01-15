@@ -30,7 +30,7 @@ EStatusCode UnicodeEncoding::UTF16ToUnicode(const wstring& inText,ULongVector& o
 			}
 			unsigned short lowSurrogate = *it;
 
-			unicodeCharacter = 0x10000 + (highSurrogate - 0xD800) << 5 + (lowSurrogate - 0xDC00);
+			unicodeCharacter = 0x10000 + ((highSurrogate - 0xD800) << 5) + (lowSurrogate - 0xDC00);
 		}
 		else
 			unicodeCharacter = *it;

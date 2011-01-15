@@ -21,19 +21,17 @@ public:
 
 
 private:
-	virtual bool AddToANSIRepresentation(const ULongVector& inUnicodeCharacters,
-							 const UIntList& inGlyphsList,
-							 UShortList& outEncodedCharacters);
+	virtual bool AddToANSIRepresentation(const GlyphUnicodeMappingList& inGlyphsList,
+										 UShortList& outEncodedCharacters);
 
-	virtual bool AddToANSIRepresentation(const ULongVectorList& inUnicodeCharacters,
-							const UIntListList& inGlyphsList,
-							UShortListList& outEncodedCharacters);
+	virtual bool AddToANSIRepresentation(const GlyphUnicodeMappingListList& inGlyphsList,
+										UShortListList& outEncodedCharacters);
 
-	bool HasEnoughSpaceForGlyphs(const UIntList& inGlyphsList);
-	unsigned short EncodeGlyph(unsigned int inGlyph,unsigned long inCharacter);
+	bool HasEnoughSpaceForGlyphs(const GlyphUnicodeMappingList& inGlyphsList);
+	unsigned short EncodeGlyph(unsigned int inGlyph,const ULongVector& inCharacters);
 	void RemoveFromFreeList(unsigned char inAllocatedPosition);
 	unsigned char AllocateFromFreeList(unsigned int inGlyph);
-	bool HasEnoughSpaceForGlyphs(const UIntListList& inGlyphsList);
+	bool HasEnoughSpaceForGlyphs(const GlyphUnicodeMappingListList& inGlyphsList);
 
 	unsigned char mAvailablePositionsCount;
 	UCharAndUCharList mFreeList;

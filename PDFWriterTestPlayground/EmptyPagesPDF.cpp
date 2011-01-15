@@ -24,15 +24,7 @@ EStatusCode EmptyPagesPDF::Run()
 
 	do
 	{
-
-		status = pdfWriter.InitializePDFWriter(L"C:\\PDFLibTests\\EmptyPages.PDF",logConfiguration);
-		if(status != eSuccess)
-		{
-			wcout<<"failed to initialize PDF Writer\n";
-			break;
-		}
-
-		status = pdfWriter.StartPDF(ePDFVersion13);
+		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\EmptyPages.PDF",ePDFVersion13,logConfiguration);
 		if(status != eSuccess)
 		{
 			wcout<<"failed to start PDF\n";

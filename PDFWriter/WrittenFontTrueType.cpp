@@ -20,8 +20,7 @@ here's what i'm deciding on:
 2. While encoding use WinAnsiEncoding values, of course. This will necasserily work
 3. While writing the font description simply write the WinAnsiEncoding glyph name, and pray.*/
 
-bool WrittenFontTrueType::AddToANSIRepresentation(	const ULongVector& inUnicodeCharacters,
-													const UIntList& inGlyphsList,
+bool WrittenFontTrueType::AddToANSIRepresentation(	const GlyphUnicodeMappingList& inGlyphsList,
 													UShortList& outEncodedCharacters)
 {
 	// i'm totally relying on the text here, which is fine till i'll do ligatures, in which case
@@ -31,13 +30,21 @@ bool WrittenFontTrueType::AddToANSIRepresentation(	const ULongVector& inUnicodeC
 	UShortList candidates;
 	BoolAndByte encodingResult(true,0);
 	WinAnsiEncoding winAnsiEncoding;
-	ULongVector::const_iterator it = inUnicodeCharacters.begin(); 
+	GlyphUnicodeMappingList::const_iterator it = inGlyphsList.begin(); 
 
-	for(; it != inUnicodeCharacters.end() && encodingResult.first; ++it)
+	for(; it != inGlyphsList.end() && encodingResult.first; ++it)
 	{
-		encodingResult = winAnsiEncoding.Encode((wchar_t)*it);
-		if(encodingResult.first)
-			candidates.push_back(encodingResult.second);
+		// don't bother with characters of more than one unicode
+		if(it->mUnicodeValues.size() > 1)
+		{
+			encodingResult.first = false;
+		}
+		else
+		{
+			encodingResult = winAnsiEncoding.Encode((wchar_t)(it->mUnicodeValues.front()));
+			if(encodingResult.first)
+				candidates.push_back(encodingResult.second);
+		}
 	}
 
 	if(encodingResult.first)
@@ -47,13 +54,13 @@ bool WrittenFontTrueType::AddToANSIRepresentation(	const ULongVector& inUnicodeC
 			mANSIRepresentation->mGlyphIDToEncodedChar.insert(UIntToGlyphEncodingInfoMap::value_type(0,GlyphEncodingInfo(0,0)));
 
 
-		UIntList::const_iterator itGlyphs = inGlyphsList.begin();
+		GlyphUnicodeMappingList::const_iterator itGlyphs = inGlyphsList.begin();
 		UShortList::iterator itEncoded = candidates.begin();
-		ULongVector::const_iterator itText = inUnicodeCharacters.begin(); 
-		for(; itGlyphs != inGlyphsList.end(); ++ itGlyphs,++itEncoded,++itText)
+		for(; itGlyphs != inGlyphsList.end(); ++ itGlyphs,++itEncoded)
 		{
-			if(mANSIRepresentation->mGlyphIDToEncodedChar.find(*itGlyphs) == mANSIRepresentation->mGlyphIDToEncodedChar.end())
-				mANSIRepresentation->mGlyphIDToEncodedChar.insert(UIntToGlyphEncodingInfoMap::value_type(*itGlyphs,GlyphEncodingInfo(*itEncoded,*itText)));
+			if(mANSIRepresentation->mGlyphIDToEncodedChar.find(itGlyphs->mGlyphCode) == mANSIRepresentation->mGlyphIDToEncodedChar.end())
+				mANSIRepresentation->mGlyphIDToEncodedChar.insert(
+					UIntToGlyphEncodingInfoMap::value_type(itGlyphs->mGlyphCode,GlyphEncodingInfo(*itEncoded,itGlyphs->mUnicodeValues)));
 		}
 
 		outEncodedCharacters = candidates;
@@ -99,25 +106,32 @@ EStatusCode WrittenFontTrueType::WriteFontDefinition(FreeTypeFaceWrapper& inFont
 	return status;
 }
 
-bool WrittenFontTrueType::AddToANSIRepresentation(	const ULongVectorList& inUnicodeCharacters,
-													const UIntListList& inGlyphsList,
+bool WrittenFontTrueType::AddToANSIRepresentation(	const GlyphUnicodeMappingListList& inGlyphsList,
 													UShortListList& outEncodedCharacters)
 {
 	UShortListList candidatesList;
 	UShortList candidates;
 	BoolAndByte encodingResult(true,0);
 	WinAnsiEncoding winAnsiEncoding;
-	ULongVectorList::const_iterator itList = inUnicodeCharacters.begin(); 
-	ULongVector::const_iterator it; 
+	GlyphUnicodeMappingListList::const_iterator itList = inGlyphsList.begin(); 
+	GlyphUnicodeMappingList::const_iterator it; 
 
-	for(; itList != inUnicodeCharacters.end() && encodingResult.first; ++itList)
+	for(; itList != inGlyphsList.end() && encodingResult.first; ++itList)
 	{
 		it = itList->begin();
 		for(; it != itList->end() && encodingResult.first; ++it)
 		{
-			encodingResult = winAnsiEncoding.Encode((wchar_t)*it);
-			if(encodingResult.first)
-				candidates.push_back(encodingResult.second);
+			// don't bother with characters of more than one unicode
+			if(it->mUnicodeValues.size() > 1)
+			{
+				encodingResult.first = false;
+			}
+			else
+			{
+				encodingResult = winAnsiEncoding.Encode((wchar_t)(it->mUnicodeValues.front()));
+				if(encodingResult.first)
+					candidates.push_back(encodingResult.second);
+			}
 		}
 		if(encodingResult.first)
 		{
@@ -133,22 +147,20 @@ bool WrittenFontTrueType::AddToANSIRepresentation(	const ULongVectorList& inUnic
 			mANSIRepresentation->mGlyphIDToEncodedChar.insert(UIntToGlyphEncodingInfoMap::value_type(0,GlyphEncodingInfo(0,0)));
 
 
-		UIntListList::const_iterator itGlyphsList = inGlyphsList.begin();
+		GlyphUnicodeMappingListList::const_iterator itGlyphsList = inGlyphsList.begin();
 		UShortListList::iterator itEncodedList = candidatesList.begin();
-		ULongVectorList::const_iterator itTextList = inUnicodeCharacters.begin();
-		UIntList::const_iterator itGlyphs;
+		GlyphUnicodeMappingList::const_iterator itGlyphs;
 		UShortList::iterator itEncoded;
-		ULongVector::const_iterator itText;
 
-		for(; itGlyphsList != inGlyphsList.end(); ++ itGlyphsList,++itEncodedList,++itTextList)
+		for(; itGlyphsList != inGlyphsList.end(); ++ itGlyphsList,++itEncodedList)
 		{
 			itGlyphs = itGlyphsList->begin();
 			itEncoded = itEncodedList->begin();
-			itText = itTextList->begin();
-			for(; itGlyphs != itGlyphsList->end(); ++ itGlyphs,++itEncoded,++itText)
+			for(; itGlyphs != itGlyphsList->end(); ++ itGlyphs,++itEncoded)
 			{
-				if(mANSIRepresentation->mGlyphIDToEncodedChar.find(*itGlyphs) == mANSIRepresentation->mGlyphIDToEncodedChar.end())
-					mANSIRepresentation->mGlyphIDToEncodedChar.insert(UIntToGlyphEncodingInfoMap::value_type(*itGlyphs,GlyphEncodingInfo(*itEncoded,*itText)));
+				if(mANSIRepresentation->mGlyphIDToEncodedChar.find(itGlyphs->mGlyphCode) == mANSIRepresentation->mGlyphIDToEncodedChar.end())
+					mANSIRepresentation->mGlyphIDToEncodedChar.insert(
+					UIntToGlyphEncodingInfoMap::value_type(itGlyphs->mGlyphCode,GlyphEncodingInfo(*itEncoded,itGlyphs->mUnicodeValues)));
 			}
 		}
 

@@ -11,6 +11,7 @@ class FreeTypeFaceWrapper;
 class ObjectsContext;
 class DictionaryContext;
 class IDescendentFontWriter;
+class IByteWriter;
 
 using namespace std;
 
@@ -39,4 +40,6 @@ private:
 	void WriteEncoding(DictionaryContext* inFontContext);
 	void CalculateCharacterEncodingArray();
 	void WriteToUnicodeMap(ObjectIDType inToUnicodeMap);
+	void WriteGlyphEntry(IByteWriter* inWriter,unsigned short inEncodedCharacter,const ULongVector& inUnicodeValues);
+
 };

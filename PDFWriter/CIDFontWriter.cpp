@@ -156,8 +156,6 @@ void CIDFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 	unsigned long i = 1;
 	UIntAndGlyphEncodingInfoVector::iterator it = mCharactersVector.begin() + 1; // skip 0 glyph
 	unsigned long vectorSize = (unsigned long)mCharactersVector.size() - 1; // cause 0 is not there
-	char formattingBuffer[19];
-	UnicodeEncoding unicode;
 
 	cmapWriteContext->Write((const Byte*)scCmapHeader,strlen(scCmapHeader));
 	primitiveWriter.WriteHexString(scFourByteRangeStart);
@@ -170,19 +168,7 @@ void CIDFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 		primitiveWriter.WriteInteger(100);
 	primitiveWriter.WriteKeyword(scBeginBFChar);
 	
-	if(unicode.IsSupplementary(it->second.mUnicodeCharacter))
-	{
-		UTF16Encoding highAndLow = unicode.EncodeCharater(it->second.mUnicodeCharacter);
-		SAFE_SPRINTF_3(formattingBuffer,19,"<%04x> <%04x%04x>\n",it->second.mEncodedCharacter,
-																highAndLow.HighSurrogate,
-																highAndLow.LowSurrogate);
-		cmapWriteContext->Write((const Byte*)formattingBuffer,18);
-	}
-	else
-	{
-		SAFE_SPRINTF_2(formattingBuffer,15,"<%04x> <%04x>\n",it->second.mEncodedCharacter,it->second.mUnicodeCharacter);
-		cmapWriteContext->Write((const Byte*)formattingBuffer,14);
-	}
+	WriteGlyphEntry(cmapWriteContext,it->second.mEncodedCharacter,it->second.mUnicodeCharacters);
 	++it;
 	for(; it != mCharactersVector.end(); ++it,++i)
 	{
@@ -195,21 +181,38 @@ void CIDFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 				primitiveWriter.WriteInteger(100);
 			primitiveWriter.WriteKeyword(scBeginBFChar);
 		}
-		if(unicode.IsSupplementary(it->second.mUnicodeCharacter))
-		{
-			UTF16Encoding highAndLow = unicode.EncodeCharater(it->second.mUnicodeCharacter);
-			SAFE_SPRINTF_3(formattingBuffer,19,"<%04x> <%04x%04x>\n",it->second.mEncodedCharacter,
-																	highAndLow.HighSurrogate,
-																	highAndLow.LowSurrogate);
-			cmapWriteContext->Write((const Byte*)formattingBuffer,18);
-		}
-		else
-		{
-			SAFE_SPRINTF_2(formattingBuffer,15,"<%04x> <%04x>\n",it->second.mEncodedCharacter,it->second.mUnicodeCharacter);
-			cmapWriteContext->Write((const Byte*)formattingBuffer,14);
-		}
+		WriteGlyphEntry(cmapWriteContext,it->second.mEncodedCharacter,it->second.mUnicodeCharacters);
 	}
 	primitiveWriter.WriteKeyword(scEndBFChar);
 	cmapWriteContext->Write((const Byte*)scCmapFooter,strlen(scCmapFooter));
 	mObjectsContext->EndPDFStream(pdfStream);
+}
+
+static const Byte scEntryEnding[2] = {'>','\n'};
+void CIDFontWriter::WriteGlyphEntry(IByteWriter* inWriter,unsigned short inEncodedCharacter,const ULongVector& inUnicodeValues)
+{
+	UnicodeEncoding unicode;
+	char formattingBuffer[17];
+	ULongVector::const_iterator it = inUnicodeValues.begin();
+
+	SAFE_SPRINTF_1(formattingBuffer,17,"<%04x> <",inEncodedCharacter);
+	inWriter->Write((const Byte*)formattingBuffer,8);
+	
+	for(; it != inUnicodeValues.end(); ++it)
+	{
+		if(unicode.IsSupplementary(*it))
+		{
+			UTF16Encoding highAndLow = unicode.EncodeCharater(*it);
+			SAFE_SPRINTF_2(formattingBuffer,17,"%04x%04x",
+															highAndLow.HighSurrogate,
+															highAndLow.LowSurrogate);
+			inWriter->Write((const Byte*)formattingBuffer,8);
+		}
+		else
+		{
+			SAFE_SPRINTF_1(formattingBuffer,17,"%04x",*it);
+			inWriter->Write((const Byte*)formattingBuffer,4);
+		}
+	}
+	inWriter->Write(scEntryEnding,2);
 }

@@ -607,6 +607,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GlyphUnicodeMapping.h"
+				>
+			</File>
+			<File
 				RelativePath=".\GraphicState.cpp"
 				>
 			</File>

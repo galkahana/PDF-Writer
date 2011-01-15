@@ -30,14 +30,7 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 	do
 	{
 
-		status = pdfWriter.InitializePDFWriter(L"C:\\PDFLibTests\\ImagesAndFormsForwardReferenceTest.PDF");
-		if(status != eSuccess)
-		{
-			wcout<<"failed to initialize PDF Writer\n";
-			break;
-		}
-
-		status = pdfWriter.StartPDF(ePDFVersion13);
+		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\ImagesAndFormsForwardReferenceTest.PDF",ePDFVersion13);
 		if(status != eSuccess)
 		{
 			wcout<<"failed to start PDF\n";

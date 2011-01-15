@@ -45,11 +45,10 @@ public:
 	PDFWriter(void);
 	~PDFWriter(void);
 
-	EStatusCode InitializePDFWriter(const wstring& inOutputFilePath,
-									const LogConfiguration& inLogConfiguration = LogConfiguration::DefaultLogConfiguration,
-									const PDFCreationSettings& inPDFCreationSettings = PDFCreationSettings::DefaultPDFCreationSettings);
-	
-	EStatusCode StartPDF(EPDFVersion inPDFVersion);
+	EStatusCode StartPDF(	const wstring& inOutputFilePath,
+							EPDFVersion inPDFVersion,
+							const LogConfiguration& inLogConfiguration = LogConfiguration::DefaultLogConfiguration,
+							const PDFCreationSettings& inPDFCreationSettings = PDFCreationSettings::DefaultPDFCreationSettings);
 	EStatusCode EndPDF();
 
 

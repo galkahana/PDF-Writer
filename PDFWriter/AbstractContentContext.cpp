@@ -738,46 +738,18 @@ EStatusCode AbstractContentContext::WriteTextCommandWithEncoding(const wstring& 
 	if(!currentFont)
 	{
 		TRACE_LOG("AbstractContentContext::WriteTextCommandWithEncoding, Cannot write text, no current font is defined");
-		return eSuccess;
+		return eFailure;
 	}
 
-	ObjectIDType fontObjectID;
-	UShortList encodedCharachtersList;
-	bool writeAsCID;	
+	GlyphUnicodeMappingList glyphsAndUnicode;
+	EStatusCode encodingStatus = currentFont->TranslateStringToGlyphs(inUnicodeText,glyphsAndUnicode);
 
-	EStatusCode encodingStatus = currentFont->EncodeStringForShowing(inUnicodeText,fontObjectID,encodedCharachtersList,writeAsCID);
-	
-	// status only returns if strings can be coded or not. so continue with writing regardless
+	// encoding returns false if was unable to encode some of the glyphs. will display as missing characters
+	if(encodingStatus != eSuccess)
+		TRACE_LOG("AbstractContextContext::WriteTextCommandWithEncoding, was unable to find glyphs for all characters, some will appear as missing");
 
-	// Write the font reference (only if required)
-	std::string fontName = GetResourcesDictionary()->AddFontMapping(fontObjectID);
 
-	if(mGraphicStack.GetCurrentState().mPlacedFontName != fontName)
-		Tf(fontName,mGraphicStack.GetCurrentState().mFontSize);
-	
-	// Now write the string using the text command
-	OutputStringBufferStream stringStream;
-	char formattingBuffer[5];
-	UShortList::iterator it = encodedCharachtersList.begin();
-	if(writeAsCID)
-	{
-		for(;it!= encodedCharachtersList.end();++it)
-		{
-			SAFE_SPRINTF_2(formattingBuffer,5,"%02x%02x",((*it)>>8) & 0x00ff,(*it) & 0x00ff);
-			stringStream.Write((const Byte*)formattingBuffer,4);
-		}
-		inTextCommand->WriteHexStringCommand(stringStream.ToString());
-	}
-	else
-	{
-		for(;it!= encodedCharachtersList.end();++it)
-		{
-			formattingBuffer[0] = (*it) & 0x00ff;
-			stringStream.Write((const Byte*)formattingBuffer,1);
-		}
-		inTextCommand->WriteLiteralStringCommand(stringStream.ToString());	
-	}
-	return encodingStatus;
+	return WriteTextCommandWithDirectGlyphSelection(glyphsAndUnicode,inTextCommand);
 }
 
 class TjCommand : public ITextCommand
@@ -791,10 +763,10 @@ private:
 	AbstractContentContext* mContext;
 };
 
-EStatusCode AbstractContentContext::Tj(const wstring& inUnicodeText)
+EStatusCode AbstractContentContext::Tj(const wstring& inText)
 {
 	TjCommand command(this);
-	return WriteTextCommandWithEncoding(inUnicodeText,&command);
+	return WriteTextCommandWithEncoding(inText,&command);
 }
 
 class QuoteCommand : public ITextCommand
@@ -841,6 +813,109 @@ EStatusCode AbstractContentContext::TJ(const WStringOrDoubleList& inStringsAndSp
 	if(!currentFont)
 	{
 		TRACE_LOG("AbstractContentContext::TJ, Cannot write text, no current font is defined");
+		return eFailure;
+	}
+
+	WStringOrDoubleList::const_iterator it = inStringsAndSpacing.begin();
+	GlyphUnicodeMappingListOrDoubleList parameters;
+	EStatusCode encodingStatus;
+	
+	for(; it != inStringsAndSpacing.end();++it)
+	{
+		if(it->IsDouble)
+		{
+			parameters.push_back(GlyphUnicodeMappingListOrDouble(it->DoubleValue));
+		}
+		else
+		{
+			GlyphUnicodeMappingList glyphsAndUnicode;
+			encodingStatus = currentFont->TranslateStringToGlyphs(it->SomeValue,glyphsAndUnicode);
+
+			// encoding returns false if was unable to encode some of the glyphs. will display as missing characters
+			if(encodingStatus != eSuccess)
+				TRACE_LOG("AbstractContextContext::TJ, was unable to find glyphs for all characters, some will appear as missing");
+			parameters.push_back(GlyphUnicodeMappingListOrDouble(glyphsAndUnicode));
+		}
+	}
+
+	return TJ(parameters);
+}
+
+EStatusCode AbstractContentContext::Tj(const GlyphUnicodeMappingList& inText)
+{
+	TjCommand command(this);
+	return WriteTextCommandWithDirectGlyphSelection(inText,&command);
+}
+
+EStatusCode AbstractContentContext::WriteTextCommandWithDirectGlyphSelection(const GlyphUnicodeMappingList& inText,ITextCommand* inTextCommand)
+{
+	PDFUsedFont* currentFont = mGraphicStack.GetCurrentState().mFont;
+	if(!currentFont)
+	{
+		TRACE_LOG("AbstractContentContext::WriteTextCommandWithDirectGlyphSelection, Cannot write text, no current font is defined");
+		return eFailure;
+	}
+
+	ObjectIDType fontObjectID;
+	UShortList encodedCharachtersList;
+	bool writeAsCID;	
+
+	if(currentFont->EncodeStringForShowing(inText,fontObjectID,encodedCharachtersList,writeAsCID) != eSuccess)
+	{
+		TRACE_LOG("AbstractcontextContext::WriteTextCommandWithDirectGlyphSelection, Unexepcted failure, Cannot encode characters");
+		return eFailure;
+	}
+	
+
+	// Write the font reference (only if required)
+	std::string fontName = GetResourcesDictionary()->AddFontMapping(fontObjectID);
+
+	if(mGraphicStack.GetCurrentState().mPlacedFontName != fontName)
+		Tf(fontName,mGraphicStack.GetCurrentState().mFontSize);
+	
+	// Now write the string using the text command
+	OutputStringBufferStream stringStream;
+	char formattingBuffer[5];
+	UShortList::iterator it = encodedCharachtersList.begin();
+	if(writeAsCID)
+	{
+		for(;it!= encodedCharachtersList.end();++it)
+		{
+			SAFE_SPRINTF_2(formattingBuffer,5,"%02x%02x",((*it)>>8) & 0x00ff,(*it) & 0x00ff);
+			stringStream.Write((const Byte*)formattingBuffer,4);
+		}
+		inTextCommand->WriteHexStringCommand(stringStream.ToString());
+	}
+	else
+	{
+		for(;it!= encodedCharachtersList.end();++it)
+		{
+			formattingBuffer[0] = (*it) & 0x00ff;
+			stringStream.Write((const Byte*)formattingBuffer,1);
+		}
+		inTextCommand->WriteLiteralStringCommand(stringStream.ToString());	
+	}
+	return eSuccess;
+}
+
+EStatusCode AbstractContentContext::Quote(const GlyphUnicodeMappingList& inText)
+{
+	QuoteCommand command(this);
+	return WriteTextCommandWithDirectGlyphSelection(inText,&command);
+}
+
+EStatusCode AbstractContentContext::DoubleQuote(double inWordSpacing, double inCharacterSpacing, const GlyphUnicodeMappingList& inText)
+{
+	DoubleQuoteCommand command(this,inWordSpacing,inCharacterSpacing);
+	return WriteTextCommandWithDirectGlyphSelection(inText,&command);
+}
+
+EStatusCode AbstractContentContext::TJ(const GlyphUnicodeMappingListOrDoubleList& inStringsAndSpacing)
+{
+	PDFUsedFont* currentFont = mGraphicStack.GetCurrentState().mFont;
+	if(!currentFont)
+	{
+		TRACE_LOG("AbstractContentContext::TJ, Cannot write text, no current font is defined");
 		return eSuccess;
 	}
 
@@ -849,8 +924,8 @@ EStatusCode AbstractContentContext::TJ(const WStringOrDoubleList& inStringsAndSp
 	// a slightly different algorithm
 
 	// first, list all the strings, so that you can encode them
-	WStringList stringsList;
-	WStringOrDoubleList::const_iterator it = inStringsAndSpacing.begin();
+	GlyphUnicodeMappingListList stringsList;
+	GlyphUnicodeMappingListOrDoubleList::const_iterator it = inStringsAndSpacing.begin();
 	
 	for(; it != inStringsAndSpacing.end(); ++it)
 		if(!it->IsDouble)
@@ -862,7 +937,11 @@ EStatusCode AbstractContentContext::TJ(const WStringOrDoubleList& inStringsAndSp
 	UShortListList encodedCharachtersListsList;
 	bool writeAsCID;	
 
-	EStatusCode encodingStatus = currentFont->EncodeStringsForShowing(stringsList,fontObjectID,encodedCharachtersListsList,writeAsCID);
+	if(currentFont->EncodeStringsForShowing(stringsList,fontObjectID,encodedCharachtersListsList,writeAsCID)!= eSuccess)
+	{
+		TRACE_LOG("AbstractContentContext::TJ, Unexepcted failure, cannot include characters for writing final representation");
+		return eFailure;
+	}
 	
 	// status only returns if strings can be coded or not. so continue with writing regardless
 
@@ -924,5 +1003,5 @@ EStatusCode AbstractContentContext::TJ(const WStringOrDoubleList& inStringsAndSp
 		}
 		TJ(stringOrDoubleList);
 	}
-	return encodingStatus;
+	return eSuccess;	
 }

@@ -15,6 +15,7 @@
 #include "EStatusCode.h"
 #include "PrimitiveObjectsWriter.h"
 #include "GraphicStateStack.h"
+#include "GlyphUnicodeMapping.h"
 #include <string>
 #include <list>
 
@@ -40,10 +41,11 @@ struct SomethingOrDouble
 
 typedef SomethingOrDouble<string> StringOrDouble;
 typedef SomethingOrDouble<wstring> WStringOrDouble;
-
+typedef SomethingOrDouble<GlyphUnicodeMappingList> GlyphUnicodeMappingListOrDouble;
 
 typedef list<StringOrDouble> StringOrDoubleList;
 typedef list<WStringOrDouble> WStringOrDoubleList;
+typedef list<GlyphUnicodeMappingListOrDouble> GlyphUnicodeMappingListOrDoubleList;
 
 typedef list<wstring> WStringList;
 
@@ -124,10 +126,6 @@ public:
 	void Tr(int inRenderingMode);
 	void Ts(double inFontRise);
 
-	// Low level setting of font. for the high level version, see below
-	void Tf(const string& inFontName,double inFontSize); 
-
-
 	// Text object operators
 	void BT();
 	void ET();
@@ -138,8 +136,50 @@ public:
 	void Tm(double inA, double inB, double inC, double inD, double inE, double inF);
 	void TStar();
 
-	// Text showing operators (low level. for the library high level of handling fonts see below)
+	//
+	// Text showing operators using the library handling of fonts with unicode text using UTF 16
+	//
+
+	// Set the font for later text writing command to the font in reference.
+	// to create such a font use PDF Writer GetFontForFile.
+	// Note that placing an actual Tf command (and including in resources dictionary) will
+	// only occur when actually placing text.
+	void Tf(PDFUsedFont* inFontReference,double inFontSize);
+
+	// place text to the current set font with Tf
+	// will return error if no font was set, or that one of the glyphs
+	// didn't succeed in encoding.
+	// input parameter is UTF-16 encoded
+	EStatusCode Tj(const wstring& inText);
+
+	// The rest of the text operators, handled by the library handing of font. text is in UTF16
+	EStatusCode Quote(const wstring& inText);
+	EStatusCode DoubleQuote(double inWordSpacing, double inCharacterSpacing, const wstring& inText);
+	EStatusCode TJ(const WStringOrDoubleList& inStringsAndSpacing); 
+
+	//
+	// Text showing operators using the library handling of fonts with direct glyph selection
+	//
 	
+	// For Direct glyph selections (if you don't like my UTF16 encoding), use the following commands.
+	// each command accepts a list of glyphs. each glyph is mapped to its matching unicode values. 
+	// a glyph may have more than one unicode value in case it reperesents a series of Characters.
+
+	EStatusCode Tj(const GlyphUnicodeMappingList& inText);
+	EStatusCode Quote(const GlyphUnicodeMappingList& inText);
+	EStatusCode DoubleQuote(double inWordSpacing, double inCharacterSpacing, const GlyphUnicodeMappingList& inText);
+	EStatusCode TJ(const GlyphUnicodeMappingListOrDoubleList& inStringsAndSpacing); 
+
+	//
+	// Text showing operators overriding library behavior
+	//
+
+	// Low level text showing operators. use them only if you completly take chare of
+	// font and text usage
+
+	// Low level setting of font. for the high level version, see below
+	void Tf(const string& inFontName,double inFontSize); 
+
 	// first version of Tj writes the string in literal string paranthesis, 
 	// second version of Tj writes the string in hex string angle brackets
 	void Tj(const string& inText);
@@ -156,23 +196,6 @@ public:
 	void TJ(const StringOrDoubleList& inStringsAndSpacing);
 	void TJHex(const StringOrDoubleList& inStringsAndSpacing);
 
-	// Text showing operators using the library handling of fonts
-
-	// Set the font for later text writing command to the font in reference.
-	// to create such a font use PDF Writer GetFontForFile.
-	// Note that placing an actual Tf command (and including in resources dictionary) will
-	// only occur when actually placing text.
-	void Tf(PDFUsedFont* inFontReference,double inFontSize);
-
-	// place text to the current set font with Tf
-	// will return error if no font was set, or that one of the glyphs
-	// didn't succeed in encoding.
-	EStatusCode Tj(const wstring& inUnicodeText);
-
-	// The rest of the text operators, handled by the library handing of font. text is in unicode values
-	EStatusCode Quote(const wstring& inText);
-	EStatusCode DoubleQuote(double inWordSpacing, double inCharacterSpacing, const wstring& inText);
-	EStatusCode TJ(const WStringOrDoubleList& inStringsAndSpacing); 
 
 protected:
 
@@ -193,5 +216,5 @@ private:
 	void AssertProcsetAvailable(const string& inProcsetName);
 
 	EStatusCode WriteTextCommandWithEncoding(const wstring& inUnicodeText,ITextCommand* inTextCommand);
-
+	EStatusCode WriteTextCommandWithDirectGlyphSelection(const GlyphUnicodeMappingList& inText,ITextCommand* inTextCommand);
 };

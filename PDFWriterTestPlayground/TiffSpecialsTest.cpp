@@ -26,15 +26,7 @@ EStatusCode TiffSpecialsTest::Run()
 
 	do
 	{
-
-		status = pdfWriter.InitializePDFWriter(L"C:\\PDFLibTests\\TiffSpecialsTest.PDF",LogConfiguration(true,L"C:\\PDFLibTests\\TiffSpecialsTestLog.txt"));
-		if(status != eSuccess)
-		{
-			wcout<<"failed to initialize PDF Writer\n";
-			break;
-		}
-
-		status = pdfWriter.StartPDF(ePDFVersion13);
+		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\TiffSpecialsTest.PDF",ePDFVersion13,LogConfiguration(true,L"C:\\PDFLibTests\\TiffSpecialsTestLog.txt"));
 		if(status != eSuccess)
 		{
 			wcout<<"failed to start PDF\n";

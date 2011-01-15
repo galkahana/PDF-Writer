@@ -2,20 +2,16 @@
 
 #include "EStatusCode.h"
 #include "ObjectsBasicTypes.h"
+#include "GlyphUnicodeMapping.h"
 
-#include <string>
 #include <list>
 #include <vector>
 
 using namespace std;
 
-typedef list<unsigned int> UIntList;
 typedef list<unsigned short> UShortList;
-typedef list<UIntList> UIntListList;
 typedef list<UShortList> UShortListList;
-typedef list<wstring> WStringList;
-typedef vector<unsigned long> ULongVector;
-typedef list<ULongVector> ULongVectorList;
+typedef list<GlyphUnicodeMappingList> GlyphUnicodeMappingListList;
 
 class FreeTypeFaceWrapper;
 
@@ -30,17 +26,15 @@ public:
 		this chap simply states whether this is non CID or CID. last but not least - return the object ID for the font, so that 
 		the using content can refer to it
 	*/
-	virtual void AppendGlyphs(const UIntList& inGlyphsList,
-					  const ULongVector& inUnicodeCharacters,
-					  UShortList& outEncodedCharacters,
-					  bool& outEncodingIsMultiByte,
-					  ObjectIDType &outFontObjectID) = 0;
+	virtual void AppendGlyphs(const GlyphUnicodeMappingList& inGlyphsList,
+							  UShortList& outEncodedCharacters,
+							  bool& outEncodingIsMultiByte,
+							  ObjectIDType &outFontObjectID) = 0;
 
-	virtual void AppendGlyphs(const UIntListList& inGlyphsList,
-					  const ULongVectorList& inUnicodeCharacters,
-					  UShortListList& outEncodedCharacters,
-					  bool& outEncodingIsMultiByte,
-					  ObjectIDType &outFontObjectID) = 0;
+	virtual void AppendGlyphs(const GlyphUnicodeMappingListList& inGlyphsList,
+							  UShortListList& outEncodedCharacters,
+							  bool& outEncodingIsMultiByte,
+							  ObjectIDType &outFontObjectID) = 0;
 
 	/*
 		Write a font definition using the glyphs appended.
