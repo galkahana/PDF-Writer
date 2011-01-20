@@ -36,9 +36,9 @@ public:
 	EStatusCode WriteEmbeddedFont(	FreeTypeFaceWrapper& inFontInfo,
 									const UIntVector& inSubsetGlyphIDs,
 									const string& inFontFile3SubType,
-									ObjectIDType inEmbeddedFontObjectID,
 									const string& inSubsetFontName,
-									ObjectsContext* inObjectsContext);
+									ObjectsContext* inObjectsContext,
+									ObjectIDType& outEmbeddedFontObjectID);
 
 private:
 	Type1Input mType1Input;
@@ -66,6 +66,7 @@ private:
 								FreeTypeFaceWrapper& inFontInfo,
 								const UIntVector& inSubsetGlyphIDs,
 								const string& inSubsetFontName,
+								bool& outNotEmbedded,
 								MyStringBuf& outFontProgram);
 	EStatusCode AddDependentGlyphs(StringVector& ioSubsetGlyphIDs);
 	EStatusCode AddComponentGlyphs(const string& inGlyphID,StringSet& ioComponents,bool &outFoundComponents);

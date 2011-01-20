@@ -35,9 +35,9 @@ public:
 	EStatusCode WriteEmbeddedFont(	FreeTypeFaceWrapper& inFontInfo,
 									const UIntVector& inSubsetGlyphIDs,
 									const string& inFontFile3SubType,
-									ObjectIDType inEmbeddedFontObjectID,
 									const string& inSubsetFontName,
-									ObjectsContext* inObjectsContext);
+									ObjectsContext* inObjectsContext,
+									ObjectIDType& outEmbeddedFontObjectID);
 
 	// the optional inCIDMapping parameter provides a vector ordered in the same
 	// way as the glyph IDs. for each position in the CID mapping vector there's the matching CID
@@ -47,10 +47,10 @@ public:
 	EStatusCode WriteEmbeddedFont(	FreeTypeFaceWrapper& inFontInfo,
 									const UIntVector& inSubsetGlyphIDs,
 									const string& inFontFile3SubType,
-									ObjectIDType inEmbeddedFontObjectID,
 									const string& inSubsetFontName,
 									ObjectsContext* inObjectsContext,
-									UShortVector* inCIDMapping);
+									UShortVector* inCIDMapping,
+									ObjectIDType& outEmbeddedFontObjectID);
 
 
 private:
@@ -59,6 +59,7 @@ private:
 	CFFPrimitiveWriter mPrimitivesWriter;
 	OutputStringBufferStream mFontFileStream;
 	bool mIsCID;
+	string mOptionalEmbeddedPostscript;
 
 	// placeholders positions
 	LongFilePositionType mCharsetPlaceHolderPosition;
@@ -81,6 +82,7 @@ private:
 					const UIntVector& inSubsetGlyphIDs,
 					UShortVector* inCIDMapping,
 					const string& inSubsetFontName,
+					bool& outNotEmbedded,
 					MyStringBuf& outFontProgram);
 	EStatusCode AddDependentGlyphs(UIntVector& ioSubsetGlyphIDs);
 	EStatusCode AddComponentGlyphs(unsigned int inGlyphID,UIntSet& ioComponents,bool &outFoundComponents);

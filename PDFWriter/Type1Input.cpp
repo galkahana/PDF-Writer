@@ -47,6 +47,8 @@ void Type1Input::Reset()
 		mEncoding.mCustomEncoding[i].clear();
 	mReverseEncoding.clear();
 	mFontDictionary.StrokeWidth = 1;
+	mFontDictionary.FSTypeValid = false;
+	mFontDictionary.fsType = 0;
 
 	mFontInfoDictionary.isFixedPitch = false;
 	mFontInfoDictionary.ItalicAngle = 0;
@@ -54,6 +56,8 @@ void Type1Input::Reset()
 	mFontInfoDictionary.version.clear();
 	mFontInfoDictionary.Weight.clear();
 	mFontInfoDictionary.Copyright.clear();
+	mFontInfoDictionary.FSTypeValid = false;
+	mFontInfoDictionary.fsType = 0;
 
 	mPrivateDictionary.BlueFuzz = 1;
 	mPrivateDictionary.BlueScale = 0.039625;
@@ -210,6 +214,12 @@ EStatusCode Type1Input::ReadFontDictionary()
 				CalculateReverseEncoding();
 			continue;
 		}
+
+		if(token.second.compare("/FSType") == 0)
+		{
+			mFontInfoDictionary.fsType = (unsigned short)Int(mPFBDecoder.GetNextToken().second);
+			mFontInfoDictionary.FSTypeValid = true;
+		}
 	}
 	return status;
 }
@@ -287,6 +297,12 @@ EStatusCode Type1Input::ReadFontInfoDictionary()
 			mFontInfoDictionary.UnderlineThickness = 
 				Double(mPFBDecoder.GetNextToken().second);
 			continue;
+		}
+
+		if(token.second.compare("/FSType") == 0)
+		{
+			mFontInfoDictionary.fsType = (unsigned short)Int(mPFBDecoder.GetNextToken().second);
+			mFontInfoDictionary.FSTypeValid = true;
 		}
 	}
 	return status;	

@@ -7,6 +7,7 @@
 #include "OutputStreamTraits.h"
 #include "InputStringBufferStream.h"
 #include "OpenTypeFileInput.h"
+#include "FSType.h"
 
 #include <sstream>
 #include <algorithm>
@@ -25,22 +26,31 @@ static const string scLength1 = "Length1";
 EStatusCode TrueTypeEmbeddedFontWriter::WriteEmbeddedFont(	
 								FreeTypeFaceWrapper& inFontInfo,
 								const UIntVector& inSubsetGlyphIDs,
-								ObjectIDType inEmbeddedFontObjectID,
-								ObjectsContext* inObjectsContext)
+								ObjectsContext* inObjectsContext,
+								ObjectIDType& outEmbeddedFontObjectID)
 {
 	MyStringBuf rawFontProgram;
+	bool notEmbedded;
 	EStatusCode status;
 
 	do
 	{
-		status = CreateTrueTypeSubset(inFontInfo,inSubsetGlyphIDs,rawFontProgram);
+		status = CreateTrueTypeSubset(inFontInfo,inSubsetGlyphIDs,notEmbedded,rawFontProgram);
 		if(status != eSuccess)
 		{
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::WriteEmbeddedFont, failed to write embedded font program");
 			break;
 		}	
 
-		inObjectsContext->StartNewIndirectObject(inEmbeddedFontObjectID);
+		if(notEmbedded)
+		{
+			// can't embed. mark succesful, and go back empty
+			outEmbeddedFontObjectID = 0;
+			TRACE_LOG("TrueTypeEmbeddedFontWriter::WriteEmbeddedFont, font may not be embedded. so not embedding");
+			return eSuccess;
+		}
+
+		outEmbeddedFontObjectID = inObjectsContext->StartNewIndirectObject();
 		
 		DictionaryContext* fontProgramDictionaryContext = inObjectsContext->StartDictionary();
 
@@ -71,6 +81,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteEmbeddedFont(
 
 EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrapper& inFontInfo, /*consider requiring only the file path...actually i don't need the whole thing*/
 																const UIntVector& inSubsetGlyphIDs,
+																bool& outNotEmbedded,
 																MyStringBuf& outFontProgram)
 {
 	EStatusCode status;
@@ -99,7 +110,16 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, font file is not true type, so there is an exceptions here. expecting true types only");
 			break;
 		}
-		
+	
+		// see if font may be embedded
+		if(!FSType(mTrueTypeInput.mOS2.fsType).CanEmbed())
+		{
+			outNotEmbedded = true;
+			return eSuccess;
+		}
+		else
+			outNotEmbedded = false;
+
 		AddDependentGlyphs(subsetGlyphIDs);
 
 		// K. this needs a bit explaining.

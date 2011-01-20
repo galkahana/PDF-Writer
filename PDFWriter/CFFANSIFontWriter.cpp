@@ -25,37 +25,60 @@ CFFANSIFontWriter::~CFFANSIFontWriter(void)
 static const string scType1C = "Type1C";
 static const char* scType1Type = "Type 1";
 static const char* scCFF = "CFF";
+static const string scPlus = "+";
 EStatusCode CFFANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 											WrittenFontRepresentation* inFontOccurrence,
 											ObjectsContext* inObjectsContext)
 {
-	ANSIFontWriter fontWriter;
-	string subsetFontName;
-
-	EStatusCode status = fontWriter.WriteFont(inFontInfo,inFontOccurrence,inObjectsContext,this,subsetFontName);
-
-	if(eFailure == status)
-		return status;
-
+	const char* postscriptFontName = FT_Get_Postscript_Name(inFontInfo);
+	if(!postscriptFontName)
+	{
+		TRACE_LOG("CFFANSIFontWriter::WriteFont, unexpected failure. no postscript font name for font");
+		return eFailure;
+	}
+	std::string subsetFontName = inObjectsContext->GenerateSubsetFontPrefix() + scPlus + postscriptFontName;
+	
 	const char* fontType = inFontInfo.GetTypeString();
+
+	// reset embedded font object ID (and flag...to whether it was actually embedded or not, which may 
+	// happen due to font embedding restrictions)
+	mEmbeddedFontFileObjectID = 0;
+
+	EStatusCode status;
 	if(strcmp(scType1Type,fontType) == 0)
 	{
 		Type1ToCFFEmbeddedFontWriter embeddedFontWriter;
 
-		return embeddedFontWriter.WriteEmbeddedFont(inFontInfo,inFontOccurrence->GetGlyphIDsAsOrderedVector(),scType1C,mEmbeddedFontFileObjectID,subsetFontName, inObjectsContext);
+		status = embeddedFontWriter.WriteEmbeddedFont(inFontInfo,
+													inFontOccurrence->GetGlyphIDsAsOrderedVector(),
+													scType1C,
+													subsetFontName, 
+													inObjectsContext,
+													mEmbeddedFontFileObjectID);
 	}
 	else if(strcmp(scCFF,fontType) == 0)
 	{
 		CFFEmbeddedFontWriter embeddedFontWriter;
 
-		return embeddedFontWriter.WriteEmbeddedFont(inFontInfo,inFontOccurrence->GetGlyphIDsAsOrderedVector(),scType1C,mEmbeddedFontFileObjectID,subsetFontName, inObjectsContext);
+		status = embeddedFontWriter.WriteEmbeddedFont(inFontInfo,
+													inFontOccurrence->GetGlyphIDsAsOrderedVector(),
+													scType1C,
+													subsetFontName, 
+													inObjectsContext,
+													mEmbeddedFontFileObjectID);
 	}
 	else
 	{
 
 		TRACE_LOG("CFFANSIFontWriter::WriteFont, Exception, unfamilar font type for embedding representation");
-		return eFailure;
+		status = eFailure;
 	}
+	if(status != eSuccess)
+		return status;
+
+	ANSIFontWriter fontWriter;
+
+	return fontWriter.WriteFont(inFontInfo,inFontOccurrence,inObjectsContext,this,subsetFontName);
 }
 
 static const char* scType1 = "Type1";
@@ -107,8 +130,11 @@ void CFFANSIFontWriter::WriteFontFileReference(
 										DictionaryContext* inDescriptorContext,
 										ObjectsContext* inObjectsContext)
 {
-	// FontFile3
-	inDescriptorContext->WriteKey(scFontFile3);
-	mEmbeddedFontFileObjectID = inObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
-	inDescriptorContext->WriteObjectReferenceValue(mEmbeddedFontFileObjectID);
+	// write font reference only if there's what to write....
+	if(mEmbeddedFontFileObjectID != 0)
+	{
+		// FontFile3
+		inDescriptorContext->WriteKey(scFontFile3);
+		inDescriptorContext->WriteObjectReferenceValue(mEmbeddedFontFileObjectID);
+	}
 }

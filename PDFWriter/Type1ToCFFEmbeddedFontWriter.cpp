@@ -7,6 +7,7 @@
 #include "PDFStream.h"
 #include "Trace.h"
 #include "Type1ToType2Converter.h"
+#include "FSType.h"
 
 #include <algorithm>
 
@@ -115,25 +116,34 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteEmbeddedFont(
 															FreeTypeFaceWrapper& inFontInfo,
 															const UIntVector& inSubsetGlyphIDs,
 															const string& inFontFile3SubType,
-															ObjectIDType inEmbeddedFontObjectID,
 															const string& inSubsetFontName,
-															ObjectsContext* inObjectsContext)
+															ObjectsContext* inObjectsContext,
+															ObjectIDType& outEmbeddedFontObjectID)
 {
 	MyStringBuf rawFontProgram; 
+	bool notEmbedded;
 		// as oppose to true type, the reason for using a memory stream here is mainly peformance - i don't want to start
 		// setting file pointers and move in a file stream
 	EStatusCode status;
 
 	do
 	{
-		status = CreateCFFSubset(inFontInfo,inSubsetGlyphIDs,inSubsetFontName,rawFontProgram);
+		status = CreateCFFSubset(inFontInfo,inSubsetGlyphIDs,inSubsetFontName,notEmbedded,rawFontProgram);
 		if(status != eSuccess)
 		{
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::WriteEmbeddedFont, failed to write embedded font program");
 			break;
 		}	
 
-		inObjectsContext->StartNewIndirectObject(inEmbeddedFontObjectID);
+		if(notEmbedded)
+		{
+			// can't embed. mark succesful, and go back empty
+			outEmbeddedFontObjectID = 0;
+			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::WriteEmbeddedFont, font may not be embedded. so not embedding");
+			return eSuccess;
+		}
+
+		outEmbeddedFontObjectID = inObjectsContext->StartNewIndirectObject();
 		
 		DictionaryContext* fontProgramDictionaryContext = inObjectsContext->StartDictionary();
 
@@ -166,6 +176,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::CreateCFFSubset(
 															FreeTypeFaceWrapper& inFontInfo,
 															const UIntVector& inSubsetGlyphIDs,
 															const string& inSubsetFontName,
+															bool& outNotEmbedded,
 															MyStringBuf& outFontProgram)
 {
 	EStatusCode status;
@@ -191,6 +202,24 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::CreateCFFSubset(
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, failed to read true type file");
 			break;
 		}
+
+		// see if font may be embedded
+		if(mType1Input.mFontDictionary.FSTypeValid || mType1Input.mFontInfoDictionary.FSTypeValid)
+		{
+			if(!FSType(
+					mType1Input.mFontInfoDictionary.FSTypeValid ? 
+						mType1Input.mFontInfoDictionary.fsType :
+						mType1Input.mFontDictionary.fsType).CanEmbed())
+			{
+				outNotEmbedded = true;
+				return eSuccess;
+			}
+			else
+				outNotEmbedded = false;
+		}
+		else
+			outNotEmbedded = false;
+
 
 		// Found big gap between FreeType indexing and the way it's in the Type 1. obvioulsy due to encoding differences.
 		// So i'm replacing the indexes of free type, with names...should be safer
@@ -492,6 +521,20 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteTopDictSegment(MyStringBuf& ioTop
 		dictPrimitiveWriter.WriteRealOperand(mType1Input.mFontDictionary.FontBBox[2]);
 		dictPrimitiveWriter.WriteRealOperand(mType1Input.mFontDictionary.FontBBox[3]);
 		dictPrimitiveWriter.WriteDictOperator(5);
+	}
+
+	// FSType if required. format as an embedded postscript string. /FSType fstype def
+	if(mType1Input.mFontDictionary.FSTypeValid || mType1Input.mFontInfoDictionary.FSTypeValid)
+	{
+		stringstream formatter;
+		formatter<<"/FSType "<<
+						(mType1Input.mFontInfoDictionary.FSTypeValid ? 
+							mType1Input.mFontInfoDictionary.fsType :
+							mType1Input.mFontDictionary.fsType)<<
+					" def";
+		dictPrimitiveWriter.WriteIntegerOperand(
+			AddStringToStringsArray(formatter.str()));
+		dictPrimitiveWriter.WriteDictOperator(0xC15);
 	}
 
 	// now leave placeholders, record their positions

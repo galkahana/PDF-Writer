@@ -92,7 +92,7 @@ struct OS2Table
 	short AvgCharWidth;
 	unsigned short WeightClass;
 	unsigned short WidthClass;
-	unsigned short FSType;
+	unsigned short fsType;
 	short SubscriptXSize;
 	short SubscriptYSize;
 	short SubscriptXOffset;

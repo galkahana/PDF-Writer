@@ -4,6 +4,11 @@
 #include "ObjectsContext.h"
 #include "IndirectObjectsReferenceRegistry.h"
 #include "TrueTypeEmbeddedFontWriter.h"
+#include "FreeTypeFaceWrapper.h"
+#include "Trace.h"
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 TrueTypeANSIFontWriter::TrueTypeANSIFontWriter(void)
 {
@@ -13,21 +18,35 @@ TrueTypeANSIFontWriter::~TrueTypeANSIFontWriter(void)
 {
 }
 
+static const string scPlus = "+";
 EStatusCode TrueTypeANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 											WrittenFontRepresentation* inFontOccurrence,
 											ObjectsContext* inObjectsContext)
 {
-	ANSIFontWriter fontWriter;
-	string subsetFontName;
+	const char* postscriptFontName = FT_Get_Postscript_Name(inFontInfo);
+	if(!postscriptFontName)
+	{
+		TRACE_LOG("TrueTypeANSIFontWriter::WriteFont, unexpected failure. no postscript font name for font");
+		return eFailure;
+	}
+	std::string subsetFontName = inObjectsContext->GenerateSubsetFontPrefix() + scPlus + postscriptFontName;
 
-	EStatusCode status = fontWriter.WriteFont(inFontInfo,inFontOccurrence,inObjectsContext,this,subsetFontName);
-
-	if(eFailure == status)
-		return status;
+	// reset embedded font object ID (and flag...to whether it was actually embedded or not, which may 
+	// happen due to font embedding restrictions)
+	mEmbeddedFontFileObjectID = 0;
 
 	TrueTypeEmbeddedFontWriter embeddedFontWriter;
 
-	return embeddedFontWriter.WriteEmbeddedFont(inFontInfo,inFontOccurrence->GetGlyphIDsAsOrderedVector(),mEmbeddedFontFileObjectID,inObjectsContext);
+	EStatusCode status = embeddedFontWriter.WriteEmbeddedFont(	inFontInfo,
+																inFontOccurrence->GetGlyphIDsAsOrderedVector(),
+																inObjectsContext,
+																mEmbeddedFontFileObjectID);
+	if(eFailure == status)
+		return status;
+
+	ANSIFontWriter fontWriter;
+
+	return fontWriter.WriteFont(inFontInfo,inFontOccurrence,inObjectsContext,this,subsetFontName);
 }
 
 static const string scTrueType = "TrueType";
@@ -57,8 +76,11 @@ void TrueTypeANSIFontWriter::WriteFontFileReference(
 										DictionaryContext* inDescriptorContext,
 										ObjectsContext* inObjectsContext)
 {
-	// FontFile2
-	inDescriptorContext->WriteKey(scFontFile2);
-	mEmbeddedFontFileObjectID = inObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
-	inDescriptorContext->WriteObjectReferenceValue(mEmbeddedFontFileObjectID);
+	// will be 0 in case embedding didn't occur due to font embedding restrictions
+	if(mEmbeddedFontFileObjectID != 0)
+	{
+		// FontFile2
+		inDescriptorContext->WriteKey(scFontFile2);
+		inDescriptorContext->WriteObjectReferenceValue(mEmbeddedFontFileObjectID);
+	}
 }

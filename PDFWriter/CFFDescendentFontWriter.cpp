@@ -27,13 +27,9 @@ EStatusCode CFFDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID
 														const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
 														ObjectsContext* inObjectsContext)
 {
-	DescendentFontWriter descendentFontWriter;
-	string subsetFontName;
-
-	EStatusCode status = descendentFontWriter.WriteFont(inDecendentObjectID,inFontName,inFontInfo,inEncodedGlyphs,inObjectsContext,this,subsetFontName);
-
-	if(eFailure == status)
-		return status;
+	// reset embedded font object ID (and flag...to whether it was actually embedded or not, which may 
+	// happen due to font embedding restrictions)
+	mEmbeddedFontFileObjectID = 0;
 
 	// Logically speaking, i shouldn't be getting to CID writing
 	// if in type 1. at least, this is the current assumption, since
@@ -45,7 +41,6 @@ EStatusCode CFFDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID
 		TRACE_LOG1("CFFDescendentFontWriter::WriteFont, Exception. identified type1 font when writing CFF CID font, font name - %s. type 1 CIDs are not supported.",inFontName.c_str());
 		return eFailure;
 	}
-
 
 	CFFEmbeddedFontWriter embeddedFontWriter;
 	UIntAndGlyphEncodingInfoVector encodedGlyphs = inEncodedGlyphs;
@@ -61,13 +56,19 @@ EStatusCode CFFDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID
 		orderedGlyphs.push_back(it->first);
 		cidMapping.push_back(it->second.mEncodedCharacter);
 	}
-	return embeddedFontWriter.WriteEmbeddedFont(inFontInfo,
+	EStatusCode status = embeddedFontWriter.WriteEmbeddedFont(inFontInfo,
 												orderedGlyphs,
 												scCIDFontType0C,
-												mEmbeddedFontFileObjectID,
-												subsetFontName,
+												inFontName,
 												inObjectsContext,
-												&cidMapping);
+												&cidMapping,
+												mEmbeddedFontFileObjectID);
+	if(status != eSuccess)
+		return status;
+
+	DescendentFontWriter descendentFontWriter;
+
+	return descendentFontWriter.WriteFont(inDecendentObjectID,inFontName,inFontInfo,inEncodedGlyphs,inObjectsContext,this);
 }
 
 static const string scCIDFontType0 = "CIDFontType0";
@@ -86,8 +87,11 @@ static const string scFontFile3 = "FontFile3";
 void CFFDescendentFontWriter::WriteFontFileReference(DictionaryContext* inDescriptorContext,
 													ObjectsContext* inObjectsContext)
 {
-	// FontFile3
-	inDescriptorContext->WriteKey(scFontFile3);
-	mEmbeddedFontFileObjectID = inObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
-	inDescriptorContext->WriteObjectReferenceValue(mEmbeddedFontFileObjectID);	
+	// write font reference only if there's what to write....
+	if(mEmbeddedFontFileObjectID != 0)
+	{
+		// FontFile3
+		inDescriptorContext->WriteKey(scFontFile3);
+		inDescriptorContext->WriteObjectReferenceValue(mEmbeddedFontFileObjectID);	
+	}
 }

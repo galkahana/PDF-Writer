@@ -32,6 +32,8 @@ struct Type1FontDictionary
 	int UniqueID;
 	// Metrics ignored
 	double StrokeWidth;
+	bool FSTypeValid;
+	unsigned short fsType;
 };
 
 struct Type1FontInfoDictionary
@@ -46,6 +48,8 @@ struct Type1FontInfoDictionary
 	bool isFixedPitch;
 	double UnderlinePosition;
 	double UnderlineThickness;
+	bool FSTypeValid;
+	unsigned short fsType;
 };
 
 struct Type1PrivateDictionary
@@ -108,7 +112,6 @@ public:
 	Type1FontDictionary mFontDictionary;
 	Type1FontInfoDictionary mFontInfoDictionary;
 	Type1PrivateDictionary mPrivateDictionary;
-
 
 	// IType1InterpreterImplementation overrides
 	virtual Type1CharString* GetSubr(long inSubrIndex);

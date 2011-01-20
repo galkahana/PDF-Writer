@@ -32,8 +32,7 @@ public:
 									FreeTypeFaceWrapper& inFontInfo,
 									const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
 									ObjectsContext* inObjectsContext,
-									IDescendentFontWriter* inDescendentFontWriterHelper,
-									string& outSubsetFontName);
+									IDescendentFontWriter* inDescendentFontWriterHelper);
 
 	// IFontDescriptorHelper implementation [would probably evolve at some point to IDescriptorWriterHelper...
 	virtual void WriteCharSet(	DictionaryContext* inDescriptorContext,

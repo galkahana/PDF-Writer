@@ -366,7 +366,7 @@ EStatusCode OpenTypeFileInput::ReadOS2()
 	mPrimitivesReader.ReadSHORT(mOS2.AvgCharWidth);
 	mPrimitivesReader.ReadUSHORT(mOS2.WeightClass);
 	mPrimitivesReader.ReadUSHORT(mOS2.WidthClass);
-	mPrimitivesReader.ReadUSHORT(mOS2.FSType);
+	mPrimitivesReader.ReadUSHORT(mOS2.fsType);
 
 	mPrimitivesReader.ReadSHORT(mOS2.SubscriptXSize);
 	mPrimitivesReader.ReadSHORT(mOS2.SubscriptYSize);

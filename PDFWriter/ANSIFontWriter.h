@@ -34,7 +34,7 @@ public:
 							WrittenFontRepresentation* inFontOccurrence,
 							ObjectsContext* inObjectsContext,
 							IANSIFontWriterHelper* inANSIFontWriterHelper,
-							std::string& outWrittenFontName);
+							const std::string& inWrittenFontName);
 
 private:
 

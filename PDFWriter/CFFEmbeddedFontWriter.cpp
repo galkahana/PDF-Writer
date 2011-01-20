@@ -8,6 +8,7 @@
 #include "DictionaryContext.h"
 #include "IByteReaderWithPosition.h"
 #include "CharStringType2Flattener.h"
+#include "FSType.h"
 
 #include <algorithm>
 #include <utility>
@@ -27,37 +28,46 @@ EStatusCode CFFEmbeddedFontWriter::WriteEmbeddedFont(
 								FreeTypeFaceWrapper& inFontInfo,
 								const UIntVector& inSubsetGlyphIDs,
 								const string& inFontFile3SubType,
-								ObjectIDType inEmbeddedFontObjectID,
 								const string& inSubsetFontName,
-								ObjectsContext* inObjectsContext)
+								ObjectsContext* inObjectsContext,
+								ObjectIDType& outEmbeddedFontObjectID)
 {
-	return WriteEmbeddedFont(inFontInfo,inSubsetGlyphIDs,inFontFile3SubType,inEmbeddedFontObjectID,inSubsetFontName,inObjectsContext,NULL);
+	return WriteEmbeddedFont(inFontInfo,inSubsetGlyphIDs,inFontFile3SubType,inSubsetFontName,inObjectsContext,NULL,outEmbeddedFontObjectID);
 }
 
 EStatusCode CFFEmbeddedFontWriter::WriteEmbeddedFont(
 	FreeTypeFaceWrapper& inFontInfo,
 	const UIntVector& inSubsetGlyphIDs,
 	const string& inFontFile3SubType,
-	ObjectIDType inEmbeddedFontObjectID,
 	const string& inSubsetFontName,
 	ObjectsContext* inObjectsContext,
-	UShortVector* inCIDMapping)
+	UShortVector* inCIDMapping,
+	ObjectIDType& outEmbeddedFontObjectID)
 {
 	MyStringBuf rawFontProgram; 
+	bool notEmbedded;
 		// as oppose to true type, the reason for using a memory stream here is mainly peformance - i don't want to start
 		// setting file pointers and move in a file stream
 	EStatusCode status;
 
 	do
 	{
-		status = CreateCFFSubset(inFontInfo,inSubsetGlyphIDs,inCIDMapping,inSubsetFontName,rawFontProgram);
+		status = CreateCFFSubset(inFontInfo,inSubsetGlyphIDs,inCIDMapping,inSubsetFontName,notEmbedded,rawFontProgram);
 		if(status != eSuccess)
 		{
 			TRACE_LOG("CFFEmbeddedFontWriter::WriteEmbeddedFont, failed to write embedded font program");
 			break;
 		}	
 
-		inObjectsContext->StartNewIndirectObject(inEmbeddedFontObjectID);
+		if(notEmbedded)
+		{
+			// can't embed. mark succesful, and go back empty
+			outEmbeddedFontObjectID = 0;
+			TRACE_LOG("CFFEmbeddedFontWriter::WriteEmbeddedFont, font may not be embedded. so not embedding");
+			return eSuccess;
+		}
+
+		outEmbeddedFontObjectID = inObjectsContext->StartNewIndirectObject();
 		
 		DictionaryContext* fontProgramDictionaryContext = inObjectsContext->StartDictionary();
 
@@ -91,15 +101,13 @@ EStatusCode CFFEmbeddedFontWriter::CreateCFFSubset(
 									const UIntVector& inSubsetGlyphIDs,
 									UShortVector* inCIDMapping,
 									const string& inSubsetFontName,
+									bool& outNotEmbedded,
 									MyStringBuf& outFontProgram)
 {
 	EStatusCode status;
 
 	do
 	{
-		UIntVector subsetGlyphIDs = inSubsetGlyphIDs;
-		if(subsetGlyphIDs.front() != 0) // make sure 0 glyph is in
-			subsetGlyphIDs.insert(subsetGlyphIDs.begin(),0);
 
 		status = mOpenTypeFile.OpenFile(inFontInfo.GetFontFilePath());
 		if(status != eSuccess)
@@ -120,6 +128,19 @@ EStatusCode CFFEmbeddedFontWriter::CreateCFFSubset(
 			TRACE_LOG("CFFEmbeddedFontWriter::CreateCFFSubset, font file is not CFF, so there is an exceptions here. expecting CFFs only");
 			break;
 		}
+
+		// see if font may be embedded
+		if(!FSType(mOpenTypeInput.mOS2.fsType).CanEmbed())
+		{
+			outNotEmbedded = true;
+			return eSuccess;
+		}
+		else
+			outNotEmbedded = false;
+
+		UIntVector subsetGlyphIDs = inSubsetGlyphIDs;
+		if(subsetGlyphIDs.front() != 0) // make sure 0 glyph is in
+			subsetGlyphIDs.insert(subsetGlyphIDs.begin(),0);
 
 		status = AddDependentGlyphs(subsetGlyphIDs);
 		if(status != eSuccess)
@@ -390,12 +411,15 @@ EStatusCode CFFEmbeddedFontWriter::WriteTopIndex()
 	return status;
 }
 
+#define N_STD_STRINGS 391
+
 static const unsigned short scCharset = 15;
 static const unsigned short scEncoding = 16;
 static const unsigned short scCharstrings = 17;
 static const unsigned short scPrivate = 18;
 static const unsigned short scFDArray = 0xC24;
 static const unsigned short scFDSelect = 0xC25;
+static const unsigned short scEmbeddedPostscript = 0xC15;
 EStatusCode CFFEmbeddedFontWriter::WriteTopDictSegment(MyStringBuf& ioTopDictSegment)
 {
 	OutputStringBufferStream topDictStream(&ioTopDictSegment);
@@ -424,6 +448,20 @@ EStatusCode CFFEmbeddedFontWriter::WriteTopDictSegment(MyStringBuf& ioTopDictSeg
 			it->first != scFDSelect)
 				dictPrimitiveWriter.WriteDictItems(it->first,it->second);
 	}
+	// check if it had an embedded postscript (which would normally be the FSType implementation).
+	// if not...create one to implement the FSType
+	if(originalTopDictRef.find(scEmbeddedPostscript) == originalTopDictRef.end())
+	{
+		// no need for sophistication here...you can consider this as the only string to be added.
+		// so can be sure that its index would be the current count 
+		stringstream formatter;
+		formatter<<"/FSType "<<mOpenTypeInput.mOS2.fsType<<" def";
+		mOptionalEmbeddedPostscript = formatter.str();
+		dictPrimitiveWriter.WriteIntegerOperand(mOpenTypeInput.mCFF.mStringsCount + N_STD_STRINGS);
+		dictPrimitiveWriter.WriteDictOperator(scEmbeddedPostscript);
+	}
+	else
+		mOptionalEmbeddedPostscript = "";
 
 	// now leave placeholders, record their positions
 	mCharsetPlaceHolderPosition = topDictStream.GetCurrentPosition();
@@ -466,14 +504,53 @@ EStatusCode CFFEmbeddedFontWriter::WriteTopDictSegment(MyStringBuf& ioTopDictSeg
 
 EStatusCode CFFEmbeddedFontWriter::WriteStringIndex()
 {
-	// copy as is from the original file. note that the global subroutines
-	// starting position is equal to the strings end position. hence length is...
+	// if added a new string...needs to work hard, otherwise just copy the strings.
+	if(mOptionalEmbeddedPostscript.size() == 0)
+	{
+		// copy as is from the original file. note that the global subroutines
+		// starting position is equal to the strings end position. hence length is...
 
-	OutputStreamTraits streamCopier(&mFontFileStream);
-	mOpenTypeFile.GetInputStream()->SetPosition(mOpenTypeInput.mCFF.mCFFOffset + mOpenTypeInput.mCFF.mStringIndexPosition);
-	return streamCopier.CopyToOutputStream(mOpenTypeFile.GetInputStream(),
-											(LongBufferSizeType)(mOpenTypeInput.mCFF.mGlobalSubrsPosition -
-											mOpenTypeInput.mCFF.mStringIndexPosition));
+		OutputStreamTraits streamCopier(&mFontFileStream);
+		mOpenTypeFile.GetInputStream()->SetPosition(mOpenTypeInput.mCFF.mCFFOffset + mOpenTypeInput.mCFF.mStringIndexPosition);
+		return streamCopier.CopyToOutputStream(mOpenTypeFile.GetInputStream(),
+												(LongBufferSizeType)(mOpenTypeInput.mCFF.mGlobalSubrsPosition -
+												mOpenTypeInput.mCFF.mStringIndexPosition));
+	}
+	else
+	{
+		// need to write the bloody strings...[remember that i'm adding one more string at the end]
+		mPrimitivesWriter.WriteCard16(mOpenTypeInput.mCFF.mStringsCount + 1);
+		
+		// calculate the total data size to determine the required offset size
+		unsigned long totalSize=0;
+		for(int i=0; i < mOpenTypeInput.mCFF.mStringsCount; ++i)
+			totalSize += (unsigned long)strlen(mOpenTypeInput.mCFF.mStrings[i]);
+		totalSize+=mOptionalEmbeddedPostscript.size();
+		
+		Byte sizeOfOffset = GetMostCompressedOffsetSize(totalSize + 1);
+		mPrimitivesWriter.WriteOffSize(sizeOfOffset);
+		mPrimitivesWriter.SetOffSize(sizeOfOffset);
+	
+		unsigned long currentOffset = 1;
+
+		// write the offsets
+		for(int i=0; i < mOpenTypeInput.mCFF.mStringsCount; ++i)
+		{
+			mPrimitivesWriter.WriteOffset(currentOffset);
+			currentOffset += (unsigned long)strlen(mOpenTypeInput.mCFF.mStrings[i]);
+		}
+		mPrimitivesWriter.WriteOffset(currentOffset);
+		currentOffset+=mOptionalEmbeddedPostscript.size();
+		mPrimitivesWriter.WriteOffset(currentOffset);
+
+		// write the data
+		for(int i=0; i < mOpenTypeInput.mCFF.mStringsCount; ++i)
+		{
+			mFontFileStream.Write((const Byte*)(mOpenTypeInput.mCFF.mStrings[i]),strlen(mOpenTypeInput.mCFF.mStrings[i]));
+		}
+		mFontFileStream.Write((const Byte*)(mOptionalEmbeddedPostscript.c_str()),mOptionalEmbeddedPostscript.size());
+		return mPrimitivesWriter.GetInternalState();
+	}
 }
 
 EStatusCode CFFEmbeddedFontWriter::WriteGlobalSubrsIndex()

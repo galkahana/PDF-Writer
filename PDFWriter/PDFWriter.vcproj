@@ -1174,6 +1174,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\FSType.h"
+					>
+				</File>
+				<File
 					RelativePath=".\IANSIFontWriterHelper.h"
 					>
 				</File>

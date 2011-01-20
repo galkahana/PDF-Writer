@@ -31,7 +31,6 @@ static const string scType = "Type";
 static const string scFont = "Font";
 static const string scSubtype = "Subtype";
 static const string scBaseFont = "BaseFont";
-static const string scPlus = "+";
 static const string scToUnicode = "ToUnicode";
 static const string scFontDescriptor = "FontDescriptor";
 
@@ -39,7 +38,7 @@ EStatusCode ANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 											WrittenFontRepresentation* inFontOccurrence,
 											ObjectsContext* inObjectsContext,
 											IANSIFontWriterHelper* inANSIFontWriterHelper,
-											std::string& outWrittenFontName)
+											const std::string& inSubsetFontName)
 {
 	EStatusCode status = eSuccess;
 	FontDescriptorWriter fontDescriptorWriter;
@@ -64,16 +63,7 @@ EStatusCode ANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 
 		// BaseFont
 		fontContext->WriteKey(scBaseFont);
-		const char* postscriptFontName = FT_Get_Postscript_Name(inFontInfo);
-		if(!postscriptFontName)
-		{
-			TRACE_LOG("ANSIFontWriter::WriteFont, unexpected failure. no postscript font name for font");
-			status = eFailure;
-			break;
-		}
-		std::string subsetFontName = inObjectsContext->GenerateSubsetFontPrefix() + scPlus + postscriptFontName;
-		fontContext->WriteNameValue(subsetFontName);
-		outWrittenFontName = subsetFontName;
+		fontContext->WriteNameValue(inSubsetFontName);
 
 
 		/*
@@ -115,7 +105,7 @@ EStatusCode ANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 
 		WriteToUnicodeMap(toUnicodeMapObjectID);
 		fontDescriptorWriter.WriteFontDescriptor(fontDescriptorObjectID,
-												subsetFontName,
+												inSubsetFontName,
 												&inFontInfo,
 												mCharactersVector,
 												inObjectsContext,

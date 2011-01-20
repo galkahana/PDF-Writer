@@ -25,7 +25,6 @@ static const string scDescent = "Descent";
 static const string scCapHeight = "CapHeight";
 static const string scXHeight = "XHeight";
 static const string scStemV = "StemV";
-static const string scFontFile3 = "FontFile3";
 static const string scCharSet = "CharSet";
 
 void FontDescriptorWriter::WriteFontDescriptor(	ObjectIDType inFontDescriptorObjectID,
@@ -105,7 +104,7 @@ void FontDescriptorWriter::WriteFontDescriptor(	ObjectIDType inFontDescriptorObj
 	fontDescriptorDictionary->WriteKey(scFlags);
 	fontDescriptorDictionary->WriteIntegerValue(CalculateFlags(inFontInfo,inEncodedGlyphs));
 
-	// font embedding
+	// font embedding [may not happen due to font embedding restrictions. helper is supposed to avoid reference as well]
 	inDescriptorHelper->WriteFontFileReference(fontDescriptorDictionary,inObjectsContext);
 
 	inObjectsContext->EndDictionary(fontDescriptorDictionary);
