@@ -189,6 +189,7 @@ void CIDFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 }
 
 static const Byte scEntryEnding[2] = {'>','\n'};
+static const Byte scAllZeros[4] = {'0','0','0','0'};
 void CIDFontWriter::WriteGlyphEntry(IByteWriter* inWriter,unsigned short inEncodedCharacter,const ULongVector& inUnicodeValues)
 {
 	UnicodeEncoding unicode;
@@ -198,20 +199,27 @@ void CIDFontWriter::WriteGlyphEntry(IByteWriter* inWriter,unsigned short inEncod
 	SAFE_SPRINTF_1(formattingBuffer,17,"<%04x> <",inEncodedCharacter);
 	inWriter->Write((const Byte*)formattingBuffer,8);
 	
-	for(; it != inUnicodeValues.end(); ++it)
+	if(inUnicodeValues.size() == 0)
 	{
-		if(unicode.IsSupplementary(*it))
+		inWriter->Write(scAllZeros,4);
+	}
+	else
+	{
+		for(; it != inUnicodeValues.end(); ++it)
 		{
-			UTF16Encoding highAndLow = unicode.EncodeCharater(*it);
-			SAFE_SPRINTF_2(formattingBuffer,17,"%04x%04x",
-															highAndLow.HighSurrogate,
-															highAndLow.LowSurrogate);
-			inWriter->Write((const Byte*)formattingBuffer,8);
-		}
-		else
-		{
-			SAFE_SPRINTF_1(formattingBuffer,17,"%04x",*it);
-			inWriter->Write((const Byte*)formattingBuffer,4);
+			if(unicode.IsSupplementary(*it))
+			{
+				UTF16Encoding highAndLow = unicode.EncodeCharater(*it);
+				SAFE_SPRINTF_2(formattingBuffer,17,"%04x%04x",
+																highAndLow.HighSurrogate,
+																highAndLow.LowSurrogate);
+				inWriter->Write((const Byte*)formattingBuffer,8);
+			}
+			else
+			{
+				SAFE_SPRINTF_1(formattingBuffer,17,"%04x",*it);
+				inWriter->Write((const Byte*)formattingBuffer,4);
+			}
 		}
 	}
 	inWriter->Write(scEntryEnding,2);
