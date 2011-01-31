@@ -1,5 +1,5 @@
 /*
- Additioncal Copyright Information:
+ Additional Copyright Information:
 
  Gal Kahana 8/5/2010. my code is completely copied/adapted from this:
 

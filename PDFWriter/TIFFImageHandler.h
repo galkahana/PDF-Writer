@@ -1,5 +1,5 @@
 /*
-  Additioncal Copyright Information:
+  Additional Copyright Information:
 
   The majority of this code is converted from tiff2pdf tool that comes with the
   tifflib library. in accordance with the code instructions the header of tiff2pdf 
