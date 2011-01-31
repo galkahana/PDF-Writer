@@ -1,3 +1,23 @@
+/*
+   Source File : CFFEmbeddedFontWriter.cpp
+
+
+   Copyright 2011 Gal Kahana PDFWriter
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+   
+*/
 #include "CFFEmbeddedFontWriter.h"
 #include "ObjectsContext.h"
 #include "InputStringBufferStream.h"
@@ -525,7 +545,7 @@ EStatusCode CFFEmbeddedFontWriter::WriteStringIndex()
 		unsigned long totalSize=0;
 		for(int i=0; i < mOpenTypeInput.mCFF.mStringsCount; ++i)
 			totalSize += (unsigned long)strlen(mOpenTypeInput.mCFF.mStrings[i]);
-		totalSize+=mOptionalEmbeddedPostscript.size();
+		totalSize+=(unsigned long)mOptionalEmbeddedPostscript.size();
 		
 		Byte sizeOfOffset = GetMostCompressedOffsetSize(totalSize + 1);
 		mPrimitivesWriter.WriteOffSize(sizeOfOffset);
@@ -540,7 +560,7 @@ EStatusCode CFFEmbeddedFontWriter::WriteStringIndex()
 			currentOffset += (unsigned long)strlen(mOpenTypeInput.mCFF.mStrings[i]);
 		}
 		mPrimitivesWriter.WriteOffset(currentOffset);
-		currentOffset+=mOptionalEmbeddedPostscript.size();
+		currentOffset+=(unsigned long)mOptionalEmbeddedPostscript.size();
 		mPrimitivesWriter.WriteOffset(currentOffset);
 
 		// write the data
