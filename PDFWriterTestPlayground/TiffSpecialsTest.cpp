@@ -58,10 +58,10 @@ EStatusCode TiffSpecialsTest::Run()
 		for(int i=0;i<4 && (eSuccess == status);++i)
 		{
 			TIFFParameters.PageIndex = i;
-			PDFFormXObject* imageFormXObject = pdfWriter.CreateFormXObjectFromTIFFFile(L"C:\\PDFLibTests\\TestMaterials\\multipage.tif",TIFFParameters);
+			PDFFormXObject* imageFormXObject = pdfWriter.CreateFormXObjectFromTIFFFile(L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\multipage.tif",TIFFParameters);
 			if(!imageFormXObject)
 			{
-				wcout<<"failed to create image form XObject from file, for file "<<"C:\\PDFLibTests\\TestMaterials\\multipage.tif page "<<i<<"\n";
+				wcout<<"failed to create image form XObject from file, for file "<<"multipage.tif page "<<i<<"\n";
 				status = eFailure;
 			}
 			else
@@ -135,7 +135,7 @@ EStatusCode TiffSpecialsTest::CreatePageForImageAndRelease(PDFWriter& inPDFWrite
 	return status;
 }
 
-static const wstring scJimBW = L"C:\\PDFLibTests\\TestMaterials\\pics-3.7.2\\jim___ah.tif";
+static const wstring scJimBW = L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\jim___ah.tif";
 
 EStatusCode TiffSpecialsTest::CreateBlackAndWhiteMaskImage(PDFWriter& inPDFWriter)
 {
@@ -206,7 +206,7 @@ EStatusCode TiffSpecialsTest::CreateBlackAndWhiteMaskImage(PDFWriter& inPDFWrite
 	return status;
 }
 
-static const wstring scWJim = L"C:\\PDFLibTests\\TestMaterials\\pics-3.7.2\\jim___cg.tif";
+static const wstring scWJim = L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\jim___cg.tif";
 
 EStatusCode TiffSpecialsTest::CreateBiLevelGrayScales(PDFWriter& inPDFWriter)
 {

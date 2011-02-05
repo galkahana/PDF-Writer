@@ -54,11 +54,7 @@ EStatusCode FreeTypeInitializationTest::Run()
 
 	do
 	{
-		status = ShowFaceProperties(ftWrapper,L"C:\\PDFLibTests\\TestMaterials\\fonts\\AdobeMingStd-Light.otf");
-		if(status != eSuccess)
-			break;
-
-		status = ShowFaceProperties(ftWrapper,L"C:\\PDFLibTests\\TestMaterials\\fonts\\ARIALMT_.TTF");
+		status = ShowFaceProperties(ftWrapper,L"C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
 		if(status != eSuccess)
 			break;
 

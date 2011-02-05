@@ -21,7 +21,6 @@
 // PDFWriterTestPlayground.cpp : Defines the entry point for the console application.
 //
 
-#include "stdafx.h"
 #include "Singleton.h"
 #include "TestsRunner.h"
 
@@ -47,7 +46,7 @@ static void PrintUsage()
 		"	PDFWriterTestPlayGround -c PDF -xt TiffImageTest.";
 }
 
-int _tmain(int argc, _TCHAR* argv[])
+int main(int argc, wchar_t* argv[])
 {
 	if(3 <= argc)
 	{

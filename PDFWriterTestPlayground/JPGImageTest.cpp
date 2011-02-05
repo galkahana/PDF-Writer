@@ -78,7 +78,7 @@ EStatusCode JPGImageTest::Run()
 		}
 
 		// Create image xobject from 
-		PDFImageXObject* imageXObject  = pdfWriter.CreateImageXObjectFromJPGFile(L"C:\\PDFLibTests\\TestMaterials\\otherStage.JPG");
+		PDFImageXObject* imageXObject  = pdfWriter.CreateImageXObjectFromJPGFile(L"C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG");
 		if(!imageXObject)
 		{
 			wcout<<"failed to create image XObject from file\n";
@@ -104,7 +104,7 @@ EStatusCode JPGImageTest::Run()
 		}
 
 
-		PDFFormXObject*  formXObject = pdfWriter.CreateFormXObjectFromJPGFile(L"C:\\PDFLibTests\\TestMaterials\\otherStage.JPG");
+		PDFFormXObject*  formXObject = pdfWriter.CreateFormXObjectFromJPGFile(L"C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG");
 		if(!formXObject)
 		{
 			wcout<<"failed to create form XObject from file\n";

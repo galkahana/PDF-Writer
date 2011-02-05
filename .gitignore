@@ -25,9 +25,12 @@ _.swp
 *.manifest
 *.manifest.res
 
-#unwanted zlib sources #
+#unwanted other sources #
 ########################
 zlib-1.2.3
 tiff-3.9.4
 freetype-2.4.2
 *.gz
+TestMaterials
+Downloads
+

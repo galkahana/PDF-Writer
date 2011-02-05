@@ -194,11 +194,11 @@ EStatusCode SimpleTextUsage::RunTrueTypeTest()
 			break;
 		}
 
-		PDFUsedFont* font = pdfWriter.GetFontForFile(L"C:\\PDFLibTests\\TestMaterials\\fonts\\ARIALMT_.TTF");
+		PDFUsedFont* font = pdfWriter.GetFontForFile(L"C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
 		if(!font)
 		{
 			status = eFailure;
-			wcout<<"Failed to create font object for ArialMT_.ttf\n";
+			wcout<<"Failed to create font object for arial.ttf\n";
 			break;
 		}
 

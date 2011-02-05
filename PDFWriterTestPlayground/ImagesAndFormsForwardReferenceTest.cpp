@@ -117,7 +117,7 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 
 
 		// Create image xobject  
-		PDFImageXObject* imageXObject  = pdfWriter.CreateImageXObjectFromJPGFile(L"C:\\PDFLibTests\\TestMaterials\\otherStage.JPG",imageXObjectID);
+		PDFImageXObject* imageXObject  = pdfWriter.CreateImageXObjectFromJPGFile(L"C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG",imageXObjectID);
 		if(!imageXObject)
 		{
 			wcout<<"failed to create image XObject from file\n";
@@ -126,7 +126,7 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 		}
 
 		// now create form xobject
-		PDFFormXObject*  formXObject = pdfWriter.CreateFormXObjectFromJPGFile(L"C:\\PDFLibTests\\TestMaterials\\otherStage.JPG",formXObjectID);
+		PDFFormXObject*  formXObject = pdfWriter.CreateFormXObjectFromJPGFile(L"C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG",formXObjectID);
 		if(!formXObject)
 		{
 			wcout<<"failed to create form XObject from file\n";
@@ -134,7 +134,7 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 			break;
 		}
 
-		PDFFormXObject* tiffFormXObject = pdfWriter.CreateFormXObjectFromTIFFFile(L"C:\\PDFLibTests\\TestMaterials\\pics-3.7.2\\jim___ah.tif",tiffFormXObjectID);
+		PDFFormXObject* tiffFormXObject = pdfWriter.CreateFormXObjectFromTIFFFile(L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\jim___ah.tif",tiffFormXObjectID);
 		if(!tiffFormXObject)
 		{
 			wcout<<"failed to create image form XObject from file, for file\n";
