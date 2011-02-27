@@ -54,8 +54,8 @@ bool WrittenFontTrueType::AddToANSIRepresentation(	const GlyphUnicodeMappingList
 
 	for(; it != inGlyphsList.end() && encodingResult.first; ++it)
 	{
-		// don't bother with characters of more than one unicode
-		if(it->mUnicodeValues.size() > 1)
+		// don't bother with characters of more (or less) than one unicode
+		if(it->mUnicodeValues.size() != 1)
 		{
 			encodingResult.first = false;
 		}
@@ -141,8 +141,8 @@ bool WrittenFontTrueType::AddToANSIRepresentation(	const GlyphUnicodeMappingList
 		it = itList->begin();
 		for(; it != itList->end() && encodingResult.first; ++it)
 		{
-			// don't bother with characters of more than one unicode
-			if(it->mUnicodeValues.size() > 1)
+			// don't bother with characters of more or less than one unicode
+			if(it->mUnicodeValues.size() != 1)
 			{
 				encodingResult.first = false;
 			}

@@ -540,7 +540,7 @@ void AbstractContentContext::Tf(const string& inFontName,double inFontSize)
 	mPrimitiveWriter.WriteKeyword("Tf");
 
 	mGraphicStack.GetCurrentState().mPlacedFontName = inFontName;
-	mGraphicStack.GetCurrentState().mFontSize = inFontSize;
+	mGraphicStack.GetCurrentState().mPlacedFontSize = inFontSize;
 }
 
 void AbstractContentContext::Tr(int inRenderingMode)
@@ -890,7 +890,8 @@ EStatusCode AbstractContentContext::WriteTextCommandWithDirectGlyphSelection(con
 	// Write the font reference (only if required)
 	std::string fontName = GetResourcesDictionary()->AddFontMapping(fontObjectID);
 
-	if(mGraphicStack.GetCurrentState().mPlacedFontName != fontName)
+	if(mGraphicStack.GetCurrentState().mPlacedFontName != fontName ||
+		mGraphicStack.GetCurrentState().mPlacedFontSize != mGraphicStack.GetCurrentState().mFontSize)
 		Tf(fontName,mGraphicStack.GetCurrentState().mFontSize);
 	
 	// Now write the string using the text command
@@ -968,7 +969,8 @@ EStatusCode AbstractContentContext::TJ(const GlyphUnicodeMappingListOrDoubleList
 	// Write the font reference (only if required)
 	std::string fontName = GetResourcesDictionary()->AddFontMapping(fontObjectID);
 
-	if(mGraphicStack.GetCurrentState().mPlacedFontName != fontName)
+	if(mGraphicStack.GetCurrentState().mPlacedFontName != fontName ||
+		mGraphicStack.GetCurrentState().mPlacedFontSize != mGraphicStack.GetCurrentState().mFontSize)
 		Tf(fontName,mGraphicStack.GetCurrentState().mFontSize);
 	
 	// Now write the string using the text command

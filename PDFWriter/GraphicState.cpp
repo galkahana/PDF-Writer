@@ -28,6 +28,7 @@ GraphicState::GraphicState(void)
 {
 	mFont = NULL;
 	mFontSize = 0;
+	mPlacedFontSize = 0;
 }
 
 GraphicState::GraphicState(const GraphicState& inGraphicState)

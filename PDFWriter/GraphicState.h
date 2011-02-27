@@ -37,6 +37,7 @@ public:
 	PDFUsedFont* mFont;
 	double mFontSize;
 	std::string mPlacedFontName;
+	double mPlacedFontSize;
 
 
 
