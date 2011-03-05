@@ -20,6 +20,8 @@
 */
 #pragma once
 
+#include "EStatusCode.h"
+
 class PDFPage;
 class DictionaryContext;
 class ObjectsContext;

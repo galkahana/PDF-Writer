@@ -76,4 +76,4 @@ public:
 protected:
 	DocumentContextExtenderAdapter(){}
 
-}
+};

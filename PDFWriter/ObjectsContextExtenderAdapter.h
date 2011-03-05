@@ -22,7 +22,7 @@
 
 #include "IObjectsContextExtender.h"
 
-class ObjectsContextExtenderAdapter
+class ObjectsContextExtenderAdapter : public IObjectsContextExtender
 {
 public:
 
