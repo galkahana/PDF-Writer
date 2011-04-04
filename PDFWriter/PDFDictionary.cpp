@@ -19,3 +19,15 @@ PDFNameToPDFObjectMap* PDFDictionary::operator ->()
 {
 	return &mValues;
 }
+
+PDFObject* PDFDictionary::GetObject(string inName)
+{
+	PDFName key(inName);
+	PDFNameToPDFObjectMap::iterator it = mValues.find(&key);
+
+	if(it == mValues.end())
+		return NULL;
+	else
+		return it->second;
+}
+

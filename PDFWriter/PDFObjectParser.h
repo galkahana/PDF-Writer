@@ -29,12 +29,14 @@ public:
 
 	PDFObject* ParseNewObject();
 
+	// calls this when changing underlying stream position
+	void ResetReadState();
+
 private:
 	PDFParserTokenizer mTokenizer;
 	StringList mTokenBuffer;
 	IByteReaderWithPosition* mStream;
 
-	void ResetReadState();
 	bool GetNextToken(string& outToken);
 	void SaveTokenToBuffer(string& inToken);
 
@@ -62,5 +64,7 @@ private:
 
 	bool IsDictionary(const string& inToken);
 	PDFObject* ParseDictionary();
+
+	bool IsComment(const string& inToken);
 
 };

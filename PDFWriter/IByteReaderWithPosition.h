@@ -36,6 +36,11 @@ public:
 	virtual void SetPosition(LongFilePositionType inOffsetFromStart) = 0;
 
 	/*
+		Set read position from end. measure is the number of bytes from end towards the beginning
+	*/
+	virtual void SetPositionFromEnd(LongFilePositionType inOffsetFromEnd) = 0;
+
+	/*
 		Get the current read position
 	*/
 	virtual LongFilePositionType GetCurrentPosition() = 0;

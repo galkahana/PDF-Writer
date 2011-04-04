@@ -143,6 +143,12 @@ void InputBufferedStream::SetPosition(LongFilePositionType inOffsetFromStart)
 	mSourceStream->SetPosition(inOffsetFromStart);
 }
 
+void InputBufferedStream::SetPositionFromEnd(LongFilePositionType inOffsetFromEnd)
+{
+	mLastAvailableIndex = mCurrentBufferIndex = mBuffer;
+	mSourceStream->SetPositionFromEnd(inOffsetFromEnd);	
+}
+
 IByteReaderWithPosition* InputBufferedStream::GetSourceStream()
 {
 	return mSourceStream;

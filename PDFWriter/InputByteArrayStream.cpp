@@ -73,7 +73,12 @@ void InputByteArrayStream::Skip(LongBufferSizeType inSkipSize)
 
 void InputByteArrayStream::SetPosition(LongFilePositionType inOffsetFromStart)
 {
-	mCurrentPosition = inOffsetFromStart > (LongFilePositionType)mArrayLength ? mArrayLength:inOffsetFromStart;
+	mCurrentPosition = inOffsetFromStart > mArrayLength ? mArrayLength:inOffsetFromStart;
+}
+
+void InputByteArrayStream::SetPositionFromEnd(LongFilePositionType inOffsetFromEnd)
+{
+	mCurrentPosition = inOffsetFromEnd > mArrayLength ? 0:(mArrayLength-inOffsetFromEnd);
 }
 
 LongFilePositionType InputByteArrayStream::GetCurrentPosition()

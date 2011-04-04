@@ -38,6 +38,7 @@ void PDFObjectParser::SetReadStream(IByteReaderWithPosition* inSourceStream)
 void PDFObjectParser::ResetReadState()
 {
 	mTokenBuffer.clear();
+	mTokenizer.ResetReadState();
 }
 
 /*
@@ -193,14 +194,19 @@ bool PDFObjectParser::GetNextToken(string& outToken)
 	}
 	else
 	{
-		BoolAndString tokenizerResult = mTokenizer.GetNextToken();
-		if(tokenizerResult.first)
+		// skip comments
+		BoolAndString tokenizerResult;
+
+		do
 		{
-			outToken = tokenizerResult.second;
-			return true;
-		}
-		else
-			return false;
+			tokenizerResult = mTokenizer.GetNextToken();
+			if(tokenizerResult.first && !IsComment(tokenizerResult.second))
+			{
+				outToken = tokenizerResult.second;
+				break;
+			}
+		}while(tokenizerResult.first);
+		return tokenizerResult.first;
 	}
 }
 
@@ -610,4 +616,10 @@ PDFObject* PDFObjectParser::ParseDictionary()
 		TRACE_LOG1("PDFObjectParser::ParseDictionary, failure to parse dictionary, didn't find end of array or failure to parse dictionary member object. token = %s",token);
 		return NULL;
 	}
+}
+
+static const char scCommentStart = '%';
+bool PDFObjectParser::IsComment(const string& inToken)
+{
+	return inToken.at(0) == scCommentStart;
 }

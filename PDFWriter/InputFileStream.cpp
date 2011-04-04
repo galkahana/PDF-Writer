@@ -103,3 +103,10 @@ LongFilePositionType InputFileStream::GetFileSize()
 	else
 		return 0;
 }
+
+void InputFileStream::SetPositionFromEnd(LongFilePositionType inOffsetFromEnd)
+{
+	if(mStream)
+		_fseeki64(mStream,-inOffsetFromEnd,SEEK_END);
+
+}

@@ -27,6 +27,8 @@ public:
 	// being lazy ;) just giving you some smart PTRs to the map itself
 	PDFNameToPDFObjectMap* operator ->();
 
+	PDFObject* GetObject(string inName);
+
 private:
 
 	PDFNameToPDFObjectMap mValues;

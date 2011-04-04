@@ -1251,6 +1251,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PDFParser.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PDFParser.h"
+				>
+			</File>
+			<File
 				RelativePath=".\PDFParserTokenizer.cpp"
 				>
 			</File>

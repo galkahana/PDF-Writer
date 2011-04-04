@@ -55,6 +55,12 @@ void InputStringBufferStream::SetPosition(LongFilePositionType inOffsetFromStart
 	mBufferToReadFrom->pubseekoff((long)inOffsetFromStart,ios_base::beg);
 }
 
+void InputStringBufferStream::SetPositionFromEnd(LongFilePositionType inOffsetFromEnd)
+{
+	mBufferToReadFrom->pubseekoff((long)inOffsetFromEnd,ios_base::end);
+}
+
+
 LongFilePositionType InputStringBufferStream::GetCurrentPosition()
 {
 	return mBufferToReadFrom->GetCurrentReadPosition();

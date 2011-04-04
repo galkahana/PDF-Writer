@@ -59,6 +59,9 @@ public:
 	// 6. Any othr entity separated from other by space or token delimeters (or eof)
 	BoolAndString GetNextToken();
 
+	// calls this when changing underlying stream position
+	void ResetReadState();
+
 private:
 
 	IByteReader* mStream;
@@ -66,7 +69,6 @@ private:
 	Byte mTokenBuffer;
 
 
-	void ResetReadState();
 	void SkipTillToken();
 
 	// failure in GetNextByteForToken actually marks a true read failure, if you checked end of file before calling it...
