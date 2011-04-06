@@ -21,13 +21,19 @@ typedef map<PDFName*,PDFObject*,PDFNameLess> PDFNameToPDFObjectMap;
 class PDFDictionary : public PDFObject
 {
 public:
+
+	enum EType
+	{
+		eType = ePDFObjectDictionary
+	};
+
 	PDFDictionary(void);
 	virtual ~PDFDictionary(void);
 
 	// being lazy ;) just giving you some smart PTRs to the map itself
 	PDFNameToPDFObjectMap* operator ->();
 
-	PDFObject* GetObject(string inName);
+	PDFObject* QueryDirectObject(string inName);
 
 private:
 

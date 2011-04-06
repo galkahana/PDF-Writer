@@ -1,6 +1,6 @@
 #include "PDFInteger.h"
 
-PDFInteger::PDFInteger(long inValue):PDFObject(ePDFObjectInteger)
+PDFInteger::PDFInteger(long inValue):PDFObject(eType)
 {
 	mValue = inValue;
 }

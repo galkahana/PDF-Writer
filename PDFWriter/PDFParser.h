@@ -4,11 +4,13 @@
 #include "PDFObjectParser.h"
 #include "IOBasicTypes.h"
 #include "ObjectsBasicTypes.h"
+#include "RefCountPtr.h"
 
 using namespace IOBasicTypes;
 
 class IByteReaderWithPosition;
 class PDFDictionary;
+class PDFArray;
 
 #define LINE_BUFFER_SIZE 1024
 
@@ -42,19 +44,28 @@ public:
 	PDFObjectParser& GetObjectParser();
 
 	// below become available after initial parsing
-
 	double GetPDFLevel();
+
+	// GetTrailer, not calling AddRef
 	PDFDictionary* GetTrailer();
-	// Creates a new object...so you should delete it later
+
+	// IMPORTANT! All non "Get" prefix methods below return an object after calling AddRef (or at least make sure reference is added)
+	// to handle refcount use the RefCountPtr object, or just make sure to call Release when you are done.
+	
+	// Creates a new object, use smart pointers to control ownership
 	PDFObject* ParseNewObject(ObjectIDType inObjectId);
 	ObjectIDType GetObjectsCount();
-	// parses object and checks that it's dictionary
-	PDFDictionary* ParseNewDictionaryObject(ObjectIDType inObjectId);
 
-
+	// Query a dictinary object, if indirect, go and fetch the indirect object and return it instead
+	// [if you want the direct dictionary value, use PDFDictionary::QueryDirectObject [will AddRef automatically]
+	PDFObject* QueryDictionaryObject(PDFDictionary* inDictionary,const string& inName);
+	
+	// Query an array object, if indirect, go and fetch the indirect object and return it instead
+	// [if you want the direct array value, use the PDFArray direct access to the vector [and use AddRef, cause it won't]
+	PDFObject* QueryArrayObject(PDFArray* inArray,unsigned long inIndex);
 
 	unsigned long GetPagesCount();
-	// don't be confused - number of pages here. returns the dictionary, and verifies that it's actually a page (via type)
+	// don't be confused - pass number of pages here. returns the dictionary, and verifies that it's actually a page (via type)
 	PDFDictionary* ParsePage(unsigned long inPageIndex);
 
 private:
@@ -70,7 +81,7 @@ private:
 
 	double mPDFLevel;
 	LongFilePositionType mLastXrefPosition;
-	PDFDictionary* mTrailer;
+	RefCountPtr<PDFDictionary> mTrailer;
 	ObjectIDType mXrefSize;
 	XrefEntryInput* mXrefTable;
 	unsigned long mPagesCount;

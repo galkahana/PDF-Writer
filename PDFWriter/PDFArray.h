@@ -10,6 +10,12 @@ typedef vector<PDFObject*> PDFObjectVector;
 class PDFArray : public PDFObject
 {
 public:
+
+	enum EType
+	{
+		eType = ePDFObjectArray
+	};
+
 	PDFArray(void);
 	virtual ~PDFArray(void);
 	

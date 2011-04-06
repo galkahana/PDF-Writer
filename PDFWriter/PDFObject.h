@@ -1,9 +1,12 @@
 #pragma once
+
+#include "RefCountObject.h"
+
 #include <string>
 
 using namespace std;
 
-enum ePDFObjectType
+enum EPDFObjectType
 {
 	ePDFObjectBoolean,
 	ePDFObjectLiteralString,
@@ -35,14 +38,15 @@ static const char* scPDFObjectTypeLabel[] =
 	"Symbol"
 };
 
-class PDFObject
+class PDFObject : public RefCountObject
 {
 public:
-	PDFObject(ePDFObjectType inType);
+	PDFObject(EPDFObjectType inType); 
+	PDFObject(int inType); 
 	virtual ~PDFObject(void);
 
-	ePDFObjectType GetType();
+	EPDFObjectType GetType();
 
 private:
-	ePDFObjectType mType;
+	EPDFObjectType mType;
 };

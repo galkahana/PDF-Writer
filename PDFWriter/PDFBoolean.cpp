@@ -1,6 +1,6 @@
 #include "PDFBoolean.h"
 
-PDFBoolean::PDFBoolean(bool inValue):PDFObject(ePDFObjectBoolean)
+PDFBoolean::PDFBoolean(bool inValue):PDFObject(eType)
 {
 	mValue = inValue;
 }

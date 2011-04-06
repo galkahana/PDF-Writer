@@ -1,6 +1,6 @@
 #include "PDFHexString.h"
 
-PDFHexString::PDFHexString(const string& inValue):PDFObject(ePDFObjectHexString)
+PDFHexString::PDFHexString(const string& inValue):PDFObject(eType)
 {
 	mValue = inValue;
 }

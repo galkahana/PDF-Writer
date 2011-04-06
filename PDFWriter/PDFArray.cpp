@@ -1,6 +1,6 @@
 #include "PDFArray.h"
 
-PDFArray::PDFArray(void) : PDFObject(ePDFObjectArray)
+PDFArray::PDFArray(void) : PDFObject(eType)
 {
 }
 
@@ -9,7 +9,7 @@ PDFArray::~PDFArray(void)
 	PDFObjectVector::iterator it = mValues.begin();
 
 	for(; it != mValues.end(); ++it)
-		delete *it;
+		(*it)->Release();
 }
 
 PDFObjectVector* PDFArray::operator ->()

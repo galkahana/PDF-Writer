@@ -8,6 +8,12 @@ using namespace std;
 class PDFName : public PDFObject
 {
 public:
+
+	enum EType
+	{
+		eType = ePDFObjectName
+	};
+
 	// value must be the already interpreted name - no initial slash, and all special charachters (with # definition) interpreted
 	PDFName(const string& inValue);
 	virtual ~PDFName(void);

@@ -1,6 +1,6 @@
 #include "PDFName.h"
 
-PDFName::PDFName(const string& inValue) : PDFObject(ePDFObjectName)
+PDFName::PDFName(const string& inValue) : PDFObject(eType)
 {
 	mValue = inValue;
 }

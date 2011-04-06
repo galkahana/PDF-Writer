@@ -486,6 +486,18 @@
 					>
 				</File>
 				<File
+					RelativePath=".\RefCountObject.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\RefCountObject.h"
+					>
+				</File>
+				<File
+					RelativePath=".\RefCountPtr.h"
+					>
+				</File>
+				<File
 					RelativePath=".\Singleton.h"
 					>
 				</File>
@@ -1347,6 +1359,10 @@
 				</File>
 				<File
 					RelativePath=".\PDFObject.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PDFObjectCast.h"
 					>
 				</File>
 				<File

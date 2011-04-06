@@ -1,6 +1,6 @@
 #include "PDFSymbol.h"
 
-PDFSymbol::PDFSymbol(const string& inSymbol) : PDFObject(ePDFObjectSymbol)
+PDFSymbol::PDFSymbol(const string& inSymbol) : PDFObject(eType)
 {
 	mValue = inSymbol;
 }

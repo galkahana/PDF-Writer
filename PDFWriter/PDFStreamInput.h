@@ -9,6 +9,11 @@ using namespace IOBasicTypes;
 class PDFStreamInput : public PDFObject
 {
 public:
+	enum EType
+	{
+		eType = ePDFObjectStream
+	};
+
 	PDFStreamInput(PDFDictionary* inStreamDictionary,LongFilePositionType inStreamContentStart);
 	virtual ~PDFStreamInput(void);
 

@@ -1,6 +1,6 @@
 #include "PDFReal.h"
 
-PDFReal::PDFReal(double inValue):PDFObject(ePDFObjectReal)
+PDFReal::PDFReal(double inValue):PDFObject(eType)
 {
 	mValue = inValue;
 }

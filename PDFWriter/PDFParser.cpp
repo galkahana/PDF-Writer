@@ -11,6 +11,8 @@
 #include "PDFIndirectObjectReference.h"
 #include "PDFName.h"
 #include "PDFArray.h"
+#include "RefCountPtr.h"
+#include "PDFObjectCast.h"
 
 PDFParser::PDFParser(void)
 {
@@ -27,7 +29,6 @@ PDFParser::~PDFParser(void)
 
 void PDFParser::ResetParser()
 {
-	delete mTrailer;
 	mTrailer = NULL;
 	delete[] mXrefTable;
 	mXrefTable = NULL;
@@ -241,13 +242,12 @@ static const string scStartxref = "startxref";
 EStatusCode PDFParser::ParseLastXrefPosition()
 {
 	EStatusCode status = eSuccess;
-	PDFObject* xrefPosition = NULL;
-	PDFObject* startxRef = NULL;
 	
 	// next two lines should be the xref position and then "startxref"
 	
 	do
 	{
+
 		// find and read xref position
 		if(!GoBackTillToken())
 		{
@@ -260,14 +260,15 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 		mStream->SetPosition(GetCurrentPositionFromEnd());
 		
 		mObjectParser.ResetReadState();
-		xrefPosition = mObjectParser.ParseNewObject();
-		if(!xrefPosition || xrefPosition->GetType() != ePDFObjectInteger)
+		PDFObjectCastPtr<PDFInteger> xrefPosition(mObjectParser.ParseNewObject());
+		if(!xrefPosition)
 		{
 			status = eFailure;
 			TRACE_LOG("PDFParser::ParseXrefPosition, syntax error in reading xref position");
 			break;
 		}
-		mLastXrefPosition = (LongFilePositionType)((PDFInteger*)xrefPosition)->GetValue();
+
+		mLastXrefPosition = (LongFilePositionType)xrefPosition->GetValue();
 
 		// find and read startxref keyword
 		if(!GoBackTillToken())
@@ -281,8 +282,9 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 		mStream->SetPosition(GetCurrentPositionFromEnd());
 		
 		mObjectParser.ResetReadState();
-		startxRef = mObjectParser.ParseNewObject();
-		if(!startxRef || startxRef->GetType() != ePDFObjectSymbol || ((PDFSymbol*)startxRef)->GetValue() != scStartxref)
+		PDFObjectCastPtr<PDFSymbol> startxRef(mObjectParser.ParseNewObject());
+
+		if(!startxRef || startxRef->GetValue() != scStartxref)
 		{
 			status = eFailure;
 			TRACE_LOG("PDFParser::ParseXrefPosition, syntax error in reading xref position");
@@ -291,8 +293,6 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 
 	}while(false);
 
-	delete xrefPosition;
-	delete startxRef;
 	return status;
 
 }
@@ -386,7 +386,7 @@ EStatusCode PDFParser::ParseTrailerDictionary()
 		}
 
 		// k. now that all is well, just parse the damn dictionary, which is actually...the easiest part.
-		PDFObject* dictionaryObject = mObjectParser.ParseNewObject();
+		PDFObjectCastPtr<PDFDictionary> dictionaryObject(mObjectParser.ParseNewObject());
 		if(!dictionaryObject)
 		{
 			status = eFailure;
@@ -394,16 +394,7 @@ EStatusCode PDFParser::ParseTrailerDictionary()
 			break;
 		}
 
-		if(dictionaryObject->GetType() != ePDFObjectDictionary)
-		{
-			status = eFailure;
-			TRACE_LOG1("PDFParser::ParseTrailerDictionary, unexpected trailer type. expected dictinary and received type = %s",
-					scPDFObjectTypeLabel[dictionaryObject->GetType()]);
-			delete dictionaryObject;
-			break;
-		}
-
-		mTrailer = (PDFDictionary*)dictionaryObject;
+		mTrailer = dictionaryObject;
 	}while(false);
 
 	return status;
@@ -434,30 +425,17 @@ EStatusCode PDFParser::BuildXrefTable()
 
 EStatusCode PDFParser::DetermineXrefSize()
 {
-	// First, get the xref size from the trailer
-	PDFName xrefSize("Size");
+	PDFObjectCastPtr<PDFInteger> aSize(mTrailer->QueryDirectObject("Size"));
 
-	PDFNameToPDFObjectMap::iterator it = (*mTrailer)->find(&xrefSize);
-	PDFObject* sizeObject;
-
-	if(it == (*mTrailer)->end())
+	if(!aSize)
 	{
-		TRACE_LOG("PDFParser::DetermineXrefSize, Trailer does not contain size entry.");
 		return eFailure;
 	}
-
-	sizeObject = it->second;
-		
-	if(sizeObject->GetType() != ePDFObjectInteger)
+	else
 	{
-		TRACE_LOG1("PDFParser::DetermineXrefSize, unexpected trailer size entry type. expected integer and received type = %s",
-				scPDFObjectTypeLabel[sizeObject->GetType()]);
-		delete sizeObject;
-		return eFailure;
+		mXrefSize = (ObjectIDType)aSize->GetValue();
+		return eSuccess;
 	}
-
-	mXrefSize = (ObjectIDType)((PDFInteger*)sizeObject)->GetValue();
-	return eSuccess;
 }
 
 EStatusCode PDFParser::InitializeXref()
@@ -548,7 +526,7 @@ EStatusCode PDFParser::ParseXref()
 
 PDFDictionary* PDFParser::GetTrailer()
 {
-	return mTrailer;
+	return mTrailer.GetPtr();
 }
 
 double PDFParser::GetPDFLevel()
@@ -578,11 +556,11 @@ ObjectIDType PDFParser::GetObjectsCount()
 static const string scObj = "obj";
 PDFObject* PDFParser::ParseExistingInDirectObject(ObjectIDType inObjectID)
 {
+	PDFObject* readObject = NULL;
+
 	mStream->SetPosition(mXrefTable[inObjectID].mObjectPosition);
 	mObjectParser.ResetReadState();
-	EStatusCode status = eSuccess;
 
-	PDFObject* readObject;
 
 	do
 	{
@@ -590,124 +568,79 @@ PDFObject* PDFParser::ParseExistingInDirectObject(ObjectIDType inObjectID)
 		// verify that it's good and if so continue to parse the object itself
 
 		// verify object ID
-		readObject = mObjectParser.ParseNewObject();
-		if(!readObject)
+		PDFObjectCastPtr<PDFInteger> idObject(mObjectParser.ParseNewObject());
+
+		if(!idObject)
 		{
 			TRACE_LOG("PDFParser::ParseExistingInDirectObject, failed to read object declaration, ID");
-			status = eFailure;
 			break;
 		}
 
-		if(readObject->GetType() != ePDFObjectInteger)
-		{
-			TRACE_LOG1("PDFParser::ParseExistingInDirectObject, failed to read object declaration, ID, expected integer, found %s",scPDFObjectTypeLabel[readObject->GetType()]);
-			status = eFailure;
-			break;
-		}
-
-		if(((PDFInteger*)readObject)->GetValue() != inObjectID)
+		if(idObject->GetValue() != inObjectID)
 		{
 			TRACE_LOG2("PDFParser::ParseExistingInDirectObject, failed to read object declaration, exepected ID = %ld, found %ld",
-				inObjectID,((PDFInteger*)readObject)->GetValue());
-			status = eFailure;
+				inObjectID,idObject->GetValue());
 			break;
 		}
-
-		delete readObject;
 
 		// verify object Version
-		readObject = mObjectParser.ParseNewObject();
-		if(!readObject)
+		PDFObjectCastPtr<PDFInteger> versionObject(mObjectParser.ParseNewObject());
+
+		if(!versionObject)
 		{
 			TRACE_LOG("PDFParser::ParseExistingInDirectObject, failed to read object declaration, Version");
-			status = eFailure;
 			break;
 		}
 
-		if(readObject->GetType() != ePDFObjectInteger)
-		{
-			TRACE_LOG1("PDFParser::ParseExistingInDirectObject, failed to read object declaration, Version, expected integer, found %s",scPDFObjectTypeLabel[readObject->GetType()]);
-			status = eFailure;
-			break;
-		}
-
-		if(((PDFInteger*)readObject)->GetValue() != mXrefTable[inObjectID].mRivision)
+		if(versionObject->GetValue() != mXrefTable[inObjectID].mRivision)
 		{
 			TRACE_LOG2("PDFParser::ParseExistingInDirectObject, failed to read object declaration, exepected version = %ld, found %ld",
-				mXrefTable[inObjectID].mRivision,((PDFInteger*)readObject)->GetValue());
-			status = eFailure;
+				mXrefTable[inObjectID].mRivision,versionObject->GetValue());
 			break;
 		}
-
-		delete readObject;
 
 		// now the obj keyword
-		readObject = mObjectParser.ParseNewObject();
-		if(!readObject)
+		PDFObjectCastPtr<PDFSymbol> objKeyword(mObjectParser.ParseNewObject());
+
+		if(!objKeyword)
 		{
 			TRACE_LOG("PDFParser::ParseExistingInDirectObject, failed to read object declaration, obj keyword");
-			status = eFailure;
 			break;
 		}
 
-		if(readObject->GetType() != ePDFObjectSymbol)
-		{
-			TRACE_LOG1("PDFParser::ParseExistingInDirectObject, failed to read object declaration, obj keyword, expected symbol, found %s",scPDFObjectTypeLabel[readObject->GetType()]);
-			status = eFailure;
-			break;
-		}
-
-		if(((PDFSymbol*)readObject)->GetValue() != scObj)
+		if(objKeyword->GetValue() != scObj)
 		{
 			TRACE_LOG1("PDFParser::ParseExistingInDirectObject, failed to read object declaration, expected obj keyword found %s",
-				((PDFSymbol*)readObject)->GetValue().c_str());
-			status = eFailure;
+				objKeyword->GetValue().c_str());
 			break;
 		}
 
-		delete readObject;
-
-		// k..now for the object, finally
 		readObject = mObjectParser.ParseNewObject();
-
-		// and that's it
 
 	}while(false);
 
-	if(status != eSuccess)
-	{
-		delete readObject;
-		return NULL;
-	}
-	else
-		return readObject;
+	return readObject;
 }
 
 EStatusCode PDFParser::ParsePagesObjectIDs()
 {
 	EStatusCode status = eSuccess;
-	PDFObject* catalogReference = NULL;
-	PDFDictionary* catalog = NULL;
-	PDFObject* pagesReference = NULL;
-	PDFDictionary* pages = NULL;
-	PDFObject* totalPagesCount = NULL;
-	PDFObject* totalPagesObject = NULL;
 
 	// m.k plan is to look for the catalog, then find the pages, then initialize the array to the count at the root, and then just recursively loop
 	// the pages by order of pages and fill up the IDs. easy.
 	
 	do
 	{
-		// get catalogue
-		catalogReference = mTrailer->GetObject("Root");
-		if(!catalogReference || catalogReference->GetType() != ePDFObjectIndirectObjectReference)
+		// get catalogue, verify indirect reference
+		PDFObjectCastPtr<PDFIndirectObjectReference> catalogReference(mTrailer->QueryDirectObject("Root"));
+		if(!catalogReference)
 		{
 			TRACE_LOG("PDFParser::ParsePagesObjectIDs, failed to read catalog reference in trailer");
 			status = eFailure;
 			break;
 		}
 
-		catalog = ParseNewDictionaryObject(((PDFIndirectObjectReference*)catalogReference)->mObjectID);
+		PDFObjectCastPtr<PDFDictionary> catalog(ParseNewObject(catalogReference->mObjectID));
 		if(!catalog)
 		{
 			TRACE_LOG("PDFParser::ParsePagesObjectIDs, failed to read catalog");
@@ -715,16 +648,16 @@ EStatusCode PDFParser::ParsePagesObjectIDs()
 			break;
 		}
 
-		// get pages
-		pagesReference = mTrailer->GetObject("Pages");
-		if(!pagesReference || pagesReference->GetType() != ePDFObjectIndirectObjectReference)
+		// get pages, verify indirect reference
+		PDFObjectCastPtr<PDFIndirectObjectReference> pagesReference(catalog->QueryDirectObject("Pages"));
+		if(!pagesReference)
 		{
 			TRACE_LOG("PDFParser::ParsePagesObjectIDs, failed to read pages reference in catalog");
 			status = eFailure;
 			break;
 		}
 
-		pages = ParseNewDictionaryObject(((PDFIndirectObjectReference*)pagesReference)->mObjectID);
+		PDFObjectCastPtr<PDFDictionary> pages(ParseNewObject(pagesReference->mObjectID));
 		if(!pages)
 		{
 			TRACE_LOG("PDFParser::ParsePagesObjectIDs, failed to read pages");
@@ -732,61 +665,23 @@ EStatusCode PDFParser::ParsePagesObjectIDs()
 			break;
 		}
 
-		totalPagesCount = pages->GetObject("Count");
+		PDFObjectCastPtr<PDFInteger> totalPagesCount(QueryDictionaryObject(pages.GetPtr(),"Count"));
 		if(!totalPagesCount)
 		{
 			TRACE_LOG("PDFParser::ParsePagesObjectIDs, failed to read pages count");
 			status = eFailure;
 			break;
 		}
-		if(totalPagesCount->GetType() == ePDFObjectIndirectObjectReference)
-		{
-			totalPagesObject = ParseNewObject(((PDFIndirectObjectReference*)totalPagesCount)->mObjectID);
-			if(!totalPagesObject)
-			{
-				TRACE_LOG("PDFParser::ParsePagesObjectIDs, cant find total pages count object");
-				status = eFailure;
-				break;
-			}
-			totalPagesCount = totalPagesObject;
-		}
-
-		if(totalPagesCount->GetType() != ePDFObjectInteger)
-		{
-			TRACE_LOG1("PDFParser::ParsePagesObjectIDs, pages count is not integer, is %s",scPDFObjectTypeLabel[totalPagesCount->GetType()]);
-			status = eFailure;
-			break;
-		}
-
-		mPagesCount = ((PDFInteger*)totalPagesCount)->GetValue();
+	
+		mPagesCount = totalPagesCount->GetValue();
 		mPagesObjectIDs = new ObjectIDType[mPagesCount];
 
 		// now iterate through pages objects, and fill up the IDs [don't really need the object ID for the root pages tree...but whatever
-		status = ParsePagesIDs(pages,((PDFIndirectObjectReference*)pagesReference)->mObjectID);
+		status = ParsePagesIDs(pages.GetPtr(),pagesReference->mObjectID);
 
 	}while(false);
 
-	delete catalog;
-	delete pages;
-	delete totalPagesObject;
-
 	return status;
-}
-
-PDFDictionary* PDFParser::ParseNewDictionaryObject(ObjectIDType inObjectID)
-{
-	PDFObject* anObject = ParseNewObject(inObjectID);
-
-	if(anObject->GetType() == ePDFObjectDictionary)
-	{
-		return (PDFDictionary*)anObject;
-	}
-	else
-	{
-		TRACE_LOG1("PDFParser::ParseNewDictionaryObject, expected dictionary, found %s",scPDFObjectTypeLabel[anObject->GetType()]);
-		delete anObject;
-		return NULL;
-	}
 }
 
 EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID)
@@ -808,16 +703,15 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 
 	do
 	{
-		PDFObject* objectType = inPageNode->GetObject("Type");
-		if(!objectType || objectType->GetType() != ePDFObjectName)
+		PDFObjectCastPtr<PDFName> objectType(inPageNode->QueryDirectObject("Type"));
+		if(!objectType)
 		{
 			TRACE_LOG("PDFParser::ParsePagesIDs, can't read object type");
 			status = eFailure;
 			break;
 		}
 		
-		string objectTypeName = ((PDFName*)objectType)->GetValue();
-		if(scPage == objectTypeName)
+		if(scPage == objectType->GetValue())
 		{
 			// a Page
 			if(ioCurrentPageIndex >= mPagesCount)
@@ -830,21 +724,20 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 			mPagesObjectIDs[ioCurrentPageIndex] = inNodeObjectID;
 			++ioCurrentPageIndex;
 		}
-		else if(scPages == objectTypeName)
+		else if(scPages == objectType->GetValue())
 		{
 			// a Page tree node
-			PDFObject* kidsObject = inPageNode->GetObject("Kids");
-			if(!kidsObject || kidsObject->GetType() != ePDFObjectArray)
+			PDFObjectCastPtr<PDFArray> kidsObject(inPageNode->QueryDirectObject("Kids"));
+			if(!kidsObject)
 			{
 				TRACE_LOG("PDFParser::ParsePagesIDs, unable to find page kids array");
 				status = eFailure;
 				break;
 			}
-			PDFArray* kidsArray = (PDFArray*)kidsObject;
 
-			PDFObjectVector::iterator it = (*kidsArray)->begin();
+			PDFObjectVector::iterator it = (*kidsObject.GetPtr())->begin();
 			
-			for(; it != (*kidsArray)->end() && eSuccess == status; ++it)
+			for(; it != (*kidsObject.GetPtr())->end() && eSuccess == status; ++it)
 			{
 				if((*it)->GetType() != ePDFObjectIndirectObjectReference)
 				{
@@ -853,7 +746,7 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 					break;
 				}
 
-				PDFDictionary* pageNodeObject = ParseNewDictionaryObject(((PDFIndirectObjectReference*)*it)->mObjectID);
+				PDFObjectCastPtr<PDFDictionary> pageNodeObject(ParseNewObject(((PDFIndirectObjectReference*)*it)->mObjectID));
 				if(!pageNodeObject)
 				{
 					TRACE_LOG("PDFParser::ParsePagesIDs, unable to parse page node object from kids reference");
@@ -861,13 +754,12 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 					break;
 				}
 
-				status = ParsePagesIDs(pageNodeObject,((PDFIndirectObjectReference*)*it)->mObjectID,ioCurrentPageIndex);
-				delete pageNodeObject;
+				status = ParsePagesIDs(pageNodeObject.GetPtr(),((PDFIndirectObjectReference*)*it)->mObjectID,ioCurrentPageIndex);
 			}
 		}
 		else 
 		{
-			TRACE_LOG1("PDFParser::ParsePagesIDs, unexpected object type. should be either Page or Pages, found %s",objectTypeName.c_str());
+			TRACE_LOG1("PDFParser::ParsePagesIDs, unexpected object type. should be either Page or Pages, found %s",objectType->GetValue().c_str());
 			status = eFailure;
 			break;
 		}
@@ -886,29 +778,64 @@ PDFDictionary* PDFParser::ParsePage(unsigned long inPageIndex)
 	if(mPagesCount <= inPageIndex)
 		return NULL;
 
-	PDFDictionary* pageObject = ParseNewDictionaryObject(inPageIndex);
+	PDFObjectCastPtr<PDFDictionary> pageObject(ParseNewObject(mPagesObjectIDs[inPageIndex]));
 
 	if(!pageObject)
 	{
-		TRACE_LOG("PDFParser::ParsePage, couldn't find page object");
+		TRACE_LOG1("PDFParser::ParsePage, couldn't find page object for index %ld",inPageIndex);
 		return NULL;
 	}
 
-	PDFObject* objectType = pageObject->GetObject("Type");
-	if(!pageObject || pageObject->GetType() != ePDFObjectName)
+	PDFObjectCastPtr<PDFName> objectType(pageObject->QueryDirectObject("Type"));
+
+	if(scPage == objectType->GetValue())
 	{
-		TRACE_LOG("PDFParser::ParsePage, can't read object type");
-		return NULL;
-	}
-	
-	string objectTypeName = ((PDFName*)objectType)->GetValue();
-	if(scPage == objectTypeName)
-	{
-		return pageObject;
+		pageObject->AddRef();
+		return pageObject.GetPtr();
 	}
 	else
 	{
-		delete pageObject;
+		TRACE_LOG1("PDFParser::ParsePage, page object listed in page array for %ld is actually not a page",inPageIndex);
 		return NULL;
 	}
 }
+
+PDFObject* PDFParser::QueryDictionaryObject(PDFDictionary* inDictionary,const string& inName)
+{
+	RefCountPtr<PDFObject> anObject(inDictionary->QueryDirectObject(inName));
+
+	if(anObject.GetPtr() == NULL)
+		return NULL;
+
+	if(anObject->GetType() == ePDFObjectIndirectObjectReference)
+	{
+		PDFObject* theActualObject = ParseNewObject(((PDFIndirectObjectReference*)anObject.GetPtr())->mObjectID);
+		return theActualObject;
+	}
+	else
+	{
+		anObject->AddRef(); // adding ref to increase owners
+		return anObject.GetPtr();
+	}
+}
+
+PDFObject* PDFParser::QueryArrayObject(PDFArray* inArray,unsigned long inIndex)
+{
+	if((*inArray)->size() <= inIndex)
+		return NULL;
+
+	PDFObject* anObject((*inArray)->at(inIndex));
+
+	if(anObject->GetType() == ePDFObjectIndirectObjectReference)
+	{
+		PDFObject* theActualObject = ParseNewObject(((PDFIndirectObjectReference*)anObject)->mObjectID);
+		return theActualObject;
+	}
+	else
+	{
+		anObject->AddRef(); // adding ref to increase owners
+		return anObject;
+	}
+
+}
+

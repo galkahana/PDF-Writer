@@ -1,15 +1,21 @@
 #include "PDFObject.h"
 
-PDFObject::PDFObject(ePDFObjectType inType)
+PDFObject::PDFObject(EPDFObjectType inType)
 {
 	mType = inType;
 }
+
+PDFObject::PDFObject(int inType)
+{
+	mType = (EPDFObjectType)inType;
+}
+
 
 PDFObject::~PDFObject(void)
 {
 }
 
-ePDFObjectType PDFObject::GetType()
+EPDFObjectType PDFObject::GetType()
 {
 	return mType;
 }

@@ -1,6 +1,6 @@
 #include "PDFLiteralString.h"
 
-PDFLiteralString::PDFLiteralString(const string& inValue):PDFObject(ePDFObjectLiteralString)
+PDFLiteralString::PDFLiteralString(const string& inValue):PDFObject(eType)
 {
 	mValue = inValue;
 }

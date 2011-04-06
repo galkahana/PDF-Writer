@@ -6,6 +6,12 @@
 class PDFIndirectObjectReference : public PDFObject
 {
 public:
+
+	enum EType
+	{
+		eType = ePDFObjectIndirectObjectReference
+	};
+
 	PDFIndirectObjectReference(ObjectIDType inObjectID,unsigned long inVersion);
 	virtual ~PDFIndirectObjectReference(void);
 

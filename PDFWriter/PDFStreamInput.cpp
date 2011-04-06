@@ -2,7 +2,7 @@
 #include "PDFDictionary.h"
 #include "PDFName.h"
 
-PDFStreamInput::PDFStreamInput(PDFDictionary* inStreamDictionary,LongFilePositionType inStreamContentStart) : PDFObject(ePDFObjectStream)
+PDFStreamInput::PDFStreamInput(PDFDictionary* inStreamDictionary,LongFilePositionType inStreamContentStart) : PDFObject(eType)
 {
 	mDictionary = inStreamDictionary;
 	mStreamContentStart = inStreamContentStart;
@@ -10,7 +10,7 @@ PDFStreamInput::PDFStreamInput(PDFDictionary* inStreamDictionary,LongFilePositio
 
 PDFStreamInput::~PDFStreamInput(void)
 {
-	delete mDictionary;
+	mDictionary->Release();
 }
 
 PDFDictionary* PDFStreamInput::GetStreamDictionary()

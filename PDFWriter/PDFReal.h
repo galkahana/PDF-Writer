@@ -4,6 +4,12 @@
 class PDFReal : public PDFObject
 {
 public:
+
+	enum EType
+	{
+		eType = ePDFObjectReal
+	};
+
 	PDFReal(double inValue);
 	virtual ~PDFReal(void);
 

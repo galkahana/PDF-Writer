@@ -4,6 +4,12 @@
 class PDFInteger : public PDFObject
 {
 public:
+
+	enum EType
+	{
+		eType = ePDFObjectSymbol
+	};
+
 	PDFInteger(long inValue);
 	virtual ~PDFInteger(void);
 

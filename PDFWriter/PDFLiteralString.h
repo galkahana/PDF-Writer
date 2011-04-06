@@ -9,6 +9,12 @@ using namespace std;
 class PDFLiteralString : public PDFObject
 {
 public:
+
+	enum EType
+	{
+		eType = ePDFObjectLiteralString
+	};
+
 	// Value is the interpreted string (no enclosing paranthesis and escaped sequances as the result values)
 	PDFLiteralString(const string& inValue);
 	virtual ~PDFLiteralString(void);

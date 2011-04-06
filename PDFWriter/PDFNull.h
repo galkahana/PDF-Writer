@@ -4,6 +4,11 @@
 class PDFNull : public PDFObject
 {
 public:
+	enum EType
+	{
+		eType = ePDFObjectNull
+	};
+
 	PDFNull(void);
 	virtual ~PDFNull(void);
 };
