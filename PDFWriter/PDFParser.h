@@ -5,11 +5,11 @@
 #include "IOBasicTypes.h"
 #include "ObjectsBasicTypes.h"
 #include "RefCountPtr.h"
+#include "PDFDictionary.h"
 
 using namespace IOBasicTypes;
 
 class IByteReaderWithPosition;
-class PDFDictionary;
 class PDFArray;
 
 #define LINE_BUFFER_SIZE 1024

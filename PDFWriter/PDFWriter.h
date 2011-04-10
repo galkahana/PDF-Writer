@@ -31,6 +31,7 @@
 #include "ObjectsContext.h"
 #include "PDFRectangle.h"
 #include "TIFFUsageParameters.h"
+#include "PDFEmbedParameterTypes.h"
 
 #include <string>
 
@@ -112,6 +113,12 @@ public:
 	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const wstring& inTIFFFilePath,
 													ObjectIDType inFormXObjectID,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
+
+	// PDF 
+	EStatusCodeAndPDFFormXObjectList CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+																const PDFPageRange& inPageRange,
+																EPDFPageBox inPageBoxToUseAsFormBox,
+																const double* inTransformationMatrix = NULL);
 
 	// fonts [text]
 	PDFUsedFont* GetFontForFile(const wstring& inFontFilePath);

@@ -1255,6 +1255,18 @@
 			Name="PDF Embedding"
 			>
 			<File
+				RelativePath=".\PDFDocumentHandler.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PDFDocumentHandler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PDFEmbedParameterTypes.h"
+				>
+			</File>
+			<File
 				RelativePath=".\PDFObjectParser.cpp"
 				>
 			</File>

@@ -42,7 +42,10 @@ public:
 	
 	void WriteIntegerValue(long long inValue);
 	void WriteLiteralStringValue(const string& inValue);
+	void WriteHexStringValue(const string& inValue);
+	void WriteNullValue();
 	void WriteNameValue(const string& inValue);
+	void WriteKeywordValue(const string& inValue);
 	void WriteObjectReferenceValue(ObjectIDType inObjectReference);
 	void WriteRectangleValue(const PDFRectangle& inRectangle);
 	void WriteDoubleValue(double inValue);

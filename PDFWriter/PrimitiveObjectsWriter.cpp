@@ -57,8 +57,50 @@ void PrimitiveObjectsWriter::WriteKeyword(const string& inKeyword)
 static const IOBasicTypes::Byte scSlash[1] = {'/'};
 void PrimitiveObjectsWriter::WriteName(const string& inName,ETokenSeparator inSeparate)
 {
+/*
+from the pdf reference:
+This syntax is required to represent any of the delimiter or white-space characters or the number sign character itself; 
+it is recommended but not required for characters whose codes are outside the range 33 (!) to 126 (~).
+*/
+
 	mStreamForWriting->Write(scSlash,1);
-	mStreamForWriting->Write((const IOBasicTypes::Byte *)inName.c_str(),inName.size());
+
+	IOBasicTypes::Byte buffer[5];
+	string::const_iterator it = inName.begin();
+	for(;it != inName.end();++it)
+	{
+		Byte aValue = *it;
+
+		if(aValue < 33 || aValue > 126)
+		{
+			SAFE_SPRINTF_1((char*)buffer,5,"#%d",aValue); 
+			mStreamForWriting->Write(buffer,strlen((char*)buffer));		
+		}
+		else
+		{
+			buffer[0] = aValue;
+			mStreamForWriting->Write(buffer,1);
+		}
+		
+		if(*it == '(' || *it == ')' || *it == '\\')
+		{
+			buffer[0] = '\\';
+			buffer[1] = *it;
+			mStreamForWriting->Write(buffer,2);
+		}
+		else if (*it < 32 || *it > 126) // grabbing all nonprintable chars
+		{
+			SAFE_SPRINTF_1((char*)buffer,5,"\\%03o",*it); 
+			mStreamForWriting->Write(buffer,4);		
+		}
+		else
+		{
+			buffer[0] = *it;
+			mStreamForWriting->Write(buffer,1);
+		}
+		
+	}
+
 	WriteTokenSeparator(inSeparate);
 }
 
@@ -90,20 +132,21 @@ void PrimitiveObjectsWriter::WriteLiteralString(const string& inString,ETokenSep
 	string::const_iterator it = inString.begin();
 	for(;it != inString.end();++it)
 	{
-		if(*it == '(' || *it == ')' || *it == '\\')
+		Byte aValue = *it;
+		if(aValue == '(' || aValue == ')' || aValue == '\\')
 		{
 			buffer[0] = '\\';
-			buffer[1] = *it;
+			buffer[1] = aValue;
 			mStreamForWriting->Write(buffer,2);
 		}
-		else if (*it < 32 || *it > 126) // grabbing all nonprintable chars
+		else if (aValue < 32 || aValue > 126) // grabbing all nonprintable chars
 		{
-			SAFE_SPRINTF_1((char*)buffer,5,"\\%03o",*it); 
+			SAFE_SPRINTF_1((char*)buffer,5,"\\%03o",aValue); 
 			mStreamForWriting->Write(buffer,4);		
 		}
 		else
 		{
-			buffer[0] = *it;
+			buffer[0] = aValue;
 			mStreamForWriting->Write(buffer,1);
 		}
 		
@@ -147,6 +190,13 @@ void PrimitiveObjectsWriter::WriteBoolean(bool inBoolean,ETokenSeparator inSepar
 		mStreamForWriting->Write(scTrue,4);
 	else
 		mStreamForWriting->Write(scFalse,5);
+	WriteTokenSeparator(inSeparate);
+}
+
+static const IOBasicTypes::Byte scNull[4] = {'n','u','l','l'};
+void PrimitiveObjectsWriter::WriteNull(ETokenSeparator inSeparate)
+{
+	mStreamForWriting->Write(scNull,4);	
 	WriteTokenSeparator(inSeparate);
 }
 

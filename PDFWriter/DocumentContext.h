@@ -29,8 +29,11 @@
 #include "TIFFImageHandler.h"
 #include "TIFFUsageParameters.h"
 #include "UsedFontsRepository.h"
+#include "PDFEmbedParameterTypes.h"
+#include "PDFDocumentHandler.h"
 
 #include <string>
+#include <set>
 
 using namespace std;
 using namespace IOBasicTypes;
@@ -47,6 +50,8 @@ class PDFFormXObject;
 class PDFRectangle;
 class PDFImageXObject;
 class PDFUsedFont;
+
+typedef set<IDocumentContextExtender*> IDocumentContextExtenderSet;
 
 class DocumentContext
 {
@@ -112,13 +117,20 @@ public:
 													ObjectIDType inFormXObjectID,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 	
+	// PDF
+	EStatusCodeAndPDFFormXObjectList CreateFormXObjectsFromPDF( const wstring& inPDFFilePath,
+																const PDFPageRange& inPageRange,
+																EPDFPageBox inPageBoxToUseAsFormBox,
+																const double* inTransformationMatrix);
+
 	// Font [Text]
 	PDFUsedFont* GetFontForFile(const wstring& inFontFilePath);
 	// second overload is for type 1, when an additional metrics file is available
 	PDFUsedFont* GetFontForFile(const wstring& inFontFilePath,const wstring& inAdditionalMeticsFilePath);
 
 	// Extensibility
-	void SetDocumentContextExtender(IDocumentContextExtender* inExtender);
+	void AddDocumentContextExtender(IDocumentContextExtender* inExtender);
+	void RemoveDocumentContextExtender(IDocumentContextExtender* inExtender);
 
 	// JPG images handler for retrieving JPG images information
 	JPEGImageHandler& GetJPEGImageHandler();
@@ -129,9 +141,10 @@ private:
 	TrailerInformation mTrailerInformation;
 	CatalogInformation mCatalogInformation;
 	wstring mOutputFilePath;
-	IDocumentContextExtender* mExtender;
+	IDocumentContextExtenderSet mExtenders;
 	JPEGImageHandler mJPEGImageHandler;
 	TIFFImageHandler mTIFFImageHandler;
+	PDFDocumentHandler mPDFDocumentHandler;
 	UsedFontsRepository mUsedFontsRepository;
 	
 	void WriteHeaderComment(EPDFVersion inPDFVersion);

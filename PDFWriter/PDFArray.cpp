@@ -12,7 +12,32 @@ PDFArray::~PDFArray(void)
 		(*it)->Release();
 }
 
-PDFObjectVector* PDFArray::operator ->()
+void PDFArray::AppendObject(PDFObject* inObject)
 {
-	return &mValues;
+	inObject->AddRef();
+	mValues.push_back(inObject);
+}
+
+
+SingleValueContainerIterator<PDFObjectVector> PDFArray::GetIterator()
+{
+	return SingleValueContainerIterator<PDFObjectVector>(mValues);
+}
+
+PDFObject* PDFArray::QueryObject(unsigned long i)
+{
+	if(mValues.size() >= i)
+	{
+		return NULL;
+	}
+	else
+	{
+		mValues[i]->AddRef();
+		return mValues[i];
+	}
+}
+
+unsigned long PDFArray::GetLength()
+{
+	return mValues.size();
 }

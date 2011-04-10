@@ -13,20 +13,10 @@ PDFStreamInput::~PDFStreamInput(void)
 	mDictionary->Release();
 }
 
-PDFDictionary* PDFStreamInput::GetStreamDictionary()
+PDFDictionary* PDFStreamInput::QueryStreamDictionary()
 {
+	mDictionary->AddRef();
 	return mDictionary;
-}
-
-PDFObject* PDFStreamInput::GetExtentObject()
-{
-	PDFName nameLength("Length");
-
-	PDFNameToPDFObjectMap::const_iterator it = (*mDictionary)->find(&nameLength);
-	if(it == (*mDictionary)->end())
-		return NULL; // k. an exception
-	else
-		return it->second;
 }
 
 LongFilePositionType PDFStreamInput::GetStreamContentStart()

@@ -26,6 +26,7 @@
 #include <map>
 #include <string>
 #include <utility>
+#include <set>
 
 using namespace std;
 
@@ -36,8 +37,10 @@ class PDFFormXObject;
 class DocumentContext;
 
 typedef map<wstring,JPEGImageInformation> WStringToJPEGImageInformationMap;
-typedef std::pair<bool,JPEGImageInformation> BoolAndJPEGImageInformation;
-typedef std::pair<double,double> DoubleAndDoublePair;
+typedef pair<bool,JPEGImageInformation> BoolAndJPEGImageInformation;
+typedef pair<double,double> DoubleAndDoublePair;
+typedef set<IDocumentContextExtender*> IDocumentContextExtenderSet;
+
 
 class JPEGImageHandler
 {
@@ -57,14 +60,15 @@ public:
 	PDFFormXObject* CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inFormXObjectID);
 
 	void SetOperationsContexts(DocumentContext* inDocumentContext,ObjectsContext* inObjectsContext);
-	void SetDocumentContextExtender(IDocumentContextExtender* inExtender);
+	void AddDocumentContextExtender(IDocumentContextExtender* inExtender);
+	void RemoveDocumentContextExtender(IDocumentContextExtender* inExtender);
 
 private:
 	JPEGImageInformation mNullInformation;
 	WStringToJPEGImageInformationMap mImagesInformationMap;
 	ObjectsContext* mObjectsContext;
 	DocumentContext* mDocumentContext;
-	IDocumentContextExtender* mExtender;
+	IDocumentContextExtenderSet mExtenders;
 
 	PDFImageXObject* CreateAndWriteImageXObjectFromJPGInformation(const wstring& inJPGFilePath,ObjectIDType inImageXObjectID, const JPEGImageInformation& inJPGImageInformation);
 	PDFFormXObject* CreateImageFormXObjectFromImageXObject(PDFImageXObject* inImageXObject,ObjectIDType inFormXObjectID, const JPEGImageInformation& inJPGImageInformation);

@@ -15,7 +15,7 @@ public:
 		eType = ePDFObjectHexString
 	};
 
-	// Value is the interpreted string (no enclosing angle brackets and each hex pairs represented by a single byte)
+	// Value is the hex charactes string
 	PDFHexString(const string& inValue);
 	virtual ~PDFHexString(void);
 

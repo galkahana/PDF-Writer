@@ -41,14 +41,14 @@ class SingleValueContainerIterator : public ContainerIterator<T>
 {
 public:
 
-	SingleValueContainerIterator(T& inList);
+	SingleValueContainerIterator(T& inContainer);
 	SingleValueContainerIterator(const SingleValueContainerIterator<T>& inOtherIterator);
 
 	typename T::value_type GetItem();
 };
 
 template <class T>
-SingleValueContainerIterator<T>::SingleValueContainerIterator(T& inList):ContainerIterator(inList)
+SingleValueContainerIterator<T>::SingleValueContainerIterator(T& inContainer):ContainerIterator(inContainer)
 {
 }
 

@@ -16,6 +16,8 @@
 #include "BoxingBase.h"
 #include "PDFStream.h"
 #include "IByteReaderWithPosition.h"
+#include "RefCountPtr.h"
+#include "PDFObjectCast.h"
 
 #include <sstream>
 
@@ -313,12 +315,6 @@ static const char scRightAngle = '<';
 PDFObject* PDFObjectParser::ParseHexadecimalString(const string& inToken)
 {
 	EStatusCode status = eSuccess;
-	stringbuf stringBuffer;
-	Byte buffer;
-	string::const_iterator it = inToken.begin();
-	BoolAndByte hexResult;
-	size_t i=1;
-	++it; // skip first paranthesis
 	
 	// verify that last character is '>'
 	if(inToken.at(inToken.size()-1) != scRightAngle)
@@ -327,50 +323,7 @@ PDFObject* PDFObjectParser::ParseHexadecimalString(const string& inToken)
 		return NULL;
 	}
 
-	for(; i < inToken.size()-1 && eSuccess == status;)
-	{
-		hexResult = GetHexValue(*it);
-		if(!hexResult.first)
-		{
-			status = eFailure;
-			break;
-		}
-		buffer=(hexResult.second << 4);
-		++it;
-		++i;
-		if(i != inToken.size()-1) // check for odd number of chars (in which case 0 is assumed to be the even pair)
-		{
-			hexResult = GetHexValue(*it);
-			if(!hexResult.first)
-			{
-				status = eFailure;
-				break;
-			}
-			buffer+=hexResult.second;
-			++it;
-			++i;
-		}
-		stringBuffer.sputn((const char*)&buffer,1);
-	}
-	if(eSuccess == status)
-		return new PDFHexString(stringBuffer.str());
-	else
-		return NULL;
-}
-
-BoolAndByte PDFObjectParser::GetHexValue(Byte inValue)
-{
-	if('0' <= inValue && inValue <='9')
-		return BoolAndByte(true,inValue - '0');
-	else if('A' <= inValue && inValue <= 'F')
-		return BoolAndByte(true,inValue - 'A');
-	else if('a' <= inValue && inValue <= 'f')
-		return BoolAndByte(true,inValue - 'a');
-	else
-	{
-		TRACE_LOG1("PDFObjectParser::GetHexValue, unrecongnized hex value - %c",inValue);
-		return BoolAndByte(false,inValue);
-	}
+	return new PDFHexString(inToken.substr(1,inToken.size()-2));
 }
 
 static const string scNull = "null";
@@ -501,7 +454,6 @@ static const string scRightSquare = "]";
 PDFObject* PDFObjectParser::ParseArray()
 {
 	PDFArray* anArray = new PDFArray();
-	PDFObject* anObject;
 	bool arrayEndEncountered = false;
 	string token;
 	EStatusCode status = eSuccess;
@@ -514,15 +466,15 @@ PDFObject* PDFObjectParser::ParseArray()
 			break;
 
 		SaveTokenToBuffer(token);
-		anObject = ParseNewObject();
-		if(anObject)
-		{
-			(*anArray)->push_back(anObject);
-		}
-		else
+		RefCountPtr<PDFObject> anObject(ParseNewObject());
+		if(!anObject)
 		{
 			status = eFailure;
 			TRACE_LOG1("PDFObjectParser::ParseArray, failure to parse array, failed to parse a member object. token = %s",token);
+		}
+		else
+		{
+			anArray->AppendObject(anObject.GetPtr());
 		}
 	}
 
@@ -568,27 +520,19 @@ PDFObject* PDFObjectParser::ParseDictionary()
 		SaveTokenToBuffer(token);
 
 		// Parse Key
-		aKey = ParseNewObject();
+		PDFObjectCastPtr<PDFName> aKey(ParseNewObject());
 		if(!aKey)
 		{
 			status = eFailure;
 			TRACE_LOG1("PDFObjectParser::ParseDictionary, failure to parse key for a dictionary. token = %s",token);
 			break;
 		}
-		if(aKey->GetType() != ePDFObjectName)
-		{
-			delete aKey;
-			status = eFailure;
-			TRACE_LOG1("PDFObjectParser::ParseDictionary, failure to parse key for a dictionary, Parsed object is not a key. token = %s",token);
-			break;
-		}
 
 		// i'll consider duplicate keys as failure
-		if((*aDictionary)->find((PDFName*)aKey) != (*aDictionary)->end())
+		if(aDictionary->Exists(aKey->GetValue()))
 		{
 			status = eFailure;
-			TRACE_LOG1("PDFObjectParser::ParseDictionary, failure to parse key for a dictionary, key already exists. key = %s",((PDFName*)aKey)->GetValue().c_str());
-			delete aKey;
+			TRACE_LOG1("PDFObjectParser::ParseDictionary, failure to parse key for a dictionary, key already exists. key = %s",aKey->GetValue().c_str());
 			break;
 		}
 
@@ -596,14 +540,13 @@ PDFObject* PDFObjectParser::ParseDictionary()
 		aValue = ParseNewObject();
 		if(!aValue)
 		{
-			delete aKey;
 			status = eFailure;
 			TRACE_LOG1("PDFObjectParser::ParseDictionary, failure to parse value for a dictionary. token = %s",token);
 			break;
 		}
 	
 		// all well, add the two items to the dictionary
-		(*aDictionary)->insert(PDFNameToPDFObjectMap::value_type((PDFName*)aKey,aValue));
+		aDictionary->Insert(aKey.GetPtr(),aValue);
 	}
 
 	if(dictionaryEndEncountered && eSuccess == status)
@@ -622,4 +565,19 @@ static const char scCommentStart = '%';
 bool PDFObjectParser::IsComment(const string& inToken)
 {
 	return inToken.at(0) == scCommentStart;
+}
+
+BoolAndByte PDFObjectParser::GetHexValue(Byte inValue)
+{
+	if('0' <= inValue && inValue <='9')
+		return BoolAndByte(true,inValue - '0');
+	else if('A' <= inValue && inValue <= 'F')
+		return BoolAndByte(true,inValue - 'A');
+	else if('a' <= inValue && inValue <= 'f')
+		return BoolAndByte(true,inValue - 'a');
+	else
+	{
+		TRACE_LOG1("PDFObjectParser::GetHexValue, unrecongnized hex value - %c",inValue);
+		return BoolAndByte(false,inValue);
+	}
 }

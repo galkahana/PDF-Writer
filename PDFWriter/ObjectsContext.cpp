@@ -196,6 +196,11 @@ void ObjectsContext::WriteBoolean(bool inBooleanToken,ETokenSeparator inSeparate
 	mPrimitiveWriter.WriteBoolean(inBooleanToken,inSeparate);
 }
 
+void ObjectsContext::WriteNull(ETokenSeparator inSeparate)
+{
+	mPrimitiveWriter.WriteNull(inSeparate);
+}
+
 static const std::string scObj = "obj";
 ObjectIDType ObjectsContext::StartNewIndirectObject()
 {

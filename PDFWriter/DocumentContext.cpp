@@ -37,7 +37,6 @@
 DocumentContext::DocumentContext()
 {
 	mObjectsContext = NULL;
-	mExtender = NULL;
 }
 
 DocumentContext::~DocumentContext(void)
@@ -49,6 +48,7 @@ void DocumentContext::SetObjectsContext(ObjectsContext* inObjectsContext)
 	mObjectsContext = inObjectsContext;
 	mJPEGImageHandler.SetOperationsContexts(this,mObjectsContext);
 	mTIFFImageHandler.SetOperationsContexts(this,mObjectsContext);
+	mPDFDocumentHandler.SetOperationsContexts(this,mObjectsContext);
 	mUsedFontsRepository.SetObjectsContext(mObjectsContext);
 }
 
@@ -58,10 +58,16 @@ void DocumentContext::SetOutputFileInformation(OutputFile* inOutputFile)
 	mOutputFilePath = inOutputFile->GetFilePath();
 }
 
-void DocumentContext::SetDocumentContextExtender(IDocumentContextExtender* inExtender)
+void DocumentContext::AddDocumentContextExtender(IDocumentContextExtender* inExtender)
 {
-	mExtender = inExtender;
-	mJPEGImageHandler.SetDocumentContextExtender(inExtender);
+	mExtenders.insert(inExtender);
+	mJPEGImageHandler.AddDocumentContextExtender(inExtender);
+}
+
+void DocumentContext::RemoveDocumentContextExtender(IDocumentContextExtender* inExtender)
+{
+	mExtenders.erase(inExtender);
+	mJPEGImageHandler.RemoveDocumentContextExtender(inExtender);
 }
 
 TrailerInformation& DocumentContext::GetTrailerInformation()
@@ -375,9 +381,10 @@ EStatusCode DocumentContext::WriteCatalogObject()
 	catalogContext->WriteKey(scPages);
 	catalogContext->WriteObjectReferenceValue(mCatalogInformation.GetPageTreeRoot(mObjectsContext->GetInDirectObjectsRegistry())->GetID());
 
-	if(mExtender)
+	IDocumentContextExtenderSet::iterator it = mExtenders.begin();
+	for(; it != mExtenders.end() && eSuccess == status; ++it)
 	{
-		status = mExtender->OnCatalogWrite(&mCatalogInformation,catalogContext,mObjectsContext,this);
+		status = (*it)->OnCatalogWrite(&mCatalogInformation,catalogContext,mObjectsContext,this);
 		if(status != eSuccess)
 			TRACE_LOG("DocumentContext::WriteCatalogObject, unexpected faiulre. extender declared failure when writing catalog.");
 	}
@@ -537,9 +544,10 @@ EStatusCode DocumentContext::WritePage(PDFPage* inPage)
 			}
 		}
 
-		if(mExtender)
+		IDocumentContextExtenderSet::iterator it = mExtenders.begin();
+		for(; it != mExtenders.end() && eSuccess == status; ++it)
 		{
-			status = mExtender->OnPageWrite(inPage,pageContext,mObjectsContext,this);
+			status = (*it)->OnPageWrite(inPage,pageContext,mObjectsContext,this);
 			if(status != eSuccess)
 			{
 				TRACE_LOG("DocumentContext::WritePage, unexpected faiulre. extender declared failure when writing page.");
@@ -669,19 +677,23 @@ PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBounding
 		ObjectIDType formXObjectResourcesDictionaryID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
 		xobjectContext->WriteObjectReferenceValue(formXObjectResourcesDictionaryID);
 
-		if(mExtender)
+		IDocumentContextExtenderSet::iterator it = mExtenders.begin();
+		EStatusCode status = eSuccess;
+		for(; it != mExtenders.end() && eSuccess == status; ++it)
 		{
-			if(mExtender->OnFormXObjectWrite(inFormXObjectID,formXObjectResourcesDictionaryID,xobjectContext,mObjectsContext,this) != eSuccess)
+			if((*it)->OnFormXObjectWrite(inFormXObjectID,formXObjectResourcesDictionaryID,xobjectContext,mObjectsContext,this) != eSuccess)
 			{
 				TRACE_LOG("DocumentContext::StartFormXObject, unexpected faiulre. extender declared failure when writing form xobject.");
+				status = eFailure;
 				break;
 			}
 		}
+		if(status != eSuccess)
+			break;
 
 		// Now start the stream and the form XObject state
 		aFormXObject =  new PDFFormXObject(inFormXObjectID,mObjectsContext->StartPDFStream(xobjectContext),formXObjectResourcesDictionaryID);
-	}
-	while(false);
+	} while(false);
 
 	return aFormXObject;	
 }
@@ -789,9 +801,10 @@ EStatusCode DocumentContext::WriteResourcesDictionary(ResourcesDictionary& inRes
 			mObjectsContext->EndDictionary(fontsContext);	
 		}
 
-		if(mExtender)
+		IDocumentContextExtenderSet::iterator it = mExtenders.begin();
+		for(; it != mExtenders.end() && eSuccess == status; ++it)
 		{
-			status = mExtender->OnResourcesWrite(&(inResourcesDictionary),resourcesContext,mObjectsContext,this);
+			status = (*it)->OnResourcesWrite(&(inResourcesDictionary),resourcesContext,mObjectsContext,this);
 			if(status != eSuccess)
 			{
 				TRACE_LOG("DocumentContext::WriteResourcesDictionary, unexpected faiulre. extender declared failure when writing resources.");
@@ -871,4 +884,13 @@ EStatusCode DocumentContext::WriteUsedFontsDefinitions()
 PDFUsedFont* DocumentContext::GetFontForFile(const wstring& inFontFilePath,const wstring& inAdditionalMeticsFilePath)
 {
 	return mUsedFontsRepository.GetFontForFile(inFontFilePath,inAdditionalMeticsFilePath);
+}
+
+EStatusCodeAndPDFFormXObjectList DocumentContext::CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+																			const PDFPageRange& inPageRange,
+																			EPDFPageBox inPageBoxToUseAsFormBox,
+																			const double* inTransformationMatrix)
+{
+	return mPDFDocumentHandler.CreateFormXObjectsFromPDF(inPDFFilePath,inPageRange,inPageBoxToUseAsFormBox,inTransformationMatrix);	
+
 }

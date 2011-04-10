@@ -183,3 +183,14 @@ PDFUsedFont* PDFWriter::GetFontForFile(const wstring& inFontFilePath,const wstri
 {
 	return mDocumentContext.GetFontForFile(inFontFilePath,inAdditionalMeticsFilePath);
 }
+
+EStatusCodeAndPDFFormXObjectList PDFWriter::CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+																	  const PDFPageRange& inPageRange,
+																	  EPDFPageBox inPageBoxToUseAsFormBox,
+																	  const double* inTransformationMatrix)
+{
+	return mDocumentContext.CreateFormXObjectsFromPDF(inPDFFilePath,
+														inPageRange,
+														inPageBoxToUseAsFormBox,
+														inTransformationMatrix);
+}

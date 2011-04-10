@@ -39,7 +39,6 @@ JPEGImageHandler::JPEGImageHandler(void)
 {
 	mObjectsContext = NULL;
 	mDocumentContext = NULL;
-	mExtender = NULL;
 }
 
 JPEGImageHandler::~JPEGImageHandler(void)
@@ -167,14 +166,19 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 		imageContext->WriteKey(scFilter);
 		imageContext->WriteNameValue(scDCTDecode);
 
-		if(mExtender)
+		IDocumentContextExtenderSet::iterator it = mExtenders.begin();
+		EStatusCode status = eSuccess;
+		for(; it != mExtenders.end() && eSuccess == status; ++it)
 		{
-			if(mExtender->OnJPEGImageXObjectWrite(inImageXObjectID,imageContext,mObjectsContext,mDocumentContext,this) != eSuccess)
+			if((*it)->OnJPEGImageXObjectWrite(inImageXObjectID,imageContext,mObjectsContext,mDocumentContext,this) != eSuccess)
 			{
 				TRACE_LOG("JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation, unexpected faiulre. extender declared failure when writing image xobject.");
+				status = eFailure;
 				break;
 			}
 		}	
+		if(status != eSuccess)
+			break;
 		
 		InputFile JPGFile;
 		status = JPGFile.OpenFile(inJPGFilePath);
@@ -256,10 +260,16 @@ BoolAndJPEGImageInformation JPEGImageHandler::RetrieveImageInformation(const wst
 	return imageInformationResult;
 }
 
-void JPEGImageHandler::SetDocumentContextExtender(IDocumentContextExtender* inExtender)
+void JPEGImageHandler::AddDocumentContextExtender(IDocumentContextExtender* inExtender)
 {
-	mExtender = inExtender;
+	mExtenders.insert(inExtender);
 }
+
+void JPEGImageHandler::RemoveDocumentContextExtender(IDocumentContextExtender* inExtender)
+{
+	mExtenders.erase(inExtender);
+}
+
 
 PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inFormXObjectID)
 {

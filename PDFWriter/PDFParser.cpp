@@ -735,18 +735,18 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 				break;
 			}
 
-			PDFObjectVector::iterator it = (*kidsObject.GetPtr())->begin();
+			SingleValueContainerIterator<PDFObjectVector> it = kidsObject->GetIterator();
 			
-			for(; it != (*kidsObject.GetPtr())->end() && eSuccess == status; ++it)
+			while(it.MoveNext() && eSuccess == status)
 			{
-				if((*it)->GetType() != ePDFObjectIndirectObjectReference)
+				if(it.GetItem()->GetType() != ePDFObjectIndirectObjectReference)
 				{
-					TRACE_LOG1("PDFParser::ParsePagesIDs, unexpected type for a Kids array object, type = %s",scPDFObjectTypeLabel[(*it)->GetType()]);
+					TRACE_LOG1("PDFParser::ParsePagesIDs, unexpected type for a Kids array object, type = %s",scPDFObjectTypeLabel[it.GetItem()->GetType()]);
 					status = eFailure;
 					break;
 				}
 
-				PDFObjectCastPtr<PDFDictionary> pageNodeObject(ParseNewObject(((PDFIndirectObjectReference*)*it)->mObjectID));
+				PDFObjectCastPtr<PDFDictionary> pageNodeObject(ParseNewObject(((PDFIndirectObjectReference*)it.GetItem())->mObjectID));
 				if(!pageNodeObject)
 				{
 					TRACE_LOG("PDFParser::ParsePagesIDs, unable to parse page node object from kids reference");
@@ -754,7 +754,7 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 					break;
 				}
 
-				status = ParsePagesIDs(pageNodeObject.GetPtr(),((PDFIndirectObjectReference*)*it)->mObjectID,ioCurrentPageIndex);
+				status = ParsePagesIDs(pageNodeObject.GetPtr(),((PDFIndirectObjectReference*)it.GetItem())->mObjectID,ioCurrentPageIndex);
 			}
 		}
 		else 
@@ -821,20 +821,20 @@ PDFObject* PDFParser::QueryDictionaryObject(PDFDictionary* inDictionary,const st
 
 PDFObject* PDFParser::QueryArrayObject(PDFArray* inArray,unsigned long inIndex)
 {
-	if((*inArray)->size() <= inIndex)
+	RefCountPtr<PDFObject> anObject(inArray->QueryObject(inIndex));
+
+	if(anObject.GetPtr() == NULL)
 		return NULL;
-
-	PDFObject* anObject((*inArray)->at(inIndex));
-
+	
 	if(anObject->GetType() == ePDFObjectIndirectObjectReference)
 	{
-		PDFObject* theActualObject = ParseNewObject(((PDFIndirectObjectReference*)anObject)->mObjectID);
+		PDFObject* theActualObject = ParseNewObject(((PDFIndirectObjectReference*)anObject.GetPtr())->mObjectID);
 		return theActualObject;
 	}
 	else
 	{
 		anObject->AddRef(); // adding ref to increase owners
-		return anObject;
+		return anObject.GetPtr();
 	}
 
 }

@@ -53,7 +53,7 @@ void OutputFlateDecodeStream::FinalizeEncoding()
 	mCurrentlyEncoding = false;
 }
 
-OutputFlateDecodeStream::OutputFlateDecodeStream(IByteWriterWithPosition* inTargetWriter, bool inInitiallyOn)
+OutputFlateDecodeStream::OutputFlateDecodeStream(IByteWriter* inTargetWriter, bool inInitiallyOn)
 {
 	mBuffer = new IOBasicTypes::Byte[BUFFER_SIZE];
 	mZLibState = new z_stream;
@@ -85,7 +85,7 @@ void OutputFlateDecodeStream::StartEncoding()
 }
 
 
-void OutputFlateDecodeStream::Assign(IByteWriterWithPosition* inWriter,bool inInitiallyOn)
+void OutputFlateDecodeStream::Assign(IByteWriter* inWriter,bool inInitiallyOn)
 {	
 	mTargetStream = inWriter;
 	if(inInitiallyOn && mTargetStream)
@@ -151,14 +151,6 @@ LongBufferSizeType OutputFlateDecodeStream::DecodeBufferAndWrite(const IOBasicTy
 	// should be that at the last buffer we'll get here a nice Z_STREAM_END
 	if(Z_OK == inflateResult || Z_STREAM_END == inflateResult)
 		return inSize;
-	else
-		return 0;
-}
-
-LongFilePositionType OutputFlateDecodeStream::GetCurrentPosition()
-{
-	if(mTargetStream)
-		return mTargetStream->GetCurrentPosition();
 	else
 		return 0;
 }

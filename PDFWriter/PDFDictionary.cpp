@@ -15,11 +15,6 @@ PDFDictionary::~PDFDictionary(void)
 	}
 }
 
-PDFNameToPDFObjectMap* PDFDictionary::operator ->()
-{
-	return &mValues;
-}
-
 PDFObject* PDFDictionary::QueryDirectObject(string inName)
 {
 	PDFName key(inName);
@@ -36,3 +31,22 @@ PDFObject* PDFDictionary::QueryDirectObject(string inName)
 	}
 }
 
+void PDFDictionary::Insert(PDFName* inKeyObject, PDFObject* inValueObject)
+{
+	inKeyObject->AddRef();
+	inValueObject->AddRef();
+
+	mValues.insert(PDFNameToPDFObjectMap::value_type(inKeyObject,inValueObject));
+}
+
+
+bool PDFDictionary::Exists(string inName)
+{
+	PDFName key(inName);
+	return mValues.find(&key) != mValues.end();
+}
+
+MapIterator<PDFNameToPDFObjectMap> PDFDictionary::GetIterator()
+{
+	return MapIterator<PDFNameToPDFObjectMap>(mValues);
+}

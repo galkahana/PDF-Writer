@@ -25,8 +25,18 @@ template <class T>
 class PDFObjectCastPtr : public RefCountPtr<T>
 {
 public:
+	PDFObjectCastPtr():RefCountPtr()
+	{
+	}
+
 	PDFObjectCastPtr(PDFObject* inPDFObject): RefCountPtr(PDFObjectCast<T>(inPDFObject))
 	{
+	}
+
+	PDFObjectCastPtr<T>&  operator =(PDFObject* inValue)
+	{
+		RefCountPtr::operator =(PDFObjectCast<T>(inValue));
+		return *this;
 	}
 };
 

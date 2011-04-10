@@ -1,6 +1,7 @@
 #pragma once
 #include "PDFObject.h"
 #include "PDFName.h"
+#include "MapIterator.h"
 
 #include <map>
 
@@ -30,10 +31,13 @@ public:
 	PDFDictionary(void);
 	virtual ~PDFDictionary(void);
 
-	// being lazy ;) just giving you some smart PTRs to the map itself
-	PDFNameToPDFObjectMap* operator ->();
+	// AddRefs on both
+	void Insert(PDFName* inKeyObject, PDFObject* inValueObject);
 
+	bool Exists(string inName);
 	PDFObject* QueryDirectObject(string inName);
+
+	MapIterator<PDFNameToPDFObjectMap> GetIterator();
 
 private:
 

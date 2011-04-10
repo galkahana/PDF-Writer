@@ -48,8 +48,6 @@ private:
 
 	bool IsHexadecimalString(const string& inToken);
 	PDFObject* ParseHexadecimalString(const string& inToken);
-	// return "false" if not hex value
-	BoolAndByte GetHexValue(Byte inValue);
 
 	bool IsNull(const string& inToken);
 
@@ -66,5 +64,8 @@ private:
 	PDFObject* ParseDictionary();
 
 	bool IsComment(const string& inToken);
+
+	BoolAndByte GetHexValue(Byte inValue);
+
 
 };

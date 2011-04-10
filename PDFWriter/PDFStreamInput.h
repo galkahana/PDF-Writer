@@ -17,8 +17,9 @@ public:
 	PDFStreamInput(PDFDictionary* inStreamDictionary,LongFilePositionType inStreamContentStart);
 	virtual ~PDFStreamInput(void);
 
-	PDFDictionary* GetStreamDictionary();
-	PDFObject* GetExtentObject();
+	// These two calls AddRef on both objects
+	PDFDictionary* QueryStreamDictionary();
+
 	LongFilePositionType GetStreamContentStart();
 
 private:

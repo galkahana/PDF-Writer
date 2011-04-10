@@ -84,6 +84,22 @@ void DictionaryContext::WriteLiteralStringValue(const string& inValue)
 	mObjectsContext->WriteLiteralString(inValue,eTokenSeparatorEndLine);
 }
 
+void DictionaryContext::WriteKeywordValue(const string& inValue)
+{
+	mObjectsContext->WriteKeyword(inValue);
+}
+
+
+void DictionaryContext::WriteHexStringValue(const string& inValue)
+{
+	mObjectsContext->WriteHexString(inValue,eTokenSeparatorEndLine);
+}
+
+void DictionaryContext::WriteNullValue()
+{
+	mObjectsContext->WriteNull(eTokenSeparatorEndLine);
+}
+
 void DictionaryContext::WriteNameValue(const string& inValue)
 {
 	mObjectsContext->WriteName(inValue,eTokenSeparatorEndLine);	
