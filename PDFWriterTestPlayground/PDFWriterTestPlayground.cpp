@@ -46,7 +46,7 @@ static void PrintUsage()
 		"	PDFWriterTestPlayGround -c PDF -xt TiffImageTest.";
 }
 
-int main(int argc, wchar_t* argv[])
+int wmain(int argc, wchar_t* argv[])
 {
 	if(3 <= argc)
 	{

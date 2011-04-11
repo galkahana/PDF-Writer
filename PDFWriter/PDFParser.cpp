@@ -55,6 +55,7 @@ EStatusCode PDFParser::StartPDFParsing(IByteReaderWithPosition* inSourceStream)
 		// initialize reading from end
 		mLastReadPositionFromEnd = 0;
 		mEncounteredFileStart = false;
+		mLastAvailableIndex = mCurrentBufferIndex = mLinesBuffer;
 
 		status = ParseEOFLine();
 		if(status != eSuccess)
@@ -121,7 +122,7 @@ EStatusCode PDFParser::ParseEOFLine()
 	if(GoBackTillToken())
 	{
 		GoBackTillLineStart();
-		mStream->SetPosition(GetCurrentPositionFromEnd());
+		mStream->SetPositionFromEnd(GetCurrentPositionFromEnd());
 
 		PDFParserTokenizer aTokenizer;
 		aTokenizer.SetReadStream(mStream);
@@ -162,7 +163,7 @@ bool PDFParser::GoBackTillToken()
 			break;
 		}
 	}
-	return !foundToken;
+	return foundToken;
 }
 
 static const Byte scWhiteSpaces[] = {0,0x9,0xA,0xC,0xD,0x20};
@@ -257,7 +258,7 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 		}
 
 		GoBackTillLineStart();
-		mStream->SetPosition(GetCurrentPositionFromEnd());
+		mStream->SetPositionFromEnd(GetCurrentPositionFromEnd());
 		
 		mObjectParser.ResetReadState();
 		PDFObjectCastPtr<PDFInteger> xrefPosition(mObjectParser.ParseNewObject());
@@ -279,7 +280,7 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 		}
 
 		GoBackTillLineStart();
-		mStream->SetPosition(GetCurrentPositionFromEnd());
+		mStream->SetPositionFromEnd(GetCurrentPositionFromEnd());
 		
 		mObjectParser.ResetReadState();
 		PDFObjectCastPtr<PDFSymbol> startxRef(mObjectParser.ParseNewObject());
@@ -322,7 +323,7 @@ EStatusCode PDFParser::ParseTrailerDictionary()
 		}
 
 		GoBackTillLineStart();
-		mStream->SetPosition(GetCurrentPositionFromEnd());
+		mStream->SetPositionFromEnd(GetCurrentPositionFromEnd());
 
 		BoolAndString token = aTokenizer.GetNextToken();
 		if(!token.first || token.second != scDictionaryClose)
@@ -344,7 +345,7 @@ EStatusCode PDFParser::ParseTrailerDictionary()
 				break;
 			}
 			GoBackTillLineStart();
-			mStream->SetPosition(GetCurrentPositionFromEnd());
+			mStream->SetPositionFromEnd(GetCurrentPositionFromEnd());
 
 			aTokenizer.ResetReadState();
 			BoolAndString token = aTokenizer.GetNextToken();
@@ -374,7 +375,7 @@ EStatusCode PDFParser::ParseTrailerDictionary()
 		}
 
 		GoBackTillLineStart();
-		mStream->SetPosition(GetCurrentPositionFromEnd());
+		mStream->SetPositionFromEnd(GetCurrentPositionFromEnd());
 
 		aTokenizer.ResetReadState();
 		token = aTokenizer.GetNextToken();
@@ -513,7 +514,8 @@ EStatusCode PDFParser::ParseXref()
 				}
 				mXrefTable[currentObject].mObjectPosition = LongFilePositionTypeBox((const char*)entry);
 				mXrefTable[currentObject].mRivision = ULong((const char*)(entry+11));
-				mXrefTable[currentObject].mType = entry[17] == 'n' ? eXrefEntryExisting:eXrefEntryDelete;
+				mXrefTable[currentObject].mType = entry[18] == 'n' ? eXrefEntryExisting:eXrefEntryDelete;
+				++currentObject;
 			}
 		}
 		if(status != eSuccess)

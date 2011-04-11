@@ -18,6 +18,9 @@ public:
 	// This one will not call AddRef (assume called from outside)
 	RefCountPtr(T* inValue);
 
+	// This one will call AddRef
+	RefCountPtr(RefCountPtr<T>& inOtherPtr);
+
 	// This one calls Release
 	virtual ~RefCountPtr();
 
@@ -56,11 +59,21 @@ RefCountPtr<T>::RefCountPtr(T* inValue)
 	mValue = inValue;
 }
 
+template <typename T>
+RefCountPtr<T>::RefCountPtr(RefCountPtr<T>& inOtherPtr)
+{
+	mValue = inOtherPtr.mValue;
+	if(mValue)
+		mValue->AddRef();
+}
+
+
 // This one calls Release
 template <typename T>
 RefCountPtr<T>::~RefCountPtr()
 {
-	mValue->Release();
+	if(mValue)
+		mValue->Release();
 }
 
 template <typename T>

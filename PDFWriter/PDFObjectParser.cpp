@@ -104,10 +104,10 @@ PDFObject* PDFObjectParser::ParseNewObject()
 				((PDFInteger*)pdfObject)->GetValue() > 0)
 			{
 				// try parse version
-				if(!GetNextToken(token)) // k. no next token...cant be reference
+				string numberToken;
+				if(!GetNextToken(numberToken)) // k. no next token...cant be reference
 					break;
 
-				string numberToken;
 				if(!IsNumber(numberToken)) // k. no number, cant be reference
 				{
 					SaveTokenToBuffer(numberToken);
@@ -311,7 +311,7 @@ bool PDFObjectParser::IsHexadecimalString(const string& inToken)
 }
 
 
-static const char scRightAngle = '<';
+static const char scRightAngle = '>';
 PDFObject* PDFObjectParser::ParseHexadecimalString(const string& inToken)
 {
 	EStatusCode status = eSuccess;
@@ -465,7 +465,7 @@ PDFObject* PDFObjectParser::ParseArray()
 		if(arrayEndEncountered)
 			break;
 
-		SaveTokenToBuffer(token);
+		ReturnTokenToBuffer(token);
 		RefCountPtr<PDFObject> anObject(ParseNewObject());
 		if(!anObject)
 		{
@@ -495,13 +495,18 @@ void PDFObjectParser::SaveTokenToBuffer(string& inToken)
 	mTokenBuffer.push_back(inToken);
 }
 
+void PDFObjectParser::ReturnTokenToBuffer(string& inToken)
+{
+	mTokenBuffer.push_front(inToken);
+}
+
 static const string scDoubleLeftAngle = "<<";
 bool PDFObjectParser::IsDictionary(const string& inToken)
 {
 	return scDoubleLeftAngle == inToken;
 }
 
-static const string scDoubleRightAngle = "<<";
+static const string scDoubleRightAngle = ">>";
 PDFObject* PDFObjectParser::ParseDictionary()
 {
 	PDFDictionary* aDictionary = new PDFDictionary();
@@ -517,7 +522,7 @@ PDFObject* PDFObjectParser::ParseDictionary()
 		if(dictionaryEndEncountered)
 			break;
 
-		SaveTokenToBuffer(token);
+		ReturnTokenToBuffer(token);
 
 		// Parse Key
 		PDFObjectCastPtr<PDFName> aKey(ParseNewObject());
@@ -537,7 +542,7 @@ PDFObject* PDFObjectParser::ParseDictionary()
 		}
 
 		// Parse Value
-		aValue = ParseNewObject();
+		RefCountPtr<PDFObject> aValue = ParseNewObject();
 		if(!aValue)
 		{
 			status = eFailure;
@@ -546,7 +551,7 @@ PDFObject* PDFObjectParser::ParseDictionary()
 		}
 	
 		// all well, add the two items to the dictionary
-		aDictionary->Insert(aKey.GetPtr(),aValue);
+		aDictionary->Insert(aKey.GetPtr(),aValue.GetPtr());
 	}
 
 	if(dictionaryEndEncountered && eSuccess == status)

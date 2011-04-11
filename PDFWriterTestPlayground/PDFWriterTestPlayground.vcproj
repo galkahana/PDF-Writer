@@ -623,6 +623,34 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="PDFEmbedding"
+				>
+				<File
+					RelativePath=".\PDFObjectCastTest.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PDFObjectCastTest.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PDFParserTest.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PDFParserTest.h"
+					>
+				</File>
+				<File
+					RelativePath=".\RefCountTest.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\RefCountTest.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath=".\ImportantReadme.txt"

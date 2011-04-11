@@ -39,6 +39,7 @@ private:
 
 	bool GetNextToken(string& outToken);
 	void SaveTokenToBuffer(string& inToken);
+	void ReturnTokenToBuffer(string& inToken);
 
 	bool IsBoolean(const string& inToken);
 	PDFObject* ParseBoolean(const string& inToken);

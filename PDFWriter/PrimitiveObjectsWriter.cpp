@@ -81,24 +81,6 @@ it is recommended but not required for characters whose codes are outside the ra
 			buffer[0] = aValue;
 			mStreamForWriting->Write(buffer,1);
 		}
-		
-		if(*it == '(' || *it == ')' || *it == '\\')
-		{
-			buffer[0] = '\\';
-			buffer[1] = *it;
-			mStreamForWriting->Write(buffer,2);
-		}
-		else if (*it < 32 || *it > 126) // grabbing all nonprintable chars
-		{
-			SAFE_SPRINTF_1((char*)buffer,5,"\\%03o",*it); 
-			mStreamForWriting->Write(buffer,4);		
-		}
-		else
-		{
-			buffer[0] = *it;
-			mStreamForWriting->Write(buffer,1);
-		}
-		
 	}
 
 	WriteTokenSeparator(inSeparate);

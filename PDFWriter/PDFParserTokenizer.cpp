@@ -252,7 +252,7 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 					// verify that buffer is either CR or LF, and behave accordingly
 					if(scCR == buffer) // CR. should be CR-LF
 					{
-						if(GetNextByteForToken(buffer))
+						if(GetNextByteForToken(buffer) == eSuccess)
 							result.first = (scLF == buffer); // verify that buffer is LF (so that we see CR-LF)
 						else
 							result.first = false; // cant have CR alone!

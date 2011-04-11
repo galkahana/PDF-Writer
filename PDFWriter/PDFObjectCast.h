@@ -1,5 +1,6 @@
 #pragma once
 
+#include "RefCountPtr.h"
 #include "PDFObject.h"
 
 /*
@@ -10,6 +11,9 @@
 template <class T>
 T* PDFObjectCast(PDFObject* inOriginal)
 {
+	if(!inOriginal)
+		return NULL;
+
 	if(inOriginal->GetType() == T::eType)
 	{
 		return (T*)inOriginal;

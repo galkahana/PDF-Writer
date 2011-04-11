@@ -7,7 +7,7 @@ public:
 
 	enum EType
 	{
-		eType = ePDFObjectSymbol
+		eType = ePDFObjectInteger
 	};
 
 	PDFInteger(long inValue);

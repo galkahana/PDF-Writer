@@ -39,5 +39,5 @@ PDFObject* PDFArray::QueryObject(unsigned long i)
 
 unsigned long PDFArray::GetLength()
 {
-	return mValues.size();
+	return (unsigned long)mValues.size();
 }
