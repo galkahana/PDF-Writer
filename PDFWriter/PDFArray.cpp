@@ -26,7 +26,7 @@ SingleValueContainerIterator<PDFObjectVector> PDFArray::GetIterator()
 
 PDFObject* PDFArray::QueryObject(unsigned long i)
 {
-	if(mValues.size() >= i)
+	if(mValues.size() <= i)
 	{
 		return NULL;
 	}

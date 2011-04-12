@@ -289,7 +289,7 @@ EStatusCode PDFDocumentHandler::WritePageContentToSingleStream(IByteWriter* inTa
 {
 	EStatusCode status = eSuccess;
 
-	RefCountPtr<PDFObject> pageContent(mParser.QueryDictionaryObject(inPageObject,"Content"));
+	RefCountPtr<PDFObject> pageContent(mParser.QueryDictionaryObject(inPageObject,"Contents"));
 	if(pageContent->GetType() == ePDFObjectStream)
 	{
 		status = WritePDFStreamInputToStream(inTargetStream,(PDFStreamInput*)pageContent.GetPtr());
@@ -297,10 +297,23 @@ EStatusCode PDFDocumentHandler::WritePageContentToSingleStream(IByteWriter* inTa
 	else if(pageContent->GetType() == ePDFObjectArray)
 	{
 		SingleValueContainerIterator<PDFObjectVector> it = ((PDFArray*)pageContent.GetPtr())->GetIterator();
-		PDFObjectCastPtr<PDFStreamInput> contentStream;
+		PDFObjectCastPtr<PDFIndirectObjectReference> refItem;
 		while(it.MoveNext() && status == eSuccess)
 		{
-			contentStream = it.GetItem();
+			refItem = it.GetItem();
+			if(!refItem)
+			{
+				status = eFailure;
+				TRACE_LOG("PDFDocumentHandler::WritePageContentToSingleStream, content stream array contains non-refs");
+				break;
+			}
+			PDFObjectCastPtr<PDFStreamInput> contentStream(mParser.ParseNewObject(refItem->mObjectID));
+			if(!contentStream)
+			{
+				status = eFailure;
+				TRACE_LOG("PDFDocumentHandler::WritePageContentToSingleStream, content stream array contains references to non streams");
+				break;
+			}
 			status = WritePDFStreamInputToStream(inTargetStream,contentStream.GetPtr());
 			if(eSuccess == status)
 			{
@@ -391,10 +404,14 @@ EStatusCode PDFDocumentHandler::WriteNewObjects(const ObjectIDTypeList& inSource
 		// copied, so make sure to check that these objects are still required for copying
 		if(ioCopiedObjects.find(*itNewObjects) == ioCopiedObjects.end())
 		{
-			ObjectIDType newObjectID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
-			mSourceToTarget.insert(ObjectIDTypeToObjectIDTypeMap::value_type(*itNewObjects,newObjectID));
+			ObjectIDTypeToObjectIDTypeMap::iterator it = mSourceToTarget.find(*itNewObjects);
+			if(it == mSourceToTarget.end())
+			{
+				ObjectIDType newObjectID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
+				it = mSourceToTarget.insert(ObjectIDTypeToObjectIDTypeMap::value_type(*itNewObjects,newObjectID)).first;
+			}
 			ioCopiedObjects.insert(*itNewObjects);
-			status = CopyInDirectObject(*itNewObjects,newObjectID,ioCopiedObjects);
+			status = CopyInDirectObject(*itNewObjects,it->second,ioCopiedObjects);
 		}
 	}
 	return status;
@@ -532,6 +549,7 @@ EStatusCode PDFDocumentHandler::WriteObjectByType(PDFObject* inObject,ETokenSepa
 				outSourceObjectsToAdd.push_back(sourceObjectID);
 			}
 			mObjectsContext->WriteIndirectObjectReference(itObjects->second,inSeparator);
+			break;
 		}
 		case ePDFObjectArray:
 		{
@@ -651,6 +669,7 @@ EStatusCode PDFDocumentHandler::WriteObjectByType(PDFObject* inObject,Dictionary
 				outSourceObjectsToAdd.push_back(sourceObjectID);
 			}
 			inDictionaryContext->WriteObjectReferenceValue(itObjects->second);
+			break;
 		}
 		case ePDFObjectArray:
 		{
