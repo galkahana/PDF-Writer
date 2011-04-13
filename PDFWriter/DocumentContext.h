@@ -34,6 +34,7 @@
 
 #include <string>
 #include <set>
+#include <utility>
 
 using namespace std;
 using namespace IOBasicTypes;
@@ -50,6 +51,7 @@ class PDFFormXObject;
 class PDFRectangle;
 class PDFImageXObject;
 class PDFUsedFont;
+class PageContentContext;
 
 typedef set<IDocumentContextExtender*> IDocumentContextExtenderSet;
 
@@ -71,6 +73,7 @@ public:
 
 	// Use StartPageContentContext for creating a page content for this page.
 	// using the context you can now start creating content for it.
+	// if this page already has a content context, it will be returned
 	PageContentContext* StartPageContentContext(PDFPage* inPage);
 
 	// Use PausePageContentContext in order to flush a current content write, in order
@@ -83,8 +86,8 @@ public:
 	// Finalize and release the page context. the current content stream is flushed to the PDF stream
 	EStatusCode EndPageContentContext(PageContentContext* inPageContext);
 	
-	EStatusCode WritePage(PDFPage* inPage);
-	EStatusCode WritePageAndRelease(PDFPage* inPage);
+	EStatusCodeAndObjectIDType WritePage(PDFPage* inPage);
+	EStatusCodeAndObjectIDType WritePageAndRelease(PDFPage* inPage);
 
 
 	// Form XObject creation and finalization
@@ -122,6 +125,10 @@ public:
 																const PDFPageRange& inPageRange,
 																EPDFPageBox inPageBoxToUseAsFormBox,
 																const double* inTransformationMatrix);
+
+	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
+														const PDFPageRange& inPageRange);
+
 
 	// Font [Text]
 	PDFUsedFont* GetFontForFile(const wstring& inFontFilePath);

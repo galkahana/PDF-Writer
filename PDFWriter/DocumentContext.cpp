@@ -493,10 +493,12 @@ static const string scPage = "Page";
 static const string scMediaBox = "MediaBox";
 static const string scContents = "Contents";
 
-EStatusCode DocumentContext::WritePage(PDFPage* inPage)
+EStatusCodeAndObjectIDType DocumentContext::WritePage(PDFPage* inPage)
 {
-	EStatusCode status = eSuccess;
-	ObjectIDType pageID = mObjectsContext->StartNewIndirectObject();
+	EStatusCodeAndObjectIDType result;
+	
+	result.first = eSuccess;
+	result.second = mObjectsContext->StartNewIndirectObject();
 
 	DictionaryContext* pageContext = mObjectsContext->StartDictionary();
 
@@ -506,7 +508,7 @@ EStatusCode DocumentContext::WritePage(PDFPage* inPage)
 
 	// parent
 	pageContext->WriteKey(scParent);
-	pageContext->WriteObjectReferenceValue(mCatalogInformation.AddPageToPageTree(pageID,mObjectsContext->GetInDirectObjectsRegistry()));
+	pageContext->WriteObjectReferenceValue(mCatalogInformation.AddPageToPageTree(result.second,mObjectsContext->GetInDirectObjectsRegistry()));
 	
 	// Media Box
 	pageContext->WriteKey(scMediaBox);
@@ -516,8 +518,8 @@ EStatusCode DocumentContext::WritePage(PDFPage* inPage)
 	{
 		// Resource dict 
 		pageContext->WriteKey(scResources);
-		status = WriteResourcesDictionary(inPage->GetResourcesDictionary());
-		if(status != eSuccess)
+		result.first = WriteResourcesDictionary(inPage->GetResourcesDictionary());
+		if(result.first != eSuccess)
 		{
 			TRACE_LOG("DocumentContext::WritePage, failed to write resources dictionary");
 			break;
@@ -545,17 +547,17 @@ EStatusCode DocumentContext::WritePage(PDFPage* inPage)
 		}
 
 		IDocumentContextExtenderSet::iterator it = mExtenders.begin();
-		for(; it != mExtenders.end() && eSuccess == status; ++it)
+		for(; it != mExtenders.end() && eSuccess == result.first; ++it)
 		{
-			status = (*it)->OnPageWrite(inPage,pageContext,mObjectsContext,this);
-			if(status != eSuccess)
+			result.first = (*it)->OnPageWrite(inPage,pageContext,mObjectsContext,this);
+			if(result.first != eSuccess)
 			{
 				TRACE_LOG("DocumentContext::WritePage, unexpected faiulre. extender declared failure when writing page.");
 				break;
 			}
 		}
-		status = mObjectsContext->EndDictionary(pageContext);
-		if(status != eSuccess)
+		result.first = mObjectsContext->EndDictionary(pageContext);
+		if(result.first != eSuccess)
 		{
 			TRACE_LOG("DocumentContext::WritePage, unexpected faiulre. Failed to end dictionary in page write.");
 			break;
@@ -563,13 +565,13 @@ EStatusCode DocumentContext::WritePage(PDFPage* inPage)
 		mObjectsContext->EndIndirectObject();	
 	}while(false);
 
-	return status;
+	return result;
 }
 
 
-EStatusCode DocumentContext::WritePageAndRelease(PDFPage* inPage)
+EStatusCodeAndObjectIDType DocumentContext::WritePageAndRelease(PDFPage* inPage)
 {
-	EStatusCode status = WritePage(inPage);
+	EStatusCodeAndObjectIDType status = WritePage(inPage);
 	delete inPage;
 	return status;
 }
@@ -616,7 +618,11 @@ string DocumentContext::GenerateMD5IDForFile()
 
 PageContentContext* DocumentContext::StartPageContentContext(PDFPage* inPage)
 {
-	return new PageContentContext(inPage,mObjectsContext);
+	if(!inPage->GetAssociatedContentContext())
+	{
+		inPage->AssociateContentContext(new PageContentContext(inPage,mObjectsContext));
+	}
+	return inPage->GetAssociatedContentContext();
 }
 
 EStatusCode DocumentContext::PausePageContentContext(PageContentContext* inPageContext)
@@ -893,4 +899,10 @@ EStatusCodeAndPDFFormXObjectList DocumentContext::CreateFormXObjectsFromPDF(cons
 {
 	return mPDFDocumentHandler.CreateFormXObjectsFromPDF(inPDFFilePath,inPageRange,inPageBoxToUseAsFormBox,inTransformationMatrix);	
 
+}
+
+EStatusCodeAndObjectIDTypeList DocumentContext::AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
+																	  const PDFPageRange& inPageRange)
+{
+	return mPDFDocumentHandler.AppendPDFPagesFromPDF(inPDFFilePath,inPageRange);	
 }

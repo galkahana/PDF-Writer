@@ -72,14 +72,24 @@ EStatusCode PDFWriter::EndPDF()
 	return status;
 }
 
-EStatusCode PDFWriter::WritePage(PDFPage* inPage)
+EStatusCodeAndObjectIDType PDFWriter::WritePageAndReturnPageID(PDFPage* inPage)
 {
 	return mDocumentContext.WritePage(inPage);
 }
 
-EStatusCode PDFWriter::WritePageAndRelease(PDFPage* inPage)
+EStatusCodeAndObjectIDType PDFWriter::WritePageReleaseAndReturnPageID(PDFPage* inPage)
 {
 	return mDocumentContext.WritePageAndRelease(inPage);
+}
+
+EStatusCode PDFWriter::WritePage(PDFPage* inPage)
+{
+	return mDocumentContext.WritePage(inPage).first;
+}
+
+EStatusCode PDFWriter::WritePageAndRelease(PDFPage* inPage)
+{
+	return mDocumentContext.WritePageAndRelease(inPage).first;
 }
 
 
@@ -194,3 +204,11 @@ EStatusCodeAndPDFFormXObjectList PDFWriter::CreateFormXObjectsFromPDF(const wstr
 														inPageBoxToUseAsFormBox,
 														inTransformationMatrix);
 }
+
+EStatusCodeAndObjectIDTypeList PDFWriter::AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
+																const PDFPageRange& inPageRange)
+{
+	return mDocumentContext.AppendPDFPagesFromPDF(inPDFFilePath,
+														inPageRange);
+}
+

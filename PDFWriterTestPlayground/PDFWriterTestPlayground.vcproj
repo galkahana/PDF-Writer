@@ -661,6 +661,14 @@
 			</Filter>
 		</Filter>
 		<File
+			RelativePath=".\AppendPagesTest.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\AppendPagesTest.h"
+			>
+		</File>
+		<File
 			RelativePath=".\ImportantReadme.txt"
 			>
 		</File>

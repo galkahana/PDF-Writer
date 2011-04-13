@@ -27,6 +27,8 @@
 
 #include <list>
 
+class PageContentContext;
+
 typedef std::list<ObjectIDType> ObjectIDTypeList;
 
 class PDFPage
@@ -44,9 +46,15 @@ public:
 	ObjectIDType GetContentStreamsCount();
 	SingleValueContainerIterator<ObjectIDTypeList> GetContentStreamReferencesIterator();
 
+	// extensibility, direct access to the content context used for this page..
+	PageContentContext* GetAssociatedContentContext();
+	void DisassociateContentContext();
+	void AssociateContentContext(PageContentContext* inContentContext);
+
 private:
 	PDFRectangle mMediaBox;
 	ObjectIDTypeList mContentStreamReferences;
 	ResourcesDictionary mResources;
+	PageContentContext* mContentContext;
 
 };

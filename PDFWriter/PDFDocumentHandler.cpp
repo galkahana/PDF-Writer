@@ -20,6 +20,9 @@
 #include "PDFLiteralString.h"
 #include "PDFHexString.h"
 #include "PrimitiveObjectsWriter.h"
+#include "PageContentContext.h"
+#include "PDFPage.h"
+
 
 PDFDocumentHandler::PDFDocumentHandler(void)
 {
@@ -753,4 +756,214 @@ EStatusCode PDFDocumentHandler::OnResourcesWrite(
 			status = WriteObjectByType(it.GetValue(),inPageResourcesDictionaryContext,dummyObjectList);
 	}
 	return status;
+}
+
+EStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
+																		const PDFPageRange& inPageRange)
+{
+	EStatusCodeAndObjectIDTypeList result;
+	
+
+	do
+	{
+		result.first = mPDFFile.OpenFile(inPDFFilePath);
+		if(result.first != eSuccess)
+		{
+			TRACE_LOG1("PDFDocumentHandler::CreatePDFPagesFromPDF, unable to open file for reading in %s",inPDFFilePath.c_str());
+			break;
+		}
+
+		result.first = mParser.StartPDFParsing(mPDFFile.GetInputStream());
+		if(result.first != eSuccess)
+		{
+			TRACE_LOG("PDFDocumentHandler::CreatePDFPagesFromPDF, failure occured while parsing PDF file.");
+			break;
+		}
+
+		EStatusCodeAndObjectIDType newObject;
+
+		if(PDFPageRange::eRangeTypeAll == inPageRange.mType)
+		{
+			for(unsigned long i=0; i < mParser.GetPagesCount() && eSuccess == result.first; ++i)
+			{
+				newObject = CreatePDFPageForPage(i);
+				if(eSuccess == newObject.first)
+				{
+					result.second.push_back(newObject.second);
+				}
+				else
+				{
+					TRACE_LOG1("PDFDocumentHandler::CreatePDFPagesFromPDF, failed to embed page %ld", i);
+					result.first = eFailure;
+				}
+			}
+		}
+		else
+		{
+			// eRangeTypeSpecific
+			ULongAndULongList::const_iterator it = inPageRange.mSpecificRanges.begin();
+			for(; it != inPageRange.mSpecificRanges.end() && eSuccess == result.first;++it)
+			{
+				if(it->first <= it->second && it->second < mParser.GetPagesCount())
+				{
+					for(unsigned long i=it->first; i <= it->second && eSuccess == result.first; ++i)
+					{
+						newObject = CreatePDFPageForPage(i);
+						if(eSuccess == newObject.first)
+						{
+							result.second.push_back(newObject.second);
+						}
+						else
+						{
+							TRACE_LOG1("PDFDocumentHandler::CreatePDFPagesFromPDF, failed to embed page %ld", i);
+							result.first = eFailure;
+						}
+					}
+				}
+				else
+				{
+					TRACE_LOG3("PDFDocumentHandler::CreatePDFPagesFromPDF, range mismatch. first = %ld, second = %ld, PDF page count = %ld", 
+						it->first,
+						it->second,
+						mParser.GetPagesCount());
+					result.first = eFailure;
+				}
+			}
+		}
+
+
+	}while(false);
+
+	mPDFFile.CloseFile();
+	// clearing the source to target mapping here. note that pages copying enjoyed sharing of objects between them
+	mSourceToTarget.clear();
+
+	return result;
+}
+
+EStatusCodeAndObjectIDType PDFDocumentHandler::CreatePDFPageForPage(unsigned long inPageIndex)
+{
+	RefCountPtr<PDFDictionary> pageObject = mParser.ParsePage(inPageIndex);
+	EStatusCodeAndObjectIDType result;
+	result.first = eFailure;
+	result.second = 0;
+	PDFPage* newPage = NULL;
+
+	if(!pageObject)
+	{
+		TRACE_LOG1("PDFDocumentHandler::CreatePDFPageForPage, unhexpected exception, page index does not denote a page object. page index = %ld",inPageIndex);
+		return result;
+	}
+
+	do
+	{
+		if(CopyResourcesIndirectObjects(pageObject.GetPtr()) != eSuccess)
+			break;
+
+		// Create a new form XObject
+		newPage = new PDFPage();
+		newPage->SetMediaBox(DeterminePageBox(pageObject.GetPtr(),ePDFPageBoxMediaBox));
+
+		// copy the page content to the target page content
+		if(CopyPageContentToTargetPage(newPage,pageObject.GetPtr()) != eSuccess)
+		{
+			delete newPage;
+			newPage = NULL;
+			break;
+		}
+
+		// resources dictionary is gonna be empty at this point...so we can use our own code to write the dictionary, by extending.
+		// which will be a simple loop. note that at this point all indirect objects should have been copied, and have mapping
+		mDocumentContext->AddDocumentContextExtender(this);
+		mWrittenPage = pageObject.GetPtr();
+
+		result = mDocumentContext->WritePage(newPage);
+		if(result.first != eSuccess)
+		{
+			delete newPage;
+			newPage = NULL;
+			break;
+		}
+
+	}while(false);
+
+	delete newPage;
+	mWrittenPage = NULL;
+	mDocumentContext->RemoveDocumentContextExtender(this);
+
+	return result;	
+}
+
+EStatusCode PDFDocumentHandler::CopyPageContentToTargetPage(PDFPage* inPage,PDFDictionary* inPageObject)
+{
+	EStatusCode status = eSuccess;
+
+	PageContentContext* pageContentContext = mDocumentContext->StartPageContentContext(inPage);
+
+	RefCountPtr<PDFObject> pageContent(mParser.QueryDictionaryObject(inPageObject,"Contents"));
+	if(pageContent->GetType() == ePDFObjectStream)
+	{
+		status = WritePDFStreamInputToContentContext(pageContentContext,(PDFStreamInput*)pageContent.GetPtr());
+	}
+	else if(pageContent->GetType() == ePDFObjectArray)
+	{
+		SingleValueContainerIterator<PDFObjectVector> it = ((PDFArray*)pageContent.GetPtr())->GetIterator();
+		PDFObjectCastPtr<PDFIndirectObjectReference> refItem;
+		while(it.MoveNext() && status == eSuccess)
+		{
+			refItem = it.GetItem();
+			if(!refItem)
+			{
+				status = eFailure;
+				TRACE_LOG("PDFDocumentHandler::CopyPageContentToTargetPage, content stream array contains non-refs");
+				break;
+			}
+			PDFObjectCastPtr<PDFStreamInput> contentStream(mParser.ParseNewObject(refItem->mObjectID));
+			if(!contentStream)
+			{
+				status = eFailure;
+				TRACE_LOG("PDFDocumentHandler::CopyPageContentToTargetPage, content stream array contains references to non streams");
+				break;
+			}
+			status = WritePDFStreamInputToContentContext(pageContentContext,contentStream.GetPtr());
+		}
+	}
+	else
+	{
+		TRACE_LOG1("PDFDocumentHandler::CopyPageContentToTargetPage, error copying page content, expected either array or stream, getting %s",scPDFObjectTypeLabel[pageContent->GetType()]);
+		status = eFailure;
+	}
+	
+	if(status != eSuccess)
+	{
+		delete pageContentContext;
+	}
+	else
+	{
+		mDocumentContext->EndPageContentContext(pageContentContext);
+	}
+	return status;
+}
+
+EStatusCode PDFDocumentHandler::WritePDFStreamInputToContentContext(PageContentContext* inContentContext,PDFStreamInput* inContentSource)
+{
+	EStatusCode status = eSuccess;
+	
+	do
+	{
+		inContentContext->StartAStreamIfRequired();
+
+		status = WritePDFStreamInputToStream(inContentContext->GetCurrentPageContentStream()->GetWriteStream(),inContentSource);
+		if(status != eSuccess)
+		{
+			TRACE_LOG("PDFDocumentHandler::WritePDFStreamInputToContentContext, failed to write content stream from page input to target page");
+			break;
+		}
+
+		status = inContentContext->FinalizeCurrentStream();
+
+	}while(false);
+
+	return status;
+
 }

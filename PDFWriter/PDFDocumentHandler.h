@@ -19,11 +19,12 @@ class PDFDictionary;
 class PDFArray;
 class PDFStreamInput;
 class DictionaryContext;
+class PageContentContext;
+class PDFPage;
 
 using namespace std;
 
 typedef map<ObjectIDType,ObjectIDType> ObjectIDTypeToObjectIDTypeMap;
-typedef list<ObjectIDType> ObjectIDTypeList;
 typedef set<ObjectIDType> ObjectIDTypeSet;
 
 
@@ -35,10 +36,18 @@ public:
 
 	void SetOperationsContexts(DocumentContext* inDocumentcontext,ObjectsContext* inObjectsContext);
 
+	// Create a list of XObjects from a PDF file.
+	// the list of objects can then be used to place the "pages" in various locations on the written
+	// PDF page.
 	EStatusCodeAndPDFFormXObjectList CreateFormXObjectsFromPDF( const wstring& inPDFFilePath,
 																const PDFPageRange& inPageRange,
 																EPDFPageBox inPageBoxToUseAsFormBox,
 																const double* inTransformationMatrix);
+	
+	// appends pages from source PDF to the written PDF. returns object ID for the created pages
+	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
+														const PDFPageRange& inPageRange);
+
 
 	// IDocumentContextExtender implementation
 	virtual EStatusCode OnResourcesWrite(
@@ -78,6 +87,9 @@ private:
 
 
 	EStatusCode WriteStreamObject(PDFStreamInput* inStream,ObjectIDTypeList& outSourceObjectsToAdd);
+	EStatusCodeAndObjectIDType CreatePDFPageForPage(unsigned long inPageIndex);
+	EStatusCode CopyPageContentToTargetPage(PDFPage* inPage,PDFDictionary* inPageObject);
+	EStatusCode WritePDFStreamInputToContentContext(PageContentContext* inContentContext,PDFStreamInput* inContentSource);
 
 
 };

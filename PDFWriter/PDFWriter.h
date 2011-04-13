@@ -83,6 +83,10 @@ public:
 	EStatusCode WritePage(PDFPage* inPage);
 	EStatusCode WritePageAndRelease(PDFPage* inPage);
 
+	// same as above page writing, but also return page ID. good for extensibility, when you want to refer to the written page form some other place
+	EStatusCodeAndObjectIDType WritePageAndReturnPageID(PDFPage* inPage);
+	EStatusCodeAndObjectIDType WritePageReleaseAndReturnPageID(PDFPage* inPage);
+
 
 	// Form XObject creating and writing
 	PDFFormXObject* StartFormXObject(const PDFRectangle& inBoundingBox,const double* inMatrix = NULL);
@@ -115,10 +119,16 @@ public:
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 
 	// PDF 
+
+	// CreateFormXObjectsFromPDF is for using input PDF pages as objects in one page or more
 	EStatusCodeAndPDFFormXObjectList CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
 																const PDFPageRange& inPageRange,
 																EPDFPageBox inPageBoxToUseAsFormBox,
 																const double* inTransformationMatrix = NULL);
+
+	// AppendPDFPagesFromPDF is for simple appending of the input PDF pages
+	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
+														const PDFPageRange& inPageRange);
 
 	// fonts [text]
 	PDFUsedFont* GetFontForFile(const wstring& inFontFilePath);

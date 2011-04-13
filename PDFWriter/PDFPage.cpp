@@ -22,6 +22,7 @@
 
 PDFPage::PDFPage(void)
 {
+	mContentContext = NULL;
 }
 
 PDFPage::~PDFPage(void)
@@ -57,4 +58,19 @@ SingleValueContainerIterator<ObjectIDTypeList> PDFPage::GetContentStreamReferenc
 ResourcesDictionary& PDFPage::GetResourcesDictionary()
 {
 	return mResources;
+}
+
+PageContentContext* PDFPage::GetAssociatedContentContext()
+{
+	return mContentContext;
+}
+
+void PDFPage::DisassociateContentContext()
+{
+	mContentContext = NULL;
+}
+
+void PDFPage::AssociateContentContext(PageContentContext* inContentContext)
+{
+	mContentContext = inContentContext;
 }

@@ -38,13 +38,15 @@ public:
 	// Extensibility method, retrieves the current content stream for writing. if one does not exist - creates it.
 	PDFStream* GetCurrentPageContentStream();
 
+	// Extensibility method, forces creation of a new stream, if one does not exist now.
+	void StartAStreamIfRequired();
+
 private:
 	PDFPage* mPageOfContext;
 	ObjectsContext* mObjectsContext;
 	PDFStream* mCurrentStream;
 
 	EStatusCode FinalizeStreamWriteAndRelease();
-	void StartAStreamIfRequired();
 	void StartContentStreamDefinition();
 
 	// AbstractContentContext implementation
