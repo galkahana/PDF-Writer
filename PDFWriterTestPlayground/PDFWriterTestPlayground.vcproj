@@ -627,6 +627,14 @@
 				Name="PDFEmbedding"
 				>
 				<File
+					RelativePath=".\AppendPagesTest.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\AppendPagesTest.h"
+					>
+				</File>
+				<File
 					RelativePath=".\PDFEmbedTest.cpp"
 					>
 				</File>
@@ -660,14 +668,6 @@
 				</File>
 			</Filter>
 		</Filter>
-		<File
-			RelativePath=".\AppendPagesTest.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\AppendPagesTest.h"
-			>
-		</File>
 		<File
 			RelativePath=".\ImportantReadme.txt"
 			>
