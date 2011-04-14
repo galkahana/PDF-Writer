@@ -47,6 +47,7 @@ ObjectIDType IndirectObjectsReferenceRegistry::AllocateNewObjectID()
 	return newObjectID;
 }
 
+
 EStatusCode IndirectObjectsReferenceRegistry::MarkObjectAsWritten(ObjectIDType inObjectID,LongFilePositionType inWritePosition)
 {
 	if(mObjectsWritesRegistry.size() <= inObjectID)
@@ -62,7 +63,7 @@ EStatusCode IndirectObjectsReferenceRegistry::MarkObjectAsWritten(ObjectIDType i
 		return eFailure; // trying to mark as written an object that was already marked as such in the past. probably a mistake [till we have revisions]
 	}
 
-	if(inWritePosition > 999999999L) // if write position is larger than what can be represented by 10 digits, xref write will fail
+	if(inWritePosition > 9999999999L) // if write position is larger than what can be represented by 10 digits, xref write will fail
 	{
 		TRACE_LOG1("IndirectObjectsReferenceRegistry::MarkObjectAsWritten, Write position out of bounds. Trying to write an object at position that cannot be represented in Xref = %lld. probably means file got too long",inWritePosition);
 		return eFailure;

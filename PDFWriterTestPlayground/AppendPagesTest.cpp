@@ -21,7 +21,7 @@ EStatusCode AppendPagesTest::Run()
 
 	do
 	{
-		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\AppendPagesTest.PDF",ePDFVersion13);
+		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\AppendPagesTest.PDF",ePDFVersion13,LogConfiguration(true,L"c:\\PDFLibTests\\zvika.txt"));
 		if(status != eSuccess)
 		{
 			wcout<<"failed to start PDF\n";
@@ -36,6 +36,7 @@ EStatusCode AppendPagesTest::Run()
 			status = result.first;
 			break;
 		}
+
 
 		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\BasicTIFFImagesTest.PDF",PDFPageRange());
 		if(result.first != eSuccess)
