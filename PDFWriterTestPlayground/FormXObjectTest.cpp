@@ -176,4 +176,4 @@ EStatusCode FormXObjectTest::Run()
 	return status;	
 }
 
-ADD_CETEGORIZED_TEST(FormXObjectTest,"PDF")
+ADD_CATEGORIZED_TEST(FormXObjectTest,"PDF")

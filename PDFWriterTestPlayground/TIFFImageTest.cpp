@@ -237,4 +237,4 @@ EStatusCode TIFFImageTest::AddPageForTIFF(PDFWriter& inPDFWriter, const wchar_t*
 	return status;
 }
 
-ADD_CETEGORIZED_TEST(TIFFImageTest,"PDF Images")
+ADD_CATEGORIZED_TEST(TIFFImageTest,"PDF Images")

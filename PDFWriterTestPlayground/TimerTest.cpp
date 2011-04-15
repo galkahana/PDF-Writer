@@ -67,4 +67,4 @@ void TimerTest::Sleep(double inSeconds)
 		;
 }
 
-ADD_CETEGORIZED_TEST(TimerTest,"Basics")
+ADD_CATEGORIZED_TEST(TimerTest,"Basics")

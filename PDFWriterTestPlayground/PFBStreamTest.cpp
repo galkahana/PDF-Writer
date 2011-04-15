@@ -79,4 +79,4 @@ EStatusCode PFBStreamTest::Run()
 }
 
 
-ADD_CETEGORIZED_TEST(PFBStreamTest,"Type1")
+ADD_CATEGORIZED_TEST(PFBStreamTest,"Type1")

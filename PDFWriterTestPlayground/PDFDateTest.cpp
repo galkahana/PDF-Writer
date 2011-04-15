@@ -103,4 +103,4 @@ EStatusCode PDFDateTest::Run()
 }
 
 
-ADD_CETEGORIZED_TEST(PDFDateTest,"ObjectContext")
+ADD_CATEGORIZED_TEST(PDFDateTest,"ObjectContext")

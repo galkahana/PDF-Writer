@@ -137,8 +137,8 @@ PDFObject* PDFObjectParser::ParseNewObject()
 
 				// if passed all these, then this is a reference
 				PDFObject* referenceObject = new PDFIndirectObjectReference(
-													((PDFInteger*)pdfObject)->GetValue(),
-													((PDFInteger*)versionObject)->GetValue());
+													(ObjectIDType)((PDFInteger*)pdfObject)->GetValue(),
+													(unsigned long)((PDFInteger*)versionObject)->GetValue());
 				delete pdfObject;
 				delete versionObject;
 				pdfObject = referenceObject;
@@ -435,13 +435,15 @@ bool PDFObjectParser::IsNumber(const string& inToken)
 	return isNumber;
 }
 
+typedef BoxingBaseWithRW<long long> LongLong;
+
 PDFObject* PDFObjectParser::ParseNumber(const string& inToken)
 {
 	// once we know this is a number, then parsing is easy. just determine if it's a real or integer, so as to separate classes for better accuracy
 	if(inToken.find(scDot) != inToken.npos)
 		return new PDFReal(Double(inToken));
 	else
-		return new PDFInteger(Long(inToken));
+		return new PDFInteger(LongLong(inToken));
 }
 
 static const string scLeftSquare = "[";

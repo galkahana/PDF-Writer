@@ -100,4 +100,4 @@ EStatusCode BoxingBaseTest::RunIntTest()
 	return status;
 }
 
-ADD_CETEGORIZED_TEST(BoxingBaseTest,"Patterns")
+ADD_CATEGORIZED_TEST(BoxingBaseTest,"Patterns")

@@ -60,4 +60,4 @@ EStatusCode TrueTypeTest::Run()
 	return status;
 }
 
-ADD_CETEGORIZED_TEST(TrueTypeTest,"TrueType")
+ADD_CATEGORIZED_TEST(TrueTypeTest,"TrueType")

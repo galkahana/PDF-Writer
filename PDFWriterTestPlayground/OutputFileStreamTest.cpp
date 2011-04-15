@@ -48,5 +48,5 @@ EStatusCode OutputFileStreamTest::Run()
 	return eSuccess;
 }
 
-ADD_CETEGORIZED_TEST(OutputFileStreamTest,"IO")
+ADD_CATEGORIZED_TEST(OutputFileStreamTest,"IO")
 

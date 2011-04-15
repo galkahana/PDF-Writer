@@ -243,4 +243,4 @@ EStatusCode Type1Test::SaveCharstringCode(const string& inCharStringName,Type1In
 
 }
 
-ADD_CETEGORIZED_TEST(Type1Test,"Type1")
+ADD_CATEGORIZED_TEST(Type1Test,"Type1")

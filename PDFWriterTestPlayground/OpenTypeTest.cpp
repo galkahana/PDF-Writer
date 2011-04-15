@@ -101,4 +101,4 @@ EStatusCode OpenTypeTest::TestFont()
 	return status;
 }
 
-ADD_CETEGORIZED_TEST(OpenTypeTest,"OpenType")
+ADD_CATEGORIZED_TEST(OpenTypeTest,"OpenType")

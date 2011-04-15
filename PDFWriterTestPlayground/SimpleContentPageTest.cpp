@@ -121,4 +121,4 @@ EStatusCode SimpleContentPageTest::Run()
 	return status;
 }
 
-ADD_CETEGORIZED_TEST(SimpleContentPageTest,"PDF")
+ADD_CATEGORIZED_TEST(SimpleContentPageTest,"PDF")

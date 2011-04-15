@@ -70,7 +70,7 @@ private:
 	void DeleteTests();
 };
 
-// make sure to use ADD_TEST or ADD_CETEGORIZED_TEST for the test class in your local CPP code...in order not to get
+// make sure to use ADD_TEST or ADD_CATEGORIZED_TEST for the test class in your local CPP code...in order not to get
 // multiple definitions of TestRegistrar
 #define ADD_TEST(X) \
 template <class T> \
@@ -82,7 +82,7 @@ class TestRegistrar { \
 };  \
 static TestRegistrar<X> TestRegistrar;
 
-#define ADD_CETEGORIZED_TEST(X,CATEGORY) \
+#define ADD_CATEGORIZED_TEST(X,CATEGORY) \
 template <class T> \
 class TestRegistrar { \
 	public:  \

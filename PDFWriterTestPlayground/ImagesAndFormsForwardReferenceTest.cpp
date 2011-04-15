@@ -176,4 +176,4 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 	return status;		
 }
 
-ADD_CETEGORIZED_TEST(ImagesAndFormsForwardReferenceTest,"PDF Images")
+ADD_CATEGORIZED_TEST(ImagesAndFormsForwardReferenceTest,"PDF Images")

@@ -43,7 +43,7 @@ public:
 	// get a parser that can parse objects
 	PDFObjectParser& GetObjectParser();
 
-	// below become available after initial parsing
+	// below become available after initial parsing [this level is from the header]
 	double GetPDFLevel();
 
 	// GetTrailer, not calling AddRef
@@ -94,11 +94,13 @@ private:
 	EStatusCode BuildXrefTable();
 	EStatusCode DetermineXrefSize();
 	EStatusCode InitializeXref();
-	EStatusCode ParseXref();
+	EStatusCode ParseXref(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,LongFilePositionType inXrefPosition);
 	PDFObject* ParseExistingInDirectObject(ObjectIDType inObjectID);
 	EStatusCode ParsePagesObjectIDs();
 	EStatusCode ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID);
 	EStatusCode ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID,unsigned long& ioCurrentPageIndex);
+	EStatusCode ParsePreviousXrefs(PDFDictionary* inTrailer);
+	void MergeXrefWithMainXref(XrefEntryInput* inTableToMerge);
 
 	void ResetParser();
 
@@ -110,6 +112,7 @@ private:
 	bool IsBeginOfFile();
 
 	bool GoBackTillToken();
+	bool GoBackTillNonToken();
 	void GoBackTillLineStart();
 	bool IsPDFWhiteSpace(Byte inCharacter);
 

@@ -60,4 +60,4 @@ EStatusCode EmptyFileTest::Run()
 	return status;
 }
 
-ADD_CETEGORIZED_TEST(EmptyFileTest,"PDF")
+ADD_CATEGORIZED_TEST(EmptyFileTest,"PDF")

@@ -1,6 +1,6 @@
 #include "PDFInteger.h"
 
-PDFInteger::PDFInteger(long inValue):PDFObject(eType)
+PDFInteger::PDFInteger(long long inValue):PDFObject(eType)
 {
 	mValue = inValue;
 }
@@ -9,12 +9,12 @@ PDFInteger::~PDFInteger(void)
 {
 }
 
-long PDFInteger::GetValue() const
+long long PDFInteger::GetValue() const
 {
 	return mValue;
 }
 
-PDFInteger::operator long() const
+PDFInteger::operator long long() const
 {
 	return mValue;
 }

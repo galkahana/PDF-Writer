@@ -77,4 +77,4 @@ EStatusCode PDFTextStringTest::Run()
 }
 
 
-ADD_CETEGORIZED_TEST(PDFTextStringTest,"ObjectContext")
+ADD_CATEGORIZED_TEST(PDFTextStringTest,"ObjectContext")

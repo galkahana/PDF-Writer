@@ -50,4 +50,4 @@ EStatusCode LogTest::Run()
 	return eSuccess;
 }
 
-ADD_CETEGORIZED_TEST(LogTest,"IO")
+ADD_CATEGORIZED_TEST(LogTest,"IO")

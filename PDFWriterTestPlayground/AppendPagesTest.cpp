@@ -21,18 +21,25 @@ EStatusCode AppendPagesTest::Run()
 
 	do
 	{
-		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\AppendPagesTest.PDF",ePDFVersion13,LogConfiguration(true,L"c:\\PDFLibTests\\zvika.txt"));
+		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\AppendPagesTest.PDF",ePDFVersion13,LogConfiguration(true,L"c:\\pdflibtests\\AppendPagesTestLog.txt"));
 		if(status != eSuccess)
 		{
 			wcout<<"failed to start PDF\n";
 			break;
 		}	
 
-		// append pages from XObjectContent.pdf
-		EStatusCodeAndObjectIDTypeList result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF",PDFPageRange());
+		EStatusCodeAndObjectIDTypeList result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\Original.pdf",PDFPageRange());
 		if(result.first != eSuccess)
 		{
-			wcout<<"failed to create append pages from XObjectContent.pdf\n";
+			wcout<<"failed to append pages from Original.PDF\n";
+			status = result.first;
+			break;
+		}
+
+		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF",PDFPageRange());
+		if(result.first != eSuccess)
+		{
+			wcout<<"failed to append pages from XObjectContent.pdf\n";
 			status = result.first;
 			break;
 		}
@@ -41,10 +48,11 @@ EStatusCode AppendPagesTest::Run()
 		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\BasicTIFFImagesTest.PDF",PDFPageRange());
 		if(result.first != eSuccess)
 		{
-			wcout<<"failed to create append pages from BasicTIFFImagesTest.PDF\n";
+			wcout<<"failed to append pages from BasicTIFFImagesTest.PDF\n";
 			status = result.first;
 			break;
 		}
+
 
 		status = pdfWriter.EndPDF();
 		if(status != eSuccess)
@@ -59,4 +67,4 @@ EStatusCode AppendPagesTest::Run()
 }
 
 
-ADD_CETEGORIZED_TEST(AppendPagesTest,"PDFEmbedding")
+ADD_CATEGORIZED_TEST(AppendPagesTest,"PDFEmbedding")

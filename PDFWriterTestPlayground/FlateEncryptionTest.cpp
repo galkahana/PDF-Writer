@@ -94,4 +94,4 @@ EStatusCode FlateEncryptionTest::Run()
 	return status;
 }
 
-ADD_CETEGORIZED_TEST(FlateEncryptionTest,"IO")
+ADD_CATEGORIZED_TEST(FlateEncryptionTest,"IO")

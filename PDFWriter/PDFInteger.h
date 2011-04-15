@@ -10,12 +10,12 @@ public:
 		eType = ePDFObjectInteger
 	};
 
-	PDFInteger(long inValue);
+	PDFInteger(long long inValue);
 	virtual ~PDFInteger(void);
 
-	long GetValue() const;
-	operator long() const;
+	long long GetValue() const;
+	operator long long() const;
 
 private:
-	long mValue;
+	long long mValue;
 };

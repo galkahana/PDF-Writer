@@ -169,4 +169,4 @@ EStatusCode PDFParserTest::IterateObjectTypes(PDFObject* inObject,PDFParser& inP
 	
 }
 
-ADD_CETEGORIZED_TEST(PDFParserTest,"PDFEmbedding")
+ADD_CATEGORIZED_TEST(PDFParserTest,"PDFEmbedding")

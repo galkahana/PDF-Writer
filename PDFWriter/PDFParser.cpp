@@ -33,6 +33,7 @@ void PDFParser::ResetParser()
 	delete[] mXrefTable;
 	mXrefTable = NULL;
 	delete[] mPagesObjectIDs;
+	mPagesObjectIDs = NULL;
 
 }
 
@@ -164,6 +165,22 @@ bool PDFParser::GoBackTillToken()
 		}
 	}
 	return foundToken;
+}
+
+bool PDFParser::GoBackTillNonToken()
+{
+	Byte buffer;
+	bool foundNonToken = false;
+
+	while(ReadBack(buffer))
+	{
+		if(IsPDFWhiteSpace(buffer))
+		{
+			foundNonToken = true;
+			break;
+		}
+	}
+	return foundNonToken;
 }
 
 static const Byte scWhiteSpaces[] = {0,0x9,0xA,0xC,0xD,0x20};
@@ -315,7 +332,7 @@ EStatusCode PDFParser::ParseTrailerDictionary()
 
 	do
 	{
-		if(!GoBackTillToken())
+		if(!GoBackTillToken()) // this should be the end dictionary
 		{
 			status = eFailure;
 			TRACE_LOG("PDFParser::ParseTrailerDictionary, couldn't find trailer end token");
@@ -326,7 +343,7 @@ EStatusCode PDFParser::ParseTrailerDictionary()
 		mStream->SetPositionFromEnd(GetCurrentPositionFromEnd());
 
 		BoolAndString token = aTokenizer.GetNextToken();
-		if(!token.first || token.second != scDictionaryClose)
+		if(!token.first || (token.second != scDictionaryClose && token.second != scDictionaryStart))
 		{
 			status = eFailure;
 			TRACE_LOG1("PDFParser::ParseTrailerDictionary, unexpected token in find trailer end. token = %s",token.second.c_str());
@@ -335,7 +352,7 @@ EStatusCode PDFParser::ParseTrailerDictionary()
 
 		// now loop till you get to dictionar start 
 		//(note that no nesting is expected due to specifications where all must be indirect, so no need to consider nesting.)
-		bool foundDictionaryStart = false;
+		bool foundDictionaryStart = (token.second == scDictionaryStart);
 		while(!foundDictionaryStart)
 		{
 			if(!GoBackTillToken())
@@ -415,7 +432,14 @@ EStatusCode PDFParser::BuildXrefTable()
 		if(status != eSuccess)
 			break;
 
-		status = ParseXref();
+		if(mTrailer->Exists("Prev"))
+		{
+			status = ParsePreviousXrefs(mTrailer.GetPtr());
+			if(status != eSuccess)
+				break;
+		}
+
+		status = ParseXref(mXrefTable,mXrefSize,mLastXrefPosition);
 		if(status != eSuccess)
 			break;
 
@@ -450,7 +474,7 @@ typedef BoxingBaseWithRW<unsigned long> ULong;
 typedef BoxingBaseWithRW<LongFilePositionType> LongFilePositionTypeBox;
 
 static const string scXref = "xref";
-EStatusCode PDFParser::ParseXref()
+EStatusCode PDFParser::ParseXref(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,LongFilePositionType inXrefPosition)
 {
 	// K. cross ref starts at  xref position
 	// and ends with trailer (or when exahausted the number of objects...whichever first)
@@ -462,7 +486,8 @@ EStatusCode PDFParser::ParseXref()
 	Byte entry[20];
 
 	tokenizer.SetReadStream(mStream);
-	mStream->SetPosition(mLastXrefPosition);
+	mStream->SetPosition(inXrefPosition);
+	mObjectParser.ResetReadState();
 
 	// i'll just use a tokenizer, to save perofrmance, and assume that the file is correct
 
@@ -479,7 +504,7 @@ EStatusCode PDFParser::ParseXref()
 		
 		ObjectIDType currentObject = 0;
 
-		while(currentObject < mXrefSize && eSuccess == status)
+		while(currentObject < inXrefSize && eSuccess == status)
 		{
 			token = tokenizer.GetNextToken();
 			if(!token.first)
@@ -501,7 +526,35 @@ EStatusCode PDFParser::ParseXref()
 				status = eFailure;
 				break;
 			}
+			if(ObjectIDTypeBox(token.second) == 0)
+				continue; // probably will never happen
 			firstNonSectionObject = currentObject + ObjectIDTypeBox(token.second);
+
+
+			// first row...not sure where starts...so skip till passing all endlines
+			do
+			{
+				if(mStream->Read(entry,1) != 1)
+				{
+					TRACE_LOG("PDFParser::ParseXref, failed to read xref entry");
+					status = eFailure;
+					break;
+				}
+			}while(IsPDFWhiteSpace(entry[0]));
+
+			// now read extra 19
+			if(mStream->Read(entry+1,19) != 19)
+			{
+				TRACE_LOG("PDFParser::ParseXref, failed to read xref entry");
+				status = eFailure;
+				break;
+			}
+			inXrefTable[currentObject].mObjectPosition = LongFilePositionTypeBox((const char*)entry);
+			inXrefTable[currentObject].mRivision = ULong((const char*)(entry+11));
+			inXrefTable[currentObject].mType = entry[17] == 'n' ? eXrefEntryExisting:eXrefEntryDelete;
+			++currentObject;
+
+
 
 			// now parse the section. 
 			while(currentObject < firstNonSectionObject)
@@ -512,9 +565,9 @@ EStatusCode PDFParser::ParseXref()
 					status = eFailure;
 					break;
 				}
-				mXrefTable[currentObject].mObjectPosition = LongFilePositionTypeBox((const char*)entry);
-				mXrefTable[currentObject].mRivision = ULong((const char*)(entry+11));
-				mXrefTable[currentObject].mType = entry[18] == 'n' ? eXrefEntryExisting:eXrefEntryDelete;
+				inXrefTable[currentObject].mObjectPosition = LongFilePositionTypeBox((const char*)entry);
+				inXrefTable[currentObject].mRivision = ULong((const char*)(entry+11));
+				inXrefTable[currentObject].mType = entry[17] == 'n' ? eXrefEntryExisting:eXrefEntryDelete;
 				++currentObject;
 			}
 		}
@@ -523,6 +576,8 @@ EStatusCode PDFParser::ParseXref()
 
 
 	}while(false);	
+	mObjectParser.ResetReadState(); // cause read without consulting with the tokenizer...so now there shouldn't be available tokens
+
 	return status;
 }
 
@@ -675,7 +730,7 @@ EStatusCode PDFParser::ParsePagesObjectIDs()
 			break;
 		}
 	
-		mPagesCount = totalPagesCount->GetValue();
+		mPagesCount = (unsigned long)totalPagesCount->GetValue();
 		mPagesObjectIDs = new ObjectIDType[mPagesCount];
 
 		// now iterate through pages objects, and fill up the IDs [don't really need the object ID for the root pages tree...but whatever
@@ -841,3 +896,55 @@ PDFObject* PDFParser::QueryArrayObject(PDFArray* inArray,unsigned long inIndex)
 
 }
 
+EStatusCode PDFParser::ParsePreviousXrefs(PDFDictionary* inTrailer)
+{
+	PDFObjectCastPtr<PDFInteger> previousPosition(inTrailer->QueryDirectObject("Prev"));
+	if(!previousPosition)
+	{
+		TRACE_LOG("PDFParser::ParsePreviousXrefs, unexpected, prev is not integer");
+		return eFailure;
+	}
+
+	XrefEntryInput* aTable = new XrefEntryInput[mXrefSize];
+	EStatusCode status;
+	do
+	{
+		status = ParseXref(aTable,mXrefSize,previousPosition->GetValue());
+		if(status != eSuccess)
+		{
+			TRACE_LOG1("PDFParser::ParsePreviousXrefs, failed to parse xref table in %ld",previousPosition->GetValue());
+			break;
+		}
+
+		// at this point we should be after the token of the "trailer"
+		PDFObjectCastPtr<PDFDictionary> trailer(mObjectParser.ParseNewObject());
+		if(!trailer)
+		{
+			status = eFailure;
+			TRACE_LOG("PDFParser::ParsePreviousXrefs, failure to parse trailer dictionary");
+			break;
+		}
+
+		if(trailer->Exists("Prev"))
+		{
+			status = ParsePreviousXrefs(trailer.GetPtr());
+			if(status != eSuccess)
+				break;
+		}
+
+		MergeXrefWithMainXref(aTable);
+	}
+	while(false);
+
+	delete[] aTable;
+	return status;
+}
+
+void PDFParser::MergeXrefWithMainXref(XrefEntryInput* inTableToMerge)
+{
+	for(ObjectIDType i = 0; i < mXrefSize; ++i)
+	{
+		if(inTableToMerge[i].mType != eXrefEntryUndefined)
+			mXrefTable[i] =	inTableToMerge[i];
+	}
+}

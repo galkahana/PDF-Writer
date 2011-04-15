@@ -145,4 +145,4 @@ EStatusCode JPGImageTest::Run()
 	return status;	
 }
 
-ADD_CETEGORIZED_TEST(JPGImageTest,"PDF Images")
+ADD_CATEGORIZED_TEST(JPGImageTest,"PDF Images")

@@ -334,4 +334,4 @@ EStatusCode TiffSpecialsTest::CreateBiLevelGrayScales(PDFWriter& inPDFWriter)
 	return status;
 }
 
-ADD_CETEGORIZED_TEST(TiffSpecialsTest,"PDF Images")
+ADD_CATEGORIZED_TEST(TiffSpecialsTest,"PDF Images")

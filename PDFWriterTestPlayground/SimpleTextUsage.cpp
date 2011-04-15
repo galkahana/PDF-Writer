@@ -316,4 +316,4 @@ EStatusCode SimpleTextUsage::RunType1Test()
 	return status;		
 }
 
-ADD_CETEGORIZED_TEST(SimpleTextUsage,"PDF")
+ADD_CATEGORIZED_TEST(SimpleTextUsage,"PDF")

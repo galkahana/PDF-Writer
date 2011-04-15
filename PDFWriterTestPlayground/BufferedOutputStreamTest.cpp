@@ -48,4 +48,4 @@ EStatusCode BufferedOutputStreamTest::Run()
 	return eSuccess;
 }
 
-ADD_CETEGORIZED_TEST(BufferedOutputStreamTest,"IO")
+ADD_CATEGORIZED_TEST(BufferedOutputStreamTest,"IO")

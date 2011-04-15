@@ -102,4 +102,4 @@ EStatusCode PDFEmbedTest::Run()
 	return status;
 }
 
-ADD_CETEGORIZED_TEST(PDFEmbedTest,"PDFEmbedding")
+ADD_CATEGORIZED_TEST(PDFEmbedTest,"PDFEmbedding")

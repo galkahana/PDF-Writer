@@ -83,4 +83,4 @@ EStatusCode UppercaseSequanceTest::Run()
 }
 
 
-ADD_CETEGORIZED_TEST(UppercaseSequanceTest,"ObjectContext")
+ADD_CATEGORIZED_TEST(UppercaseSequanceTest,"ObjectContext")

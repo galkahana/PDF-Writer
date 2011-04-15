@@ -635,6 +635,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\AppendSpecialPagesTest.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\AppendSpecialPagesTest.h"
+					>
+				</File>
+				<File
 					RelativePath=".\PDFEmbedTest.cpp"
 					>
 				</File>

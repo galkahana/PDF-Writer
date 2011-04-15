@@ -74,4 +74,4 @@ EStatusCode EmptyPagesPDF::Run()
 }
 
 
-ADD_CETEGORIZED_TEST(EmptyPagesPDF,"PDF")
+ADD_CATEGORIZED_TEST(EmptyPagesPDF,"PDF")

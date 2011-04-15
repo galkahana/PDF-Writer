@@ -190,4 +190,4 @@ EStatusCode FreeTypeInitializationTest::ShowGlobalFontProperties(FreeTypeWrapper
 	return status;
 }
 
-ADD_CETEGORIZED_TEST(FreeTypeInitializationTest,"FreeType")
+ADD_CATEGORIZED_TEST(FreeTypeInitializationTest,"FreeType")

@@ -138,4 +138,4 @@ EStatusCode MyTest::Run()
 }
 
 
-ADD_CETEGORIZED_TEST(MyTest,"MyTest")
+ADD_CATEGORIZED_TEST(MyTest,"MyTest")

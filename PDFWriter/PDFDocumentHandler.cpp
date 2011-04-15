@@ -187,7 +187,7 @@ PDFRectangle PDFDocumentHandler::DeterminePageBox(PDFDictionary* inDictionary,EP
 	{
 		case ePDFPageBoxMediaBox:
 		{
-			PDFObjectCastPtr<PDFArray> mediaBox(mParser.QueryDictionaryObject(inDictionary,"MediaBox"));
+			PDFObjectCastPtr<PDFArray> mediaBox(QueryInheritedValue(inDictionary,"MediaBox"));
 			if(!mediaBox || mediaBox->GetLength() != 4)
 			{
 				TRACE_LOG("PDFDocumentHandler::DeterminePageBox, Exception, pdf page does not have correct media box. defaulting to A4");
@@ -201,7 +201,8 @@ PDFRectangle PDFDocumentHandler::DeterminePageBox(PDFDictionary* inDictionary,EP
 		}
 		case ePDFPageBoxCropBox:
 		{
-			PDFObjectCastPtr<PDFArray> cropBox(mParser.QueryDictionaryObject(inDictionary,"CropBox"));
+			PDFObjectCastPtr<PDFArray> cropBox(QueryInheritedValue(inDictionary,"CropBox"));
+			
 			if(!cropBox || cropBox->GetLength() != 4)
 			{
 				TRACE_LOG("PDFDocumentHandler::DeterminePageBox, PDF does not have crop box, defaulting to media box.");
@@ -277,7 +278,7 @@ double PDFDocumentHandler::GetAsDoubleValue(PDFObject* inNumberObject)
 	if(inNumberObject->GetType() == ePDFObjectInteger)
 	{
 		PDFInteger* anInteger = (PDFInteger*)inNumberObject;
-		return anInteger->GetValue();
+		return (double)anInteger->GetValue();
 	}
 	else if(inNumberObject->GetType() == ePDFObjectReal)
 	{
@@ -354,13 +355,13 @@ EStatusCode PDFDocumentHandler::WritePDFStreamInputToStream(IByteWriter* inTarge
 	if(!filterObject)
 	{
 		OutputStreamTraits traits(inTargetStream);
-		return traits.CopyToOutputStream(mPDFFile.GetInputStream(),lengthObject->GetValue());	
+		return traits.CopyToOutputStream(mPDFFile.GetInputStream(),(LongBufferSizeType)lengthObject->GetValue());	
 	}
 	else if(filterObject->GetType() == ePDFObjectName && ((PDFName*)(filterObject.GetPtr()))->GetValue() == "FlateDecode")
 	{
 		OutputFlateDecodeStream decoder(inTargetStream);
 		OutputStreamTraits traits(&decoder);
-		EStatusCode status = traits.CopyToOutputStream(mPDFFile.GetInputStream(),lengthObject->GetValue());	
+		EStatusCode status = traits.CopyToOutputStream(mPDFFile.GetInputStream(),(LongBufferSizeType)lengthObject->GetValue());	
 
 		// must assign null, cause decoder takes ownership
 		decoder.Assign(NULL);
@@ -720,7 +721,7 @@ EStatusCode PDFDocumentHandler::WriteStreamObject(PDFStreamInput* inStream,Objec
 	mPDFFile.GetInputStream()->SetPosition(inStream->GetStreamContentStart());
 
 	OutputStreamTraits traits(mObjectsContext->StartFreeContext());
-	EStatusCode status = traits.CopyToOutputStream(mPDFFile.GetInputStream(),lengthObject->GetValue());	
+	EStatusCode status = traits.CopyToOutputStream(mPDFFile.GetInputStream(),(LongBufferSizeType)lengthObject->GetValue());	
 	if(eSuccess == status)
 	{
 		mObjectsContext->EndFreeContext();
@@ -966,4 +967,22 @@ EStatusCode PDFDocumentHandler::WritePDFStreamInputToContentContext(PageContentC
 
 	return status;
 
+}
+
+static const string scParent = "Parent";
+PDFObject* PDFDocumentHandler::QueryInheritedValue(PDFDictionary* inDictionary,string inName)
+{
+	if(inDictionary->Exists(inName))
+	{
+		return mParser.QueryDictionaryObject(inDictionary,inName);
+	}
+	else if(inDictionary->Exists(scParent))
+	{
+		PDFObjectCastPtr<PDFDictionary> parent(mParser.QueryDictionaryObject(inDictionary,scParent));
+		if(!parent)
+			return NULL;
+		return QueryInheritedValue(parent.GetPtr(),inName);
+	}
+	else
+		return NULL;
 }

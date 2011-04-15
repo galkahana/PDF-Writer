@@ -51,4 +51,4 @@ EStatusCode PDFObjectCastTest::Run()
 	return status;
 }
 
-ADD_CETEGORIZED_TEST(PDFObjectCastTest,"PDFEmbedding")
+ADD_CATEGORIZED_TEST(PDFObjectCastTest,"PDFEmbedding")

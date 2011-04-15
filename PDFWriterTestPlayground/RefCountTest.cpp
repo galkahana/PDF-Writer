@@ -209,4 +209,4 @@ EStatusCode RefCountTest::Run()
 }
 
 
-ADD_CETEGORIZED_TEST(RefCountTest,"PDFEmbedding")
+ADD_CATEGORIZED_TEST(RefCountTest,"PDFEmbedding")
