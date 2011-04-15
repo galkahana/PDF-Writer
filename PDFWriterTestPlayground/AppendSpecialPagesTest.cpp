@@ -62,6 +62,14 @@ EStatusCode AppendSpecialPagesTest::Run()
 		}
 
 
+		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\Linearized.pdf",PDFPageRange());
+		if(result.first != eSuccess)
+		{
+			wcout<<"failed to append pages from RemovedItem.pdf\n";
+			status = result.first;
+			break;
+		}
+
 		status = pdfWriter.EndPDF();
 		if(status != eSuccess)
 		{

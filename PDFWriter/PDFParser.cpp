@@ -315,95 +315,40 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 
 }
 
-static const string scDictionaryClose = ">>";
-static const string scDictionaryStart = "<<";
 static const string scTrailer = "trailer";
 EStatusCode PDFParser::ParseTrailerDictionary()
 {
-	// K. here's a little tricky part. so i'm gonna be more strict
-	// i'm going up one line, and the line must be ">>"
-	// then going up lines till i hit a line which is equal to "<<"
-	// then up one line and it must be the keyword "trailer"
-	// then ParseNewObject should give us the trailer dictionary.
+	// K. to support both regular and linearized output, i'm gonna have to parse the trailer in the follow manner:
+	// jump to the location of the last xref start.
+	// jump lines till you get to a line where the token is "trailer". then parse.
 
 	EStatusCode status = eSuccess;
-	PDFParserTokenizer aTokenizer;
-	aTokenizer.SetReadStream(mStream);
+	bool foundTrailer = false;
 
 	do
 	{
-		if(!GoBackTillToken()) // this should be the end dictionary
+		mStream->SetPosition(mLastXrefPosition);
+		PDFParserTokenizer aTokenizer;
+		aTokenizer.SetReadStream(mStream);
+		
+		do
 		{
-			status = eFailure;
-			TRACE_LOG("PDFParser::ParseTrailerDictionary, couldn't find trailer end token");
-			break;
-		}
-
-		GoBackTillLineStart();
-		mStream->SetPositionFromEnd(GetCurrentPositionFromEnd());
-
-		BoolAndString token = aTokenizer.GetNextToken();
-		if(!token.first || (token.second != scDictionaryClose && token.second != scDictionaryStart))
-		{
-			status = eFailure;
-			TRACE_LOG1("PDFParser::ParseTrailerDictionary, unexpected token in find trailer end. token = %s",token.second.c_str());
-			break;
-		}
-
-		// now loop till you get to dictionar start 
-		//(note that no nesting is expected due to specifications where all must be indirect, so no need to consider nesting.)
-		bool foundDictionaryStart = (token.second == scDictionaryStart);
-		while(!foundDictionaryStart)
-		{
-			if(!GoBackTillToken())
-			{
-				status = eFailure;
-				TRACE_LOG("PDFParser::ParseTrailerDictionary, couldn't find token while looking for trailer dictionary start");
-				break;
-			}
-			GoBackTillLineStart();
-			mStream->SetPositionFromEnd(GetCurrentPositionFromEnd());
-
-			aTokenizer.ResetReadState();
 			BoolAndString token = aTokenizer.GetNextToken();
 			if(!token.first)
-			{
-				status = eFailure;
-				TRACE_LOG("PDFParser::ParseTrailerDictionary, unexpected token read error");
 				break;
-			}
-			
-			foundDictionaryStart = (token.second == scDictionaryStart);
-		}
+			foundTrailer = (scTrailer == token.second);
+		}while(!foundTrailer);
 
-		if(!foundDictionaryStart)
+
+		if(!foundTrailer)
 		{
 			status = eFailure;
-			TRACE_LOG("PDFParser::ParseTrailerDictionary, couldn't find trailer dictionary start");
-			break;
-		}
-
-		// k. next thing is to just make sure that the previous token is trailer, and we are set
-		if(!GoBackTillToken())
-		{
-			status = eFailure;
-			TRACE_LOG("PDFParser::ParseTrailerDictionary, couldn't find trailer keyword");
-			break;
-		}
-
-		GoBackTillLineStart();
-		mStream->SetPositionFromEnd(GetCurrentPositionFromEnd());
-
-		aTokenizer.ResetReadState();
-		token = aTokenizer.GetNextToken();
-		if(!token.first || token.second != scTrailer)
-		{
-			status = eFailure;
-			TRACE_LOG1("PDFParser::ParseTrailerDictionary, unexpected token instead of trailer keword. token = %s",token.second.c_str());
+			TRACE_LOG("PDFParser::ParseTrailerDictionary, trailer not found...");
 			break;
 		}
 
 		// k. now that all is well, just parse the damn dictionary, which is actually...the easiest part.
+		mObjectParser.ResetReadState();
 		PDFObjectCastPtr<PDFDictionary> dictionaryObject(mObjectParser.ParseNewObject());
 		if(!dictionaryObject)
 		{
@@ -557,7 +502,7 @@ EStatusCode PDFParser::ParseXref(XrefEntryInput* inXrefTable,ObjectIDType inXref
 
 
 			// now parse the section. 
-			while(currentObject < firstNonSectionObject)
+			while(currentObject < firstNonSectionObject && currentObject < inXrefSize)
 			{
 				if(mStream->Read(entry,20) != 20)
 				{
