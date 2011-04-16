@@ -13,6 +13,12 @@
 #include "PDFArray.h"
 #include "RefCountPtr.h"
 #include "PDFObjectCast.h"
+#include "PDFStreamInput.h"
+#include "InputLimitedStream.h"
+#include "InputFlateDecodeStream.h"
+#include "InputStreamSkipperStream.h"
+#include "InputPNGPredictor12Stream.h"
+#include  <algorithm>
 
 PDFParser::PDFParser(void)
 {
@@ -41,11 +47,11 @@ EStatusCode PDFParser::StartPDFParsing(IByteReaderWithPosition* inSourceStream)
 {
 	EStatusCode status;
 
-
 	ResetParser();
 
-	mObjectParser.SetReadStream(inSourceStream);
 	mStream = inSourceStream;
+	mCurrentPositionProvider.Assign(mStream);
+	mObjectParser.SetReadStream(inSourceStream,&mCurrentPositionProvider);
 
 	do
 	{
@@ -66,11 +72,7 @@ EStatusCode PDFParser::StartPDFParsing(IByteReaderWithPosition* inSourceStream)
 		if(status != eSuccess)
 			break;
 
-		status = ParseTrailerDictionary();
-		if(status != eSuccess)
-			break;
-
-		status = BuildXrefTable();
+		status = ParseFileDirectory(); // that would be the xref and trailer
 		if(status != eSuccess)
 			break;
 
@@ -318,16 +320,12 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 static const string scTrailer = "trailer";
 EStatusCode PDFParser::ParseTrailerDictionary()
 {
-	// K. to support both regular and linearized output, i'm gonna have to parse the trailer in the follow manner:
-	// jump to the location of the last xref start.
-	// jump lines till you get to a line where the token is "trailer". then parse.
 
 	EStatusCode status = eSuccess;
 	bool foundTrailer = false;
 
 	do
 	{
-		mStream->SetPosition(mLastXrefPosition);
 		PDFParserTokenizer aTokenizer;
 		aTokenizer.SetReadStream(mStream);
 		
@@ -363,7 +361,7 @@ EStatusCode PDFParser::ParseTrailerDictionary()
 	return status;
 }
 
-EStatusCode PDFParser::BuildXrefTable()
+EStatusCode PDFParser::BuildXrefTableFromTable()
 {
 	EStatusCode status;
 
@@ -384,7 +382,7 @@ EStatusCode PDFParser::BuildXrefTable()
 				break;
 		}
 
-		status = ParseXref(mXrefTable,mXrefSize,mLastXrefPosition);
+		status = ParseXrefFromXrefTable(mXrefTable,mXrefSize,mLastXrefPosition);
 		if(status != eSuccess)
 			break;
 
@@ -419,7 +417,7 @@ typedef BoxingBaseWithRW<unsigned long> ULong;
 typedef BoxingBaseWithRW<LongFilePositionType> LongFilePositionTypeBox;
 
 static const string scXref = "xref";
-EStatusCode PDFParser::ParseXref(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,LongFilePositionType inXrefPosition)
+EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,LongFilePositionType inXrefPosition)
 {
 	// K. cross ref starts at  xref position
 	// and ends with trailer (or when exahausted the number of objects...whichever first)
@@ -434,7 +432,9 @@ EStatusCode PDFParser::ParseXref(XrefEntryInput* inXrefTable,ObjectIDType inXref
 	mStream->SetPosition(inXrefPosition);
 	mObjectParser.ResetReadState();
 
-	// i'll just use a tokenizer, to save perofrmance, and assume that the file is correct
+	// Note that at times, the xref is being read "on empty". meaning - entries will be read but they will not affect the actual xref.
+	// This is done because final xref might be smaller than the prev xrefs, and i'm only interested in objects that are in the final xref.
+	// That said - i still want to be in the position of the trailer after this function is being executed.
 
 	do
 	{
@@ -449,7 +449,7 @@ EStatusCode PDFParser::ParseXref(XrefEntryInput* inXrefTable,ObjectIDType inXref
 		
 		ObjectIDType currentObject = 0;
 
-		while(currentObject < inXrefSize && eSuccess == status)
+		while(eSuccess == status)
 		{
 			token = tokenizer.GetNextToken();
 			if(!token.first)
@@ -494,9 +494,12 @@ EStatusCode PDFParser::ParseXref(XrefEntryInput* inXrefTable,ObjectIDType inXref
 				status = eFailure;
 				break;
 			}
-			inXrefTable[currentObject].mObjectPosition = LongFilePositionTypeBox((const char*)entry);
-			inXrefTable[currentObject].mRivision = ULong((const char*)(entry+11));
-			inXrefTable[currentObject].mType = entry[17] == 'n' ? eXrefEntryExisting:eXrefEntryDelete;
+			if(currentObject < inXrefSize)
+			{
+				inXrefTable[currentObject].mObjectPosition = LongFilePositionTypeBox((const char*)entry);
+				inXrefTable[currentObject].mRivision = ULong((const char*)(entry+11));
+				inXrefTable[currentObject].mType = entry[17] == 'n' ? eXrefEntryExisting:eXrefEntryDelete;
+			}
 			++currentObject;
 
 
@@ -510,15 +513,17 @@ EStatusCode PDFParser::ParseXref(XrefEntryInput* inXrefTable,ObjectIDType inXref
 					status = eFailure;
 					break;
 				}
-				inXrefTable[currentObject].mObjectPosition = LongFilePositionTypeBox((const char*)entry);
-				inXrefTable[currentObject].mRivision = ULong((const char*)(entry+11));
-				inXrefTable[currentObject].mType = entry[17] == 'n' ? eXrefEntryExisting:eXrefEntryDelete;
+				if(currentObject < inXrefSize)
+				{
+					inXrefTable[currentObject].mObjectPosition = LongFilePositionTypeBox((const char*)entry);
+					inXrefTable[currentObject].mRivision = ULong((const char*)(entry+11));
+					inXrefTable[currentObject].mType = entry[17] == 'n' ? eXrefEntryExisting:eXrefEntryDelete;
+				}
 				++currentObject;
 			}
 		}
 		if(status != eSuccess)
 			break;
-
 
 	}while(false);	
 	mObjectParser.ResetReadState(); // cause read without consulting with the tokenizer...so now there shouldn't be available tokens
@@ -545,6 +550,10 @@ PDFObject* PDFParser::ParseNewObject(ObjectIDType inObjectId)
 	else if(eXrefEntryExisting == mXrefTable[inObjectId].mType)
 	{
 		return ParseExistingInDirectObject(inObjectId);
+	}
+	else if(eXrefEntryStreamObject == mXrefTable[inObjectId].mType)
+	{
+		return ParseExistingInDirectStreamObject(inObjectId);
 	}
 	else
 		return NULL;
@@ -850,25 +859,17 @@ EStatusCode PDFParser::ParsePreviousXrefs(PDFDictionary* inTrailer)
 		return eFailure;
 	}
 
-	XrefEntryInput* aTable = new XrefEntryInput[mXrefSize];
 	EStatusCode status;
+
+	XrefEntryInput* aTable = new XrefEntryInput[mXrefSize];
 	do
 	{
-		status = ParseXref(aTable,mXrefSize,previousPosition->GetValue());
-		if(status != eSuccess)
-		{
-			TRACE_LOG1("PDFParser::ParsePreviousXrefs, failed to parse xref table in %ld",previousPosition->GetValue());
-			break;
-		}
+		PDFDictionary* trailerP = NULL;
 
-		// at this point we should be after the token of the "trailer"
-		PDFObjectCastPtr<PDFDictionary> trailer(mObjectParser.ParseNewObject());
-		if(!trailer)
-		{
-			status = eFailure;
-			TRACE_LOG("PDFParser::ParsePreviousXrefs, failure to parse trailer dictionary");
+		status = ParseDirectory(previousPosition->GetValue(),aTable,mXrefSize,&trailerP);
+		if(status != eSuccess)
 			break;
-		}
+		RefCountPtr<PDFDictionary> trailer(trailerP);
 
 		if(trailer->Exists("Prev"))
 		{
@@ -885,6 +886,104 @@ EStatusCode PDFParser::ParsePreviousXrefs(PDFDictionary* inTrailer)
 	return status;
 }
 
+EStatusCode PDFParser::ParseDirectory(LongFilePositionType inXrefPosition,
+									  XrefEntryInput* inXrefTable,
+									  ObjectIDType inXrefSize,
+									  PDFDictionary** outTrailer)
+{
+	EStatusCode status = eSuccess;
+	
+	mStream->SetPosition(inXrefPosition);
+	mObjectParser.ResetReadState();
+
+	do
+	{
+		// take the object, so that we can check whether this is an Xref or an Xref stream
+		RefCountPtr<PDFObject> anObject(mObjectParser.ParseNewObject());
+		if(!anObject)
+		{
+			status = eFailure;
+			break;
+		}
+
+		if(anObject->GetType() == ePDFObjectSymbol && ((PDFSymbol*)anObject.GetPtr())->GetValue() == scXref)
+		{
+			// This is the case of a regular xref table. note that as oppose to the main trailer case
+			// i already have a limit of Xrefsize (which is determined by the main trailer Size entry)
+			// so i don't have to parse the trailer in advance, but rather just read the file in the natural order:
+			// first - the xref then the trailer.
+			status = ParseXrefFromXrefTable(inXrefTable,inXrefSize,inXrefPosition);
+			if(status != eSuccess)
+			{
+				TRACE_LOG1("PDFParser::ParseDirectory, failed to parse xref table in %ld",inXrefPosition);
+				break;
+			}
+
+			// at this point we should be after the token of the "trailer"
+			PDFObjectCastPtr<PDFDictionary> trailerDictionary(mObjectParser.ParseNewObject());
+			if(!trailerDictionary)
+			{
+				status = eFailure;
+				TRACE_LOG("PDFParser::ParseDirectory, failure to parse trailer dictionary");
+				break;
+			}	
+
+			trailerDictionary->AddRef();
+			*outTrailer = trailerDictionary.GetPtr();
+		}
+		else if(anObject->GetType() == ePDFObjectInteger && ((PDFInteger*)anObject.GetPtr())->GetValue() > 0)
+		{
+			// Xref stream case. make some validations, grab the xref stream object details, and parse it
+
+			PDFObjectCastPtr<PDFInteger> versionObject(mObjectParser.ParseNewObject());
+
+			if(!versionObject)
+			{
+				TRACE_LOG("PDFParser::ParseDirectory, failed to read xref object declaration, Version");
+				status = eFailure;
+				break;
+			}
+
+			PDFObjectCastPtr<PDFSymbol> objKeyword(mObjectParser.ParseNewObject());
+
+			if(!objKeyword)
+			{
+				TRACE_LOG("PDFParser::ParseDirectory, failed to read xref object declaration, obj keyword");
+				status = eFailure;
+				break;
+			}
+
+			if(objKeyword->GetValue() != scObj)
+			{
+				TRACE_LOG1("PDFParser::ParseDirectory, failed to read xref object declaration, expected obj keyword found %s",
+					objKeyword->GetValue().c_str());
+				status = eFailure;
+				break;
+			}
+
+			PDFObjectCastPtr<PDFStreamInput> xrefStream(mObjectParser.ParseNewObject());
+			if(!xrefStream)
+			{
+				TRACE_LOG("PDFParser::BuildXrefTableAndTrailerFromXrefStream, failure to parse xref stream");
+				status = eFailure;
+				break;
+			}
+
+			*outTrailer = xrefStream->QueryStreamDictionary();
+
+			status = ParseXrefFromXrefStream(inXrefTable,inXrefSize,xrefStream.GetPtr());
+			if(status != eSuccess)
+				break;
+		}
+		else
+		{
+			TRACE_LOG("PDFParser::ParseDirectory,Unexpected object at xref start");
+			status = eFailure;
+		}
+	}while(false);
+	return status;
+}	
+
 void PDFParser::MergeXrefWithMainXref(XrefEntryInput* inTableToMerge)
 {
 	for(ObjectIDType i = 0; i < mXrefSize; ++i)
@@ -893,3 +992,511 @@ void PDFParser::MergeXrefWithMainXref(XrefEntryInput* inTableToMerge)
 			mXrefTable[i] =	inTableToMerge[i];
 	}
 }
+
+
+EStatusCode PDFParser::ParseFileDirectory()
+{
+	EStatusCode status = eSuccess;
+
+
+	mStream->SetPosition(mLastXrefPosition);
+	mObjectParser.ResetReadState();
+
+	do
+	{
+		// take the object, so that we can check whether this is an Xref or an Xref stream
+		RefCountPtr<PDFObject> anObject(mObjectParser.ParseNewObject());
+		if(!anObject)
+		{
+			status = eFailure;
+			break;
+		}
+
+		if(anObject->GetType() == ePDFObjectSymbol && ((PDFSymbol*)anObject.GetPtr())->GetValue() == scXref)
+		{
+			// this would be a normal xref case
+			// jump lines till you get to a line where the token is "trailer". then parse.
+			status = ParseTrailerDictionary();
+			if(status != eSuccess)
+				break;
+
+			status = BuildXrefTableFromTable();
+			if(status != eSuccess)
+				break;
+		}
+		else if(anObject->GetType() == ePDFObjectInteger && ((PDFInteger*)anObject.GetPtr())->GetValue() > 0)
+		{
+			// Xref stream case
+			status = BuildXrefTableAndTrailerFromXrefStream();
+			if(status != eSuccess)
+				break;
+
+		}
+		else
+		{
+			TRACE_LOG("PDFParser::ParseFileDirectory,Unexpected object at xref start");
+		}
+
+
+	}while(false);
+
+
+
+	return status;
+}
+
+EStatusCode PDFParser::BuildXrefTableAndTrailerFromXrefStream()
+{
+	// xref stream is trailer and stream togather. need to parse them both.
+	// the object parser is now after the object ID. so verify that next we goot a version and the obj keyword
+	// then parse the xref stream
+	EStatusCode status = eSuccess;
+	
+	PDFObjectCastPtr<PDFInteger> versionObject(mObjectParser.ParseNewObject());
+
+	do
+	{
+		if(!versionObject)
+		{
+			TRACE_LOG("PDFParser::BuildXrefTableAndTrailerFromXrefStream, failed to read xref object declaration, Version");
+			status = eFailure;
+			break;
+		}
+
+		PDFObjectCastPtr<PDFSymbol> objKeyword(mObjectParser.ParseNewObject());
+
+		if(!objKeyword)
+		{
+			TRACE_LOG("PDFParser::BuildXrefTableAndTrailerFromXrefStream, failed to read xref object declaration, obj keyword");
+			status = eFailure;
+			break;
+		}
+
+		if(objKeyword->GetValue() != scObj)
+		{
+			TRACE_LOG1("PDFParser::BuildXrefTableAndTrailerFromXrefStream, failed to read xref object declaration, expected obj keyword found %s",
+				objKeyword->GetValue().c_str());
+			status = eFailure;
+			break;
+		}
+
+		// k. now just parse the object which should be a stream
+		PDFObjectCastPtr<PDFStreamInput> xrefStream(mObjectParser.ParseNewObject());
+		if(!xrefStream)
+		{
+			TRACE_LOG("PDFParser::BuildXrefTableAndTrailerFromXrefStream, failure to parse xref stream");
+			status = eFailure;
+			break;
+		}
+
+		RefCountPtr<PDFDictionary> xrefDictionary(xrefStream->QueryStreamDictionary());
+		mTrailer = xrefDictionary;
+
+		status = DetermineXrefSize();
+		if(status != eSuccess)
+			break;
+
+		status = InitializeXref();
+		if(status != eSuccess)
+			break;
+
+		if(mTrailer->Exists("Prev"))
+		{
+			status = ParsePreviousXrefs(mTrailer.GetPtr());
+			if(status != eSuccess)
+				break;
+		}
+
+		status = ParseXrefFromXrefStream(mXrefTable,mXrefSize,xrefStream.GetPtr());
+		if(status != eSuccess)
+			break;
+	}while(false);
+
+	return status;
+
+}
+
+EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,PDFStreamInput* inXrefStream)
+{
+	// 1. Setup the stream to read from the stream start location
+	// 2. Set it up with an input stream to decode if required
+	// 3. if there are subsections, loop them, otherwise assume a single section of 0..size
+	// 4. for each subsection use the base number as starting, and count as well, to read the stream entries to the right position in the table
+	//    The entries are read using the "W" value. make sure to read even values that you don't need.
+
+	EStatusCode status = eSuccess;
+	RefCountPtr<PDFDictionary> streamDictionary(inXrefStream->QueryStreamDictionary());
+
+	// setup stream according to length and possible filter
+	PDFObjectCastPtr<PDFInteger> lengthObject(QueryDictionaryObject(streamDictionary.GetPtr(),"Length"));	
+
+	if(!lengthObject)
+	{
+		TRACE_LOG("PDFParser::ParseXrefFromXrefStream, stream does not have length, failing");
+		return eFailure;
+	}	
+
+	InputLimitedStream streamLimit(mStream,lengthObject->GetValue());
+	InputFlateDecodeStream decodeStream;
+	IByteReader* predictorStream = NULL;
+	IByteReader* xrefStreamSource = NULL;
+	int* widthsArray = NULL;
+
+	
+	do
+	{
+		RefCountPtr<PDFObject> filterObject(QueryDictionaryObject(streamDictionary.GetPtr(),"Filter"));
+		if(!filterObject)
+		{
+			xrefStreamSource =&streamLimit;
+		} 
+		else if(filterObject->GetType() == ePDFObjectName && ((PDFName*)(filterObject.GetPtr()))->GetValue() == "FlateDecode")
+		{
+			decodeStream.Assign(&streamLimit);
+
+			PDFObjectCastPtr<PDFDictionary> decodeParams(QueryDictionaryObject(streamDictionary.GetPtr(),"DecodeParms"));
+			if(decodeParams.GetPtr() != NULL)
+			{
+				PDFObjectCastPtr<PDFInteger> predictor(QueryDictionaryObject(decodeParams.GetPtr(),"Predictor"));
+				PDFObjectCastPtr<PDFInteger> columns(QueryDictionaryObject(decodeParams.GetPtr(),"Columns"));
+
+				if(!predictor || predictor->GetValue() == 1)
+				{
+					xrefStreamSource = &decodeStream;
+				}
+				else if(predictor->GetValue() == 12)
+				{
+					predictorStream = new InputPNGPredictor12Stream(&decodeStream, 
+												columns.GetPtr() ? (IOBasicTypes::LongBufferSizeType)columns->GetValue():1);
+					xrefStreamSource = predictorStream;
+				}
+				else
+				{
+					TRACE_LOG1("PDFParser::ParseXrefFromXrefStream, unsupported predictor %ld. only 12 is supported",predictor->GetValue());
+					status = eFailure;
+					break;
+				}
+			}
+			else
+			{
+				xrefStreamSource = &decodeStream;
+			}
+		}
+		else
+		{
+			TRACE_LOG("PDFParser::ParseXrefFromXrefStream, can handle only flate streams, or unencoded");
+			status = eFailure;
+			break;
+		}
+
+	
+		// setup w array
+		PDFObjectCastPtr<PDFArray> wArray(QueryDictionaryObject(streamDictionary.GetPtr(),"W"));
+		if(!wArray)
+		{
+			TRACE_LOG("PDFParser::ParseXrefFromXrefStream, W array not available. failing");
+			status = eFailure;
+			break;
+		}
+
+		widthsArray = new int[wArray->GetLength()];
+		for(unsigned long i=0;i <wArray->GetLength();++i)
+		{
+			PDFObjectCastPtr<PDFInteger> widthObject(wArray->QueryObject(i));
+			if(!widthObject)
+			{
+				TRACE_LOG("PDFParser::ParseXrefFromXrefStream, wrong items in width array (supposed to have only integers)");
+				status = eFailure;
+				break;
+			}
+			widthsArray[i] = (int)widthObject->GetValue();
+		}
+		if(status != eSuccess)
+			break;
+
+		// k. now for the actuall reading of the segments (!#!@$@#$)
+		PDFObjectCastPtr<PDFArray> subsectionsIndex(QueryDictionaryObject(streamDictionary.GetPtr(),"I"));
+		mStream->SetPosition(inXrefStream->GetStreamContentStart());
+		mObjectParser.ResetReadState(); // just to be on the safe side (might join them in a func?)
+
+		if(!subsectionsIndex)
+		{
+			status = ReadXrefStreamSegment(inXrefTable,0,inXrefSize,xrefStreamSource,widthsArray,wArray->GetLength());
+		}
+		else
+		{
+			SingleValueContainerIterator<PDFObjectVector> segmentsIterator  = subsectionsIndex->GetIterator();
+			PDFObjectCastPtr<PDFInteger> segmentValue;
+			while(segmentsIterator.MoveNext() && eSuccess == status)
+			{
+				segmentValue = segmentsIterator.GetItem();
+				if(!segmentValue)
+				{
+					TRACE_LOG("PDFParser::ParseXrefFromXrefStream, found non integer value in Index array of xref stream");
+					status = eFailure;
+					break;
+				}
+				ObjectIDType startObject = (ObjectIDType)segmentValue->GetValue();
+				if(!segmentsIterator.MoveNext())
+				{
+					TRACE_LOG("PDFParser::ParseXrefFromXrefStream,Index array of xref stream should have an even number of values");
+					status = eFailure;
+					break;
+				}
+				
+				// if startobject is past what's interesting just stop the loop
+				if(startObject >= inXrefSize)
+					break;
+
+				segmentValue = segmentsIterator.GetItem();
+				if(!segmentValue)
+				{
+					TRACE_LOG("PDFParser::ParseXrefFromXrefStream, found non integer value in Index array of xref stream");
+					status = eFailure;
+					break;
+				}
+				ObjectIDType objectsCount = (ObjectIDType)segmentValue->GetValue();
+				status = ReadXrefStreamSegment(inXrefTable,startObject,min<ObjectIDType>(objectsCount,inXrefSize - startObject),xrefStreamSource,widthsArray,wArray->GetLength());
+			}
+		}
+	}while(false);
+
+	streamLimit.Assign(NULL,0);
+	decodeStream.Assign(NULL);
+	delete predictorStream;
+	delete[] widthsArray;
+	return status;
+}
+
+EStatusCode PDFParser::ReadXrefStreamSegment(XrefEntryInput* inXrefTable,
+											 ObjectIDType inSegmentStartObject,
+											 ObjectIDType inSegmentCount,
+											 IByteReader* inReadFrom,
+											 int* inEntryWidths,
+											 unsigned long inEntryWidthsSize)
+{
+	ObjectIDType objectToRead = inSegmentStartObject;
+	EStatusCode status = eSuccess;
+	if(inEntryWidthsSize != 3)
+	{
+		TRACE_LOG("PDFParser::ReadXrefStreamSegment, can handle only 3 length entries");
+		return eFailure;
+	}
+
+	for(; (objectToRead < inSegmentStartObject + inSegmentCount) && eSuccess == status;++objectToRead)
+	{
+		long long entryType;
+		status = ReadXrefSegmentValue(inReadFrom,inEntryWidths[0],entryType);
+		if(status != eSuccess)
+			break;
+		status = ReadXrefSegmentValue(inReadFrom,inEntryWidths[1],inXrefTable[objectToRead].mObjectPosition);
+		if(status != eSuccess)
+			break;
+		status = ReadXrefSegmentValue(inReadFrom,inEntryWidths[2],inXrefTable[objectToRead].mRivision);
+		if(status != eSuccess)
+			break;
+
+		if(0 == entryType)
+		{
+			inXrefTable[objectToRead].mType = eXrefEntryDelete;
+		}
+		else if (1 == entryType)
+		{
+			inXrefTable[objectToRead].mType = eXrefEntryExisting;
+		}
+		else if(2 == entryType)
+		{
+			inXrefTable[objectToRead].mType = eXrefEntryStreamObject;
+		}
+		else
+		{
+			TRACE_LOG("PDFParser::ReadXrefStreamSegment, unfamiliar entry type. must be either 0,1 or 2");
+			//status = eFailure;
+		}
+	}
+	return status;
+}
+
+EStatusCode PDFParser::ReadXrefSegmentValue(IByteReader* inSource,int inEntrySize,long long& outValue)
+{
+	outValue = 0;
+	Byte buffer;
+	EStatusCode status = eSuccess;
+
+	for(int i=0;i<inEntrySize && eSuccess == status;++i)
+	{
+		status = (inSource->Read(&buffer,1) == 1 ? eSuccess : eFailure);
+		if(status != eFailure)
+			outValue = (outValue<<8) + buffer;
+	}
+	return status;
+}
+
+EStatusCode PDFParser::ReadXrefSegmentValue(IByteReader* inSource,int inEntrySize,ObjectIDType& outValue)
+{
+	outValue = 0;
+	Byte buffer;
+	EStatusCode status = eSuccess;
+
+	for(int i=0;i<inEntrySize && eSuccess == status;++i)
+	{
+		status = (inSource->Read(&buffer,1) == 1 ? eSuccess : eFailure);
+		if(status != eFailure)
+			outValue = (outValue<<8) + buffer;
+	}
+	return status;
+}
+
+PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
+{
+	// parsing an object in an object stream requires the following:
+	// 1. Setting the position to this object stream
+	// 2. Reading the stream First and N. store.
+	// 3. Creating a stream reader for the initial stream position and length, possibly decoding with flate
+	// 4. Read the stream header. store.
+	// 5. Jump to the right object position (or decode till its position)
+	// 6. Read the object
+
+	EStatusCode status = eSuccess;
+	ObjectStreamHeaderEntry* objectStreamHeader = NULL;
+	InputLimitedStream streamLimit;
+	InputFlateDecodeStream decodeStream;
+	InputStreamSkipperStream skipperStream;
+	PDFObject* anObject;
+
+	do
+	{
+		PDFObjectCastPtr<PDFStreamInput> objectStream(ParseNewObject((ObjectIDType)mXrefTable[inObjectId].mObjectPosition));
+		if(!objectStream)
+		{
+			TRACE_LOG2("PDFParser::ParseExistingInDirectStreamObject, failed to parse object %ld. failed to find object stream for it, which should be %ld",
+						inObjectId,mXrefTable[inObjectId].mObjectPosition);
+			status = eFailure;
+			break;
+		}
+
+		RefCountPtr<PDFDictionary> streamDictionary(objectStream->QueryStreamDictionary());
+
+		PDFObjectCastPtr<PDFInteger> streamObjectsCount(QueryDictionaryObject(streamDictionary.GetPtr(),"N"));
+		if(!streamObjectsCount)
+		{
+			TRACE_LOG1("PDFParser::ParseExistingInDirectStreamObject, no N key in stream dictionary %ld",mXrefTable[inObjectId].mObjectPosition);
+			status = eFailure;
+			break;
+		}
+		ObjectIDType objectsCount = (ObjectIDType)streamObjectsCount->GetValue();
+
+		PDFObjectCastPtr<PDFInteger> firstStreamObjectPosition(QueryDictionaryObject(streamDictionary.GetPtr(),"First"));
+		if(!streamObjectsCount)
+		{
+			TRACE_LOG1("PDFParser::ParseExistingInDirectStreamObject, no First key in stream dictionary %ld",mXrefTable[inObjectId].mObjectPosition);
+			status = eFailure;
+			break;
+		}		
+		LongFilePositionType firstObjectPosition = firstStreamObjectPosition->GetValue();
+
+		PDFObjectCastPtr<PDFInteger> lengthObject(QueryDictionaryObject(streamDictionary.GetPtr(),"Length"));	
+		if(!lengthObject)
+		{
+			TRACE_LOG("PDFParser::ParseExistingInDirectStreamObject, stream does not have length, failing");
+			status = eFailure;
+			break;
+		}	
+		streamLimit.Assign(mStream,lengthObject->GetValue());
+
+		RefCountPtr<PDFObject> filterObject(QueryDictionaryObject(streamDictionary.GetPtr(),"Filter"));
+		if(!filterObject)
+		{
+			skipperStream.Assign(&streamLimit);
+		} 
+		else if(filterObject->GetType() == ePDFObjectName && ((PDFName*)(filterObject.GetPtr()))->GetValue() == "FlateDecode")
+		{
+			decodeStream.Assign(&streamLimit);
+			skipperStream.Assign(&decodeStream);
+		}
+		else
+		{
+			TRACE_LOG("PDFParser::ParseXrefFromXrefStream, can handle only flate streams, or unencoded");
+			status = eFailure;
+			break;
+		}
+		mStream->SetPosition(objectStream->GetStreamContentStart());
+		mObjectParser.SetReadStream(&skipperStream,&skipperStream);
+		mObjectParser.ResetReadState();
+
+		objectStreamHeader = new ObjectStreamHeaderEntry[objectsCount];
+		status = ParseObjectStreamHeader(objectStreamHeader,objectsCount);
+		if(status != eSuccess)
+			break;
+
+		// verify that i got the right object ID
+		if(objectsCount <= mXrefTable[inObjectId].mRivision || objectStreamHeader[mXrefTable[inObjectId].mRivision].mObjectNumber != inObjectId)
+		{
+			TRACE_LOG2("PDFParser::ParseXrefFromXrefStream, wrong object. expecting to find object ID %ld, and found %ld",
+						inObjectId,
+						objectsCount <= mXrefTable[inObjectId].mRivision ? 
+							-1 :
+							objectStreamHeader[mXrefTable[inObjectId].mRivision].mObjectNumber);
+			status = eFailure;
+			break;
+		}
+
+		if(mXrefTable[inObjectId].mRivision != 0)
+		{
+			// if not the first object, which we are ready to parse now, skip to the right place. you can count on "skippability"
+			LongFilePositionType objectPositionInStream = objectStreamHeader[mXrefTable[inObjectId].mRivision].mObjectOffset + firstObjectPosition;
+			skipperStream.SkipTo(objectPositionInStream);
+			mObjectParser.ResetReadState();
+		}
+		
+		anObject = mObjectParser.ParseNewObject();
+
+	}while(false);
+
+	delete[] objectStreamHeader;
+	streamLimit.Assign(NULL,0);
+	decodeStream.Assign(NULL);
+	skipperStream.Assign(NULL);
+	mObjectParser.SetReadStream(mStream,&mCurrentPositionProvider);
+
+	if(eSuccess == status)
+	{
+		return anObject;
+	}
+	else
+	{
+		if(anObject)
+			anObject->Release();
+		return NULL;
+	}
+}
+
+EStatusCode PDFParser::ParseObjectStreamHeader(ObjectStreamHeaderEntry* inHeaderInfo,ObjectIDType inObjectsCount)
+{
+	ObjectIDType currentObject = 0;
+	EStatusCode status = eSuccess;
+
+	while(currentObject < inObjectsCount && (eSuccess == status))
+	{
+		PDFObjectCastPtr<PDFInteger> objectNumber(mObjectParser.ParseNewObject());
+		if(!objectNumber)
+		{
+			TRACE_LOG("PDFParser::ParseObjectStreamHeader, parsing failed when reading object number. either not enough objects, or of the wrong type");
+			status = eFailure;
+			break;
+		}
+
+		PDFObjectCastPtr<PDFInteger> objectPosition(mObjectParser.ParseNewObject());
+		if(!objectPosition)
+		{
+			TRACE_LOG("PDFParser::ParseObjectStreamHeader, parsing failed when reading object position. either not enough objects, or of the wrong type");
+			status = eFailure;
+			break;
+		}
+		inHeaderInfo[currentObject].mObjectNumber = (ObjectIDType)(objectNumber->GetValue());
+		inHeaderInfo[currentObject].mObjectOffset = objectPosition->GetValue();
+		++currentObject;
+	}
+	return status;
+}
+

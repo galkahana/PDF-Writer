@@ -37,14 +37,14 @@ InputByteArrayStream::~InputByteArrayStream(void)
 {
 }
 
-void InputByteArrayStream::Assign(Byte* inByteArray,LongFilePositionType inArrayLength)
+void InputByteArrayStream::Assign(IOBasicTypes::Byte* inByteArray,IOBasicTypes::LongFilePositionType inArrayLength)
 {
 	mByteArray = inByteArray;
 	mArrayLength = inArrayLength;
 	mCurrentPosition = 0;
 }
 
-LongBufferSizeType InputByteArrayStream::Read(Byte* inBuffer,LongBufferSizeType inBufferSize)
+LongBufferSizeType InputByteArrayStream::Read(IOBasicTypes::Byte* inBuffer,IOBasicTypes::LongBufferSizeType inBufferSize)
 {
 	if(!mByteArray)
 		return 0;

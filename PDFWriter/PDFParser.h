@@ -6,11 +6,13 @@
 #include "ObjectsBasicTypes.h"
 #include "RefCountPtr.h"
 #include "PDFDictionary.h"
+#include "IByteReaderWithPosition.h"
+#include "AdapterIByteReaderWithPositionToIReadPositionProvider.h"
 
 using namespace IOBasicTypes;
 
-class IByteReaderWithPosition;
 class PDFArray;
+class PDFStreamInput;
 
 #define LINE_BUFFER_SIZE 1024
 
@@ -18,6 +20,7 @@ enum EXrefEntryType
 {
 	eXrefEntryExisting,
 	eXrefEntryDelete,
+	eXrefEntryStreamObject,
 	eXrefEntryUndefined
 };
 
@@ -25,9 +28,34 @@ struct XrefEntryInput
 {
 	XrefEntryInput(){mObjectPosition = 0;mRivision=0;mType = eXrefEntryUndefined;}
 
+	// well...it's more like...the first number in a pair on an xref, and the second one. the names
+	// are true only for "n" type of entries
 	LongFilePositionType mObjectPosition;
 	unsigned long mRivision;
 	EXrefEntryType mType;	
+};
+
+struct ObjectStreamHeaderEntry
+{
+	ObjectIDType mObjectNumber;
+	LongFilePositionType mObjectOffset;
+};
+
+class ReadPositionProviderForStreamWithPosition : public IReadPositionProvider
+{
+public:
+	void Assign(IByteReaderWithPosition* inStream)
+	{
+		mStream = inStream;
+	}
+
+	virtual LongFilePositionType GetCurrentPosition()
+	{
+		return mStream->GetCurrentPosition();
+	}
+private:
+	IByteReaderWithPosition* mStream;
+	
 };
 
 class PDFParser
@@ -71,6 +99,7 @@ public:
 private:
 	PDFObjectParser mObjectParser;
 	IByteReaderWithPosition* mStream;
+	AdapterIByteReaderWithPositionToIReadPositionProvider mCurrentPositionProvider;
 	
 	// we'll use this items for bacwkards reading. might turns this into a proper stream object
 	Byte mLinesBuffer[LINE_BUFFER_SIZE];
@@ -91,16 +120,30 @@ private:
 	EStatusCode ParseEOFLine();
 	EStatusCode ParseLastXrefPosition();
 	EStatusCode ParseTrailerDictionary();
-	EStatusCode BuildXrefTable();
+	EStatusCode BuildXrefTableFromTable();
 	EStatusCode DetermineXrefSize();
 	EStatusCode InitializeXref();
-	EStatusCode ParseXref(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,LongFilePositionType inXrefPosition);
-	PDFObject* ParseExistingInDirectObject(ObjectIDType inObjectID);
+	EStatusCode ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,LongFilePositionType inXrefPosition);
+	PDFObject*  ParseExistingInDirectObject(ObjectIDType inObjectID);
 	EStatusCode ParsePagesObjectIDs();
 	EStatusCode ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID);
 	EStatusCode ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID,unsigned long& ioCurrentPageIndex);
 	EStatusCode ParsePreviousXrefs(PDFDictionary* inTrailer);
 	void MergeXrefWithMainXref(XrefEntryInput* inTableToMerge);
+	EStatusCode ParseFileDirectory();
+	EStatusCode BuildXrefTableAndTrailerFromXrefStream();
+	EStatusCode ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,PDFStreamInput* inXrefStream);
+	EStatusCode ReadXrefStreamSegment(XrefEntryInput* inXrefTable,
+									 ObjectIDType inSegmentStartObject,
+									 ObjectIDType inSegmentCount,
+									 IByteReader* inReadFrom,
+									 int* inEntryWidths,
+									 unsigned long inEntryWidthsSize);
+	EStatusCode ReadXrefSegmentValue(IByteReader* inSource,int inEntrySize,long long& outValue);
+	EStatusCode ReadXrefSegmentValue(IByteReader* inSource,int inEntrySize,ObjectIDType& outValue);
+	EStatusCode ParseDirectory(LongFilePositionType inXrefPosition,XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,PDFDictionary** outTrailer);
+	PDFObject* ParseExistingInDirectStreamObject(ObjectIDType inObjectId);
+	EStatusCode ParseObjectStreamHeader(ObjectStreamHeaderEntry* inHeaderInfo,ObjectIDType inObjectsCount);
 
 	void ResetParser();
 

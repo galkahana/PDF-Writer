@@ -32,6 +32,7 @@
 #include <string>
 
 using namespace std;
+using namespace IOBasicTypes;
 
 class InputPFBDecodeStream;
 

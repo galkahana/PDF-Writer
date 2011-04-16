@@ -680,6 +680,14 @@
 			RelativePath=".\ImportantReadme.txt"
 			>
 		</File>
+		<File
+			RelativePath=".\InputFlateDecodeTester.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\InputFlateDecodeTester.h"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

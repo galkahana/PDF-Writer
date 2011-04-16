@@ -22,6 +22,10 @@
 #include "IByteReader.h"
 #include "EStatusCode.h"
  
+
+using namespace IOBasicTypes;
+
+
 class InputCharStringDecodeStream : public IByteReader
 {
 public:

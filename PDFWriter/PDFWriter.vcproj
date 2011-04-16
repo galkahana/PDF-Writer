@@ -282,6 +282,10 @@
 				Name="IO"
 				>
 				<File
+					RelativePath=".\AdapterIByteReaderWithPositionToIReadPositionProvider.h"
+					>
+				</File>
+				<File
 					RelativePath=".\IByteReader.h"
 					>
 				</File>
@@ -330,6 +334,30 @@
 					>
 				</File>
 				<File
+					RelativePath=".\InputFlateDecodeStream.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\InputFlateDecodeStream.h"
+					>
+				</File>
+				<File
+					RelativePath=".\InputLimitedStream.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\InputLimitedStream.h"
+					>
+				</File>
+				<File
+					RelativePath=".\InputStreamSkipperStream.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\InputStreamSkipperStream.h"
+					>
+				</File>
+				<File
 					RelativePath=".\InputStringBufferStream.cpp"
 					>
 				</File>
@@ -339,6 +367,10 @@
 				</File>
 				<File
 					RelativePath=".\IOBasicTypes.h"
+					>
+				</File>
+				<File
+					RelativePath=".\IReadPositionProvider.h"
 					>
 				</File>
 				<File
@@ -1255,6 +1287,14 @@
 			Name="PDF Embedding"
 			>
 			<File
+				RelativePath=".\InputPNGPredictor12Stream.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\InputPNGPredictor12Stream.h"
+				>
+			</File>
+			<File
 				RelativePath=".\PDFDocumentHandler.cpp"
 				>
 			</File>
@@ -1401,6 +1441,10 @@
 					RelativePath=".\PDFSymbol.h"
 					>
 				</File>
+			</Filter>
+			<Filter
+				Name="PredictionFilters"
+				>
 			</Filter>
 		</Filter>
 		<File

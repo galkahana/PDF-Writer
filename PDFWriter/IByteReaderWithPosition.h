@@ -25,6 +25,8 @@
 
 #include "IByteReader.h"
 
+using namespace IOBasicTypes;
+
 class IByteReaderWithPosition : public IByteReader
 {
 public:

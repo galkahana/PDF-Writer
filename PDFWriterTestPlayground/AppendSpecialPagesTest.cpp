@@ -21,6 +21,7 @@ EStatusCode AppendSpecialPagesTest::Run()
 
 	do
 	{
+
 		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\AppendSpecialPagesTest.PDF",ePDFVersion13,LogConfiguration(true,L"c:\\pdflibtests\\AppendSpecialPagesTestLog.txt"));
 		if(status != eSuccess)
 		{
@@ -28,7 +29,18 @@ EStatusCode AppendSpecialPagesTest::Run()
 			break;
 		}	
 
-		EStatusCodeAndObjectIDTypeList result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\AddedItem.pdf",PDFPageRange());
+		EStatusCodeAndObjectIDTypeList result;
+
+		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\ObjectStreams.pdf",PDFPageRange());
+		if(result.first != eSuccess)
+		{
+			wcout<<"failed to append pages from AddedItem.pdf\n";
+			status = result.first;
+			break;
+		}
+
+		
+		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\AddedItem.pdf",PDFPageRange());
 		if(result.first != eSuccess)
 		{
 			wcout<<"failed to append pages from AddedItem.pdf\n";

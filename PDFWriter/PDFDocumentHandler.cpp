@@ -43,13 +43,13 @@ void PDFDocumentHandler::SetOperationsContexts(DocumentContext* inDocumentContex
 
 
 
+
 EStatusCodeAndPDFFormXObjectList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const wstring& inPDFFilePath,
 																				const PDFPageRange& inPageRange,
 																				EPDFPageBox inPageBoxToUseAsFormBox,
 																				const double* inTransformationMatrix)
 {
 	EStatusCodeAndPDFFormXObjectList result;
-	
 
 	do
 	{

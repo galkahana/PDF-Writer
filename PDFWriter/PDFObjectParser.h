@@ -3,13 +3,14 @@
 #include "PDFParserTokenizer.h"
 #include "EStatusCode.h"
 #include "IOBasicTypes.h"
+#include "IReadPositionProvider.h"
 
 #include <string>
 #include <list>
 #include <utility>
 
 class PDFObject;
-class IByteReaderWithPosition;
+class IByteReader;
 
 using namespace std;
 using namespace IOBasicTypes;
@@ -25,7 +26,7 @@ public:
 
 	
 	// Assign the stream to read from (does not take ownership of the stream)
-	void SetReadStream(IByteReaderWithPosition* inSourceStream);
+	void SetReadStream(IByteReader* inSourceStream,IReadPositionProvider* inCurrentPositionProvider);
 
 	PDFObject* ParseNewObject();
 
@@ -35,7 +36,8 @@ public:
 private:
 	PDFParserTokenizer mTokenizer;
 	StringList mTokenBuffer;
-	IByteReaderWithPosition* mStream;
+	IByteReader* mStream;
+	IReadPositionProvider* mCurrentPositionProvider;
 
 	bool GetNextToken(string& outToken);
 	void SaveTokenToBuffer(string& inToken);

@@ -15,7 +15,7 @@
 #include "Trace.h"
 #include "BoxingBase.h"
 #include "PDFStream.h"
-#include "IByteReaderWithPosition.h"
+#include "IByteReader.h"
 #include "RefCountPtr.h"
 #include "PDFObjectCast.h"
 
@@ -30,10 +30,12 @@ PDFObjectParser::~PDFObjectParser(void)
 {
 }
 
-void PDFObjectParser::SetReadStream(IByteReaderWithPosition* inSourceStream)
+void PDFObjectParser::SetReadStream(IByteReader* inSourceStream,
+									IReadPositionProvider* inCurrentPositionProvider)
 {
 	mStream = inSourceStream;
 	mTokenizer.SetReadStream(inSourceStream);
+	mCurrentPositionProvider = inCurrentPositionProvider;
 	ResetReadState();
 }
 
@@ -42,10 +44,6 @@ void PDFObjectParser::ResetReadState()
 	mTokenBuffer.clear();
 	mTokenizer.ResetReadState();
 }
-
-/*
-4. Stream (including the dictionary)
-*/
 
 static const string scR = "R";
 static const string scStream = "stream";
@@ -166,7 +164,7 @@ PDFObject* PDFObjectParser::ParseNewObject()
 				{
 					// yes, found a stream. record current position as the position where the stream starts. 
 					// [tokenizer took care that the posiiton should be that way with a special case]
-					pdfObject = new PDFStreamInput((PDFDictionary*)pdfObject,mStream->GetCurrentPosition());
+					pdfObject = new PDFStreamInput((PDFDictionary*)pdfObject,mCurrentPositionProvider->GetCurrentPosition());
 				}
 				else
 				{
