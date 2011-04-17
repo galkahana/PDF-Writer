@@ -31,6 +31,14 @@ EStatusCode AppendSpecialPagesTest::Run()
 
 		EStatusCodeAndObjectIDTypeList result;
 
+		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\ObjectStreamsModified.pdf",PDFPageRange());
+		if(result.first != eSuccess)
+		{
+			wcout<<"failed to append pages from AddedItem.pdf\n";
+			status = result.first;
+			break;
+		}
+
 		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\ObjectStreams.pdf",PDFPageRange());
 		if(result.first != eSuccess)
 		{

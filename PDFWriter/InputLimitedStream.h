@@ -8,17 +8,18 @@ public:
 	InputLimitedStream();
 	virtual ~InputLimitedStream(void);
 
-	// Owns inSourceStream, so use Assign(NULL,0) if when done if this is not the case
-	InputLimitedStream(IByteReader* inSourceStream,IOBasicTypes::LongFilePositionType inReadLimit);
+	// K. with this one (just cause i'm tired of this ownership thing) i'm trying something new - to flag ownership. 
+	// So make good use of this last flag
+	InputLimitedStream(IByteReader* inSourceStream,IOBasicTypes::LongFilePositionType inReadLimit,bool inOwnsStream);
 
-	// Owns inSourceStream, so use Assign(NULL,0) if when done if this is not the case
-	void Assign(IByteReader* inSourceStream,IOBasicTypes::LongFilePositionType inReadLimit);
+	void Assign(IByteReader* inSourceStream,IOBasicTypes::LongFilePositionType inReadLimit,bool inOwnsStream);
 
 	virtual IOBasicTypes::LongBufferSizeType Read(IOBasicTypes::Byte* inBuffer,IOBasicTypes::LongBufferSizeType inBufferSize);
 	virtual bool NotEnded();
 
 private:
 
+	bool mOwnsStream;
 	IByteReader* mStream;
 	IOBasicTypes::LongFilePositionType mMoreToRead;
 };

@@ -9,6 +9,8 @@
 #include "IByteReaderWithPosition.h"
 #include "AdapterIByteReaderWithPositionToIReadPositionProvider.h"
 
+#include <map>
+
 using namespace IOBasicTypes;
 
 class PDFArray;
@@ -58,6 +60,8 @@ private:
 	
 };
 
+typedef map<ObjectIDType,ObjectStreamHeaderEntry*> ObjectIDTypeToObjectStreamHeaderEntryMap;
+
 class PDFParser
 {
 public:
@@ -96,6 +100,11 @@ public:
 	// don't be confused - pass number of pages here. returns the dictionary, and verifies that it's actually a page (via type)
 	PDFDictionary* ParsePage(unsigned long inPageIndex);
 
+	// This is sort of a public function, in order to provide the right filters when reading
+	// note that the final reader does not own the source stream. You can delete it safely after usage
+	// even if it's cascading filters
+	IByteReader* CreateInputStreamReader(PDFStreamInput* inStream);
+
 private:
 	PDFObjectParser mObjectParser;
 	IByteReaderWithPosition* mStream;
@@ -107,6 +116,7 @@ private:
 	IOBasicTypes::Byte* mLastAvailableIndex;
 	LongBufferSizeType mLastReadPositionFromEnd;
 	bool mEncounteredFileStart;
+	ObjectIDTypeToObjectStreamHeaderEntryMap mObjectStreamsCache;
 
 	double mPDFLevel;
 	LongFilePositionType mLastXrefPosition;
@@ -132,7 +142,10 @@ private:
 	void MergeXrefWithMainXref(XrefEntryInput* inTableToMerge);
 	EStatusCode ParseFileDirectory();
 	EStatusCode BuildXrefTableAndTrailerFromXrefStream();
+	// an overload for cases where the xref stream object is already parsed
 	EStatusCode ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,PDFStreamInput* inXrefStream);
+	// an overload for cases where the position should hold a stream object, and it should be parsed
+	EStatusCode ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,LongFilePositionType inXrefPosition);
 	EStatusCode ReadXrefStreamSegment(XrefEntryInput* inXrefTable,
 									 ObjectIDType inSegmentStartObject,
 									 ObjectIDType inSegmentCount,
@@ -144,6 +157,7 @@ private:
 	EStatusCode ParseDirectory(LongFilePositionType inXrefPosition,XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,PDFDictionary** outTrailer);
 	PDFObject* ParseExistingInDirectStreamObject(ObjectIDType inObjectId);
 	EStatusCode ParseObjectStreamHeader(ObjectStreamHeaderEntry* inHeaderInfo,ObjectIDType inObjectsCount);
+	void MovePositionInStream(LongFilePositionType inPosition);
 
 	void ResetParser();
 

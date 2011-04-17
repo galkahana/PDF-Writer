@@ -11,7 +11,7 @@
 #include "PDFStream.h"
 #include "OutputStreamTraits.h"
 #include "PDFStreamInput.h"
-#include "OutputFlateDecodeStream.h"
+#include "InputFlateDecodeStream.h"
 #include "ObjectsContext.h"
 #include "PDFIndirectObjectReference.h"
 #include "PDFBoolean.h"
@@ -340,38 +340,17 @@ EStatusCode PDFDocumentHandler::WritePageContentToSingleStream(IByteWriter* inTa
 
 EStatusCode PDFDocumentHandler::WritePDFStreamInputToStream(IByteWriter* inTargetStream,PDFStreamInput* inSourceStream)
 {
-	RefCountPtr<PDFDictionary> streamDictionary(inSourceStream->QueryStreamDictionary());
-	PDFObjectCastPtr<PDFInteger> lengthObject(mParser.QueryDictionaryObject(streamDictionary.GetPtr(),"Length"));	
+	IByteReader* streamReader = mParser.CreateInputStreamReader(inSourceStream);
 
-	if(!lengthObject)
-	{
-		TRACE_LOG("PDFDocumentHandler::WritePDFStreamInputToStream, stream does not have length, failing");
+	if(!streamReader)
 		return eFailure;
-	}
-
-	RefCountPtr<PDFObject> filterObject(mParser.QueryDictionaryObject(streamDictionary.GetPtr(),"Filter"));
 
 	mPDFFile.GetInputStream()->SetPosition(inSourceStream->GetStreamContentStart());
-	if(!filterObject)
-	{
-		OutputStreamTraits traits(inTargetStream);
-		return traits.CopyToOutputStream(mPDFFile.GetInputStream(),(LongBufferSizeType)lengthObject->GetValue());	
-	}
-	else if(filterObject->GetType() == ePDFObjectName && ((PDFName*)(filterObject.GetPtr()))->GetValue() == "FlateDecode")
-	{
-		OutputFlateDecodeStream decoder(inTargetStream);
-		OutputStreamTraits traits(&decoder);
-		EStatusCode status = traits.CopyToOutputStream(mPDFFile.GetInputStream(),(LongBufferSizeType)lengthObject->GetValue());	
 
-		// must assign null, cause decoder takes ownership
-		decoder.Assign(NULL);
-		return status;
-	}
-	else
-	{
-		TRACE_LOG("PDFDocumentHandler::WritePDFStreamInputToStream, can only handle unencoded or flate streams. sorry");
-		return eFailure;
-	}
+	OutputStreamTraits traits(inTargetStream);
+	EStatusCode status = traits.CopyToOutputStream(streamReader);
+	delete streamReader;
+	return status;
 }
 
 EStatusCode PDFDocumentHandler::CopyResourcesIndirectObjects(PDFDictionary* inPage)

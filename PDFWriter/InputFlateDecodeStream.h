@@ -31,6 +31,7 @@ private:
 	IByteReader* mSourceStream;
 	z_stream* mZLibState;
 	bool mCurrentlyEncoding;
+	bool mEndOfCompressionEoncountered;
 
 	void FinalizeEncoding();
 	IOBasicTypes::LongBufferSizeType DecodeBufferAndRead(const IOBasicTypes::Byte* inBuffer,IOBasicTypes::LongBufferSizeType inSize);

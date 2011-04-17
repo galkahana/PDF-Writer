@@ -9,6 +9,7 @@ InputFlateDecodeStream::InputFlateDecodeStream(void)
 	mZLibState = new z_stream;
 	mSourceStream = NULL;
 	mCurrentlyEncoding = false;
+	mEndOfCompressionEoncountered = false;
 }
 
 InputFlateDecodeStream::~InputFlateDecodeStream(void)
@@ -33,7 +34,7 @@ InputFlateDecodeStream::InputFlateDecodeStream(IByteReader* inSourceReader)
 	mSourceStream = NULL;
 	mCurrentlyEncoding = false;
 
-	Assign(mSourceStream);
+	Assign(inSourceReader);
 }
 
 void InputFlateDecodeStream::Assign(IByteReader* inSourceReader)
@@ -50,6 +51,8 @@ void InputFlateDecodeStream::StartEncoding()
     mZLibState->opaque = Z_NULL;
 	mZLibState->avail_in = 0;
 	mZLibState->next_in = Z_NULL;
+	mEndOfCompressionEoncountered = false;
+
 
     int inflateStatus = inflateInit(mZLibState);
     if (inflateStatus != Z_OK)
@@ -112,7 +115,7 @@ IOBasicTypes::LongBufferSizeType InputFlateDecodeStream::DecodeBufferAndRead(con
 			mZLibState->avail_in = 1; 
 			mZLibState->next_in = (Bytef*)&mBuffer;
 
-			while(mZLibState->avail_in != 0 && mZLibState->avail_out != 0)
+			while(mZLibState->avail_in != 0 && mZLibState->avail_out != 0 && inflateResult != Z_STREAM_END)
 			{
 				inflateResult = inflate(mZLibState,Z_NO_FLUSH);
 				if(Z_STREAM_ERROR == inflateResult ||
@@ -131,7 +134,8 @@ IOBasicTypes::LongBufferSizeType InputFlateDecodeStream::DecodeBufferAndRead(con
 	} while(false);
 
 	// should be that at the last buffer we'll get here a nice Z_STREAM_END
-	if(Z_OK == inflateResult || Z_STREAM_END == inflateResult)
+		mEndOfCompressionEoncountered = (Z_STREAM_END == inflateResult);
+	if(Z_OK == inflateResult || mEndOfCompressionEoncountered)
 		return inSize - mZLibState->avail_out;
 	else
 		return 0;
@@ -140,7 +144,7 @@ IOBasicTypes::LongBufferSizeType InputFlateDecodeStream::DecodeBufferAndRead(con
 bool InputFlateDecodeStream::NotEnded()
 {
 	if(mSourceStream)
-		return mSourceStream->NotEnded() || mZLibState->avail_in != 0;
+		return (mSourceStream->NotEnded() || mZLibState->avail_in != 0) && !mEndOfCompressionEoncountered;
 	else
-		return mZLibState->avail_in != 0;
+		return mZLibState->avail_in != 0 && mEndOfCompressionEoncountered;
 }

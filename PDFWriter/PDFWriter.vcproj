@@ -1287,14 +1287,6 @@
 			Name="PDF Embedding"
 			>
 			<File
-				RelativePath=".\InputPNGPredictor12Stream.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\InputPNGPredictor12Stream.h"
-				>
-			</File>
-			<File
 				RelativePath=".\PDFDocumentHandler.cpp"
 				>
 			</File>
@@ -1445,6 +1437,62 @@
 			<Filter
 				Name="PredictionFilters"
 				>
+				<File
+					RelativePath=".\InputPredictorPNGAverageStream.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\InputPredictorPNGAverageStream.h"
+					>
+				</File>
+				<File
+					RelativePath=".\InputPredictorPNGNoneStream.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\InputPredictorPNGNoneStream.h"
+					>
+				</File>
+				<File
+					RelativePath=".\InputPredictorPNGOptimumStream.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\InputPredictorPNGOptimumStream.h"
+					>
+				</File>
+				<File
+					RelativePath=".\InputPredictorPNGPaethStream.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\InputPredictorPNGPaethStream.h"
+					>
+				</File>
+				<File
+					RelativePath=".\InputPredictorPNGSubStream.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\InputPredictorPNGSubStream.h"
+					>
+				</File>
+				<File
+					RelativePath=".\InputPredictorPNGUpStream.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\InputPredictorPNGUpStream.h"
+					>
+				</File>
+				<File
+					RelativePath=".\InputPredictorTIFFSubStream.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\InputPredictorTIFFSubStream.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<File

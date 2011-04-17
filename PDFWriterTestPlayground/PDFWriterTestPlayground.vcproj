@@ -643,6 +643,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\InputFlateDecodeTester.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\InputFlateDecodeTester.h"
+					>
+				</File>
+				<File
 					RelativePath=".\PDFEmbedTest.cpp"
 					>
 				</File>
@@ -678,14 +686,6 @@
 		</Filter>
 		<File
 			RelativePath=".\ImportantReadme.txt"
-			>
-		</File>
-		<File
-			RelativePath=".\InputFlateDecodeTester.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\InputFlateDecodeTester.h"
 			>
 		</File>
 	</Files>

@@ -8,24 +8,26 @@ InputLimitedStream::InputLimitedStream(void)
 {
 	mStream = NULL;
 	mMoreToRead = 0;
+	mOwnsStream = false;
 }
 
 InputLimitedStream::~InputLimitedStream(void)
 {
-	if(mStream)
+	if(mStream && mOwnsStream)
 		delete mStream;
 }
 
-InputLimitedStream::InputLimitedStream(IByteReader* inSourceStream,LongFilePositionType inReadLimit)
+InputLimitedStream::InputLimitedStream(IByteReader* inSourceStream,LongFilePositionType inReadLimit,bool inOwnsStream)
 {
-	Assign(inSourceStream,inReadLimit);
+	Assign(inSourceStream,inReadLimit,inOwnsStream);
 }
 
 
-void InputLimitedStream::Assign(IByteReader* inSourceStream,LongFilePositionType inReadLimit)
+void InputLimitedStream::Assign(IByteReader* inSourceStream,LongFilePositionType inReadLimit,bool inOwnsStream)
 {
 	mStream = inSourceStream;
 	mMoreToRead = inReadLimit;
+	mOwnsStream = inOwnsStream;
 }
 
 LongBufferSizeType InputLimitedStream::Read(Byte* inBuffer,LongBufferSizeType inBufferSize)
