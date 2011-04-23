@@ -17,9 +17,6 @@
    limitations under the License.
 
    
-	PDFParserTokenizer reads tokens from a stream whic is PDF.
-	very similar in implementation to InputPFBDecodeStream, without the part
-	of acting as a stream. should consider refactoring if makes semantical sense.
 */
 #pragma once
 
