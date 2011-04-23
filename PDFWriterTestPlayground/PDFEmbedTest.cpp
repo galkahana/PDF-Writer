@@ -23,7 +23,6 @@
 #include "PDFWriter.h"
 #include "PageContentContext.h"
 #include "PDFPage.h"
-#include "PDFFormXObject.h"
 
 #include <iostream>
 
@@ -53,7 +52,7 @@ EStatusCode PDFEmbedTest::Run()
 		}	
 
 		// Create XObjects from PDF to embed
-		EStatusCodeAndPDFFormXObjectList result = pdfWriter.CreateFormXObjectsFromPDF(L"C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF",PDFPageRange(),ePDFPageBoxMediaBox);
+		EStatusCodeAndObjectIDTypeList result = pdfWriter.CreateFormXObjectsFromPDF(L"C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF",PDFPageRange(),ePDFPageBoxMediaBox);
 		if(result.first != eSuccess)
 		{
 			wcout<<"failed to create PDF XObjects from PDF file\n";
@@ -69,7 +68,7 @@ EStatusCode PDFEmbedTest::Run()
 		// place the first page in the top left corner of the document
 		contentContext->q();
 		contentContext->cm(0.5,0,0,0.5,0,421);
-		contentContext->Do(page->GetResourcesDictionary().AddFormXObjectMapping(result.second.front()->GetObjectID()));
+		contentContext->Do(page->GetResourcesDictionary().AddFormXObjectMapping(result.second.front()));
 		contentContext->Q();
 		
 		contentContext->G(0);
@@ -81,7 +80,7 @@ EStatusCode PDFEmbedTest::Run()
 		// place the second page in the bottom right corner of the document
 		contentContext->q();
 		contentContext->cm(0.5,0,0,0.5,297.5,0);
-		contentContext->Do(page->GetResourcesDictionary().AddFormXObjectMapping(result.second.back()->GetObjectID()));
+		contentContext->Do(page->GetResourcesDictionary().AddFormXObjectMapping(result.second.back()));
 		contentContext->Q();
 
 		contentContext->G(0);
@@ -103,12 +102,6 @@ EStatusCode PDFEmbedTest::Run()
 			wcout<<"failed to write page\n";
 			break;
 		}
-
-		// delete all form xobjects now
-		PDFFormXObjectList::iterator it = result.second.begin();
-		for(; it != result.second.end();++it)
-			delete (*it);
-		result.second.clear();
 
 		status = pdfWriter.EndPDF();
 		if(status != eSuccess)

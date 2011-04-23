@@ -126,15 +126,21 @@ public:
 
 	// PDF 
 
-	// CreateFormXObjectsFromPDF is for using input PDF pages as objects in one page or more
-	EStatusCodeAndPDFFormXObjectList CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
-																const PDFPageRange& inPageRange,
-																EPDFPageBox inPageBoxToUseAsFormBox,
-																const double* inTransformationMatrix = NULL);
+	// CreateFormXObjectsFromPDF is for using input PDF pages as objects in one page or more. you can used the returned IDs to place the 
+	// created form xobjects
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+															 const PDFPageRange& inPageRange,
+															 EPDFPageBox inPageBoxToUseAsFormBox,
+															 const double* inTransformationMatrix = NULL,
+															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
 	// AppendPDFPagesFromPDF is for simple appending of the input PDF pages
 	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
-														const PDFPageRange& inPageRange);
+														const PDFPageRange& inPageRange,
+														const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
+
+	// Copying context, allowing for a continous flow of copying from multiple sources PDFs (create one per source) to target PDF
+	PDFDocumentCopyingContext* CreatePDFCopyingContext(const wstring& inPDFFilePath);
 
 	// fonts [text]
 	PDFUsedFont* GetFontForFile(const wstring& inFontFilePath);

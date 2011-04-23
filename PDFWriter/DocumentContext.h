@@ -54,6 +54,7 @@ class PDFUsedFont;
 class PageContentContext;
 class PDFParser;
 class PDFDictionary;
+class PDFDocumentCopyingContext;
 
 typedef set<IDocumentContextExtender*> IDocumentContextExtenderSet;
 
@@ -123,13 +124,17 @@ public:
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 	
 	// PDF
-	EStatusCodeAndPDFFormXObjectList CreateFormXObjectsFromPDF( const wstring& inPDFFilePath,
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF( const wstring& inPDFFilePath,
 																const PDFPageRange& inPageRange,
 																EPDFPageBox inPageBoxToUseAsFormBox,
-																const double* inTransformationMatrix);
+																const double* inTransformationMatrix,
+																const ObjectIDTypeList& inCopyAdditionalObjects);
 
 	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
-														const PDFPageRange& inPageRange);
+														const PDFPageRange& inPageRange,
+														const ObjectIDTypeList& inCopyAdditionalObjects);
+	
+	PDFDocumentCopyingContext* CreatePDFCopyingContext(const wstring& inFilePath);
 
 
 	// Font [Text]

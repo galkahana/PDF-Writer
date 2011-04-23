@@ -113,7 +113,7 @@ EStatusCode ANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 		status = inObjectsContext->EndDictionary(fontContext);
 		if(status != eSuccess)
 		{
-			TRACE_LOG("ANSIFontWriter::WriteFont, unexpected faiulre. Failed to end dictionary in font write.");
+			TRACE_LOG("ANSIFontWriter::WriteFont, unexpected failure. Failed to end dictionary in font write.");
 			break;
 		}
 

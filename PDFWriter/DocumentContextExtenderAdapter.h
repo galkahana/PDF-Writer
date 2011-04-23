@@ -73,6 +73,44 @@ public:
 							ObjectsContext* inPDFWriterObjectContext,
 							DocumentContext* inPDFWriterDocumentContext){return eSuccess;}
 
+	// pdf copying events
+
+	virtual EStatusCode OnPDFParsingComplete(
+							ObjectsContext* inPDFWriterObjectContext,
+							DocumentContext* inPDFWriterDocumentContext,
+							PDFDocumentHandler* inPDFDocumentHandler){return eSuccess;}
+
+	virtual EStatusCode OnBeforeCreateXObjectFromPage(
+							PDFDictionary* inPageObjectDictionary,
+							ObjectsContext* inPDFWriterObjectContext,
+							DocumentContext* inPDFWriterDocumentContext,
+							PDFDocumentHandler* inPDFDocumentHandler){return eSuccess;}
+
+	virtual EStatusCode OnBeforeCreatePageFromPage(
+							PDFDictionary* inPageObjectDictionary,
+							ObjectsContext* inPDFWriterObjectContext,
+							DocumentContext* inPDFWriterDocumentContext,
+							PDFDocumentHandler* inPDFDocumentHandler){return eSuccess;}
+
+	virtual EStatusCode OnAfterCreateXObjectFromPage(
+							PDFFormXObject* iPageObjectResultXObject,
+							PDFDictionary* inPageObjectDictionary,
+							ObjectsContext* inPDFWriterObjectContext,
+							DocumentContext* inPDFWriterDocumentContext,
+							PDFDocumentHandler* inPDFDocumentHandler){return eSuccess;}
+
+	virtual EStatusCode OnAfterCreatePageFromPage(
+							PDFPage* iPageObjectResultPage,
+							PDFDictionary* inPageObjectDictionary,
+							ObjectsContext* inPDFWriterObjectContext,
+							DocumentContext* inPDFWriterDocumentContext,
+							PDFDocumentHandler* inPDFDocumentHandler){return eSuccess;}
+
+	virtual EStatusCode OnPDFCopyingComplete(
+							ObjectsContext* inPDFWriterObjectContext,
+							DocumentContext* inPDFWriterDocumentContext,
+							PDFDocumentHandler* inPDFDocumentHandler){return eSuccess;}
+
 protected:
 	DocumentContextExtenderAdapter(){}
 

@@ -27,6 +27,7 @@
 #include "ObjectsBasicTypes.h"
 #include "ETokenSeparator.h"
 #include "DocumentContextExtenderAdapter.h"
+#include "MapIterator.h"
 
 #include <map>
 #include <list>
@@ -41,12 +42,13 @@ class PDFStreamInput;
 class DictionaryContext;
 class PageContentContext;
 class PDFPage;
+class IDocumentContextExtender;
 
 using namespace std;
 
 typedef map<ObjectIDType,ObjectIDType> ObjectIDTypeToObjectIDTypeMap;
 typedef set<ObjectIDType> ObjectIDTypeSet;
-
+typedef set<IDocumentContextExtender*> IDocumentContextExtenderSet;
 
 class PDFDocumentHandler : public DocumentContextExtenderAdapter
 {
@@ -59,15 +61,20 @@ public:
 	// Create a list of XObjects from a PDF file.
 	// the list of objects can then be used to place the "pages" in various locations on the written
 	// PDF page.
-	EStatusCodeAndPDFFormXObjectList CreateFormXObjectsFromPDF( const wstring& inPDFFilePath,
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF( const wstring& inPDFFilePath,
 																const PDFPageRange& inPageRange,
 																EPDFPageBox inPageBoxToUseAsFormBox,
-																const double* inTransformationMatrix);
+																const double* inTransformationMatrix,
+																const ObjectIDTypeList& inCopyAdditionalObjects);
 	
 	// appends pages from source PDF to the written PDF. returns object ID for the created pages
 	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
-														const PDFPageRange& inPageRange);
+														const PDFPageRange& inPageRange,
+														const ObjectIDTypeList& inCopyAdditionalObjects);
 
+	// Event listeners for CreateFormXObjectsFromPDF and AppendPDFPagesFromPDF
+	void AddDocumentContextExtender(IDocumentContextExtender* inExtender);
+	void RemoveDocumentContextExtender(IDocumentContextExtender* inExtender);	
 
 	// IDocumentContextExtender implementation
 	virtual EStatusCode OnResourcesWrite(
@@ -76,10 +83,24 @@ public:
 							ObjectsContext* inPDFWriterObjectContext,
 							DocumentContext* inPDFWriterDocumentContext);
 
+
+	// copying context handling
+	EStatusCode StartFileCopyingContext(const wstring& inPDFFilePath);
+	EStatusCodeAndObjectIDType CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
+														 EPDFPageBox inPageBoxToUseAsFormBox,
+														 const double* inTransformationMatrix);
+	EStatusCodeAndObjectIDType AppendPDFPageFromPDF(unsigned long inPageIndex);
+	EStatusCodeAndObjectIDType CopyObject(ObjectIDType inSourceObjectID);
+	PDFParser* GetSourceDocumentParser();
+	EStatusCodeAndObjectIDType GetCopiedObjectID(ObjectIDType inSourceObjectID);
+	MapIterator<ObjectIDTypeToObjectIDTypeMap> GetCopiedObjectsMappingIterator();
+	void StopFileCopyingContext();
 private:
 
 	ObjectsContext* mObjectsContext;
 	DocumentContext* mDocumentContext;
+	IDocumentContextExtenderSet mExtenders;
+
 
 	InputFile mPDFFile;
 	PDFParser mParser;
@@ -97,6 +118,7 @@ private:
 	EStatusCode CopyResourcesIndirectObjects(PDFDictionary* inPage);
 	void RegisterInDirectObjects(PDFDictionary* inDictionary,ObjectIDTypeList& outNewObjects);
 	void RegisterInDirectObjects(PDFArray* inArray,ObjectIDTypeList& outNewObjects);
+	EStatusCode WriteNewObjects(const ObjectIDTypeList& inSourceObjectIDs);
 	EStatusCode WriteNewObjects(const ObjectIDTypeList& inSourceObjectIDs,ObjectIDTypeSet& ioCopiedObjects);
 	EStatusCode CopyInDirectObject(ObjectIDType inSourceObjectID,ObjectIDType inTargetObjectID,ObjectIDTypeSet& ioCopiedObjects);
 	EStatusCode WriteObjectByType(PDFObject* inObject,ETokenSeparator inSeparator,ObjectIDTypeList& outSourceObjectsToAdd);

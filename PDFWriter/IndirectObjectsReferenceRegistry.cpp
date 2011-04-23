@@ -69,7 +69,7 @@ EStatusCode IndirectObjectsReferenceRegistry::MarkObjectAsWritten(ObjectIDType i
 
 	if(mObjectsWritesRegistry[inObjectID].mObjectWritten)
 	{
-		TRACE_LOG3("IndirectObjectsReferenceRegistry::MarkObjectAsWritten, Object rewrite faiulre. The object %ld was already marked as written at %lld. New position is %lld",
+		TRACE_LOG3("IndirectObjectsReferenceRegistry::MarkObjectAsWritten, Object rewrite failure. The object %ld was already marked as written at %lld. New position is %lld",
 			inObjectID,mObjectsWritesRegistry[inObjectID].mWritePosition,inWritePosition);
 		return eFailure; // trying to mark as written an object that was already marked as such in the past. probably a mistake [till we have revisions]
 	}

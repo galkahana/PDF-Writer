@@ -31,6 +31,8 @@ class ResourcesDictionary;
 class PDFFormXObject;
 class JPEGImageHandler;
 class TIFFImageHandler;
+class PDFDocumentHandler;
+class PDFDictionary;
 
 class IDocumentContextExtender
 {
@@ -73,7 +75,7 @@ public:
 							DictionaryContext* inImageDictionaryContext,
 							ObjectsContext* inPDFWriterObjectContext,
 							DocumentContext* inPDFWriterDocumentContext,
-							TIFFImageHandler* inTIFFImageHandler){return eSuccess;}
+							TIFFImageHandler* inTIFFImageHandler) = 0;
 
 	// add items to catalog dictionary while it's written
 	virtual EStatusCode OnCatalogWrite(
@@ -81,4 +83,43 @@ public:
 							DictionaryContext* inCatalogDictionaryContext,
 							ObjectsContext* inPDFWriterObjectContext,
 							DocumentContext* inPDFWriterDocumentContext) = 0;
+
+	// PDF document embedding events
+
+	virtual EStatusCode OnPDFParsingComplete(
+							ObjectsContext* inPDFWriterObjectContext,
+							DocumentContext* inPDFWriterDocumentContext,
+							PDFDocumentHandler* inPDFDocumentHandler) = 0;
+
+	virtual EStatusCode OnBeforeCreateXObjectFromPage(
+							PDFDictionary* inPageObjectDictionary,
+							ObjectsContext* inPDFWriterObjectContext,
+							DocumentContext* inPDFWriterDocumentContext,
+							PDFDocumentHandler* inPDFDocumentHandler) = 0;
+
+	virtual EStatusCode OnBeforeCreatePageFromPage(
+							PDFDictionary* inPageObjectDictionary,
+							ObjectsContext* inPDFWriterObjectContext,
+							DocumentContext* inPDFWriterDocumentContext,
+							PDFDocumentHandler* inPDFDocumentHandler) = 0;
+
+	virtual EStatusCode OnAfterCreateXObjectFromPage(
+							PDFFormXObject* iPageObjectResultXObject,
+							PDFDictionary* inPageObjectDictionary,
+							ObjectsContext* inPDFWriterObjectContext,
+							DocumentContext* inPDFWriterDocumentContext,
+							PDFDocumentHandler* inPDFDocumentHandler) = 0;
+
+	virtual EStatusCode OnAfterCreatePageFromPage(
+							PDFPage* iPageObjectResultPage,
+							PDFDictionary* inPageObjectDictionary,
+							ObjectsContext* inPDFWriterObjectContext,
+							DocumentContext* inPDFWriterDocumentContext,
+							PDFDocumentHandler* inPDFDocumentHandler) = 0;
+
+	virtual EStatusCode OnPDFCopyingComplete(
+							ObjectsContext* inPDFWriterObjectContext,
+							DocumentContext* inPDFWriterDocumentContext,
+							PDFDocumentHandler* inPDFDocumentHandler) = 0;
+
 };

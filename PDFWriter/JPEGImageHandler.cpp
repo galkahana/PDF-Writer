@@ -172,7 +172,7 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 		{
 			if((*it)->OnJPEGImageXObjectWrite(inImageXObjectID,imageContext,mObjectsContext,mDocumentContext,this) != eSuccess)
 			{
-				TRACE_LOG("JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation, unexpected faiulre. extender declared failure when writing image xobject.");
+				TRACE_LOG("JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation, unexpected failure. extender declared failure when writing image xobject.");
 				status = eFailure;
 				break;
 			}

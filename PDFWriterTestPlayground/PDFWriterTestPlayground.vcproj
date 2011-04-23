@@ -696,6 +696,14 @@
 			RelativePath=".\ImportantReadme.txt"
 			>
 		</File>
+		<File
+			RelativePath=".\PDFCopyingContextTest.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\PDFCopyingContextTest.h"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

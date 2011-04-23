@@ -93,7 +93,7 @@ EStatusCode DescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID,
 		status = inObjectsContext->EndDictionary(fontContext);
 		if(status != eSuccess)
 		{
-			TRACE_LOG("CFFANSIFontWriter::WriteFont, unexpected faiulre. Failed to end dictionary in font write.");
+			TRACE_LOG("CFFANSIFontWriter::WriteFont, unexpected failure. Failed to end dictionary in font write.");
 			break;
 		}
 

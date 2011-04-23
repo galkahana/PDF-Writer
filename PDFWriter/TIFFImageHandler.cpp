@@ -1986,7 +1986,7 @@ PDFImageXObject* TIFFImageHandler::WriteTileImageXObject(int inTileIndex)
 		{
 			if(mExtender->OnTIFFImageXObjectWrite(imageXObjectID,imageContext,mObjectsContext,mContainerDocumentContext,this) != eSuccess)
 			{
-				TRACE_LOG("TIFFImageHandler::WriteTileImageXObject, unexpected faiulre. extender declared failure when writing image xobject.");
+				TRACE_LOG("TIFFImageHandler::WriteTileImageXObject, unexpected failure. extender declared failure when writing image xobject.");
 				break;
 			}
 		}	
@@ -2608,7 +2608,7 @@ PDFImageXObject* TIFFImageHandler::WriteUntiledImageXObject()
 		{
 			if(mExtender->OnTIFFImageXObjectWrite(imageXObjectID,imageContext,mObjectsContext,mContainerDocumentContext,this) != eSuccess)
 			{
-				TRACE_LOG("TIFFImageHandler::WriteTileImageXObject, unexpected faiulre. extender declared failure when writing image xobject.");
+				TRACE_LOG("TIFFImageHandler::WriteTileImageXObject, unexpected failure. extender declared failure when writing image xobject.");
 				break;
 			}
 		}	

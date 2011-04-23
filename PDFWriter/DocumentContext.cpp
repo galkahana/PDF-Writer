@@ -41,6 +41,7 @@
 #include "PDFLiteralString.h"
 #include "PDFBoolean.h"
 #include "PDFArray.h"
+#include "PDFDocumentCopyingContext.h"
 
 DocumentContext::DocumentContext()
 {
@@ -70,12 +71,14 @@ void DocumentContext::AddDocumentContextExtender(IDocumentContextExtender* inExt
 {
 	mExtenders.insert(inExtender);
 	mJPEGImageHandler.AddDocumentContextExtender(inExtender);
+	mPDFDocumentHandler.AddDocumentContextExtender(inExtender);
 }
 
 void DocumentContext::RemoveDocumentContextExtender(IDocumentContextExtender* inExtender)
 {
 	mExtenders.erase(inExtender);
 	mJPEGImageHandler.RemoveDocumentContextExtender(inExtender);
+	mPDFDocumentHandler.RemoveDocumentContextExtender(inExtender);
 }
 
 TrailerInformation& DocumentContext::GetTrailerInformation()
@@ -394,7 +397,7 @@ EStatusCode DocumentContext::WriteCatalogObject()
 	{
 		status = (*it)->OnCatalogWrite(&mCatalogInformation,catalogContext,mObjectsContext,this);
 		if(status != eSuccess)
-			TRACE_LOG("DocumentContext::WriteCatalogObject, unexpected faiulre. extender declared failure when writing catalog.");
+			TRACE_LOG("DocumentContext::WriteCatalogObject, unexpected failure. extender declared failure when writing catalog.");
 	}
 
 	mObjectsContext->EndDictionary(catalogContext);
@@ -560,14 +563,14 @@ EStatusCodeAndObjectIDType DocumentContext::WritePage(PDFPage* inPage)
 			result.first = (*it)->OnPageWrite(inPage,pageContext,mObjectsContext,this);
 			if(result.first != eSuccess)
 			{
-				TRACE_LOG("DocumentContext::WritePage, unexpected faiulre. extender declared failure when writing page.");
+				TRACE_LOG("DocumentContext::WritePage, unexpected failure. extender declared failure when writing page.");
 				break;
 			}
 		}
 		result.first = mObjectsContext->EndDictionary(pageContext);
 		if(result.first != eSuccess)
 		{
-			TRACE_LOG("DocumentContext::WritePage, unexpected faiulre. Failed to end dictionary in page write.");
+			TRACE_LOG("DocumentContext::WritePage, unexpected failure. Failed to end dictionary in page write.");
 			break;
 		}
 		mObjectsContext->EndIndirectObject();	
@@ -697,7 +700,7 @@ PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBounding
 		{
 			if((*it)->OnFormXObjectWrite(inFormXObjectID,formXObjectResourcesDictionaryID,xobjectContext,mObjectsContext,this) != eSuccess)
 			{
-				TRACE_LOG("DocumentContext::StartFormXObject, unexpected faiulre. extender declared failure when writing form xobject.");
+				TRACE_LOG("DocumentContext::StartFormXObject, unexpected failure. extender declared failure when writing form xobject.");
 				status = eFailure;
 				break;
 			}
@@ -821,7 +824,7 @@ EStatusCode DocumentContext::WriteResourcesDictionary(ResourcesDictionary& inRes
 			status = (*it)->OnResourcesWrite(&(inResourcesDictionary),resourcesContext,mObjectsContext,this);
 			if(status != eSuccess)
 			{
-				TRACE_LOG("DocumentContext::WriteResourcesDictionary, unexpected faiulre. extender declared failure when writing resources.");
+				TRACE_LOG("DocumentContext::WriteResourcesDictionary, unexpected failure. extender declared failure when writing resources.");
 				break;
 			}
 		}
@@ -900,19 +903,21 @@ PDFUsedFont* DocumentContext::GetFontForFile(const wstring& inFontFilePath,const
 	return mUsedFontsRepository.GetFontForFile(inFontFilePath,inAdditionalMeticsFilePath);
 }
 
-EStatusCodeAndPDFFormXObjectList DocumentContext::CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
 																			const PDFPageRange& inPageRange,
 																			EPDFPageBox inPageBoxToUseAsFormBox,
-																			const double* inTransformationMatrix)
+																			const double* inTransformationMatrix,
+																			const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	return mPDFDocumentHandler.CreateFormXObjectsFromPDF(inPDFFilePath,inPageRange,inPageBoxToUseAsFormBox,inTransformationMatrix);	
+	return mPDFDocumentHandler.CreateFormXObjectsFromPDF(inPDFFilePath,inPageRange,inPageBoxToUseAsFormBox,inTransformationMatrix,inCopyAdditionalObjects);	
 
 }
 
 EStatusCodeAndObjectIDTypeList DocumentContext::AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
-																	  const PDFPageRange& inPageRange)
+																	  const PDFPageRange& inPageRange,
+																	  const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	return mPDFDocumentHandler.AppendPDFPagesFromPDF(inPDFFilePath,inPageRange);	
+	return mPDFDocumentHandler.AppendPDFPagesFromPDF(inPDFFilePath,inPageRange,inCopyAdditionalObjects);	
 }
 
 EStatusCode DocumentContext::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
@@ -1332,4 +1337,17 @@ void DocumentContext::ReadPageTreeState(PDFParser* inStateReader,PDFDictionary* 
 			inPageTree->AddNodeToTree(kidNode,mObjectsContext->GetInDirectObjectsRegistry());
 		}
 	}
+}
+
+PDFDocumentCopyingContext* DocumentContext::CreatePDFCopyingContext(const wstring& inFilePath)
+{
+	PDFDocumentCopyingContext* context = new PDFDocumentCopyingContext();
+
+	if(context->Start(inFilePath,this,mObjectsContext) != eSuccess)
+	{
+		delete context;
+		return NULL;
+	}
+	else
+		return context;
 }

@@ -64,36 +64,37 @@ void PDFDocumentHandler::SetOperationsContexts(DocumentContext* inDocumentContex
 
 
 
-EStatusCodeAndPDFFormXObjectList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const wstring& inPDFFilePath,
+EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const wstring& inPDFFilePath,
 																				const PDFPageRange& inPageRange,
 																				EPDFPageBox inPageBoxToUseAsFormBox,
-																				const double* inTransformationMatrix)
+																				const double* inTransformationMatrix,
+																				const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	EStatusCodeAndPDFFormXObjectList result;
+	EStatusCodeAndObjectIDTypeList result;
 
 	do
 	{
-		result.first = mPDFFile.OpenFile(inPDFFilePath);
+		result.first = StartFileCopyingContext(inPDFFilePath);
 		if(result.first != eSuccess)
-		{
-			TRACE_LOG1("PDFDocumentHandler::CreateFormXObjectsFromPDF, unable to open file for reading in %s",inPDFFilePath.c_str());
 			break;
+
+		IDocumentContextExtenderSet::iterator it = mExtenders.begin();
+		for(; it != mExtenders.end() && eSuccess == result.first; ++it)
+		{
+			result.first = (*it)->OnPDFParsingComplete(mObjectsContext,mDocumentContext,this);
+			if(result.first != eSuccess)
+				TRACE_LOG("DocumentContext::CreateFormXObjectsFromPDF, unexpected failure. extender declared failure after parsing page.");
 		}
 
-		result.first = mParser.StartPDFParsing(mPDFFile.GetInputStream());
-		if(result.first != eSuccess)
+		// copy additional objects prior to pages, so we have them ready at page copying
+		if(inCopyAdditionalObjects.size() > 0)
 		{
-			TRACE_LOG("PDFDocumentHandler::CreateFormXObjectsFromPDF, failure occured while parsing PDF file.");
-			break;
-		}
-
-		// do not allow encrypted/protected documents
-		PDFObjectCastPtr<PDFDictionary> encryptionDictionary(mParser.QueryDictionaryObject(mParser.GetTrailer(),"Encrypt"));
-		if(encryptionDictionary.GetPtr())
-		{
-			TRACE_LOG("PDFDocumentHandler::CreateFormXObjectsFromPDF, Document contains an encryption dictionary. Library does not support embedding of encrypted PDF");
-			result.first = eFailure;
-			break;
+			result.first = WriteNewObjects(inCopyAdditionalObjects);
+			if(result.first != eSuccess)
+			{
+				TRACE_LOG("PDFDocumentHandler::CreateFormXObjectsFromPDF, failed copying additional objects");
+				break;
+			}
 		}
 
 		PDFFormXObject* newObject;
@@ -105,7 +106,8 @@ EStatusCodeAndPDFFormXObjectList PDFDocumentHandler::CreateFormXObjectsFromPDF(	
 				newObject = CreatePDFFormXObjectForPage(i,inPageBoxToUseAsFormBox,inTransformationMatrix);
 				if(newObject)
 				{
-					result.second.push_back(newObject);
+					result.second.push_back(newObject->GetObjectID());
+					delete newObject;
 				}
 				else
 				{
@@ -127,7 +129,8 @@ EStatusCodeAndPDFFormXObjectList PDFDocumentHandler::CreateFormXObjectsFromPDF(	
 						newObject = CreatePDFFormXObjectForPage(i,inPageBoxToUseAsFormBox,inTransformationMatrix);
 						if(newObject)
 						{
-							result.second.push_back(newObject);
+							result.second.push_back(newObject->GetObjectID());
+							delete newObject;
 						}
 						else
 						{
@@ -150,9 +153,16 @@ EStatusCodeAndPDFFormXObjectList PDFDocumentHandler::CreateFormXObjectsFromPDF(	
 
 	}while(false);
 
-	mPDFFile.CloseFile();
-	// clearing the source to target mapping here. note that pages copying enjoyed sharing of objects between them
-	mSourceToTarget.clear();
+	IDocumentContextExtenderSet::iterator it = mExtenders.begin();
+	for(; it != mExtenders.end() && eSuccess == result.first; ++it)
+	{
+		result.first = (*it)->OnPDFCopyingComplete(mObjectsContext,mDocumentContext,this);
+		if(result.first != eSuccess)
+			TRACE_LOG("DocumentContext::CreateFormXObjectsFromPDF, unexpected failure. extender declared failure before finalizing copy.");
+	}
+
+
+	StopFileCopyingContext();
 
 	return result;
 
@@ -164,12 +174,23 @@ PDFFormXObject* PDFDocumentHandler::CreatePDFFormXObjectForPage(unsigned long in
 {
 	RefCountPtr<PDFDictionary> pageObject = mParser.ParsePage(inPageIndex);
 	PDFFormXObject* result = NULL;
+	EStatusCode status = eSuccess;
 
 	if(!pageObject)
 	{
 		TRACE_LOG1("PDFDocumentHandler::CreatePDFFormXObjectForPage, unhexpected exception, page index does not denote a page object. page index = %ld",inPageIndex);
 		return NULL;
 	}
+
+	IDocumentContextExtenderSet::iterator it = mExtenders.begin();
+	for(; it != mExtenders.end() && eSuccess == status; ++it)
+	{
+		status = (*it)->OnBeforeCreateXObjectFromPage(pageObject.GetPtr(),mObjectsContext,mDocumentContext,this);
+		if(status != eSuccess)
+			TRACE_LOG("DocumentContext::CreatePDFFormXObjectForPage, unexpected failure. extender declared failure before writing page.");
+	}
+	if(status != eSuccess)
+		return NULL;
 
 	do
 	{
@@ -204,8 +225,25 @@ PDFFormXObject* PDFDocumentHandler::CreatePDFFormXObjectForPage(unsigned long in
 	mWrittenPage = NULL;
 	mDocumentContext->RemoveDocumentContextExtender(this);
 
-	return result;
-
+	if(result)
+	{
+		IDocumentContextExtenderSet::iterator it = mExtenders.begin();
+		for(; it != mExtenders.end() && eSuccess == status; ++it)
+		{
+			status = (*it)->OnAfterCreateXObjectFromPage(result,pageObject.GetPtr(),mObjectsContext,mDocumentContext,this);
+			if(status != eSuccess)
+				TRACE_LOG("DocumentContext::CreatePDFFormXObjectForPage, unexpected failure. extender declared failure after writing page.");
+		}
+		if(status != eSuccess)
+		{
+			delete result;
+			return NULL;
+		}
+		else
+			return result;
+	}
+	else
+		return result;
 }
 
 PDFRectangle PDFDocumentHandler::DeterminePageBox(PDFDictionary* inDictionary,EPDFPageBox inPageBoxType)
@@ -397,12 +435,20 @@ EStatusCode PDFDocumentHandler::CopyResourcesIndirectObjects(PDFDictionary* inPa
 		return eSuccess;
 
 	ObjectIDTypeList newObjectsToWrite;
-	ObjectIDTypeSet writtenObjects;
 
 	RegisterInDirectObjects(resources.GetPtr(),newObjectsToWrite);
-
-	return WriteNewObjects(newObjectsToWrite,writtenObjects);
+	return WriteNewObjects(newObjectsToWrite);
 }
+
+EStatusCode PDFDocumentHandler::WriteNewObjects(const ObjectIDTypeList& inSourceObjectIDs)
+{
+	// notice that using this method directly is slightly unsafe - the input objects are ASSUMED to have not been
+	// copied yet. unexpected results if the objects of these ids were already copied.
+
+	ObjectIDTypeSet writtenObjects;
+	return WriteNewObjects(inSourceObjectIDs,writtenObjects);
+}
+
 
 EStatusCode PDFDocumentHandler::WriteNewObjects(const ObjectIDTypeList& inSourceObjectIDs,ObjectIDTypeSet& ioCopiedObjects)
 {
@@ -768,34 +814,35 @@ EStatusCode PDFDocumentHandler::OnResourcesWrite(
 }
 
 EStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
-																		const PDFPageRange& inPageRange)
+																		const PDFPageRange& inPageRange,
+																		const ObjectIDTypeList& inCopyAdditionalObjects)
 {
 	EStatusCodeAndObjectIDTypeList result;
 	
 
 	do
 	{
-		result.first = mPDFFile.OpenFile(inPDFFilePath);
+		result.first = StartFileCopyingContext(inPDFFilePath);
 		if(result.first != eSuccess)
-		{
-			TRACE_LOG1("PDFDocumentHandler::CreatePDFPagesFromPDF, unable to open file for reading in %s",inPDFFilePath.c_str());
 			break;
+
+		IDocumentContextExtenderSet::iterator it = mExtenders.begin();
+		for(; it != mExtenders.end() && eSuccess == result.first; ++it)
+		{
+			result.first = (*it)->OnPDFParsingComplete(mObjectsContext,mDocumentContext,this);
+			if(result.first != eSuccess)
+				TRACE_LOG("DocumentContext::AppendPDFPagesFromPDF, unexpected failure. extender declared failure after parsing page.");
 		}
 
-		result.first = mParser.StartPDFParsing(mPDFFile.GetInputStream());
-		if(result.first != eSuccess)
+		// copy additional objects prior to pages, so we have them ready at page copying
+		if(inCopyAdditionalObjects.size() > 0)
 		{
-			TRACE_LOG("PDFDocumentHandler::CreatePDFPagesFromPDF, failure occured while parsing PDF file.");
-			break;
-		}
-
-		// do not allow encrypted/protected documents
-		PDFObjectCastPtr<PDFDictionary> encryptionDictionary(mParser.QueryDictionaryObject(mParser.GetTrailer(),"Encrypt"));
-		if(encryptionDictionary.GetPtr())
-		{
-			TRACE_LOG("PDFDocumentHandler::AppendPDFPagesFromPDF, Document contains an encryption dictionary. Library does not support embedding of encrypted PDF");
-			result.first = eFailure;
-			break;
+			result.first = WriteNewObjects(inCopyAdditionalObjects);
+			if(result.first != eSuccess)
+			{
+				TRACE_LOG("PDFDocumentHandler::AppendPDFPagesFromPDF, failed copying additional objects");
+				break;
+			}
 		}
 
 		EStatusCodeAndObjectIDType newObject;
@@ -811,7 +858,7 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDF(const w
 				}
 				else
 				{
-					TRACE_LOG1("PDFDocumentHandler::CreatePDFPagesFromPDF, failed to embed page %ld", i);
+					TRACE_LOG1("PDFDocumentHandler::AppendPDFPagesFromPDF, failed to embed page %ld", i);
 					result.first = eFailure;
 				}
 			}
@@ -833,14 +880,14 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDF(const w
 						}
 						else
 						{
-							TRACE_LOG1("PDFDocumentHandler::CreatePDFPagesFromPDF, failed to embed page %ld", i);
+							TRACE_LOG1("PDFDocumentHandler::AppendPDFPagesFromPDF, failed to embed page %ld", i);
 							result.first = eFailure;
 						}
 					}
 				}
 				else
 				{
-					TRACE_LOG3("PDFDocumentHandler::CreatePDFPagesFromPDF, range mismatch. first = %ld, second = %ld, PDF page count = %ld", 
+					TRACE_LOG3("PDFDocumentHandler::AppendPDFPagesFromPDF, range mismatch. first = %ld, second = %ld, PDF page count = %ld", 
 						it->first,
 						it->second,
 						mParser.GetPagesCount());
@@ -852,9 +899,15 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDF(const w
 
 	}while(false);
 
-	mPDFFile.CloseFile();
-	// clearing the source to target mapping here. note that pages copying enjoyed sharing of objects between them
-	mSourceToTarget.clear();
+	IDocumentContextExtenderSet::iterator it = mExtenders.begin();
+	for(; it != mExtenders.end() && eSuccess == result.first; ++it)
+	{
+		result.first = (*it)->OnPDFCopyingComplete(mObjectsContext,mDocumentContext,this);
+		if(result.first != eSuccess)
+			TRACE_LOG("DocumentContext::AppendPDFPagesFromPDF, unexpected failure. extender declared failure before finalizing copy.");
+	}
+
+	StopFileCopyingContext();
 
 	return result;
 }
@@ -872,6 +925,18 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::CreatePDFPageForPage(unsigned lon
 		TRACE_LOG1("PDFDocumentHandler::CreatePDFPageForPage, unhexpected exception, page index does not denote a page object. page index = %ld",inPageIndex);
 		return result;
 	}
+
+	EStatusCode status = eSuccess;
+
+	IDocumentContextExtenderSet::iterator it = mExtenders.begin();
+	for(; it != mExtenders.end() && eSuccess == status; ++it)
+	{
+		result.first = (*it)->OnBeforeCreatePageFromPage(pageObject.GetPtr(),mObjectsContext,mDocumentContext,this);
+		if(result.first != eSuccess)
+			TRACE_LOG("DocumentContext::CreatePDFPageForPage, unexpected failure. extender declared failure before writing page.");
+	}
+	if(status != eSuccess)
+		return result;
 
 	do
 	{
@@ -905,9 +970,21 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::CreatePDFPageForPage(unsigned lon
 
 	}while(false);
 
-	delete newPage;
 	mWrittenPage = NULL;
 	mDocumentContext->RemoveDocumentContextExtender(this);
+
+	if(result.first = eSuccess)
+	{
+		it = mExtenders.begin();
+		for(; it != mExtenders.end() && eSuccess == result.first; ++it)
+		{
+			result.first = (*it)->OnAfterCreatePageFromPage(newPage,pageObject.GetPtr(),mObjectsContext,mDocumentContext,this);
+			if(result.first != eSuccess)
+				TRACE_LOG("DocumentContext::CreatePDFFormXObjectForPage, unexpected failure. extender declared failure after writing page.");
+		}
+	}
+
+	delete newPage;
 
 	return result;	
 }
@@ -1002,4 +1079,158 @@ PDFObject* PDFDocumentHandler::QueryInheritedValue(PDFDictionary* inDictionary,s
 	}
 	else
 		return NULL;
+}
+
+EStatusCode PDFDocumentHandler::StartFileCopyingContext(const wstring& inPDFFilePath)
+{
+	EStatusCode status;
+
+	do
+	{
+		status = mPDFFile.OpenFile(inPDFFilePath);
+		if(status != eSuccess)
+		{
+			TRACE_LOG1("PDFDocumentHandler::StartFileCopyingContext, unable to open file for reading in %s",inPDFFilePath.c_str());
+			break;
+		}
+
+		status = mParser.StartPDFParsing(mPDFFile.GetInputStream());
+		if(status != eSuccess)
+		{
+			TRACE_LOG("PDFDocumentHandler::StartFileCopyingContext, failure occured while parsing PDF file.");
+			break;
+		}
+
+		// do not allow encrypted/protected documents
+		PDFObjectCastPtr<PDFDictionary> encryptionDictionary(mParser.QueryDictionaryObject(mParser.GetTrailer(),"Encrypt"));
+		if(encryptionDictionary.GetPtr())
+		{
+			TRACE_LOG("PDFDocumentHandler::StartFileCopyingContext, Document contains an encryption dictionary. Library does not support embedding of encrypted PDF");
+			status = eFailure;
+			break;
+		}
+
+	}while(false);
+
+	return status;
+}
+
+EStatusCodeAndObjectIDType PDFDocumentHandler::CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
+																			EPDFPageBox inPageBoxToUseAsFormBox,
+																			const double* inTransformationMatrix)
+{
+	EStatusCodeAndObjectIDType result;
+	PDFFormXObject* newObject;
+
+	if(inPageIndex < mParser.GetPagesCount())
+	{
+		newObject = CreatePDFFormXObjectForPage(inPageIndex,inPageBoxToUseAsFormBox,inTransformationMatrix);
+		if(newObject)
+		{
+			result.first = eSuccess;
+			result.second = newObject->GetObjectID();
+			delete newObject;
+		}
+		else
+		{
+			TRACE_LOG1("PDFDocumentHandler::CreateFormXObjectFromPDFPage, failed to embed page %ld",inPageIndex);
+			result.first = eFailure;
+		}
+	}
+	else
+	{
+		TRACE_LOG2(
+			"PDFDocumentHandler::CreateFormXObjectFromPDFPage, request object index %ld is larger than maximum page for input document = %ld", 
+			inPageIndex,
+			mParser.GetPagesCount()-1);
+		result.first = eFailure;
+	}
+	return result;
+}
+
+EStatusCodeAndObjectIDType PDFDocumentHandler::AppendPDFPageFromPDF(unsigned long inPageIndex)
+{
+	EStatusCodeAndObjectIDType result;
+
+	if(inPageIndex < mParser.GetPagesCount())
+	{
+		result = CreatePDFPageForPage(inPageIndex);
+		if(result.first != eSuccess)
+			TRACE_LOG1("PDFDocumentHandler::AppendPDFPageFromPDF, failed to append page %ld",inPageIndex);
+	}
+	else
+	{
+		TRACE_LOG2(
+			"PDFDocumentHandler::AppendPDFPageFromPDF, request object index %ld is larger than maximum page for input document = %ld", 
+			inPageIndex,
+			mParser.GetPagesCount()-1);
+		result.first = eFailure;
+	}
+	return result;
+}
+
+EStatusCodeAndObjectIDType PDFDocumentHandler::CopyObject(ObjectIDType inSourceObjectID)
+{
+	EStatusCodeAndObjectIDType result;
+
+	ObjectIDTypeToObjectIDTypeMap::iterator it = mSourceToTarget.find(inSourceObjectID);
+	if(it == mSourceToTarget.end())
+	{
+		ObjectIDTypeList anObjectList;
+		anObjectList.push_back(inSourceObjectID);
+		result.first = WriteNewObjects(anObjectList);
+		result.second = mSourceToTarget[inSourceObjectID];
+	}
+	else
+	{
+		result.first = eSuccess;
+		result.second = it->second;
+	}
+	return result;
+}
+
+PDFParser* PDFDocumentHandler::GetSourceDocumentParser()
+{
+	return &mParser;
+}
+
+EStatusCodeAndObjectIDType PDFDocumentHandler::GetCopiedObjectID(ObjectIDType inSourceObjectID)
+{
+	EStatusCodeAndObjectIDType result;
+
+	ObjectIDTypeToObjectIDTypeMap::iterator it = mSourceToTarget.find(inSourceObjectID);
+	if(it == mSourceToTarget.end())
+	{
+		result.first = eFailure;
+	}
+	else
+	{
+		result.first = eSuccess;
+		result.second = it->second;
+	}
+	return result;
+}
+
+MapIterator<ObjectIDTypeToObjectIDTypeMap> PDFDocumentHandler::GetCopiedObjectsMappingIterator()
+{
+	return MapIterator<ObjectIDTypeToObjectIDTypeMap>(mSourceToTarget);
+}
+
+void PDFDocumentHandler::StopFileCopyingContext()
+{
+	mPDFFile.CloseFile();
+	// clearing the source to target mapping here. note that copying enjoyed sharing of objects between them
+	mSourceToTarget.clear();
+	mParser.ResetParser();
+
+}
+
+void PDFDocumentHandler::AddDocumentContextExtender(IDocumentContextExtender* inExtender)
+{
+	mExtenders.insert(inExtender);
+}
+
+void PDFDocumentHandler::RemoveDocumentContextExtender(IDocumentContextExtender* inExtender)
+{
+	mExtenders.erase(inExtender);
 }

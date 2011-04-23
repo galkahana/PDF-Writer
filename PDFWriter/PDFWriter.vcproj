@@ -1287,6 +1287,14 @@
 			Name="PDF Embedding"
 			>
 			<File
+				RelativePath=".\PDFDocumentCopyingContext.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PDFDocumentCopyingContext.h"
+				>
+			</File>
+			<File
 				RelativePath=".\PDFDocumentHandler.cpp"
 				>
 			</File>

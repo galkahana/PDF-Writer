@@ -201,22 +201,26 @@ PDFUsedFont* PDFWriter::GetFontForFile(const wstring& inFontFilePath,const wstri
 	return mDocumentContext.GetFontForFile(inFontFilePath,inAdditionalMeticsFilePath);
 }
 
-EStatusCodeAndPDFFormXObjectList PDFWriter::CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+EStatusCodeAndObjectIDTypeList PDFWriter::CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
 																	  const PDFPageRange& inPageRange,
 																	  EPDFPageBox inPageBoxToUseAsFormBox,
-																	  const double* inTransformationMatrix)
+																	  const double* inTransformationMatrix,
+																	  const ObjectIDTypeList& inCopyAdditionalObjects)
 {
 	return mDocumentContext.CreateFormXObjectsFromPDF(inPDFFilePath,
 														inPageRange,
 														inPageBoxToUseAsFormBox,
-														inTransformationMatrix);
+														inTransformationMatrix,
+														inCopyAdditionalObjects);
 }
 
 EStatusCodeAndObjectIDTypeList PDFWriter::AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
-																const PDFPageRange& inPageRange)
+																const PDFPageRange& inPageRange,
+																const ObjectIDTypeList& inCopyAdditionalObjects)
 {
 	return mDocumentContext.AppendPDFPagesFromPDF(inPDFFilePath,
-														inPageRange);
+														inPageRange,
+														inCopyAdditionalObjects);
 }
 
 EStatusCode PDFWriter::Shutdown(const wstring& inStateFilePath)
@@ -322,4 +326,9 @@ EStatusCode PDFWriter::ContinuePDF(const wstring& inOutputFilePath,
 	}while(false);
 
 	return status;
+}
+
+PDFDocumentCopyingContext* PDFWriter::CreatePDFCopyingContext(const wstring& inPDFFilePath)
+{
+	return mDocumentContext.CreatePDFCopyingContext(inPDFFilePath);
 }
