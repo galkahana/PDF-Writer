@@ -211,3 +211,144 @@ const char* PDFDocEncoding::GetEncodedGlyphName(IOBasicTypes::Byte inEncodedChar
 {
 	return scGlyphNames[inEncodedCharacter];
 }
+
+wchar_t PDFDocEncoding::Decode(IOBasicTypes::Byte inEncodedCharacter)
+{
+	wchar_t result;
+
+	if(	betweenIncluding<IOBasicTypes::Byte>(inEncodedCharacter,0x00,0x17) ||
+		betweenIncluding<IOBasicTypes::Byte>(inEncodedCharacter,0x20,0x7E) ||
+		betweenIncluding<IOBasicTypes::Byte>(inEncodedCharacter,0xA1,0xFF))
+	{
+		result = (wchar_t)inEncodedCharacter;
+	}
+	else 
+	{
+		switch(inEncodedCharacter)
+		{
+			case 0x18:
+				result = 0x02D8;
+				break;
+			case 0x19:
+				result = 0x02C7;
+				break;
+			case 0x1a:
+				result = 0x02C6;
+				break;
+			case 0x1b:
+				result = 0x02D9;
+				break;
+			case 0x1c:
+				result = 0x02DD;
+				break;
+			case 0x1d:
+				result = 0x02DB;
+				break;
+			case 0x1e:
+				result = 0x02DA;
+				break;
+			case 0x1f:
+				result = 0x02DC;
+				break;
+			case 0x80:
+				result = 0x2022;
+				break;
+			case 0x81:
+				result = 0x2020;
+				break;
+			case 0x82:
+				result = 0x2021;
+				break;
+			case 0x83:
+				result = 0x2026;
+				break;
+			case 0x84:
+				result = 0x2014;
+				break;
+			case 0x85:
+				result = 0x2013;
+				break;
+			case 0x86:
+				result = 0x192;
+				break;
+			case 0x87:
+				result = 0x2044;
+				break;
+			case 0x88:
+				result = 0x2039;
+				break;
+			case 0x89:
+				result = 0x203A;
+				break;
+			case 0x8a:
+				result = 0x2212;
+				break;
+			case 0x8b:
+				result = 0x2030;
+				break;
+			case 0x8c:
+				result = 0x201E;
+				break;
+			case 0x8d:
+				result = 0x201C;
+				break;
+			case 0x8e:
+				result = 0x201D;
+				break;
+			case 0x8f:
+				result = 0x2018;
+				break;
+			case 0x90:
+				result = 0x2019;
+				break;
+			case 0x91:
+				result = 0x201A;
+				break;
+			case 0x92:
+				result = 0x2122;
+				break;
+			case 0x93:
+				result = 0xFB01;
+				break;
+			case 0x94:
+				result = 0xFB02;
+				break;
+			case 0x95:
+				result = 0x141;
+				break;
+			case 0x96:
+				result = 0x152;
+				break;
+			case 0x97:
+				result = 0x160;
+				break;
+			case 0x98:
+				result = 0x178;
+				break;
+			case 0x99:
+				result = 0x17D;
+				break;
+			case 0x9a:
+				result = 0x131;
+				break;
+			case 0x9b:
+				result = 0x142;
+				break;
+			case 0x9c:
+				result = 0x153;
+				break;
+			case 0x9d:
+				result = 0x161;
+				break;
+			case 0x9e:
+				result = 0x17E;
+				break;
+			case 0xa0:
+				result = 0x20AC;
+				break;
+			default:
+				result = 0;
+		}
+	}
+	return result;
+}

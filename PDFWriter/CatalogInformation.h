@@ -47,6 +47,9 @@ public:
 	// indirect objects registry is passed in case there's no page tree root...in which case it'll automatically create one
 	PageTree* GetPageTreeRoot(IndirectObjectsReferenceRegistry& inObjectsRegistry);
 
+	PageTree* GetCurrentPageTreeNode();
+	
+	void SetCurrentPageTreeNode(PageTree* inCurrentPageTreeNode);
 private:
 
 	PageTree* mCurrentPageTreeNode;

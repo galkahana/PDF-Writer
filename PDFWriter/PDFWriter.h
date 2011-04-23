@@ -72,6 +72,12 @@ public:
 							const PDFCreationSettings& inPDFCreationSettings = PDFCreationSettings::DefaultPDFCreationSettings);
 	EStatusCode EndPDF();
 
+	// Ending and Restarting writing session
+	EStatusCode Shutdown(const wstring& inStateFilePath);
+	EStatusCode ContinuePDF(const wstring& inOutputFilePath,
+							const wstring& inStateFilePath,
+							const LogConfiguration& inLogConfiguration = LogConfiguration::DefaultLogConfiguration);
+
 
 	// Page context, for drwaing page content
 	PageContentContext* StartPageContentContext(PDFPage* inPage);

@@ -29,9 +29,14 @@ public:
 	UppercaseSequance(void);
 	~UppercaseSequance(void);
 
+	UppercaseSequance(string inSequanceString);
+
 	// returns the string after the increase
 	const string& GetNextValue();
 
+	// get the current value
+	const string& ToString();
+	void SetSequanceString(const string& inSequanceString);
 private:
 	string mSequanceString;
 

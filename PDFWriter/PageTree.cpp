@@ -21,6 +21,15 @@
 #include "PageTree.h"
 #include "IndirectObjectsReferenceRegistry.h"
 
+PageTree::PageTree(ObjectIDType inObjectID)
+{
+	mPageTreeID = inObjectID;
+	mKidsIndex = 0;
+	mIsLeafParent = true;
+	mParent = NULL;
+}
+
+
 PageTree::PageTree(IndirectObjectsReferenceRegistry& inObjectsRegistry)
 {
 	mPageTreeID = inObjectsRegistry.AllocateNewObjectID();

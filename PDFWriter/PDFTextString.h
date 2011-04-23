@@ -41,7 +41,8 @@ class PDFTextString
 public:
 	
 	PDFTextString();
-	PDFTextString(const wstring inString);
+	PDFTextString(const string& inString); // initialize from an encoded string
+	PDFTextString(const wstring& inString); // initaialize from unicode string, will contvert
 	~PDFTextString(void);
 
 
@@ -49,9 +50,15 @@ public:
 
 	bool IsEmpty() const;
 	const string& ToString() const; // string representation of the PDFTextString, to be used for writing
+	wstring ToUTF16String() const;
 
 	bool operator==(const PDFTextString& inString) const; //equality check is string equality based
 	PDFTextString& operator=(const PDFTextString& inString);
+
+	// set from encoded string
+	PDFTextString& operator=(const string& inString);
+	// set from unicode string
+	PDFTextString& operator=(const wstring& inString);
 
 	static const PDFTextString Empty;
 
@@ -62,4 +69,6 @@ private:
 	void ConvertFromUTF16(const wstring& inStringToConvert);
 	bool ConvertUTF16ToPDFDocEncoding(const wstring& inStringToConvert,OutputStringBufferStream& refResult);
 	void ConvertUTF16ToUTF16BE(const wstring& inStringToConvert,OutputStringBufferStream& refResult);
+	wstring ToUTF16FromUTF16BE() const;
+	wstring ToUTF16FromPDFDocEncoding() const;
 };

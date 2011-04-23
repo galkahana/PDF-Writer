@@ -23,6 +23,14 @@
 #include "CFFANSIFontWriter.h"
 #include "CIDFontWriter.h"
 #include "CFFDescendentFontWriter.h"
+#include "DictionaryContext.h"
+#include "ObjectsContext.h"
+#include "PDFParser.h"
+#include "PDFObjectCast.h"
+#include "PDFDictionary.h"
+#include "PDFArray.h"
+#include "PDFInteger.h"
+#include "PDFBoolean.h"
 
 WrittenFontCFF::WrittenFontCFF(ObjectsContext* inObjectsContext,bool inIsCID):AbstractWrittenFont(inObjectsContext)
 {
@@ -217,4 +225,91 @@ bool WrittenFontCFF::HasEnoughSpaceForGlyphs(const GlyphUnicodeMappingListList& 
 	}
 
 	return glyphsToAddCount <= mAvailablePositionsCount;
+}
+
+EStatusCode WrittenFontCFF::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
+{
+	inStateWriter->StartNewIndirectObject(inObjectID);
+
+	DictionaryContext* writtenFontDictionary = inStateWriter->StartDictionary();
+
+	writtenFontDictionary->WriteKey("Type");
+	writtenFontDictionary->WriteNameValue("WrittenFontCFF");
+
+	writtenFontDictionary->WriteKey("mAvailablePositionsCount");
+	writtenFontDictionary->WriteIntegerValue(mAvailablePositionsCount);
+
+	writtenFontDictionary->WriteKey("mFreeList");
+
+	inStateWriter->StartArray();
+	UCharAndUCharList::iterator it = mFreeList.begin();
+	for(; it != mFreeList.end();++it)
+	{
+		inStateWriter->WriteInteger(it->first);
+		inStateWriter->WriteInteger(it->second);
+	}
+	inStateWriter->EndArray(eTokenSeparatorEndLine);
+
+	writtenFontDictionary->WriteKey("mAssignedPositions");
+	inStateWriter->StartArray();
+	for(int i=0;i<256;++i)
+		inStateWriter->WriteInteger(mAssignedPositions[i]);
+	inStateWriter->EndArray(eTokenSeparatorEndLine);
+
+	writtenFontDictionary->WriteKey("mIsCID");
+	writtenFontDictionary->WriteBooleanValue(mIsCID);
+
+	EStatusCode status = AbstractWrittenFont::WriteStateInDictionary(inStateWriter,writtenFontDictionary);
+	if(eSuccess == status)
+	{
+		inStateWriter->EndDictionary(writtenFontDictionary);
+		inStateWriter->EndIndirectObject();
+
+		status = AbstractWrittenFont::WriteStateAfterDictionary(inStateWriter);
+	}
+	return status;
+}
+
+EStatusCode WrittenFontCFF::ReadState(PDFParser* inStateReader,ObjectIDType inObjectID)
+{
+	PDFObjectCastPtr<PDFDictionary> writtenFontState(inStateReader->ParseNewObject(inObjectID));
+
+
+	PDFObjectCastPtr<PDFInteger> availablePositionsCount(writtenFontState->QueryDirectObject("mAvailablePositionsCount"));
+
+	mAvailablePositionsCount = (unsigned char)availablePositionsCount->GetValue();
+
+	mFreeList.clear();
+	PDFObjectCastPtr<PDFArray> freeListState(writtenFontState->QueryDirectObject("mFreeList"));
+
+	SingleValueContainerIterator<PDFObjectVector> it =  freeListState->GetIterator();
+	PDFObjectCastPtr<PDFInteger> item;
+	UCharAndUChar aPair;
+	while(it.MoveNext())
+	{
+		item = it.GetItem();
+		aPair.first = (unsigned char)item->GetValue();
+		it.MoveNext();
+		item = it.GetItem();
+		aPair.second = (unsigned char)item->GetValue();
+		mFreeList.push_back(aPair);
+	}
+
+	PDFObjectCastPtr<PDFArray> assignedPositionsState(writtenFontState->QueryDirectObject("mAssignedPositions"));
+	it =  assignedPositionsState->GetIterator();
+	int i=0;
+	
+	PDFObjectCastPtr<PDFInteger> assignedPositionItem;
+	while(it.MoveNext())
+	{
+		assignedPositionItem = it.GetItem();
+		mAssignedPositions[i] = (unsigned int)assignedPositionItem->GetValue();
+		++i;
+	}
+
+	PDFObjectCastPtr<PDFBoolean> isCIDState(writtenFontState->QueryDirectObject("mIsCID"));
+
+	mIsCID = isCIDState->GetValue();
+
+	return AbstractWrittenFont::ReadState(inStateReader,writtenFontState.GetPtr());
 }

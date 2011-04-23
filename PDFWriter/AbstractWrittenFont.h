@@ -25,6 +25,9 @@
 #include "GlyphUnicodeMapping.h"
 
 class ObjectsContext;
+class DictionaryContext;
+class PDFDictionary;
+class PDFParser;
 
 class AbstractWrittenFont : public IWrittenFont
 {
@@ -45,7 +48,15 @@ protected:
 	WrittenFontRepresentation* mANSIRepresentation;
 	ObjectsContext* mObjectsContext;
 
+	EStatusCode WriteStateInDictionary(ObjectsContext* inStateWriter,DictionaryContext* inDerivedObjectDictionary);
+	EStatusCode WriteStateAfterDictionary(ObjectsContext* inStateWriter);
+	EStatusCode ReadState(PDFParser* inStateReader,PDFDictionary* inState);
+
 private:
+	ObjectIDType mCidRepresentationObjectStateID;
+	ObjectIDType mAnsiRepresentationObjectStateID;
+
+
 	bool CanEncodeWithIncludedChars(WrittenFontRepresentation* inRepresentation, 
 									const GlyphUnicodeMappingList& inGlyphsList,
 									UShortList& outEncodedCharacters);
@@ -65,4 +76,12 @@ private:
 	virtual bool AddToANSIRepresentation(
 									const GlyphUnicodeMappingListList& inGlyphsList,
 									UShortListList& outEncodedCharacters) = 0;
+
+	EStatusCode WriteWrittenFontState(WrittenFontRepresentation* inRepresentation,ObjectsContext* inStateWriter,ObjectIDType inObjectID);
+	void WriteGlyphEncodingInfoState(ObjectsContext* inStateWriter,
+									 ObjectIDType inObjectId,
+									 const GlyphEncodingInfo& inGlyphEncodingInfo);
+	void ReadWrittenFontState(PDFParser* inStateReader,PDFDictionary* inState,WrittenFontRepresentation* inRepresentation);
+	void ReadGlyphEncodingInfoState(PDFParser* inStateReader,ObjectIDType inObjectID,GlyphEncodingInfo& inGlyphEncodingInfo);
+
 };

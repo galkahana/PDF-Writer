@@ -21,6 +21,7 @@
 #pragma once
 
 #include "EStatusCode.h"
+#include "ObjectsBasicTypes.h"
 
 #include <string>
 #include <map>
@@ -30,8 +31,10 @@ using namespace std;
 class FreeTypeWrapper;
 class PDFUsedFont;
 class ObjectsContext;
+class PDFParser;
 
 typedef map<wstring,PDFUsedFont*> WStringToPDFUsedFontMap;
+typedef map<wstring,wstring> WStringToWStringMap;
 
 class UsedFontsRepository
 {
@@ -47,9 +50,13 @@ public:
 
 	EStatusCode WriteUsedFontsDefinitions();
 
+	EStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
+	EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);
+
 private:
 
 	ObjectsContext* mObjectsContext;
 	FreeTypeWrapper* mInputFontsInformation;
 	WStringToPDFUsedFontMap mUsedFonts;
+	WStringToWStringMap mOptionaMetricsFiles;
 };

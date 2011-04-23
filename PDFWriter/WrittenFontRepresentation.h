@@ -35,6 +35,8 @@ struct GlyphEncodingInfo
 	unsigned short mEncodedCharacter;
 	ULongVector mUnicodeCharacters;
 
+	GlyphEncodingInfo(){}
+
 	GlyphEncodingInfo(unsigned short inEncodedCharacter,unsigned long inUnicodeCharacter)
 	{mEncodedCharacter = inEncodedCharacter; mUnicodeCharacters.push_back(inUnicodeCharacter);}
 		

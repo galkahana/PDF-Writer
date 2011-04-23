@@ -33,6 +33,9 @@
 
 using namespace IOBasicTypes;
 
+class ObjectsContext;
+class PDFParser;
+
 struct ObjectWriteInformation
 {
 	// although there's no "update" method in this project (being a single flat write), the free marker is used
@@ -65,6 +68,9 @@ public:
 	ObjectIDType GetObjectsCount() const;
 	// should be used with safe object IDs. use GetObjectsCount to verify the maximum ID
 	const ObjectWriteInformation& GetNthObjectReference(ObjectIDType inObjectID) const; 
+
+	EStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
+	EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);
 
 private:
 	ObjectWriteInformationVector mObjectsWritesRegistry;

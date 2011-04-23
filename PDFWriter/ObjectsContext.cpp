@@ -26,6 +26,12 @@
 #include "Trace.h"
 #include "OutputStreamTraits.h"
 #include "PDFStream.h"
+#include "PDFParser.h"
+#include "PDFObjectCast.h"
+#include "PDFDictionary.h"
+#include "PDFIndirectObjectReference.h"
+#include "PDFBoolean.h"
+#include "PDFLiteralString.h"
 
 ObjectsContext::ObjectsContext(void)
 {
@@ -330,4 +336,74 @@ void ObjectsContext::SetObjectsContextExtender(IObjectsContextExtender* inExtend
 string ObjectsContext::GenerateSubsetFontPrefix()
 {
 	return mSubsetFontsNamesSequance.GetNextValue();
+}
+
+EStatusCode ObjectsContext::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
+{
+	EStatusCode status;
+		
+	do
+	{
+		inStateWriter->StartNewIndirectObject(inObjectID);
+
+		ObjectIDType referencesRegistryObjectID = inStateWriter->GetInDirectObjectsRegistry().AllocateNewObjectID();
+		ObjectIDType subsetFontsNameSequanceID = inStateWriter->GetInDirectObjectsRegistry().AllocateNewObjectID();
+
+		DictionaryContext* objectsContextDict = inStateWriter->StartDictionary();
+
+		objectsContextDict->WriteKey("Type");
+		objectsContextDict->WriteNameValue("ObjectsContext");
+
+		objectsContextDict->WriteKey("mReferencesRegistry");
+		objectsContextDict->WriteObjectReferenceValue(referencesRegistryObjectID);
+
+		objectsContextDict->WriteKey("mCompressStreams");
+		objectsContextDict->WriteBooleanValue(mCompressStreams);
+
+		objectsContextDict->WriteKey("mSubsetFontsNamesSequance");
+		objectsContextDict->WriteObjectReferenceValue(subsetFontsNameSequanceID);
+
+		inStateWriter->EndDictionary(objectsContextDict);
+
+		inStateWriter->EndIndirectObject();
+
+		status = mReferencesRegistry.WriteState(inStateWriter,referencesRegistryObjectID);
+		if(status != eSuccess)
+			break;
+
+		// write subset fonts names sequance
+		inStateWriter->StartNewIndirectObject(subsetFontsNameSequanceID);
+
+		DictionaryContext* sequanceDict = inStateWriter->StartDictionary();
+
+		sequanceDict->WriteKey("Type");
+		sequanceDict->WriteNameValue("UppercaseSequance");
+
+
+		sequanceDict->WriteKey("mSequanceString");
+		sequanceDict->WriteLiteralStringValue(mSubsetFontsNamesSequance.ToString());
+
+		inStateWriter->EndDictionary(sequanceDict);
+
+		inStateWriter->EndIndirectObject();		
+	}while(false);
+
+	return status;
+}
+
+EStatusCode ObjectsContext::ReadState(PDFParser* inStateReader,ObjectIDType inObjectID)
+{
+	PDFObjectCastPtr<PDFDictionary> objectsContext(inStateReader->ParseNewObject(inObjectID));
+
+	PDFObjectCastPtr<PDFBoolean> compressStreams(objectsContext->QueryDirectObject("mCompressStreams"));
+	mCompressStreams = compressStreams->GetValue();
+
+	PDFObjectCastPtr<PDFDictionary> subsetFontsNamesSequance(inStateReader->QueryDictionaryObject(objectsContext.GetPtr(),"mSubsetFontsNamesSequance"));
+	PDFObjectCastPtr<PDFLiteralString> sequanceString(subsetFontsNamesSequance->QueryDirectObject("mSequanceString"));
+	mSubsetFontsNamesSequance.SetSequanceString(sequanceString->GetValue());
+
+	PDFObjectCastPtr<PDFIndirectObjectReference> referencesObject(objectsContext->QueryDirectObject("mReferencesRegistry"));
+
+	return mReferencesRegistry.ReadState(inStateReader,referencesObject->mObjectID);
+
 }

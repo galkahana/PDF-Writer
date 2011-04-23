@@ -52,6 +52,8 @@ class PDFRectangle;
 class PDFImageXObject;
 class PDFUsedFont;
 class PageContentContext;
+class PDFParser;
+class PDFDictionary;
 
 typedef set<IDocumentContextExtender*> IDocumentContextExtenderSet;
 
@@ -142,6 +144,9 @@ public:
 	// JPG images handler for retrieving JPG images information
 	JPEGImageHandler& GetJPEGImageHandler();
 
+
+	EStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
+	EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);
 	
 private:
 	ObjectsContext* mObjectsContext;
@@ -167,4 +172,19 @@ private:
 	EStatusCode WriteResourcesDictionary(ResourcesDictionary& inResourcesDictionary);
 	bool IsIdentityMatrix(const double* inMatrix);
 	EStatusCode WriteUsedFontsDefinitions();
+
+	void WriteTrailerState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
+	void WriteTrailerInfoState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
+	void WriteDateState(ObjectsContext* inStateWriter,const PDFDate& inDate);
+	void WriteCatalogInformationState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
+	void ReadTrailerState(PDFParser* inStateReader,PDFDictionary* inTrailerState);
+	void ReadTrailerInfoState(PDFParser* inStateReader,PDFDictionary* inTrailerInfoState);
+	void ReadDateState(PDFDictionary* inDateState,PDFDate& inDate);
+	void ReadCatalogInformationState(PDFParser* inStateReader,PDFDictionary* inCatalogInformationState);
+
+	ObjectIDType mCurrentPageTreeIDInState;
+
+	void WritePageTreeState(ObjectsContext* inStateWriter,ObjectIDType inObjectID,PageTree* inPageTree);
+	void ReadPageTreeState(PDFParser* inStateReader,PDFDictionary* inPageTreeState,PageTree* inPageTree);
+
 };

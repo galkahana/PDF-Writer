@@ -22,6 +22,17 @@
 #include "ObjectsContext.h"
 #include "InDirectObjectsReferenceRegistry.h"
 #include "Trace.h"
+#include "DictionaryContext.h"
+#include "PDFParser.h"
+#include "PDFDictionary.h"
+#include "PDFObjectCast.h"
+#include "PDFArray.h"
+#include "PDFInteger.h"
+#include "PDFIndirectObjectReference.h"
+
+#include <list>
+
+using namespace std;
 
 AbstractWrittenFont::AbstractWrittenFont(ObjectsContext* inObjectsContext)
 {
@@ -279,4 +290,195 @@ void AbstractWrittenFont::AddToCIDRepresentation(	const GlyphUnicodeMappingListL
 
 	if(0 == mCIDRepresentation->mWrittenObjectID)
 		mCIDRepresentation->mWrittenObjectID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
+}
+
+EStatusCode AbstractWrittenFont::WriteStateInDictionary(ObjectsContext* inStateWriter,DictionaryContext* inDerivedObjectDictionary)
+{
+
+
+	if(mCIDRepresentation)
+	{
+		mCidRepresentationObjectStateID = inStateWriter->GetInDirectObjectsRegistry().AllocateNewObjectID();
+
+		inDerivedObjectDictionary->WriteKey("mCIDRepresentation");
+		inDerivedObjectDictionary->WriteObjectReferenceValue(mCidRepresentationObjectStateID);
+	}
+
+	if(mANSIRepresentation)
+	{
+		mAnsiRepresentationObjectStateID = inStateWriter->GetInDirectObjectsRegistry().AllocateNewObjectID();
+
+		inDerivedObjectDictionary->WriteKey("mANSIRepresentation");
+		inDerivedObjectDictionary->WriteObjectReferenceValue(mAnsiRepresentationObjectStateID);
+	}
+	return eSuccess;
+}
+
+EStatusCode AbstractWrittenFont::WriteStateAfterDictionary(ObjectsContext* inStateWriter)
+{
+	EStatusCode status = eSuccess;
+
+	do
+	{
+		if(mCIDRepresentation)
+		{
+			status = WriteWrittenFontState(mCIDRepresentation,inStateWriter,mCidRepresentationObjectStateID);
+			if(status != eSuccess)
+				break;
+		}
+
+		if(mANSIRepresentation)
+		{
+			status = WriteWrittenFontState(mANSIRepresentation,inStateWriter,mAnsiRepresentationObjectStateID);
+			if(status != eSuccess)
+				break;
+		}
+	}while(false);
+
+	return status;
+}
+
+typedef list<ObjectIDType> ObjectIDTypeList;
+
+EStatusCode AbstractWrittenFont::WriteWrittenFontState(WrittenFontRepresentation* inRepresentation,
+													   ObjectsContext* inStateWriter,
+													   ObjectIDType inObjectID)
+{
+	ObjectIDTypeList objectIDs;
+
+	inStateWriter->StartNewIndirectObject(inObjectID);	
+	DictionaryContext* writtenFontObject = inStateWriter->StartDictionary();
+
+	writtenFontObject->WriteKey("Type");
+	writtenFontObject->WriteNameValue("WrittenFontRepresentation");
+
+	writtenFontObject->WriteKey("mGlyphIDToEncodedChar");
+	inStateWriter->StartArray();
+
+	UIntToGlyphEncodingInfoMap::iterator it = inRepresentation->mGlyphIDToEncodedChar.begin();
+
+	for(; it != inRepresentation->mGlyphIDToEncodedChar.end();++it)
+	{
+		ObjectIDType objectID = inStateWriter->GetInDirectObjectsRegistry().AllocateNewObjectID();
+		
+		inStateWriter->WriteInteger(it->first);
+		inStateWriter->WriteIndirectObjectReference(objectID);
+		objectIDs.push_back(objectID);
+	}
+	inStateWriter->EndArray(eTokenSeparatorEndLine);
+
+	writtenFontObject->WriteKey("mWrittenObjectID");
+	writtenFontObject->WriteIntegerValue(inRepresentation->mWrittenObjectID);
+
+	inStateWriter->EndDictionary(writtenFontObject);
+	inStateWriter->EndIndirectObject();
+
+	if(objectIDs.size() > 0)
+	{
+		ObjectIDTypeList::iterator itIDs = objectIDs.begin();
+
+		it = inRepresentation->mGlyphIDToEncodedChar.begin();
+		for(; it != inRepresentation->mGlyphIDToEncodedChar.end();++it,++itIDs)
+			WriteGlyphEncodingInfoState(inStateWriter,*itIDs,it->second);
+	}
+
+	return eSuccess;
+}
+
+void AbstractWrittenFont::WriteGlyphEncodingInfoState(ObjectsContext* inStateWriter,
+													  ObjectIDType inObjectID,
+													  const GlyphEncodingInfo& inGlyphEncodingInfo)
+{
+	inStateWriter->StartNewIndirectObject(inObjectID);	
+	DictionaryContext* glyphEncodingInfoObject = inStateWriter->StartDictionary();
+
+	glyphEncodingInfoObject->WriteKey("Type");
+	glyphEncodingInfoObject->WriteNameValue("GlyphEncodingInfo");
+
+	glyphEncodingInfoObject->WriteKey("mEncodedCharacter");
+	glyphEncodingInfoObject->WriteIntegerValue(inGlyphEncodingInfo.mEncodedCharacter);
+
+	glyphEncodingInfoObject->WriteKey("mUnicodeCharacters");
+	inStateWriter->StartArray();
+	
+	ULongVector::const_iterator it = inGlyphEncodingInfo.mUnicodeCharacters.begin();
+	for(; it != inGlyphEncodingInfo.mUnicodeCharacters.end();++it)
+		inStateWriter->WriteInteger(*it);
+
+	inStateWriter->EndArray(eTokenSeparatorEndLine);
+
+	inStateWriter->EndDictionary(glyphEncodingInfoObject);
+	inStateWriter->EndIndirectObject();
+	
+}
+
+EStatusCode AbstractWrittenFont::ReadState(PDFParser* inStateReader,PDFDictionary* inState)
+{
+	PDFObjectCastPtr<PDFDictionary> cidRepresentationState(inStateReader->QueryDictionaryObject(inState,"mCIDRepresentation"));
+	PDFObjectCastPtr<PDFDictionary> ansiRepresentationState(inStateReader->QueryDictionaryObject(inState,"mANSIRepresentation"));
+
+	delete mCIDRepresentation;
+	delete mANSIRepresentation;
+
+	if(cidRepresentationState.GetPtr())
+	{
+		mCIDRepresentation = new WrittenFontRepresentation();
+		ReadWrittenFontState(inStateReader,cidRepresentationState.GetPtr(),mCIDRepresentation);
+	}
+	else
+		mCIDRepresentation = NULL;
+
+	if(ansiRepresentationState.GetPtr())
+	{
+		mANSIRepresentation = new WrittenFontRepresentation();
+		ReadWrittenFontState(inStateReader,ansiRepresentationState.GetPtr(),mANSIRepresentation);
+	}
+	else
+		mANSIRepresentation = NULL;
+	return eSuccess;
+}
+
+void AbstractWrittenFont::ReadWrittenFontState(PDFParser* inStateReader,PDFDictionary* inState,WrittenFontRepresentation* inRepresentation)
+{
+	PDFObjectCastPtr<PDFArray> glyphIDToEncodedCharState(inState->QueryDirectObject("mGlyphIDToEncodedChar"));
+
+	SingleValueContainerIterator<PDFObjectVector> it = glyphIDToEncodedCharState->GetIterator();
+
+	PDFObjectCastPtr<PDFInteger> firstState;
+	PDFObjectCastPtr<PDFIndirectObjectReference> secondState;
+
+	inRepresentation->mGlyphIDToEncodedChar.clear();
+
+	while(it.MoveNext())
+	{
+		firstState = it.GetItem();
+		it.MoveNext();
+		secondState = it.GetItem();
+
+		GlyphEncodingInfo glyphEncodingInfo;		
+		ReadGlyphEncodingInfoState(inStateReader,secondState->mObjectID,glyphEncodingInfo);
+		inRepresentation->mGlyphIDToEncodedChar.insert(UIntToGlyphEncodingInfoMap::value_type((unsigned int)firstState->GetValue(),glyphEncodingInfo));
+	}
+
+	PDFObjectCastPtr<PDFInteger> writtenObjectIDState(inState->QueryDirectObject("mWrittenObjectID"));
+	inRepresentation->mWrittenObjectID = (ObjectIDType)writtenObjectIDState->GetValue();
+}
+
+void AbstractWrittenFont::ReadGlyphEncodingInfoState(PDFParser* inStateReader,ObjectIDType inObjectID,GlyphEncodingInfo& inGlyphEncodingInfo)
+{
+	PDFObjectCastPtr<PDFDictionary> glyphEncodingInfoState(inStateReader->ParseNewObject(inObjectID));
+	
+	PDFObjectCastPtr<PDFInteger> encodedCharacterState(glyphEncodingInfoState->QueryDirectObject("mEncodedCharacter"));
+	inGlyphEncodingInfo.mEncodedCharacter = (unsigned short)encodedCharacterState->GetValue();
+
+	PDFObjectCastPtr<PDFArray> unicodeCharactersState(glyphEncodingInfoState->QueryDirectObject("mUnicodeCharacters"));
+
+	inGlyphEncodingInfo.mUnicodeCharacters.clear();
+	SingleValueContainerIterator<PDFObjectVector> it = unicodeCharactersState->GetIterator();
+	PDFObjectCastPtr<PDFInteger> item;
+	while(it.MoveNext())
+	{
+		item = it.GetItem();
+		inGlyphEncodingInfo.mUnicodeCharacters.push_back((unsigned long)item->GetValue());
+	}
 }

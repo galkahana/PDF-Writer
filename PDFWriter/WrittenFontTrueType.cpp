@@ -24,6 +24,11 @@
 #include "Trace.h"
 #include "TrueTypeDescendentFontWriter.h"
 #include "CIDFontWriter.h"
+#include "DictionaryContext.h"
+#include "ObjectsContext.h"
+#include "PDFObjectCast.h"
+#include "PDFParser.h"
+#include "PDFDictionary.h"
 
 WrittenFontTrueType::WrittenFontTrueType(ObjectsContext* inObjectsContext):AbstractWrittenFont(inObjectsContext)
 {
@@ -188,4 +193,31 @@ bool WrittenFontTrueType::AddToANSIRepresentation(	const GlyphUnicodeMappingList
 	}
 
 	return encodingResult.first;	
+}
+
+EStatusCode WrittenFontTrueType::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
+{
+	inStateWriter->StartNewIndirectObject(inObjectID);
+
+	DictionaryContext* writtenFontDictionary = inStateWriter->StartDictionary();
+
+	writtenFontDictionary->WriteKey("Type");
+	writtenFontDictionary->WriteNameValue("WrittenFontTrueType");
+
+	EStatusCode status = AbstractWrittenFont::WriteStateInDictionary(inStateWriter,writtenFontDictionary);
+	if(eSuccess == status)
+	{
+		inStateWriter->EndDictionary(writtenFontDictionary);
+		inStateWriter->EndIndirectObject();
+
+		status = AbstractWrittenFont::WriteStateAfterDictionary(inStateWriter);
+	}
+	return status;
+}
+
+EStatusCode WrittenFontTrueType::ReadState(PDFParser* inStateReader,ObjectIDType inObjectID)
+{
+	PDFObjectCastPtr<PDFDictionary> writtenFontState(inStateReader->ParseNewObject(inObjectID));
+
+	return AbstractWrittenFont::ReadState(inStateReader,writtenFontState.GetPtr());
 }

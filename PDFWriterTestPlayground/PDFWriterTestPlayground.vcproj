@@ -514,6 +514,14 @@
 						>
 					</File>
 					<File
+						RelativePath=".\ShutDownRestartTest.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\ShutDownRestartTest.h"
+						>
+					</File>
+					<File
 						RelativePath=".\SimpleContentPageTest.cpp"
 						>
 					</File>

@@ -21,6 +21,7 @@
 #include "PDFTextString.h"
 #include "OutputStringBufferStream.h"
 #include "PDFDocEncoding.h"
+#include <sstream>
 
 using namespace IOBasicTypes;
 
@@ -28,7 +29,13 @@ PDFTextString::PDFTextString(void)
 {
 }
 
-PDFTextString::PDFTextString(const wstring inString)
+PDFTextString::PDFTextString(const string& inString)
+{
+	mTextString = inString;
+}
+
+
+PDFTextString::PDFTextString(const wstring& inString)
 {
 	ConvertFromUTF16(inString);
 }
@@ -113,3 +120,58 @@ void PDFTextString::ConvertUTF16ToUTF16BE(const wstring& inStringToConvert,Outpu
 	}
 }
 
+PDFTextString& PDFTextString::operator=(const string& inString)
+{
+	mTextString = inString;
+	return *this;
+}
+
+PDFTextString& PDFTextString::operator=(const wstring& inString)
+{
+	ConvertFromUTF16(inString);
+	return *this;
+}
+
+wstring PDFTextString::ToUTF16String() const
+{
+	if(mTextString.size() >= 2 && mTextString.at(0) == scBigEndianMark[0] && mTextString.at(1) == scBigEndianMark[1])
+		return ToUTF16FromUTF16BE();
+	else
+		return ToUTF16FromPDFDocEncoding();
+}
+
+wstring PDFTextString::ToUTF16FromUTF16BE() const
+{
+	wstringstream stream;
+
+	string::const_iterator it = mTextString.begin();
+
+	// skip unicode marker
+	++it;
+	++it;
+
+	wchar_t buffer;
+
+	for(; it != mTextString.end();++it)
+	{
+		buffer = ((Byte)(*it))<<8;
+		++it;
+		buffer += ((Byte)(*it));
+		stream.put(buffer);
+	}
+	return stream.str();
+}
+
+
+wstring PDFTextString::ToUTF16FromPDFDocEncoding() const
+{
+	wstringstream stream;
+	PDFDocEncoding pdfDocEncoding;
+
+	string::const_iterator it = mTextString.begin();
+
+	for(; it != mTextString.end();++it)
+		stream.put(pdfDocEncoding.Decode(*it));
+	return stream.str();
+
+}

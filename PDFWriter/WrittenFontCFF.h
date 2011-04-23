@@ -39,6 +39,8 @@ public:
 
 	virtual EStatusCode WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo);
 
+	virtual EStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectId);
+	virtual EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);
 
 private:
 	virtual bool AddToANSIRepresentation(const GlyphUnicodeMappingList& inGlyphsList,

@@ -39,6 +39,7 @@ typedef list<GlyphUnicodeMappingList> GlyphUnicodeMappingListList;
 
 class IWrittenFont;
 class ObjectsContext;
+class PDFParser;
 
 class PDFUsedFont
 {
@@ -74,6 +75,9 @@ public:
 
 	// use this method to translate text to glyphs and unicode mapping, to be later used for EncodeStringForShowing
 	EStatusCode TranslateStringToGlyphs(const wstring& inText,GlyphUnicodeMappingList& outGlyphsUnicodeMapping);
+
+	EStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
+	EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);
 
 private:
 	FreeTypeFaceWrapper mFaceWrapper;

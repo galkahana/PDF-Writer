@@ -34,6 +34,8 @@ class IByteWriterWithPosition;
 class DictionaryContext;
 class PDFStream;
 class IObjectsContextExtender;
+class ObjectsContext;
+class PDFParser;
 
 typedef list<DictionaryContext*> DictionaryContextList;
 
@@ -113,6 +115,10 @@ public:
 	// as the obly common context around...i'm using the objects context to create
 	// subset fonts prefixes. might want to consider a more relevant object...
 	string GenerateSubsetFontPrefix();
+
+
+	EStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
+	EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);
 
 private:
 	IObjectsContextExtender* mExtender;

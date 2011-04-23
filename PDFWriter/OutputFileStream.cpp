@@ -44,7 +44,14 @@ OutputFileStream::OutputFileStream(const wstring& inFilePath,bool inAppend)
 EStatusCode OutputFileStream::Open(const wstring& inFilePath,bool inAppend)
 {
 	SAFE_WFOPEN(mStream,inFilePath.c_str(),inAppend ? L"ab":L"wb")
-	return NULL == mStream ? eFailure:eSuccess;
+
+	if(!mStream)
+		return eFailure;
+
+	// seek to end, so position reading gets the correct file position, even before first write
+	_fseeki64(mStream,0,SEEK_END);
+
+	return eSuccess;
 };
 
 EStatusCode OutputFileStream::Close()

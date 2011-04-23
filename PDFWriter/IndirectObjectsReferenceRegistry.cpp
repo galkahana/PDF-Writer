@@ -20,6 +20,17 @@
 */
 #include "IndirectObjectsReferenceRegistry.h"
 #include "Trace.h"
+#include "ObjectsContext.h"
+#include "DictionaryContext.h"
+#include "PDFParser.h"
+#include "PDFObjectCast.h"
+#include "PDFDictionary.h"
+#include "PDFArray.h"
+#include "PDFIndirectObjectReference.h"
+#include "PDFInteger.h"
+#include "PDFBoolean.h"
+
+#include <list>
 
 IndirectObjectsReferenceRegistry::IndirectObjectsReferenceRegistry(void)
 {
@@ -98,4 +109,99 @@ const ObjectWriteInformation& IndirectObjectsReferenceRegistry::GetNthObjectRefe
 ObjectIDType IndirectObjectsReferenceRegistry::GetObjectsCount() const
 {
 	return static_cast<ObjectIDType>(mObjectsWritesRegistry.size());
+}
+
+typedef list<ObjectIDType> ObjectIDTypeList;
+
+EStatusCode IndirectObjectsReferenceRegistry::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
+{
+	ObjectIDTypeList objects;
+
+	inStateWriter->StartNewIndirectObject(inObjectID);
+	
+	DictionaryContext* myDictionary = inStateWriter->StartDictionary();
+	
+	myDictionary->WriteKey("Type");
+	myDictionary->WriteNameValue("IndirectObjectsReferenceRegistry");
+
+	myDictionary->WriteKey("mObjectsWritesRegistry");
+	
+	ObjectWriteInformationVector::iterator it = mObjectsWritesRegistry.begin();
+
+	inStateWriter->StartArray();
+	for(; it != mObjectsWritesRegistry.end(); ++it)
+	{
+		ObjectIDType objectWriteEntry = inStateWriter->GetInDirectObjectsRegistry().AllocateNewObjectID();
+		inStateWriter->WriteIndirectObjectReference(objectWriteEntry);
+		objects.push_back(objectWriteEntry);
+	}
+	inStateWriter->EndArray(eTokenSeparatorEndLine);
+
+	inStateWriter->EndDictionary(myDictionary);
+	inStateWriter->EndIndirectObject();
+
+	ObjectIDTypeList::iterator itIDs = objects.begin();
+
+	it = mObjectsWritesRegistry.begin();
+
+	for(; it != mObjectsWritesRegistry.end(); ++it,++itIDs)
+	{
+		inStateWriter->StartNewIndirectObject(*itIDs);
+
+		DictionaryContext* registryDictionary = inStateWriter->StartDictionary();
+		
+		registryDictionary->WriteKey("Type");
+		registryDictionary->WriteNameValue("ObjectWriteInformation");
+
+		registryDictionary->WriteKey("mObjectWritten");
+		registryDictionary->WriteBooleanValue(it->mObjectWritten);
+
+		if(it->mObjectWritten)
+		{
+			registryDictionary->WriteKey("mWritePosition");
+			registryDictionary->WriteIntegerValue(it->mWritePosition);
+		}
+
+		registryDictionary->WriteKey("mObjectReferenceType");
+		registryDictionary->WriteIntegerValue(it->mObjectReferenceType);
+
+		inStateWriter->EndDictionary(registryDictionary);
+		inStateWriter->EndIndirectObject();
+	}
+
+	return eSuccess;
+}
+
+EStatusCode IndirectObjectsReferenceRegistry::ReadState(PDFParser* inStateReader,ObjectIDType inObjectID)
+{
+	PDFObjectCastPtr<PDFDictionary> indirectObjectsDictionary(inStateReader->ParseNewObject(inObjectID));
+
+	PDFObjectCastPtr<PDFArray> objectsWritesRegistry(indirectObjectsDictionary->QueryDirectObject("mObjectsWritesRegistry"));
+
+	SingleValueContainerIterator<PDFObjectVector> it = objectsWritesRegistry->GetIterator();
+
+	mObjectsWritesRegistry.clear();
+	while(it.MoveNext())
+	{
+		ObjectWriteInformation newObjectInformation;
+		PDFObjectCastPtr<PDFDictionary> objectWriteInformationDictionary(inStateReader->ParseNewObject(
+																				((PDFIndirectObjectReference*)it.GetItem())->mObjectID));
+		
+		PDFObjectCastPtr<PDFBoolean> objectWritten(objectWriteInformationDictionary->QueryDirectObject("mObjectWritten"));
+
+		newObjectInformation.mObjectWritten = objectWritten->GetValue();
+
+		if(newObjectInformation.mObjectWritten)
+		{
+			PDFObjectCastPtr<PDFInteger> writePosition(objectWriteInformationDictionary->QueryDirectObject("mWritePosition"));
+			newObjectInformation.mWritePosition = writePosition->GetValue();
+		}
+
+		PDFObjectCastPtr<PDFInteger> objectReferenceType(objectWriteInformationDictionary->QueryDirectObject("mObjectReferenceType"));
+		newObjectInformation.mObjectReferenceType = (ObjectWriteInformation::EObjectReferenceType)objectReferenceType->GetValue();
+
+		mObjectsWritesRegistry.push_back(newObjectInformation);
+	}
+
+	return eSuccess;
 }

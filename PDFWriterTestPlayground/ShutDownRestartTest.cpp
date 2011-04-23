@@ -1,0 +1,225 @@
+#include "ShutDownRestartTest.h"
+#include "PDFWriter.h"
+#include "PDFPage.h"
+#include "PDFRectangle.h"
+#include "PageContentContext.h"
+#include "PDFFormXObject.h"
+#include "XObjectContentContext.h"
+#include "TestsRunner.h"
+
+#include <iostream>
+
+using namespace std;
+
+ShutDownRestartTest::ShutDownRestartTest(void)
+{
+}
+
+ShutDownRestartTest::~ShutDownRestartTest(void)
+{
+}
+
+
+EStatusCode ShutDownRestartTest::Run()
+{
+	EStatusCode status; 
+
+	do
+	{
+		{
+			PDFWriter pdfWriterA;
+			status = pdfWriterA.StartPDF(L"C:\\PDFLibTests\\SimpleContentShutdownRestart.PDF",ePDFVersion13);
+			if(status != eSuccess)
+			{
+				wcout<<"failed to start PDF\n";
+				break;
+			}	
+
+			PDFPage* page = new PDFPage();
+			page->SetMediaBox(PDFRectangle(0,0,595,842));
+
+			PDFUsedFont* font = pdfWriterA.GetFontForFile(L"C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
+			if(!font)
+			{
+				status = eFailure;
+				wcout<<"Failed to create font object for arial.ttf\n";
+				break;
+			}
+
+			PageContentContext* contentContext = pdfWriterA.StartPageContentContext(page);
+			if(NULL == contentContext)
+			{
+				status = eFailure;
+				wcout<<"failed to create content context for page\n";
+				break;
+			}
+
+			// draw a 100X100 points cyan square
+			contentContext->q();
+			contentContext->k(100,0,0,0);
+			contentContext->re(100,500,100,100);
+			contentContext->f();
+			contentContext->Q();
+
+			// force stream change
+			status = pdfWriterA.PausePageContentContext(contentContext);
+			if(status != eSuccess)
+			{
+				wcout<<"failed to pause page content context\n";
+				break;
+			}
+
+			// draw a 200X100 points red rectangle
+			contentContext->q();
+			contentContext->k(0,100,100,0);
+			contentContext->re(200,600,200,100);
+			contentContext->f();
+			contentContext->Q();
+
+			// draw a gray line
+			contentContext->q();
+			contentContext->G(0.5);
+			contentContext->w(3);
+			contentContext->m(200,600);
+			contentContext->l(400,400);
+			contentContext->S();
+			contentContext->Q();
+
+			// Draw some text
+			contentContext->BT();
+			contentContext->k(0,0,0,1);
+			contentContext->Tf(font,1);
+			contentContext->Tm(30,0,0,30,78.4252,662.8997);
+
+			EStatusCode encodingStatus = contentContext->Tj(L"hello world");
+			if(encodingStatus != eSuccess)
+				wcout<<"Could not find some of the glyphs for this font";
+
+			// continue even if failed...want to see how it looks like
+			contentContext->ET();
+				
+			status = pdfWriterA.EndPageContentContext(contentContext);
+			if(status != eSuccess)
+			{
+				wcout<<"failed to end page content context\n";
+				break;
+			}
+
+			status = pdfWriterA.WritePageAndRelease(page);
+			if(status != eSuccess)
+			{
+				wcout<<"failed to write page\n";
+				break;
+			}
+
+
+			status = pdfWriterA.Shutdown(L"C:\\PDFLibTests\\ShutDownRestartState.txt");
+			if(status != eSuccess)
+			{
+				wcout<<"failed to shutdown library\n";
+				break;
+			}
+
+		}
+		{
+			PDFWriter pdfWriterB;
+			status = pdfWriterB.ContinuePDF(L"C:\\PDFLibTests\\SimpleContentShutdownRestart.PDF",L"C:\\PDFLibTests\\ShutDownRestartState.txt");
+			if(status != eSuccess)
+			{
+				wcout<<"failed to restart library\n";
+				break;
+			}	
+
+			PDFPage* page = new PDFPage();
+			page->SetMediaBox(PDFRectangle(0,0,595,842));
+
+			PageContentContext* pageContentContext = pdfWriterB.StartPageContentContext(page);
+			if(NULL == pageContentContext)
+			{
+				status = eFailure;
+				wcout<<"failed to create content context for page\n";
+			}
+
+			// draw a 100X100 points cyan square
+			pageContentContext->q();
+			pageContentContext->k(100,0,0,0);
+			pageContentContext->re(100,500,100,100);
+			pageContentContext->f();
+			pageContentContext->Q();
+
+			// pause stream to start writing a form xobject
+			status = pdfWriterB.PausePageContentContext(pageContentContext);
+			if(status != eSuccess)
+			{
+				wcout<<"failed to pause page content context\n";
+				break;
+			}
+
+			// define an xobject form to draw a 200X100 points red rectangle
+			PDFFormXObject* xobjectForm = pdfWriterB.StartFormXObject(PDFRectangle(0,0,200,100));
+			ObjectIDType formObjectID = xobjectForm->GetObjectID();
+
+			XObjectContentContext* xobjectContentContext = xobjectForm->GetContentContext();
+			xobjectContentContext->q();
+			xobjectContentContext->k(0,100,100,0);
+			xobjectContentContext->re(0,0,200,100);
+			xobjectContentContext->f();
+			xobjectContentContext->Q();
+
+			status = pdfWriterB.EndFormXObjectAndRelease(xobjectForm);
+			if(status != eSuccess)
+			{
+				wcout<<"failed to write XObject form\n";
+				break;
+			}
+
+			string formXObjectName = page->GetResourcesDictionary().AddFormXObjectMapping(formObjectID);
+
+			// continue page drawing, place the form in 200,600
+			pageContentContext->q();
+			pageContentContext->cm(1,0,0,1,200,600);
+			pageContentContext->Do(formXObjectName);
+			pageContentContext->Q();
+
+			// draw a gray line
+			pageContentContext->q();
+			pageContentContext->G(0.5);
+			pageContentContext->w(3);
+			pageContentContext->m(200,600);
+			pageContentContext->l(400,400);
+			pageContentContext->S();
+			pageContentContext->Q();
+
+			// place the form in another location
+			pageContentContext->q();
+			pageContentContext->cm(1,0,0,1,200,200);
+			pageContentContext->Do(formXObjectName);
+			pageContentContext->Q();
+
+			status = pdfWriterB.EndPageContentContext(pageContentContext);
+			if(status != eSuccess)
+			{
+				wcout<<"failed to end page content context\n";
+				break;
+			}
+
+			status = pdfWriterB.WritePageAndRelease(page);
+			if(status != eSuccess)
+			{
+				wcout<<"failed to write page\n";
+				break;
+			}
+
+			status = pdfWriterB.EndPDF();
+			if(status != eSuccess)
+			{
+				wcout<<"failed in end PDF\n";
+				break;
+			}
+		}
+	}while(false);
+	return status;
+
+}
+
+ADD_CATEGORIZED_TEST(ShutDownRestartTest,"PDF")

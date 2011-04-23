@@ -28,7 +28,9 @@ EStatusCode AppendPagesTest::Run()
 			break;
 		}	
 
-		EStatusCodeAndObjectIDTypeList result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\Original.pdf",PDFPageRange());
+		EStatusCodeAndObjectIDTypeList result;
+		
+		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\Original.pdf",PDFPageRange());
 		if(result.first != eSuccess)
 		{
 			wcout<<"failed to append pages from Original.PDF\n";

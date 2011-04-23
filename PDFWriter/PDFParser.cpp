@@ -47,6 +47,8 @@ void PDFParser::ResetParser()
 	mXrefTable = NULL;
 	delete[] mPagesObjectIDs;
 	mPagesObjectIDs = NULL;
+	mStream = NULL;
+	mCurrentPositionProvider.Assign(NULL);
 
 	ObjectIDTypeToObjectStreamHeaderEntryMap::iterator it = mObjectStreamsCache.begin();
 	for(; it != mObjectStreamsCache.end();++it)
@@ -1658,4 +1660,38 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 		result = NULL;
 	}
 	return result;
+}
+
+EStatusCode PDFParser::StartStateFileParsing(IByteReaderWithPosition* inSourceStream)
+{
+	EStatusCode status;
+
+	ResetParser();
+
+	mStream = inSourceStream;
+	mCurrentPositionProvider.Assign(mStream);
+	mObjectParser.SetReadStream(inSourceStream,&mCurrentPositionProvider);
+
+	do
+	{
+		// initialize reading from end
+		mLastReadPositionFromEnd = 0;
+		mEncounteredFileStart = false;
+		mLastAvailableIndex = mCurrentBufferIndex = mLinesBuffer;
+
+		status = ParseEOFLine();
+		if(status != eSuccess)
+			break;
+
+		status = ParseLastXrefPosition();
+		if(status != eSuccess)
+			break;
+
+		status = ParseFileDirectory(); // that would be the xref and trailer
+		if(status != eSuccess)
+			break;
+
+	}while(false);
+
+	return status;	
 }

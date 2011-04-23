@@ -58,4 +58,12 @@ PageTree* CatalogInformation::GetPageTreeRoot(IndirectObjectsReferenceRegistry& 
 	}
 }
 
+PageTree* CatalogInformation::GetCurrentPageTreeNode()
+{
+	return mCurrentPageTreeNode;
+}
 
+void CatalogInformation::SetCurrentPageTreeNode(PageTree* inCurrentPageTreeNode)
+{
+	mCurrentPageTreeNode = inCurrentPageTreeNode;
+}

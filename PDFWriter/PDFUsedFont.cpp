@@ -21,6 +21,12 @@
 #include "PDFUsedFont.h"
 #include "IWrittenFont.h"
 #include "UnicodeEncoding.h"
+#include "ObjectsContext.h"
+#include "DictionaryContext.h"
+#include "PDFParser.h"
+#include "PDFObjectCast.h"
+#include "PDFDictionary.h"
+#include "PDFIndirectObjectReference.h"
 
 PDFUsedFont::PDFUsedFont(FT_Face inInputFace,
 						 const wstring& inFontFilePath,
@@ -91,4 +97,50 @@ EStatusCode PDFUsedFont::EncodeStringsForShowing(const GlyphUnicodeMappingListLi
 EStatusCode PDFUsedFont::WriteFontDefinition()
 {
 	return mWrittenFont->WriteFontDefinition(mFaceWrapper);
+}
+
+EStatusCode PDFUsedFont::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
+{
+	inStateWriter->StartNewIndirectObject(inObjectID);
+	DictionaryContext* pdfUsedFontObject = inStateWriter->StartDictionary();
+
+	pdfUsedFontObject->WriteKey("Type");
+	pdfUsedFontObject->WriteNameValue("PDFUsedFont");
+
+	ObjectIDType writtenFontObject;
+
+	if(mWrittenFont)
+	{
+		writtenFontObject = inStateWriter->GetInDirectObjectsRegistry().AllocateNewObjectID();
+
+		pdfUsedFontObject->WriteKey("mWrittenFont");
+		pdfUsedFontObject->WriteObjectReferenceValue(writtenFontObject);
+	}
+
+	inStateWriter->EndDictionary(pdfUsedFontObject);
+	inStateWriter->EndIndirectObject();
+
+	if(mWrittenFont)
+		mWrittenFont->WriteState(inStateWriter,writtenFontObject);
+
+	return eSuccess;
+}
+
+EStatusCode PDFUsedFont::ReadState(PDFParser* inStateReader,ObjectIDType inObjectID)
+{
+	PDFObjectCastPtr<PDFDictionary> pdfUsedFontState(inStateReader->ParseNewObject(inObjectID));
+
+	PDFObjectCastPtr<PDFIndirectObjectReference> writtenFontReference(pdfUsedFontState->QueryDirectObject("mWrittenFont"));
+
+	if(!writtenFontReference)
+		return eSuccess;
+
+	if(mWrittenFont)
+		delete mWrittenFont;
+
+	mWrittenFont = mFaceWrapper.CreateWrittenFontObject(mObjectsContext);
+	if(!mWrittenFont)
+		return eFailure;
+
+	return mWrittenFont->ReadState(inStateReader,writtenFontReference->mObjectID);
 }

@@ -56,6 +56,7 @@ public:
 	void AddAdditionalInfoEntry(const string& inKey,
 								const PDFTextString& inValue);
 	void RemoveAdditionalInfoEntry(const string& inKey);
+	void ClearAdditionalInfoEntries();
 	PDFTextString GetAdditionalInfoEntry(const string& inKey);
 
 	MapIterator<StringToPDFTextString> GetAdditionaEntriesIterator();

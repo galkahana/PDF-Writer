@@ -1495,6 +1495,26 @@
 				</File>
 			</Filter>
 		</Filter>
+		<Filter
+			Name="State Serialization"
+			>
+			<File
+				RelativePath=".\StateReader.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\StateReader.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StateWriter.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\StateWriter.h"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\PDFWriter.cpp"
 			>

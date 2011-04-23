@@ -26,6 +26,12 @@ UppercaseSequance::UppercaseSequance(void)
 	mSequanceString = "AAAAAA";
 }
 
+UppercaseSequance::UppercaseSequance(string inSequanceString)
+{
+	mSequanceString = inSequanceString;
+}
+
+
 UppercaseSequance::~UppercaseSequance(void)
 {
 	
@@ -55,4 +61,14 @@ const string& UppercaseSequance::GetNextValue()
 		
 	}
 	return mSequanceString;
+}
+
+const string& UppercaseSequance::ToString()
+{
+	return mSequanceString;
+}
+
+void UppercaseSequance::SetSequanceString(const string& inSequanceString)
+{
+	mSequanceString = inSequanceString;
 }

@@ -105,6 +105,11 @@ public:
 	// even if it's cascading filters
 	IByteReader* CreateInputStreamReader(PDFStreamInput* inStream);
 
+	// use this to explictly free used objects. quite obviously this means that you'll have to parse the file again
+	void ResetParser();
+
+	// using PDFParser also for state information reading. this is a specialized version of the StartParsing for reading state
+	EStatusCode StartStateFileParsing(IByteReaderWithPosition* inSourceStream);
 private:
 	PDFObjectParser mObjectParser;
 	IByteReaderWithPosition* mStream;
@@ -158,9 +163,6 @@ private:
 	PDFObject* ParseExistingInDirectStreamObject(ObjectIDType inObjectId);
 	EStatusCode ParseObjectStreamHeader(ObjectStreamHeaderEntry* inHeaderInfo,ObjectIDType inObjectsCount);
 	void MovePositionInStream(LongFilePositionType inPosition);
-
-	void ResetParser();
-
 
 	// Backward reading
 	bool ReadNextBufferFromEnd();

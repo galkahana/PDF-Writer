@@ -33,6 +33,7 @@ class IndirectObjectsReferenceRegistry;
 class PageTree
 {
 public:
+	PageTree(ObjectIDType inObjectID);
 	PageTree(IndirectObjectsReferenceRegistry& inObjectsRegistry);
 	~PageTree(void);
 
@@ -52,12 +53,13 @@ public:
 	PageTree* AddNodeToTree(PageTree* inPageTreeNode,IndirectObjectsReferenceRegistry& inObjectsRegistry);
 
 	void SetParent(PageTree* inParent);
+
 private:
 	PageTree* mParent;
 	ObjectIDType mPageTreeID;
 	bool mIsLeafParent;
-
 	int mKidsIndex;
+
 	PageTree* mKidsNodes[PAGE_TREE_LEVEL_SIZE];
 	ObjectIDType mKidsIDs[PAGE_TREE_LEVEL_SIZE];
 

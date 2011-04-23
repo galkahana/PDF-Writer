@@ -61,6 +61,11 @@ void InfoDictionary::RemoveAdditionalInfoEntry(const string& inKey)
 		mAdditionalInfoEntries.erase(it);
 }
 
+void InfoDictionary::ClearAdditionalInfoEntries()
+{
+	mAdditionalInfoEntries.clear();
+}
+
 PDFTextString InfoDictionary::GetAdditionalInfoEntry(const string& inKey)
 {
 	StringToPDFTextString::iterator it = mAdditionalInfoEntries.find(inKey);

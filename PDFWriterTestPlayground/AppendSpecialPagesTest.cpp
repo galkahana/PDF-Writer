@@ -31,10 +31,18 @@ EStatusCode AppendSpecialPagesTest::Run()
 
 		EStatusCodeAndObjectIDTypeList result;
 
+		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\Protected.pdf",PDFPageRange());
+		if(result.first == eSuccess)
+		{
+			wcout<<"failted to NOT ALLOW embedding of protected documents\n";
+			status = eFailure;
+			break;
+		}
+
 		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\ObjectStreamsModified.pdf",PDFPageRange());
 		if(result.first != eSuccess)
 		{
-			wcout<<"failed to append pages from AddedItem.pdf\n";
+			wcout<<"failed to append pages from ObjectStreamsModified.pdf\n";
 			status = result.first;
 			break;
 		}
@@ -42,7 +50,7 @@ EStatusCode AppendSpecialPagesTest::Run()
 		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\ObjectStreams.pdf",PDFPageRange());
 		if(result.first != eSuccess)
 		{
-			wcout<<"failed to append pages from AddedItem.pdf\n";
+			wcout<<"failed to append pages from ObjectStreams.pdf\n";
 			status = result.first;
 			break;
 		}

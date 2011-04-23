@@ -249,6 +249,7 @@ PDFObject* PDFObjectParser::ParseLiteralString(const string& inToken)
 		if(*it == '\\')
 		{
 			++it;
+			++i;
 			if('0' <= *it && *it <= '7')
 			{
 				buffer = (*it - '0') * 64;

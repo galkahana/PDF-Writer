@@ -21,6 +21,13 @@
 #include "PDFWriter.h"
 #include "Trace.h"
 #include "Singleton.h"
+#include "StateWriter.h"
+#include "StateReader.h"
+#include "ObjectsContext.h"
+#include "DictionaryContext.h"
+#include "PDFDictionary.h"
+#include "PDFObjectCast.h"
+#include "PDFIndirectObjectReference.h"
 
 const LogConfiguration LogConfiguration::DefaultLogConfiguration(false,L"PDFWriterLog.txt");
 
@@ -212,3 +219,107 @@ EStatusCodeAndObjectIDTypeList PDFWriter::AppendPDFPagesFromPDF(const wstring& i
 														inPageRange);
 }
 
+EStatusCode PDFWriter::Shutdown(const wstring& inStateFilePath)
+{
+	EStatusCode status;
+
+	do
+	{
+		StateWriter writer;
+
+		status = writer.Start(inStateFilePath);
+		if(status != eSuccess)
+		{
+			TRACE_LOG("PDFWriter::Shutdown, cant start state writing");
+			break;
+		}
+
+		ObjectIDType rootObjectID = writer.GetObjectsWriter()->StartNewIndirectObject();
+		DictionaryContext* pdfWriterDictionary = writer.GetObjectsWriter()->StartDictionary();
+
+		pdfWriterDictionary->WriteKey("Type");
+		pdfWriterDictionary->WriteNameValue("PDFWriter");
+
+		ObjectIDType objectsContextID = writer.GetObjectsWriter()->GetInDirectObjectsRegistry().AllocateNewObjectID();
+		ObjectIDType documentContextID = writer.GetObjectsWriter()->GetInDirectObjectsRegistry().AllocateNewObjectID();
+
+		pdfWriterDictionary->WriteKey("mObjectsContext");
+		pdfWriterDictionary->WriteObjectReferenceValue(objectsContextID);
+
+		pdfWriterDictionary->WriteKey("mDocumentContext");
+		pdfWriterDictionary->WriteObjectReferenceValue(documentContextID);
+
+		writer.GetObjectsWriter()->EndDictionary(pdfWriterDictionary);
+		writer.GetObjectsWriter()->EndIndirectObject();
+
+		writer.SetRootObject(rootObjectID);
+
+		status = mObjectsContext.WriteState(writer.GetObjectsWriter(),objectsContextID);
+		if(status != eSuccess)
+			break;
+
+		status = mDocumentContext.WriteState(writer.GetObjectsWriter(),documentContextID);
+		if(status != eSuccess)
+			break;
+
+		status = writer.Finish();
+		if(status != eSuccess)
+		{
+			TRACE_LOG("PDFWriter::Shutdown, cant finish state writing");
+		}
+
+	}while(false);
+
+	if(status != eSuccess)
+	{
+		mOutputFile.CloseFile();
+		TRACE_LOG("PDFWriter::Shutdown, Could not end PDF");
+	}
+	else
+		status = mOutputFile.CloseFile();
+	ReleaseLog();
+	return status;
+}
+
+EStatusCode PDFWriter::ContinuePDF(const wstring& inOutputFilePath,
+								   const wstring& inStateFilePath,
+								   const LogConfiguration& inLogConfiguration)
+{
+	SetupLog(inLogConfiguration);
+	EStatusCode status = mOutputFile.OpenFile(inOutputFilePath,true);
+	if(status != eSuccess)
+		return status;
+
+	mObjectsContext.SetOutputStream(mOutputFile.GetOutputStream());
+	mDocumentContext.SetObjectsContext(&mObjectsContext);
+	mDocumentContext.SetOutputFileInformation(&mOutputFile);
+
+	do
+	{
+		StateReader reader;
+
+		status = reader.Start(inStateFilePath);
+		if(status != eSuccess)
+		{
+			TRACE_LOG("PDFWriter::ContinuePDF, cant start state readering");
+			break;
+		}
+
+		PDFObjectCastPtr<PDFDictionary> pdfWriterDictionary(reader.GetObjectsReader()->ParseNewObject(reader.GetRootObjectID()));
+
+		PDFObjectCastPtr<PDFIndirectObjectReference> objectsContextObject(pdfWriterDictionary->QueryDirectObject("mObjectsContext"));
+		status = mObjectsContext.ReadState(reader.GetObjectsReader(),objectsContextObject->mObjectID);
+		if(status!= eSuccess)
+			break;
+
+		PDFObjectCastPtr<PDFIndirectObjectReference> documentContextObject(pdfWriterDictionary->QueryDirectObject("mDocumentContext"));
+		status = mDocumentContext.ReadState(reader.GetObjectsReader(),documentContextObject->mObjectID);
+		if(status!= eSuccess)
+			break;
+
+		reader.Finish();
+
+	}while(false);
+
+	return status;
+}

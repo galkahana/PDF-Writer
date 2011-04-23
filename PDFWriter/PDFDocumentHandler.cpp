@@ -67,6 +67,15 @@ EStatusCodeAndPDFFormXObjectList PDFDocumentHandler::CreateFormXObjectsFromPDF(	
 			break;
 		}
 
+		// do not allow encrypted/protected documents
+		PDFObjectCastPtr<PDFDictionary> encryptionDictionary(mParser.QueryDictionaryObject(mParser.GetTrailer(),"Encrypt"));
+		if(encryptionDictionary.GetPtr())
+		{
+			TRACE_LOG("PDFDocumentHandler::CreateFormXObjectsFromPDF, Document contains an encryption dictionary. Library does not support embedding of encrypted PDF");
+			result.first = eFailure;
+			break;
+		}
+
 		PDFFormXObject* newObject;
 
 		if(PDFPageRange::eRangeTypeAll == inPageRange.mType)
@@ -757,6 +766,15 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDF(const w
 		if(result.first != eSuccess)
 		{
 			TRACE_LOG("PDFDocumentHandler::CreatePDFPagesFromPDF, failure occured while parsing PDF file.");
+			break;
+		}
+
+		// do not allow encrypted/protected documents
+		PDFObjectCastPtr<PDFDictionary> encryptionDictionary(mParser.QueryDictionaryObject(mParser.GetTrailer(),"Encrypt"));
+		if(encryptionDictionary.GetPtr())
+		{
+			TRACE_LOG("PDFDocumentHandler::AppendPDFPagesFromPDF, Document contains an encryption dictionary. Library does not support embedding of encrypted PDF");
+			result.first = eFailure;
 			break;
 		}
 
