@@ -68,6 +68,7 @@
   OF THIS SOFTWARE.
 
 
+
 */
 #include "TIFFImageHandler.h"
 #include "Trace.h"
