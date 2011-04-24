@@ -659,6 +659,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\PDFCopyingContextTest.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PDFCopyingContextTest.h"
+					>
+				</File>
+				<File
 					RelativePath=".\PDFEmbedTest.cpp"
 					>
 				</File>
@@ -694,14 +702,6 @@
 		</Filter>
 		<File
 			RelativePath=".\ImportantReadme.txt"
-			>
-		</File>
-		<File
-			RelativePath=".\PDFCopyingContextTest.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\PDFCopyingContextTest.h"
 			>
 		</File>
 	</Files>
