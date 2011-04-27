@@ -100,7 +100,7 @@ IOBasicTypes::LongBufferSizeType InputFlateDecodeStream::DecodeBufferAndRead(con
 
 	do
 	{
-		mZLibState->avail_out = inSize;
+		mZLibState->avail_out = (uInt)inSize;
 		mZLibState->next_out = (Bytef*)inBuffer;
 
 		// first, flush whatever is already available

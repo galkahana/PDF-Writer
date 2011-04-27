@@ -18,6 +18,8 @@
 
    
 */
+#pragma once
+
 #include "IDocumentContextExtender.h"
 
 // adapter class for IDocumentContextExtender interface.
