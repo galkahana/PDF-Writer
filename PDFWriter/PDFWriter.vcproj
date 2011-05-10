@@ -108,7 +108,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\zlib;..\libtiff;..\FreeType\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRTDBG_MAP_ALLOC"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"

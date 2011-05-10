@@ -21,6 +21,7 @@
 // PDFWriterTestPlayground.cpp : Defines the entry point for the console application.
 //
 
+
 #include "Singleton.h"
 #include "TestsRunner.h"
 
@@ -112,7 +113,9 @@ int wmain(int argc, wchar_t* argv[])
 	}
 	else
 		PrintUsage();
+
 	std::cin.get();
+
 	return 0;
 }
 

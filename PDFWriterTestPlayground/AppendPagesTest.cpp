@@ -58,7 +58,6 @@ EStatusCode AppendPagesTest::Run()
 			status = result.first;
 			break;
 		}
-
 		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF",PDFPageRange());
 		if(result.first != eSuccess)
 		{
@@ -67,7 +66,6 @@ EStatusCode AppendPagesTest::Run()
 			break;
 		}
 
-
 		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\BasicTIFFImagesTest.PDF",PDFPageRange());
 		if(result.first != eSuccess)
 		{
@@ -75,7 +73,6 @@ EStatusCode AppendPagesTest::Run()
 			status = result.first;
 			break;
 		}
-
 		status = pdfWriter.EndPDF();
 		if(status != eSuccess)
 		{
