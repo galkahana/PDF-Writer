@@ -83,6 +83,8 @@ EStatusCode FlateEncryptionTest::Run()
 		LongBufferSizeType readSize = decoderReaderStream->Read((IOBasicTypes::Byte*)buffer,255);
 		buffer[readSize] = 0;
 
+		delete decoderReaderStream;
+
 		if(strcmp(aString,buffer) != 0)
 		{
 			wcout<<"decrypted content is different from encrypted content\n";

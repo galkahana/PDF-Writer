@@ -20,8 +20,6 @@
 */
 // PDFWriterTestPlayground.cpp : Defines the entry point for the console application.
 //
-
-
 #include "Singleton.h"
 #include "TestsRunner.h"
 

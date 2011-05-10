@@ -206,6 +206,7 @@ void CIDFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 	primitiveWriter.WriteKeyword(scEndBFChar);
 	cmapWriteContext->Write((const Byte*)scCmapFooter,strlen(scCmapFooter));
 	mObjectsContext->EndPDFStream(pdfStream);
+	delete pdfStream;
 }
 
 static const Byte scEntryEnding[2] = {'>','\n'};

@@ -23,11 +23,16 @@
 #include "EStatusCode.h"
 
 #include <string>
+#include <map>
+#include <list>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
 using namespace std;
+
+typedef list<FT_Stream> FTStreamList;
+typedef map<FT_Face,FTStreamList> FTFaceToFTStreamListMap;
 
 class FreeTypeWrapper
 {
@@ -47,9 +52,13 @@ public:
 private:
 
 	FT_Library mFreeType;
+	FTFaceToFTStreamListMap mOpenStreams;
 
 	FT_Stream CreateFTStreamForPath(const wstring& inFilePath);
 	EStatusCode FillOpenFaceArgumentsForWideString(const wstring& inFilePath, FT_Open_Args& ioArgs);
 	void CloseOpenFaceArgumentsStream(FT_Open_Args& ioArgs);
+	void RegisterStreamForFace(FT_Face inFace,FT_Stream inStream);
+	void CleanStreamsForFace(FT_Face inFace);
+
 
 };

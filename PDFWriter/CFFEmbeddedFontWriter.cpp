@@ -110,6 +110,7 @@ EStatusCode CFFEmbeddedFontWriter::WriteEmbeddedFont(
 
 
 		inObjectsContext->EndPDFStream(pdfStream);
+		delete pdfStream;
 	}while(false);
 
 	return status;	

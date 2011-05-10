@@ -94,6 +94,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteEmbeddedFont(
 
 
 		inObjectsContext->EndPDFStream(pdfStream);
+		delete pdfStream;
 	}while(false);
 
 	return status;
@@ -248,7 +249,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 			break;	
 		}
 
-		unsigned long* locaTable = new unsigned long[mSubsetFontGlyphsCount+1];
+		locaTable = new unsigned long[mSubsetFontGlyphsCount+1];
 
 		status = WriteGlyf(subsetGlyphIDs,locaTable);
 		if(status != eSuccess)

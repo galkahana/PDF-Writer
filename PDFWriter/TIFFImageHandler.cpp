@@ -141,29 +141,46 @@ typedef enum{
 } t2p_err_t;
 
 /* This struct defines a logical page of a TIFF. */
-typedef struct {
+struct T2P_PAGE{
 	tdir_t page_directory;
 	uint32 page_number;
 	ttile_t page_tilecount;
 	uint32 page_extra;
-} T2P_PAGE;
+
+	T2P_PAGE()
+	{
+		page_directory = 0;
+		page_number = 0;
+		page_tilecount = 0;
+		page_extra = 0;
+	}
+};
 
 /* This struct defines a PDF rectangle's coordinates. */
-typedef struct T2P_BOX{
+struct T2P_BOX{
 	float x1;
 	float y1;
 	float x2;
 	float y2;
 	float mat[9];
-} T2P_BOX;
+
+	T2P_BOX()
+	{
+		x1 = 0;
+		y1 = 0;
+		x2 = 0;
+		y2 = 0;
+		mat[0] = mat[1] = mat[2] = mat[3] = mat[4] = mat[5] = mat[6] = mat[7] = mat[8] = 0;
+	}
+};
 
 /* This struct defines a tile of a PDF.  */
-typedef struct {
+struct T2P_TILE{
 	T2P_BOX tile_box;
-} T2P_TILE;
+};
 
 /* This struct defines information about the tiles on a PDF page. */
-typedef struct {
+struct T2P_TILES{
 	ttile_t tiles_tilecount;
 	uint32 tiles_tilewidth;
 	uint32 tiles_tilelength;
@@ -172,10 +189,22 @@ typedef struct {
 	uint32 tiles_edgetilewidth;
 	uint32 tiles_edgetilelength;
 	T2P_TILE* tiles_tiles;
-} T2P_TILES;
+
+	T2P_TILES()
+	{
+		tiles_tilecount = 0;
+		tiles_tilewidth = 0;
+		tiles_tilelength = 0;
+		tiles_tilecountx = 0;
+		tiles_tilecounty = 0;
+		tiles_edgetilewidth = 0;
+		tiles_edgetilelength = 0;
+		tiles_tiles = 0;
+	}
+};
 
 /* This struct is the context of a function to generate PDF from a TIFF. */
-typedef struct T2P{
+struct T2P{
 	t2p_err_t t2p_error;
 	T2P_PAGE* tiff_pages;
 	T2P_TILES* tiff_tiles;
@@ -245,7 +274,75 @@ typedef struct T2P{
 	PDFStream* pdfStream;
 	ObjectIDType pdf_transfer_functions_gstate;
 
-} T2P;
+	T2P()
+	{
+		t2p_error = T2P_ERR_OK;
+		tiff_pages = 0;
+		tiff_tiles = 0;
+		tiff_pagecount = 0;
+		tiff_compression = 0;
+		tiff_photometric = 0;
+		tiff_fillorder = 0;
+		tiff_bitspersample = 0;
+		tiff_samplesperpixel = 0;
+		tiff_planar = 0;
+		tiff_width = 0;
+		tiff_length = 0;
+		tiff_xres = 0;
+		tiff_yres = 0;
+		tiff_orientation = 0;
+		tiff_dataoffset = 0;
+		tiff_datasize = 0;
+		tiff_resunit = 0;
+		pdf_centimeters = 0;
+		pdf_overrideres = 0;
+		pdf_overridepagesize = 0;
+		pdf_defaultxres = 0;
+		pdf_defaultyres = 0;
+		pdf_xres = 0;
+		pdf_yres = 0;
+		pdf_pagewidth = 0;
+		pdf_pagelength = 0;
+		pdf_imagewidth = 0;
+		pdf_imagelength = 0;
+		pdf_catalog = 0;
+		pdf_pages = 0;
+		pdf_info = 0;
+		pdf_palettecs = 0;
+		pdf_fitwindow = 0;
+		pdf_startxref = 0;
+		pdf_colorspace = T2P_CS_BILEVEL;
+		pdf_colorspace_invert = 0;
+		pdf_switchdecode = 0;
+		pdf_palettesize = 0;
+		pdf_palette = 0;
+		pdf_labrange[0] = pdf_labrange[1] = pdf_labrange[2] = pdf_labrange[3] = 0;
+		pdf_defaultcompression = T2P_COMPRESS_NONE;
+		pdf_defaultcompressionquality = 0;
+		pdf_compression = T2P_COMPRESS_NONE;
+		pdf_compressionquality = 0;
+		pdf_nopassthrough = 0;
+		pdf_transcode = T2P_TRANSCODE_RAW;
+		pdf_sample = T2P_SAMPLE_NOTHING;
+		pdf_page = 0;
+
+		tiff_whitechromaticities[0] = tiff_whitechromaticities[1] = 0;
+		tiff_primarychromaticities[0] = tiff_primarychromaticities[1] = tiff_primarychromaticities[2] = tiff_primarychromaticities[3] = tiff_primarychromaticities[4] = tiff_primarychromaticities[5] = 0;
+		tiff_referenceblackwhite[0] = tiff_referenceblackwhite[1] = 0;
+		tiff_transferfunction[0] = tiff_transferfunction[1] = tiff_transferfunction[2] = 0 ;
+		pdf_image_interpolate = 0;
+		tiff_transferfunctioncount = 0;
+		pdf_icccs = 0;
+		tiff_iccprofilelength = 0;
+		tiff_iccprofile = 0;
+
+		input = 0;
+		output = 0;
+		pdfStream = 0;
+		pdf_transfer_functions_gstate = 0;
+	}
+
+};
 
 typedef	void (*TIFFErrorHandler)(const char*, const char*, va_list);
 
@@ -350,8 +447,7 @@ PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFFile(const wstring& i
 
 void TIFFImageHandler::InitializeConversionState(){
 
-	mT2p = (T2P*) _TIFFmalloc(sizeof(T2P));
-	_TIFFmemset(mT2p, 0x00, sizeof(T2P));
+	mT2p = new T2P();
 	mT2p->pdf_defaultxres=300.0;
 	mT2p->pdf_defaultyres=300.0;
 	// if does not have a compression that is either zip or ccit, this should cause it to compress in zip...like all other normal compression
@@ -377,7 +473,7 @@ void TIFFImageHandler::DestroyConversionState()
 		if(mT2p->pdf_palette != NULL){
 			_TIFFfree( (tdata_t) mT2p->pdf_palette);
 		}
-		_TIFFfree( (tdata_t) mT2p );
+		delete mT2p;
 		mT2p = NULL;
 
 	}
@@ -463,6 +559,10 @@ PDFFormXObject* TIFFImageHandler::ConvertTiff2PDF(ObjectIDType inFormXObjectID)
 		imageFormXObject = WriteImagesFormXObject(imagesImageXObject,inFormXObjectID);
 
 	}while(false);
+
+	PDFImageXObjectList::iterator itImages = imagesImageXObject.begin();
+	for(; itImages != imagesImageXObject.end(); ++itImages)
+		delete *itImages;
 
 	return imageFormXObject;
 }

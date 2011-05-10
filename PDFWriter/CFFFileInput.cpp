@@ -165,7 +165,10 @@ void CFFFileInput::FreeData()
 
 	LongFilePositionTypeToCharStringsMap::iterator itLocalSubrs = mLocalSubrs.begin();
 	for(; itLocalSubrs != mLocalSubrs.end(); ++itLocalSubrs)
+	{
+		delete[] itLocalSubrs->second->mCharStringsIndex;
 		delete itLocalSubrs->second;
+	}
 
 	CharSetInfoVector::iterator itCharSets = mCharSets.begin();
 	for(; itCharSets != mCharSets.end(); ++itCharSets)
