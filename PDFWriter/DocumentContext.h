@@ -129,6 +129,11 @@ public:
 																EPDFPageBox inPageBoxToUseAsFormBox,
 																const double* inTransformationMatrix,
 																const ObjectIDTypeList& inCopyAdditionalObjects);
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF( const wstring& inPDFFilePath,
+																const PDFPageRange& inPageRange,
+																const PDFRectangle& inCropBox,
+																const double* inTransformationMatrix,
+																const ObjectIDTypeList& inCopyAdditionalObjects);
 
 	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
 														const PDFPageRange& inPageRange,

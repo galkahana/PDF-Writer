@@ -214,6 +214,19 @@ EStatusCodeAndObjectIDTypeList PDFWriter::CreateFormXObjectsFromPDF(const wstrin
 														inCopyAdditionalObjects);
 }
 
+EStatusCodeAndObjectIDTypeList PDFWriter::CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+																	 const PDFPageRange& inPageRange,
+																	 const PDFRectangle& inCropBox,
+																	 const double* inTransformationMatrix,
+																	 const ObjectIDTypeList& inCopyAdditionalObjects)
+{
+	return mDocumentContext.CreateFormXObjectsFromPDF(inPDFFilePath,
+														inPageRange,
+														inCropBox,
+														inTransformationMatrix,
+														inCopyAdditionalObjects);
+}
+
 EStatusCodeAndObjectIDTypeList PDFWriter::AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
 																const PDFPageRange& inPageRange,
 																const ObjectIDTypeList& inCopyAdditionalObjects)

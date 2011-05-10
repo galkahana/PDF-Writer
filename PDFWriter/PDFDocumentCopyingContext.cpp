@@ -44,6 +44,14 @@ EStatusCodeAndObjectIDType PDFDocumentCopyingContext::CreateFormXObjectFromPDFPa
 	return mDocumentHandler.CreateFormXObjectFromPDFPage(inPageIndex,inPageBoxToUseAsFormBox,inTransformationMatrix);
 }
 
+EStatusCodeAndObjectIDType PDFDocumentCopyingContext::CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
+																					 const PDFRectangle& inCropBox,
+																					 const double* inTransformationMatrix)
+{
+	return mDocumentHandler.CreateFormXObjectFromPDFPage(inPageIndex,inCropBox,inTransformationMatrix);	
+}
+
+
 EStatusCodeAndObjectIDType PDFDocumentCopyingContext::AppendPDFPageFromPDF(unsigned long inPageIndex)
 {
 	return mDocumentHandler.AppendPDFPageFromPDF(inPageIndex);

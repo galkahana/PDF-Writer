@@ -112,9 +112,7 @@ int wmain(int argc, wchar_t* argv[])
 	}
 	else
 		PrintUsage();
-
 	std::cin.get();
-
 	return 0;
 }
 

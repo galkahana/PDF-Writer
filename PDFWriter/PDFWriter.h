@@ -133,6 +133,13 @@ public:
 															 EPDFPageBox inPageBoxToUseAsFormBox,
 															 const double* inTransformationMatrix = NULL,
 															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
+	
+	// CreateFormXObjectsFromPDF is an override to allow you to determine a custom crop for the page embed
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+															 const PDFPageRange& inPageRange,
+															 const PDFRectangle& inCropBox,
+															 const double* inTransformationMatrix = NULL,
+															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
 	// AppendPDFPagesFromPDF is for simple appending of the input PDF pages
 	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
