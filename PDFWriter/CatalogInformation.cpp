@@ -29,7 +29,14 @@ CatalogInformation::CatalogInformation(void)
 
 CatalogInformation::~CatalogInformation(void)
 {
-	delete mCurrentPageTreeNode;
+	if(mCurrentPageTreeNode)
+	{
+		// delete root
+		PageTree* resultPageTree = mCurrentPageTreeNode;
+		while(resultPageTree->GetParent())
+			resultPageTree = resultPageTree->GetParent();
+		delete resultPageTree;
+	}
 }
 
 ObjectIDType CatalogInformation::AddPageToPageTree(ObjectIDType inPageID,IndirectObjectsReferenceRegistry& inObjectsRegistry)

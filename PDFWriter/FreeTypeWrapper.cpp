@@ -50,6 +50,16 @@ FreeTypeWrapper::~FreeTypeWrapper(void)
 {
 	if(mFreeType)
 		FT_Done_FreeType(mFreeType);
+
+	FTFaceToFTStreamListMap::iterator it = mOpenStreams.begin();
+	for(;it != mOpenStreams.end();++it)
+	{
+		FTStreamList::iterator itStreams = it->second.begin();
+		for(; itStreams != it->second.end();++itStreams)
+		{
+			delete *itStreams;
+		}
+	}
 }
 
 FT_Face FreeTypeWrapper::NewFace(const string& inFilePath,FT_Long inFontIndex)
@@ -114,6 +124,8 @@ FT_Face FreeTypeWrapper::NewFace(const wstring& inFilePath,FT_Long inFontIndex)
 
 	if(!face)
 		CloseOpenFaceArgumentsStream(openFaceArguments);
+	else
+		RegisterStreamForFace(face,openFaceArguments.stream);
 	return face;
 }
 
@@ -148,6 +160,15 @@ void FreeTypeWrapper::CloseOpenFaceArgumentsStream(FT_Open_Args& ioArgs)
 	}
 }
 
+void FreeTypeWrapper::RegisterStreamForFace(FT_Face inFace,FT_Stream inStream)
+{
+	FTFaceToFTStreamListMap::iterator it = mOpenStreams.find(inFace);
+	if(it == mOpenStreams.end())
+		it = mOpenStreams.insert(FTFaceToFTStreamListMap::value_type(inFace,FTStreamList())).first;
+	it->second.push_back(inStream);
+}
+
+
 FT_Face FreeTypeWrapper::NewFace(const wstring& inFilePath,const wstring& inSecondaryFilePath,FT_Long inFontIndex)
 {
 	FT_Open_Args attachStreamArguments;
@@ -176,6 +197,9 @@ FT_Face FreeTypeWrapper::NewFace(const wstring& inFilePath,const wstring& inSeco
 
 		if(!face)
 			CloseOpenFaceArgumentsStream(attachStreamArguments);
+		else
+			RegisterStreamForFace(face,attachStreamArguments.stream);
+
 	}
 
 	return face;	
@@ -184,8 +208,25 @@ FT_Face FreeTypeWrapper::NewFace(const wstring& inFilePath,const wstring& inSeco
 
 FT_Error FreeTypeWrapper::DoneFace(FT_Face ioFace)
 {
-	return FT_Done_Face(ioFace);
+	FT_Error status = FT_Done_Face(ioFace);
+	CleanStreamsForFace(ioFace);
+	return status;
 }
+
+void FreeTypeWrapper::CleanStreamsForFace(FT_Face inFace)
+{
+	FTFaceToFTStreamListMap::iterator it = mOpenStreams.find(inFace);
+	if(it != mOpenStreams.end())
+	{
+		FTStreamList::iterator itStreams = it->second.begin();
+		for(; itStreams != it->second.end();++itStreams)
+		{
+			delete *itStreams;
+		}
+	}
+	mOpenStreams.erase(it);
+}
+
 
 FT_Library FreeTypeWrapper::operator->()
 {

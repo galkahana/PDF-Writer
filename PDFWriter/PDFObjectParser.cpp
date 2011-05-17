@@ -133,33 +133,42 @@ PDFObject* PDFObjectParser::ParseNewObject()
 				}
 
 				PDFObject* versionObject = ParseNumber(numberToken); 
-				if(!versionObject || 
-					(versionObject->GetType() != ePDFObjectInteger) ||
-					((PDFInteger*)versionObject)->GetValue() < 0) // k. failure to parse number, or no non-negative, cant be reference
+				bool isReference = false;
+				do
 				{
-					SaveTokenToBuffer(numberToken);
-					break;
-				}
+					if(!versionObject || 
+						(versionObject->GetType() != ePDFObjectInteger) ||
+						((PDFInteger*)versionObject)->GetValue() < 0) // k. failure to parse number, or no non-negative, cant be reference
+					{
+						SaveTokenToBuffer(numberToken);
+						break;
+					}
 
-				// try parse R keyword
-				string keywordToken;
-				if(!GetNextToken(keywordToken)) // k. no next token...cant be reference
-					break;
+					// try parse R keyword
+					string keywordToken;
+					if(!GetNextToken(keywordToken)) // k. no next token...cant be reference
+						break;
 
-				if(keywordToken != scR) // k. not R...cant be reference
-				{
-					SaveTokenToBuffer(numberToken);
-					SaveTokenToBuffer(keywordToken);
-					break;
-				}
+					if(keywordToken != scR) // k. not R...cant be reference
+					{
+						SaveTokenToBuffer(numberToken);
+						SaveTokenToBuffer(keywordToken);
+						break;
+					}
+
+					isReference = true;
+				}while(false);
 
 				// if passed all these, then this is a reference
-				PDFObject* referenceObject = new PDFIndirectObjectReference(
-													(ObjectIDType)((PDFInteger*)pdfObject)->GetValue(),
-													(unsigned long)((PDFInteger*)versionObject)->GetValue());
-				delete pdfObject;
+				if(isReference)
+				{
+					PDFObject* referenceObject = new PDFIndirectObjectReference(
+														(ObjectIDType)((PDFInteger*)pdfObject)->GetValue(),
+														(unsigned long)((PDFInteger*)versionObject)->GetValue());
+					delete pdfObject;
+					pdfObject = referenceObject;
+				}
 				delete versionObject;
-				pdfObject = referenceObject;
 			}
 			break;
 		}

@@ -292,6 +292,7 @@ void DescendentFontWriter::WriteCIDSet(const UIntAndGlyphEncodingInfoVector& inE
 		cidSetWritingContext->Write(&buffer,1);
 	}
 	mObjectsContext->EndPDFStream(pdfStream);
+	delete pdfStream;
 }
 
 void DescendentFontWriter::WriteFontFileReference(

@@ -43,6 +43,8 @@ AbstractWrittenFont::AbstractWrittenFont(ObjectsContext* inObjectsContext)
 
 AbstractWrittenFont::~AbstractWrittenFont(void)
 {
+	delete mCIDRepresentation;
+	delete mANSIRepresentation;
 }
 
 void AbstractWrittenFont::AppendGlyphs(

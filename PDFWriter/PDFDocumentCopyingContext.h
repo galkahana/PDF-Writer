@@ -47,6 +47,9 @@ public:
 	EStatusCodeAndObjectIDType CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
 															 EPDFPageBox inPageBoxToUseAsFormBox,
 															 const double* inTransformationMatrix = NULL);
+	EStatusCodeAndObjectIDType CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
+															 const PDFRectangle& inCropBox,
+															 const double* inTransformationMatrix = NULL);
 	EStatusCodeAndObjectIDType AppendPDFPageFromPDF(unsigned long inPageIndex);
 	
 	EStatusCodeAndObjectIDType CopyObject(ObjectIDType inSourceObjectID);

@@ -37,10 +37,11 @@ AppendPagesTest::~AppendPagesTest(void)
 EStatusCode AppendPagesTest::Run()
 {
 	EStatusCode status;
-	PDFWriter pdfWriter;
 
 	do
 	{
+	 	PDFWriter pdfWriter;
+
 		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\AppendPagesTest.PDF",ePDFVersion13,LogConfiguration(true,L"c:\\pdflibtests\\AppendPagesTestLog.txt"));
 		if(status != eSuccess)
 		{
@@ -57,7 +58,6 @@ EStatusCode AppendPagesTest::Run()
 			status = result.first;
 			break;
 		}
-
 		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF",PDFPageRange());
 		if(result.first != eSuccess)
 		{
@@ -66,7 +66,6 @@ EStatusCode AppendPagesTest::Run()
 			break;
 		}
 
-
 		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\BasicTIFFImagesTest.PDF",PDFPageRange());
 		if(result.first != eSuccess)
 		{
@@ -74,8 +73,6 @@ EStatusCode AppendPagesTest::Run()
 			status = result.first;
 			break;
 		}
-
-
 		status = pdfWriter.EndPDF();
 		if(status != eSuccess)
 		{

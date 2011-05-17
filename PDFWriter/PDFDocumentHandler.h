@@ -43,6 +43,7 @@ class DictionaryContext;
 class PageContentContext;
 class PDFPage;
 class IDocumentContextExtender;
+class IPageEmbedInFormCommand;
 
 using namespace std;
 
@@ -64,6 +65,12 @@ public:
 	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF( const wstring& inPDFFilePath,
 																const PDFPageRange& inPageRange,
 																EPDFPageBox inPageBoxToUseAsFormBox,
+																const double* inTransformationMatrix,
+																const ObjectIDTypeList& inCopyAdditionalObjects);
+
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF( const wstring& inPDFFilePath,
+																const PDFPageRange& inPageRange,
+																const PDFRectangle& inCropBox,
 																const double* inTransformationMatrix,
 																const ObjectIDTypeList& inCopyAdditionalObjects);
 	
@@ -89,12 +96,24 @@ public:
 	EStatusCodeAndObjectIDType CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
 														 EPDFPageBox inPageBoxToUseAsFormBox,
 														 const double* inTransformationMatrix);
+	EStatusCodeAndObjectIDType CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
+														 const PDFRectangle& inCropBox,
+														 const double* inTransformationMatrix);
 	EStatusCodeAndObjectIDType AppendPDFPageFromPDF(unsigned long inPageIndex);
 	EStatusCodeAndObjectIDType CopyObject(ObjectIDType inSourceObjectID);
 	PDFParser* GetSourceDocumentParser();
 	EStatusCodeAndObjectIDType GetCopiedObjectID(ObjectIDType inSourceObjectID);
 	MapIterator<ObjectIDTypeToObjectIDTypeMap> GetCopiedObjectsMappingIterator();
 	void StopFileCopyingContext();
+
+
+	// Internal implementation. do not use directly
+	PDFFormXObject* CreatePDFFormXObjectForPage(unsigned long inPageIndex,
+												EPDFPageBox inPageBoxToUseAsFormBox,
+												const double* inTransformationMatrix);
+	PDFFormXObject* CreatePDFFormXObjectForPage(unsigned long inPageIndex,
+												const PDFRectangle& inCropBox,
+												const double* inTransformationMatrix);
 private:
 
 	ObjectsContext* mObjectsContext;
@@ -107,9 +126,7 @@ private:
 	ObjectIDTypeToObjectIDTypeMap mSourceToTarget;
 	PDFDictionary* mWrittenPage;
 
-	PDFFormXObject* CreatePDFFormXObjectForPage(unsigned long inPageIndex,
-												EPDFPageBox inPageBoxToUseAsFormBox,
-												const double* inTransformationMatrix);
+
 	PDFRectangle DeterminePageBox(PDFDictionary* inDictionary,EPDFPageBox inPageBoxType);
 	void SetPDFRectangleFromPDFArray(PDFArray* inPDFArray,PDFRectangle& outPDFRectangle);
 	double GetAsDoubleValue(PDFObject* inNumberObject);
@@ -123,6 +140,14 @@ private:
 	EStatusCode CopyInDirectObject(ObjectIDType inSourceObjectID,ObjectIDType inTargetObjectID,ObjectIDTypeSet& ioCopiedObjects);
 	EStatusCode WriteObjectByType(PDFObject* inObject,ETokenSeparator inSeparator,ObjectIDTypeList& outSourceObjectsToAdd);
 	EStatusCode WriteArrayObject(PDFArray* inArray,ETokenSeparator inSeparator,ObjectIDTypeList& outSourceObjectsToAdd);
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+															const PDFPageRange& inPageRange,
+															IPageEmbedInFormCommand* inPageEmbedCommand,
+															const double* inTransformationMatrix,
+															const ObjectIDTypeList& inCopyAdditionalObjects);
+	PDFFormXObject* CreatePDFFormXObjectForPage(PDFDictionary* inPageObject,
+												const PDFRectangle& inCropBox,
+												const double* inTransformationMatrix);
 
 
 	EStatusCode WriteDictionaryObject(PDFDictionary* inDictionary,ObjectIDTypeList& outSourceObjectsToAdd);

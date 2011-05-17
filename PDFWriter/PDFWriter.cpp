@@ -18,6 +18,7 @@
 
    
 */
+
 #include "PDFWriter.h"
 #include "Trace.h"
 #include "Singleton.h"
@@ -210,6 +211,19 @@ EStatusCodeAndObjectIDTypeList PDFWriter::CreateFormXObjectsFromPDF(const wstrin
 	return mDocumentContext.CreateFormXObjectsFromPDF(inPDFFilePath,
 														inPageRange,
 														inPageBoxToUseAsFormBox,
+														inTransformationMatrix,
+														inCopyAdditionalObjects);
+}
+
+EStatusCodeAndObjectIDTypeList PDFWriter::CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+																	 const PDFPageRange& inPageRange,
+																	 const PDFRectangle& inCropBox,
+																	 const double* inTransformationMatrix,
+																	 const ObjectIDTypeList& inCopyAdditionalObjects)
+{
+	return mDocumentContext.CreateFormXObjectsFromPDF(inPDFFilePath,
+														inPageRange,
+														inCropBox,
 														inTransformationMatrix,
 														inCopyAdditionalObjects);
 }

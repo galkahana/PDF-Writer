@@ -913,6 +913,15 @@ EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(const 
 
 }
 
+EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+																			const PDFPageRange& inPageRange,
+																			const PDFRectangle& inCropBox,
+																			const double* inTransformationMatrix,
+																			const ObjectIDTypeList& inCopyAdditionalObjects)
+{
+	return mPDFDocumentHandler.CreateFormXObjectsFromPDF(inPDFFilePath,inPageRange,inCropBox,inTransformationMatrix,inCopyAdditionalObjects);	
+
+}
 EStatusCodeAndObjectIDTypeList DocumentContext::AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
 																	  const PDFPageRange& inPageRange,
 																	  const ObjectIDTypeList& inCopyAdditionalObjects)
