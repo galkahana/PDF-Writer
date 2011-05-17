@@ -24,6 +24,12 @@ _.swp
 *.dep
 *.manifest
 *.manifest.res
+*.sdf
+*.log
+*.tlog
+*.lastbuildstate
+*.ipch
+*.rc
 
 #unwanted other sources #
 ########################

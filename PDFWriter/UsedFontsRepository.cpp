@@ -84,7 +84,8 @@ PDFUsedFont* UsedFontsRepository::GetFontForFile(const wstring& inFontFilePath,c
 		if(!face)
 		{
 			TRACE_LOG1("UsedFontsRepository::GetFontForFile, Failed to load font from %s",inFontFilePath.c_str());
-			it = mUsedFonts.insert(WStringToPDFUsedFontMap::value_type(inFontFilePath,NULL)).first;
+			PDFUsedFont* aNull = NULL;
+			it = mUsedFonts.insert(WStringToPDFUsedFontMap::value_type(inFontFilePath,aNull)).first;
 		}
 		else
 		{
