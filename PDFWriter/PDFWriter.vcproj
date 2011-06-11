@@ -594,6 +594,14 @@
 				Name="Encoding"
 				>
 				<File
+					RelativePath=".\Ascii7Encoding.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\Ascii7Encoding.h"
+					>
+				</File>
+				<File
 					RelativePath=".\PDFDocEncoding.cpp"
 					>
 				</File>

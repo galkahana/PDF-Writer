@@ -31,10 +31,12 @@
 #include "UsedFontsRepository.h"
 #include "PDFEmbedParameterTypes.h"
 #include "PDFDocumentHandler.h"
+#include "ObjectsBasicTypes.h"
 
 #include <string>
 #include <set>
 #include <utility>
+#include <list>
 
 using namespace std;
 using namespace IOBasicTypes;
@@ -57,6 +59,8 @@ class PDFDictionary;
 class PDFDocumentCopyingContext;
 
 typedef set<IDocumentContextExtender*> IDocumentContextExtenderSet;
+typedef pair<EStatusCode,ObjectIDType> EStatusCodeAndObjectIDType;
+typedef list<ObjectIDType> ObjectIDTypeList;
 
 class DocumentContext
 {
@@ -92,6 +96,8 @@ public:
 	EStatusCodeAndObjectIDType WritePage(PDFPage* inPage);
 	EStatusCodeAndObjectIDType WritePageAndRelease(PDFPage* inPage);
 
+	// Use this to add annotation references to a page. the references will be written on the next page write (see WritePage and WritePageAndRelease)
+	void RegisterAnnotationReferenceForNextPageWrite(ObjectIDType inAnnotationReference);
 
 	// Form XObject creation and finalization
 	PDFFormXObject* StartFormXObject(const PDFRectangle& inBoundingBox,const double* inMatrix = NULL);
@@ -147,6 +153,9 @@ public:
 	// second overload is for type 1, when an additional metrics file is available
 	PDFUsedFont* GetFontForFile(const wstring& inFontFilePath,const wstring& inAdditionalMeticsFilePath);
 
+	// URL should be encoded to be a valid URL, ain't gonna be checking that!
+	EStatusCode AttachURLLinktoCurrentPage(const wstring& inURL,const PDFRectangle& inLinkClickArea);
+
 	// Extensibility
 	void AddDocumentContextExtender(IDocumentContextExtender* inExtender);
 	void RemoveDocumentContextExtender(IDocumentContextExtender* inExtender);
@@ -168,6 +177,7 @@ private:
 	TIFFImageHandler mTIFFImageHandler;
 	PDFDocumentHandler mPDFDocumentHandler;
 	UsedFontsRepository mUsedFontsRepository;
+	ObjectIDTypeList mAnnotations;
 	
 	void WriteHeaderComment(EPDFVersion inPDFVersion);
 	void Write4BinaryBytes();
@@ -182,6 +192,7 @@ private:
 	EStatusCode WriteResourcesDictionary(ResourcesDictionary& inResourcesDictionary);
 	bool IsIdentityMatrix(const double* inMatrix);
 	EStatusCode WriteUsedFontsDefinitions();
+	EStatusCodeAndObjectIDType WriteAnnotationAndLinkForURL(const wstring& inURL,const PDFRectangle& inLinkClickArea);
 
 	void WriteTrailerState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
 	void WriteTrailerInfoState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);

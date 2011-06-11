@@ -346,3 +346,8 @@ PDFDocumentCopyingContext* PDFWriter::CreatePDFCopyingContext(const wstring& inP
 {
 	return mDocumentContext.CreatePDFCopyingContext(inPDFFilePath);
 }
+
+EStatusCode PDFWriter::AttachURLLinktoCurrentPage(const wstring& inURL,const PDFRectangle& inLinkClickArea)
+{
+	return mDocumentContext.AttachURLLinktoCurrentPage(inURL,inLinkClickArea);
+}

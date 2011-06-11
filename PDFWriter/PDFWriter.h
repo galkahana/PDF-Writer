@@ -154,6 +154,9 @@ public:
 	// second overload is for type 1, when an additional metrics file is available
 	PDFUsedFont* GetFontForFile(const wstring& inFontFilePath,const wstring& inAdditionalMeticsFilePath);
 
+	// URL links
+	// URL should be encoded to be a valid URL, ain't gonna be checking that!
+	EStatusCode AttachURLLinktoCurrentPage(const wstring& inURL,const PDFRectangle& inLinkClickArea);
 
 	// Extensibility, reaching to lower levels
 	DocumentContext& GetDocumentContext();

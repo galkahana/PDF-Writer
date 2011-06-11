@@ -20,7 +20,6 @@
 */
 #include "DocumentContext.h"
 #include "ObjectsContext.h"
-#include "IOBasicTypes.h"
 #include "IByteWriterWithPosition.h"
 #include "DictionaryContext.h"
 #include "PDFPage.h"
@@ -42,6 +41,7 @@
 #include "PDFBoolean.h"
 #include "PDFArray.h"
 #include "PDFDocumentCopyingContext.h"
+#include "Ascii7Encoding.h"
 
 DocumentContext::DocumentContext()
 {
@@ -535,6 +535,20 @@ EStatusCodeAndObjectIDType DocumentContext::WritePage(PDFPage* inPage)
 			TRACE_LOG("DocumentContext::WritePage, failed to write resources dictionary");
 			break;
 		}
+
+		// Annotations
+		if(mAnnotations.size() > 0)
+		{
+			pageContext->WriteKey("Annots");
+
+			ObjectIDTypeList::iterator it = mAnnotations.begin();
+
+			mObjectsContext->StartArray();
+			for(; it != mAnnotations.end(); ++it)
+				mObjectsContext->WriteIndirectObjectReference(*it);
+			mObjectsContext->EndArray(eTokenSeparatorEndLine);			
+		}
+		mAnnotations.clear();
 
 		// Content
 		if(inPage->GetContentStreamsCount() > 0)
@@ -1359,4 +1373,98 @@ PDFDocumentCopyingContext* DocumentContext::CreatePDFCopyingContext(const wstrin
 	}
 	else
 		return context;
+}
+
+EStatusCode DocumentContext::AttachURLLinktoCurrentPage(const wstring& inURL,const PDFRectangle& inLinkClickArea)
+{
+	EStatusCodeAndObjectIDType writeResult = WriteAnnotationAndLinkForURL(inURL,inLinkClickArea);
+
+	if(writeResult.first != eSuccess)
+		return writeResult.first;
+
+	RegisterAnnotationReferenceForNextPageWrite(writeResult.second);
+	return eSuccess;
+}
+
+static const string scAnnot = "Annot";
+static const string scLink = "Link";
+static const string scRect = "Rect";
+static const string scF = "F";
+static const string scW = "W";
+static const string scA = "A";
+static const string scBS = "BS";
+static const string scAction = "Action";
+static const string scS = "S";
+static const string scURI = "URI";
+EStatusCodeAndObjectIDType DocumentContext::WriteAnnotationAndLinkForURL(const wstring& inURL,const PDFRectangle& inLinkClickArea)
+{
+	EStatusCodeAndObjectIDType result(eFailure,0);
+
+	do
+	{
+		Ascii7Encoding encoding;
+
+		BoolAndString encodedResult = encoding.Encode(inURL);
+		if(!encodedResult.first)
+		{
+			TRACE_LOG1("DocumentContext::WriteAnnotationAndLinkForURL, unable to encode string to Ascii7. make sure that all charachters are valid URLs [should be ascii 7 compatible]. URL - %s",inURL.c_str());
+			break;
+		}
+
+		result.second = mObjectsContext->StartNewIndirectObject();
+		DictionaryContext* linkAnnotationContext = mObjectsContext->StartDictionary();
+
+		// Type
+		linkAnnotationContext->WriteKey(scType);
+		linkAnnotationContext->WriteNameValue(scAnnot);
+
+		// Subtype
+		linkAnnotationContext->WriteKey(scSubType);
+		linkAnnotationContext->WriteNameValue(scLink);
+
+		// Rect
+		linkAnnotationContext->WriteKey(scRect);
+		linkAnnotationContext->WriteRectangleValue(inLinkClickArea);
+
+		// F
+		linkAnnotationContext->WriteKey(scF);
+		linkAnnotationContext->WriteIntegerValue(4);
+
+		// BS
+		linkAnnotationContext->WriteKey(scBS);
+		DictionaryContext* borderStyleContext = mObjectsContext->StartDictionary();
+
+		borderStyleContext->WriteKey(scW);
+		borderStyleContext->WriteIntegerValue(0);
+		mObjectsContext->EndDictionary(borderStyleContext);
+
+		// A
+		linkAnnotationContext->WriteKey(scA);
+		DictionaryContext* actionContext = mObjectsContext->StartDictionary();
+
+		// Type
+		actionContext->WriteKey(scType);
+		actionContext->WriteNameValue(scAction);
+
+		// S
+		actionContext->WriteKey(scS);
+		actionContext->WriteNameValue(scURI);
+
+		// URI
+		actionContext->WriteKey(scURI);
+		actionContext->WriteLiteralStringValue(encodedResult.second);
+		
+		mObjectsContext->EndDictionary(actionContext);
+
+		mObjectsContext->EndDictionary(linkAnnotationContext);
+		mObjectsContext->EndIndirectObject();
+		result.first = eSuccess;
+	}while(false);
+
+	return result;
+}
+
+void DocumentContext::RegisterAnnotationReferenceForNextPageWrite(ObjectIDType inAnnotationReference)
+{
+	mAnnotations.push_back(inAnnotationReference);
 }
