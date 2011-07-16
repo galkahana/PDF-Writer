@@ -58,11 +58,15 @@ ResourcesDictionary* PageContentContext::GetResourcesDictionary()
 
 EStatusCode PageContentContext::FinalizeCurrentStream()
 {
-	mPageOfContext->DisassociateContentContext();
 	if(mCurrentStream)
 		return FinalizeStreamWriteAndRelease();
 	else
 		return eSuccess;
+}
+
+PDFPage* PageContentContext::GetAssociatedPage()
+{
+	return mPageOfContext;
 }
 
 EStatusCode PageContentContext::FinalizeStreamWriteAndRelease()

@@ -41,6 +41,9 @@ public:
 	// Extensibility method, forces creation of a new stream, if one does not exist now.
 	void StartAStreamIfRequired();
 
+	// Extensibility method, get the page to which this content is associated
+	PDFPage* GetAssociatedPage();
+
 private:
 	PDFPage* mPageOfContext;
 	ObjectsContext* mObjectsContext;

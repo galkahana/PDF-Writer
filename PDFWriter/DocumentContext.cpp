@@ -641,6 +641,11 @@ string DocumentContext::GenerateMD5IDForFile()
 	return md5.ToString();
 }
 
+bool DocumentContext::HasContentContext(PDFPage* inPage)
+{
+	return inPage->GetAssociatedContentContext() != NULL;
+}
+
 PageContentContext* DocumentContext::StartPageContentContext(PDFPage* inPage)
 {
 	if(!inPage->GetAssociatedContentContext())
@@ -658,6 +663,7 @@ EStatusCode DocumentContext::PausePageContentContext(PageContentContext* inPageC
 EStatusCode DocumentContext::EndPageContentContext(PageContentContext* inPageContext)
 {
 	EStatusCode status = inPageContext->FinalizeCurrentStream();
+	inPageContext->GetAssociatedPage()->DisassociateContentContext();
 	delete inPageContext;
 	return status;
 }
@@ -760,6 +766,10 @@ static const string scXObjects = "XObject";
 static const string scProcesets = "ProcSet";
 static const string scExtGStates = "ExtGState";
 static const string scFonts = "Font";
+static const string scColorSpaces = "ColorSpace";
+static const string scPatterns = "Pattern";
+static const string scShadings = "Shading";
+static const string scProperties = "Properties";
 EStatusCode DocumentContext::WriteResourcesDictionary(ResourcesDictionary& inResourcesDictionary)
 {
 	EStatusCode status = eSuccess;
@@ -801,36 +811,41 @@ EStatusCode DocumentContext::WriteResourcesDictionary(ResourcesDictionary& inRes
 				xobjectsContext->WriteKey(itImageXObjects.GetValue());
 				xobjectsContext->WriteObjectReferenceValue(itImageXObjects.GetKey());
 			}
+			// generic xobjects
+			MapIterator<ObjectIDTypeToStringMap> itGenericXObjects = inResourcesDictionary.GetGenericXObjectsIterator();
+			while(itGenericXObjects.MoveNext())
+			{
+				xobjectsContext->WriteKey(itGenericXObjects.GetValue());
+				xobjectsContext->WriteObjectReferenceValue(itGenericXObjects.GetKey());
+			}
 			mObjectsContext->EndDictionary(xobjectsContext);
+
+			// i'm not having further extensiblity to XObjects. they will always be indirect, and user can use either of the three options to write xobject resources.
 		}
 
+		// ExtGStates
 		if(inResourcesDictionary.GetExtGStatesCount() > 0)
-		{
-			// ExtGStates
-			resourcesContext->WriteKey(scExtGStates);
-			DictionaryContext* extGStatesContext = mObjectsContext->StartDictionary();
-			MapIterator<ObjectIDTypeToStringMap> itExtGStates = inResourcesDictionary.GetExtGStatesIterator();
-			while(itExtGStates.MoveNext())
-			{
-				extGStatesContext->WriteKey(itExtGStates.GetValue());
-				extGStatesContext->WriteObjectReferenceValue(itExtGStates.GetKey());
-			}
-			mObjectsContext->EndDictionary(extGStatesContext);	
-		}
+			WriteResourceDictionary(resourcesContext,scExtGStates,inResourcesDictionary.GetExtGStatesIterator());
 
+		// Fonts
 		if(inResourcesDictionary.GetFontsCount() > 0)
-		{
-			// Fonts
-			resourcesContext->WriteKey(scFonts);
-			DictionaryContext* fontsContext = mObjectsContext->StartDictionary();
-			MapIterator<ObjectIDTypeToStringMap> itFonts = inResourcesDictionary.GetFontsIterator();
-			while(itFonts.MoveNext())
-			{
-				fontsContext->WriteKey(itFonts.GetValue());
-				fontsContext->WriteObjectReferenceValue(itFonts.GetKey());
-			}
-			mObjectsContext->EndDictionary(fontsContext);	
-		}
+			WriteResourceDictionary(resourcesContext,scFonts,inResourcesDictionary.GetFontsIterator());
+
+		// Color space
+		if(inResourcesDictionary.GetColorSpacesCount() > 0)
+			WriteResourceDictionary(resourcesContext,scColorSpaces,inResourcesDictionary.GetColorSpacesIterator());
+	
+		// Patterns
+		if(inResourcesDictionary.GetPatternsCount() > 0)
+			WriteResourceDictionary(resourcesContext,scPatterns,inResourcesDictionary.GetPatternsIterator());
+
+		// Shading
+		if(inResourcesDictionary.GetShadingsCount() > 0)
+			WriteResourceDictionary(resourcesContext,scShadings,inResourcesDictionary.GetShadingsIterator());
+
+		// Properties
+		if(inResourcesDictionary.GetPropertiesCount() > 0)
+			WriteResourceDictionary(resourcesContext,scShadings,inResourcesDictionary.GetPropertiesIterator());
 
 		IDocumentContextExtenderSet::iterator it = mExtenders.begin();
 		for(; it != mExtenders.end() && eSuccess == status; ++it)
@@ -848,6 +863,36 @@ EStatusCode DocumentContext::WriteResourcesDictionary(ResourcesDictionary& inRes
 
 	return status;
 }
+
+void DocumentContext::WriteResourceDictionary(DictionaryContext* inResourcesDictionary,
+											const string& inResourceDictionaryLabel,
+											MapIterator<ObjectIDTypeToStringMap> inMapping)
+{
+	inResourcesDictionary->WriteKey(inResourceDictionaryLabel);
+	DictionaryContext* resourceContext = mObjectsContext->StartDictionary();
+	while(inMapping.MoveNext())
+	{
+		resourceContext->WriteKey(inMapping.GetValue());
+		resourceContext->WriteObjectReferenceValue(inMapping.GetKey());
+	}
+
+
+	IDocumentContextExtenderSet::iterator it = mExtenders.begin();
+	EStatusCode status = eSuccess;
+	for(; it != mExtenders.end() && eSuccess == status; ++it)
+	{
+		status = (*it)->OnResourceDictionaryWrite(resourceContext,inResourceDictionaryLabel,mObjectsContext,this);
+		if(status != eSuccess)
+		{
+			TRACE_LOG("DocumentContext::WriteResourceDictionary, unexpected failure. extender declared failure when writing a resource dictionary.");
+			break;
+		}
+	}
+
+	mObjectsContext->EndDictionary(resourceContext);	
+}
+
+
 
 bool DocumentContext::IsIdentityMatrix(const double* inMatrix)
 {
@@ -1467,4 +1512,15 @@ EStatusCodeAndObjectIDType DocumentContext::WriteAnnotationAndLinkForURL(const w
 void DocumentContext::RegisterAnnotationReferenceForNextPageWrite(ObjectIDType inAnnotationReference)
 {
 	mAnnotations.push_back(inAnnotationReference);
+}
+
+EStatusCode DocumentContext::MergePDFPagesToPage(PDFPage* inPage,
+								const wstring& inPDFFilePath,
+								const PDFPageRange& inPageRange,
+								const ObjectIDTypeList& inCopyAdditionalObjects)
+{
+	return mPDFDocumentHandler.MergePDFPagesToPage(inPage,
+												   inPDFFilePath,
+												   inPageRange,
+												   inCopyAdditionalObjects);
 }

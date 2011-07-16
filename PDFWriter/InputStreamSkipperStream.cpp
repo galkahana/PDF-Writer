@@ -33,7 +33,7 @@ InputStreamSkipperStream::~InputStreamSkipperStream(void)
 
 InputStreamSkipperStream::InputStreamSkipperStream(IByteReader* inSourceStream)
 {
-
+	Assign(inSourceStream);
 }
 
 

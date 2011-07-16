@@ -41,6 +41,8 @@ void PDFParserTokenizer::SetReadStream(IByteReader* inSourceStream)
 void PDFParserTokenizer::ResetReadState()
 {
 	mHasTokenBuffer = false;
+	mStreamPositionTracker = 0;
+	mRecentTokenPosition = 0;
 }
 
 static const Byte scBackSlash[] = {'\\'};
@@ -67,6 +69,10 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 			result.first = false;
 			break;
 		}
+
+
+		// before reading the first byte save the token position, for external queries
+		mRecentTokenPosition = mStreamPositionTracker;
 
 		// get the first byte of the token
 		if(GetNextByteForToken(buffer) != eSuccess)
@@ -316,6 +322,7 @@ void PDFParserTokenizer::SkipTillToken()
 
 EStatusCode PDFParserTokenizer::GetNextByteForToken(Byte& outByte)
 {
+	++mStreamPositionTracker; // advance position tracker, because we are reading the next byte.
 	if(mHasTokenBuffer)
 	{
 		outByte = mTokenBuffer;
@@ -339,6 +346,7 @@ void PDFParserTokenizer::SaveTokenBuffer(Byte inToSave)
 {
 	mHasTokenBuffer = true;
 	mTokenBuffer = inToSave;
+	--mStreamPositionTracker; // decreasing position trakcer, because it is as if the byte is put back in the stream
 }
 
 static const Byte scEntityBreakers[] = {'(',')','<','>',']','[','{','}','/','%'};
@@ -348,4 +356,9 @@ bool PDFParserTokenizer::IsPDFEntityBreaker(Byte inCharacter)
 	for(int i=0; i < 10 && !isEntityBreak; ++i)
 		isEntityBreak =  (scEntityBreakers[i] == inCharacter);
 	return isEntityBreak;
+}
+
+LongFilePositionType PDFParserTokenizer::GetRecentTokenPosition()
+{
+	return mRecentTokenPosition;
 }

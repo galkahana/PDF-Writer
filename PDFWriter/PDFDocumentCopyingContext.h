@@ -51,6 +51,7 @@ public:
 															 const PDFRectangle& inCropBox,
 															 const double* inTransformationMatrix = NULL);
 	EStatusCodeAndObjectIDType AppendPDFPageFromPDF(unsigned long inPageIndex);
+	EStatusCode MergePDFPageToPage(PDFPage* inTargetPage,unsigned long inSourcePageIndex);
 	
 	EStatusCodeAndObjectIDType CopyObject(ObjectIDType inSourceObjectID);
 

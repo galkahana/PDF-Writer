@@ -667,6 +667,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\MergePDFPages.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\MergePDFPages.h"
+					>
+				</File>
+				<File
 					RelativePath=".\PDFCopyingContextTest.cpp"
 					>
 				</File>

@@ -37,6 +37,7 @@
 #include <set>
 #include <utility>
 #include <list>
+#include <map>
 
 using namespace std;
 using namespace IOBasicTypes;
@@ -61,6 +62,7 @@ class PDFDocumentCopyingContext;
 typedef set<IDocumentContextExtender*> IDocumentContextExtenderSet;
 typedef pair<EStatusCode,ObjectIDType> EStatusCodeAndObjectIDType;
 typedef list<ObjectIDType> ObjectIDTypeList;
+typedef map<ObjectIDType,string> ObjectIDTypeToStringMap;
 
 class DocumentContext
 {
@@ -92,6 +94,9 @@ public:
 
 	// Finalize and release the page context. the current content stream is flushed to the PDF stream
 	EStatusCode EndPageContentContext(PageContentContext* inPageContext);
+
+	// Determine whether this page already has a content context
+	bool HasContentContext(PDFPage* inPage);
 	
 	EStatusCodeAndObjectIDType WritePage(PDFPage* inPage);
 	EStatusCodeAndObjectIDType WritePageAndRelease(PDFPage* inPage);
@@ -144,6 +149,11 @@ public:
 	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
 														const PDFPageRange& inPageRange,
 														const ObjectIDTypeList& inCopyAdditionalObjects);
+
+	EStatusCode MergePDFPagesToPage(PDFPage* inPage,
+									const wstring& inPDFFilePath,
+									const PDFPageRange& inPageRange,
+									const ObjectIDTypeList& inCopyAdditionalObjects);
 	
 	PDFDocumentCopyingContext* CreatePDFCopyingContext(const wstring& inFilePath);
 
@@ -190,6 +200,9 @@ private:
 	int WritePageTree(PageTree* inPageTreeToWrite);
 	string GenerateMD5IDForFile();
 	EStatusCode WriteResourcesDictionary(ResourcesDictionary& inResourcesDictionary);
+	void WriteResourceDictionary(DictionaryContext* inResourcesDictionary,
+								const string& inResourceDictionaryLabel,
+								MapIterator<ObjectIDTypeToStringMap> inMapping);
 	bool IsIdentityMatrix(const double* inMatrix);
 	EStatusCode WriteUsedFontsDefinitions();
 	EStatusCodeAndObjectIDType WriteAnnotationAndLinkForURL(const wstring& inURL,const PDFRectangle& inLinkClickArea);

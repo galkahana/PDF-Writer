@@ -59,11 +59,19 @@ public:
 	// calls this when changing underlying stream position
 	void ResetReadState();
 
+	// Advanced option!
+	// This will return the position of the stream on the first byte of the recently provided token (use after GetNextToken).
+	// the implementation counts bytes as it goes, as such any external shifting of the stream will render the method invalid.
+	// In other words - use only if the only position movement is through GetNextToken repeated calls.
+	// Specifically "ResetReadState" resets the count
+	LongFilePositionType GetRecentTokenPosition();
 private:
 
 	IByteReader* mStream;
 	bool mHasTokenBuffer;
 	Byte mTokenBuffer;
+	LongFilePositionType mStreamPositionTracker;
+	LongFilePositionType mRecentTokenPosition;
 
 
 	void SkipTillToken();

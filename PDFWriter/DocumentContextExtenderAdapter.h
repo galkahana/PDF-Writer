@@ -43,6 +43,13 @@ public:
 							ObjectsContext* inPDFWriterObjectContext,
 							DocumentContext* inPDFWriterDocumentContext){return eSuccess;}
 
+	// add items to a particular resource dictionary (will be called from all but procset array and xobjects dict)
+	virtual EStatusCode OnResourceDictionaryWrite(
+							DictionaryContext* inResourceDictionary,
+							const string& inResourceDictionaryName,
+							ObjectsContext* inPDFWriterObjectContext,
+							DocumentContext* inPDFWriterDocumentContext){return eSuccess;}
+
 	// add items to the form dictionary while it's written
 	virtual EStatusCode OnFormXObjectWrite(
 							ObjectIDType inFormXObjectID,
@@ -77,23 +84,20 @@ public:
 
 	// pdf copying events
 
+	// When using any embedding method - Parsing of PDF to merge is not complete, before starting any merging
 	virtual EStatusCode OnPDFParsingComplete(
 							ObjectsContext* inPDFWriterObjectContext,
 							DocumentContext* inPDFWriterDocumentContext,
 							PDFDocumentHandler* inPDFDocumentHandler){return eSuccess;}
 
+	// When creating XObjects from pages - before creating a particular page xobject
 	virtual EStatusCode OnBeforeCreateXObjectFromPage(
 							PDFDictionary* inPageObjectDictionary,
 							ObjectsContext* inPDFWriterObjectContext,
 							DocumentContext* inPDFWriterDocumentContext,
 							PDFDocumentHandler* inPDFDocumentHandler){return eSuccess;}
 
-	virtual EStatusCode OnBeforeCreatePageFromPage(
-							PDFDictionary* inPageObjectDictionary,
-							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext,
-							PDFDocumentHandler* inPDFDocumentHandler){return eSuccess;}
-
+	// When creating XObjects from pages - after creating a particular page xobject
 	virtual EStatusCode OnAfterCreateXObjectFromPage(
 							PDFFormXObject* iPageObjectResultXObject,
 							PDFDictionary* inPageObjectDictionary,
@@ -101,6 +105,15 @@ public:
 							DocumentContext* inPDFWriterDocumentContext,
 							PDFDocumentHandler* inPDFDocumentHandler){return eSuccess;}
 
+	// When appending pages from PDF - before appending a particular page
+	virtual EStatusCode OnBeforeCreatePageFromPage(
+							PDFDictionary* inPageObjectDictionary,
+							ObjectsContext* inPDFWriterObjectContext,
+							DocumentContext* inPDFWriterDocumentContext,
+							PDFDocumentHandler* inPDFDocumentHandler){return eSuccess;}
+
+
+	// When appending pages from PDF - after appending a particular page
 	virtual EStatusCode OnAfterCreatePageFromPage(
 							PDFPage* iPageObjectResultPage,
 							PDFDictionary* inPageObjectDictionary,
@@ -108,6 +121,23 @@ public:
 							DocumentContext* inPDFWriterDocumentContext,
 							PDFDocumentHandler* inPDFDocumentHandler){return eSuccess;}
 
+	// When merging pages from PDF - before merging a particular page
+	virtual EStatusCode OnBeforeMergePageFromPage(
+							PDFPage* inTargetPage,
+							PDFDictionary* inPageObjectDictionary,
+							ObjectsContext* inPDFWriterObjectContext,
+							DocumentContext* inPDFWriterDocumentContext,
+							PDFDocumentHandler* inPDFDocumentHandler){return eSuccess;}
+
+	// When merging pages from PDF - after merging a particular page
+	virtual EStatusCode OnAfterMergePageFromPage(
+							PDFPage* inTargetPage,
+							PDFDictionary* inPageObjectDictionary,
+							ObjectsContext* inPDFWriterObjectContext,
+							DocumentContext* inPDFWriterDocumentContext,
+							PDFDocumentHandler* inPDFDocumentHandler){return eSuccess;}
+
+	// When using any embedding method - right after embedding of the PDF is complete
 	virtual EStatusCode OnPDFCopyingComplete(
 							ObjectsContext* inPDFWriterObjectContext,
 							DocumentContext* inPDFWriterDocumentContext,

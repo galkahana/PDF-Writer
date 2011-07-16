@@ -86,6 +86,33 @@ public:
 	int GetFontsCount();
 	MapIterator<ObjectIDTypeToStringMap> GetFontsIterator();
 
+
+	// Color space
+	string AddColorSpaceMapping(ObjectIDType inColorspaceID);
+	int GetColorSpacesCount();
+	MapIterator<ObjectIDTypeToStringMap> GetColorSpacesIterator();
+
+	// Patterns
+	string AddPatternMapping(ObjectIDType inPatternID);
+	int GetPatternsCount();
+	MapIterator<ObjectIDTypeToStringMap> GetPatternsIterator();
+
+	// Properties
+	string AddPropertyMapping(ObjectIDType inPropertyID);
+	int GetPropertiesCount();
+	MapIterator<ObjectIDTypeToStringMap> GetPropertiesIterator();
+	
+
+	// Generic XObjects
+	string AddGenericXObjectMapping(ObjectIDType inXObjectID);
+	int GetGenericXObjectsCount();
+	MapIterator<ObjectIDTypeToStringMap> GetGenericXObjectsIterator();
+
+	// Shading
+	string AddShadingMapping(ObjectIDType inShadingID);
+	int GetShadingsCount();
+	MapIterator<ObjectIDTypeToStringMap> GetShadingsIterator();
+
 private:
 
 	StringSet mProcsets;
@@ -94,6 +121,11 @@ private:
 	ObjectIDTypeToStringMap mExtGStates;
 	ObjectIDTypeToStringMap mFonts;
 	
+	ObjectIDTypeToStringMap mColorSpaces;
+	ObjectIDTypeToStringMap mPatterns;
+	ObjectIDTypeToStringMap mProperties;
+	ObjectIDTypeToStringMap mGenericXObjects;
+	ObjectIDTypeToStringMap mShading;
 
 	void AddImageXObjectMappingWithName(PDFImageXObject* inImageXObject, const string& inImageXObjectName);
 

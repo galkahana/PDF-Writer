@@ -136,7 +136,7 @@ MapIterator<ObjectIDTypeToStringMap> ResourcesDictionary::GetImageXObjectsIterat
 
 int ResourcesDictionary::GetXObjectsCount()
 {
-	return int(mImageXObjects.size() + mFormXObjects.size());
+	return int(mImageXObjects.size() + mFormXObjects.size() + mGenericXObjects.size());
 }
 
 static const string scGS = "GS";
@@ -236,4 +236,145 @@ int ResourcesDictionary::GetFontsCount()
 MapIterator<ObjectIDTypeToStringMap> ResourcesDictionary::GetFontsIterator()
 {
 	return MapIterator<ObjectIDTypeToStringMap>(mFonts);
+}
+
+// Color space
+static const string scCS = "CS";
+string ResourcesDictionary::AddColorSpaceMapping(ObjectIDType inColorspaceID)
+{
+	ObjectIDTypeToStringMap::iterator it = mColorSpaces.find(inColorspaceID);
+
+	if(it == mColorSpaces.end())
+	{
+		string newName = scCS + Int((int)mColorSpaces.size()+1).ToString();
+		mColorSpaces.insert(ObjectIDTypeToStringMap::value_type(inColorspaceID,newName));
+		return newName;
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
+int ResourcesDictionary::GetColorSpacesCount()
+{
+	return (int)mColorSpaces.size();
+}
+
+MapIterator<ObjectIDTypeToStringMap> ResourcesDictionary::GetColorSpacesIterator()
+{
+	return MapIterator<ObjectIDTypeToStringMap>(mColorSpaces);
+}
+
+// Patterns
+static const string scPT = "PT";
+string ResourcesDictionary::AddPatternMapping(ObjectIDType inPatternID)
+{
+	ObjectIDTypeToStringMap::iterator it = mPatterns.find(inPatternID);
+
+	if(it == mPatterns.end())
+	{
+		string newName = scPT + Int((int)mPatterns.size()+1).ToString();
+		mPatterns.insert(ObjectIDTypeToStringMap::value_type(inPatternID,newName));
+		return newName;
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
+int ResourcesDictionary::GetPatternsCount()
+{
+	return (int)mPatterns.size();
+}
+
+MapIterator<ObjectIDTypeToStringMap> ResourcesDictionary::GetPatternsIterator()
+{
+	return MapIterator<ObjectIDTypeToStringMap>(mPatterns);
+}
+
+
+// Properties
+static const string scPP = "PP";
+string ResourcesDictionary::AddPropertyMapping(ObjectIDType inPropertyID)
+{
+	ObjectIDTypeToStringMap::iterator it = mProperties.find(inPropertyID);
+
+	if(it == mProperties.end())
+	{
+		string newName = scPP + Int((int)mProperties.size()+1).ToString();
+		mProperties.insert(ObjectIDTypeToStringMap::value_type(inPropertyID,newName));
+		return newName;
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
+int ResourcesDictionary::GetPropertiesCount()
+{
+	return (int)mProperties.size();
+}
+
+MapIterator<ObjectIDTypeToStringMap> ResourcesDictionary::GetPropertiesIterator()
+{
+	return MapIterator<ObjectIDTypeToStringMap>(mProperties);
+}
+
+// Generic XObjects
+static const string scXO = "XO";
+string ResourcesDictionary::AddGenericXObjectMapping(ObjectIDType inXObjectID)
+{
+	ObjectIDTypeToStringMap::iterator it = mGenericXObjects.find(inXObjectID);
+
+	if(it == mGenericXObjects.end())
+	{
+		string newName = scXO + Int((int)mGenericXObjects.size()+1).ToString();
+		mGenericXObjects.insert(ObjectIDTypeToStringMap::value_type(inXObjectID,newName));
+		return newName;
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
+int ResourcesDictionary::GetGenericXObjectsCount()
+{
+	return (int)mGenericXObjects.size();
+}
+
+MapIterator<ObjectIDTypeToStringMap> ResourcesDictionary::GetGenericXObjectsIterator()
+{
+	return MapIterator<ObjectIDTypeToStringMap>(mGenericXObjects);
+}
+
+// Shading
+static const string scSH = "SH";
+string ResourcesDictionary::AddShadingMapping(ObjectIDType inShadingID)
+{
+	ObjectIDTypeToStringMap::iterator it = mShading.find(inShadingID);
+
+	if(it == mShading.end())
+	{
+		string newName = scSH + Int((int)mShading.size()+1).ToString();
+		mShading.insert(ObjectIDTypeToStringMap::value_type(inShadingID,newName));
+		return newName;
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
+int ResourcesDictionary::GetShadingsCount()
+{
+	return (int)mShading.size();
+}
+
+MapIterator<ObjectIDTypeToStringMap> ResourcesDictionary::GetShadingsIterator()
+{
+	return MapIterator<ObjectIDTypeToStringMap>(mShading);
 }

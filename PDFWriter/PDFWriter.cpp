@@ -351,3 +351,14 @@ EStatusCode PDFWriter::AttachURLLinktoCurrentPage(const wstring& inURL,const PDF
 {
 	return mDocumentContext.AttachURLLinktoCurrentPage(inURL,inLinkClickArea);
 }
+
+EStatusCode PDFWriter::MergePDFPagesToPage(PDFPage* inPage,
+								const wstring& inPDFFilePath,
+								const PDFPageRange& inPageRange,
+								const ObjectIDTypeList& inCopyAdditionalObjects)
+{
+	return mDocumentContext.MergePDFPagesToPage(inPage,
+												inPDFFilePath,
+												inPageRange,
+												inCopyAdditionalObjects);
+}

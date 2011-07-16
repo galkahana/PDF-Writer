@@ -146,6 +146,13 @@ public:
 														const PDFPageRange& inPageRange,
 														const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
+	// MergePDFPagesToPage, merge PDF pages content to an input page. good for single-placement of a page content, cheaper than creating
+	// and XObject and later placing, when the intention is to use this graphic just once.
+	EStatusCode MergePDFPagesToPage(PDFPage* inPage,
+									const wstring& inPDFFilePath,
+									const PDFPageRange& inPageRange,
+									const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
+
 	// Copying context, allowing for a continous flow of copying from multiple sources PDFs (create one per source) to target PDF
 	PDFDocumentCopyingContext* CreatePDFCopyingContext(const wstring& inPDFFilePath);
 

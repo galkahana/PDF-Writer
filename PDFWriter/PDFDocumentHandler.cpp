@@ -42,6 +42,8 @@
 #include "PrimitiveObjectsWriter.h"
 #include "PageContentContext.h"
 #include "PDFPage.h"
+#include "PDFParserTokenizer.h"
+#include "InputStreamSkipperStream.h"
 
 
 PDFDocumentHandler::PDFDocumentHandler(void)
@@ -605,6 +607,13 @@ void PDFDocumentHandler::RegisterInDirectObjects(PDFArray* inArray,ObjectIDTypeL
 		}
 	}
 }
+
+EStatusCode PDFDocumentHandler::CopyInDirectObject(ObjectIDType inSourceObjectID,ObjectIDType inTargetObjectID)
+{
+	ObjectIDTypeSet ioCopiedObjects;
+	return CopyInDirectObject(inSourceObjectID,inTargetObjectID,ioCopiedObjects);
+}
+
 
 EStatusCode PDFDocumentHandler::CopyInDirectObject(ObjectIDType inSourceObjectID,ObjectIDType inTargetObjectID,ObjectIDTypeSet& ioCopiedObjects)
 {
@@ -1351,4 +1360,562 @@ void PDFDocumentHandler::AddDocumentContextExtender(IDocumentContextExtender* in
 void PDFDocumentHandler::RemoveDocumentContextExtender(IDocumentContextExtender* inExtender)
 {
 	mExtenders.erase(inExtender);
+}
+
+
+EStatusCode PDFDocumentHandler::MergePDFPagesToPage(PDFPage* inPage,
+													const wstring& inPDFFilePath,
+													const PDFPageRange& inPageRange,
+													const ObjectIDTypeList& inCopyAdditionalObjects)
+{
+	EStatusCode status;
+	
+
+	do
+	{
+		status = StartFileCopyingContext(inPDFFilePath);
+		if(status != eSuccess)
+			break;
+
+		IDocumentContextExtenderSet::iterator it = mExtenders.begin();
+		for(; it != mExtenders.end() && eSuccess == status; ++it)
+		{
+			status = (*it)->OnPDFParsingComplete(mObjectsContext,mDocumentContext,this);
+			if(status != eSuccess)
+				TRACE_LOG("DocumentContext::MergePDFPagesToPage, unexpected failure. extender declared failure after parsing page.");
+		}
+
+		// copy additional objects prior to pages, so we have them ready at page merging
+		if(inCopyAdditionalObjects.size() > 0)
+		{
+			status = WriteNewObjects(inCopyAdditionalObjects);
+			if(status != eSuccess)
+			{
+				TRACE_LOG("PDFDocumentHandler::MergePDFPagesToPage, failed copying additional objects");
+				break;
+			}
+		}
+
+		if(PDFPageRange::eRangeTypeAll == inPageRange.mType)
+		{
+			for(unsigned long i=0; i < mParser.GetPagesCount() && eSuccess == status; ++i)
+			{
+				status = MergePDFPageForPage(inPage,i);
+				if(status != eSuccess)
+					TRACE_LOG1("PDFDocumentHandler::MergePDFPagesToPage, failed to embed page %ld", i);
+			}
+		}
+		else
+		{
+			// eRangeTypeSpecific
+			ULongAndULongList::const_iterator it = inPageRange.mSpecificRanges.begin();
+			for(; it != inPageRange.mSpecificRanges.end() && eSuccess == status;++it)
+			{
+				if(it->first <= it->second && it->second < mParser.GetPagesCount())
+				{
+					for(unsigned long i=it->first; i <= it->second && eSuccess == status; ++i)
+					{
+						status = MergePDFPageForPage(inPage,i);
+						if(status != eSuccess)
+							TRACE_LOG1("PDFDocumentHandler::MergePDFPagesToPage, failed to embed page %ld", i);
+					}
+				}
+				else
+				{
+					TRACE_LOG3("PDFDocumentHandler::MergePDFPagesToPage, range mismatch. first = %ld, second = %ld, PDF page count = %ld", 
+						it->first,
+						it->second,
+						mParser.GetPagesCount());
+					status = eFailure;
+				}
+			}
+		}
+
+
+	}while(false);
+
+	IDocumentContextExtenderSet::iterator it = mExtenders.begin();
+	for(; it != mExtenders.end() && eSuccess == status; ++it)
+	{
+		status = (*it)->OnPDFCopyingComplete(mObjectsContext,mDocumentContext,this);
+		if(status != eSuccess)
+			TRACE_LOG("DocumentContext::MergePDFPagesToPage, unexpected failure. extender declared failure before finalizing copy.");
+	}
+
+	StopFileCopyingContext();
+
+	return status;
+
+}
+
+EStatusCode PDFDocumentHandler::MergePDFPageForPage(PDFPage* inTargetPage,unsigned long inSourcePageIndex)
+{
+	RefCountPtr<PDFDictionary> pageObject = mParser.ParsePage(inSourcePageIndex);
+	EStatusCode status  = eSuccess;
+
+	if(!pageObject)
+	{
+		TRACE_LOG1("PDFDocumentHandler::MergePDFPageForPage, unhexpected exception, page index does not denote a page object. page index = %ld",inSourcePageIndex);
+		return eFailure;
+	}
+
+
+	IDocumentContextExtenderSet::iterator it = mExtenders.begin();
+	for(; it != mExtenders.end() && eSuccess == status; ++it)
+	{
+		status = (*it)->OnBeforeMergePageFromPage(inTargetPage,pageObject.GetPtr(),mObjectsContext,mDocumentContext,this);
+		if(status != eSuccess)
+			TRACE_LOG("DocumentContext::MergePDFPageForPage, unexpected failure. extender declared failure before writing page.");
+	}
+	if(status != eSuccess)
+		return status;
+
+	do
+	{
+		StringToStringMap pageResourcesNamesMapping;
+
+		// pause current content context on the stream, if such exists, to allow a safe and separate copying of the page content
+		if(mDocumentContext->HasContentContext(inTargetPage))
+		{
+			status = mDocumentContext->PausePageContentContext(mDocumentContext->StartPageContentContext(inTargetPage));
+			if(status != eSuccess)
+				break;
+		}
+
+		if(MergeResourcesToPage(inTargetPage,pageObject.GetPtr(),pageResourcesNamesMapping) != eSuccess)
+			break;
+
+		// copy the page content to the target page content
+		status = MergePageContentToTargetPage(inTargetPage,pageObject.GetPtr(),pageResourcesNamesMapping);
+
+	}while(false);
+
+	if(eSuccess == status)
+	{
+		it = mExtenders.begin();
+		for(; it != mExtenders.end() && eSuccess == status; ++it)
+		{
+			status = (*it)->OnAfterMergePageFromPage(inTargetPage,pageObject.GetPtr(),mObjectsContext,mDocumentContext,this);
+			if(status != eSuccess)
+				TRACE_LOG("DocumentContext::MergePDFPageForPage, unexpected failure. extender declared failure after writing page.");
+		}
+	}
+
+	return status;	
+
+}
+
+EStatusCode PDFDocumentHandler::MergeResourcesToPage(PDFPage* inTargetPage,PDFDictionary* inPage,StringToStringMap& outMappedResourcesNames)
+{
+	// parse each individual resources dictionary separately and copy the resources. the output parameter should be used for old vs. new names
+	
+	PDFObjectCastPtr<PDFDictionary> resources(mParser.QueryDictionaryObject(inPage,"Resources"));
+
+	// k. no resources...as wierd as that might be...or just wrong...i'll let it be
+	if(!resources)
+		return eSuccess;
+
+	EStatusCode status = eSuccess;
+
+	// ProcSet
+	PDFObjectCastPtr<PDFArray> procsets(mParser.QueryDictionaryObject(resources.GetPtr(),"ProcSet"));
+	if(procsets.GetPtr())
+	{
+		SingleValueContainerIterator<PDFObjectVector> it(procsets->GetIterator());
+		while(it.MoveNext())
+			inTargetPage->GetResourcesDictionary().AddProcsetResource(((PDFName*)it.GetItem())->GetValue());
+	}
+
+
+	do
+	{
+
+		// ExtGState
+		PDFObjectCastPtr<PDFDictionary> extgstate(mParser.QueryDictionaryObject(resources.GetPtr(),"ExtGState"));
+		if(extgstate.GetPtr())
+		{	
+			MapIterator<PDFNameToPDFObjectMap> it(extgstate->GetIterator());
+			while(it.MoveNext() && eSuccess == status)
+			{
+				// always copying to indirect object. with this method i'm forcing to write them now, not having to hold them in memory till i actually write the resource dictionary.
+				EStatusCodeAndObjectIDType result = CopyObjectToIndirectObject(it.GetValue());
+				if(result.first != eSuccess)
+					status = eFailure;				
+				outMappedResourcesNames.insert(
+					StringToStringMap::value_type(
+						AsEncodedName(it.GetKey()->GetValue()),
+						inTargetPage->GetResourcesDictionary().AddExtGStateMapping(result.second)));
+				
+			}
+			if(status != eSuccess)
+				break;
+		}
+
+		// ColorSpace
+		PDFObjectCastPtr<PDFDictionary> colorspace(mParser.QueryDictionaryObject(resources.GetPtr(),"ColorSpace"));
+		if(colorspace.GetPtr())
+		{	
+			MapIterator<PDFNameToPDFObjectMap> it(colorspace->GetIterator());
+			while(it.MoveNext() && eSuccess == status)
+			{
+				EStatusCodeAndObjectIDType result = CopyObjectToIndirectObject(it.GetValue());
+				if(result.first != eSuccess)
+					status = eFailure;				
+				outMappedResourcesNames.insert(
+					StringToStringMap::value_type(
+						AsEncodedName(it.GetKey()->GetValue()),
+						inTargetPage->GetResourcesDictionary().AddColorSpaceMapping(result.second)));
+				
+			}
+			if(status != eSuccess)
+				break;
+		}
+
+		// Pattern
+		PDFObjectCastPtr<PDFDictionary> pattern(mParser.QueryDictionaryObject(resources.GetPtr(),"Pattern"));
+		if(pattern.GetPtr())
+		{	
+			MapIterator<PDFNameToPDFObjectMap> it(pattern->GetIterator());
+			while(it.MoveNext() && eSuccess == status)
+			{
+				EStatusCodeAndObjectIDType result = CopyObjectToIndirectObject(it.GetValue());
+				if(result.first != eSuccess)
+					status = eFailure;				
+				outMappedResourcesNames.insert(
+					StringToStringMap::value_type(
+						AsEncodedName(it.GetKey()->GetValue()),
+						inTargetPage->GetResourcesDictionary().AddPatternMapping(result.second)));
+				
+			}
+			if(status != eSuccess)
+				break;
+		}
+
+		// Shading
+		PDFObjectCastPtr<PDFDictionary> shading(mParser.QueryDictionaryObject(resources.GetPtr(),"Shading"));
+		if(shading.GetPtr())
+		{	
+			MapIterator<PDFNameToPDFObjectMap> it(shading->GetIterator());
+			while(it.MoveNext() && eSuccess == status)
+			{
+				EStatusCodeAndObjectIDType result = CopyObjectToIndirectObject(it.GetValue());
+				if(result.first != eSuccess)
+					status = eFailure;				
+				outMappedResourcesNames.insert(
+					StringToStringMap::value_type(
+						AsEncodedName(it.GetKey()->GetValue()),
+						inTargetPage->GetResourcesDictionary().AddShadingMapping(result.second)));
+				
+			}
+			if(status != eSuccess)
+				break;
+		}
+
+		// XObject
+		PDFObjectCastPtr<PDFDictionary> xobject(mParser.QueryDictionaryObject(resources.GetPtr(),"XObject"));
+		if(xobject.GetPtr())
+		{	
+			MapIterator<PDFNameToPDFObjectMap> it(xobject->GetIterator());
+			while(it.MoveNext() && eSuccess == status)
+			{
+				EStatusCodeAndObjectIDType result = CopyObjectToIndirectObject(it.GetValue());
+				if(result.first != eSuccess)
+					status = eFailure;				
+				outMappedResourcesNames.insert(
+					StringToStringMap::value_type(
+						AsEncodedName(it.GetKey()->GetValue()),
+						inTargetPage->GetResourcesDictionary().AddGenericXObjectMapping(result.second)));
+				
+			}
+			if(status != eSuccess)
+				break;
+		}
+
+		// Font
+		PDFObjectCastPtr<PDFDictionary> font(mParser.QueryDictionaryObject(resources.GetPtr(),"Font"));
+		if(font.GetPtr())
+		{	
+			MapIterator<PDFNameToPDFObjectMap> it(font->GetIterator());
+			while(it.MoveNext() && eSuccess == status)
+			{
+				EStatusCodeAndObjectIDType result = CopyObjectToIndirectObject(it.GetValue());
+				if(result.first != eSuccess)
+					status = eFailure;				
+				outMappedResourcesNames.insert(
+					StringToStringMap::value_type(
+						AsEncodedName(it.GetKey()->GetValue()),
+						inTargetPage->GetResourcesDictionary().AddFontMapping(result.second)));
+				
+			}
+			if(status != eSuccess)
+				break;
+		}
+
+		// Properties
+		PDFObjectCastPtr<PDFDictionary> properties(mParser.QueryDictionaryObject(resources.GetPtr(),"Properties"));
+		if(properties.GetPtr())
+		{	
+			MapIterator<PDFNameToPDFObjectMap> it(properties->GetIterator());
+			while(it.MoveNext() && eSuccess == status)
+			{
+				EStatusCodeAndObjectIDType result = CopyObjectToIndirectObject(it.GetValue());
+				if(result.first != eSuccess)
+					status = eFailure;				
+				outMappedResourcesNames.insert(
+					StringToStringMap::value_type(
+						AsEncodedName(it.GetKey()->GetValue()),
+						inTargetPage->GetResourcesDictionary().AddPropertyMapping(result.second)));
+				
+			}
+			if(status != eSuccess)
+				break;
+		}
+
+	}while(false);
+	return status;
+}
+
+string PDFDocumentHandler::AsEncodedName(const string& inName)
+{
+	// for later comparisons and replacement, i'd like to have the name as it appears in a PDF stream, with all spaces encoded.
+	// i know there's little chance that resource names will contain spaces...but i want to be safe.
+
+	PrimitiveObjectsWriter primitiveWriter;
+	OutputStringBufferStream aStringBuilder;
+
+	primitiveWriter.SetStreamForWriting(&aStringBuilder);
+	primitiveWriter.WriteName(inName,eTokenSepratorNone);
+
+	return aStringBuilder.ToString().substr(1); // return without initial forward slash
+}
+
+EStatusCodeAndObjectIDType PDFDocumentHandler::CopyObjectToIndirectObject(PDFObject* inObject)
+{
+	EStatusCodeAndObjectIDType result;
+	if(inObject->GetType() != ePDFObjectIndirectObjectReference)
+	{
+		result.second = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
+		result.first = CopyDirectObjectToIndirectObject(inObject,result.second);
+	}
+	else
+	{
+		ObjectIDTypeToObjectIDTypeMap::iterator	itObjects = mSourceToTarget.find(((PDFIndirectObjectReference*)inObject)->mObjectID);
+		if(itObjects == mSourceToTarget.end())
+		{
+			result.second = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
+			mSourceToTarget.insert(ObjectIDTypeToObjectIDTypeMap::value_type(((PDFIndirectObjectReference*)inObject)->mObjectID,result.second));
+			result.first = CopyInDirectObject(((PDFIndirectObjectReference*)inObject)->mObjectID,result.second);
+		}
+		else
+		{
+			result.second = itObjects->second;
+			result.first = eSuccess;
+		}
+	}
+	return result;
+
+}
+
+EStatusCode PDFDocumentHandler::CopyDirectObjectToIndirectObject(PDFObject* inObject,ObjectIDType inTargetObjectID)
+{
+	EStatusCode status;
+	ObjectIDTypeList newObjectsToWrite;
+
+	mObjectsContext->StartNewIndirectObject(inTargetObjectID);
+	status = WriteObjectByType(inObject,eTokenSeparatorEndLine,newObjectsToWrite);
+	if(eSuccess == status)
+	{
+		mObjectsContext->EndIndirectObject();
+		return WriteNewObjects(newObjectsToWrite);
+	}
+	else
+		return status;
+}
+
+EStatusCode PDFDocumentHandler::MergePageContentToTargetPage(PDFPage* inTargetPage,PDFDictionary* inSourcePage,const StringToStringMap& inMappedResourcesNames)
+{
+	EStatusCode status = eSuccess;
+
+	bool hasAlreadyAContentContext = mDocumentContext->HasContentContext(inTargetPage);
+	PageContentContext* pageContentContext = mDocumentContext->StartPageContentContext(inTargetPage);
+
+	RefCountPtr<PDFObject> pageContent(mParser.QueryDictionaryObject(inSourcePage,"Contents"));
+	if(pageContent->GetType() == ePDFObjectStream)
+	{
+		status = WritePDFStreamInputToContentContext(pageContentContext,(PDFStreamInput*)pageContent.GetPtr(),inMappedResourcesNames);
+	}
+	else if(pageContent->GetType() == ePDFObjectArray)
+	{
+		SingleValueContainerIterator<PDFObjectVector> it = ((PDFArray*)pageContent.GetPtr())->GetIterator();
+		PDFObjectCastPtr<PDFIndirectObjectReference> refItem;
+		while(it.MoveNext() && status == eSuccess)
+		{
+			refItem = it.GetItem();
+			if(!refItem)
+			{
+				status = eFailure;
+				TRACE_LOG("PDFDocumentHandler::MergePageContentToTargetPage, content stream array contains non-refs");
+				break;
+			}
+			PDFObjectCastPtr<PDFStreamInput> contentStream(mParser.ParseNewObject(refItem->mObjectID));
+			if(!contentStream)
+			{
+				status = eFailure;
+				TRACE_LOG("PDFDocumentHandler::MergePageContentToTargetPage, content stream array contains references to non streams");
+				break;
+			}
+			status = WritePDFStreamInputToContentContext(pageContentContext,contentStream.GetPtr(),inMappedResourcesNames);
+		}
+	}
+	else
+	{
+		TRACE_LOG1("PDFDocumentHandler::MergePageContentToTargetPage, error copying page content, expected either array or stream, getting %s",scPDFObjectTypeLabel[pageContent->GetType()]);
+		status = eFailure;
+	}
+
+	// this means that this function created the content context, in which case it owns it and should finalize it
+	if(!hasAlreadyAContentContext)
+		mDocumentContext->EndPageContentContext(pageContentContext);
+	return status;	
+}
+
+EStatusCode PDFDocumentHandler::WritePDFStreamInputToContentContext(PageContentContext* inContentContext,PDFStreamInput* inContentSource,const StringToStringMap& inMappedResourcesNames)
+{
+	EStatusCode status = eSuccess;
+	
+	do
+	{
+		inContentContext->StartAStreamIfRequired();
+
+		status = WritePDFStreamInputToStream(inContentContext->GetCurrentPageContentStream()->GetWriteStream(),inContentSource,inMappedResourcesNames);
+		if(status != eSuccess)
+		{
+			TRACE_LOG("PDFDocumentHandler::WritePDFStreamInputToContentContext, failed to write content stream from page input to target page");
+			break;
+		}
+
+		status = inContentContext->FinalizeCurrentStream(); // i want to begin a new stream after this, to maintain some sort of consistency [if important] with the embedded pages
+
+	}while(false);
+
+	return status;
+}
+
+EStatusCode PDFDocumentHandler::WritePDFStreamInputToStream(IByteWriter* inTargetStream,PDFStreamInput* inSourceStream,const StringToStringMap& inMappedResourcesNames)
+{
+	// as oppose to regular copying, this copying has to replace name references that refer to mapped resources.
+	// as such, the method of copying will be token by token, where each token is checked for being a resource reference.
+	// the current assumption, somewhere between speed and safety compromise, is that the any name token that has a resource name is in fact a relevant
+	// resource reference. 
+
+
+	// in order to have minimal interferences with the stream content i'm going for two passes here.
+	// the first pass will scan the stream for tokens to replace providing the tokens and their positions.
+	// a second pass is then repeatedly copies the content between tokens that are to be replaced. this might be wasteful,
+	// but is the safest method to get the content right.
+
+	ResourceTokenMarkerList resourcesPositions;
+
+	EStatusCode status = ScanStreamForResourcesTokens(inSourceStream,inMappedResourcesNames,resourcesPositions);
+	if(status != eSuccess)
+		return status;
+
+	return MergeAndReplaceResourcesTokens(inTargetStream,inSourceStream,inMappedResourcesNames,resourcesPositions);
+}
+
+
+static const char scSlash = '/';
+EStatusCode PDFDocumentHandler::ScanStreamForResourcesTokens(PDFStreamInput* inSourceStream,const StringToStringMap& inMappedResourcesNames,ResourceTokenMarkerList& outResourceMarkers)
+{
+	IByteReader* streamReader = mParser.CreateInputStreamReader(inSourceStream);
+
+	if(!streamReader)
+		return eFailure;
+
+	mPDFFile.GetInputStream()->SetPosition(inSourceStream->GetStreamContentStart());
+
+	PDFParserTokenizer tokenizer;
+	tokenizer.SetReadStream(streamReader);
+
+	BoolAndString tokenizerResult;
+
+	while(streamReader->NotEnded())
+	{
+		BoolAndString tokenizerResult = tokenizer.GetNextToken();
+
+		if(!tokenizerResult.first)
+			break;
+
+		// check if this is a token that will need replacement - 1. verify that it's a name 2. verify that it's a name in the input map
+		// note that here i don't have to take care of name space chars encoding, as the names are alrady encoded in the map [the new names are never containing space chars]
+		if(tokenizerResult.second.at(0) == scSlash && 
+			(inMappedResourcesNames.find(tokenizerResult.second.substr(1)) != inMappedResourcesNames.end()))
+				outResourceMarkers.push_back(ResourceTokenMarker(tokenizerResult.second.substr(1),tokenizer.GetRecentTokenPosition()));
+	}
+
+	delete streamReader;
+	return eSuccess;
+}
+
+EStatusCode PDFDocumentHandler::MergeAndReplaceResourcesTokens(	IByteWriter* inTargetStream,
+																PDFStreamInput* inSourceStream,
+																const StringToStringMap& inMappedResourcesNames,
+																const ResourceTokenMarkerList& inResourceMarkers)
+{
+	IByteReader* streamReader = mParser.CreateInputStreamReader(inSourceStream);
+
+	if(!streamReader)
+		return eFailure;
+
+	mPDFFile.GetInputStream()->SetPosition(inSourceStream->GetStreamContentStart());
+
+	OutputStreamTraits traits(inTargetStream);
+	PrimitiveObjectsWriter primitivesWriter;
+	primitivesWriter.SetStreamForWriting(inTargetStream);
+	EStatusCode status = eSuccess;
+	InputStreamSkipperStream skipper(streamReader);
+	ResourceTokenMarkerList::const_iterator it = inResourceMarkers.begin();
+	LongFilePositionType previousContentPosition = 0;
+
+	for(; it != inResourceMarkers.end() && eSuccess == status; ++it)
+	{
+		status = traits.CopyToOutputStream(streamReader,(LongBufferSizeType)(it->ResourceTokenPosition - previousContentPosition));
+		if(status != eSuccess)
+			break;
+		primitivesWriter.WriteName(inMappedResourcesNames.find(it->ResourceToken)->second,eTokenSepratorNone);
+		// note that i'm using SkipBy here. if i want to use SkipTo, i have to user the skipper stream as input stream for the rest
+		// of the reader objects here, as SkipTo relies on information on how many bytes were read
+		skipper.SkipBy(it->ResourceToken.size() + 1); // skip the resource name in the read stream [include +1 for slash]
+		previousContentPosition = it->ResourceTokenPosition + it->ResourceToken.size() + 1;
+	}
+
+	// copy from last marker (or in case there are none - from the beginning), till end
+	if(eSuccess == status)
+		status = traits.CopyToOutputStream(streamReader);
+	
+	skipper.Assign(NULL);
+	delete streamReader;
+	return status;
+}
+
+
+EStatusCode PDFDocumentHandler::MergePDFPageToPage(PDFPage* inTargetPage,unsigned long inSourcePageIndex)
+{
+	EStatusCode status;
+
+	if(inSourcePageIndex < mParser.GetPagesCount())
+	{
+		status = MergePDFPageForPage(inTargetPage,inSourcePageIndex);
+		if(status != eSuccess)
+			TRACE_LOG1("PDFDocumentHandler::MergePDFPageToPage, failed to merge page %ld",inSourcePageIndex);
+	}
+	else
+	{
+		TRACE_LOG2(
+			"PDFDocumentHandler::MergePDFPageToPage, request object index %ld is larger than maximum page for input document = %ld", 
+			inSourcePageIndex,
+			mParser.GetPagesCount()-1);
+		status = eFailure;
+	}
+	return status;
 }

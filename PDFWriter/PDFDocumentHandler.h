@@ -48,8 +48,23 @@ class IPageEmbedInFormCommand;
 using namespace std;
 
 typedef map<ObjectIDType,ObjectIDType> ObjectIDTypeToObjectIDTypeMap;
+typedef map<string,string> StringToStringMap;
 typedef set<ObjectIDType> ObjectIDTypeSet;
 typedef set<IDocumentContextExtender*> IDocumentContextExtenderSet;
+
+struct ResourceTokenMarker
+{
+	ResourceTokenMarker(string inResourceToken,LongFilePositionType inResourceTokenPosition)
+	{
+		ResourceToken = inResourceToken;
+		ResourceTokenPosition = inResourceTokenPosition;
+	}
+
+	string ResourceToken;
+	LongFilePositionType ResourceTokenPosition;
+};
+
+typedef list<ResourceTokenMarker> ResourceTokenMarkerList;
 
 class PDFDocumentHandler : public DocumentContextExtenderAdapter
 {
@@ -79,6 +94,13 @@ public:
 														const PDFPageRange& inPageRange,
 														const ObjectIDTypeList& inCopyAdditionalObjects);
 
+	// MergePDFPagesToPage, merge PDF pages content to an input page. good for single-placement of a page content, cheaper than creating
+	// and XObject and later placing, when the intention is to use this graphic just once.
+	EStatusCode MergePDFPagesToPage(PDFPage* inPage,
+									const wstring& inPDFFilePath,
+									const PDFPageRange& inPageRange,
+									const ObjectIDTypeList& inCopyAdditionalObjects);
+
 	// Event listeners for CreateFormXObjectsFromPDF and AppendPDFPagesFromPDF
 	void AddDocumentContextExtender(IDocumentContextExtender* inExtender);
 	void RemoveDocumentContextExtender(IDocumentContextExtender* inExtender);	
@@ -100,6 +122,7 @@ public:
 														 const PDFRectangle& inCropBox,
 														 const double* inTransformationMatrix);
 	EStatusCodeAndObjectIDType AppendPDFPageFromPDF(unsigned long inPageIndex);
+	EStatusCode MergePDFPageToPage(PDFPage* inTargetPage,unsigned long inSourcePageIndex);
 	EStatusCodeAndObjectIDType CopyObject(ObjectIDType inSourceObjectID);
 	PDFParser* GetSourceDocumentParser();
 	EStatusCodeAndObjectIDType GetCopiedObjectID(ObjectIDType inSourceObjectID);
@@ -148,6 +171,7 @@ private:
 	PDFFormXObject* CreatePDFFormXObjectForPage(PDFDictionary* inPageObject,
 												const PDFRectangle& inCropBox,
 												const double* inTransformationMatrix);
+	EStatusCode CopyInDirectObject(ObjectIDType inSourceObjectID,ObjectIDType inTargetObjectID);
 
 
 	EStatusCode WriteDictionaryObject(PDFDictionary* inDictionary,ObjectIDTypeList& outSourceObjectsToAdd);
@@ -159,6 +183,19 @@ private:
 	EStatusCode CopyPageContentToTargetPage(PDFPage* inPage,PDFDictionary* inPageObject);
 	EStatusCode WritePDFStreamInputToContentContext(PageContentContext* inContentContext,PDFStreamInput* inContentSource);
 	PDFObject* QueryInheritedValue(PDFDictionary* inDictionary,string inName);
+	EStatusCode MergePDFPageForPage(PDFPage* inTargetPage,unsigned long inSourcePageIndex);
+	EStatusCode MergeResourcesToPage(PDFPage* inTargetPage,PDFDictionary* inPage,StringToStringMap& outMappedResourcesNames);
+	EStatusCodeAndObjectIDType CopyObjectToIndirectObject(PDFObject* inObject);
+	EStatusCode CopyDirectObjectToIndirectObject(PDFObject* inObject,ObjectIDType inTargetObjectID);
+	EStatusCode MergePageContentToTargetPage(PDFPage* inTargetPage,PDFDictionary* inSourcePage,const StringToStringMap& inMappedResourcesNames);
+	EStatusCode WritePDFStreamInputToContentContext(PageContentContext* inContentContext,PDFStreamInput* inContentSource,const StringToStringMap& inMappedResourcesNames);
+	EStatusCode WritePDFStreamInputToStream(IByteWriter* inTargetStream,PDFStreamInput* inSourceStream,const StringToStringMap& inMappedResourcesNames);
+	EStatusCode ScanStreamForResourcesTokens(PDFStreamInput* inSourceStream,const StringToStringMap& inMappedResourcesNames,ResourceTokenMarkerList& outResourceMarkers);
+	EStatusCode MergeAndReplaceResourcesTokens(	IByteWriter* inTargetStream,
+												PDFStreamInput* inSourceStream,
+												const StringToStringMap& inMappedResourcesNames,
+												const ResourceTokenMarkerList& inResourceMarkers);
 
+	string AsEncodedName(const string& inName);
 
 };
