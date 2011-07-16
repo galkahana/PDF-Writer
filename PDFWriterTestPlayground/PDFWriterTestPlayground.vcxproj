@@ -176,6 +176,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="MergePDFPages.cpp" />
     <ClCompile Include="PDFWriterTestPlayground.cpp" />
     <ClCompile Include="TestsRunner.cpp" />
     <ClCompile Include="BufferedOutputStreamTest.cpp" />
@@ -223,6 +224,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ITestUnit.h" />
+    <ClInclude Include="MergePDFPages.h" />
     <ClInclude Include="TestsRunner.h" />
     <ClInclude Include="BufferedOutputStreamTest.h" />
     <ClInclude Include="FlateEncryptionTest.h" />

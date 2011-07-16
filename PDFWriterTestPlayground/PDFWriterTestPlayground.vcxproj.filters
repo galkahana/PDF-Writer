@@ -156,6 +156,9 @@
     <ClCompile Include="RefCountTest.cpp">
       <Filter>Tests\PDFEmbedding</Filter>
     </ClCompile>
+    <ClCompile Include="MergePDFPages.cpp">
+      <Filter>Tests\PDFEmbedding</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ITestUnit.h">
@@ -261,6 +264,9 @@
       <Filter>Tests\PDFEmbedding</Filter>
     </ClInclude>
     <ClInclude Include="RefCountTest.h">
+      <Filter>Tests\PDFEmbedding</Filter>
+    </ClInclude>
+    <ClInclude Include="MergePDFPages.h">
       <Filter>Tests\PDFEmbedding</Filter>
     </ClInclude>
   </ItemGroup>

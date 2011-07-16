@@ -556,6 +556,9 @@
       <Filter>State Serialization</Filter>
     </ClInclude>
     <ClInclude Include="PDFWriter.h" />
+    <ClInclude Include="Ascii7Encoding.h">
+      <Filter>Infrastracture\Encoding</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="InputBufferedStream.cpp">
@@ -919,5 +922,8 @@
       <Filter>State Serialization</Filter>
     </ClCompile>
     <ClCompile Include="PDFWriter.cpp" />
+    <ClCompile Include="Ascii7Encoding.cpp">
+      <Filter>Infrastracture\Encoding</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
