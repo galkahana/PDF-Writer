@@ -91,6 +91,7 @@ class PDFFormXObject;
 class DocumentContext;
 class ObjectsContext;
 class IDocumentContextExtender;
+class IByteReaderWithPosition;
 
 typedef list<ObjectIDType> ObjectIDTypeList;
 typedef list<PDFImageXObject*> PDFImageXObjectList;
@@ -114,9 +115,15 @@ public:
 	// create a form XObject from an image (using form for 1. tiled images 2. to setup matrix, set color space...and leave you with just placing the image object
 	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const wstring& inTIFFFilePath,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
+	PDFFormXObject* CreateFormXObjectFromTIFFStream(IByteReaderWithPosition* inTIFFStream,
+													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const wstring& inTIFFFilePath,
 													ObjectIDType inFormXObjectID,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
+	PDFFormXObject* CreateFormXObjectFromTIFFStream(IByteReaderWithPosition* inTIFFStream,
+													ObjectIDType inFormXObjectID,
+													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
+
 
 	void SetOperationsContexts(DocumentContext* inContainerDocumentContext,ObjectsContext* inObjectsContext);
 	void SetDocumentContextExtender(IDocumentContextExtender* inExtender);

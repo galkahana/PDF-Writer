@@ -83,14 +83,30 @@ public:
 																const double* inTransformationMatrix,
 																const ObjectIDTypeList& inCopyAdditionalObjects);
 
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+															 const PDFPageRange& inPageRange,
+															 EPDFPageBox inPageBoxToUseAsFormBox,
+															 const double* inTransformationMatrix,
+															 const ObjectIDTypeList& inCopyAdditionalObjects);
+
 	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF( const wstring& inPDFFilePath,
 																const PDFPageRange& inPageRange,
 																const PDFRectangle& inCropBox,
 																const double* inTransformationMatrix,
 																const ObjectIDTypeList& inCopyAdditionalObjects);
+
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+															 const PDFPageRange& inPageRange,
+															 const PDFRectangle& inCropBox,
+															 const double* inTransformationMatrix,
+															 const ObjectIDTypeList& inCopyAdditionalObjects);
 	
 	// appends pages from source PDF to the written PDF. returns object ID for the created pages
 	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
+														const PDFPageRange& inPageRange,
+														const ObjectIDTypeList& inCopyAdditionalObjects);
+
+	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(IByteReaderWithPosition* inPDFStream,
 														const PDFPageRange& inPageRange,
 														const ObjectIDTypeList& inCopyAdditionalObjects);
 
@@ -98,6 +114,11 @@ public:
 	// and XObject and later placing, when the intention is to use this graphic just once.
 	EStatusCode MergePDFPagesToPage(PDFPage* inPage,
 									const wstring& inPDFFilePath,
+									const PDFPageRange& inPageRange,
+									const ObjectIDTypeList& inCopyAdditionalObjects);
+
+	EStatusCode MergePDFPagesToPage(PDFPage* inPage,
+									IByteReaderWithPosition* inPDFStream,
 									const PDFPageRange& inPageRange,
 									const ObjectIDTypeList& inCopyAdditionalObjects);
 
@@ -115,6 +136,7 @@ public:
 
 	// copying context handling
 	EStatusCode StartFileCopyingContext(const wstring& inPDFFilePath);
+	EStatusCode StartStreamCopyingContext(IByteReaderWithPosition* inPDFStream);
 	EStatusCodeAndObjectIDType CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
 														 EPDFPageBox inPageBoxToUseAsFormBox,
 														 const double* inTransformationMatrix);
@@ -127,7 +149,7 @@ public:
 	PDFParser* GetSourceDocumentParser();
 	EStatusCodeAndObjectIDType GetCopiedObjectID(ObjectIDType inSourceObjectID);
 	MapIterator<ObjectIDTypeToObjectIDTypeMap> GetCopiedObjectsMappingIterator();
-	void StopFileCopyingContext();
+	void StopCopyingContext();
 
 
 	// Internal implementation. do not use directly
@@ -145,6 +167,7 @@ private:
 
 
 	InputFile mPDFFile;
+	IByteReaderWithPosition* mPDFStream;
 	PDFParser mParser;
 	ObjectIDTypeToObjectIDTypeMap mSourceToTarget;
 	PDFDictionary* mWrittenPage;
@@ -195,6 +218,24 @@ private:
 												PDFStreamInput* inSourceStream,
 												const StringToStringMap& inMappedResourcesNames,
 												const ResourceTokenMarkerList& inResourceMarkers);
+
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDFInContext(
+																		const PDFPageRange& inPageRange,
+																		IPageEmbedInFormCommand* inPageEmbedCommand,
+																		const double* inTransformationMatrix,
+																		const ObjectIDTypeList& inCopyAdditionalObjects);
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+															const PDFPageRange& inPageRange,
+															IPageEmbedInFormCommand* inPageEmbedCommand,
+															const double* inTransformationMatrix,
+															const ObjectIDTypeList& inCopyAdditionalObjects);
+	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDFInContext(const PDFPageRange& inPageRange,
+																  const ObjectIDTypeList& inCopyAdditionalObjects);
+	EStatusCode MergePDFPagesToPageInContext(PDFPage* inPage,
+											const PDFPageRange& inPageRange,
+											const ObjectIDTypeList& inCopyAdditionalObjects);
+	EStatusCode StartCopyingContext(IByteReaderWithPosition* inPDFStream);
+
 
 	string AsEncodedName(const string& inName);
 

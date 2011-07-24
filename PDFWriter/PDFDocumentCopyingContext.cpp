@@ -37,6 +37,15 @@ EStatusCode PDFDocumentCopyingContext::Start(const wstring& inPDFFilePath,
 	return mDocumentHandler.StartFileCopyingContext(inPDFFilePath);
 }
 
+EStatusCode PDFDocumentCopyingContext::Start(IByteReaderWithPosition* inPDFStream,
+											 DocumentContext* inDocumentcontext,
+											 ObjectsContext* inObjectsContext)
+{
+	mDocumentHandler.SetOperationsContexts(inDocumentcontext,inObjectsContext);
+	return mDocumentHandler.StartStreamCopyingContext(inPDFStream);
+}
+
+
 EStatusCodeAndObjectIDType PDFDocumentCopyingContext::CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
 																					EPDFPageBox inPageBoxToUseAsFormBox,
 																					const double* inTransformationMatrix)
@@ -85,5 +94,5 @@ EStatusCode PDFDocumentCopyingContext::MergePDFPageToPage(PDFPage* inTargetPage,
 
 void PDFDocumentCopyingContext::End()
 {
-	return mDocumentHandler.StopFileCopyingContext();
+	return mDocumentHandler.StopCopyingContext();
 }

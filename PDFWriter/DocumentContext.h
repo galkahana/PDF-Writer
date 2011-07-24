@@ -133,34 +133,67 @@ public:
 	// TIFF
 	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const wstring& inTIFFFilePath,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
-
+	PDFFormXObject* CreateFormXObjectFromTIFFStream(IByteReaderWithPosition* inTIFFStream,
+													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const wstring& inTIFFFilePath,
+													ObjectIDType inFormXObjectID,
+													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
+	PDFFormXObject* CreateFormXObjectFromTIFFStream(	IByteReaderWithPosition* inTIFFStream,
 													ObjectIDType inFormXObjectID,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 	
 	// PDF
-	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF( const wstring& inPDFFilePath,
-																const PDFPageRange& inPageRange,
-																EPDFPageBox inPageBoxToUseAsFormBox,
-																const double* inTransformationMatrix,
-																const ObjectIDTypeList& inCopyAdditionalObjects);
-	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF( const wstring& inPDFFilePath,
-																const PDFPageRange& inPageRange,
-																const PDFRectangle& inCropBox,
-																const double* inTransformationMatrix,
-																const ObjectIDTypeList& inCopyAdditionalObjects);
+	// CreateFormXObjectsFromPDF is for using input PDF pages as objects in one page or more. you can used the returned IDs to place the 
+	// created form xobjects
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+															 const PDFPageRange& inPageRange,
+															 EPDFPageBox inPageBoxToUseAsFormBox,
+															 const double* inTransformationMatrix = NULL,
+															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+															 const PDFPageRange& inPageRange,
+															 EPDFPageBox inPageBoxToUseAsFormBox,
+															 const double* inTransformationMatrix = NULL,
+															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
+	
+	// CreateFormXObjectsFromPDF is an override to allow you to determine a custom crop for the page embed
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+															 const PDFPageRange& inPageRange,
+															 const PDFRectangle& inCropBox,
+															 const double* inTransformationMatrix = NULL,
+															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
+
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+															 const PDFPageRange& inPageRange,
+															 const PDFRectangle& inCropBox,
+															 const double* inTransformationMatrix = NULL,
+															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
+
+	// AppendPDFPagesFromPDF is for simple appending of the input PDF pages
 	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
 														const PDFPageRange& inPageRange,
-														const ObjectIDTypeList& inCopyAdditionalObjects);
+														const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
+	
+	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(IByteReaderWithPosition* inPDFStream,
+														const PDFPageRange& inPageRange,
+														const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
+	// MergePDFPagesToPage, merge PDF pages content to an input page. good for single-placement of a page content, cheaper than creating
+	// and XObject and later placing, when the intention is to use this graphic just once.
 	EStatusCode MergePDFPagesToPage(PDFPage* inPage,
 									const wstring& inPDFFilePath,
 									const PDFPageRange& inPageRange,
-									const ObjectIDTypeList& inCopyAdditionalObjects);
-	
-	PDFDocumentCopyingContext* CreatePDFCopyingContext(const wstring& inFilePath);
+									const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
+	EStatusCode MergePDFPagesToPage(PDFPage* inPage,
+									IByteReaderWithPosition* inPDFStream,
+									const PDFPageRange& inPageRange,
+									const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
+
+	PDFDocumentCopyingContext* CreatePDFCopyingContext(const wstring& inPDFFilePath);
+
+	PDFDocumentCopyingContext* CreatePDFCopyingContext(IByteReaderWithPosition* inPDFStream);
 
 	// Font [Text]
 	PDFUsedFont* GetFontForFile(const wstring& inFontFilePath);

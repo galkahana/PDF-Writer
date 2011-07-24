@@ -434,3 +434,57 @@ PDFFormXObject* PDFWriter::CreateFormXObjectFromJPGStream(IByteReaderWithPositio
 {
 	return mDocumentContext.CreateFormXObjectFromJPGStream(inJPGStream,inFormXObjectID);
 }
+
+
+PDFFormXObject* PDFWriter::CreateFormXObjectFromTIFFStream(IByteReaderWithPosition* inTIFFStream,
+															const TIFFUsageParameters& inTIFFUsageParameters)
+{
+	return mDocumentContext.CreateFormXObjectFromTIFFStream(inTIFFStream,inTIFFUsageParameters);
+}
+
+PDFFormXObject* PDFWriter::CreateFormXObjectFromTIFFStream(IByteReaderWithPosition* inTIFFStream,
+															ObjectIDType inFormXObjectID,
+															const TIFFUsageParameters& inTIFFUsageParameters)
+{
+	return mDocumentContext.CreateFormXObjectFromTIFFStream(inTIFFStream,inFormXObjectID,inTIFFUsageParameters);
+}
+
+
+EStatusCodeAndObjectIDTypeList PDFWriter::CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+																	const PDFPageRange& inPageRange,
+																	EPDFPageBox inPageBoxToUseAsFormBox,
+																	const double* inTransformationMatrix,
+																	const ObjectIDTypeList& inCopyAdditionalObjects)
+{
+	return mDocumentContext.CreateFormXObjectsFromPDF(inPDFStream,inPageRange,inPageBoxToUseAsFormBox,inTransformationMatrix,inCopyAdditionalObjects);
+}
+
+EStatusCodeAndObjectIDTypeList PDFWriter::CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+																	const PDFPageRange& inPageRange,
+																	const PDFRectangle& inCropBox,
+																	const double* inTransformationMatrix,
+																	const ObjectIDTypeList& inCopyAdditionalObjects)
+{
+	return mDocumentContext.CreateFormXObjectsFromPDF(inPDFStream,inPageRange,inCropBox,inTransformationMatrix,inCopyAdditionalObjects);
+}
+
+EStatusCodeAndObjectIDTypeList PDFWriter::AppendPDFPagesFromPDF(IByteReaderWithPosition* inPDFStream,
+																const PDFPageRange& inPageRange,
+																const ObjectIDTypeList& inCopyAdditionalObjects)
+{
+	return mDocumentContext.AppendPDFPagesFromPDF(inPDFStream,inPageRange,inCopyAdditionalObjects);
+}
+
+EStatusCode PDFWriter::MergePDFPagesToPage(	PDFPage* inPage,
+											IByteReaderWithPosition* inPDFStream,
+											const PDFPageRange& inPageRange,
+											const ObjectIDTypeList& inCopyAdditionalObjects)
+{
+	return mDocumentContext.MergePDFPagesToPage(inPage,inPDFStream,inPageRange,inCopyAdditionalObjects);
+}
+
+PDFDocumentCopyingContext* PDFWriter::CreatePDFCopyingContext(IByteReaderWithPosition* inPDFStream)
+{
+	return mDocumentContext.CreatePDFCopyingContext(inPDFStream);	
+}
+

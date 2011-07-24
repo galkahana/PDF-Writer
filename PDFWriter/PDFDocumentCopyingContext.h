@@ -44,6 +44,10 @@ public:
 					  DocumentContext* inDocumentcontext,
 					  ObjectsContext* inObjectsContext);
 
+	EStatusCode Start(IByteReaderWithPosition* inPDFStream,
+					  DocumentContext* inDocumentcontext,
+					  ObjectsContext* inObjectsContext);
+
 	EStatusCodeAndObjectIDType CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
 															 EPDFPageBox inPageBoxToUseAsFormBox,
 															 const double* inTransformationMatrix = NULL);

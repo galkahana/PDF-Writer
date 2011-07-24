@@ -84,6 +84,7 @@
 #include "SafeBufferMacrosDefs.h"
 #include "IDocumentContextExtender.h"
 #include "StringTraits.h"
+#include "IByteReaderWithPosition.h"
 
 // tiff lib includes
 #include "tif_config.h"
@@ -3393,4 +3394,135 @@ void TIFFImageHandler::WriteIndexedCSForBiLevelColorMap()
 void TIFFImageHandler::SetDocumentContextExtender(IDocumentContextExtender* inExtender)
 {
 	mExtender = inExtender;
+}
+
+PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFStream(	IByteReaderWithPosition* inTIFFStream,
+																	const TIFFUsageParameters& inTIFFUsageParameters)
+{
+	if(!mObjectsContext)
+	{
+		TRACE_LOG("TIFFImageHandler::CreateFormXObjectFromTIFFFile. Unexpected Error, mObjectsContext not initialized with an objects context");
+		return NULL;
+	}
+
+	return CreateFormXObjectFromTIFFStream(inTIFFStream,mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID(),inTIFFUsageParameters);
+}
+
+struct StreamWithPos
+{
+	IByteReaderWithPosition* mStream;
+	LongFilePositionType mOriginalPosition;
+};
+
+static tsize_t STATIC_streamRead(thandle_t inData,tdata_t inBuffer,tsize_t inBufferSize)
+{
+	return (tsize_t)(((StreamWithPos*)inData)->mStream)->Read((Byte*)inBuffer,inBufferSize);
+}
+
+static tsize_t STATIC_streamWrite(thandle_t inData,tdata_t inBuffer,tsize_t inBufferSize)
+{
+	return 0; // not writing...just reading
+}
+
+static toff_t STATIC_streamSeek(thandle_t inData, toff_t inOffset, int inDirection)
+{
+
+    switch (inDirection) {
+    case 0: // set
+      (((StreamWithPos*)inData)->mStream)->SetPosition(inOffset);
+      break;
+    case 1: // current
+		if(inOffset >=0)
+	      (((StreamWithPos*)inData)->mStream)->Skip(inOffset);
+		else
+	      (((StreamWithPos*)inData)->mStream)->SetPosition(((StreamWithPos*)inData)->mStream->GetCurrentPosition() + inOffset);
+      break;
+    case 2: // from end
+      ((StreamWithPos*)inData)->mStream->SetPositionFromEnd(inOffset);
+      break;
+    }	
+
+	return (toff_t)((((StreamWithPos*)inData)->mStream)->GetCurrentPosition() - ((StreamWithPos*)inData)->mOriginalPosition);
+}
+
+static int STATIC_streamClose(thandle_t inData)
+{
+	return 0;
+}
+
+toff_t STATIC_tiffSize(thandle_t inData) 
+{ 
+	LongFilePositionType currentPosition = ((StreamWithPos*)inData)->mStream->GetCurrentPosition();
+
+	((StreamWithPos*)inData)->mStream->SetPositionFromEnd(0);
+
+	LongFilePositionType size = ((StreamWithPos*)inData)->mStream->GetCurrentPosition() - ((StreamWithPos*)inData)->mOriginalPosition;
+
+	((StreamWithPos*)inData)->mStream->SetPosition(currentPosition);
+
+    return  (toff_t)size; 
+}; 
+
+int STATIC_tiffMap(thandle_t, tdata_t*, toff_t*) 
+{ 
+ return 0; 
+}; 
+
+void STATIC_tiffUnmap(thandle_t, tdata_t, toff_t) 
+{ 
+ return; 
+}; 
+
+PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFStream(	IByteReaderWithPosition* inTIFFStream,
+																	ObjectIDType inFormXObjectID,
+																	const TIFFUsageParameters& inTIFFUsageParameters)
+{
+
+	PDFFormXObject* imageFormXObject = NULL;
+	TIFF* input = NULL;
+
+	do
+	{
+		TIFFSetErrorHandler(ReportError);
+		TIFFSetWarningHandler(ReportWarning);
+
+		if(!mObjectsContext || !mContainerDocumentContext)
+		{
+			TRACE_LOG("TIFFImageHandler::CreateFormXObjectFromTIFFFile. Unexpected Error, mObjectsContext or mContainerDocumentContext not initialized");
+			break;
+		}
+
+		StreamWithPos streamInfo;
+		streamInfo.mStream = inTIFFStream;
+		streamInfo.mOriginalPosition = inTIFFStream->GetCurrentPosition();
+		
+		input = TIFFClientOpen("Stream","r",(thandle_t)&streamInfo,STATIC_streamRead,
+																	STATIC_streamWrite,
+																	STATIC_streamSeek,
+																	STATIC_streamClose,
+																	STATIC_tiffSize,
+																	STATIC_tiffMap,
+																	STATIC_tiffUnmap);
+		if(!input)
+		{
+			TRACE_LOG("TIFFImageHandler::CreateFormXObjectFromTIFFFile. cannot open stream for reading");
+			break;
+		}
+
+
+		InitializeConversionState();
+		mT2p->input = input;
+		mT2p->inputFilePath = L"";
+		mT2p->pdf_page = inTIFFUsageParameters.PageIndex;
+		mUserParameters = inTIFFUsageParameters;
+
+		imageFormXObject = ConvertTiff2PDF(inFormXObjectID);
+
+	}while(false);
+
+	DestroyConversionState();
+	if(input != NULL)
+		TIFFClose(input);
+
+	return imageFormXObject;
 }

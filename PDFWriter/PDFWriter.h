@@ -140,7 +140,12 @@ public:
 	// tiff
 	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const wstring& inTIFFFilePath,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
+	PDFFormXObject* CreateFormXObjectFromTIFFStream(IByteReaderWithPosition* inTIFFStream,
+													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const wstring& inTIFFFilePath,
+													ObjectIDType inFormXObjectID,
+													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
+	PDFFormXObject* CreateFormXObjectFromTIFFStream(	IByteReaderWithPosition* inTIFFStream,
 													ObjectIDType inFormXObjectID,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 
@@ -153,6 +158,12 @@ public:
 															 EPDFPageBox inPageBoxToUseAsFormBox,
 															 const double* inTransformationMatrix = NULL,
 															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
+
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+															 const PDFPageRange& inPageRange,
+															 EPDFPageBox inPageBoxToUseAsFormBox,
+															 const double* inTransformationMatrix = NULL,
+															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 	
 	// CreateFormXObjectsFromPDF is an override to allow you to determine a custom crop for the page embed
 	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
@@ -161,8 +172,18 @@ public:
 															 const double* inTransformationMatrix = NULL,
 															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+															 const PDFPageRange& inPageRange,
+															 const PDFRectangle& inCropBox,
+															 const double* inTransformationMatrix = NULL,
+															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
+
 	// AppendPDFPagesFromPDF is for simple appending of the input PDF pages
 	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
+														const PDFPageRange& inPageRange,
+														const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
+	
+	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(IByteReaderWithPosition* inPDFStream,
 														const PDFPageRange& inPageRange,
 														const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
@@ -173,8 +194,17 @@ public:
 									const PDFPageRange& inPageRange,
 									const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
+	EStatusCode MergePDFPagesToPage(PDFPage* inPage,
+									IByteReaderWithPosition* inPDFStream,
+									const PDFPageRange& inPageRange,
+									const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
+
+
 	// Copying context, allowing for a continous flow of copying from multiple sources PDFs (create one per source) to target PDF
 	PDFDocumentCopyingContext* CreatePDFCopyingContext(const wstring& inPDFFilePath);
+
+	PDFDocumentCopyingContext* CreatePDFCopyingContext(IByteReaderWithPosition* inPDFStream);
+
 
 	// fonts [text]
 	PDFUsedFont* GetFontForFile(const wstring& inFontFilePath);
