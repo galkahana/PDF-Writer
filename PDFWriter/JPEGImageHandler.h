@@ -35,6 +35,7 @@ class PDFImageXObject;
 class IDocumentContextExtender;
 class PDFFormXObject;
 class DocumentContext;
+class IByteReaderWithPosition;
 
 typedef map<wstring,JPEGImageInformation> WStringToJPEGImageInformationMap;
 typedef pair<bool,JPEGImageInformation> BoolAndJPEGImageInformation;
@@ -53,11 +54,15 @@ public:
 
 	// DocumentContext::CreateImageXObjectFromJPGFile are equivelent
 	PDFImageXObject* CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath);
+	PDFImageXObject* CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream);
 	PDFImageXObject* CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inImageXObjectID);
+	PDFImageXObject* CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inImageXObjectID);
 	
 	// will return form XObject, which will include the xobject at it's size
 	PDFFormXObject* CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath);
+	PDFFormXObject* CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream);
 	PDFFormXObject* CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inFormXObjectID);
+	PDFFormXObject* CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inFormXObjectID);
 
 	void SetOperationsContexts(DocumentContext* inDocumentContext,ObjectsContext* inObjectsContext);
 	void AddDocumentContextExtender(IDocumentContextExtender* inExtender);
@@ -71,6 +76,7 @@ private:
 	IDocumentContextExtenderSet mExtenders;
 
 	PDFImageXObject* CreateAndWriteImageXObjectFromJPGInformation(const wstring& inJPGFilePath,ObjectIDType inImageXObjectID, const JPEGImageInformation& inJPGImageInformation);
+	PDFImageXObject* CreateAndWriteImageXObjectFromJPGInformation(IByteReaderWithPosition* inJPGImageStream,ObjectIDType inImageXObjectID, const JPEGImageInformation& inJPGImageInformation);
 	PDFFormXObject* CreateImageFormXObjectFromImageXObject(PDFImageXObject* inImageXObject,ObjectIDType inFormXObjectID, const JPEGImageInformation& inJPGImageInformation);
 	DoubleAndDoublePair GetImageDimensions(const JPEGImageInformation& inJPGImageInformation);
 

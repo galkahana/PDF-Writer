@@ -1524,3 +1524,24 @@ EStatusCode DocumentContext::MergePDFPagesToPage(PDFPage* inPage,
 												   inPageRange,
 												   inCopyAdditionalObjects);
 }
+
+PDFImageXObject* DocumentContext::CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream)
+{
+	return mJPEGImageHandler.CreateImageXObjectFromJPGStream(inJPGStream);
+}
+
+PDFImageXObject* DocumentContext::CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inImageXObjectID)
+{
+	return mJPEGImageHandler.CreateImageXObjectFromJPGStream(inJPGStream,inImageXObjectID);
+}
+
+PDFFormXObject* DocumentContext::CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream)
+{
+	return mJPEGImageHandler.CreateFormXObjectFromJPGStream(inJPGStream);
+
+}
+
+PDFFormXObject* DocumentContext::CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inFormXObjectID)
+{
+	return mJPEGImageHandler.CreateFormXObjectFromJPGStream(inJPGStream,inFormXObjectID);
+}

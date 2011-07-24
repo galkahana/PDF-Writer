@@ -42,6 +42,7 @@ void Trace::SetLogSettings(const wstring& inLogFilePath,bool inShouldLog)
 {
 	mShouldLog = inShouldLog;
 	mLogFilePath = inLogFilePath;
+	mLogStream = NULL;
 	if(mLog != NULL)
 	{
 		delete mLog;
@@ -51,12 +52,31 @@ void Trace::SetLogSettings(const wstring& inLogFilePath,bool inShouldLog)
 	}
 }
 
+void Trace::SetLogSettings(IByteWriter* inLogStream,bool inShouldLog)
+{
+	mShouldLog = inShouldLog;
+	mLogStream = inLogStream;
+	if(mLog != NULL)
+	{
+		delete mLog;
+		mLog = NULL;
+		if(mShouldLog)
+			mLog = new Log(mLogStream);
+	}
+}
+
+
 void Trace::TraceToLog(const wchar_t* inFormat,...)
 {
 	if(mShouldLog)
 	{
 		if(NULL == mLog)
-			mLog = new Log(mLogFilePath);
+		{
+			if(mLogStream)
+				mLog = new Log(mLogStream);
+			else
+				mLog = new Log(mLogFilePath);
+		}
 
 		va_list argptr;
 		va_start(argptr, inFormat);
@@ -73,7 +93,12 @@ void Trace::TraceToLog(const wchar_t* inFormat,va_list inList)
 	if(mShouldLog)
 	{
 		if(NULL == mLog)
-			mLog = new Log(mLogFilePath);
+		{
+			if(mLogStream)
+				mLog = new Log(mLogStream);
+			else
+				mLog = new Log(mLogFilePath);
+		}
 
 		SAFE_VSWPRINTF(mBuffer,5001,inFormat,inList);
 

@@ -550,6 +550,18 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="CustomStreamsIO"
+					>
+					<File
+						RelativePath=".\CustomLogTest.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\CustomLogTest.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="Patterns"

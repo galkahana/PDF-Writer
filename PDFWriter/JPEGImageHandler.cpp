@@ -94,6 +94,25 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 																				ObjectIDType inImageXObjectID,
 																				const JPEGImageInformation& inJPGImageInformation)
 {
+	InputFile JPGFile;
+	if(JPGFile.OpenFile(inJPGFilePath) != eSuccess)
+	{
+		TRACE_LOG1("JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation. Unable to open JPG file for reading, %s", inJPGFilePath.c_str());
+		return NULL;
+	}
+
+	PDFImageXObject* imageXObject = CreateAndWriteImageXObjectFromJPGInformation(JPGFile.GetInputStream(),inImageXObjectID,inJPGImageInformation);
+
+	JPGFile.CloseFile();
+
+	return imageXObject;
+}
+
+																				
+PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(IByteReaderWithPosition* inJPGImageStream,
+																				ObjectIDType inImageXObjectID,
+																				const JPEGImageInformation& inJPGImageInformation)
+{
 	PDFImageXObject* imageXObject = NULL;
 	EStatusCode status = eSuccess;
 
@@ -180,20 +199,11 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 		if(status != eSuccess)
 			break;
 		
-		InputFile JPGFile;
-		status = JPGFile.OpenFile(inJPGFilePath);
-		if(status != eSuccess)
-		{
-			TRACE_LOG1("JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation. Unable to open JPG file for reading, %s", inJPGFilePath.c_str());
-			break;
-		}
-
 
 		PDFStream* imageStream = mObjectsContext->StartUnfilteredPDFStream(imageContext);
 
 		OutputStreamTraits outputTraits(imageStream->GetWriteStream());
-		status = outputTraits.CopyToOutputStream(JPGFile.GetInputStream());
-		JPGFile.CloseFile(); // close file regardless
+		status = outputTraits.CopyToOutputStream(inJPGImageStream);
 		if(status != eSuccess)
 		{
 			TRACE_LOG("JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation. Unexpected Error, failed to copy jpg stream to output stream");
@@ -444,4 +454,110 @@ PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGFile(const wstring& in
 
 	return CreateFormXObjectFromJPGFile(inJPGFilePath,mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID());
 
+}
+
+PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream)
+{
+	if(!mObjectsContext)
+	{
+		TRACE_LOG("JPEGImageHandler::CreateImageXObjectFromJPGStream. Unexpected Error, mObjectsContext not initialized with an objects context");
+		return NULL;
+	}
+
+	return CreateImageXObjectFromJPGStream(inJPGStream,mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID());
+}
+
+PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inImageXObjectID)
+{
+	PDFImageXObject* imageXObject = NULL;
+
+	do 
+	{
+		if(!mObjectsContext)
+		{
+			TRACE_LOG("JPEGImageHandler::CreateImageXObjectFromJPGStream. Unexpected Error, mDocumentContex not initialized with a document context");
+			break;
+		}
+
+		JPEGImageParser jpgImageParser;
+		JPEGImageInformation imageInformation;
+
+		LongFilePositionType recordedPosition = inJPGStream->GetCurrentPosition();
+		
+		EStatusCode status = jpgImageParser.Parse(inJPGStream,imageInformation);
+		if(status != eSuccess)
+		{
+			TRACE_LOG("JPEGImageHandler::CreateImageXObjectFromJPGStream. Failed to parse JPG stream");
+			break;
+		}
+
+		// reset image position after parsing header, for later content copying
+		inJPGStream->SetPosition(recordedPosition);
+
+		imageXObject = CreateAndWriteImageXObjectFromJPGInformation(inJPGStream,inImageXObjectID,imageInformation);
+
+	} while(false);
+
+	return imageXObject;  	
+
+}
+
+PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream)
+{
+	if(!mObjectsContext)
+	{
+		TRACE_LOG("JPEGImageHandler::CreateFormXObjectFromJPGStream. Unexpected Error, mObjectsContext not initialized with an objects context");
+		return NULL;
+	}
+
+	return CreateFormXObjectFromJPGStream(inJPGStream,mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID());
+}
+
+PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inFormXObjectID)
+{
+	PDFFormXObject* imageFormXObject = NULL;
+	PDFImageXObject* imageXObject = NULL;
+
+	do 
+	{
+		if(!mObjectsContext)
+		{
+			TRACE_LOG("JPEGImageHandler::CreateImageXObjectFromJPGStream. Unexpected Error, mDocumentContex not initialized with a document context");
+			break;
+		}
+
+		JPEGImageParser jpgImageParser;
+		JPEGImageInformation imageInformation;
+
+		LongFilePositionType recordedPosition = inJPGStream->GetCurrentPosition();
+		
+		EStatusCode status = jpgImageParser.Parse(inJPGStream,imageInformation);
+		if(status != eSuccess)
+		{
+			TRACE_LOG("JPEGImageHandler::CreateImageXObjectFromJPGStream. Failed to parse JPG stream");
+			break;
+		}
+
+		// reset image position after parsing header, for later content copying
+		inJPGStream->SetPosition(recordedPosition);
+
+		imageXObject = CreateAndWriteImageXObjectFromJPGInformation(inJPGStream,mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID(),imageInformation);
+		if(!imageXObject)
+		{
+			TRACE_LOG("JPEGImageHandler::CreateFormXObjectFromJPGStream, unable to create image xobject");
+			break;
+		}
+
+		// Write Image form XObject
+		imageFormXObject = CreateImageFormXObjectFromImageXObject(imageXObject,inFormXObjectID,imageInformation);
+		if(!imageFormXObject)
+		{
+			TRACE_LOG("JPEGImageHandler::CreateImageXObjectFromJPGStream, unable to create form xobject");
+			break;
+		}
+
+	} while(false);
+
+	delete imageXObject;
+	return imageFormXObject;  
 }

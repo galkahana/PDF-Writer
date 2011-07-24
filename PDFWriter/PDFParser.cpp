@@ -311,38 +311,64 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 		}
 
 		GoBackTillLineStart();
+
+		// now go forward, and here i'm guessing a bit, till you get to either and integer, or the startxref keyword
 		mStream->SetPositionFromEnd(GetCurrentPositionFromEnd());
 		
 		mObjectParser.ResetReadState();
-		PDFObjectCastPtr<PDFInteger> xrefPosition(mObjectParser.ParseNewObject());
-		if(!xrefPosition)
+		RefCountPtr<PDFObject> anObject(mObjectParser.ParseNewObject());
+
+		if(anObject->GetType() == ePDFObjectInteger)
 		{
-			status = eFailure;
-			TRACE_LOG("PDFParser::ParseXrefPosition, syntax error in reading xref position");
-			break;
+			mLastXrefPosition = (LongFilePositionType)((PDFInteger*)anObject.GetPtr())->GetValue();
+
+			// find and read startxref keyword
+			if(!GoBackTillToken())
+			{
+				status = eFailure;
+				TRACE_LOG("PDFParser::ParseXrefPosition, couldn't find startxref keyword");
+				break;
+			}
+
+			GoBackTillLineStart();
+			mStream->SetPositionFromEnd(GetCurrentPositionFromEnd());
+			
+			mObjectParser.ResetReadState();
+			PDFObjectCastPtr<PDFSymbol> startxRef(mObjectParser.ParseNewObject());
+
+			if(!startxRef || startxRef->GetValue() != scStartxref)
+			{
+				status = eFailure;
+				TRACE_LOG("PDFParser::ParseXrefPosition, syntax error in reading xref position");
+				break;
+			}
 		}
-
-		mLastXrefPosition = (LongFilePositionType)xrefPosition->GetValue();
-
-		// find and read startxref keyword
-		if(!GoBackTillToken())
+		else // this means that the line is not only integer, a bit more complicated path, look for startxref and then the next would be the number
 		{
-			status = eFailure;
-			TRACE_LOG("PDFParser::ParseXrefPosition, couldn't find startxref keyword");
-			break;
-		}
+			bool foundStartXref = (anObject->GetType() == ePDFObjectSymbol) && (((PDFSymbol*)anObject.GetPtr())->GetValue() == scStartxref);
 
-		GoBackTillLineStart();
-		mStream->SetPositionFromEnd(GetCurrentPositionFromEnd());
-		
-		mObjectParser.ResetReadState();
-		PDFObjectCastPtr<PDFSymbol> startxRef(mObjectParser.ParseNewObject());
+			while(!foundStartXref && mStream->NotEnded())
+			{
+				PDFObjectCastPtr<PDFSymbol> startxRef(mObjectParser.ParseNewObject());
+				foundStartXref = startxRef.GetPtr() && (startxRef->GetValue() == scStartxref);
+			}
+			
+			if(!foundStartXref)
+			{
+				status = eFailure;
+				TRACE_LOG("PDFParser::ParseXrefPosition, could not find startxref keyword");
+				break;
+			}
 
-		if(!startxRef || startxRef->GetValue() != scStartxref)
-		{
-			status = eFailure;
-			TRACE_LOG("PDFParser::ParseXrefPosition, syntax error in reading xref position");
-			break;
+			PDFObjectCastPtr<PDFInteger> xrefPosition(mObjectParser.ParseNewObject());
+			if(!xrefPosition)
+			{
+				status = eFailure;
+				TRACE_LOG("PDFParser::ParseXrefPosition, syntax error in reading xref position");
+				break;
+			}		
+
+			mLastXrefPosition = xrefPosition->GetValue();
 		}
 
 	}while(false);

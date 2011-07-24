@@ -28,6 +28,7 @@ using namespace std;
 // good for tracing upto 5K wide chars messages
 
 class Log;
+class IByteWriter;
 
 class Trace
 {
@@ -36,6 +37,7 @@ public:
 	~Trace(void);
 
 	void SetLogSettings(const wstring& inLogFilePath,bool inShouldLog);
+	void SetLogSettings(IByteWriter* inLogStream,bool inShouldLog);
 
 	void TraceToLog(const wchar_t* inFormat,...);
 	void TraceToLog(const wchar_t* inFormat,va_list inList);
@@ -46,6 +48,7 @@ private:
 	Log* mLog;
 
 	wstring mLogFilePath;
+	IByteWriter* mLogStream;
 	bool mShouldLog;
 
 	// use the log

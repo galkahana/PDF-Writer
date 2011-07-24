@@ -24,9 +24,22 @@
 #include <ctime>
 #include <stdio.h>
 
+void STATIC_LogEntryToFile(Log* inThis,const Byte* inMessage, LongBufferSizeType inMessageSize)
+{
+	inThis->LogEntryToFile(inMessage,inMessageSize);
+}
+
+void STATIC_LogEntryToStream(Log* inThis,const Byte* inMessage, LongBufferSizeType inMessageSize)
+{
+	inThis->LogEntryToStream(inMessage,inMessageSize);
+}
+
+
 Log::Log(const wstring& inLogFilePath)
 {
 	mFilePath = inLogFilePath;
+	mLogStream = NULL;
+	mLogMethod = STATIC_LogEntryToFile;
 
 	// check if file exists or not...if not, create new one and place a bom in its beginning
 	FILE* logFile;
@@ -48,6 +61,15 @@ Log::Log(const wstring& inLogFilePath)
 	}
 }
 
+Log::Log(IByteWriter* inLogStream)
+{
+	// when writing stream, no bom is written. assuming that the input will take care, because most chances are that this is a non-file stream, and may be part of something else.
+	mLogStream = inLogStream;
+	mLogMethod = STATIC_LogEntryToStream;
+
+}
+
+
 Log::~Log(void)
 {
 }
@@ -57,15 +79,32 @@ void Log::LogEntry(const wstring& inMessage)
 	LogEntry((const Byte*)inMessage.c_str(), inMessage.length() * 2);
 }
 
-static const wchar_t scEndLine[] = L"\r\n";
 void Log::LogEntry(const Byte* inMessage, LongBufferSizeType inMessageSize)
 {
+	mLogMethod(this,inMessage,inMessageSize);
+}
+
+static const wchar_t scEndLine[] = L"\r\n";
+
+void Log::LogEntryToFile(const Byte* inMessage, LongBufferSizeType inMessageSize)
+{
 	mLogFile.OpenFile(mFilePath,true);
-	wstring formattedTimeString = GetFormattedTimeString();
-	mLogFile.GetOutputStream()->Write((const Byte*)formattedTimeString.c_str(),formattedTimeString.length()*2);
-	mLogFile.GetOutputStream()->Write(inMessage,inMessageSize);
-	mLogFile.GetOutputStream()->Write((const Byte*)scEndLine,4);
+	WriteLogEntryToStream(inMessage,inMessageSize,mLogFile.GetOutputStream());
 	mLogFile.CloseFile();
+}
+
+void Log::LogEntryToStream(const Byte* inMessage, LongBufferSizeType inMessageSize)
+{
+	WriteLogEntryToStream(inMessage,inMessageSize,mLogStream);
+}
+
+
+void Log::WriteLogEntryToStream(const Byte* inMessage, LongBufferSizeType inMessageSize,IByteWriter* inStream)
+{
+	wstring formattedTimeString = GetFormattedTimeString();
+	inStream->Write((const Byte*)formattedTimeString.c_str(),formattedTimeString.length()*2);
+	inStream->Write(inMessage,inMessageSize);
+	inStream->Write((const Byte*)scEndLine,4);
 }
 
 wstring Log::GetFormattedTimeString()

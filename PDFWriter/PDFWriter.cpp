@@ -29,6 +29,7 @@
 #include "PDFDictionary.h"
 #include "PDFObjectCast.h"
 #include "PDFIndirectObjectReference.h"
+#include "IByteWriterWithPosition.h"
 
 const LogConfiguration LogConfiguration::DefaultLogConfiguration(false,L"PDFWriterLog.txt");
 
@@ -103,7 +104,10 @@ EStatusCode PDFWriter::WritePageAndRelease(PDFPage* inPage)
 
 void PDFWriter::SetupLog(const LogConfiguration& inLogConfiguration)
 {
-	Singleton<Trace>::GetInstance()->SetLogSettings(inLogConfiguration.LogFileLocation,inLogConfiguration.ShouldLog);
+	if(inLogConfiguration.LogStream)
+		Singleton<Trace>::GetInstance()->SetLogSettings(inLogConfiguration.LogStream,inLogConfiguration.ShouldLog);
+	else
+		Singleton<Trace>::GetInstance()->SetLogSettings(inLogConfiguration.LogFileLocation,inLogConfiguration.ShouldLog);
 }
 
 void PDFWriter::SetupObjectsContext(const PDFCreationSettings& inPDFCreationSettings)
@@ -303,6 +307,8 @@ EStatusCode PDFWriter::ContinuePDF(const wstring& inOutputFilePath,
 								   const wstring& inStateFilePath,
 								   const LogConfiguration& inLogConfiguration)
 {
+	
+
 	SetupLog(inLogConfiguration);
 	EStatusCode status = mOutputFile.OpenFile(inOutputFilePath,true);
 	if(status != eSuccess)
@@ -312,6 +318,15 @@ EStatusCode PDFWriter::ContinuePDF(const wstring& inOutputFilePath,
 	mDocumentContext.SetObjectsContext(&mObjectsContext);
 	mDocumentContext.SetOutputFileInformation(&mOutputFile);
 
+	return SetupState(inStateFilePath);
+
+
+}
+
+EStatusCode PDFWriter::SetupState(const wstring& inStateFilePath)
+{
+	EStatusCode status;
+
 	do
 	{
 		StateReader reader;
@@ -319,7 +334,7 @@ EStatusCode PDFWriter::ContinuePDF(const wstring& inOutputFilePath,
 		status = reader.Start(inStateFilePath);
 		if(status != eSuccess)
 		{
-			TRACE_LOG("PDFWriter::ContinuePDF, cant start state readering");
+			TRACE_LOG("PDFWriter::SetupState, cant start state readering");
 			break;
 		}
 
@@ -342,6 +357,21 @@ EStatusCode PDFWriter::ContinuePDF(const wstring& inOutputFilePath,
 	return status;
 }
 
+
+EStatusCode PDFWriter::ContinuePDFForStream(IByteWriterWithPosition* inOutputStream,
+											const wstring& inStateFilePath,
+			 								const LogConfiguration& inLogConfiguration)
+{
+	SetupLog(inLogConfiguration);
+
+	mObjectsContext.SetOutputStream(inOutputStream);
+	mDocumentContext.SetObjectsContext(&mObjectsContext);
+
+	return SetupState(inStateFilePath);
+
+}
+
+
 PDFDocumentCopyingContext* PDFWriter::CreatePDFCopyingContext(const wstring& inPDFFilePath)
 {
 	return mDocumentContext.CreatePDFCopyingContext(inPDFFilePath);
@@ -361,4 +391,46 @@ EStatusCode PDFWriter::MergePDFPagesToPage(PDFPage* inPage,
 												inPDFFilePath,
 												inPageRange,
 												inCopyAdditionalObjects);
+}
+
+
+EStatusCode PDFWriter::StartPDFForStream(IByteWriterWithPosition* inOutputStream,
+										 EPDFVersion inPDFVersion,
+										 const LogConfiguration& inLogConfiguration,
+										 const PDFCreationSettings& inPDFCreationSettings)
+{
+	SetupLog(inLogConfiguration);
+	SetupObjectsContext(inPDFCreationSettings);
+
+	mObjectsContext.SetOutputStream(inOutputStream);
+	mDocumentContext.SetObjectsContext(&mObjectsContext);
+	
+	return mDocumentContext.WriteHeader(inPDFVersion);
+}
+EStatusCode PDFWriter::EndPDFForStream()
+{
+	EStatusCode status = mDocumentContext.FinalizePDF();
+	ReleaseLog();
+	return status;
+}
+
+PDFImageXObject* PDFWriter::CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream)
+{
+	return mDocumentContext.CreateImageXObjectFromJPGStream(inJPGStream);
+}
+
+PDFImageXObject* PDFWriter::CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inImageXObjectID)
+{
+	return mDocumentContext.CreateImageXObjectFromJPGStream(inJPGStream,inImageXObjectID);
+}
+
+PDFFormXObject* PDFWriter::CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream)
+{
+	return mDocumentContext.CreateFormXObjectFromJPGStream(inJPGStream);
+
+}
+
+PDFFormXObject* PDFWriter::CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inFormXObjectID)
+{
+	return mDocumentContext.CreateFormXObjectFromJPGStream(inJPGStream,inFormXObjectID);
 }

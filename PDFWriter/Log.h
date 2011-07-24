@@ -28,20 +28,34 @@
 using namespace std;
 using namespace IOBasicTypes;
 
+class Log;
+
+typedef void (*LogFileMethod)(Log* inThis,const Byte* inMessage, LongBufferSizeType inMessageSize);
+
+class IByteWriter;
+
 class Log
 {
 public:
 	Log(const wstring& inLogFilePath);
+	Log(IByteWriter* inLogStream);
 	~Log(void);
 
 	void LogEntry(const wstring& inMessage);
 	void LogEntry(const Byte* inMessage, LongBufferSizeType inMessageSize);
 
+
+	// don't use
+	void LogEntryToFile(const Byte* inMessage, LongBufferSizeType inMessageSize);
+	void LogEntryToStream(const Byte* inMessage, LongBufferSizeType inMessageSize);
+
 private:
 
 	wstring mFilePath;
 	OutputFile mLogFile;
+	IByteWriter* mLogStream;
+	LogFileMethod mLogMethod;
 
 	wstring GetFormattedTimeString();
-
+	void WriteLogEntryToStream(const Byte* inMessage, LongBufferSizeType inMessageSize,IByteWriter* inStream);
 };

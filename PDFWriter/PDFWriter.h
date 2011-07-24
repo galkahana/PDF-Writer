@@ -39,9 +39,11 @@ struct LogConfiguration
 {
 	bool ShouldLog;
 	wstring LogFileLocation;
+	IByteWriter* LogStream;
 
 	LogConfiguration(bool inShouldLog,const wstring& inLogFileLocation){ShouldLog=inShouldLog;
-																		LogFileLocation=inLogFileLocation;}
+																		LogFileLocation=inLogFileLocation;LogStream = NULL;}
+	LogConfiguration(bool inShouldLog,IByteWriter* inLogStream){ShouldLog = inShouldLog;LogStream = inLogStream;}
 
 	static const LogConfiguration DefaultLogConfiguration;
 };
@@ -59,6 +61,7 @@ class PageContentContext;
 class PDFFormXObject;
 class PDFImageXObject;
 class PDFUsedFont;
+class IByteWriterWithPosition;
 
 class PDFWriter
 {
@@ -66,18 +69,31 @@ public:
 	PDFWriter(void);
 	~PDFWriter(void);
 
+	// output to file
 	EStatusCode StartPDF(	const wstring& inOutputFilePath,
 							EPDFVersion inPDFVersion,
 							const LogConfiguration& inLogConfiguration = LogConfiguration::DefaultLogConfiguration,
 							const PDFCreationSettings& inPDFCreationSettings = PDFCreationSettings::DefaultPDFCreationSettings);
+
 	EStatusCode EndPDF();
+
+	// output to stream
+	EStatusCode StartPDFForStream(IByteWriterWithPosition* inOutputStream,
+								  EPDFVersion inPDFVersion,
+								  const LogConfiguration& inLogConfiguration = LogConfiguration::DefaultLogConfiguration,
+								  const PDFCreationSettings& inPDFCreationSettings = PDFCreationSettings::DefaultPDFCreationSettings);
+	EStatusCode EndPDFForStream();
+
 
 	// Ending and Restarting writing session
 	EStatusCode Shutdown(const wstring& inStateFilePath);
 	EStatusCode ContinuePDF(const wstring& inOutputFilePath,
 							const wstring& inStateFilePath,
 							const LogConfiguration& inLogConfiguration = LogConfiguration::DefaultLogConfiguration);
-
+	// Continue PDF in output stream workflow
+	EStatusCode ContinuePDFForStream(IByteWriterWithPosition* inOutputStream,
+									 const wstring& inStateFilePath,
+				 					 const LogConfiguration& inLogConfiguration = LogConfiguration::DefaultLogConfiguration);
 
 	// Page context, for drwaing page content
 	PageContentContext* StartPageContentContext(PDFPage* inPage);
@@ -106,7 +122,9 @@ public:
 	// jpeg - two variants
 	// will return image xobject sized at 1X1
 	PDFImageXObject* CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath);
+	PDFImageXObject* CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream);
 	PDFImageXObject* CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inImageXObjectID);
+	PDFImageXObject* CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inImageXObjectID);
 
 	// will return form XObject, which will include the xobject at it's size.
 	// size is determined by the following order:
@@ -115,7 +133,9 @@ public:
 	// - if not found. Photoshop resolution information is looked for. if found used to determine the size
 	// - otherwise aspect ratio is assumed, and so size is determined trivially from the samples width and height.
 	PDFFormXObject* CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath);
+	PDFFormXObject* CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream);
 	PDFFormXObject* CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inFormXObjectID);
+	PDFFormXObject* CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inFormXObjectID);
 	
 	// tiff
 	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const wstring& inTIFFFilePath,
@@ -171,13 +191,16 @@ public:
 	OutputFile& GetOutputFile();
 private:
 
-	OutputFile mOutputFile;
 	ObjectsContext mObjectsContext;
 	DocumentContext mDocumentContext;
 
+	// for output file workflow, this will be the valid output [stream workflow does not have a file]
+	OutputFile mOutputFile;
 
 	void SetupLog(const LogConfiguration& inLogConfiguration);
 	void SetupObjectsContext(const PDFCreationSettings& inPDFCreationSettings);
 	void ReleaseLog();
+	EStatusCode SetupState(const wstring& inStateFilePath);
+
 
 };
