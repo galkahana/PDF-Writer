@@ -2,7 +2,7 @@
    Source File : TIFFImageTest.h
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 #pragma once
 #include "ITestUnit.h"
 
-class PDFWriter;
+class HummusPDFWriter;
 
 class TIFFImageTest : public ITestUnit
 {
@@ -29,8 +29,8 @@ public:
 	TIFFImageTest(void);
 	virtual ~TIFFImageTest(void);
 
-	virtual EStatusCode Run();
+	virtual EPDFStatusCode Run();
 
 private:
-	EStatusCode AddPageForTIFF(PDFWriter& inPDFWriter, const wchar_t* inTiffFilePath);
+	EPDFStatusCode AddPageForTIFF(HummusPDFWriter& inHummusPDFWriter, const wchar_t* inTiffFilePath);
 };

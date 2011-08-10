@@ -19,7 +19,7 @@
    
 */
 #pragma once
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "InputPFBDecodeStream.h"
 #include "IType1InterpreterImplementation.h"
 
@@ -116,10 +116,10 @@ public:
 	Type1Input(void);
 	~Type1Input(void);
 
-	EStatusCode ReadType1File(IByteReaderWithPosition* inType1File);
-	EStatusCode CalculateDependenciesForCharIndex(Byte inCharStringIndex,
+	EPDFStatusCode ReadType1File(IByteReaderWithPosition* inType1File);
+	EPDFStatusCode CalculateDependenciesForCharIndex(Byte inCharStringIndex,
 												  CharString1Dependencies& ioDependenciesInfo);
-	EStatusCode CalculateDependenciesForCharIndex(const string& inCharStringName,
+	EPDFStatusCode CalculateDependenciesForCharIndex(const string& inCharStringName,
 												  CharString1Dependencies& ioDependenciesInfo);
 	void Reset();
 	Type1CharString* GetGlyphCharString(const string& inCharStringName);
@@ -135,7 +135,7 @@ public:
 
 	// IType1InterpreterImplementation overrides
 	virtual Type1CharString* GetSubr(long inSubrIndex);
-	virtual EStatusCode Type1Seac(const LongList& inOperandList);
+	virtual EPDFStatusCode Type1Seac(const LongList& inOperandList);
 	virtual bool IsOtherSubrSupported(long inOtherSubrsIndex);
 	virtual unsigned long GetLenIV();
 
@@ -153,16 +153,16 @@ private:
 
 	void FreeTables();
 	bool IsComment(const string& inToken);
-	EStatusCode ReadFontDictionary();
-	EStatusCode ReadFontInfoDictionary();
+	EPDFStatusCode ReadFontDictionary();
+	EPDFStatusCode ReadFontInfoDictionary();
 	string FromPSName(const string& inPostScriptName);
-	EStatusCode ParseEncoding();
-	EStatusCode ReadPrivateDictionary();
-	EStatusCode ParseIntVector(vector<int>& inVector);
-	EStatusCode ParseDoubleVector(vector<double>& inVector);
-	EStatusCode ParseSubrs();
-	EStatusCode ParseCharstrings();
-	EStatusCode ParseDoubleArray(double* inArray,int inArraySize);
+	EPDFStatusCode ParseEncoding();
+	EPDFStatusCode ReadPrivateDictionary();
+	EPDFStatusCode ParseIntVector(vector<int>& inVector);
+	EPDFStatusCode ParseDoubleVector(vector<double>& inVector);
+	EPDFStatusCode ParseSubrs();
+	EPDFStatusCode ParseCharstrings();
+	EPDFStatusCode ParseDoubleArray(double* inArray,int inArraySize);
 	string FromPSString(const string& inPSString);
 	void CalculateReverseEncoding();
 };

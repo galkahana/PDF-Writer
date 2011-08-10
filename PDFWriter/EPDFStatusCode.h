@@ -1,5 +1,5 @@
 /*
-   Source File : EStatusCode.h
+   Source File : EPDFStatusCode.h
 
 
    Copyright 2011 Gal Kahana PDFWriter
@@ -20,8 +20,8 @@
 */
 #pragma once
 
-enum EStatusCode
+enum EPDFStatusCode
 {
-	eFailure = -1,
-	eSuccess = 0
+	ePDFFailure = -1,
+	ePDFSuccess = 0
 };

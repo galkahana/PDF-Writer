@@ -2,7 +2,7 @@
    Source File : AppendPagesTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 */
 #include "AppendPagesTest.h"
 #include "TestsRunner.h"
-#include "PDFWriter.h"
+#include "HummusPDFWriter.h"
 
 #include <iostream>
 
@@ -34,32 +34,32 @@ AppendPagesTest::~AppendPagesTest(void)
 {
 }
 
-EStatusCode AppendPagesTest::Run()
+EPDFStatusCode AppendPagesTest::Run()
 {
-	EStatusCode status;
+	EPDFStatusCode status;
 
 	do
 	{
-	 	PDFWriter pdfWriter;
+	 	HummusPDFWriter pdfWriter;
 
 		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\AppendPagesTest.PDF",ePDFVersion13,LogConfiguration(true,L"c:\\pdflibtests\\AppendPagesTestLog.txt"));
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to start PDF\n";
 			break;
 		}	
 
-		EStatusCodeAndObjectIDTypeList result;
+		EPDFStatusCodeAndObjectIDTypeList result;
 		
 		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\Original.pdf",PDFPageRange());
-		if(result.first != eSuccess)
+		if(result.first != ePDFSuccess)
 		{
 			wcout<<"failed to append pages from Original.PDF\n";
 			status = result.first;
 			break;
 		}
 		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF",PDFPageRange());
-		if(result.first != eSuccess)
+		if(result.first != ePDFSuccess)
 		{
 			wcout<<"failed to append pages from XObjectContent.pdf\n";
 			status = result.first;
@@ -67,14 +67,14 @@ EStatusCode AppendPagesTest::Run()
 		}
 
 		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\BasicTIFFImagesTest.PDF",PDFPageRange());
-		if(result.first != eSuccess)
+		if(result.first != ePDFSuccess)
 		{
 			wcout<<"failed to append pages from BasicTIFFImagesTest.PDF\n";
 			status = result.first;
 			break;
 		}
 		status = pdfWriter.EndPDF();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed in end PDF\n";
 			break;

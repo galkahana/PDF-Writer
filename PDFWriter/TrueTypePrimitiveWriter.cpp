@@ -33,77 +33,77 @@ TrueTypePrimitiveWriter::~TrueTypePrimitiveWriter(void)
 void TrueTypePrimitiveWriter::SetOpenTypeStream(OutputStringBufferStream* inTrueTypeFile)
 {
 	mTrueTypeFile = inTrueTypeFile;
-	mInternalState = (inTrueTypeFile ? eSuccess:eFailure);
+	mInternalState = (inTrueTypeFile ? ePDFSuccess:ePDFFailure);
 }
 
-EStatusCode TrueTypePrimitiveWriter::GetInternalState()
+EPDFStatusCode TrueTypePrimitiveWriter::GetInternalState()
 {
 	return mInternalState;
 }
 
-EStatusCode TrueTypePrimitiveWriter::WriteBYTE(Byte inValue)
+EPDFStatusCode TrueTypePrimitiveWriter::WriteBYTE(Byte inValue)
 {
-	if(eFailure == mInternalState)
-		return eFailure;
+	if(ePDFFailure == mInternalState)
+		return ePDFFailure;
 
-	EStatusCode status = (mTrueTypeFile->Write(&inValue,1) == 1 ? eSuccess : eFailure);
+	EPDFStatusCode status = (mTrueTypeFile->Write(&inValue,1) == 1 ? ePDFSuccess : ePDFFailure);
 
-	if(eFailure == status)
-		mInternalState = eFailure;
+	if(ePDFFailure == status)
+		mInternalState = ePDFFailure;
 	return status;	
 }
 
-EStatusCode TrueTypePrimitiveWriter::WriteULONG(unsigned long inValue)
+EPDFStatusCode TrueTypePrimitiveWriter::WriteULONG(unsigned long inValue)
 {
 	Byte byte1 = (inValue>>24) & 0xff;
 	Byte byte2 = (inValue>>16) & 0xff;
 	Byte byte3 = (inValue>>8) & 0xff;
 	Byte byte4 = inValue & 0xff;
 
-	if(WriteBYTE(byte1) != eSuccess)
-		return eFailure;
+	if(WriteBYTE(byte1) != ePDFSuccess)
+		return ePDFFailure;
 
-	if(WriteBYTE(byte2) != eSuccess)
-		return eFailure;
+	if(WriteBYTE(byte2) != ePDFSuccess)
+		return ePDFFailure;
 
-	if(WriteBYTE(byte3) != eSuccess)
-		return eFailure;
+	if(WriteBYTE(byte3) != ePDFSuccess)
+		return ePDFFailure;
 
-	if(WriteBYTE(byte4) != eSuccess)
-		return eFailure;
+	if(WriteBYTE(byte4) != ePDFSuccess)
+		return ePDFFailure;
 
-	return eSuccess;
+	return ePDFSuccess;
 }
 
-EStatusCode TrueTypePrimitiveWriter::WriteUSHORT(unsigned short inValue)
+EPDFStatusCode TrueTypePrimitiveWriter::WriteUSHORT(unsigned short inValue)
 {	
 	Byte byte1 = (inValue>>8) & 0xff;
 	Byte byte2 = inValue & 0xff;
 	
-	if(WriteBYTE(byte1) != eSuccess)
-		return eFailure;
+	if(WriteBYTE(byte1) != ePDFSuccess)
+		return ePDFFailure;
 
-	if(WriteBYTE(byte2) != eSuccess)
-		return eFailure;
+	if(WriteBYTE(byte2) != ePDFSuccess)
+		return ePDFFailure;
 
-	return eSuccess;
+	return ePDFSuccess;
 }
 
-EStatusCode TrueTypePrimitiveWriter::WriteSHORT(short inValue)
+EPDFStatusCode TrueTypePrimitiveWriter::WriteSHORT(short inValue)
 {
 	return WriteUSHORT((unsigned short)inValue);
 }
 
-EStatusCode TrueTypePrimitiveWriter::Pad(int inCount)
+EPDFStatusCode TrueTypePrimitiveWriter::Pad(int inCount)
 {
 
-	for(int i=0; i <inCount && (mInternalState == eSuccess); ++i)
+	for(int i=0; i <inCount && (mInternalState == ePDFSuccess); ++i)
 		WriteBYTE(0);
 
 	return mInternalState;
 }
 
-EStatusCode TrueTypePrimitiveWriter::PadTo4()
+EPDFStatusCode TrueTypePrimitiveWriter::PadTo4()
 {
 	int padSize = (4 - (mTrueTypeFile->GetCurrentPosition() % 4)) % 4;
 

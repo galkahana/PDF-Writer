@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "IOBasicTypes.h"
 
 using namespace IOBasicTypes;
@@ -35,18 +35,18 @@ public:
 
 	void SetOpenTypeStream(OutputStringBufferStream* inTrueTypeFile);
 	
-	EStatusCode GetInternalState();
+	EPDFStatusCode GetInternalState();
 
-	EStatusCode WriteBYTE(Byte inValue);
-	EStatusCode WriteULONG(unsigned long inValue);
-	EStatusCode WriteUSHORT(unsigned short inValue);
-	EStatusCode WriteSHORT(short inValue);
+	EPDFStatusCode WriteBYTE(Byte inValue);
+	EPDFStatusCode WriteULONG(unsigned long inValue);
+	EPDFStatusCode WriteUSHORT(unsigned short inValue);
+	EPDFStatusCode WriteSHORT(short inValue);
 
-	EStatusCode Pad(int inCount);
-	EStatusCode PadTo4();
+	EPDFStatusCode Pad(int inCount);
+	EPDFStatusCode PadTo4();
 
 private:
 	OutputStringBufferStream* mTrueTypeFile;
-	EStatusCode mInternalState;
+	EPDFStatusCode mInternalState;
 
 };

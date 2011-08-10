@@ -2,7 +2,7 @@
    Source File : RefCountTest.h
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -28,5 +28,5 @@ public:
 	RefCountTest(void);
 	virtual ~RefCountTest(void);
 
-	virtual EStatusCode Run();
+	virtual EPDFStatusCode Run();
 };

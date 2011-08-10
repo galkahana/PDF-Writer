@@ -25,7 +25,7 @@
 #include "ObjectsContext.h"
 #include "DictionaryContext.h"
 #include "PDFTextString.h"
-#include "PDFParser.h"
+#include "HummusPDFParser.h"
 #include "PDFObjectCast.h"
 #include "PDFDictionary.h"
 #include "PDFArray.h"
@@ -104,12 +104,12 @@ PDFUsedFont* UsedFontsRepository::GetFontForFile(const wstring& inFontFilePath,c
 	return it->second;
 }
 
-EStatusCode UsedFontsRepository::WriteUsedFontsDefinitions()
+EPDFStatusCode UsedFontsRepository::WriteUsedFontsDefinitions()
 {
 	WStringToPDFUsedFontMap::iterator it = mUsedFonts.begin();
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
-	for(; it != mUsedFonts.end() && eSuccess == status; ++it)
+	for(; it != mUsedFonts.end() && ePDFSuccess == status; ++it)
 		status = it->second->WriteFontDefinition();
 
 	return status;	
@@ -121,9 +121,9 @@ PDFUsedFont* UsedFontsRepository::GetFontForFile(const wstring& inFontFilePath)
 }
 
 typedef list<ObjectIDType> ObjectIDTypeList;
-EStatusCode UsedFontsRepository::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
+EPDFStatusCode UsedFontsRepository::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	ObjectIDTypeList usedFontsObjects;
 
 	inStateWriter->StartNewIndirectObject(inObjectID);
@@ -173,16 +173,16 @@ EStatusCode UsedFontsRepository::WriteState(ObjectsContext* inStateWriter,Object
 		it = mUsedFonts.begin();
 		ObjectIDTypeList::iterator itIDs = usedFontsObjects.begin();
 
-		for(; it != mUsedFonts.end() && eSuccess == status;++it,++itIDs)
+		for(; it != mUsedFonts.end() && ePDFSuccess == status;++it,++itIDs)
 			status = it->second->WriteState(inStateWriter,*itIDs);
 	}
 
 	return status;
 }
 
-EStatusCode UsedFontsRepository::ReadState(PDFParser* inStateReader,ObjectIDType inObjectID)
+EPDFStatusCode UsedFontsRepository::ReadState(HummusPDFParser* inStateReader,ObjectIDType inObjectID)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	// clear current state
 	WStringToPDFUsedFontMap::iterator itUsedFonts = mUsedFonts.begin();
@@ -223,7 +223,7 @@ EStatusCode UsedFontsRepository::ReadState(PDFParser* inStateReader,ObjectIDType
 	if(!mInputFontsInformation)
 		mInputFontsInformation = new FreeTypeWrapper();
 
-	while(it.MoveNext() && eSuccess == status)
+	while(it.MoveNext() && ePDFSuccess == status)
 	{
 		keyItem = it.GetItem();
 		it.MoveNext();
@@ -238,7 +238,7 @@ EStatusCode UsedFontsRepository::ReadState(PDFParser* inStateReader,ObjectIDType
 		if(!face)
 		{
 			TRACE_LOG1("UsedFontsRepository::ReadState, Failed to load font from %s",filePath.c_str());
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -255,7 +255,7 @@ EStatusCode UsedFontsRepository::ReadState(PDFParser* inStateReader,ObjectIDType
 			TRACE_LOG1("UsedFontsRepository::ReadState, Unreckognized font format for font in %s",filePath.c_str());
 			delete usedFont;
 			usedFont = NULL;
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 

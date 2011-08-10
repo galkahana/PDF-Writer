@@ -20,7 +20,7 @@
 */
 #pragma once
 #include "IByteReader.h"
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
  
 
 using namespace IOBasicTypes;
@@ -45,7 +45,7 @@ private:
 
 
 	void InitializeCharStringDecode(unsigned long inLenIV);
-	EStatusCode ReadDecodedByte(Byte& outByte);
+	EPDFStatusCode ReadDecodedByte(Byte& outByte);
 	Byte DecodeByte(Byte inByteToDecode);
 
 };

@@ -2,7 +2,7 @@
    Source File : TimerTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ TimerTest::~TimerTest(void)
 {
 }
 
-EStatusCode TimerTest::Run()
+EPDFStatusCode TimerTest::Run()
 {
 	Singleton<Trace>::GetInstance()->SetLogSettings(L"c:\\PDFLibTests\\timersTrace.txt",true);
 
@@ -55,7 +55,7 @@ EStatusCode TimerTest::Run()
 
 	Singleton<Trace>::Reset();
 
-	return eSuccess;
+	return ePDFSuccess;
 }
 
 void TimerTest::Sleep(double inSeconds)

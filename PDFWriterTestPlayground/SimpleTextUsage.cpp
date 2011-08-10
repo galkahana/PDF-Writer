@@ -2,7 +2,7 @@
    Source File : SimpleTextUsage.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
    
 */
 #include "SimpleTextUsage.h"
-#include "PDFWriter.h"
+#include "HummusPDFWriter.h"
 #include "PDFPage.h"
 #include "PDFRectangle.h"
 #include "PageContentContext.h"
@@ -38,33 +38,33 @@ SimpleTextUsage::~SimpleTextUsage(void)
 
 
 #include "Trace.h"
-EStatusCode SimpleTextUsage::Run()
+EPDFStatusCode SimpleTextUsage::Run()
 {
-	EStatusCode status;
+	EPDFStatusCode status;
 
 	do
 	{
 		status = RunCFFTest();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"Failed CFF Test\n";
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
 		status = RunTrueTypeTest();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"Failed True Type Test\n";
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
 		status = RunType1Test();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"Failed Type 1 Test\n";
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -73,15 +73,15 @@ EStatusCode SimpleTextUsage::Run()
 	return status;
 }
 
-EStatusCode SimpleTextUsage::RunCFFTest()
+EPDFStatusCode SimpleTextUsage::RunCFFTest()
 {
-	PDFWriter pdfWriter;
-	EStatusCode status; 
+	HummusPDFWriter pdfWriter;
+	EPDFStatusCode status; 
 
 	do
 	{
 		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\SimpleTextUsageCFF.PDF",ePDFVersion13,LogConfiguration(true,L"C:\\PDFLibTests\\SimpleTextUsage.log"));
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to start PDF\n";
 			break;
@@ -93,7 +93,7 @@ EStatusCode SimpleTextUsage::RunCFFTest()
 		PageContentContext* contentContext = pdfWriter.StartPageContentContext(page);
 		if(NULL == contentContext)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			wcout<<"failed to create content context for page\n";
 			break;
 		}
@@ -101,7 +101,7 @@ EStatusCode SimpleTextUsage::RunCFFTest()
 		PDFUsedFont* font = pdfWriter.GetFontForFile(L"C:\\PDFLibTests\\TestMaterials\\fonts\\BrushScriptStd.otf");
 		if(!font)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			wcout<<"Failed to create font object for brushscriptstd.otf\n";
 			break;
 		}
@@ -114,8 +114,8 @@ EStatusCode SimpleTextUsage::RunCFFTest()
 
 		contentContext->Tm(30,0,0,30,78.4252,662.8997);
 
-		EStatusCode encodingStatus = contentContext->Tj(L"abcd");
-		if(encodingStatus != eSuccess)
+		EPDFStatusCode encodingStatus = contentContext->Tj(L"abcd");
+		if(encodingStatus != ePDFSuccess)
 			wcout<<"Could not find some of the glyphs for this font (BrushScriptStd)";
 
 		// continue even if failed...want to see how it looks like
@@ -128,7 +128,7 @@ EStatusCode SimpleTextUsage::RunCFFTest()
 		PDFUsedFont* fontK = pdfWriter.GetFontForFile(L"C:\\PDFLibTests\\TestMaterials\\fonts\\KozGoPro-Regular.otf");
 		if(!fontK)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			wcout<<"Failed to create font object for KozGoPro-Regular.otf\n";
 			break;
 		}
@@ -138,28 +138,28 @@ EStatusCode SimpleTextUsage::RunCFFTest()
 		contentContext->Tm(30,0,0,30,78.4252,400.8997);
 
 		encodingStatus = contentContext->Tj(L"abcd");
-		if(encodingStatus != eSuccess)
+		if(encodingStatus != ePDFSuccess)
 			wcout<<"Could not find some of the glyphs for this font (Kozuka)";
 
 		// continue even if failed...want to see how it looks like
 		contentContext->ET();
 
 		status = pdfWriter.EndPageContentContext(contentContext);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to write page\n";
 			break;
 		}
 
 		status = pdfWriter.EndPDF();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed in end PDF\n";
 			break;
@@ -169,15 +169,15 @@ EStatusCode SimpleTextUsage::RunCFFTest()
 
 }
 
-EStatusCode SimpleTextUsage::RunTrueTypeTest()
+EPDFStatusCode SimpleTextUsage::RunTrueTypeTest()
 {
-	PDFWriter pdfWriter;
-	EStatusCode status; 
+	HummusPDFWriter pdfWriter;
+	EPDFStatusCode status; 
 
 	do
 	{
 		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\SimpleTextUsageTrueType.PDF",ePDFVersion13,LogConfiguration(true,L"C:\\PDFLibTests\\SimpleTextUsage.log"));
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to start PDF\n";
 			break;
@@ -189,7 +189,7 @@ EStatusCode SimpleTextUsage::RunTrueTypeTest()
 		PageContentContext* contentContext = pdfWriter.StartPageContentContext(page);
 		if(NULL == contentContext)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			wcout<<"failed to create content context for page\n";
 			break;
 		}
@@ -197,7 +197,7 @@ EStatusCode SimpleTextUsage::RunTrueTypeTest()
 		PDFUsedFont* font = pdfWriter.GetFontForFile(L"C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
 		if(!font)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			wcout<<"Failed to create font object for arial.ttf\n";
 			break;
 		}
@@ -211,29 +211,29 @@ EStatusCode SimpleTextUsage::RunTrueTypeTest()
 
 		contentContext->Tm(30,0,0,30,78.4252,662.8997);
 
-		EStatusCode encodingStatus = contentContext->Tj(L"hello world");
-		if(encodingStatus != eSuccess)
+		EPDFStatusCode encodingStatus = contentContext->Tj(L"hello world");
+		if(encodingStatus != ePDFSuccess)
 			wcout<<"Could not find some of the glyphs for this font";
 
 		// continue even if failed...want to see how it looks like
 		contentContext->ET();
 
 		status = pdfWriter.EndPageContentContext(contentContext);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to write page\n";
 			break;
 		}
 
 		status = pdfWriter.EndPDF();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed in end PDF\n";
 			break;
@@ -242,15 +242,15 @@ EStatusCode SimpleTextUsage::RunTrueTypeTest()
 	return status;	
 }
 
-EStatusCode SimpleTextUsage::RunType1Test()
+EPDFStatusCode SimpleTextUsage::RunType1Test()
 {
-	PDFWriter pdfWriter;
-	EStatusCode status; 
+	HummusPDFWriter pdfWriter;
+	EPDFStatusCode status; 
 
 	do
 	{
 		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\SimpleTextUsageType1.PDF",ePDFVersion13,LogConfiguration(true,L"C:\\PDFLibTests\\SimpleTextUsage.log"));
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to start PDF\n";
 			break;
@@ -262,7 +262,7 @@ EStatusCode SimpleTextUsage::RunType1Test()
 		PageContentContext* contentContext = pdfWriter.StartPageContentContext(page);
 		if(NULL == contentContext)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			wcout<<"failed to create content context for page\n";
 			break;
 		}
@@ -271,7 +271,7 @@ EStatusCode SimpleTextUsage::RunType1Test()
 													 L"C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFM");
 		if(!font)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			wcout<<"Failed to create font object for Helvetica Neue font\n";
 			break;
 		}
@@ -285,29 +285,29 @@ EStatusCode SimpleTextUsage::RunType1Test()
 
 		contentContext->Tm(30,0,0,30,78.4252,662.8997);
 
-		EStatusCode encodingStatus = contentContext->Tj(L"abcd");
-		if(encodingStatus != eSuccess)
+		EPDFStatusCode encodingStatus = contentContext->Tj(L"abcd");
+		if(encodingStatus != ePDFSuccess)
 			wcout<<"Could not find some of the glyphs for this font";
 
 		// continue even if failed...want to see how it looks like
 		contentContext->ET();
 
 		status = pdfWriter.EndPageContentContext(contentContext);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to write page\n";
 			break;
 		}
 
 		status = pdfWriter.EndPDF();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed in end PDF\n";
 			break;

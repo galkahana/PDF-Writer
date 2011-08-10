@@ -46,7 +46,7 @@ static const string scType1C = "Type1C";
 static const char* scType1Type = "Type 1";
 static const char* scCFF = "CFF";
 static const string scPlus = "+";
-EStatusCode CFFANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
+EPDFStatusCode CFFANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 											WrittenFontRepresentation* inFontOccurrence,
 											ObjectsContext* inObjectsContext)
 {
@@ -54,7 +54,7 @@ EStatusCode CFFANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 	if(!postscriptFontName)
 	{
 		TRACE_LOG("CFFANSIFontWriter::WriteFont, unexpected failure. no postscript font name for font");
-		return eFailure;
+		return ePDFFailure;
 	}
 	std::string subsetFontName = inObjectsContext->GenerateSubsetFontPrefix() + scPlus + postscriptFontName;
 	
@@ -64,7 +64,7 @@ EStatusCode CFFANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 	// happen due to font embedding restrictions)
 	mEmbeddedFontFileObjectID = 0;
 
-	EStatusCode status;
+	EPDFStatusCode status;
 	if(strcmp(scType1Type,fontType) == 0)
 	{
 		Type1ToCFFEmbeddedFontWriter embeddedFontWriter;
@@ -91,9 +91,9 @@ EStatusCode CFFANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 	{
 
 		TRACE_LOG("CFFANSIFontWriter::WriteFont, Exception, unfamilar font type for embedding representation");
-		status = eFailure;
+		status = ePDFFailure;
 	}
-	if(status != eSuccess)
+	if(status != ePDFSuccess)
 		return status;
 
 	ANSIFontWriter fontWriter;

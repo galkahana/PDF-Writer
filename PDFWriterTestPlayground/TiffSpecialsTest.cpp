@@ -2,7 +2,7 @@
    Source File : TiffSpecialsTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 */
 #include "TiffSpecialsTest.h"
 #include "TestsRunner.h"
-#include "PDFWriter.h"
+#include "HummusPDFWriter.h"
 #include "PDFFormXObject.h"
 #include "PDFPage.h"
 #include "PageContentContext.h"
@@ -38,16 +38,16 @@ TiffSpecialsTest::~TiffSpecialsTest(void)
 }
 
 
-EStatusCode TiffSpecialsTest::Run()
+EPDFStatusCode TiffSpecialsTest::Run()
 {
-	PDFWriter pdfWriter;
-	EStatusCode status; 
+	HummusPDFWriter pdfWriter;
+	EPDFStatusCode status; 
 	TIFFUsageParameters TIFFParameters;
 
 	do
 	{
 		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\TiffSpecialsTest.PDF",ePDFVersion13,LogConfiguration(true,L"C:\\PDFLibTests\\TiffSpecialsTestLog.txt"));
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to start PDF\n";
 			break;
@@ -55,34 +55,34 @@ EStatusCode TiffSpecialsTest::Run()
 
 
 		// multipage Tiff
-		for(int i=0;i<4 && (eSuccess == status);++i)
+		for(int i=0;i<4 && (ePDFSuccess == status);++i)
 		{
 			TIFFParameters.PageIndex = i;
 			PDFFormXObject* imageFormXObject = pdfWriter.CreateFormXObjectFromTIFFFile(L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\multipage.tif",TIFFParameters);
 			if(!imageFormXObject)
 			{
 				wcout<<"failed to create image form XObject from file, for file "<<"multipage.tif page "<<i<<"\n";
-				status = eFailure;
+				status = ePDFFailure;
 			}
 			else
 				status = CreatePageForImageAndRelease(pdfWriter,imageFormXObject);
 		}
 
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		// Black and White mask
 		status = CreateBlackAndWhiteMaskImage(pdfWriter);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		//Create BiLevel grayscales
 		status = CreateBiLevelGrayScales(pdfWriter);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		status = pdfWriter.EndPDF();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed in end PDF\n";
 			break;
@@ -91,19 +91,19 @@ EStatusCode TiffSpecialsTest::Run()
 	return status;
 }
 
-EStatusCode TiffSpecialsTest::CreatePageForImageAndRelease(PDFWriter& inPDFWriter,PDFFormXObject* inImageObject)
+EPDFStatusCode TiffSpecialsTest::CreatePageForImageAndRelease(HummusPDFWriter& inpdfWriter,PDFFormXObject* inImageObject)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	do
 	{
 		PDFPage* page = new PDFPage();
 		page->SetMediaBox(PDFRectangle(0,0,595,842));
 
-		PageContentContext* pageContentContext = inPDFWriter.StartPageContentContext(page);
+		PageContentContext* pageContentContext = inpdfWriter.StartPageContentContext(page);
 		if(NULL == pageContentContext)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			wcout<<"failed to create content context for page\n";
 		}
 
@@ -117,15 +117,15 @@ EStatusCode TiffSpecialsTest::CreatePageForImageAndRelease(PDFWriter& inPDFWrite
 
 		delete inImageObject;
 
-		status = inPDFWriter.EndPageContentContext(pageContentContext);
-		if(status != eSuccess)
+		status = inpdfWriter.EndPageContentContext(pageContentContext);
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to end page content context, for Image form xobject"<<inImageObject->GetObjectID()<<"\n";
 			break;
 		}
 
-		status = inPDFWriter.WritePageAndRelease(page);
-		if(status != eSuccess)
+		status = inpdfWriter.WritePageAndRelease(page);
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to write page, for image form xobject "<<inImageObject->GetObjectID()<<"\n";
 			break;
@@ -137,38 +137,38 @@ EStatusCode TiffSpecialsTest::CreatePageForImageAndRelease(PDFWriter& inPDFWrite
 
 static const wstring scJimBW = L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\jim___ah.tif";
 
-EStatusCode TiffSpecialsTest::CreateBlackAndWhiteMaskImage(PDFWriter& inPDFWriter)
+EPDFStatusCode TiffSpecialsTest::CreateBlackAndWhiteMaskImage(HummusPDFWriter& inpdfWriter)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	TIFFUsageParameters TIFFParameters;
 
 	do
 	{
-		PDFFormXObject* imageBW = inPDFWriter.CreateFormXObjectFromTIFFFile(scJimBW);
+		PDFFormXObject* imageBW = inpdfWriter.CreateFormXObjectFromTIFFFile(scJimBW);
 		if(!imageBW)
 		{
 			wcout<<"failed to create image BW, for file "<<scJimBW<<"\n";
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
 		TIFFParameters.BWTreatment.AsImageMask = true;
 		TIFFParameters.BWTreatment.OneColor = CMYKRGBColor(255,128,0);
-		PDFFormXObject* imageBWMask = inPDFWriter.CreateFormXObjectFromTIFFFile(scJimBW,TIFFParameters);
+		PDFFormXObject* imageBWMask = inpdfWriter.CreateFormXObjectFromTIFFFile(scJimBW,TIFFParameters);
 		if(!imageBWMask)
 		{
 			wcout<<"failed to create image mask BW, for file "<<scJimBW<<"\n";
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
 		PDFPage* page = new PDFPage();
 		page->SetMediaBox(PDFRectangle(0,0,595,842));
 
-		PageContentContext* pageContentContext = inPDFWriter.StartPageContentContext(page);
+		PageContentContext* pageContentContext = inpdfWriter.StartPageContentContext(page);
 		if(NULL == pageContentContext)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			wcout<<"failed to create content context for page\n";
 		}
 
@@ -188,15 +188,15 @@ EStatusCode TiffSpecialsTest::CreateBlackAndWhiteMaskImage(PDFWriter& inPDFWrite
 		delete imageBW;
 		delete imageBWMask;
 
-		status = inPDFWriter.EndPageContentContext(pageContentContext);
-		if(status != eSuccess)
+		status = inpdfWriter.EndPageContentContext(pageContentContext);
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to end page content context, for Image BWs test\n";
 			break;
 		}
 
-		status = inPDFWriter.WritePageAndRelease(page);
-		if(status != eSuccess)
+		status = inpdfWriter.WritePageAndRelease(page);
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to write page, for image BWs test\n";
 			break;
@@ -208,20 +208,20 @@ EStatusCode TiffSpecialsTest::CreateBlackAndWhiteMaskImage(PDFWriter& inPDFWrite
 
 static const wstring scWJim = L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\jim___cg.tif";
 
-EStatusCode TiffSpecialsTest::CreateBiLevelGrayScales(PDFWriter& inPDFWriter)
+EPDFStatusCode TiffSpecialsTest::CreateBiLevelGrayScales(HummusPDFWriter& inpdfWriter)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	TIFFUsageParameters TIFFParameters;
 
 	do
 	{
 
 		// GrayScale regular
-		PDFFormXObject* imageGrayScale = inPDFWriter.CreateFormXObjectFromTIFFFile(scWJim);
+		PDFFormXObject* imageGrayScale = inpdfWriter.CreateFormXObjectFromTIFFFile(scWJim);
 		if(!imageGrayScale)
 		{
 			wcout<<"failed to create image form XObject from file, grayscale for file "<<scWJim;
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -229,11 +229,11 @@ EStatusCode TiffSpecialsTest::CreateBiLevelGrayScales(PDFWriter& inPDFWriter)
 		TIFFParameters.GrayscaleTreatment.AsColorMap = true;
 		TIFFParameters.GrayscaleTreatment.OneColor = CMYKRGBColor(0,255,0);
 		TIFFParameters.GrayscaleTreatment.ZeroColor = CMYKRGBColor(255,255,255);
-		PDFFormXObject* imageGrayScaleGreen = inPDFWriter.CreateFormXObjectFromTIFFFile(scWJim,TIFFParameters);
+		PDFFormXObject* imageGrayScaleGreen = inpdfWriter.CreateFormXObjectFromTIFFFile(scWJim,TIFFParameters);
 		if(!imageGrayScaleGreen)
 		{
 			wcout<<"failed to create image form XObject from file, green n white for file "<<scWJim;
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -242,11 +242,11 @@ EStatusCode TiffSpecialsTest::CreateBiLevelGrayScales(PDFWriter& inPDFWriter)
 		TIFFParameters.GrayscaleTreatment.AsColorMap = true;
 		TIFFParameters.GrayscaleTreatment.OneColor = CMYKRGBColor(255,255,0,0);
 		TIFFParameters.GrayscaleTreatment.ZeroColor = CMYKRGBColor(0,0,0,0);
-		PDFFormXObject* imageGrayScaleCyanMagenta = inPDFWriter.CreateFormXObjectFromTIFFFile(scWJim,TIFFParameters);
+		PDFFormXObject* imageGrayScaleCyanMagenta = inpdfWriter.CreateFormXObjectFromTIFFFile(scWJim,TIFFParameters);
 		if(!imageGrayScaleCyanMagenta)
 		{
 			wcout<<"failed to create image form XObject from file, cyan magenta n white for file "<<scWJim;
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -254,11 +254,11 @@ EStatusCode TiffSpecialsTest::CreateBiLevelGrayScales(PDFWriter& inPDFWriter)
 		TIFFParameters.GrayscaleTreatment.AsColorMap = true;
 		TIFFParameters.GrayscaleTreatment.OneColor = CMYKRGBColor(0,255,0);
 		TIFFParameters.GrayscaleTreatment.ZeroColor = CMYKRGBColor(255,0,0);
-		PDFFormXObject* imageGrayScaleGreenVSRed = inPDFWriter.CreateFormXObjectFromTIFFFile(scWJim,TIFFParameters);
+		PDFFormXObject* imageGrayScaleGreenVSRed = inpdfWriter.CreateFormXObjectFromTIFFFile(scWJim,TIFFParameters);
 		if(!imageGrayScaleGreenVSRed)
 		{
 			wcout<<"failed to create image form XObject from file, green n red for file "<<scWJim;
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -266,11 +266,11 @@ EStatusCode TiffSpecialsTest::CreateBiLevelGrayScales(PDFWriter& inPDFWriter)
 		TIFFParameters.GrayscaleTreatment.AsColorMap = true;
 		TIFFParameters.GrayscaleTreatment.OneColor = CMYKRGBColor(255,0,0,0);
 		TIFFParameters.GrayscaleTreatment.ZeroColor = CMYKRGBColor(0,255,0,0);
-		PDFFormXObject* imageGrayScaleCyanVSMagenta = inPDFWriter.CreateFormXObjectFromTIFFFile(scWJim,TIFFParameters);
+		PDFFormXObject* imageGrayScaleCyanVSMagenta = inpdfWriter.CreateFormXObjectFromTIFFFile(scWJim,TIFFParameters);
 		if(!imageGrayScaleCyanVSMagenta)
 		{
 			wcout<<"failed to create image form XObject from file, cyan n magenta for file "<<scWJim;
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -278,10 +278,10 @@ EStatusCode TiffSpecialsTest::CreateBiLevelGrayScales(PDFWriter& inPDFWriter)
 		PDFPage* page = new PDFPage();
 		page->SetMediaBox(PDFRectangle(0,0,595,842));
 
-		PageContentContext* pageContentContext = inPDFWriter.StartPageContentContext(page);
+		PageContentContext* pageContentContext = inpdfWriter.StartPageContentContext(page);
 		if(NULL == pageContentContext)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			wcout<<"failed to create content context for page\n";
 		}
 
@@ -316,15 +316,15 @@ EStatusCode TiffSpecialsTest::CreateBiLevelGrayScales(PDFWriter& inPDFWriter)
 		delete imageGrayScaleGreenVSRed;
 		delete imageGrayScaleCyanVSMagenta;
 
-		status = inPDFWriter.EndPageContentContext(pageContentContext);
-		if(status != eSuccess)
+		status = inpdfWriter.EndPageContentContext(pageContentContext);
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to end page content context, for bilevel grayscale images\n";
 			break;
 		}
 
-		status = inPDFWriter.WritePageAndRelease(page);
-		if(status != eSuccess)
+		status = inpdfWriter.WritePageAndRelease(page);
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to write page, for bilevel grayscale images\n";
 			break;

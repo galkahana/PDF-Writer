@@ -75,7 +75,7 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 		mRecentTokenPosition = mStreamPositionTracker;
 
 		// get the first byte of the token
-		if(GetNextByteForToken(buffer) != eSuccess)
+		if(GetNextByteForToken(buffer) != ePDFSuccess)
 		{
 			result.first = false;
 			break;
@@ -93,7 +93,7 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 				// for a comment, the token goes on till the end of line marker [not including]
 				while(mStream->NotEnded())
 				{
-					if(GetNextByteForToken(buffer) != eSuccess)
+					if(GetNextByteForToken(buffer) != ePDFSuccess)
 					{	
 						result.first = false;
 						break;
@@ -113,7 +113,7 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 				bool backSlashEncountered = false;
 				while(balanceLevel > 0 && mStream->NotEnded())
 				{
-					if(GetNextByteForToken(buffer) != eSuccess)
+					if(GetNextByteForToken(buffer) != ePDFSuccess)
 					{	
 						result.first = false;
 						break;
@@ -128,7 +128,7 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 							// for cr-ln
 							if(0xD == buffer && mStream->NotEnded())
 							{
-								if(GetNextByteForToken(buffer) != eSuccess)
+								if(GetNextByteForToken(buffer) != ePDFSuccess)
 								{
 									result.first = false;
 									break;
@@ -173,7 +173,7 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 					break;
 				}
 
-				if(GetNextByteForToken(buffer) != eSuccess)
+				if(GetNextByteForToken(buffer) != ePDFSuccess)
 				{	
 						result.first = false;
 						break;
@@ -192,7 +192,7 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 
 					while(mStream->NotEnded())
 					{
-						if(GetNextByteForToken(buffer) != eSuccess)
+						if(GetNextByteForToken(buffer) != ePDFSuccess)
 						{	
 							result.first = false;
 							break;
@@ -221,7 +221,7 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 					break;
 				}
 
-				if(GetNextByteForToken(buffer) != eSuccess)
+				if(GetNextByteForToken(buffer) != ePDFSuccess)
 				{	
 					result.first = false;
 					break;
@@ -248,7 +248,7 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 			{
 				while(mStream->NotEnded())
 				{
-					if(GetNextByteForToken(buffer) != eSuccess)
+					if(GetNextByteForToken(buffer) != ePDFSuccess)
 					{	
 						result.first = false;
 						break;
@@ -278,7 +278,7 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 					// verify that buffer is either CR or LF, and behave accordingly
 					if(scCR == buffer) // CR. should be CR-LF
 					{
-						if(GetNextByteForToken(buffer) == eSuccess)
+						if(GetNextByteForToken(buffer) == ePDFSuccess)
 							result.first = (scLF == buffer); // verify that buffer is LF (so that we see CR-LF)
 						else
 							result.first = false; // cant have CR alone!
@@ -309,7 +309,7 @@ void PDFParserTokenizer::SkipTillToken()
 	// skip till hitting first non space, or segment end
 	while(mStream->NotEnded())
 	{
-		if(GetNextByteForToken(buffer) != eSuccess)
+		if(GetNextByteForToken(buffer) != ePDFSuccess)
 			break;
 
 		if(!IsPDFWhiteSpace(buffer))
@@ -320,17 +320,17 @@ void PDFParserTokenizer::SkipTillToken()
 	}
 }
 
-EStatusCode PDFParserTokenizer::GetNextByteForToken(Byte& outByte)
+EPDFStatusCode PDFParserTokenizer::GetNextByteForToken(Byte& outByte)
 {
 	++mStreamPositionTracker; // advance position tracker, because we are reading the next byte.
 	if(mHasTokenBuffer)
 	{
 		outByte = mTokenBuffer;
 		mHasTokenBuffer = false;
-		return eSuccess;
+		return ePDFSuccess;
 	}
 	else
-		return (mStream->Read(&outByte,1) != 1) ? eFailure:eSuccess;
+		return (mStream->Read(&outByte,1) != 1) ? ePDFFailure:ePDFSuccess;
 }
 
 static const Byte scWhiteSpaces[] = {0,0x9,0xA,0xC,0xD,0x20};

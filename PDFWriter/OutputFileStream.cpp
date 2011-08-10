@@ -41,22 +41,22 @@ OutputFileStream::OutputFileStream(const wstring& inFilePath,bool inAppend)
 	Open(inFilePath,inAppend);
 }
 
-EStatusCode OutputFileStream::Open(const wstring& inFilePath,bool inAppend)
+EPDFStatusCode OutputFileStream::Open(const wstring& inFilePath,bool inAppend)
 {
 	SAFE_WFOPEN(mStream,inFilePath.c_str(),inAppend ? L"ab":L"wb")
 
 	if(!mStream)
-		return eFailure;
+		return ePDFFailure;
 
 	// seek to end, so position reading gets the correct file position, even before first write
 	_fseeki64(mStream,0,SEEK_END);
 
-	return eSuccess;
+	return ePDFSuccess;
 };
 
-EStatusCode OutputFileStream::Close()
+EPDFStatusCode OutputFileStream::Close()
 {
-	EStatusCode result = fclose(mStream) == 0 ? eSuccess:eFailure;
+	EPDFStatusCode result = fclose(mStream) == 0 ? ePDFSuccess:ePDFFailure;
 
 	mStream = NULL;
 	return result;

@@ -39,7 +39,7 @@ TrueTypeANSIFontWriter::~TrueTypeANSIFontWriter(void)
 }
 
 static const string scPlus = "+";
-EStatusCode TrueTypeANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
+EPDFStatusCode TrueTypeANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 											WrittenFontRepresentation* inFontOccurrence,
 											ObjectsContext* inObjectsContext)
 {
@@ -47,7 +47,7 @@ EStatusCode TrueTypeANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 	if(!postscriptFontName)
 	{
 		TRACE_LOG("TrueTypeANSIFontWriter::WriteFont, unexpected failure. no postscript font name for font");
-		return eFailure;
+		return ePDFFailure;
 	}
 	std::string subsetFontName = inObjectsContext->GenerateSubsetFontPrefix() + scPlus + postscriptFontName;
 
@@ -57,11 +57,11 @@ EStatusCode TrueTypeANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 
 	TrueTypeEmbeddedFontWriter embeddedFontWriter;
 
-	EStatusCode status = embeddedFontWriter.WriteEmbeddedFont(	inFontInfo,
+	EPDFStatusCode status = embeddedFontWriter.WriteEmbeddedFont(	inFontInfo,
 																inFontOccurrence->GetGlyphIDsAsOrderedVector(),
 																inObjectsContext,
 																mEmbeddedFontFileObjectID);
-	if(eFailure == status)
+	if(ePDFFailure == status)
 		return status;
 
 	ANSIFontWriter fontWriter;

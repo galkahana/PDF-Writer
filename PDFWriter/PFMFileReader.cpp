@@ -31,14 +31,14 @@ PFMFileReader::~PFMFileReader(void)
 {
 }
 
-EStatusCode PFMFileReader::Read(const wstring& inPFMFilePath)
+EPDFStatusCode PFMFileReader::Read(const wstring& inPFMFilePath)
 {
-	EStatusCode status = eSuccess;
-	mInternalReadStatus = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
+	mInternalReadStatus = ePDFSuccess;
 	InputFile pfmFile;
 
 	status = pfmFile.OpenFile(inPFMFilePath);
-	if(status != eSuccess)
+	if(status != ePDFSuccess)
 	{
 		TRACE_LOG1("PFMFileReader::Read, unable to open PFM file in %s",inPFMFilePath.c_str());
 		return status;
@@ -49,15 +49,15 @@ EStatusCode PFMFileReader::Read(const wstring& inPFMFilePath)
 		mReaderStream = pfmFile.GetInputStream();
 
 		status = ReadHeader();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		status = ReadExtension();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		status = ReadExtendedFontMetrics();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 		
 	}while(false);
@@ -66,7 +66,7 @@ EStatusCode PFMFileReader::Read(const wstring& inPFMFilePath)
 	return status;
 }
 
-EStatusCode PFMFileReader::ReadHeader()
+EPDFStatusCode PFMFileReader::ReadHeader()
 {
 	ReadWord(Header.Version);
 	ReadDWord(Header.Size);
@@ -102,39 +102,39 @@ EStatusCode PFMFileReader::ReadHeader()
 	return mInternalReadStatus;
 }
 
-EStatusCode PFMFileReader::ReadByte(BYTE& outByte)
+EPDFStatusCode PFMFileReader::ReadByte(BYTE& outByte)
 {
 	IOBasicTypes::Byte buffer;
 
-	if(mInternalReadStatus != eFailure)
+	if(mInternalReadStatus != ePDFFailure)
 	{
 		if(mReaderStream->Read(&buffer,1) != 1)
-			mInternalReadStatus = eFailure;
+			mInternalReadStatus = ePDFFailure;
 		else
 			outByte = buffer;
 	}
 	return mInternalReadStatus;
 }
 
-EStatusCode PFMFileReader::ReadWord(WORD& outWord)
+EPDFStatusCode PFMFileReader::ReadWord(WORD& outWord)
 {
 	IOBasicTypes::Byte buffer;
 	outWord = 0;
 
-	if(mInternalReadStatus != eFailure)
+	if(mInternalReadStatus != ePDFFailure)
 	{
 		if(mReaderStream->Read(&buffer,1) != 1)
 		{
-			mInternalReadStatus = eFailure;
-			return eFailure;
+			mInternalReadStatus = ePDFFailure;
+			return ePDFFailure;
 		}
 
 		outWord = buffer;
 
 		if(mReaderStream->Read(&buffer,1) != 1)
 		{
-			mInternalReadStatus = eFailure;
-			return eFailure;
+			mInternalReadStatus = ePDFFailure;
+			return ePDFFailure;
 		}
 
 		outWord |= (((WORD)buffer) << 8);
@@ -143,41 +143,41 @@ EStatusCode PFMFileReader::ReadWord(WORD& outWord)
 	return mInternalReadStatus;
 }
 
-EStatusCode PFMFileReader::ReadDWord(DWORD& outDWORD)
+EPDFStatusCode PFMFileReader::ReadDWord(DWORD& outDWORD)
 {
 	IOBasicTypes::Byte buffer;
 	outDWORD = 0;
 
-	if(mInternalReadStatus != eFailure)
+	if(mInternalReadStatus != ePDFFailure)
 	{
 		if(mReaderStream->Read(&buffer,1) != 1)
 		{
-			mInternalReadStatus = eFailure;
-			return eFailure;
+			mInternalReadStatus = ePDFFailure;
+			return ePDFFailure;
 		}
 
 		outDWORD = buffer;
 
 		if(mReaderStream->Read(&buffer,1) != 1)
 		{
-			mInternalReadStatus = eFailure;
-			return eFailure;
+			mInternalReadStatus = ePDFFailure;
+			return ePDFFailure;
 		}
 
 		outDWORD |= (((DWORD)buffer) << 8);
 
 		if(mReaderStream->Read(&buffer,1) != 1)
 		{
-			mInternalReadStatus = eFailure;
-			return eFailure;
+			mInternalReadStatus = ePDFFailure;
+			return ePDFFailure;
 		}
 
 		outDWORD |= (((DWORD)buffer) << 16);
 
 		if(mReaderStream->Read(&buffer,1) != 1)
 		{
-			mInternalReadStatus = eFailure;
-			return eFailure;
+			mInternalReadStatus = ePDFFailure;
+			return ePDFFailure;
 		}
 
 		outDWORD |= (((DWORD)buffer) << 24);
@@ -186,7 +186,7 @@ EStatusCode PFMFileReader::ReadDWord(DWORD& outDWORD)
 	return mInternalReadStatus;
 }
 
-EStatusCode PFMFileReader::ReadExtension()
+EPDFStatusCode PFMFileReader::ReadExtension()
 {
 	ReadWord(Extension.SizeFields);
 	ReadDWord(Extension.ExtMetricsOffset);
@@ -200,7 +200,7 @@ EStatusCode PFMFileReader::ReadExtension()
 	return mInternalReadStatus;
 }
 
-EStatusCode PFMFileReader::ReadExtendedFontMetrics()
+EPDFStatusCode PFMFileReader::ReadExtendedFontMetrics()
 {
 	ReadWord(ExtendedFontMetrics.Size);
 	ReadWord(ExtendedFontMetrics.PointSize);

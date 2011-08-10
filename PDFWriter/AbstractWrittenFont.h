@@ -27,7 +27,7 @@
 class ObjectsContext;
 class DictionaryContext;
 class PDFDictionary;
-class PDFParser;
+class HummusPDFParser;
 
 class AbstractWrittenFont : public IWrittenFont
 {
@@ -48,9 +48,9 @@ protected:
 	WrittenFontRepresentation* mANSIRepresentation;
 	ObjectsContext* mObjectsContext;
 
-	EStatusCode WriteStateInDictionary(ObjectsContext* inStateWriter,DictionaryContext* inDerivedObjectDictionary);
-	EStatusCode WriteStateAfterDictionary(ObjectsContext* inStateWriter);
-	EStatusCode ReadState(PDFParser* inStateReader,PDFDictionary* inState);
+	EPDFStatusCode WriteStateInDictionary(ObjectsContext* inStateWriter,DictionaryContext* inDerivedObjectDictionary);
+	EPDFStatusCode WriteStateAfterDictionary(ObjectsContext* inStateWriter);
+	EPDFStatusCode ReadState(HummusPDFParser* inStateReader,PDFDictionary* inState);
 
 private:
 	ObjectIDType mCidRepresentationObjectStateID;
@@ -77,11 +77,11 @@ private:
 									const GlyphUnicodeMappingListList& inGlyphsList,
 									UShortListList& outEncodedCharacters) = 0;
 
-	EStatusCode WriteWrittenFontState(WrittenFontRepresentation* inRepresentation,ObjectsContext* inStateWriter,ObjectIDType inObjectID);
+	EPDFStatusCode WriteWrittenFontState(WrittenFontRepresentation* inRepresentation,ObjectsContext* inStateWriter,ObjectIDType inObjectID);
 	void WriteGlyphEncodingInfoState(ObjectsContext* inStateWriter,
 									 ObjectIDType inObjectId,
 									 const GlyphEncodingInfo& inGlyphEncodingInfo);
-	void ReadWrittenFontState(PDFParser* inStateReader,PDFDictionary* inState,WrittenFontRepresentation* inRepresentation);
-	void ReadGlyphEncodingInfoState(PDFParser* inStateReader,ObjectIDType inObjectID,GlyphEncodingInfo& inGlyphEncodingInfo);
+	void ReadWrittenFontState(HummusPDFParser* inStateReader,PDFDictionary* inState,WrittenFontRepresentation* inRepresentation);
+	void ReadGlyphEncodingInfoState(HummusPDFParser* inStateReader,ObjectIDType inObjectID,GlyphEncodingInfo& inGlyphEncodingInfo);
 
 };

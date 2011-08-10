@@ -43,7 +43,7 @@ TrueTypeEmbeddedFontWriter::~TrueTypeEmbeddedFontWriter(void)
 }
 
 static const string scLength1 = "Length1";
-EStatusCode TrueTypeEmbeddedFontWriter::WriteEmbeddedFont(	
+EPDFStatusCode TrueTypeEmbeddedFontWriter::WriteEmbeddedFont(	
 								FreeTypeFaceWrapper& inFontInfo,
 								const UIntVector& inSubsetGlyphIDs,
 								ObjectsContext* inObjectsContext,
@@ -51,12 +51,12 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteEmbeddedFont(
 {
 	MyStringBuf rawFontProgram;
 	bool notEmbedded;
-	EStatusCode status;
+	EPDFStatusCode status;
 
 	do
 	{
 		status = CreateTrueTypeSubset(inFontInfo,inSubsetGlyphIDs,notEmbedded,rawFontProgram);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::WriteEmbeddedFont, failed to write embedded font program");
 			break;
@@ -67,7 +67,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteEmbeddedFont(
 			// can't embed. mark succesful, and go back empty
 			outEmbeddedFontObjectID = 0;
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::WriteEmbeddedFont, font may not be embedded. so not embedding");
-			return eSuccess;
+			return ePDFSuccess;
 		}
 
 		outEmbeddedFontObjectID = inObjectsContext->StartNewIndirectObject();
@@ -86,7 +86,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteEmbeddedFont(
 		InputStringBufferStream fontProgramStream(&rawFontProgram);
 		OutputStreamTraits streamCopier(pdfStream->GetWriteStream());
 		status = streamCopier.CopyToOutputStream(&fontProgramStream);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::WriteEmbeddedFont, failed to copy font program into pdf stream");
 			break;
@@ -100,12 +100,12 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteEmbeddedFont(
 	return status;
 }
 
-EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrapper& inFontInfo, /*consider requiring only the file path...actually i don't need the whole thing*/
+EPDFStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrapper& inFontInfo, /*consider requiring only the file path...actually i don't need the whole thing*/
 																const UIntVector& inSubsetGlyphIDs,
 																bool& outNotEmbedded,
 																MyStringBuf& outFontProgram)
 {
-	EStatusCode status;
+	EPDFStatusCode status;
 	unsigned long* locaTable = NULL;
 
 	do
@@ -113,14 +113,14 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 		UIntVector subsetGlyphIDs = inSubsetGlyphIDs;
 
 		status = mTrueTypeFile.OpenFile(inFontInfo.GetFontFilePath());
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG1("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, cannot open true type font file at %s",inFontInfo.GetFontFilePath().c_str());
 			break;
 		}
 
 		status = mTrueTypeInput.ReadOpenTypeFile(mTrueTypeFile.GetInputStream());
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to read true type file");
 			break;
@@ -136,7 +136,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 		if(!FSType(mTrueTypeInput.mOS2.fsType).CanEmbed())
 		{
 			outNotEmbedded = true;
-			return eSuccess;
+			return ePDFSuccess;
 		}
 		else
 			outNotEmbedded = false;
@@ -164,35 +164,35 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 
 
 		status = WriteTrueTypeHeader();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to write true type header");
 			break;
 		}
 
 		status = WriteHead();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to write head table");
 			break;
 		}
 
 		status = WriteHHea();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to write hhea table");
 			break;
 		}
 
 		status = WriteHMtx();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to write hmtx table");
 			break;
 		}
 
 		status = WriteMaxp();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to write Maxp table");
 			break;
@@ -201,7 +201,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 		if(mTrueTypeInput.mCVTExists)
 		{
 			status = WriteCVT();
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
 				TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to write cvt table");
 				break;
@@ -211,7 +211,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 		if(mTrueTypeInput.mFPGMExists)
 		{
 			status = WriteFPGM();
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
 				TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to write fpgm table");
 				break;
@@ -221,7 +221,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 		if(mTrueTypeInput.mPREPExists)
 		{
 			status = WritePREP();
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
 				TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to write prep table");
 				break;	
@@ -229,21 +229,21 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 		}
 
 		status = WriteNAME();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to write name table");
 			break;	
 		}
 
 		status = WriteOS2();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to write os2 table");
 			break;	
 		}
 
 		status = WriteCMAP();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to write cmap table");
 			break;	
@@ -252,14 +252,14 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 		locaTable = new unsigned long[mSubsetFontGlyphsCount+1];
 
 		status = WriteGlyf(subsetGlyphIDs,locaTable);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to write prep table");
 			break;
 		}
 
 		status = WriteLoca(locaTable);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to write loca table");
 			break;
@@ -335,7 +335,7 @@ unsigned short TrueTypeEmbeddedFontWriter::GetSmallerPower2(unsigned short inNum
 	return i;
 }
 
-EStatusCode TrueTypeEmbeddedFontWriter::WriteTrueTypeHeader()
+EPDFStatusCode TrueTypeEmbeddedFontWriter::WriteTrueTypeHeader()
 {
 	// prepare space for tables to write. will write (at maximum) - 
 	// cmap, cvt, fpgm, glyf, head, hhea, hmtx, loca, maxp, name, os/2, prep
@@ -398,7 +398,7 @@ unsigned long TrueTypeEmbeddedFontWriter::GetTag(const char* inTagName)
 			((unsigned long)buffer[2]<<8) + buffer[3];
 }
 
-EStatusCode TrueTypeEmbeddedFontWriter::WriteHead()
+EPDFStatusCode TrueTypeEmbeddedFontWriter::WriteHead()
 {
 	// copy as is, then adjust loca table format to long (that's what i'm always writing), 
 	// set the checksum
@@ -468,7 +468,7 @@ unsigned long TrueTypeEmbeddedFontWriter::GetCheckSum(LongFilePositionType inOff
 	return sum;
 }
 
-EStatusCode TrueTypeEmbeddedFontWriter::WriteHHea()
+EPDFStatusCode TrueTypeEmbeddedFontWriter::WriteHHea()
 {
 	// copy as is, then possibly adjust the hmtx NumberOfHMetrics field, if the glyphs
 	// count is lower
@@ -502,7 +502,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteHHea()
 	return mPrimitivesWriter.GetInternalState();	
 }
 
-EStatusCode TrueTypeEmbeddedFontWriter::WriteHMtx()
+EPDFStatusCode TrueTypeEmbeddedFontWriter::WriteHMtx()
 {
 	// k. basically i'm supposed to fill this up till the max glyph count.
 	// so i'll just use the original table (keeping an eye on the NumberOfHMetrics)
@@ -540,7 +540,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteHMtx()
 	return mPrimitivesWriter.GetInternalState();	
 }
 
-EStatusCode TrueTypeEmbeddedFontWriter::WriteMaxp()
+EPDFStatusCode TrueTypeEmbeddedFontWriter::WriteMaxp()
 {
 	// copy as is, then adjust the glyphs count
 
@@ -570,22 +570,22 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteMaxp()
 	return mPrimitivesWriter.GetInternalState();
 }
 
-EStatusCode TrueTypeEmbeddedFontWriter::WriteCVT()
+EPDFStatusCode TrueTypeEmbeddedFontWriter::WriteCVT()
 {
 	return CreateTableCopy("cvt ",mCVTEntryWritingOffset);
 }
 
-EStatusCode TrueTypeEmbeddedFontWriter::WriteFPGM()
+EPDFStatusCode TrueTypeEmbeddedFontWriter::WriteFPGM()
 {
 	return CreateTableCopy("fpgm",mFPGMEntryWritingOffset);
 }
 
-EStatusCode TrueTypeEmbeddedFontWriter::WritePREP()
+EPDFStatusCode TrueTypeEmbeddedFontWriter::WritePREP()
 {
 	return CreateTableCopy("prep",mPREPEntryWritingOffset);
 }
 
-EStatusCode TrueTypeEmbeddedFontWriter::WriteGlyf(const UIntVector& inSubsetGlyphIDs,unsigned long* inLocaTable)
+EPDFStatusCode TrueTypeEmbeddedFontWriter::WriteGlyf(const UIntVector& inSubsetGlyphIDs,unsigned long* inLocaTable)
 {
 	// k. write the glyphs table. you only need to write the glyphs you are actually using.
 	// while at it...update the locaTable
@@ -628,7 +628,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteGlyf(const UIntVector& inSubsetGlyp
 	return mPrimitivesWriter.GetInternalState();	
 }
 
-EStatusCode TrueTypeEmbeddedFontWriter::WriteLoca(unsigned long* inLocaTable)
+EPDFStatusCode TrueTypeEmbeddedFontWriter::WriteLoca(unsigned long* inLocaTable)
 {
 	// k. just write the input locatable. in longs format
 
@@ -654,7 +654,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteLoca(unsigned long* inLocaTable)
 	return mPrimitivesWriter.GetInternalState();	
 }
 
-EStatusCode TrueTypeEmbeddedFontWriter::CreateHeadTableCheckSumAdjustment()
+EPDFStatusCode TrueTypeEmbeddedFontWriter::CreateHeadTableCheckSumAdjustment()
 {
 	LongFilePositionType endStream = mFontFileStream.GetCurrentPosition();
     unsigned long checkSum = 0xb1b0afba - GetCheckSum(0, (unsigned long)endStream);
@@ -666,23 +666,23 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateHeadTableCheckSumAdjustment()
 	return mPrimitivesWriter.GetInternalState();
 }
 
-EStatusCode TrueTypeEmbeddedFontWriter::WriteNAME()
+EPDFStatusCode TrueTypeEmbeddedFontWriter::WriteNAME()
 {
 	return CreateTableCopy("name",mNAMEEntryWritingOffset);
 }
 
-EStatusCode TrueTypeEmbeddedFontWriter::WriteOS2()
+EPDFStatusCode TrueTypeEmbeddedFontWriter::WriteOS2()
 {
 	return CreateTableCopy("OS/2",mOS2EntryWritingOffset);
 }
 
 
-EStatusCode TrueTypeEmbeddedFontWriter::WriteCMAP()
+EPDFStatusCode TrueTypeEmbeddedFontWriter::WriteCMAP()
 {
 	return CreateTableCopy("cmap",mCMAPEntryWritingOffset);
 }
 
-EStatusCode TrueTypeEmbeddedFontWriter::CreateTableCopy(const char* inTableName,LongFilePositionType inTableEntryLocation)
+EPDFStatusCode TrueTypeEmbeddedFontWriter::CreateTableCopy(const char* inTableName,LongFilePositionType inTableEntryLocation)
 {
 	// copy as is, no adjustments required
 

@@ -2,7 +2,7 @@
    Source File : PDFDateTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -33,15 +33,15 @@ PDFDateTest::~PDFDateTest(void)
 {
 }
 
-EStatusCode PDFDateTest::Run()
+EPDFStatusCode PDFDateTest::Run()
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	// Empty Date
 	PDFDate emptyDate;
 	if(emptyDate.ToString() != "")
 	{
-		status = eFailure;
+		status = ePDFFailure;
 		wcout<<"wrong string conversion for empty date - "<<emptyDate.ToString().c_str()<<"\n";
 	}
 
@@ -50,7 +50,7 @@ EStatusCode PDFDateTest::Run()
 	yearDate.Year = 1984;
 	if(yearDate.ToString() != "D:1984")
 	{
-		status = eFailure;
+		status = ePDFFailure;
 		wcout<<"wrong string conversion for year date - "<<yearDate.ToString().c_str()<<"\n";
 	}
 
@@ -61,7 +61,7 @@ EStatusCode PDFDateTest::Run()
 	dayDate.Day = 3;
 	if(dayDate.ToString() != "D:19840403")
 	{
-		status = eFailure;
+		status = ePDFFailure;
 		wcout<<"wrong string conversion for day date - "<<dayDate.ToString().c_str()<<"\n";
 	}
 	// local Time Date
@@ -74,7 +74,7 @@ EStatusCode PDFDateTest::Run()
 	localTimeDate.Second = 45;
 	if(localTimeDate.ToString() != "D:19840403183045")
 	{
-		status = eFailure;
+		status = ePDFFailure;
 		wcout<<"wrong string conversion for local date - "<<localTimeDate.ToString().c_str()<<"\n";
 	}
 	// Fully qualified Time date
@@ -90,7 +90,7 @@ EStatusCode PDFDateTest::Run()
 	fullDate.MinuteFromUTC = 0;
 	if(fullDate.ToString() != "D:19840403183045-02'00'")
 	{
-		status = eFailure;
+		status = ePDFFailure;
 		wcout<<"wrong string conversion for full date - "<<fullDate.ToString().c_str()<<"\n";
 	}
 

@@ -2,7 +2,7 @@
    Source File : ShutDownRestartTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
    
 */
 #include "ShutDownRestartTest.h"
-#include "PDFWriter.h"
+#include "HummusPDFWriter.h"
 #include "PDFPage.h"
 #include "PDFRectangle.h"
 #include "PageContentContext.h"
@@ -40,16 +40,16 @@ ShutDownRestartTest::~ShutDownRestartTest(void)
 }
 
 
-EStatusCode ShutDownRestartTest::Run()
+EPDFStatusCode ShutDownRestartTest::Run()
 {
-	EStatusCode status; 
+	EPDFStatusCode status; 
 
 	do
 	{
 		{
-			PDFWriter pdfWriterA;
+			HummusPDFWriter pdfWriterA;
 			status = pdfWriterA.StartPDF(L"C:\\PDFLibTests\\SimpleContentShutdownRestart.PDF",ePDFVersion13);
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
 				wcout<<"failed to start PDF\n";
 				break;
@@ -61,7 +61,7 @@ EStatusCode ShutDownRestartTest::Run()
 			PDFUsedFont* font = pdfWriterA.GetFontForFile(L"C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
 			if(!font)
 			{
-				status = eFailure;
+				status = ePDFFailure;
 				wcout<<"Failed to create font object for arial.ttf\n";
 				break;
 			}
@@ -69,7 +69,7 @@ EStatusCode ShutDownRestartTest::Run()
 			PageContentContext* contentContext = pdfWriterA.StartPageContentContext(page);
 			if(NULL == contentContext)
 			{
-				status = eFailure;
+				status = ePDFFailure;
 				wcout<<"failed to create content context for page\n";
 				break;
 			}
@@ -83,7 +83,7 @@ EStatusCode ShutDownRestartTest::Run()
 
 			// force stream change
 			status = pdfWriterA.PausePageContentContext(contentContext);
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
 				wcout<<"failed to pause page content context\n";
 				break;
@@ -111,22 +111,22 @@ EStatusCode ShutDownRestartTest::Run()
 			contentContext->Tf(font,1);
 			contentContext->Tm(30,0,0,30,78.4252,662.8997);
 
-			EStatusCode encodingStatus = contentContext->Tj(L"hello world");
-			if(encodingStatus != eSuccess)
+			EPDFStatusCode encodingStatus = contentContext->Tj(L"hello world");
+			if(encodingStatus != ePDFSuccess)
 				wcout<<"Could not find some of the glyphs for this font";
 
 			// continue even if failed...want to see how it looks like
 			contentContext->ET();
 				
 			status = pdfWriterA.EndPageContentContext(contentContext);
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
 				wcout<<"failed to end page content context\n";
 				break;
 			}
 
 			status = pdfWriterA.WritePageAndRelease(page);
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
 				wcout<<"failed to write page\n";
 				break;
@@ -134,7 +134,7 @@ EStatusCode ShutDownRestartTest::Run()
 
 
 			status = pdfWriterA.Shutdown(L"C:\\PDFLibTests\\ShutDownRestartState.txt");
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
 				wcout<<"failed to shutdown library\n";
 				break;
@@ -142,9 +142,9 @@ EStatusCode ShutDownRestartTest::Run()
 
 		}
 		{
-			PDFWriter pdfWriterB;
+			HummusPDFWriter pdfWriterB;
 			status = pdfWriterB.ContinuePDF(L"C:\\PDFLibTests\\SimpleContentShutdownRestart.PDF",L"C:\\PDFLibTests\\ShutDownRestartState.txt");
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
 				wcout<<"failed to restart library\n";
 				break;
@@ -156,7 +156,7 @@ EStatusCode ShutDownRestartTest::Run()
 			PageContentContext* pageContentContext = pdfWriterB.StartPageContentContext(page);
 			if(NULL == pageContentContext)
 			{
-				status = eFailure;
+				status = ePDFFailure;
 				wcout<<"failed to create content context for page\n";
 			}
 
@@ -169,7 +169,7 @@ EStatusCode ShutDownRestartTest::Run()
 
 			// pause stream to start writing a form xobject
 			status = pdfWriterB.PausePageContentContext(pageContentContext);
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
 				wcout<<"failed to pause page content context\n";
 				break;
@@ -187,7 +187,7 @@ EStatusCode ShutDownRestartTest::Run()
 			xobjectContentContext->Q();
 
 			status = pdfWriterB.EndFormXObjectAndRelease(xobjectForm);
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
 				wcout<<"failed to write XObject form\n";
 				break;
@@ -217,21 +217,21 @@ EStatusCode ShutDownRestartTest::Run()
 			pageContentContext->Q();
 
 			status = pdfWriterB.EndPageContentContext(pageContentContext);
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
 				wcout<<"failed to end page content context\n";
 				break;
 			}
 
 			status = pdfWriterB.WritePageAndRelease(page);
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
 				wcout<<"failed to write page\n";
 				break;
 			}
 
 			status = pdfWriterB.EndPDF();
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
 				wcout<<"failed in end PDF\n";
 				break;

@@ -56,12 +56,12 @@ ResourcesDictionary* PageContentContext::GetResourcesDictionary()
 	return &(mPageOfContext->GetResourcesDictionary());
 }
 
-EStatusCode PageContentContext::FinalizeCurrentStream()
+EPDFStatusCode PageContentContext::FinalizeCurrentStream()
 {
 	if(mCurrentStream)
 		return FinalizeStreamWriteAndRelease();
 	else
-		return eSuccess;
+		return ePDFSuccess;
 }
 
 PDFPage* PageContentContext::GetAssociatedPage()
@@ -69,13 +69,13 @@ PDFPage* PageContentContext::GetAssociatedPage()
 	return mPageOfContext;
 }
 
-EStatusCode PageContentContext::FinalizeStreamWriteAndRelease()
+EPDFStatusCode PageContentContext::FinalizeStreamWriteAndRelease()
 {
 	mObjectsContext->EndPDFStream(mCurrentStream);
 
 	delete mCurrentStream;
 	mCurrentStream = NULL;
-	return eSuccess;
+	return ePDFSuccess;
 }
 
 PDFStream* PageContentContext::GetCurrentPageContentStream()

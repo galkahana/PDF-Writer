@@ -26,7 +26,7 @@
 #include "PDFInteger.h"
 #include "PDFReal.h"
 #include "PDFDictionary.h"
-#include "DocumentContext.h"
+#include "DocumentsContext.h"
 #include "PDFFormXObject.h"
 #include "PDFStream.h"
 #include "OutputStreamTraits.h"
@@ -49,7 +49,7 @@
 PDFDocumentHandler::PDFDocumentHandler(void)
 {
 	mObjectsContext = NULL;
-	mDocumentContext = NULL;
+	mDocumentsContext = NULL;
 	mWrittenPage = NULL;
 }
 
@@ -57,10 +57,10 @@ PDFDocumentHandler::~PDFDocumentHandler(void)
 {
 }
 
-void PDFDocumentHandler::SetOperationsContexts(DocumentContext* inDocumentContext,ObjectsContext* inObjectsContext)
+void PDFDocumentHandler::SetOperationsContexts(DocumentsContext* inDocumentsContext,ObjectsContext* inObjectsContext)
 {
 	mObjectsContext = inObjectsContext;
-	mDocumentContext = inDocumentContext;
+	mDocumentsContext = inDocumentsContext;
 }
 
 class IPageEmbedInFormCommand
@@ -107,43 +107,43 @@ private:
 };
 
 
-EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const wstring& inPDFFilePath,
+EPDFStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const wstring& inPDFFilePath,
 																				const PDFPageRange& inPageRange,
 																				IPageEmbedInFormCommand* inPageEmbedCommand,
 																				const double* inTransformationMatrix,
 																				const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	if(StartFileCopyingContext(inPDFFilePath) != eSuccess)
+	if(StartFileCopyingContext(inPDFFilePath) != ePDFSuccess)
 	{
-		return EStatusCodeAndObjectIDTypeList(eFailure,ObjectIDTypeList());
+		return EPDFStatusCodeAndObjectIDTypeList(ePDFFailure,ObjectIDTypeList());
 	}
 
 	return CreateFormXObjectsFromPDFInContext(inPageRange,inPageEmbedCommand,inTransformationMatrix,inCopyAdditionalObjects);
 }
 
-EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDFInContext(
+EPDFStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDFInContext(
 																						const PDFPageRange& inPageRange,
 																						IPageEmbedInFormCommand* inPageEmbedCommand,
 																						const double* inTransformationMatrix,
 																						const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	EStatusCodeAndObjectIDTypeList result;
+	EPDFStatusCodeAndObjectIDTypeList result;
 
 	do
 	{
-		IDocumentContextExtenderSet::iterator it = mExtenders.begin();
-		for(; it != mExtenders.end() && eSuccess == result.first; ++it)
+		IDocumentsContextExtenderSet::iterator it = mExtenders.begin();
+		for(; it != mExtenders.end() && ePDFSuccess == result.first; ++it)
 		{
-			result.first = (*it)->OnPDFParsingComplete(mObjectsContext,mDocumentContext,this);
-			if(result.first != eSuccess)
-				TRACE_LOG("DocumentContext::CreateFormXObjectsFromPDFInContext, unexpected failure. extender declared failure after parsing page.");
+			result.first = (*it)->OnPDFParsingComplete(mObjectsContext,mDocumentsContext,this);
+			if(result.first != ePDFSuccess)
+				TRACE_LOG("DocumentsContext::CreateFormXObjectsFromPDFInContext, unexpected failure. extender declared failure after parsing page.");
 		}
 
 		// copy additional objects prior to pages, so we have them ready at page copying
 		if(inCopyAdditionalObjects.size() > 0)
 		{
 			result.first = WriteNewObjects(inCopyAdditionalObjects);
-			if(result.first != eSuccess)
+			if(result.first != ePDFSuccess)
 			{
 				TRACE_LOG("PDFDocumentHandler::CreateFormXObjectsFromPDFInContext, failed copying additional objects");
 				break;
@@ -154,7 +154,7 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDFInCo
 
 		if(PDFPageRange::eRangeTypeAll == inPageRange.mType)
 		{
-			for(unsigned long i=0; i < mParser.GetPagesCount() && eSuccess == result.first; ++i)
+			for(unsigned long i=0; i < mParser.GetPagesCount() && ePDFSuccess == result.first; ++i)
 			{
 				newObject = inPageEmbedCommand->CreatePDFFormXObjectForPage(this,i,inTransformationMatrix);
 				if(newObject)
@@ -165,7 +165,7 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDFInCo
 				else
 				{
 					TRACE_LOG1("PDFDocumentHandler::CreateFormXObjectsFromPDFInContext, failed to embed page %ld", i);
-					result.first = eFailure;
+					result.first = ePDFFailure;
 				}
 			}
 		}
@@ -173,11 +173,11 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDFInCo
 		{
 			// eRangeTypeSpecific
 			ULongAndULongList::const_iterator it = inPageRange.mSpecificRanges.begin();
-			for(; it != inPageRange.mSpecificRanges.end() && eSuccess == result.first;++it)
+			for(; it != inPageRange.mSpecificRanges.end() && ePDFSuccess == result.first;++it)
 			{
 				if(it->first <= it->second && it->second < mParser.GetPagesCount())
 				{
-					for(unsigned long i=it->first; i <= it->second && eSuccess == result.first; ++i)
+					for(unsigned long i=it->first; i <= it->second && ePDFSuccess == result.first; ++i)
 					{
 						newObject = inPageEmbedCommand->CreatePDFFormXObjectForPage(this,i,inTransformationMatrix);
 						if(newObject)
@@ -188,7 +188,7 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDFInCo
 						else
 						{
 							TRACE_LOG1("PDFDocumentHandler::CreateFormXObjectsFromPDFInContext, failed to embed page %ld", i);
-							result.first = eFailure;
+							result.first = ePDFFailure;
 						}
 					}
 				}
@@ -198,7 +198,7 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDFInCo
 						it->first,
 						it->second,
 						mParser.GetPagesCount());
-					result.first = eFailure;
+					result.first = ePDFFailure;
 				}
 			}
 		}
@@ -206,12 +206,12 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDFInCo
 
 	}while(false);
 
-	IDocumentContextExtenderSet::iterator it = mExtenders.begin();
-	for(; it != mExtenders.end() && eSuccess == result.first; ++it)
+	IDocumentsContextExtenderSet::iterator it = mExtenders.begin();
+	for(; it != mExtenders.end() && ePDFSuccess == result.first; ++it)
 	{
-		result.first = (*it)->OnPDFCopyingComplete(mObjectsContext,mDocumentContext,this);
-		if(result.first != eSuccess)
-			TRACE_LOG("DocumentContext::CreateFormXObjectsFromPDFInContext, unexpected failure. extender declared failure before finalizing copy.");
+		result.first = (*it)->OnPDFCopyingComplete(mObjectsContext,mDocumentsContext,this);
+		if(result.first != ePDFSuccess)
+			TRACE_LOG("DocumentsContext::CreateFormXObjectsFromPDFInContext, unexpected failure. extender declared failure before finalizing copy.");
 	}
 
 
@@ -221,7 +221,7 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDFInCo
 
 }
 
-EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const wstring& inPDFFilePath,
+EPDFStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const wstring& inPDFFilePath,
 																				const PDFPageRange& inPageRange,
 																				EPDFPageBox inPageBoxToUseAsFormBox,
 																				const double* inTransformationMatrix,
@@ -231,7 +231,7 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	co
 	return CreateFormXObjectsFromPDF(inPDFFilePath,inPageRange,&embedCommand,inTransformationMatrix,inCopyAdditionalObjects);
 }
 
-EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const wstring& inPDFFilePath,
+EPDFStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const wstring& inPDFFilePath,
 																				const PDFPageRange& inPageRange,
 																				const PDFRectangle& inCropBox,
 																				const double* inTransformationMatrix,
@@ -261,28 +261,28 @@ PDFFormXObject* PDFDocumentHandler::CreatePDFFormXObjectForPage(PDFDictionary* i
 																const double* inTransformationMatrix)
 {
 	PDFFormXObject* result = NULL;
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
-	IDocumentContextExtenderSet::iterator it = mExtenders.begin();
-	for(; it != mExtenders.end() && eSuccess == status; ++it)
+	IDocumentsContextExtenderSet::iterator it = mExtenders.begin();
+	for(; it != mExtenders.end() && ePDFSuccess == status; ++it)
 	{
-		status = (*it)->OnBeforeCreateXObjectFromPage(inPageObject,mObjectsContext,mDocumentContext,this);
-		if(status != eSuccess)
-			TRACE_LOG("DocumentContext::CreatePDFFormXObjectForPage, unexpected failure. extender declared failure before writing page.");
+		status = (*it)->OnBeforeCreateXObjectFromPage(inPageObject,mObjectsContext,mDocumentsContext,this);
+		if(status != ePDFSuccess)
+			TRACE_LOG("DocumentsContext::CreatePDFFormXObjectForPage, unexpected failure. extender declared failure before writing page.");
 	}
-	if(status != eSuccess)
+	if(status != ePDFSuccess)
 		return NULL;
 
 	do
 	{
-		if(CopyResourcesIndirectObjects(inPageObject) != eSuccess)
+		if(CopyResourcesIndirectObjects(inPageObject) != ePDFSuccess)
 			break;
 
 		// Create a new form XObject
-		result = mDocumentContext->StartFormXObject(inFormBox,inTransformationMatrix);
+		result = mDocumentsContext->StartFormXObject(inFormBox,inTransformationMatrix);
 
 		// copy the page content to the target XObject stream
-		if(WritePageContentToSingleStream(result->GetContentStream()->GetWriteStream(),inPageObject) != eSuccess)
+		if(WritePageContentToSingleStream(result->GetContentStream()->GetWriteStream(),inPageObject) != ePDFSuccess)
 		{
 			delete result;
 			result = NULL;
@@ -291,10 +291,10 @@ PDFFormXObject* PDFDocumentHandler::CreatePDFFormXObjectForPage(PDFDictionary* i
 
 		// resources dictionary is gonna be empty at this point...so we can use our own code to write the dictionary, by extending.
 		// which will be a simple loop. note that at this point all indirect objects should have been copied, and have mapping
-		mDocumentContext->AddDocumentContextExtender(this);
+		mDocumentsContext->AddDocumentsContextExtender(this);
 		mWrittenPage = inPageObject;
 
-		if(mDocumentContext->EndFormXObjectNoRelease(result) != eSuccess)
+		if(mDocumentsContext->EndFormXObjectNoRelease(result) != ePDFSuccess)
 		{
 			delete result;
 			result = NULL;
@@ -304,18 +304,18 @@ PDFFormXObject* PDFDocumentHandler::CreatePDFFormXObjectForPage(PDFDictionary* i
 	}while(false);
 
 	mWrittenPage = NULL;
-	mDocumentContext->RemoveDocumentContextExtender(this);
+	mDocumentsContext->RemoveDocumentsContextExtender(this);
 
 	if(result)
 	{
-		IDocumentContextExtenderSet::iterator it = mExtenders.begin();
-		for(; it != mExtenders.end() && eSuccess == status; ++it)
+		IDocumentsContextExtenderSet::iterator it = mExtenders.begin();
+		for(; it != mExtenders.end() && ePDFSuccess == status; ++it)
 		{
-			status = (*it)->OnAfterCreateXObjectFromPage(result,inPageObject,mObjectsContext,mDocumentContext,this);
-			if(status != eSuccess)
-				TRACE_LOG("DocumentContext::CreatePDFFormXObjectForPage, unexpected failure. extender declared failure after writing page.");
+			status = (*it)->OnAfterCreateXObjectFromPage(result,inPageObject,mObjectsContext,mDocumentsContext,this);
+			if(status != ePDFSuccess)
+				TRACE_LOG("DocumentsContext::CreatePDFFormXObjectForPage, unexpected failure. extender declared failure after writing page.");
 		}
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			delete result;
 			return NULL;
@@ -452,9 +452,9 @@ PDFFormXObject* PDFDocumentHandler::CreatePDFFormXObjectForPage(unsigned long in
 		return CreatePDFFormXObjectForPage(pageObject.GetPtr(),inCropBox,inTransformationMatrix);
 }
 
-EStatusCode PDFDocumentHandler::WritePageContentToSingleStream(IByteWriter* inTargetStream,PDFDictionary* inPageObject)
+EPDFStatusCode PDFDocumentHandler::WritePageContentToSingleStream(IByteWriter* inTargetStream,PDFDictionary* inPageObject)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	RefCountPtr<PDFObject> pageContent(mParser.QueryDictionaryObject(inPageObject,"Contents"));
 	if(pageContent->GetType() == ePDFObjectStream)
@@ -465,24 +465,24 @@ EStatusCode PDFDocumentHandler::WritePageContentToSingleStream(IByteWriter* inTa
 	{
 		SingleValueContainerIterator<PDFObjectVector> it = ((PDFArray*)pageContent.GetPtr())->GetIterator();
 		PDFObjectCastPtr<PDFIndirectObjectReference> refItem;
-		while(it.MoveNext() && status == eSuccess)
+		while(it.MoveNext() && status == ePDFSuccess)
 		{
 			refItem = it.GetItem();
 			if(!refItem)
 			{
-				status = eFailure;
+				status = ePDFFailure;
 				TRACE_LOG("PDFDocumentHandler::WritePageContentToSingleStream, content stream array contains non-refs");
 				break;
 			}
 			PDFObjectCastPtr<PDFStreamInput> contentStream(mParser.ParseNewObject(refItem->mObjectID));
 			if(!contentStream)
 			{
-				status = eFailure;
+				status = ePDFFailure;
 				TRACE_LOG("PDFDocumentHandler::WritePageContentToSingleStream, content stream array contains references to non streams");
 				break;
 			}
 			status = WritePDFStreamInputToStream(inTargetStream,contentStream.GetPtr());
-			if(eSuccess == status)
+			if(ePDFSuccess == status)
 			{
 				// separate the streams with a nice endline
 				PrimitiveObjectsWriter primitivesWriter;
@@ -494,29 +494,29 @@ EStatusCode PDFDocumentHandler::WritePageContentToSingleStream(IByteWriter* inTa
 	else
 	{
 		TRACE_LOG1("PDFDocumentHandler::WritePageContentToSingleStream, error copying page content, expected either array or stream, getting %s",scPDFObjectTypeLabel[pageContent->GetType()]);
-		status = eFailure;
+		status = ePDFFailure;
 	}
 	
 
 	return status;
 }
 
-EStatusCode PDFDocumentHandler::WritePDFStreamInputToStream(IByteWriter* inTargetStream,PDFStreamInput* inSourceStream)
+EPDFStatusCode PDFDocumentHandler::WritePDFStreamInputToStream(IByteWriter* inTargetStream,PDFStreamInput* inSourceStream)
 {
 	IByteReader* streamReader = mParser.CreateInputStreamReader(inSourceStream);
 
 	if(!streamReader)
-		return eFailure;
+		return ePDFFailure;
 
 	mPDFStream->SetPosition(inSourceStream->GetStreamContentStart());
 
 	OutputStreamTraits traits(inTargetStream);
-	EStatusCode status = traits.CopyToOutputStream(streamReader);
+	EPDFStatusCode status = traits.CopyToOutputStream(streamReader);
 	delete streamReader;
 	return status;
 }
 
-EStatusCode PDFDocumentHandler::CopyResourcesIndirectObjects(PDFDictionary* inPage)
+EPDFStatusCode PDFDocumentHandler::CopyResourcesIndirectObjects(PDFDictionary* inPage)
 {
 	// makes sure that all indirect references are copied. those will come from the resources dictionary.
 	// this is how we go about this:
@@ -528,7 +528,7 @@ EStatusCode PDFDocumentHandler::CopyResourcesIndirectObjects(PDFDictionary* inPa
 
 	// k. no resources...as wierd as that might be...or just wrong...i'll let it be
 	if(!resources)
-		return eSuccess;
+		return ePDFSuccess;
 
 	ObjectIDTypeList newObjectsToWrite;
 
@@ -536,7 +536,7 @@ EStatusCode PDFDocumentHandler::CopyResourcesIndirectObjects(PDFDictionary* inPa
 	return WriteNewObjects(newObjectsToWrite);
 }
 
-EStatusCode PDFDocumentHandler::WriteNewObjects(const ObjectIDTypeList& inSourceObjectIDs)
+EPDFStatusCode PDFDocumentHandler::WriteNewObjects(const ObjectIDTypeList& inSourceObjectIDs)
 {
 	// notice that using this method directly is slightly unsafe - the input objects are ASSUMED to have not been
 	// copied yet. unexpected results if the objects of these ids were already copied.
@@ -546,13 +546,13 @@ EStatusCode PDFDocumentHandler::WriteNewObjects(const ObjectIDTypeList& inSource
 }
 
 
-EStatusCode PDFDocumentHandler::WriteNewObjects(const ObjectIDTypeList& inSourceObjectIDs,ObjectIDTypeSet& ioCopiedObjects)
+EPDFStatusCode PDFDocumentHandler::WriteNewObjects(const ObjectIDTypeList& inSourceObjectIDs,ObjectIDTypeSet& ioCopiedObjects)
 {
 
 	ObjectIDTypeList::const_iterator itNewObjects = inSourceObjectIDs.begin();
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
-	for(; itNewObjects != inSourceObjectIDs.end() && eSuccess == status; ++itNewObjects)
+	for(; itNewObjects != inSourceObjectIDs.end() && ePDFSuccess == status; ++itNewObjects)
 	{
 		// theoretically speaking, it could be that while one object was copied, another one in this array is already
 		// copied, so make sure to check that these objects are still required for copying
@@ -618,33 +618,33 @@ void PDFDocumentHandler::RegisterInDirectObjects(PDFArray* inArray,ObjectIDTypeL
 	}
 }
 
-EStatusCode PDFDocumentHandler::CopyInDirectObject(ObjectIDType inSourceObjectID,ObjectIDType inTargetObjectID)
+EPDFStatusCode PDFDocumentHandler::CopyInDirectObject(ObjectIDType inSourceObjectID,ObjectIDType inTargetObjectID)
 {
 	ObjectIDTypeSet ioCopiedObjects;
 	return CopyInDirectObject(inSourceObjectID,inTargetObjectID,ioCopiedObjects);
 }
 
 
-EStatusCode PDFDocumentHandler::CopyInDirectObject(ObjectIDType inSourceObjectID,ObjectIDType inTargetObjectID,ObjectIDTypeSet& ioCopiedObjects)
+EPDFStatusCode PDFDocumentHandler::CopyInDirectObject(ObjectIDType inSourceObjectID,ObjectIDType inTargetObjectID,ObjectIDTypeSet& ioCopiedObjects)
 {
 	// CopyInDirectObject will do this (lissen up)
 	// Start a new object with the input ID
 	// Write the object according to type. For arrays/dicts there might be indirect objects to copy. for them do this:
 	// if you got it in the map already, just write down the new ID. if not register the ID, with a new ID already allocated at this point.
 	// Once done. loop what you registered, using CopyInDirectObject in the same manner. This should maintain that each object is written separately
-	EStatusCode status;
+	EPDFStatusCode status;
 	ObjectIDTypeList newObjectsToWrite;
 
 	RefCountPtr<PDFObject> sourceObject = mParser.ParseNewObject(inSourceObjectID);
 	if(!sourceObject)
 	{
 		TRACE_LOG1("PDFDocumentHandler::CopyInDirectObject, object not found. %ld",inSourceObjectID);
-		return eFailure;
+		return ePDFFailure;
 	}
 
 	mObjectsContext->StartNewIndirectObject(inTargetObjectID);
 	status = WriteObjectByType(sourceObject.GetPtr(),eTokenSeparatorEndLine,newObjectsToWrite);
-	if(eSuccess == status)
+	if(ePDFSuccess == status)
 	{
 		mObjectsContext->EndIndirectObject();
 		return WriteNewObjects(newObjectsToWrite,ioCopiedObjects);
@@ -653,9 +653,9 @@ EStatusCode PDFDocumentHandler::CopyInDirectObject(ObjectIDType inSourceObjectID
 		return status;
 }
 
-EStatusCode PDFDocumentHandler::WriteObjectByType(PDFObject* inObject,ETokenSeparator inSeparator,ObjectIDTypeList& outSourceObjectsToAdd)
+EPDFStatusCode PDFDocumentHandler::WriteObjectByType(PDFObject* inObject,ETokenSeparator inSeparator,ObjectIDTypeList& outSourceObjectsToAdd)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	switch(inObject->GetType())
 	{
@@ -732,18 +732,18 @@ EStatusCode PDFDocumentHandler::WriteObjectByType(PDFObject* inObject,ETokenSepa
 }
 
 
-EStatusCode PDFDocumentHandler::WriteArrayObject(PDFArray* inArray,ETokenSeparator inSeparator,ObjectIDTypeList& outSourceObjectsToAdd)
+EPDFStatusCode PDFDocumentHandler::WriteArrayObject(PDFArray* inArray,ETokenSeparator inSeparator,ObjectIDTypeList& outSourceObjectsToAdd)
 {
 	SingleValueContainerIterator<PDFObjectVector> it(inArray->GetIterator());
 
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	
 	mObjectsContext->StartArray();
 
-	while(it.MoveNext() && eSuccess == status)
+	while(it.MoveNext() && ePDFSuccess == status)
 		status = WriteObjectByType(it.GetItem(),eTokenSeparatorSpace,outSourceObjectsToAdd);
 
-	if(eSuccess == status)
+	if(ePDFSuccess == status)
 		mObjectsContext->EndArray(inSeparator);
 
 	return status;
@@ -751,30 +751,30 @@ EStatusCode PDFDocumentHandler::WriteArrayObject(PDFArray* inArray,ETokenSeparat
 
 
 
-EStatusCode PDFDocumentHandler::WriteDictionaryObject(PDFDictionary* inDictionary,ObjectIDTypeList& outSourceObjectsToAdd)
+EPDFStatusCode PDFDocumentHandler::WriteDictionaryObject(PDFDictionary* inDictionary,ObjectIDTypeList& outSourceObjectsToAdd)
 {
 	MapIterator<PDFNameToPDFObjectMap> it(inDictionary->GetIterator());
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	DictionaryContext* dictionary = mObjectsContext->StartDictionary();
 
-	while(it.MoveNext() && eSuccess == status)
+	while(it.MoveNext() && ePDFSuccess == status)
 	{
 		status = dictionary->WriteKey(it.GetKey()->GetValue());
-		if(eSuccess == status)
+		if(ePDFSuccess == status)
 			status = WriteObjectByType(it.GetValue(),dictionary,outSourceObjectsToAdd);
 	}
 	
-	if(eSuccess == status)
+	if(ePDFSuccess == status)
 	{
 		return mObjectsContext->EndDictionary(dictionary);
 	}
 	else
-		return eSuccess;
+		return ePDFSuccess;
 }
 
-EStatusCode PDFDocumentHandler::WriteObjectByType(PDFObject* inObject,DictionaryContext* inDictionaryContext,ObjectIDTypeList& outSourceObjectsToAdd)
+EPDFStatusCode PDFDocumentHandler::WriteObjectByType(PDFObject* inObject,DictionaryContext* inDictionaryContext,ObjectIDTypeList& outSourceObjectsToAdd)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	switch(inObject->GetType())
 	{
@@ -852,16 +852,16 @@ EStatusCode PDFDocumentHandler::WriteObjectByType(PDFObject* inObject,Dictionary
 	return status;
 }
 
-EStatusCode PDFDocumentHandler::WriteStreamObject(PDFStreamInput* inStream,ObjectIDTypeList& outSourceObjectsToAdd)
+EPDFStatusCode PDFDocumentHandler::WriteStreamObject(PDFStreamInput* inStream,ObjectIDTypeList& outSourceObjectsToAdd)
 {
 	// i'm going to copy the stream directly, cause i don't need all this transcoding and such. if we ever do, i'll write a proper
 	// PDFStream implementation.
 	RefCountPtr<PDFDictionary> streamDictionary(inStream->QueryStreamDictionary());
 
-	if(WriteDictionaryObject(streamDictionary.GetPtr(),outSourceObjectsToAdd) != eSuccess)
+	if(WriteDictionaryObject(streamDictionary.GetPtr(),outSourceObjectsToAdd) != ePDFSuccess)
 	{
 		TRACE_LOG("PDFDocumentHandler::WriteStreamObject, failed to write stream dictionary");
-		return eFailure;
+		return ePDFFailure;
 	}
 
 	mObjectsContext->WriteKeyword("stream");
@@ -872,14 +872,14 @@ EStatusCode PDFDocumentHandler::WriteStreamObject(PDFStreamInput* inStream,Objec
 	if(!lengthObject)
 	{
 		TRACE_LOG("PDFDocumentHandler::WriteStreamObject, stream does not have length, failing");
-		return eFailure;
+		return ePDFFailure;
 	}
 
 	mPDFStream->SetPosition(inStream->GetStreamContentStart());
 
 	OutputStreamTraits traits(mObjectsContext->StartFreeContext());
-	EStatusCode status = traits.CopyToOutputStream(mPDFStream,(LongBufferSizeType)lengthObject->GetValue());	
-	if(eSuccess == status)
+	EPDFStatusCode status = traits.CopyToOutputStream(mPDFStream,(LongBufferSizeType)lengthObject->GetValue());	
+	if(ePDFSuccess == status)
 	{
 		mObjectsContext->EndFreeContext();
 		mObjectsContext->EndLine(); // this one just to make sure
@@ -888,11 +888,11 @@ EStatusCode PDFDocumentHandler::WriteStreamObject(PDFStreamInput* inStream,Objec
 	return status;
 }
 
-EStatusCode PDFDocumentHandler::OnResourcesWrite(
+EPDFStatusCode PDFDocumentHandler::OnResourcesWrite(
 						ResourcesDictionary* inResources,
 						DictionaryContext* inPageResourcesDictionaryContext,
 						ObjectsContext* inPDFWriterObjectContext,
-						DocumentContext* inPDFWriterDocumentContext)
+						DocumentsContext* inPDFWriterDocumentsContext)
 {
 	// Writing resources dictionary. simply loop internal elements and copy. nicely enough, i can use read methods, trusting
 	// that no new objects need be written
@@ -902,73 +902,73 @@ EStatusCode PDFDocumentHandler::OnResourcesWrite(
 
 	// k. no resources...as wierd as that might be...or just wrong...i'll let it be
 	if(!resources)
-		return eSuccess;
+		return ePDFSuccess;
 
 	MapIterator<PDFNameToPDFObjectMap> it(resources->GetIterator());
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
-	while(it.MoveNext() && eSuccess == status)
+	while(it.MoveNext() && ePDFSuccess == status)
 	{
 		status = inPageResourcesDictionaryContext->WriteKey(it.GetKey()->GetValue());
-		if(eSuccess == status)
+		if(ePDFSuccess == status)
 			status = WriteObjectByType(it.GetValue(),inPageResourcesDictionaryContext,dummyObjectList);
 	}
 	return status;
 }
 
-EStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
+EPDFStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
 																		const PDFPageRange& inPageRange,
 																		const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	if(StartFileCopyingContext(inPDFFilePath) != eSuccess)
-		return EStatusCodeAndObjectIDTypeList(eFailure,ObjectIDTypeList());
+	if(StartFileCopyingContext(inPDFFilePath) != ePDFSuccess)
+		return EPDFStatusCodeAndObjectIDTypeList(ePDFFailure,ObjectIDTypeList());
 
 	return AppendPDFPagesFromPDFInContext(inPageRange,inCopyAdditionalObjects);
 }
 	
 
-EStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDFInContext(const PDFPageRange& inPageRange,
+EPDFStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDFInContext(const PDFPageRange& inPageRange,
 																					const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	EStatusCodeAndObjectIDTypeList result;
+	EPDFStatusCodeAndObjectIDTypeList result;
 
 	do
 	{
 
-		IDocumentContextExtenderSet::iterator it = mExtenders.begin();
-		for(; it != mExtenders.end() && eSuccess == result.first; ++it)
+		IDocumentsContextExtenderSet::iterator it = mExtenders.begin();
+		for(; it != mExtenders.end() && ePDFSuccess == result.first; ++it)
 		{
-			result.first = (*it)->OnPDFParsingComplete(mObjectsContext,mDocumentContext,this);
-			if(result.first != eSuccess)
-				TRACE_LOG("DocumentContext::AppendPDFPagesFromPDF, unexpected failure. extender declared failure after parsing page.");
+			result.first = (*it)->OnPDFParsingComplete(mObjectsContext,mDocumentsContext,this);
+			if(result.first != ePDFSuccess)
+				TRACE_LOG("DocumentsContext::AppendPDFPagesFromPDF, unexpected failure. extender declared failure after parsing page.");
 		}
 
 		// copy additional objects prior to pages, so we have them ready at page copying
 		if(inCopyAdditionalObjects.size() > 0)
 		{
 			result.first = WriteNewObjects(inCopyAdditionalObjects);
-			if(result.first != eSuccess)
+			if(result.first != ePDFSuccess)
 			{
 				TRACE_LOG("PDFDocumentHandler::AppendPDFPagesFromPDF, failed copying additional objects");
 				break;
 			}
 		}
 
-		EStatusCodeAndObjectIDType newObject;
+		EPDFStatusCodeAndObjectIDType newObject;
 
 		if(PDFPageRange::eRangeTypeAll == inPageRange.mType)
 		{
-			for(unsigned long i=0; i < mParser.GetPagesCount() && eSuccess == result.first; ++i)
+			for(unsigned long i=0; i < mParser.GetPagesCount() && ePDFSuccess == result.first; ++i)
 			{
 				newObject = CreatePDFPageForPage(i);
-				if(eSuccess == newObject.first)
+				if(ePDFSuccess == newObject.first)
 				{
 					result.second.push_back(newObject.second);
 				}
 				else
 				{
 					TRACE_LOG1("PDFDocumentHandler::AppendPDFPagesFromPDF, failed to embed page %ld", i);
-					result.first = eFailure;
+					result.first = ePDFFailure;
 				}
 			}
 		}
@@ -976,21 +976,21 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDFInContex
 		{
 			// eRangeTypeSpecific
 			ULongAndULongList::const_iterator it = inPageRange.mSpecificRanges.begin();
-			for(; it != inPageRange.mSpecificRanges.end() && eSuccess == result.first;++it)
+			for(; it != inPageRange.mSpecificRanges.end() && ePDFSuccess == result.first;++it)
 			{
 				if(it->first <= it->second && it->second < mParser.GetPagesCount())
 				{
-					for(unsigned long i=it->first; i <= it->second && eSuccess == result.first; ++i)
+					for(unsigned long i=it->first; i <= it->second && ePDFSuccess == result.first; ++i)
 					{
 						newObject = CreatePDFPageForPage(i);
-						if(eSuccess == newObject.first)
+						if(ePDFSuccess == newObject.first)
 						{
 							result.second.push_back(newObject.second);
 						}
 						else
 						{
 							TRACE_LOG1("PDFDocumentHandler::AppendPDFPagesFromPDF, failed to embed page %ld", i);
-							result.first = eFailure;
+							result.first = ePDFFailure;
 						}
 					}
 				}
@@ -1000,7 +1000,7 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDFInContex
 						it->first,
 						it->second,
 						mParser.GetPagesCount());
-					result.first = eFailure;
+					result.first = ePDFFailure;
 				}
 			}
 		}
@@ -1008,12 +1008,12 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDFInContex
 
 	}while(false);
 
-	IDocumentContextExtenderSet::iterator it = mExtenders.begin();
-	for(; it != mExtenders.end() && eSuccess == result.first; ++it)
+	IDocumentsContextExtenderSet::iterator it = mExtenders.begin();
+	for(; it != mExtenders.end() && ePDFSuccess == result.first; ++it)
 	{
-		result.first = (*it)->OnPDFCopyingComplete(mObjectsContext,mDocumentContext,this);
-		if(result.first != eSuccess)
-			TRACE_LOG("DocumentContext::AppendPDFPagesFromPDF, unexpected failure. extender declared failure before finalizing copy.");
+		result.first = (*it)->OnPDFCopyingComplete(mObjectsContext,mDocumentsContext,this);
+		if(result.first != ePDFSuccess)
+			TRACE_LOG("DocumentsContext::AppendPDFPagesFromPDF, unexpected failure. extender declared failure before finalizing copy.");
 	}
 
 	StopCopyingContext();
@@ -1021,11 +1021,11 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDFInContex
 	return result;
 }
 
-EStatusCodeAndObjectIDType PDFDocumentHandler::CreatePDFPageForPage(unsigned long inPageIndex)
+EPDFStatusCodeAndObjectIDType PDFDocumentHandler::CreatePDFPageForPage(unsigned long inPageIndex)
 {
 	RefCountPtr<PDFDictionary> pageObject = mParser.ParsePage(inPageIndex);
-	EStatusCodeAndObjectIDType result;
-	result.first = eFailure;
+	EPDFStatusCodeAndObjectIDType result;
+	result.first = ePDFFailure;
 	result.second = 0;
 	PDFPage* newPage = NULL;
 
@@ -1035,21 +1035,21 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::CreatePDFPageForPage(unsigned lon
 		return result;
 	}
 
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
-	IDocumentContextExtenderSet::iterator it = mExtenders.begin();
-	for(; it != mExtenders.end() && eSuccess == status; ++it)
+	IDocumentsContextExtenderSet::iterator it = mExtenders.begin();
+	for(; it != mExtenders.end() && ePDFSuccess == status; ++it)
 	{
-		result.first = (*it)->OnBeforeCreatePageFromPage(pageObject.GetPtr(),mObjectsContext,mDocumentContext,this);
-		if(result.first != eSuccess)
-			TRACE_LOG("DocumentContext::CreatePDFPageForPage, unexpected failure. extender declared failure before writing page.");
+		result.first = (*it)->OnBeforeCreatePageFromPage(pageObject.GetPtr(),mObjectsContext,mDocumentsContext,this);
+		if(result.first != ePDFSuccess)
+			TRACE_LOG("DocumentsContext::CreatePDFPageForPage, unexpected failure. extender declared failure before writing page.");
 	}
-	if(status != eSuccess)
+	if(status != ePDFSuccess)
 		return result;
 
 	do
 	{
-		if(CopyResourcesIndirectObjects(pageObject.GetPtr()) != eSuccess)
+		if(CopyResourcesIndirectObjects(pageObject.GetPtr()) != ePDFSuccess)
 			break;
 
 		// Create a new form XObject
@@ -1057,7 +1057,7 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::CreatePDFPageForPage(unsigned lon
 		newPage->SetMediaBox(DeterminePageBox(pageObject.GetPtr(),ePDFPageBoxMediaBox));
 
 		// copy the page content to the target page content
-		if(CopyPageContentToTargetPage(newPage,pageObject.GetPtr()) != eSuccess)
+		if(CopyPageContentToTargetPage(newPage,pageObject.GetPtr()) != ePDFSuccess)
 		{
 			delete newPage;
 			newPage = NULL;
@@ -1066,11 +1066,11 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::CreatePDFPageForPage(unsigned lon
 
 		// resources dictionary is gonna be empty at this point...so we can use our own code to write the dictionary, by extending.
 		// which will be a simple loop. note that at this point all indirect objects should have been copied, and have mapping
-		mDocumentContext->AddDocumentContextExtender(this);
+		mDocumentsContext->AddDocumentsContextExtender(this);
 		mWrittenPage = pageObject.GetPtr();
 
-		result = mDocumentContext->WritePage(newPage);
-		if(result.first != eSuccess)
+		result = mDocumentsContext->WritePage(newPage);
+		if(result.first != ePDFSuccess)
 		{
 			delete newPage;
 			newPage = NULL;
@@ -1080,16 +1080,16 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::CreatePDFPageForPage(unsigned lon
 	}while(false);
 
 	mWrittenPage = NULL;
-	mDocumentContext->RemoveDocumentContextExtender(this);
+	mDocumentsContext->RemoveDocumentsContextExtender(this);
 
-	if(result.first = eSuccess)
+	if(result.first = ePDFSuccess)
 	{
 		it = mExtenders.begin();
-		for(; it != mExtenders.end() && eSuccess == result.first; ++it)
+		for(; it != mExtenders.end() && ePDFSuccess == result.first; ++it)
 		{
-			result.first = (*it)->OnAfterCreatePageFromPage(newPage,pageObject.GetPtr(),mObjectsContext,mDocumentContext,this);
-			if(result.first != eSuccess)
-				TRACE_LOG("DocumentContext::CreatePDFFormXObjectForPage, unexpected failure. extender declared failure after writing page.");
+			result.first = (*it)->OnAfterCreatePageFromPage(newPage,pageObject.GetPtr(),mObjectsContext,mDocumentsContext,this);
+			if(result.first != ePDFSuccess)
+				TRACE_LOG("DocumentsContext::CreatePDFFormXObjectForPage, unexpected failure. extender declared failure after writing page.");
 		}
 	}
 
@@ -1098,11 +1098,11 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::CreatePDFPageForPage(unsigned lon
 	return result;	
 }
 
-EStatusCode PDFDocumentHandler::CopyPageContentToTargetPage(PDFPage* inPage,PDFDictionary* inPageObject)
+EPDFStatusCode PDFDocumentHandler::CopyPageContentToTargetPage(PDFPage* inPage,PDFDictionary* inPageObject)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
-	PageContentContext* pageContentContext = mDocumentContext->StartPageContentContext(inPage);
+	PageContentContext* pageContentContext = mDocumentsContext->StartPageContentContext(inPage);
 
 	RefCountPtr<PDFObject> pageContent(mParser.QueryDictionaryObject(inPageObject,"Contents"));
 	if(pageContent->GetType() == ePDFObjectStream)
@@ -1113,19 +1113,19 @@ EStatusCode PDFDocumentHandler::CopyPageContentToTargetPage(PDFPage* inPage,PDFD
 	{
 		SingleValueContainerIterator<PDFObjectVector> it = ((PDFArray*)pageContent.GetPtr())->GetIterator();
 		PDFObjectCastPtr<PDFIndirectObjectReference> refItem;
-		while(it.MoveNext() && status == eSuccess)
+		while(it.MoveNext() && status == ePDFSuccess)
 		{
 			refItem = it.GetItem();
 			if(!refItem)
 			{
-				status = eFailure;
+				status = ePDFFailure;
 				TRACE_LOG("PDFDocumentHandler::CopyPageContentToTargetPage, content stream array contains non-refs");
 				break;
 			}
 			PDFObjectCastPtr<PDFStreamInput> contentStream(mParser.ParseNewObject(refItem->mObjectID));
 			if(!contentStream)
 			{
-				status = eFailure;
+				status = ePDFFailure;
 				TRACE_LOG("PDFDocumentHandler::CopyPageContentToTargetPage, content stream array contains references to non streams");
 				break;
 			}
@@ -1135,30 +1135,30 @@ EStatusCode PDFDocumentHandler::CopyPageContentToTargetPage(PDFPage* inPage,PDFD
 	else
 	{
 		TRACE_LOG1("PDFDocumentHandler::CopyPageContentToTargetPage, error copying page content, expected either array or stream, getting %s",scPDFObjectTypeLabel[pageContent->GetType()]);
-		status = eFailure;
+		status = ePDFFailure;
 	}
 	
-	if(status != eSuccess)
+	if(status != ePDFSuccess)
 	{
 		delete pageContentContext;
 	}
 	else
 	{
-		mDocumentContext->EndPageContentContext(pageContentContext);
+		mDocumentsContext->EndPageContentContext(pageContentContext);
 	}
 	return status;
 }
 
-EStatusCode PDFDocumentHandler::WritePDFStreamInputToContentContext(PageContentContext* inContentContext,PDFStreamInput* inContentSource)
+EPDFStatusCode PDFDocumentHandler::WritePDFStreamInputToContentContext(PageContentContext* inContentContext,PDFStreamInput* inContentSource)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	
 	do
 	{
 		inContentContext->StartAStreamIfRequired();
 
 		status = WritePDFStreamInputToStream(inContentContext->GetCurrentPageContentStream()->GetWriteStream(),inContentSource);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("PDFDocumentHandler::WritePDFStreamInputToContentContext, failed to write content stream from page input to target page");
 			break;
@@ -1190,26 +1190,26 @@ PDFObject* PDFDocumentHandler::QueryInheritedValue(PDFDictionary* inDictionary,s
 		return NULL;
 }
 
-EStatusCode PDFDocumentHandler::StartFileCopyingContext(const wstring& inPDFFilePath)
+EPDFStatusCode PDFDocumentHandler::StartFileCopyingContext(const wstring& inPDFFilePath)
 {
-	if(mPDFFile.OpenFile(inPDFFilePath) != eSuccess)
+	if(mPDFFile.OpenFile(inPDFFilePath) != ePDFSuccess)
 	{
 		TRACE_LOG1("PDFDocumentHandler::StartFileCopyingContext, unable to open file for reading in %s",inPDFFilePath.c_str());
-		return eFailure;
+		return ePDFFailure;
 	}
 
 	return StartCopyingContext(mPDFFile.GetInputStream());
 }
 
-EStatusCode PDFDocumentHandler::StartCopyingContext(IByteReaderWithPosition* inPDFStream)
+EPDFStatusCode PDFDocumentHandler::StartCopyingContext(IByteReaderWithPosition* inPDFStream)
 {
-	EStatusCode status;
+	EPDFStatusCode status;
 
 	do
 	{
 		mPDFStream = inPDFStream;
 		status = mParser.StartPDFParsing(inPDFStream);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("PDFDocumentHandler::StartCopyingContext, failure occured while parsing PDF file.");
 			break;
@@ -1220,7 +1220,7 @@ EStatusCode PDFDocumentHandler::StartCopyingContext(IByteReaderWithPosition* inP
 		if(encryptionDictionary.GetPtr())
 		{
 			TRACE_LOG("PDFDocumentHandler::StartCopyingContext, Document contains an encryption dictionary. Library does not support embedding of encrypted PDF");
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -1229,11 +1229,11 @@ EStatusCode PDFDocumentHandler::StartCopyingContext(IByteReaderWithPosition* inP
 	return status;
 }
 
-EStatusCodeAndObjectIDType PDFDocumentHandler::CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
+EPDFStatusCodeAndObjectIDType PDFDocumentHandler::CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
 																			EPDFPageBox inPageBoxToUseAsFormBox,
 																			const double* inTransformationMatrix)
 {
-	EStatusCodeAndObjectIDType result;
+	EPDFStatusCodeAndObjectIDType result;
 	PDFFormXObject* newObject;
 
 	if(inPageIndex < mParser.GetPagesCount())
@@ -1241,14 +1241,14 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::CreateFormXObjectFromPDFPage(unsi
 		newObject = CreatePDFFormXObjectForPage(inPageIndex,inPageBoxToUseAsFormBox,inTransformationMatrix);
 		if(newObject)
 		{
-			result.first = eSuccess;
+			result.first = ePDFSuccess;
 			result.second = newObject->GetObjectID();
 			delete newObject;
 		}
 		else
 		{
 			TRACE_LOG1("PDFDocumentHandler::CreateFormXObjectFromPDFPage, failed to embed page %ld",inPageIndex);
-			result.first = eFailure;
+			result.first = ePDFFailure;
 		}
 	}
 	else
@@ -1257,16 +1257,16 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::CreateFormXObjectFromPDFPage(unsi
 			"PDFDocumentHandler::CreateFormXObjectFromPDFPage, request object index %ld is larger than maximum page for input document = %ld", 
 			inPageIndex,
 			mParser.GetPagesCount()-1);
-		result.first = eFailure;
+		result.first = ePDFFailure;
 	}
 	return result;
 }
 
-EStatusCodeAndObjectIDType PDFDocumentHandler::CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
+EPDFStatusCodeAndObjectIDType PDFDocumentHandler::CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
 																			 const PDFRectangle& inCropBox,
 																			 const double* inTransformationMatrix)
 {
-	EStatusCodeAndObjectIDType result;
+	EPDFStatusCodeAndObjectIDType result;
 	PDFFormXObject* newObject;
 
 	if(inPageIndex < mParser.GetPagesCount())
@@ -1274,14 +1274,14 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::CreateFormXObjectFromPDFPage(unsi
 		newObject = CreatePDFFormXObjectForPage(inPageIndex,inCropBox,inTransformationMatrix);
 		if(newObject)
 		{
-			result.first = eSuccess;
+			result.first = ePDFSuccess;
 			result.second = newObject->GetObjectID();
 			delete newObject;
 		}
 		else
 		{
 			TRACE_LOG1("PDFDocumentHandler::CreateFormXObjectFromPDFPage, failed to embed page %ld",inPageIndex);
-			result.first = eFailure;
+			result.first = ePDFFailure;
 		}
 	}
 	else
@@ -1290,20 +1290,20 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::CreateFormXObjectFromPDFPage(unsi
 			"PDFDocumentHandler::CreateFormXObjectFromPDFPage, request object index %ld is larger than maximum page for input document = %ld", 
 			inPageIndex,
 			mParser.GetPagesCount()-1);
-		result.first = eFailure;
+		result.first = ePDFFailure;
 	}
 	return result;
 }
 
 
-EStatusCodeAndObjectIDType PDFDocumentHandler::AppendPDFPageFromPDF(unsigned long inPageIndex)
+EPDFStatusCodeAndObjectIDType PDFDocumentHandler::AppendPDFPageFromPDF(unsigned long inPageIndex)
 {
-	EStatusCodeAndObjectIDType result;
+	EPDFStatusCodeAndObjectIDType result;
 
 	if(inPageIndex < mParser.GetPagesCount())
 	{
 		result = CreatePDFPageForPage(inPageIndex);
-		if(result.first != eSuccess)
+		if(result.first != ePDFSuccess)
 			TRACE_LOG1("PDFDocumentHandler::AppendPDFPageFromPDF, failed to append page %ld",inPageIndex);
 	}
 	else
@@ -1312,14 +1312,14 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::AppendPDFPageFromPDF(unsigned lon
 			"PDFDocumentHandler::AppendPDFPageFromPDF, request object index %ld is larger than maximum page for input document = %ld", 
 			inPageIndex,
 			mParser.GetPagesCount()-1);
-		result.first = eFailure;
+		result.first = ePDFFailure;
 	}
 	return result;
 }
 
-EStatusCodeAndObjectIDType PDFDocumentHandler::CopyObject(ObjectIDType inSourceObjectID)
+EPDFStatusCodeAndObjectIDType PDFDocumentHandler::CopyObject(ObjectIDType inSourceObjectID)
 {
-	EStatusCodeAndObjectIDType result;
+	EPDFStatusCodeAndObjectIDType result;
 
 	ObjectIDTypeToObjectIDTypeMap::iterator it = mSourceToTarget.find(inSourceObjectID);
 	if(it == mSourceToTarget.end())
@@ -1331,29 +1331,29 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::CopyObject(ObjectIDType inSourceO
 	}
 	else
 	{
-		result.first = eSuccess;
+		result.first = ePDFSuccess;
 		result.second = it->second;
 	}
 	return result;
 }
 
-PDFParser* PDFDocumentHandler::GetSourceDocumentParser()
+HummusPDFParser* PDFDocumentHandler::GetSourceDocumentParser()
 {
 	return &mParser;
 }
 
-EStatusCodeAndObjectIDType PDFDocumentHandler::GetCopiedObjectID(ObjectIDType inSourceObjectID)
+EPDFStatusCodeAndObjectIDType PDFDocumentHandler::GetCopiedObjectID(ObjectIDType inSourceObjectID)
 {
-	EStatusCodeAndObjectIDType result;
+	EPDFStatusCodeAndObjectIDType result;
 
 	ObjectIDTypeToObjectIDTypeMap::iterator it = mSourceToTarget.find(inSourceObjectID);
 	if(it == mSourceToTarget.end())
 	{
-		result.first = eFailure;
+		result.first = ePDFFailure;
 	}
 	else
 	{
-		result.first = eSuccess;
+		result.first = ePDFSuccess;
 		result.second = it->second;
 	}
 	return result;
@@ -1374,49 +1374,49 @@ void PDFDocumentHandler::StopCopyingContext()
 
 }
 
-void PDFDocumentHandler::AddDocumentContextExtender(IDocumentContextExtender* inExtender)
+void PDFDocumentHandler::AddDocumentsContextExtender(IDocumentsContextExtender* inExtender)
 {
 	mExtenders.insert(inExtender);
 }
 
-void PDFDocumentHandler::RemoveDocumentContextExtender(IDocumentContextExtender* inExtender)
+void PDFDocumentHandler::RemoveDocumentsContextExtender(IDocumentsContextExtender* inExtender)
 {
 	mExtenders.erase(inExtender);
 }
 
 
-EStatusCode PDFDocumentHandler::MergePDFPagesToPage(PDFPage* inPage,
+EPDFStatusCode PDFDocumentHandler::MergePDFPagesToPage(PDFPage* inPage,
 													const wstring& inPDFFilePath,
 													const PDFPageRange& inPageRange,
 													const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	if(StartFileCopyingContext(inPDFFilePath) != eSuccess)
-		return eFailure;
+	if(StartFileCopyingContext(inPDFFilePath) != ePDFSuccess)
+		return ePDFFailure;
 
 	return MergePDFPagesToPageInContext(inPage,inPageRange,inCopyAdditionalObjects);
 }
 
-EStatusCode PDFDocumentHandler::MergePDFPagesToPageInContext(PDFPage* inPage,
+EPDFStatusCode PDFDocumentHandler::MergePDFPagesToPageInContext(PDFPage* inPage,
 															const PDFPageRange& inPageRange,
 															const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	EStatusCode status;
+	EPDFStatusCode status = ePDFSuccess;
 
 	do
 	{
-		IDocumentContextExtenderSet::iterator it = mExtenders.begin();
-		for(; it != mExtenders.end() && eSuccess == status; ++it)
+		IDocumentsContextExtenderSet::iterator it = mExtenders.begin();
+		for(; it != mExtenders.end() && ePDFSuccess == status; ++it)
 		{
-			status = (*it)->OnPDFParsingComplete(mObjectsContext,mDocumentContext,this);
-			if(status != eSuccess)
-				TRACE_LOG("DocumentContext::MergePDFPagesToPage, unexpected failure. extender declared failure after parsing page.");
+			status = (*it)->OnPDFParsingComplete(mObjectsContext,mDocumentsContext,this);
+			if(status != ePDFSuccess)
+				TRACE_LOG("DocumentsContext::MergePDFPagesToPage, unexpected failure. extender declared failure after parsing page.");
 		}
 
 	// copy additional objects prior to pages, so we have them ready at page merging
 		if(inCopyAdditionalObjects.size() > 0)
 		{
 			status = WriteNewObjects(inCopyAdditionalObjects);
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
 				TRACE_LOG("PDFDocumentHandler::MergePDFPagesToPage, failed copying additional objects");
 				break;
@@ -1425,10 +1425,10 @@ EStatusCode PDFDocumentHandler::MergePDFPagesToPageInContext(PDFPage* inPage,
 
 		if(PDFPageRange::eRangeTypeAll == inPageRange.mType)
 		{
-			for(unsigned long i=0; i < mParser.GetPagesCount() && eSuccess == status; ++i)
+			for(unsigned long i=0; i < mParser.GetPagesCount() && ePDFSuccess == status; ++i)
 			{
 				status = MergePDFPageForPage(inPage,i);
-				if(status != eSuccess)
+				if(status != ePDFSuccess)
 					TRACE_LOG1("PDFDocumentHandler::MergePDFPagesToPage, failed to embed page %ld", i);
 			}
 		}
@@ -1436,14 +1436,14 @@ EStatusCode PDFDocumentHandler::MergePDFPagesToPageInContext(PDFPage* inPage,
 		{
 			// eRangeTypeSpecific
 			ULongAndULongList::const_iterator it = inPageRange.mSpecificRanges.begin();
-			for(; it != inPageRange.mSpecificRanges.end() && eSuccess == status;++it)
+			for(; it != inPageRange.mSpecificRanges.end() && ePDFSuccess == status;++it)
 			{
 				if(it->first <= it->second && it->second < mParser.GetPagesCount())
 				{
-					for(unsigned long i=it->first; i <= it->second && eSuccess == status; ++i)
+					for(unsigned long i=it->first; i <= it->second && ePDFSuccess == status; ++i)
 					{
 						status = MergePDFPageForPage(inPage,i);
-						if(status != eSuccess)
+						if(status != ePDFSuccess)
 							TRACE_LOG1("PDFDocumentHandler::MergePDFPagesToPage, failed to embed page %ld", i);
 					}
 				}
@@ -1453,7 +1453,7 @@ EStatusCode PDFDocumentHandler::MergePDFPagesToPageInContext(PDFPage* inPage,
 						it->first,
 						it->second,
 						mParser.GetPagesCount());
-					status = eFailure;
+					status = ePDFFailure;
 				}
 			}
 		}
@@ -1461,12 +1461,12 @@ EStatusCode PDFDocumentHandler::MergePDFPagesToPageInContext(PDFPage* inPage,
 
 	}while(false);
 
-	IDocumentContextExtenderSet::iterator it = mExtenders.begin();
-	for(; it != mExtenders.end() && eSuccess == status; ++it)
+	IDocumentsContextExtenderSet::iterator it = mExtenders.begin();
+	for(; it != mExtenders.end() && ePDFSuccess == status; ++it)
 	{
-		status = (*it)->OnPDFCopyingComplete(mObjectsContext,mDocumentContext,this);
-		if(status != eSuccess)
-			TRACE_LOG("DocumentContext::MergePDFPagesToPage, unexpected failure. extender declared failure before finalizing copy.");
+		status = (*it)->OnPDFCopyingComplete(mObjectsContext,mDocumentsContext,this);
+		if(status != ePDFSuccess)
+			TRACE_LOG("DocumentsContext::MergePDFPagesToPage, unexpected failure. extender declared failure before finalizing copy.");
 	}
 
 	StopCopyingContext();
@@ -1475,26 +1475,26 @@ EStatusCode PDFDocumentHandler::MergePDFPagesToPageInContext(PDFPage* inPage,
 
 }
 
-EStatusCode PDFDocumentHandler::MergePDFPageForPage(PDFPage* inTargetPage,unsigned long inSourcePageIndex)
+EPDFStatusCode PDFDocumentHandler::MergePDFPageForPage(PDFPage* inTargetPage,unsigned long inSourcePageIndex)
 {
 	RefCountPtr<PDFDictionary> pageObject = mParser.ParsePage(inSourcePageIndex);
-	EStatusCode status  = eSuccess;
+	EPDFStatusCode status  = ePDFSuccess;
 
 	if(!pageObject)
 	{
 		TRACE_LOG1("PDFDocumentHandler::MergePDFPageForPage, unhexpected exception, page index does not denote a page object. page index = %ld",inSourcePageIndex);
-		return eFailure;
+		return ePDFFailure;
 	}
 
 
-	IDocumentContextExtenderSet::iterator it = mExtenders.begin();
-	for(; it != mExtenders.end() && eSuccess == status; ++it)
+	IDocumentsContextExtenderSet::iterator it = mExtenders.begin();
+	for(; it != mExtenders.end() && ePDFSuccess == status; ++it)
 	{
-		status = (*it)->OnBeforeMergePageFromPage(inTargetPage,pageObject.GetPtr(),mObjectsContext,mDocumentContext,this);
-		if(status != eSuccess)
-			TRACE_LOG("DocumentContext::MergePDFPageForPage, unexpected failure. extender declared failure before writing page.");
+		status = (*it)->OnBeforeMergePageFromPage(inTargetPage,pageObject.GetPtr(),mObjectsContext,mDocumentsContext,this);
+		if(status != ePDFSuccess)
+			TRACE_LOG("DocumentsContext::MergePDFPageForPage, unexpected failure. extender declared failure before writing page.");
 	}
-	if(status != eSuccess)
+	if(status != ePDFSuccess)
 		return status;
 
 	do
@@ -1502,14 +1502,14 @@ EStatusCode PDFDocumentHandler::MergePDFPageForPage(PDFPage* inTargetPage,unsign
 		StringToStringMap pageResourcesNamesMapping;
 
 		// pause current content context on the stream, if such exists, to allow a safe and separate copying of the page content
-		if(mDocumentContext->HasContentContext(inTargetPage))
+		if(mDocumentsContext->HasContentContext(inTargetPage))
 		{
-			status = mDocumentContext->PausePageContentContext(mDocumentContext->StartPageContentContext(inTargetPage));
-			if(status != eSuccess)
+			status = mDocumentsContext->PausePageContentContext(mDocumentsContext->StartPageContentContext(inTargetPage));
+			if(status != ePDFSuccess)
 				break;
 		}
 
-		if(MergeResourcesToPage(inTargetPage,pageObject.GetPtr(),pageResourcesNamesMapping) != eSuccess)
+		if(MergeResourcesToPage(inTargetPage,pageObject.GetPtr(),pageResourcesNamesMapping) != ePDFSuccess)
 			break;
 
 		// copy the page content to the target page content
@@ -1517,14 +1517,14 @@ EStatusCode PDFDocumentHandler::MergePDFPageForPage(PDFPage* inTargetPage,unsign
 
 	}while(false);
 
-	if(eSuccess == status)
+	if(ePDFSuccess == status)
 	{
 		it = mExtenders.begin();
-		for(; it != mExtenders.end() && eSuccess == status; ++it)
+		for(; it != mExtenders.end() && ePDFSuccess == status; ++it)
 		{
-			status = (*it)->OnAfterMergePageFromPage(inTargetPage,pageObject.GetPtr(),mObjectsContext,mDocumentContext,this);
-			if(status != eSuccess)
-				TRACE_LOG("DocumentContext::MergePDFPageForPage, unexpected failure. extender declared failure after writing page.");
+			status = (*it)->OnAfterMergePageFromPage(inTargetPage,pageObject.GetPtr(),mObjectsContext,mDocumentsContext,this);
+			if(status != ePDFSuccess)
+				TRACE_LOG("DocumentsContext::MergePDFPageForPage, unexpected failure. extender declared failure after writing page.");
 		}
 	}
 
@@ -1532,7 +1532,7 @@ EStatusCode PDFDocumentHandler::MergePDFPageForPage(PDFPage* inTargetPage,unsign
 
 }
 
-EStatusCode PDFDocumentHandler::MergeResourcesToPage(PDFPage* inTargetPage,PDFDictionary* inPage,StringToStringMap& outMappedResourcesNames)
+EPDFStatusCode PDFDocumentHandler::MergeResourcesToPage(PDFPage* inTargetPage,PDFDictionary* inPage,StringToStringMap& outMappedResourcesNames)
 {
 	// parse each individual resources dictionary separately and copy the resources. the output parameter should be used for old vs. new names
 	
@@ -1540,9 +1540,9 @@ EStatusCode PDFDocumentHandler::MergeResourcesToPage(PDFPage* inTargetPage,PDFDi
 
 	// k. no resources...as wierd as that might be...or just wrong...i'll let it be
 	if(!resources)
-		return eSuccess;
+		return ePDFSuccess;
 
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	// ProcSet
 	PDFObjectCastPtr<PDFArray> procsets(mParser.QueryDictionaryObject(resources.GetPtr(),"ProcSet"));
@@ -1562,19 +1562,19 @@ EStatusCode PDFDocumentHandler::MergeResourcesToPage(PDFPage* inTargetPage,PDFDi
 		if(extgstate.GetPtr())
 		{	
 			MapIterator<PDFNameToPDFObjectMap> it(extgstate->GetIterator());
-			while(it.MoveNext() && eSuccess == status)
+			while(it.MoveNext() && ePDFSuccess == status)
 			{
 				// always copying to indirect object. with this method i'm forcing to write them now, not having to hold them in memory till i actually write the resource dictionary.
-				EStatusCodeAndObjectIDType result = CopyObjectToIndirectObject(it.GetValue());
-				if(result.first != eSuccess)
-					status = eFailure;				
+				EPDFStatusCodeAndObjectIDType result = CopyObjectToIndirectObject(it.GetValue());
+				if(result.first != ePDFSuccess)
+					status = ePDFFailure;				
 				outMappedResourcesNames.insert(
 					StringToStringMap::value_type(
 						AsEncodedName(it.GetKey()->GetValue()),
 						inTargetPage->GetResourcesDictionary().AddExtGStateMapping(result.second)));
 				
 			}
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 				break;
 		}
 
@@ -1583,18 +1583,18 @@ EStatusCode PDFDocumentHandler::MergeResourcesToPage(PDFPage* inTargetPage,PDFDi
 		if(colorspace.GetPtr())
 		{	
 			MapIterator<PDFNameToPDFObjectMap> it(colorspace->GetIterator());
-			while(it.MoveNext() && eSuccess == status)
+			while(it.MoveNext() && ePDFSuccess == status)
 			{
-				EStatusCodeAndObjectIDType result = CopyObjectToIndirectObject(it.GetValue());
-				if(result.first != eSuccess)
-					status = eFailure;				
+				EPDFStatusCodeAndObjectIDType result = CopyObjectToIndirectObject(it.GetValue());
+				if(result.first != ePDFSuccess)
+					status = ePDFFailure;				
 				outMappedResourcesNames.insert(
 					StringToStringMap::value_type(
 						AsEncodedName(it.GetKey()->GetValue()),
 						inTargetPage->GetResourcesDictionary().AddColorSpaceMapping(result.second)));
 				
 			}
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 				break;
 		}
 
@@ -1603,18 +1603,18 @@ EStatusCode PDFDocumentHandler::MergeResourcesToPage(PDFPage* inTargetPage,PDFDi
 		if(pattern.GetPtr())
 		{	
 			MapIterator<PDFNameToPDFObjectMap> it(pattern->GetIterator());
-			while(it.MoveNext() && eSuccess == status)
+			while(it.MoveNext() && ePDFSuccess == status)
 			{
-				EStatusCodeAndObjectIDType result = CopyObjectToIndirectObject(it.GetValue());
-				if(result.first != eSuccess)
-					status = eFailure;				
+				EPDFStatusCodeAndObjectIDType result = CopyObjectToIndirectObject(it.GetValue());
+				if(result.first != ePDFSuccess)
+					status = ePDFFailure;				
 				outMappedResourcesNames.insert(
 					StringToStringMap::value_type(
 						AsEncodedName(it.GetKey()->GetValue()),
 						inTargetPage->GetResourcesDictionary().AddPatternMapping(result.second)));
 				
 			}
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 				break;
 		}
 
@@ -1623,18 +1623,18 @@ EStatusCode PDFDocumentHandler::MergeResourcesToPage(PDFPage* inTargetPage,PDFDi
 		if(shading.GetPtr())
 		{	
 			MapIterator<PDFNameToPDFObjectMap> it(shading->GetIterator());
-			while(it.MoveNext() && eSuccess == status)
+			while(it.MoveNext() && ePDFSuccess == status)
 			{
-				EStatusCodeAndObjectIDType result = CopyObjectToIndirectObject(it.GetValue());
-				if(result.first != eSuccess)
-					status = eFailure;				
+				EPDFStatusCodeAndObjectIDType result = CopyObjectToIndirectObject(it.GetValue());
+				if(result.first != ePDFSuccess)
+					status = ePDFFailure;				
 				outMappedResourcesNames.insert(
 					StringToStringMap::value_type(
 						AsEncodedName(it.GetKey()->GetValue()),
 						inTargetPage->GetResourcesDictionary().AddShadingMapping(result.second)));
 				
 			}
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 				break;
 		}
 
@@ -1643,18 +1643,18 @@ EStatusCode PDFDocumentHandler::MergeResourcesToPage(PDFPage* inTargetPage,PDFDi
 		if(xobject.GetPtr())
 		{	
 			MapIterator<PDFNameToPDFObjectMap> it(xobject->GetIterator());
-			while(it.MoveNext() && eSuccess == status)
+			while(it.MoveNext() && ePDFSuccess == status)
 			{
-				EStatusCodeAndObjectIDType result = CopyObjectToIndirectObject(it.GetValue());
-				if(result.first != eSuccess)
-					status = eFailure;				
+				EPDFStatusCodeAndObjectIDType result = CopyObjectToIndirectObject(it.GetValue());
+				if(result.first != ePDFSuccess)
+					status = ePDFFailure;				
 				outMappedResourcesNames.insert(
 					StringToStringMap::value_type(
 						AsEncodedName(it.GetKey()->GetValue()),
 						inTargetPage->GetResourcesDictionary().AddGenericXObjectMapping(result.second)));
 				
 			}
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 				break;
 		}
 
@@ -1663,18 +1663,18 @@ EStatusCode PDFDocumentHandler::MergeResourcesToPage(PDFPage* inTargetPage,PDFDi
 		if(font.GetPtr())
 		{	
 			MapIterator<PDFNameToPDFObjectMap> it(font->GetIterator());
-			while(it.MoveNext() && eSuccess == status)
+			while(it.MoveNext() && ePDFSuccess == status)
 			{
-				EStatusCodeAndObjectIDType result = CopyObjectToIndirectObject(it.GetValue());
-				if(result.first != eSuccess)
-					status = eFailure;				
+				EPDFStatusCodeAndObjectIDType result = CopyObjectToIndirectObject(it.GetValue());
+				if(result.first != ePDFSuccess)
+					status = ePDFFailure;				
 				outMappedResourcesNames.insert(
 					StringToStringMap::value_type(
 						AsEncodedName(it.GetKey()->GetValue()),
 						inTargetPage->GetResourcesDictionary().AddFontMapping(result.second)));
 				
 			}
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 				break;
 		}
 
@@ -1683,18 +1683,18 @@ EStatusCode PDFDocumentHandler::MergeResourcesToPage(PDFPage* inTargetPage,PDFDi
 		if(properties.GetPtr())
 		{	
 			MapIterator<PDFNameToPDFObjectMap> it(properties->GetIterator());
-			while(it.MoveNext() && eSuccess == status)
+			while(it.MoveNext() && ePDFSuccess == status)
 			{
-				EStatusCodeAndObjectIDType result = CopyObjectToIndirectObject(it.GetValue());
-				if(result.first != eSuccess)
-					status = eFailure;				
+				EPDFStatusCodeAndObjectIDType result = CopyObjectToIndirectObject(it.GetValue());
+				if(result.first != ePDFSuccess)
+					status = ePDFFailure;				
 				outMappedResourcesNames.insert(
 					StringToStringMap::value_type(
 						AsEncodedName(it.GetKey()->GetValue()),
 						inTargetPage->GetResourcesDictionary().AddPropertyMapping(result.second)));
 				
 			}
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 				break;
 		}
 
@@ -1716,9 +1716,9 @@ string PDFDocumentHandler::AsEncodedName(const string& inName)
 	return aStringBuilder.ToString().substr(1); // return without initial forward slash
 }
 
-EStatusCodeAndObjectIDType PDFDocumentHandler::CopyObjectToIndirectObject(PDFObject* inObject)
+EPDFStatusCodeAndObjectIDType PDFDocumentHandler::CopyObjectToIndirectObject(PDFObject* inObject)
 {
-	EStatusCodeAndObjectIDType result;
+	EPDFStatusCodeAndObjectIDType result;
 	if(inObject->GetType() != ePDFObjectIndirectObjectReference)
 	{
 		result.second = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
@@ -1736,21 +1736,21 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::CopyObjectToIndirectObject(PDFObj
 		else
 		{
 			result.second = itObjects->second;
-			result.first = eSuccess;
+			result.first = ePDFSuccess;
 		}
 	}
 	return result;
 
 }
 
-EStatusCode PDFDocumentHandler::CopyDirectObjectToIndirectObject(PDFObject* inObject,ObjectIDType inTargetObjectID)
+EPDFStatusCode PDFDocumentHandler::CopyDirectObjectToIndirectObject(PDFObject* inObject,ObjectIDType inTargetObjectID)
 {
-	EStatusCode status;
+	EPDFStatusCode status;
 	ObjectIDTypeList newObjectsToWrite;
 
 	mObjectsContext->StartNewIndirectObject(inTargetObjectID);
 	status = WriteObjectByType(inObject,eTokenSeparatorEndLine,newObjectsToWrite);
-	if(eSuccess == status)
+	if(ePDFSuccess == status)
 	{
 		mObjectsContext->EndIndirectObject();
 		return WriteNewObjects(newObjectsToWrite);
@@ -1759,12 +1759,12 @@ EStatusCode PDFDocumentHandler::CopyDirectObjectToIndirectObject(PDFObject* inOb
 		return status;
 }
 
-EStatusCode PDFDocumentHandler::MergePageContentToTargetPage(PDFPage* inTargetPage,PDFDictionary* inSourcePage,const StringToStringMap& inMappedResourcesNames)
+EPDFStatusCode PDFDocumentHandler::MergePageContentToTargetPage(PDFPage* inTargetPage,PDFDictionary* inSourcePage,const StringToStringMap& inMappedResourcesNames)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
-	bool hasAlreadyAContentContext = mDocumentContext->HasContentContext(inTargetPage);
-	PageContentContext* pageContentContext = mDocumentContext->StartPageContentContext(inTargetPage);
+	bool hasAlreadyAContentContext = mDocumentsContext->HasContentContext(inTargetPage);
+	PageContentContext* pageContentContext = mDocumentsContext->StartPageContentContext(inTargetPage);
 
 	RefCountPtr<PDFObject> pageContent(mParser.QueryDictionaryObject(inSourcePage,"Contents"));
 	if(pageContent->GetType() == ePDFObjectStream)
@@ -1775,19 +1775,19 @@ EStatusCode PDFDocumentHandler::MergePageContentToTargetPage(PDFPage* inTargetPa
 	{
 		SingleValueContainerIterator<PDFObjectVector> it = ((PDFArray*)pageContent.GetPtr())->GetIterator();
 		PDFObjectCastPtr<PDFIndirectObjectReference> refItem;
-		while(it.MoveNext() && status == eSuccess)
+		while(it.MoveNext() && status == ePDFSuccess)
 		{
 			refItem = it.GetItem();
 			if(!refItem)
 			{
-				status = eFailure;
+				status = ePDFFailure;
 				TRACE_LOG("PDFDocumentHandler::MergePageContentToTargetPage, content stream array contains non-refs");
 				break;
 			}
 			PDFObjectCastPtr<PDFStreamInput> contentStream(mParser.ParseNewObject(refItem->mObjectID));
 			if(!contentStream)
 			{
-				status = eFailure;
+				status = ePDFFailure;
 				TRACE_LOG("PDFDocumentHandler::MergePageContentToTargetPage, content stream array contains references to non streams");
 				break;
 			}
@@ -1797,25 +1797,25 @@ EStatusCode PDFDocumentHandler::MergePageContentToTargetPage(PDFPage* inTargetPa
 	else
 	{
 		TRACE_LOG1("PDFDocumentHandler::MergePageContentToTargetPage, error copying page content, expected either array or stream, getting %s",scPDFObjectTypeLabel[pageContent->GetType()]);
-		status = eFailure;
+		status = ePDFFailure;
 	}
 
 	// this means that this function created the content context, in which case it owns it and should finalize it
 	if(!hasAlreadyAContentContext)
-		mDocumentContext->EndPageContentContext(pageContentContext);
+		mDocumentsContext->EndPageContentContext(pageContentContext);
 	return status;	
 }
 
-EStatusCode PDFDocumentHandler::WritePDFStreamInputToContentContext(PageContentContext* inContentContext,PDFStreamInput* inContentSource,const StringToStringMap& inMappedResourcesNames)
+EPDFStatusCode PDFDocumentHandler::WritePDFStreamInputToContentContext(PageContentContext* inContentContext,PDFStreamInput* inContentSource,const StringToStringMap& inMappedResourcesNames)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	
 	do
 	{
 		inContentContext->StartAStreamIfRequired();
 
 		status = WritePDFStreamInputToStream(inContentContext->GetCurrentPageContentStream()->GetWriteStream(),inContentSource,inMappedResourcesNames);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("PDFDocumentHandler::WritePDFStreamInputToContentContext, failed to write content stream from page input to target page");
 			break;
@@ -1828,7 +1828,7 @@ EStatusCode PDFDocumentHandler::WritePDFStreamInputToContentContext(PageContentC
 	return status;
 }
 
-EStatusCode PDFDocumentHandler::WritePDFStreamInputToStream(IByteWriter* inTargetStream,PDFStreamInput* inSourceStream,const StringToStringMap& inMappedResourcesNames)
+EPDFStatusCode PDFDocumentHandler::WritePDFStreamInputToStream(IByteWriter* inTargetStream,PDFStreamInput* inSourceStream,const StringToStringMap& inMappedResourcesNames)
 {
 	// as oppose to regular copying, this copying has to replace name references that refer to mapped resources.
 	// as such, the method of copying will be token by token, where each token is checked for being a resource reference.
@@ -1843,8 +1843,8 @@ EStatusCode PDFDocumentHandler::WritePDFStreamInputToStream(IByteWriter* inTarge
 
 	ResourceTokenMarkerList resourcesPositions;
 
-	EStatusCode status = ScanStreamForResourcesTokens(inSourceStream,inMappedResourcesNames,resourcesPositions);
-	if(status != eSuccess)
+	EPDFStatusCode status = ScanStreamForResourcesTokens(inSourceStream,inMappedResourcesNames,resourcesPositions);
+	if(status != ePDFSuccess)
 		return status;
 
 	return MergeAndReplaceResourcesTokens(inTargetStream,inSourceStream,inMappedResourcesNames,resourcesPositions);
@@ -1852,12 +1852,12 @@ EStatusCode PDFDocumentHandler::WritePDFStreamInputToStream(IByteWriter* inTarge
 
 
 static const char scSlash = '/';
-EStatusCode PDFDocumentHandler::ScanStreamForResourcesTokens(PDFStreamInput* inSourceStream,const StringToStringMap& inMappedResourcesNames,ResourceTokenMarkerList& outResourceMarkers)
+EPDFStatusCode PDFDocumentHandler::ScanStreamForResourcesTokens(PDFStreamInput* inSourceStream,const StringToStringMap& inMappedResourcesNames,ResourceTokenMarkerList& outResourceMarkers)
 {
 	IByteReader* streamReader = mParser.CreateInputStreamReader(inSourceStream);
 
 	if(!streamReader)
-		return eFailure;
+		return ePDFFailure;
 
 	mPDFStream->SetPosition(inSourceStream->GetStreamContentStart());
 
@@ -1881,10 +1881,10 @@ EStatusCode PDFDocumentHandler::ScanStreamForResourcesTokens(PDFStreamInput* inS
 	}
 
 	delete streamReader;
-	return eSuccess;
+	return ePDFSuccess;
 }
 
-EStatusCode PDFDocumentHandler::MergeAndReplaceResourcesTokens(	IByteWriter* inTargetStream,
+EPDFStatusCode PDFDocumentHandler::MergeAndReplaceResourcesTokens(	IByteWriter* inTargetStream,
 																PDFStreamInput* inSourceStream,
 																const StringToStringMap& inMappedResourcesNames,
 																const ResourceTokenMarkerList& inResourceMarkers)
@@ -1892,22 +1892,22 @@ EStatusCode PDFDocumentHandler::MergeAndReplaceResourcesTokens(	IByteWriter* inT
 	IByteReader* streamReader = mParser.CreateInputStreamReader(inSourceStream);
 
 	if(!streamReader)
-		return eFailure;
+		return ePDFFailure;
 
 	mPDFStream->SetPosition(inSourceStream->GetStreamContentStart());
 
 	OutputStreamTraits traits(inTargetStream);
 	PrimitiveObjectsWriter primitivesWriter;
 	primitivesWriter.SetStreamForWriting(inTargetStream);
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	InputStreamSkipperStream skipper(streamReader);
 	ResourceTokenMarkerList::const_iterator it = inResourceMarkers.begin();
 	LongFilePositionType previousContentPosition = 0;
 
-	for(; it != inResourceMarkers.end() && eSuccess == status; ++it)
+	for(; it != inResourceMarkers.end() && ePDFSuccess == status; ++it)
 	{
 		status = traits.CopyToOutputStream(streamReader,(LongBufferSizeType)(it->ResourceTokenPosition - previousContentPosition));
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 		primitivesWriter.WriteName(inMappedResourcesNames.find(it->ResourceToken)->second,eTokenSepratorNone);
 		// note that i'm using SkipBy here. if i want to use SkipTo, i have to user the skipper stream as input stream for the rest
@@ -1917,7 +1917,7 @@ EStatusCode PDFDocumentHandler::MergeAndReplaceResourcesTokens(	IByteWriter* inT
 	}
 
 	// copy from last marker (or in case there are none - from the beginning), till end
-	if(eSuccess == status)
+	if(ePDFSuccess == status)
 		status = traits.CopyToOutputStream(streamReader);
 	
 	skipper.Assign(NULL);
@@ -1926,14 +1926,14 @@ EStatusCode PDFDocumentHandler::MergeAndReplaceResourcesTokens(	IByteWriter* inT
 }
 
 
-EStatusCode PDFDocumentHandler::MergePDFPageToPage(PDFPage* inTargetPage,unsigned long inSourcePageIndex)
+EPDFStatusCode PDFDocumentHandler::MergePDFPageToPage(PDFPage* inTargetPage,unsigned long inSourcePageIndex)
 {
-	EStatusCode status;
+	EPDFStatusCode status;
 
 	if(inSourcePageIndex < mParser.GetPagesCount())
 	{
 		status = MergePDFPageForPage(inTargetPage,inSourcePageIndex);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			TRACE_LOG1("PDFDocumentHandler::MergePDFPageToPage, failed to merge page %ld",inSourcePageIndex);
 	}
 	else
@@ -1942,12 +1942,12 @@ EStatusCode PDFDocumentHandler::MergePDFPageToPage(PDFPage* inTargetPage,unsigne
 			"PDFDocumentHandler::MergePDFPageToPage, request object index %ld is larger than maximum page for input document = %ld", 
 			inSourcePageIndex,
 			mParser.GetPagesCount()-1);
-		status = eFailure;
+		status = ePDFFailure;
 	}
 	return status;
 }
 
-EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+EPDFStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
 																			 const PDFPageRange& inPageRange,
 																			 EPDFPageBox inPageBoxToUseAsFormBox,
 																			 const double* inTransformationMatrix,
@@ -1958,7 +1958,7 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(IBy
 
 }
 
-EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+EPDFStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
 																			const PDFPageRange& inPageRange,
 																			const PDFRectangle& inCropBox,
 																			const double* inTransformationMatrix,
@@ -1968,40 +1968,56 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(IBy
 	return CreateFormXObjectsFromPDF(inPDFStream,inPageRange,&embedCommand,inTransformationMatrix,inCopyAdditionalObjects);
 }
 
-EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	IByteReaderWithPosition* inPDFStream,
+EPDFStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	IByteReaderWithPosition* inPDFStream,
 																				const PDFPageRange& inPageRange,
 																				IPageEmbedInFormCommand* inPageEmbedCommand,
 																				const double* inTransformationMatrix,
 																				const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	if(StartStreamCopyingContext(inPDFStream) != eSuccess)
-		return EStatusCodeAndObjectIDTypeList(eFailure,ObjectIDTypeList());
+	if(StartStreamCopyingContext(inPDFStream) != ePDFSuccess)
+		return EPDFStatusCodeAndObjectIDTypeList(ePDFFailure,ObjectIDTypeList());
 
 	return CreateFormXObjectsFromPDFInContext(inPageRange,inPageEmbedCommand,inTransformationMatrix,inCopyAdditionalObjects);
 }
 
-EStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDF(IByteReaderWithPosition* inPDFStream,
+EPDFStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDF(IByteReaderWithPosition* inPDFStream,
 																		 const PDFPageRange& inPageRange,
 																		 const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	if(StartStreamCopyingContext(inPDFStream) != eSuccess)
-		return EStatusCodeAndObjectIDTypeList(eFailure,ObjectIDTypeList());
+	if(StartStreamCopyingContext(inPDFStream) != ePDFSuccess)
+		return EPDFStatusCodeAndObjectIDTypeList(ePDFFailure,ObjectIDTypeList());
 
 	return AppendPDFPagesFromPDFInContext(inPageRange,inCopyAdditionalObjects);
 }
 
-EStatusCode PDFDocumentHandler::MergePDFPagesToPage(PDFPage* inPage,
+EPDFStatusCode PDFDocumentHandler::MergePDFPagesToPage(PDFPage* inPage,
 													IByteReaderWithPosition* inPDFStream,
 													const PDFPageRange& inPageRange,
 													const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	if(StartStreamCopyingContext(inPDFStream) != eSuccess)
-		return eFailure;
+	if(StartStreamCopyingContext(inPDFStream) != ePDFSuccess)
+		return ePDFFailure;
 
 	return MergePDFPagesToPageInContext(inPage,inPageRange,inCopyAdditionalObjects);
 }
 
-EStatusCode PDFDocumentHandler::StartStreamCopyingContext(IByteReaderWithPosition* inPDFStream)
+EPDFStatusCode PDFDocumentHandler::StartStreamCopyingContext(IByteReaderWithPosition* inPDFStream)
 {
 	return StartCopyingContext(inPDFStream);
 }
+
+
+EPDFStatusCodeAndObjectIDTypeList PDFDocumentHandler::CopyDirectObject(PDFObject* inObject)
+{
+	ObjectIDTypeList notCopiedReferencedObjects;
+
+	EPDFStatusCode status = WriteObjectByType(inObject,eTokenSeparatorEndLine,notCopiedReferencedObjects);
+
+	return EPDFStatusCodeAndObjectIDTypeList(status,notCopiedReferencedObjects);
+}
+
+EPDFStatusCode PDFDocumentHandler::CopyNewObjectsForDirectObject(const ObjectIDTypeList& inReferencedObjects)
+{
+	return WriteNewObjects(inReferencedObjects);
+}
+

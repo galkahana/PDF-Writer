@@ -132,7 +132,7 @@ static unsigned short scSortedStandardStringsPositions[N_STD_STRINGS] = {
 
 static const string scSubtype = "Subtype";
 
-EStatusCode Type1ToCFFEmbeddedFontWriter::WriteEmbeddedFont(	
+EPDFStatusCode Type1ToCFFEmbeddedFontWriter::WriteEmbeddedFont(	
 															FreeTypeFaceWrapper& inFontInfo,
 															const UIntVector& inSubsetGlyphIDs,
 															const string& inFontFile3SubType,
@@ -144,12 +144,12 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteEmbeddedFont(
 	bool notEmbedded;
 		// as oppose to true type, the reason for using a memory stream here is mainly peformance - i don't want to start
 		// setting file pointers and move in a file stream
-	EStatusCode status;
+	EPDFStatusCode status;
 
 	do
 	{
 		status = CreateCFFSubset(inFontInfo,inSubsetGlyphIDs,inSubsetFontName,notEmbedded,rawFontProgram);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::WriteEmbeddedFont, failed to write embedded font program");
 			break;
@@ -160,7 +160,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteEmbeddedFont(
 			// can't embed. mark succesful, and go back empty
 			outEmbeddedFontObjectID = 0;
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::WriteEmbeddedFont, font may not be embedded. so not embedding");
-			return eSuccess;
+			return ePDFSuccess;
 		}
 
 		outEmbeddedFontObjectID = inObjectsContext->StartNewIndirectObject();
@@ -178,7 +178,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteEmbeddedFont(
 		InputStringBufferStream fontProgramStream(&rawFontProgram);
 		OutputStreamTraits streamCopier(pdfStream->GetWriteStream());
 		status = streamCopier.CopyToOutputStream(&fontProgramStream);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::WriteEmbeddedFont, failed to copy font program into pdf stream");
 			break;
@@ -193,14 +193,14 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteEmbeddedFont(
 
 }
 
-EStatusCode Type1ToCFFEmbeddedFontWriter::CreateCFFSubset(	
+EPDFStatusCode Type1ToCFFEmbeddedFontWriter::CreateCFFSubset(	
 															FreeTypeFaceWrapper& inFontInfo,
 															const UIntVector& inSubsetGlyphIDs,
 															const string& inSubsetFontName,
 															bool& outNotEmbedded,
 															MyStringBuf& outFontProgram)
 {
-	EStatusCode status;
+	EPDFStatusCode status;
 
 	do
 	{
@@ -211,14 +211,14 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::CreateCFFSubset(
 			subsetGlyphIDs.insert(subsetGlyphIDs.begin(),0);
 
 		status = mType1File.OpenFile(inFontInfo.GetFontFilePath());
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG1("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, cannot open type font file at %s",inFontInfo.GetFontFilePath().c_str());
 			break;
 		}
 
 		status = mType1Input.ReadType1File(mType1File.GetInputStream());
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, failed to read true type file");
 			break;
@@ -233,7 +233,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::CreateCFFSubset(
 						mType1Input.mFontDictionary.fsType).CanEmbed())
 			{
 				outNotEmbedded = true;
-				return eSuccess;
+				return ePDFSuccess;
 			}
 			else
 				outNotEmbedded = false;
@@ -247,7 +247,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::CreateCFFSubset(
 		TranslateFromFreeTypeToType1(inFontInfo,subsetGlyphIDs,subsetGlyphNames);
 
 		status = AddDependentGlyphs(subsetGlyphNames);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, failed to add dependent glyphs");
 			break;
@@ -257,21 +257,21 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::CreateCFFSubset(
 		mPrimitivesWriter.SetStream(&mFontFileStream);
 
 		status = WriteCFFHeader();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, failed to write CFF header");
 			break;
 		}
 
 		status = WriteName(inSubsetFontName);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, failed to write CFF Name");
 			break;
 		}
 
 		status = WriteTopIndex();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, failed to write Top Index");
 			break;
@@ -282,49 +282,49 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::CreateCFFSubset(
 		PrepareCharSetArray(subsetGlyphNames);
 
 		status = WriteStringIndex();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, failed to write String Index");
 			break;
 		}
 
 		status = WriteGlobalSubrsIndex();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, failed to write global subrs index");
 			break;
 		}
 
 		status = WriteEncodings(subsetGlyphNames);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, failed to write encodings");
 			break;
 		}
 
 		status = WriteCharsets(subsetGlyphNames);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, failed to write charstring");
 			break;
 		}
 
 		status = WriteCharStrings(subsetGlyphNames);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, failed to write charstring");
 			break;
 		}
 
 		status = WritePrivateDictionary();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, failed to write private");
 			break;
 		}
 
 		status = UpdateIndexesAtTopDict();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, failed to update indexes");
 			break;			
@@ -343,14 +343,14 @@ void Type1ToCFFEmbeddedFontWriter::FreeTemporaryStructs()
 	delete[] mCharset;
 }
 
-EStatusCode Type1ToCFFEmbeddedFontWriter::AddDependentGlyphs(StringVector& ioSubsetGlyphIDs)
+EPDFStatusCode Type1ToCFFEmbeddedFontWriter::AddDependentGlyphs(StringVector& ioSubsetGlyphIDs)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	StringSet glyphsSet;
 	StringVector::iterator it = ioSubsetGlyphIDs.begin();
 	bool hasCompositeGlyphs = false;
 
-	for(;it != ioSubsetGlyphIDs.end() && eSuccess == status; ++it)
+	for(;it != ioSubsetGlyphIDs.end() && ePDFSuccess == status; ++it)
 	{
 		bool localHasCompositeGlyphs;
 		status = AddComponentGlyphs(*it,glyphsSet,localHasCompositeGlyphs);
@@ -373,15 +373,15 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::AddDependentGlyphs(StringVector& ioSub
 	return status;	
 }
 
-EStatusCode Type1ToCFFEmbeddedFontWriter::AddComponentGlyphs(const string& inGlyphID,StringSet& ioComponents,bool &outFoundComponents)
+EPDFStatusCode Type1ToCFFEmbeddedFontWriter::AddComponentGlyphs(const string& inGlyphID,StringSet& ioComponents,bool &outFoundComponents)
 {
 	CharString1Dependencies dependencies;
-	EStatusCode status = mType1Input.CalculateDependenciesForCharIndex(inGlyphID,dependencies);
+	EPDFStatusCode status = mType1Input.CalculateDependenciesForCharIndex(inGlyphID,dependencies);
 
-	if(eSuccess == status && dependencies.mCharCodes.size() !=0)
+	if(ePDFSuccess == status && dependencies.mCharCodes.size() !=0)
 	{
 		ByteSet::iterator it = dependencies.mCharCodes.begin();
-		for(; it != dependencies.mCharCodes.end() && eSuccess == status; ++it)
+		for(; it != dependencies.mCharCodes.end() && ePDFSuccess == status; ++it)
 		{
 			bool dummyFound;
 			string glyphName = mType1Input.GetGlyphCharStringName(*it);
@@ -395,7 +395,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::AddComponentGlyphs(const string& inGly
 	return status;
 }
 
-EStatusCode Type1ToCFFEmbeddedFontWriter::WriteCFFHeader()
+EPDFStatusCode Type1ToCFFEmbeddedFontWriter::WriteCFFHeader()
 {
 	// write a default CFF header. i'm using dummies for the offset sizes, cause i don't think they really
 	// matter anyways.
@@ -407,7 +407,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteCFFHeader()
 	return mPrimitivesWriter.GetInternalState();
 }
 
-EStatusCode Type1ToCFFEmbeddedFontWriter::WriteName(const string& inSubsetFontName)
+EPDFStatusCode Type1ToCFFEmbeddedFontWriter::WriteName(const string& inSubsetFontName)
 {	
 	// get the first name from the name table, and write it here
 
@@ -440,16 +440,16 @@ Byte Type1ToCFFEmbeddedFontWriter::GetMostCompressedOffsetSize(unsigned long inO
 	return 4;
 }
 
-EStatusCode Type1ToCFFEmbeddedFontWriter::WriteTopIndex()
+EPDFStatusCode Type1ToCFFEmbeddedFontWriter::WriteTopIndex()
 {
 
-	EStatusCode status;
+	EPDFStatusCode status;
 	MyStringBuf topDictSegment; 
 
 	do
 	{
 		status = WriteTopDictSegment(topDictSegment);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 
@@ -470,7 +470,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteTopIndex()
 		InputStringBufferStream topDictStream(&topDictSegment);
 		OutputStreamTraits streamCopier(&mFontFileStream);
 		status = streamCopier.CopyToOutputStream(&topDictStream);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		// Adjust position locators for important placeholders
@@ -481,7 +481,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteTopIndex()
 
 	}while(false);
 
-	if(status != eSuccess)
+	if(status != ePDFSuccess)
 		return status;
 	else
 		return mPrimitivesWriter.GetInternalState();
@@ -493,7 +493,7 @@ static const unsigned short scEncoding = 16;
 static const unsigned short scCharstrings = 17;
 static const unsigned short scPrivate = 18;
 
-EStatusCode Type1ToCFFEmbeddedFontWriter::WriteTopDictSegment(MyStringBuf& ioTopDictSegment)
+EPDFStatusCode Type1ToCFFEmbeddedFontWriter::WriteTopDictSegment(MyStringBuf& ioTopDictSegment)
 {
 	OutputStringBufferStream topDictStream(&ioTopDictSegment);
 	CFFPrimitiveWriter dictPrimitiveWriter;
@@ -660,7 +660,7 @@ BoolAndUShort Type1ToCFFEmbeddedFontWriter::FindStandardString(const string& inS
 		
 }
 
-EStatusCode Type1ToCFFEmbeddedFontWriter::WriteStringIndex()
+EPDFStatusCode Type1ToCFFEmbeddedFontWriter::WriteStringIndex()
 {
 	
 	mPrimitivesWriter.WriteCard16((unsigned short)mStrings.size());
@@ -694,14 +694,14 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteStringIndex()
 	return mPrimitivesWriter.GetInternalState();
 }
 
-EStatusCode Type1ToCFFEmbeddedFontWriter::WriteGlobalSubrsIndex()
+EPDFStatusCode Type1ToCFFEmbeddedFontWriter::WriteGlobalSubrsIndex()
 {
 	// global subrs index is empty!. no subrs in my CFF outputs. all charstrings are flattened
 
 	return mPrimitivesWriter.WriteCard16(0);	
 }
 
-EStatusCode Type1ToCFFEmbeddedFontWriter::WriteEncodings(const StringVector& inSubsetGlyphIDs)
+EPDFStatusCode Type1ToCFFEmbeddedFontWriter::WriteEncodings(const StringVector& inSubsetGlyphIDs)
 {
 	// k. get the encoding for the input glyphs
 
@@ -730,7 +730,7 @@ void Type1ToCFFEmbeddedFontWriter::PrepareCharSetArray(const StringVector& inSub
 	}
 }
 
-EStatusCode Type1ToCFFEmbeddedFontWriter::WriteCharsets(const StringVector& inSubsetGlyphIDs)
+EPDFStatusCode Type1ToCFFEmbeddedFontWriter::WriteCharsets(const StringVector& inSubsetGlyphIDs)
 {
 	mCharsetPosition = mFontFileStream.GetCurrentPosition();
 
@@ -741,7 +741,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteCharsets(const StringVector& inSu
 	return mPrimitivesWriter.GetInternalState();	
 }
 
-EStatusCode Type1ToCFFEmbeddedFontWriter::WriteCharStrings(const StringVector& inSubsetGlyphIDs)
+EPDFStatusCode Type1ToCFFEmbeddedFontWriter::WriteCharStrings(const StringVector& inSubsetGlyphIDs)
 {
 	/*
 		1. build the charstrings data, looping the glyphs charstrings and writing a flattened
@@ -756,19 +756,19 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteCharStrings(const StringVector& i
 	OutputStringBufferStream charStringsDataWriteStream(&charStringsData);
 	Type1ToType2Converter charStringConverter;
 	StringVector::const_iterator itGlyphs = inSubsetGlyphIDs.begin();
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	do
 	{
 		unsigned short i=0;
-		for(; itGlyphs != inSubsetGlyphIDs.end() && eSuccess == status; ++itGlyphs,++i)
+		for(; itGlyphs != inSubsetGlyphIDs.end() && ePDFSuccess == status; ++itGlyphs,++i)
 		{
 			offsets[i] = (unsigned long)charStringsDataWriteStream.GetCurrentPosition();
 			status = charStringConverter.WriteConvertedFontProgram(*itGlyphs,
 																   &(mType1Input),
 																   &charStringsDataWriteStream);
 		}
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		offsets[i] = (unsigned long)charStringsDataWriteStream.GetCurrentPosition();
@@ -794,7 +794,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteCharStrings(const StringVector& i
 	return status;	
 }
 
-EStatusCode Type1ToCFFEmbeddedFontWriter::WritePrivateDictionary()
+EPDFStatusCode Type1ToCFFEmbeddedFontWriter::WritePrivateDictionary()
 {
 	mPrivatePosition = mFontFileStream.GetCurrentPosition();
 
@@ -855,7 +855,7 @@ void Type1ToCFFEmbeddedFontWriter::AddDeltaVectorIfNotEmpty(CFFPrimitiveWriter& 
 	inWriter.WriteDictOperator(inOperator);
 }
 
-EStatusCode Type1ToCFFEmbeddedFontWriter::UpdateIndexesAtTopDict()
+EPDFStatusCode Type1ToCFFEmbeddedFontWriter::UpdateIndexesAtTopDict()
 {
 	LongFilePositionType currentPosition = mFontFileStream.GetCurrentPosition();
 

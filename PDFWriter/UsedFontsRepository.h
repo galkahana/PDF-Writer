@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "ObjectsBasicTypes.h"
 
 #include <string>
@@ -31,7 +31,7 @@ using namespace std;
 class FreeTypeWrapper;
 class PDFUsedFont;
 class ObjectsContext;
-class PDFParser;
+class HummusPDFParser;
 
 typedef map<wstring,PDFUsedFont*> WStringToPDFUsedFontMap;
 typedef map<wstring,wstring> WStringToWStringMap;
@@ -48,10 +48,10 @@ public:
 	// second overload is for type 1, when an additional metrics file is available
 	PDFUsedFont* GetFontForFile(const wstring& inFontFilePath,const wstring& inOptionalMetricsFile);
 
-	EStatusCode WriteUsedFontsDefinitions();
+	EPDFStatusCode WriteUsedFontsDefinitions();
 
-	EStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
-	EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);
+	EPDFStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
+	EPDFStatusCode ReadState(HummusPDFParser* inStateReader,ObjectIDType inObjectID);
 
 private:
 

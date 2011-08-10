@@ -27,10 +27,10 @@ public:
 	WrittenFontTrueType(ObjectsContext* inObjectsContext);
 	~WrittenFontTrueType(void);
 
-	virtual EStatusCode WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo);
+	virtual EPDFStatusCode WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo);
 
-	virtual EStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectId);
-	virtual EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);
+	virtual EPDFStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectId);
+	virtual EPDFStatusCode ReadState(HummusPDFParser* inStateReader,ObjectIDType inObjectID);
 
 
 private:

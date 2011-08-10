@@ -1,5 +1,5 @@
 /*
-   Source File : IDocumentContextExtender.h
+   Source File : IDocumentsContextExtender.h
 
 
    Copyright 2011 Gal Kahana PDFWriter
@@ -20,12 +20,12 @@
 */
 #pragma once
 
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 
 class PDFPage;
 class DictionaryContext;
 class ObjectsContext;
-class DocumentContext;
+class DocumentsContext;
 class CatalogInformation;
 class ResourcesDictionary;
 class PDFFormXObject;
@@ -34,122 +34,122 @@ class TIFFImageHandler;
 class PDFDocumentHandler;
 class PDFDictionary;
 
-class IDocumentContextExtender
+class IDocumentsContextExtender
 {
 public:
-	virtual ~IDocumentContextExtender(){}
+	virtual ~IDocumentsContextExtender(){}
 
 	// add items to the page dictionary while it's written
-	virtual EStatusCode OnPageWrite(
+	virtual EPDFStatusCode OnPageWrite(
 							PDFPage* inPage,
 							DictionaryContext* inPageDictionaryContext,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext) = 0;
+							DocumentsContext* inPDFWriterDocumentsContext) = 0;
 
 	// add items to the resources dictionary while it's written (can be either page or xobject resources dictionary)
-	virtual EStatusCode OnResourcesWrite(
+	virtual EPDFStatusCode OnResourcesWrite(
 							ResourcesDictionary* inResources,
 							DictionaryContext* inPageResourcesDictionaryContext,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext) = 0;
+							DocumentsContext* inPDFWriterDocumentsContext) = 0;
 
 	// add items to a particular resource dictionary (will be called from all but procset array and xobjects dict)
-	virtual EStatusCode OnResourceDictionaryWrite(
+	virtual EPDFStatusCode OnResourceDictionaryWrite(
 							DictionaryContext* inResourceDictionary,
 							const string& inResourceDictionaryName,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext) = 0;
+							DocumentsContext* inPDFWriterDocumentsContext) = 0;
 
 	// add items to the form dictionary while it's written
-	virtual EStatusCode OnFormXObjectWrite(
+	virtual EPDFStatusCode OnFormXObjectWrite(
 							ObjectIDType inFormXObjectID,
 							ObjectIDType inFormXObjectResourcesDictionaryID,
 							DictionaryContext* inFormDictionaryContext,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext) = 0;
+							DocumentsContext* inPDFWriterDocumentsContext) = 0;
 
 	// add items to the image dictionary while it's written for a JPG Image
-	virtual EStatusCode OnJPEGImageXObjectWrite(
+	virtual EPDFStatusCode OnJPEGImageXObjectWrite(
 							ObjectIDType inImageXObjectID,
 							DictionaryContext* inImageDictionaryContext,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext,
+							DocumentsContext* inPDFWriterDocumentsContext,
 							JPEGImageHandler* inJPGImageHandler) = 0;
 
 	// add items to the image dictionary while it's writtern for a TIFF image (for tile images there are multiple such images)
-	virtual EStatusCode OnTIFFImageXObjectWrite(
+	virtual EPDFStatusCode OnTIFFImageXObjectWrite(
 							ObjectIDType inImageXObjectID,
 							DictionaryContext* inImageDictionaryContext,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext,
+							DocumentsContext* inPDFWriterDocumentsContext,
 							TIFFImageHandler* inTIFFImageHandler) = 0;
 
 	// add items to catalog dictionary while it's written
-	virtual EStatusCode OnCatalogWrite(
+	virtual EPDFStatusCode OnCatalogWrite(
 							CatalogInformation* inCatalogInformation,
 							DictionaryContext* inCatalogDictionaryContext,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext) = 0;
+							DocumentsContext* inPDFWriterDocumentsContext) = 0;
 
 	// PDF document embedding events
 
 	// When using any embedding method - Parsing of PDF to merge is not complete, before starting any merging
-	virtual EStatusCode OnPDFParsingComplete(
+	virtual EPDFStatusCode OnPDFParsingComplete(
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext,
+							DocumentsContext* inPDFWriterDocumentsContext,
 							PDFDocumentHandler* inPDFDocumentHandler) = 0;
 
 	// When creating XObjects from pages - before creating a particular page xobject
-	virtual EStatusCode OnBeforeCreateXObjectFromPage(
+	virtual EPDFStatusCode OnBeforeCreateXObjectFromPage(
 							PDFDictionary* inPageObjectDictionary,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext,
+							DocumentsContext* inPDFWriterDocumentsContext,
 							PDFDocumentHandler* inPDFDocumentHandler) = 0;
 
 	// When creating XObjects from pages - after creating a particular page xobject
-	virtual EStatusCode OnAfterCreateXObjectFromPage(
+	virtual EPDFStatusCode OnAfterCreateXObjectFromPage(
 							PDFFormXObject* iPageObjectResultXObject,
 							PDFDictionary* inPageObjectDictionary,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext,
+							DocumentsContext* inPDFWriterDocumentsContext,
 							PDFDocumentHandler* inPDFDocumentHandler) = 0;
 
 	// When appending pages from PDF - before appending a particular page
-	virtual EStatusCode OnBeforeCreatePageFromPage(
+	virtual EPDFStatusCode OnBeforeCreatePageFromPage(
 							PDFDictionary* inPageObjectDictionary,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext,
+							DocumentsContext* inPDFWriterDocumentsContext,
 							PDFDocumentHandler* inPDFDocumentHandler) = 0;
 
 	// When appending pages from PDF - after appending a particular page
-	virtual EStatusCode OnAfterCreatePageFromPage(
+	virtual EPDFStatusCode OnAfterCreatePageFromPage(
 							PDFPage* iPageObjectResultPage,
 							PDFDictionary* inPageObjectDictionary,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext,
+							DocumentsContext* inPDFWriterDocumentsContext,
 							PDFDocumentHandler* inPDFDocumentHandler) = 0;
 
 	// When merging pages from PDF - before merging a particular page
-	virtual EStatusCode OnBeforeMergePageFromPage(
+	virtual EPDFStatusCode OnBeforeMergePageFromPage(
 							PDFPage* inTargetPage,
 							PDFDictionary* inPageObjectDictionary,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext,
+							DocumentsContext* inPDFWriterDocumentsContext,
 							PDFDocumentHandler* inPDFDocumentHandler) = 0;
 
 	// When merging pages from PDF - after merging a particular page
-	virtual EStatusCode OnAfterMergePageFromPage(
+	virtual EPDFStatusCode OnAfterMergePageFromPage(
 							PDFPage* inTargetPage,
 							PDFDictionary* inPageObjectDictionary,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext,
+							DocumentsContext* inPDFWriterDocumentsContext,
 							PDFDocumentHandler* inPDFDocumentHandler) = 0;
 
 
 	// When using any embedding method - right after embedding of the PDF is complete
-	virtual EStatusCode OnPDFCopyingComplete(
+	virtual EPDFStatusCode OnPDFCopyingComplete(
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext,
+							DocumentsContext* inPDFWriterDocumentsContext,
 							PDFDocumentHandler* inPDFDocumentHandler) = 0;
 
 };

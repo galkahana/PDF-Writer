@@ -44,19 +44,19 @@ DictionaryContext::~DictionaryContext(void)
 	mObjectsContext->WriteKeyword(scEndDictionary);
 }
 
-EStatusCode DictionaryContext::WriteKey(const string& inKey)
+EPDFStatusCode DictionaryContext::WriteKey(const string& inKey)
 {
 	if(mKeys.find(inKey) == mKeys.end())
 	{
 		WriteIndents();
 		mObjectsContext->WriteName(inKey);
 		mKeys.insert(inKey);
-		return eSuccess;
+		return ePDFSuccess;
 	}
 	else
 	{
 		TRACE_LOG1("DictionaryContext::WriteKey, Duplicate key error. Cannot write multiple keys in the same dictionary. key reused - %s",inKey.c_str());
-		return eFailure;
+		return ePDFFailure;
 	}
 }
 

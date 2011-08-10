@@ -77,12 +77,12 @@
 #include "PDFStream.h"
 #include "IByteWriter.h"
 #include "PDFImageXObject.h"
-#include "DocumentContext.h"
+#include "DocumentsContext.h"
 #include "ProcsetResourcesConstants.h"
 #include "XObjectContentContext.h"
 #include "PDFFormXObject.h"
 #include "SafeBufferMacrosDefs.h"
-#include "IDocumentContextExtender.h"
+#include "IDocumentsContextExtender.h"
 #include "StringTraits.h"
 #include "IByteReaderWithPosition.h"
 
@@ -384,10 +384,10 @@ TIFFImageHandler::~TIFFImageHandler(void)
 	DestroyConversionState();
 }
 
-void TIFFImageHandler::SetOperationsContexts(DocumentContext* inContainerDocumentContext,ObjectsContext* inObjectsContext)
+void TIFFImageHandler::SetOperationsContexts(DocumentsContext* inContainerDocumentsContext,ObjectsContext* inObjectsContext)
 {
 	mObjectsContext = inObjectsContext;
-	mContainerDocumentContext = inContainerDocumentContext;
+	mContainerDocumentsContext = inContainerDocumentsContext;
 }
 
 PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFFile(const wstring& inTIFFFilePath,
@@ -407,43 +407,15 @@ PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFFile(const wstring& i
 																const TIFFUsageParameters& inTIFFUsageParameters)
 
 {
+	InputFile tiffFile;
 
-	PDFFormXObject* imageFormXObject = NULL;
-	TIFF* input = NULL;
-
-	do
+	if(tiffFile.OpenFile(inTIFFFilePath) != ePDFSuccess)
 	{
-		TIFFSetErrorHandler(ReportError);
-		TIFFSetWarningHandler(ReportWarning);
-
-		if(!mObjectsContext || !mContainerDocumentContext)
-		{
-			TRACE_LOG("TIFFImageHandler::CreateFormXObjectFromTIFFFile. Unexpected Error, mObjectsContext or mContainerDocumentContext not initialized");
-			break;
-		}
+		TRACE_LOG1("TIFFImageHandler::CreateFormXObjectFromTIFFFile. cannot open file for reading - %s",inTIFFFilePath.c_str());
+		return NULL;
+	}
 		
-		input = TIFFOpenW(inTIFFFilePath.c_str(), "r");
-		if(!input)
-		{
-			TRACE_LOG1("TIFFImageHandler::CreateFormXObjectFromTIFFFile. cannot open file for reading - %s",inTIFFFilePath.c_str());
-			break;
-		}
-
-		InitializeConversionState();
-		mT2p->input = input;
-		mT2p->inputFilePath = inTIFFFilePath;
-		mT2p->pdf_page = inTIFFUsageParameters.PageIndex;
-		mUserParameters = inTIFFUsageParameters;
-
-		imageFormXObject = ConvertTiff2PDF(inFormXObjectID);
-
-	}while(false);
-
-	DestroyConversionState();
-	if(input != NULL)
-		TIFFClose(input);
-
-	return imageFormXObject;
+	return CreateFormXObjectFromTIFFStream(tiffFile.GetInputStream(),inFormXObjectID,inTIFFUsageParameters);
 }
 
 void TIFFImageHandler::InitializeConversionState(){
@@ -484,14 +456,14 @@ void TIFFImageHandler::DestroyConversionState()
 PDFFormXObject* TIFFImageHandler::ConvertTiff2PDF(ObjectIDType inFormXObjectID)
 {
 	PDFFormXObject* imageFormXObject = NULL;
-	EStatusCode status;
+	EPDFStatusCode status;
 	PDFImageXObjectList imagesImageXObject;
 	PDFImageXObject* anImage;
 
 	do
 	{
 		status = ReadTopLevelTiffInformation();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		if(mT2p->pdf_page >= mT2p->tiff_pagecount)
@@ -501,11 +473,11 @@ PDFFormXObject* TIFFImageHandler::ConvertTiff2PDF(ObjectIDType inFormXObjectID)
 				mT2p->pdf_page,
 				mT2p->tiff_pagecount,
 				mT2p->inputFilePath.c_str());
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 		status = ReadTIFFPageInformation();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 		
 
@@ -538,7 +510,7 @@ PDFFormXObject* TIFFImageHandler::ConvertTiff2PDF(ObjectIDType inFormXObjectID)
 					imagesImageXObject.push_back(anImage);
 				else
 				{
-					status = eFailure;
+					status = ePDFFailure;
 					break;
 				}
 			}
@@ -549,9 +521,9 @@ PDFFormXObject* TIFFImageHandler::ConvertTiff2PDF(ObjectIDType inFormXObjectID)
 			if(anImage)
 				imagesImageXObject.push_back(anImage);
 			else
-				status = eFailure;
+				status = ePDFFailure;
 		}
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		// now...write the final XObject to posit all images in their right size
@@ -578,9 +550,9 @@ static int t2p_cmp_t2p_page(const void* e1, const void* e2)
 	return( ((T2P_PAGE*)e1)->page_number - ((T2P_PAGE*)e2)->page_number );
 }
 
-EStatusCode TIFFImageHandler::ReadTopLevelTiffInformation()
+EPDFStatusCode TIFFImageHandler::ReadTopLevelTiffInformation()
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	tdir_t directorycount = TIFFNumberOfDirectories(mT2p->input);
 	tdir_t i=0;
 	uint16 pagen=0;
@@ -595,7 +567,7 @@ EStatusCode TIFFImageHandler::ReadTopLevelTiffInformation()
 		{
 			TRACE_LOG2("Can't allocate %u bytes of memory for tiff_pages array, %s",
 						directorycount * sizeof(T2P_PAGE),mT2p->inputFilePath.c_str());
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 		_TIFFmemset( mT2p->tiff_pages, 0x00, directorycount * sizeof(T2P_PAGE));
@@ -606,7 +578,7 @@ EStatusCode TIFFImageHandler::ReadTopLevelTiffInformation()
 		{
 			TRACE_LOG2("Can't allocate %u bytes of memory for tiff_tiles array, %s",
 						directorycount * sizeof(T2P_PAGE),mT2p->inputFilePath.c_str());
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 		_TIFFmemset( mT2p->tiff_tiles, 0x00, directorycount * sizeof(T2P_TILES));
@@ -619,7 +591,7 @@ EStatusCode TIFFImageHandler::ReadTopLevelTiffInformation()
 			if(!TIFFSetDirectory(mT2p->input, i)){
 				TRACE_LOG2("Can't set directory %u of input file %s",
 							directorycount * sizeof(T2P_PAGE),mT2p->inputFilePath.c_str());
-				status = eFailure;
+				status = ePDFFailure;
 				break;
 			}			
 
@@ -658,7 +630,7 @@ EStatusCode TIFFImageHandler::ReadTopLevelTiffInformation()
 			}
 			mT2p->tiff_pagecount++;
 		}
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		qsort((void*) mT2p->tiff_pages, mT2p->tiff_pagecount,sizeof(T2P_PAGE), t2p_cmp_t2p_page);
@@ -726,7 +698,7 @@ EStatusCode TIFFImageHandler::ReadTopLevelTiffInformation()
 					TRACE_LOG2("Can't allocate %u bytes of memory for tiles, %s",
 								mT2p->tiff_tiles[i].tiles_tilecount * sizeof(T2P_TILE),
 								mT2p->inputFilePath.c_str());
-					status = eFailure;
+					status = ePDFFailure;
 					break;
 				}
 			}		
@@ -736,9 +708,9 @@ EStatusCode TIFFImageHandler::ReadTopLevelTiffInformation()
 	return status;
 }
 
-EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
+EPDFStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	int i=0;
 	uint16 xuint16;
 	uint16* xuint16p;
@@ -755,7 +727,7 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 		{
 			TRACE_LOG1("TIFFImageHandler::ReadTIFFPageInformation: No support for %s with zero width",
 						mT2p->inputFilePath.c_str());
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -764,7 +736,7 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 		{
 			TRACE_LOG1("TIFFImageHandler::ReadTIFFPageInformation: No support for %s with zero length",
 						mT2p->inputFilePath.c_str());
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -772,7 +744,7 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 		{
 			TRACE_LOG1("TIFFImageHandler::ReadTIFFPageInformation: No support for %s with no compression tag",
 						mT2p->inputFilePath.c_str());
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 
         }
@@ -783,7 +755,7 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 				"TIFFImageHandler::ReadTIFFPageInformation: No support for %s with compression type %u:  not configured", 
 				mT2p->inputFilePath.c_str(),
 				mT2p->tiff_compression);				
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -806,10 +778,10 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 					"TIFFImageHandler::ReadTIFFPageInformation: No support for %s with %u bits per sample", 
 					mT2p->inputFilePath.c_str(),
 					mT2p->tiff_bitspersample);				
-				status = eFailure;
+				status = ePDFFailure;
 				break;
 		}
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		TIFFGetFieldDefaulted(mT2p->input, TIFFTAG_SAMPLESPERPIXEL, &(mT2p->tiff_samplesperpixel));
@@ -819,7 +791,7 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 				"TIFFImageHandler::ReadTIFFPageInformation: No support for %s with %u samples per pixel", 
 				mT2p->inputFilePath.c_str(),
 				mT2p->tiff_samplesperpixel);				
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -844,11 +816,11 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 						"TIFFImageHandler::ReadTIFFPageInformation: No support for %s with sample format %u", 
 						mT2p->inputFilePath.c_str(),
 						xuint16);				
-					status = eFailure;
+					status = ePDFFailure;
 					break;
 			}
 		}
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 				break;
 		
 		TIFFGetFieldDefaulted(mT2p->input, TIFFTAG_FILLORDER, &(mT2p->tiff_fillorder));
@@ -856,7 +828,7 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 		{
 			TRACE_LOG1("TIFFImageHandler::ReadTIFFPageInformation: No support for %s with no photometric interpretation tag",
 						mT2p->inputFilePath.c_str());
-			status = eFailure;
+			status = ePDFFailure;
 			break;
         }
 
@@ -926,7 +898,7 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 							mT2p->inputFilePath.c_str(),
 							mT2p->tiff_samplesperpixel
 							);
-						status = eFailure;
+						status = ePDFFailure;
 						break;
 					}
 				} else {
@@ -935,7 +907,7 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 						mT2p->inputFilePath.c_str(),
 						mT2p->tiff_samplesperpixel
 						);
-					status = eFailure;
+					status = ePDFFailure;
 					break;
 				}
 			case PHOTOMETRIC_PALETTE: 
@@ -955,7 +927,7 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 							"TIFFImageHandler::ReadTIFFPageInformation, No support for %s because its inkset is not CMYK",
 							mT2p->inputFilePath.c_str()
 							);
-						status = eFailure;
+						status = ePDFFailure;
 						break;
 					}
 				}
@@ -970,7 +942,7 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 						mT2p->inputFilePath.c_str(),
 						mT2p->tiff_samplesperpixel
 						);
-					status = eFailure;
+					status = ePDFFailure;
 					break;
 				}
 				break;
@@ -1013,17 +985,17 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 					"TIFFImageHandler::ReadTIFFPageInformation, No support for %s with photometric interpretation LogL/LogLuv",
 					mT2p->inputFilePath.c_str()
 					);
-				status = eFailure;
+				status = ePDFFailure;
 				break;
 			default:
 				TRACE_LOG1(
 					"TIFFImageHandler::ReadTIFFPageInformation, No support for %s with photometric interpretation %u",
 					mT2p->inputFilePath.c_str()
 					);
-				status = eFailure;
+				status = ePDFFailure;
 				break;
 		}
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		if(TIFFGetField(mT2p->input, TIFFTAG_PLANARCONFIG, &(mT2p->tiff_planar)))
@@ -1045,7 +1017,7 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 							"TIFFImageHandler::ReadTIFFPageInformation, No support for %s with separated planar configuration and %u bits per sample", 
 							mT2p->inputFilePath.c_str(),
 							mT2p->tiff_bitspersample);
-						status = eFailure;
+						status = ePDFFailure;
 						break;
 					}
 					break;
@@ -1054,10 +1026,10 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 						"TIFFImageHandler::ReadTIFFPageInformation, No support for %s with planar configuration %u", 
 						mT2p->inputFilePath.c_str(),
 						mT2p->tiff_planar);
-					status = eFailure;
+					status = ePDFFailure;
 					break;
 			}
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 				break;
 		}
 
@@ -1214,9 +1186,9 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 	return status;
 }
 
-EStatusCode TIFFImageHandler::ReadPhotometricPalette()
+EPDFStatusCode TIFFImageHandler::ReadPhotometricPalette()
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	uint16* r;
 	uint16* g;
 	uint16* b;
@@ -1228,7 +1200,7 @@ EStatusCode TIFFImageHandler::ReadPhotometricPalette()
 			TRACE_LOG1(
 				"TIFFImageHandler::ReadTIFFPageInformation, No support for palettized image %s with not one sample per pixel",
 				mT2p->inputFilePath.c_str());
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 		mT2p->pdf_colorspace= (t2p_cs_t)(T2P_CS_RGB | T2P_CS_PALETTE);
@@ -1238,7 +1210,7 @@ EStatusCode TIFFImageHandler::ReadPhotometricPalette()
 			TRACE_LOG1(
 				"TIFFImageHandler::ReadTIFFPageInformation, Palettized image %s has no color map",
 				mT2p->inputFilePath.c_str());
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		} 
 		if(mT2p->pdf_palette != NULL)
@@ -1255,7 +1227,7 @@ EStatusCode TIFFImageHandler::ReadPhotometricPalette()
 				mT2p->pdf_palettesize,
 				mT2p->inputFilePath.c_str()
 				);
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 		for(int i=0;i<mT2p->pdf_palettesize;i++)
@@ -1271,9 +1243,9 @@ EStatusCode TIFFImageHandler::ReadPhotometricPalette()
 }
 
 
-EStatusCode TIFFImageHandler::ReadPhotometricPaletteCMYK()
+EPDFStatusCode TIFFImageHandler::ReadPhotometricPaletteCMYK()
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	uint16* r;
 	uint16* g;
 	uint16* b;
@@ -1287,7 +1259,7 @@ EStatusCode TIFFImageHandler::ReadPhotometricPaletteCMYK()
 				"TIFFImageHandler::ReadTIFFPageInformation, No support for palettized CMYK image %s with not one sample per pixel",
 				mT2p->inputFilePath.c_str()
 				);
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 		mT2p->pdf_colorspace=t2p_cs_t(T2P_CS_CMYK | T2P_CS_PALETTE);
@@ -1298,7 +1270,7 @@ EStatusCode TIFFImageHandler::ReadPhotometricPaletteCMYK()
 				"TIFFImageHandler::ReadTIFFPageInformation, Palettized image %s has no color map",
 				mT2p->inputFilePath.c_str()
 				);
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		} 
 		if(mT2p->pdf_palette != NULL)
@@ -1315,7 +1287,7 @@ EStatusCode TIFFImageHandler::ReadPhotometricPaletteCMYK()
 				mT2p->pdf_palettesize, 
 				mT2p->inputFilePath.c_str()
 				);
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 		for(int i=0;i<mT2p->pdf_palettesize;i++)
@@ -2086,7 +2058,7 @@ PDFImageXObject* TIFFImageHandler::WriteTileImageXObject(int inTileIndex)
 
 		if(mExtender)
 		{
-			if(mExtender->OnTIFFImageXObjectWrite(imageXObjectID,imageContext,mObjectsContext,mContainerDocumentContext,this) != eSuccess)
+			if(mExtender->OnTIFFImageXObjectWrite(imageXObjectID,imageContext,mObjectsContext,mContainerDocumentsContext,this) != ePDFSuccess)
 			{
 				TRACE_LOG("TIFFImageHandler::WriteTileImageXObject, unexpected failure. extender declared failure when writing image xobject.");
 				break;
@@ -2097,7 +2069,7 @@ PDFImageXObject* TIFFImageHandler::WriteTileImageXObject(int inTileIndex)
 
 		CalculateTiffTileSize(inTileIndex);
 
-		if(WriteImageTileData(imageStream,inTileIndex) != eSuccess)
+		if(WriteImageTileData(imageStream,inTileIndex) != ePDFSuccess)
 			break;
 
 		mObjectsContext->EndPDFStream(imageStream);
@@ -2371,9 +2343,9 @@ tsize_t GetSizeFromTIFFDataSize(T2P* inT2p)
 	return inT2p->tiff_datasize;
 }
 
-EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int inTileIndex)
+EPDFStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int inTileIndex)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	uint16 edge=0;
 	unsigned char* buffer=NULL;
 
@@ -2405,7 +2377,7 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 					"TIFFImageHandler::WriteImageTileData, Can't allocate %u bytes of memory, for image %s",
 					mT2p->tiff_datasize, 
 					mT2p->inputFilePath.c_str());
-				status = eFailure;
+				status = ePDFFailure;
 				break;
 			}
 			TIFFReadRawTile(mT2p->input, inTileIndex, (tdata_t) buffer, mT2p->tiff_datasize);
@@ -2426,7 +2398,7 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 					"TIFFImageHandler::WriteImageTileData, Can't allocate %u bytes of memory, for image %s",
 					mT2p->tiff_datasize, 
 					mT2p->inputFilePath.c_str());
-				status = eFailure;
+				status = ePDFFailure;
 				break;
 			}
 			read = TIFFReadEncodedTile(
@@ -2440,7 +2412,7 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 					"TIFFImageHandler::WriteImageTileData, Error on decoding tile %u of %s",
 					inTileIndex, 
 					mT2p->inputFilePath.c_str());
-				status = eFailure;
+				status = ePDFFailure;
 				break;
 			}
 		} 
@@ -2460,7 +2432,7 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 						"TIFFImageHandler::WriteImageTileData, Can't allocate %u bytes of memory, for image %s",
 						mT2p->tiff_datasize, 
 						mT2p->inputFilePath.c_str());
-					status = eFailure;
+					status = ePDFFailure;
 					break;
 				}
 				samplebuffer = (unsigned char*) _TIFFmalloc(mT2p->tiff_datasize);
@@ -2470,7 +2442,7 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 						"TIFFImageHandler::WriteImageTileData, Can't allocate %u bytes of memory, for image %s",
 						mT2p->tiff_datasize, 
 						mT2p->inputFilePath.c_str());
-					status = eFailure;
+					status = ePDFFailure;
 					break;
 				}
 				samplebufferoffset=0;
@@ -2489,7 +2461,7 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 							mT2p->inputFilePath.c_str());
 						_TIFFfree(samplebuffer);
 						_TIFFfree(buffer);
-						status = eFailure;
+						status = ePDFFailure;
 						break;
 					}
 					samplebufferoffset+=read;
@@ -2511,7 +2483,7 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 						"TIFFImageHandler::WriteImageTileData, Can't allocate %u bytes of memory, for image %s",
 						mT2p->tiff_datasize, 
 						mT2p->inputFilePath.c_str());
-					status = eFailure;
+					status = ePDFFailure;
 					break;
 				}
 				read = TIFFReadEncodedTile(
@@ -2526,7 +2498,7 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 						inTileIndex, 
 						mT2p->inputFilePath.c_str());
 					_TIFFfree(buffer);
-					status = eFailure;
+					status = ePDFFailure;
 					break;
 				}
 			}
@@ -2550,7 +2522,7 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 			if(mT2p->pdf_sample & T2P_SAMPLE_YCBCR_TO_RGB)
 			{
 				TRACE_LOG1("No support for YCbCr to RGB in tile for %s",mT2p->inputFilePath.c_str());
-				status = eFailure;
+				status = ePDFFailure;
 				break;
 			}
 
@@ -2708,7 +2680,7 @@ PDFImageXObject* TIFFImageHandler::WriteUntiledImageXObject()
 
 		if(mExtender)
 		{
-			if(mExtender->OnTIFFImageXObjectWrite(imageXObjectID,imageContext,mObjectsContext,mContainerDocumentContext,this) != eSuccess)
+			if(mExtender->OnTIFFImageXObjectWrite(imageXObjectID,imageContext,mObjectsContext,mContainerDocumentsContext,this) != ePDFSuccess)
 			{
 				TRACE_LOG("TIFFImageHandler::WriteTileImageXObject, unexpected failure. extender declared failure when writing image xobject.");
 				break;
@@ -2719,7 +2691,7 @@ PDFImageXObject* TIFFImageHandler::WriteUntiledImageXObject()
 
 		CalculateTiffSizeNoTiles();
 
-		if(WriteImageData(imageStream) != eSuccess)
+		if(WriteImageData(imageStream) != ePDFSuccess)
 			break;
 
 		mObjectsContext->EndPDFStream(imageStream);
@@ -2804,7 +2776,7 @@ void TIFFImageHandler::CalculateTiffSizeNoTiles()
 
 
 
-EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
+EPDFStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 {
 	unsigned char* buffer=NULL;
 	unsigned char* samplebuffer=NULL;
@@ -2818,7 +2790,7 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 	tsize_t sepstripcount=0;
 	tsize_t sepstripsize=0;
 
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	do
 	{
@@ -2834,7 +2806,7 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 						"Can't allocate %u bytes of memory for t2p_readwrite_pdf_image, %s", 
 						mT2p->tiff_datasize, 
 						mT2p->inputFilePath.c_str());
-					status = eFailure;
+					status = ePDFFailure;
 					break;
 				}
 				TIFFReadRawStrip(mT2p->input, 0, (tdata_t)buffer,mT2p->tiff_datasize);
@@ -2856,7 +2828,7 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 					"Can't allocate %u bytes of memory for t2p_readwrite_pdf_image, %s", 
 					mT2p->tiff_datasize, 
 					mT2p->inputFilePath.c_str());
-				status = eFailure;
+				status = ePDFFailure;
 				break;
 			}
 			memset(buffer, 0, mT2p->tiff_datasize);
@@ -2876,12 +2848,12 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 						i, 
 						mT2p->inputFilePath.c_str());
 					_TIFFfree(buffer);
-					status = eFailure;
+					status = ePDFFailure;
 					break;
 				}
 				bufferoffset+=read;
 			}
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 				break;
 		} 
 		else 
@@ -2902,7 +2874,7 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 						"Can't allocate %u bytes of memory for t2p_readwrite_pdf_image, %s", 
 						mT2p->tiff_datasize, 
 						mT2p->inputFilePath.c_str());
-					status = eFailure;
+					status = ePDFFailure;
 					break;
 				}
 				memset(buffer, 0, mT2p->tiff_datasize);
@@ -2913,7 +2885,7 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 						"Can't allocate %u bytes of memory for t2p_readwrite_pdf_image, %s", 
 						mT2p->tiff_datasize, 
 						mT2p->inputFilePath.c_str());
-					status = eFailure;
+					status = ePDFFailure;
 					break;
 				}
 				for(i=0;i<stripcount;i++)
@@ -2933,12 +2905,12 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 								i + j*stripcount, 
 								mT2p->inputFilePath.c_str());
 								_TIFFfree(buffer);
-							status = eFailure;
+							status = ePDFFailure;
 							break;
 						}
 						samplebufferoffset+=read;
 					}
-					if(status != eSuccess)
+					if(status != ePDFSuccess)
 						break;
 					SamplePlanarSeparateToContig(
 						&(buffer[bufferoffset]),
@@ -2947,7 +2919,7 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 					bufferoffset+=samplebufferoffset;
 				}
 				_TIFFfree(samplebuffer);
-				if(status!= eSuccess)
+				if(status!= ePDFSuccess)
 					break;
 				status = WriteImageBufferToStream(inImageStream,
 										 mT2p->tiff_width,
@@ -2969,7 +2941,7 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 					"Can't allocate %u bytes of memory for t2p_readwrite_pdf_image, %s", 
 					mT2p->tiff_datasize, 
 					mT2p->inputFilePath.c_str());
-				status = eFailure;
+				status = ePDFFailure;
 				break;
 			}
 			memset(buffer, 0, mT2p->tiff_datasize);
@@ -2990,12 +2962,12 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 						mT2p->inputFilePath.c_str());
 					_TIFFfree(samplebuffer);
 					_TIFFfree(buffer);
-					status = eFailure;
+					status = ePDFFailure;
 					break;
 				}
 				bufferoffset+=read;
 			}
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 				break;
 
 			if(mT2p->pdf_sample & T2P_SAMPLE_REALIZE_PALETTE)
@@ -3009,7 +2981,7 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 						"Can't allocate %u bytes of memory for t2p_readwrite_pdf_image, %s", 
 						mT2p->tiff_datasize, 
 						mT2p->inputFilePath.c_str());
-					status = eFailure;
+					status = ePDFFailure;
 				  _TIFFfree(buffer);
 				} 
 				else 
@@ -3045,7 +3017,7 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 						"Can't allocate %u bytes of memory for t2p_readwrite_pdf_image, %s", 
 						mT2p->tiff_datasize, 
 						mT2p->inputFilePath.c_str());
-					status = eFailure;
+					status = ePDFFailure;
 					_TIFFfree(buffer);
 					break;
 				} 
@@ -3064,7 +3036,7 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 					TRACE_LOG1( 
 						"Can't use TIFFReadRGBAImageOriented to extract RGB image from %s", 
 						mT2p->inputFilePath.c_str());
-					status = eFailure;
+					status = ePDFFailure;
 					break;
 				}
 				mT2p->tiff_datasize=SampleABGRToRGB(
@@ -3131,13 +3103,13 @@ tsize_t TIFFImageHandler::SampleABGRToRGB(tdata_t inData, uint32 inSampleCount)
 	return(i*3);	
 }
 
-EStatusCode TIFFImageHandler::WriteImageBufferToStream(PDFStream* inPDFStream,
+EPDFStatusCode TIFFImageHandler::WriteImageBufferToStream(PDFStream* inPDFStream,
 														uint32 inImageWidth,
 														uint32 inImageLength,
 														unsigned char* inBuffer,
 														ImageSizeProc inBufferSizeFunction)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	do
 	{
 		mT2p->pdfStream = NULL;
@@ -3196,7 +3168,7 @@ EStatusCode TIFFImageHandler::WriteImageBufferToStream(PDFStream* inPDFStream,
 		if (bufferoffset == (tsize_t)-1) 
 		{
 			TRACE_LOG1("Error writing encoded strip to output PDF %s",mT2p->inputFilePath.c_str());
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}		
 	}while(false);
@@ -3206,11 +3178,11 @@ EStatusCode TIFFImageHandler::WriteImageBufferToStream(PDFStream* inPDFStream,
 
 PDFFormXObject* TIFFImageHandler::WriteImagesFormXObject(const PDFImageXObjectList& inImages,ObjectIDType inFormXObjectID)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	PDFImageXObjectList::const_iterator it = inImages.begin();
 	ttile_t i=0;
 	T2P_BOX box;
-	PDFFormXObject* xobjectForm = mContainerDocumentContext->StartFormXObject(
+	PDFFormXObject* xobjectForm = mContainerDocumentsContext->StartFormXObject(
 																	PDFRectangle(
 																		mT2p->pdf_mediabox.x1,
 																		mT2p->pdf_mediabox.y1,
@@ -3279,8 +3251,8 @@ PDFFormXObject* TIFFImageHandler::WriteImagesFormXObject(const PDFImageXObjectLi
 			(mT2p->pdf_colorspace & T2P_CS_BILEVEL && mUserParameters.BWTreatment.AsImageMask))
 			xobjectContentContext->Q();
 
-		status = mContainerDocumentContext->EndFormXObjectNoRelease(xobjectForm);
-		if(status != eSuccess)
+		status = mContainerDocumentsContext->EndFormXObjectNoRelease(xobjectForm);
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG1(
 				"TIFFImageHandler::WriteImagesFormXObject, Error in writing form XObject for image %s",
@@ -3290,7 +3262,7 @@ PDFFormXObject* TIFFImageHandler::WriteImagesFormXObject(const PDFImageXObjectLi
 
 	}while(false);
 
-	if(status != eSuccess)
+	if(status != ePDFSuccess)
 	{
 		delete xobjectForm;
 		xobjectForm = NULL;
@@ -3391,7 +3363,7 @@ void TIFFImageHandler::WriteIndexedCSForBiLevelColorMap()
 	mObjectsContext->EndArray(eTokenSeparatorEndLine);
 }
 
-void TIFFImageHandler::SetDocumentContextExtender(IDocumentContextExtender* inExtender)
+void TIFFImageHandler::SetDocumentsContextExtender(IDocumentsContextExtender* inExtender)
 {
 	mExtender = inExtender;
 }
@@ -3486,9 +3458,9 @@ PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFStream(	IByteReaderWi
 		TIFFSetErrorHandler(ReportError);
 		TIFFSetWarningHandler(ReportWarning);
 
-		if(!mObjectsContext || !mContainerDocumentContext)
+		if(!mObjectsContext || !mContainerDocumentsContext)
 		{
-			TRACE_LOG("TIFFImageHandler::CreateFormXObjectFromTIFFFile. Unexpected Error, mObjectsContext or mContainerDocumentContext not initialized");
+			TRACE_LOG("TIFFImageHandler::CreateFormXObjectFromTIFFFile. Unexpected Error, mObjectsContext or mContainerDocumentsContext not initialized");
 			break;
 		}
 

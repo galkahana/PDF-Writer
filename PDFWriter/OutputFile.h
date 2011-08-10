@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include <string>
 
 class IByteWriterWithPosition;
@@ -35,8 +35,8 @@ public:
 	OutputFile(void);
 	~OutputFile(void);
 
-	EStatusCode OpenFile(const wstring& inFilePath, bool inAppend = false);
-	EStatusCode CloseFile();
+	EPDFStatusCode OpenFile(const wstring& inFilePath, bool inAppend = false);
+	EPDFStatusCode CloseFile();
 
 	IByteWriterWithPosition* GetOutputStream(); // returns buffered output stream
 	const wstring& GetFilePath();

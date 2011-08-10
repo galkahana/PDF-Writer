@@ -488,43 +488,43 @@ bool FreeTypeFaceWrapper::IsForceBold()
 	return mFormatParticularWrapper ? mFormatParticularWrapper->IsForceBold() : false;
 }
 
-EStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const ULongVector& inUnicodeCharacters,UIntList& outGlyphs)
+EPDFStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const ULongVector& inUnicodeCharacters,UIntList& outGlyphs)
 {
 	if(mFace)
 	{
 		FT_UInt glyphIndex;
-		EStatusCode status = eSuccess;
+		EPDFStatusCode status = ePDFSuccess;
 
 		outGlyphs.clear();
 
 		ULongVector::const_iterator it = inUnicodeCharacters.begin();
-		for(; it != inUnicodeCharacters.end() && eSuccess == status; ++it)
+		for(; it != inUnicodeCharacters.end() && ePDFSuccess == status; ++it)
 		{
 			glyphIndex = FT_Get_Char_Index(mFace,*it);
 			outGlyphs.push_back(glyphIndex);
 			if(0 == glyphIndex)
 			{
 				TRACE_LOG1("FreeTypeFaceWrapper::GetGlyphsForUnicodeText, failed to find glyph for charachter 0x%04x",*it);
-				status = eFailure;
+				status = ePDFFailure;
 			}
 		}
 
 		return status;
 	}
 	else
-		return eFailure;
+		return ePDFFailure;
 }
 
-EStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const ULongVectorList& inUnicodeCharacters,UIntListList& outGlyphs)
+EPDFStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const ULongVectorList& inUnicodeCharacters,UIntListList& outGlyphs)
 {
 	UIntList glyphs;
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	ULongVectorList::const_iterator it = inUnicodeCharacters.begin();
 
 	for(; it != inUnicodeCharacters.end(); ++it)
 	{
-		if(eFailure == GetGlyphsForUnicodeText(*it,glyphs))
-			status = eFailure;	
+		if(ePDFFailure == GetGlyphsForUnicodeText(*it,glyphs))
+			status = ePDFFailure;	
 		outGlyphs.push_back(glyphs);
 	}
 

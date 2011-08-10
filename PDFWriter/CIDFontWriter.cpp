@@ -53,13 +53,13 @@ static const string scPlus = "+";
 static const string scDescendantFonts = "DescendantFonts";
 static const string scToUnicode = "ToUnicode";
 
-EStatusCode CIDFontWriter::WriteFont(FreeTypeFaceWrapper& inFontInfo,
+EPDFStatusCode CIDFontWriter::WriteFont(FreeTypeFaceWrapper& inFontInfo,
 										WrittenFontRepresentation* inFontOccurrence,
 										ObjectsContext* inObjectsContext,
 										IDescendentFontWriter* inDescendentFontWriter)
 {
 
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	inObjectsContext->StartNewIndirectObject(inFontOccurrence->mWrittenObjectID);
 
 	mFontInfo = &inFontInfo;
@@ -84,7 +84,7 @@ EStatusCode CIDFontWriter::WriteFont(FreeTypeFaceWrapper& inFontInfo,
 		if(!postscriptFontName)
 		{
 			TRACE_LOG("CIDFontWriter::WriteFont, unexpected failure. no postscript font name for font");
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 		std::string subsetFontName = inObjectsContext->GenerateSubsetFontPrefix() + scPlus + postscriptFontName;
@@ -108,7 +108,7 @@ EStatusCode CIDFontWriter::WriteFont(FreeTypeFaceWrapper& inFontInfo,
 		fontContext->WriteObjectReferenceValue(toUnicodeMapObjectID);
 		
 		status = inObjectsContext->EndDictionary(fontContext);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("CIDFontWriter::WriteFont, unexpected failure. Failed to end dictionary in font write.");
 			break;

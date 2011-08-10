@@ -2,7 +2,7 @@
    Source File : OutputFileStreamTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ OutputFileStreamTest::~OutputFileStreamTest(void)
 {
 }
 
-EStatusCode OutputFileStreamTest::Run()
+EPDFStatusCode OutputFileStreamTest::Run()
 {
 	OutputFileStream stream(L"C:\\PDFLibTests\\OutputFileStreamTest.txt");
 	Byte buffer[5] = {'a','b','c','d','e'};
@@ -45,7 +45,7 @@ EStatusCode OutputFileStreamTest::Run()
 	stream.Write(buffer,5);
 	stream.Close();
 
-	return eSuccess;
+	return ePDFSuccess;
 }
 
 ADD_CATEGORIZED_TEST(OutputFileStreamTest,"IO")

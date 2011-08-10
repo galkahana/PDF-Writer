@@ -19,7 +19,7 @@
    
 */
 #pragma once
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "IByteReaderWithPosition.h"
 #include "DictOperand.h"
 
@@ -34,36 +34,36 @@ public:
 	void SetOffset(LongFilePositionType inNewOffset);
 	void Skip(LongBufferSizeType inToSkip);
 	LongFilePositionType GetCurrentPosition();
-	EStatusCode GetInternalState();
+	EPDFStatusCode GetInternalState();
 
-	EStatusCode ReadByte(Byte& outValue);
-	EStatusCode Read(Byte* ioBuffer,LongBufferSizeType inBufferSize);
+	EPDFStatusCode ReadByte(Byte& outValue);
+	EPDFStatusCode Read(Byte* ioBuffer,LongBufferSizeType inBufferSize);
 
 	// basic CFF values
-	EStatusCode ReadCard8(Byte& outValue);
-	EStatusCode ReadCard16(unsigned short& outValue);
+	EPDFStatusCode ReadCard8(Byte& outValue);
+	EPDFStatusCode ReadCard16(unsigned short& outValue);
 	// set offsize to read offsets
 	void SetOffSize(Byte inOffSize);
-	EStatusCode ReadOffset(unsigned long& outValue);
-	EStatusCode ReadOffSize(Byte& outValue);
-	EStatusCode ReadSID(unsigned short& outValue);
+	EPDFStatusCode ReadOffset(unsigned long& outValue);
+	EPDFStatusCode ReadOffSize(Byte& outValue);
+	EPDFStatusCode ReadSID(unsigned short& outValue);
 
 	// dict data
 	bool IsDictOperator(Byte inCandidate);
-	EStatusCode ReadDictOperator(Byte inFirstByte,unsigned short& outOperator);
-	EStatusCode ReadDictOperand(Byte inFirstByte,DictOperand& outOperand);
+	EPDFStatusCode ReadDictOperator(Byte inFirstByte,unsigned short& outOperator);
+	EPDFStatusCode ReadDictOperand(Byte inFirstByte,DictOperand& outOperand);
 
 private:
 	IByteReaderWithPosition* mCFFFile;
 	LongFilePositionType mInitialPosition;
-	EStatusCode mInternalState;
+	EPDFStatusCode mInternalState;
 	Byte mCurrentOffsize;
 
-	EStatusCode Read3ByteUnsigned(unsigned long& outValue);
-	EStatusCode Read4ByteUnsigned(unsigned long& outValue);
-	EStatusCode Read4ByteSigned(long& outValue);
-	EStatusCode Read2ByteSigned(short& outValue);
-	EStatusCode ReadIntegerOperand(Byte inFirstByte,long& outValue);
+	EPDFStatusCode Read3ByteUnsigned(unsigned long& outValue);
+	EPDFStatusCode Read4ByteUnsigned(unsigned long& outValue);
+	EPDFStatusCode Read4ByteSigned(long& outValue);
+	EPDFStatusCode Read2ByteSigned(short& outValue);
+	EPDFStatusCode ReadIntegerOperand(Byte inFirstByte,long& outValue);
 	// make sure you get here after discarding the initial byte, 30.
-	EStatusCode ReadRealOperand(double& outValue,long& outRealValueFractalEnd);
+	EPDFStatusCode ReadRealOperand(double& outValue,long& outRealValueFractalEnd);
 };

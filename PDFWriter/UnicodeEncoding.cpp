@@ -29,13 +29,13 @@ UnicodeEncoding::~UnicodeEncoding(void)
 {
 }
 
-EStatusCode UnicodeEncoding::UTF16ToUnicode(const wstring& inText,ULongVector& outUnicodeIndexes)
+EPDFStatusCode UnicodeEncoding::UTF16ToUnicode(const wstring& inText,ULongVector& outUnicodeIndexes)
 {
 	wstring::const_iterator it = inText.begin();
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	unsigned long unicodeCharacter;
 
-	for(; it != inText.end() && eSuccess == status; ++it)
+	for(; it != inText.end() && ePDFSuccess == status; ++it)
 	{
 		if(0xD800 <= *it && *it <= 0xDBFF) 
 		{
@@ -45,7 +45,7 @@ EStatusCode UnicodeEncoding::UTF16ToUnicode(const wstring& inText,ULongVector& o
 			if(it == inText.end() || 0xDC00 > *it || *it > 0xDFFF)
 			{
 				TRACE_LOG("UnicodeEncoding::UTF16ToUnicode, fault string - high surrogat encountered without a low surrogate");
-				status = eFailure;
+				status = ePDFFailure;
 				break;
 			}
 			unsigned short lowSurrogate = *it;

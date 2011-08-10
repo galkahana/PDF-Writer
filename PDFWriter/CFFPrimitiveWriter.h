@@ -19,7 +19,7 @@
    
 */
 #pragma once
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "IByteWriter.h"
 #include "DictOperand.h"
 
@@ -33,39 +33,39 @@ public:
 
 	void SetStream(IByteWriter* inCFFOutput);
 
-	EStatusCode GetInternalState();
+	EPDFStatusCode GetInternalState();
 
-	EStatusCode WriteByte(Byte inValue);
-	EStatusCode Write(const Byte* inBuffer,LongBufferSizeType inBufferSize);
+	EPDFStatusCode WriteByte(Byte inValue);
+	EPDFStatusCode Write(const Byte* inBuffer,LongBufferSizeType inBufferSize);
 
 	// basic CFF values
-	EStatusCode WriteCard8(Byte inValue);
-	EStatusCode WriteCard16(unsigned short inValue);
+	EPDFStatusCode WriteCard8(Byte inValue);
+	EPDFStatusCode WriteCard16(unsigned short inValue);
 	// set offsize to write offsets
 	void SetOffSize(Byte inOffSize);
-	EStatusCode WriteOffset(unsigned long inValue);
-	EStatusCode WriteOffSize(Byte inValue);
-	EStatusCode WriteSID(unsigned short inValue);
+	EPDFStatusCode WriteOffset(unsigned long inValue);
+	EPDFStatusCode WriteOffSize(Byte inValue);
+	EPDFStatusCode WriteSID(unsigned short inValue);
 
 	// dict data
-	EStatusCode WriteDictOperator(unsigned short inOperator);
-	EStatusCode WriteDictOperand(const DictOperand& inOperand);
-	EStatusCode WriteDictItems(unsigned short inOperator,const DictOperandList& inOperands);
-	EStatusCode WriteIntegerOperand(long inValue);
-	EStatusCode Write5ByteDictInteger(long inValue);
-	EStatusCode WriteRealOperand(double inValue,long inFractalLength=10);
+	EPDFStatusCode WriteDictOperator(unsigned short inOperator);
+	EPDFStatusCode WriteDictOperand(const DictOperand& inOperand);
+	EPDFStatusCode WriteDictItems(unsigned short inOperator,const DictOperandList& inOperands);
+	EPDFStatusCode WriteIntegerOperand(long inValue);
+	EPDFStatusCode Write5ByteDictInteger(long inValue);
+	EPDFStatusCode WriteRealOperand(double inValue,long inFractalLength=10);
 
-	EStatusCode Pad5Bytes();
-	EStatusCode PadNBytes(unsigned short inBytesToPad);
+	EPDFStatusCode Pad5Bytes();
+	EPDFStatusCode PadNBytes(unsigned short inBytesToPad);
 
 private:
 	IByteWriter* mCFFOutput;
-	EStatusCode mInternalState;
+	EPDFStatusCode mInternalState;
 	Byte mCurrentOffsize;
 
-	EStatusCode Write3ByteUnsigned(unsigned long inValue);
-	EStatusCode Write4ByteUnsigned(unsigned long inValue);
-	EStatusCode WriteIntegerOfReal(double inIntegerValue,Byte& ioBuffer,bool& ioUsedFirst);
-	EStatusCode SetOrWriteNibble(Byte inValue,Byte& ioBuffer,bool& ioUsedFirst);
+	EPDFStatusCode Write3ByteUnsigned(unsigned long inValue);
+	EPDFStatusCode Write4ByteUnsigned(unsigned long inValue);
+	EPDFStatusCode WriteIntegerOfReal(double inIntegerValue,Byte& ioBuffer,bool& ioUsedFirst);
+	EPDFStatusCode SetOrWriteNibble(Byte inValue,Byte& ioBuffer,bool& ioUsedFirst);
 
 };

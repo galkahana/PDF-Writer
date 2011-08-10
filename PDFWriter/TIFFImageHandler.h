@@ -72,7 +72,7 @@
 */
 #pragma once
 
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "ObjectsBasicTypes.h"
 #include "TIFFUsageParameters.h"
 
@@ -88,9 +88,9 @@ class DictionaryContext;
 class PDFImageXObject;
 class PDFStream;
 class PDFFormXObject;
-class DocumentContext;
+class DocumentsContext;
 class ObjectsContext;
-class IDocumentContextExtender;
+class IDocumentsContextExtender;
 class IByteReaderWithPosition;
 
 typedef list<ObjectIDType> ObjectIDTypeList;
@@ -125,24 +125,24 @@ public:
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 
 
-	void SetOperationsContexts(DocumentContext* inContainerDocumentContext,ObjectsContext* inObjectsContext);
-	void SetDocumentContextExtender(IDocumentContextExtender* inExtender);
+	void SetOperationsContexts(DocumentsContext* inContainerDocumentsContext,ObjectsContext* inObjectsContext);
+	void SetDocumentsContextExtender(IDocumentsContextExtender* inExtender);
 
 private:
-	DocumentContext* mContainerDocumentContext;
+	DocumentsContext* mContainerDocumentsContext;
 	ObjectsContext* mObjectsContext;
 	T2P* mT2p; // state for tiff->pdf
 	TIFFUsageParameters mUserParameters;
-	IDocumentContextExtender* mExtender;
+	IDocumentsContextExtender* mExtender;
 
 
 	void InitializeConversionState();
 	void DestroyConversionState();
 	PDFFormXObject* ConvertTiff2PDF(ObjectIDType inFormXObjectID);
-	EStatusCode ReadTopLevelTiffInformation();
-	EStatusCode ReadTIFFPageInformation();
-	EStatusCode ReadPhotometricPalette();
-	EStatusCode ReadPhotometricPaletteCMYK();
+	EPDFStatusCode ReadTopLevelTiffInformation();
+	EPDFStatusCode ReadTIFFPageInformation();
+	EPDFStatusCode ReadPhotometricPalette();
+	EPDFStatusCode ReadPhotometricPaletteCMYK();
 	void ComposePDFPage();
 	void ComposePDFPageOrient(T2P_BOX*, uint16);
 	void ComposePDFPageOrientFlip(T2P_BOX*, uint16);
@@ -158,7 +158,7 @@ private:
 	void WriteImageXObjectDecode(DictionaryContext* inImageDictionary);
 	void WriteImageXObjectFilter(DictionaryContext* inImageDictionary,int inTileIndex);
 	void CalculateTiffTileSize(int inTileIndex);
-	EStatusCode WriteImageTileData(PDFStream* inImageStream,int inTileIndex);
+	EPDFStatusCode WriteImageTileData(PDFStream* inImageStream,int inTileIndex);
 	void SamplePlanarSeparateToContig(unsigned char* inBuffer, 
 									  unsigned char* inSamplebuffer, 
 									  tsize_t inSamplebuffersize);
@@ -170,11 +170,11 @@ private:
 							uint32 inTileLength);
 	PDFImageXObject* WriteUntiledImageXObject();
 	void WriteCommonImageDictionaryProperties(DictionaryContext* inImageContext);
-	EStatusCode WriteImageData(PDFStream* inImageStream);
+	EPDFStatusCode WriteImageData(PDFStream* inImageStream);
 	void CalculateTiffSizeNoTiles();
 	void SampleRealizePalette(unsigned char* inBuffer);
 	tsize_t SampleABGRToRGB(tdata_t inData, uint32 inSampleCount);
-	EStatusCode WriteImageBufferToStream(	PDFStream* inPDFStream,
+	EPDFStatusCode WriteImageBufferToStream(	PDFStream* inPDFStream,
 											uint32 inImageWidth,
 											uint32 inImageLength,
 											unsigned char* inBuffer,

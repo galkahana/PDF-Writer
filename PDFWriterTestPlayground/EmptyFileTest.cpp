@@ -2,7 +2,7 @@
    Source File : EmptyFileTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
    
 */
 #include "EmptyFileTest.h"
-#include "PDFWriter.h"
+#include "HummusPDFWriter.h"
 
 
 #include <iostream>
@@ -35,23 +35,23 @@ EmptyFileTest::~EmptyFileTest(void)
 {
 }
 
-EStatusCode EmptyFileTest::Run()
+EPDFStatusCode EmptyFileTest::Run()
 {
-	PDFWriter pdfWriter;
+	HummusPDFWriter pdfWriter;
 	LogConfiguration logConfiguration(false,L"C:\\PDFLibTests\\EmptyFileLog.txt");
-	EStatusCode status; 
+	EPDFStatusCode status; 
 
 	do
 	{
 		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\test.txt",ePDFVersion13,logConfiguration);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to start PDF\n";
 			break;
 		}	
 		
 		status = pdfWriter.EndPDF();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed in end PDF\n";
 			break;

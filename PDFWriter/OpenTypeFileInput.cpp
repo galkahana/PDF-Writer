@@ -57,12 +57,12 @@ void OpenTypeFileInput::FreeTables()
 	mActualGlyphs.clear();
 }
 
-EStatusCode OpenTypeFileInput::ReadOpenTypeFile(const wstring& inFontFilePath)
+EPDFStatusCode OpenTypeFileInput::ReadOpenTypeFile(const wstring& inFontFilePath)
 {
 	InputFile fontFile;
 
-	EStatusCode status = fontFile.OpenFile(inFontFilePath);
-	if(status != eSuccess)
+	EPDFStatusCode status = fontFile.OpenFile(inFontFilePath);
+	if(status != ePDFSuccess)
 	{
 		TRACE_LOG1("OpenTypeFileInput::ReadOpenTypeFile, cannot open true type font file at %s",inFontFilePath.c_str());
 		return status;
@@ -73,9 +73,9 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeFile(const wstring& inFontFilePath)
 	return status;
 }
 
-EStatusCode OpenTypeFileInput::ReadOpenTypeFile(IByteReaderWithPosition* inTrueTypeFile)
+EPDFStatusCode OpenTypeFileInput::ReadOpenTypeFile(IByteReaderWithPosition* inTrueTypeFile)
 {
-	EStatusCode status;
+	EPDFStatusCode status;
 
 	do
 	{
@@ -84,49 +84,49 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeFile(IByteReaderWithPosition* inTrueT
 		mPrimitivesReader.SetOpenTypeStream(inTrueTypeFile);
 
 		status = ReadOpenTypeHeader();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read true type header");
 			break;
 		}
 		
 		status = ReadHead();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read head table");
 			break;
 		}
 		
 		status = ReadMaxP();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read maxp table");
 			break;
 		}
 
 		status = ReadHHea();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read hhea table");
 			break;
 		}
 
 		status = ReadHMtx();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read hmtx table");
 			break;
 		}
 
 		status = ReadOS2();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read os2 table");
 			break;
 		}
 
 		status = ReadName();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read name table");
 			break;
@@ -136,14 +136,14 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeFile(IByteReaderWithPosition* inTrueT
 		{
 			// true type specifics
 			status = ReadLoca();
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
 				TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read loca table");
 				break;
 			}
 
 			status = ReadGlyfForDependencies();
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
 				TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read glyf table");
 				break;
@@ -159,7 +159,7 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeFile(IByteReaderWithPosition* inTrueT
 		{
 			// CFF specifics
 			status = ReadCFF();
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
 				TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read CFF table");
 			}
@@ -176,16 +176,16 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeFile(IByteReaderWithPosition* inTrueT
 	return status;
 }
 
-EStatusCode OpenTypeFileInput::ReadOpenTypeHeader()
+EPDFStatusCode OpenTypeFileInput::ReadOpenTypeHeader()
 {
-	EStatusCode status;
+	EPDFStatusCode status;
 	TableEntry tableEntry;
 	unsigned long tableTag;
 
 	do
 	{
 		status = ReadOpenTypeSFNT();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("OpenTypeFileInput::ReaderTrueTypeHeader, SFNT header not open type");
 			break;
@@ -210,7 +210,7 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeHeader()
 	return status;
 }
 
-EStatusCode OpenTypeFileInput::ReadOpenTypeSFNT()
+EPDFStatusCode OpenTypeFileInput::ReadOpenTypeSFNT()
 {
 	unsigned long sfntVersion;
 
@@ -219,15 +219,15 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeSFNT()
 	if((0x10000 == sfntVersion) || (0x74727565 /* true */ == sfntVersion))
 	{
 		mFontType = EOpenTypeTrueType;
-		return eSuccess;
+		return ePDFSuccess;
 	}
 	else if(0x4F54544F /* OTTO */ == sfntVersion)
 	{
 		mFontType = EOpenTypeCFF;
-		return eSuccess;
+		return ePDFSuccess;
 	}
 	else
-		return eFailure;
+		return ePDFFailure;
 }
 
 unsigned long OpenTypeFileInput::GetTag(const char* inTagName)
@@ -244,13 +244,13 @@ unsigned long OpenTypeFileInput::GetTag(const char* inTagName)
 			((unsigned long)buffer[2]<<8) + buffer[3];
 }
 
-EStatusCode OpenTypeFileInput::ReadHead()
+EPDFStatusCode OpenTypeFileInput::ReadHead()
 {
 	ULongToTableEntryMap::iterator it = mTables.find(GetTag("head"));
 	if(it == mTables.end())
 	{
 		TRACE_LOG("OpenTypeFileInput::ReadHead, could not find head table");
-		return eFailure;
+		return ePDFFailure;
 	}
 
 	mPrimitivesReader.SetOffset(it->second.Offset);
@@ -275,13 +275,13 @@ EStatusCode OpenTypeFileInput::ReadHead()
 	return mPrimitivesReader.GetInternalState();	
 }
 
-EStatusCode OpenTypeFileInput::ReadMaxP()
+EPDFStatusCode OpenTypeFileInput::ReadMaxP()
 {
 	ULongToTableEntryMap::iterator it = mTables.find(GetTag("maxp"));
 	if(it == mTables.end())
 	{
 		TRACE_LOG("OpenTypeFileInput::ReadMaxP, could not find maxp table");
-		return eFailure;
+		return ePDFFailure;
 	}
 	mPrimitivesReader.SetOffset(it->second.Offset);
 
@@ -310,13 +310,13 @@ EStatusCode OpenTypeFileInput::ReadMaxP()
 
 }
 
-EStatusCode OpenTypeFileInput::ReadHHea()
+EPDFStatusCode OpenTypeFileInput::ReadHHea()
 {
 	ULongToTableEntryMap::iterator it = mTables.find(GetTag("hhea"));
 	if(it == mTables.end())
 	{
 		TRACE_LOG("OpenTypeFileInput::ReadHHea, could not find hhea table");
-		return eFailure;
+		return ePDFFailure;
 	}
 
 	mPrimitivesReader.SetOffset(it->second.Offset);
@@ -339,13 +339,13 @@ EStatusCode OpenTypeFileInput::ReadHHea()
 	return mPrimitivesReader.GetInternalState();	
 }
 
-EStatusCode OpenTypeFileInput::ReadHMtx()
+EPDFStatusCode OpenTypeFileInput::ReadHMtx()
 {
 	ULongToTableEntryMap::iterator it = mTables.find(GetTag("hmtx"));
 	if(it == mTables.end())
 	{
 		TRACE_LOG("OpenTypeFileInput::ReadHMtx, could not find hmtx table");
-		return eFailure;
+		return ePDFFailure;
 	}
 
 	mPrimitivesReader.SetOffset(it->second.Offset);
@@ -369,13 +369,13 @@ EStatusCode OpenTypeFileInput::ReadHMtx()
 	return mPrimitivesReader.GetInternalState();	
 }
 
-EStatusCode OpenTypeFileInput::ReadOS2()
+EPDFStatusCode OpenTypeFileInput::ReadOS2()
 {
 	ULongToTableEntryMap::iterator it = mTables.find(GetTag("OS/2"));
 	if(it == mTables.end())
 	{
 		TRACE_LOG("OpenTypeFileInput::ReadOS2, could not find os2 table");
-		return eFailure;
+		return ePDFFailure;
 	}
 
 	mPrimitivesReader.SetOffset(it->second.Offset);
@@ -430,13 +430,13 @@ EStatusCode OpenTypeFileInput::ReadOS2()
 	return mPrimitivesReader.GetInternalState();	
 }
 
-EStatusCode OpenTypeFileInput::ReadName()
+EPDFStatusCode OpenTypeFileInput::ReadName()
 {
 	ULongToTableEntryMap::iterator it = mTables.find(GetTag("name"));
 	if(it == mTables.end())
 	{
 		TRACE_LOG("OpenTypeFileInput::ReadName, could not find name table");
-		return eFailure;
+		return ePDFFailure;
 	}
 
 	mPrimitivesReader.SetOffset(it->second.Offset);	
@@ -468,13 +468,13 @@ EStatusCode OpenTypeFileInput::ReadName()
 	return mPrimitivesReader.GetInternalState();	
 }
 
-EStatusCode OpenTypeFileInput::ReadLoca()
+EPDFStatusCode OpenTypeFileInput::ReadLoca()
 {
 	ULongToTableEntryMap::iterator it = mTables.find(GetTag("loca"));
 	if(it == mTables.end())
 	{
 		TRACE_LOG("OpenTypeFileInput::ReadLoca, could not find loca table");
-		return eFailure;
+		return ePDFFailure;
 	}
 	mPrimitivesReader.SetOffset(it->second.Offset);	
 
@@ -497,13 +497,13 @@ EStatusCode OpenTypeFileInput::ReadLoca()
 	return mPrimitivesReader.GetInternalState();	
 }
 
-EStatusCode OpenTypeFileInput::ReadGlyfForDependencies()
+EPDFStatusCode OpenTypeFileInput::ReadGlyfForDependencies()
 {
 	ULongToTableEntryMap::iterator it = mTables.find(GetTag("glyf"));
 	if(it == mTables.end())
 	{
 		TRACE_LOG("OpenTypeFileInput::ReadGlyfForDependencies, could not find glyf table");
-		return eFailure;
+		return ePDFFailure;
 	}
 
 	// it->second.Offset, is the offset to the beginning of the table
@@ -578,13 +578,13 @@ TableEntry* OpenTypeFileInput::GetTableEntry(const char* inTagName)
 		return &(it->second);
 }
 
-EStatusCode OpenTypeFileInput::ReadCFF()
+EPDFStatusCode OpenTypeFileInput::ReadCFF()
 {
 	ULongToTableEntryMap::iterator it = mTables.find(GetTag("CFF "));
 	if(it == mTables.end())
 	{
 		TRACE_LOG("OpenTypeFileInput::ReadCFF, could not find cff table entry");
-		return eFailure;
+		return ePDFFailure;
 	}
 
 	mPrimitivesReader.SetOffset(it->second.Offset);

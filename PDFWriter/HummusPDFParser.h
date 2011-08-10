@@ -20,8 +20,8 @@
 */
 #pragma once
 
-#include "EStatusCode.h"
-#include "PDFObjectParser.h"
+#include "EPDFStatusCode.h"
+#include "PDFObjectsParser.h"
 #include "IOBasicTypes.h"
 #include "ObjectsBasicTypes.h"
 #include "RefCountPtr.h"
@@ -82,18 +82,18 @@ private:
 
 typedef map<ObjectIDType,ObjectStreamHeaderEntry*> ObjectIDTypeToObjectStreamHeaderEntryMap;
 
-class PDFParser
+class HummusPDFParser
 {
 public:
-	PDFParser(void);
-	virtual ~PDFParser(void);
+	HummusPDFParser(void);
+	virtual ~HummusPDFParser(void);
 
 	// sets the stream to parse, then parses for enough information to be able
 	// to parse objects later
-	EStatusCode StartPDFParsing(IByteReaderWithPosition* inSourceStream);
+	EPDFStatusCode StartPDFParsing(IByteReaderWithPosition* inSourceStream);
 
 	// get a parser that can parse objects
-	PDFObjectParser& GetObjectParser();
+	PDFObjectsParser& GetObjectParser();
 
 	// below become available after initial parsing [this level is from the header]
 	double GetPDFLevel();
@@ -119,6 +119,8 @@ public:
 	unsigned long GetPagesCount();
 	// don't be confused - pass number of pages here. returns the dictionary, and verifies that it's actually a page (via type)
 	PDFDictionary* ParsePage(unsigned long inPageIndex);
+	// get page object ID for an input index
+	ObjectIDType GetPageObjectID(unsigned long inPageIndex);
 
 	// This is sort of a public function, in order to provide the right filters when reading
 	// note that the final reader does not own the source stream. You can delete it safely after usage
@@ -128,10 +130,10 @@ public:
 	// use this to explictly free used objects. quite obviously this means that you'll have to parse the file again
 	void ResetParser();
 
-	// using PDFParser also for state information reading. this is a specialized version of the StartParsing for reading state
-	EStatusCode StartStateFileParsing(IByteReaderWithPosition* inSourceStream);
+	// using HummusPDFParser also for state information reading. this is a specialized version of the StartParsing for reading state
+	EPDFStatusCode StartStateFileParsing(IByteReaderWithPosition* inSourceStream);
 private:
-	PDFObjectParser mObjectParser;
+	PDFObjectsParser mObjectParser;
 	IByteReaderWithPosition* mStream;
 	AdapterIByteReaderWithPositionToIReadPositionProvider mCurrentPositionProvider;
 	
@@ -151,37 +153,37 @@ private:
 	unsigned long mPagesCount;
 	ObjectIDType* mPagesObjectIDs;
 
-	EStatusCode ParseHeaderLine();
-	EStatusCode ParseEOFLine();
-	EStatusCode ParseLastXrefPosition();
-	EStatusCode ParseTrailerDictionary();
-	EStatusCode BuildXrefTableFromTable();
-	EStatusCode DetermineXrefSize();
-	EStatusCode InitializeXref();
-	EStatusCode ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,LongFilePositionType inXrefPosition);
+	EPDFStatusCode ParseHeaderLine();
+	EPDFStatusCode ParseEOFLine();
+	EPDFStatusCode ParseLastXrefPosition();
+	EPDFStatusCode ParseTrailerDictionary();
+	EPDFStatusCode BuildXrefTableFromTable();
+	EPDFStatusCode DetermineXrefSize();
+	EPDFStatusCode InitializeXref();
+	EPDFStatusCode ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,LongFilePositionType inXrefPosition);
 	PDFObject*  ParseExistingInDirectObject(ObjectIDType inObjectID);
-	EStatusCode ParsePagesObjectIDs();
-	EStatusCode ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID);
-	EStatusCode ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID,unsigned long& ioCurrentPageIndex);
-	EStatusCode ParsePreviousXrefs(PDFDictionary* inTrailer);
+	EPDFStatusCode ParsePagesObjectIDs();
+	EPDFStatusCode ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID);
+	EPDFStatusCode ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID,unsigned long& ioCurrentPageIndex);
+	EPDFStatusCode ParsePreviousXrefs(PDFDictionary* inTrailer);
 	void MergeXrefWithMainXref(XrefEntryInput* inTableToMerge);
-	EStatusCode ParseFileDirectory();
-	EStatusCode BuildXrefTableAndTrailerFromXrefStream();
+	EPDFStatusCode ParseFileDirectory();
+	EPDFStatusCode BuildXrefTableAndTrailerFromXrefStream();
 	// an overload for cases where the xref stream object is already parsed
-	EStatusCode ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,PDFStreamInput* inXrefStream);
+	EPDFStatusCode ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,PDFStreamInput* inXrefStream);
 	// an overload for cases where the position should hold a stream object, and it should be parsed
-	EStatusCode ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,LongFilePositionType inXrefPosition);
-	EStatusCode ReadXrefStreamSegment(XrefEntryInput* inXrefTable,
+	EPDFStatusCode ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,LongFilePositionType inXrefPosition);
+	EPDFStatusCode ReadXrefStreamSegment(XrefEntryInput* inXrefTable,
 									 ObjectIDType inSegmentStartObject,
 									 ObjectIDType inSegmentCount,
 									 IByteReader* inReadFrom,
 									 int* inEntryWidths,
 									 unsigned long inEntryWidthsSize);
-	EStatusCode ReadXrefSegmentValue(IByteReader* inSource,int inEntrySize,long long& outValue);
-	EStatusCode ReadXrefSegmentValue(IByteReader* inSource,int inEntrySize,ObjectIDType& outValue);
-	EStatusCode ParseDirectory(LongFilePositionType inXrefPosition,XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,PDFDictionary** outTrailer);
+	EPDFStatusCode ReadXrefSegmentValue(IByteReader* inSource,int inEntrySize,long long& outValue);
+	EPDFStatusCode ReadXrefSegmentValue(IByteReader* inSource,int inEntrySize,ObjectIDType& outValue);
+	EPDFStatusCode ParseDirectory(LongFilePositionType inXrefPosition,XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,PDFDictionary** outTrailer);
 	PDFObject* ParseExistingInDirectStreamObject(ObjectIDType inObjectId);
-	EStatusCode ParseObjectStreamHeader(ObjectStreamHeaderEntry* inHeaderInfo,ObjectIDType inObjectsCount);
+	EPDFStatusCode ParseObjectStreamHeader(ObjectStreamHeaderEntry* inHeaderInfo,ObjectIDType inObjectsCount);
 	void MovePositionInStream(LongFilePositionType inPosition);
 
 	// Backward reading

@@ -32,30 +32,30 @@ OutputStreamTraits::~OutputStreamTraits(void)
 }
 
 #define TENMEGS 10*1024*1024
-EStatusCode OutputStreamTraits::CopyToOutputStream(IByteReader* inInputStream)
+EPDFStatusCode OutputStreamTraits::CopyToOutputStream(IByteReader* inInputStream)
 {
 	Byte* buffer = new Byte[TENMEGS];
 	LongBufferSizeType readBytes,writeBytes;
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
-	while(inInputStream->NotEnded() && eSuccess == status)
+	while(inInputStream->NotEnded() && ePDFSuccess == status)
 	{
 		readBytes = inInputStream->Read(buffer,TENMEGS);
 		writeBytes = mOutputStream->Write(buffer,readBytes);
-		status = (readBytes == writeBytes) ? eSuccess:eFailure;
+		status = (readBytes == writeBytes) ? ePDFSuccess:ePDFFailure;
 	}
 	delete[] buffer;
 	return status;
 }
 
-EStatusCode OutputStreamTraits::CopyToOutputStream(IByteReader* inInputStream,LongBufferSizeType inLength)
+EPDFStatusCode OutputStreamTraits::CopyToOutputStream(IByteReader* inInputStream,LongBufferSizeType inLength)
 {
 	Byte* buffer = new Byte[inLength];
 	LongBufferSizeType readBytes,writeBytes;
 
 	readBytes = inInputStream->Read(buffer,inLength);
 	writeBytes = mOutputStream->Write(buffer,readBytes);
-	EStatusCode status = (readBytes == writeBytes) ? eSuccess:eFailure;
+	EPDFStatusCode status = (readBytes == writeBytes) ? ePDFSuccess:ePDFFailure;
 	delete[] buffer;
 	return status;
 }

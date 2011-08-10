@@ -37,7 +37,7 @@ InputStringBufferStream::~InputStringBufferStream(void)
 
 LongBufferSizeType InputStringBufferStream::Read(Byte* inBuffer,LongBufferSizeType inBufferSize)
 {
-	return mBufferToReadFrom->SAFE_SGETN((char*)inBuffer,inBufferSize,inBufferSize);
+	return (LongBufferSizeType)mBufferToReadFrom->SAFE_SGETN((char*)inBuffer,inBufferSize,inBufferSize);
 }
 
 bool InputStringBufferStream::NotEnded()

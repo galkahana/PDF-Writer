@@ -2,7 +2,7 @@
    Source File : AppendSpecialPagesTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 */
 #include "AppendSpecialPagesTest.h"
 #include "TestsRunner.h"
-#include "PDFWriter.h"
+#include "HummusPDFWriter.h"
 
 #include <iostream>
 
@@ -34,33 +34,33 @@ AppendSpecialPagesTest::~AppendSpecialPagesTest(void)
 {
 }
 
-EStatusCode AppendSpecialPagesTest::Run()
+EPDFStatusCode AppendSpecialPagesTest::Run()
 {
-	EStatusCode status;
-	PDFWriter pdfWriter;
+	EPDFStatusCode status;
+	HummusPDFWriter pdfWriter;
 
 	do
 	{
 
 		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\AppendSpecialPagesTest.PDF",ePDFVersion13,LogConfiguration(true,L"c:\\pdflibtests\\AppendSpecialPagesTestLog.txt"));
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to start PDF\n";
 			break;
 		}	
 
-		EStatusCodeAndObjectIDTypeList result;
+		EPDFStatusCodeAndObjectIDTypeList result;
 
 		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\Protected.pdf",PDFPageRange());
-		if(result.first == eSuccess)
+		if(result.first == ePDFSuccess)
 		{
 			wcout<<"failted to NOT ALLOW embedding of protected documents\n";
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
 		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\ObjectStreamsModified.pdf",PDFPageRange());
-		if(result.first != eSuccess)
+		if(result.first != ePDFSuccess)
 		{
 			wcout<<"failed to append pages from ObjectStreamsModified.pdf\n";
 			status = result.first;
@@ -68,7 +68,7 @@ EStatusCode AppendSpecialPagesTest::Run()
 		}
 
 		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\ObjectStreams.pdf",PDFPageRange());
-		if(result.first != eSuccess)
+		if(result.first != ePDFSuccess)
 		{
 			wcout<<"failed to append pages from ObjectStreams.pdf\n";
 			status = result.first;
@@ -77,7 +77,7 @@ EStatusCode AppendSpecialPagesTest::Run()
 
 		
 		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\AddedItem.pdf",PDFPageRange());
-		if(result.first != eSuccess)
+		if(result.first != ePDFSuccess)
 		{
 			wcout<<"failed to append pages from AddedItem.pdf\n";
 			status = result.first;
@@ -85,7 +85,7 @@ EStatusCode AppendSpecialPagesTest::Run()
 		}
 
 		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\AddedPage.pdf",PDFPageRange());
-		if(result.first != eSuccess)
+		if(result.first != ePDFSuccess)
 		{
 			wcout<<"failed to append pages from AddedPage.pdf\n";
 			status = result.first;
@@ -94,7 +94,7 @@ EStatusCode AppendSpecialPagesTest::Run()
 
 
 		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\MultipleChange.pdf",PDFPageRange());
-		if(result.first != eSuccess)
+		if(result.first != ePDFSuccess)
 		{
 			wcout<<"failed to append pages from MultipleChange.pdf\n";
 			status = result.first;
@@ -102,7 +102,7 @@ EStatusCode AppendSpecialPagesTest::Run()
 		}
 
 		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\RemovedItem.pdf",PDFPageRange());
-		if(result.first != eSuccess)
+		if(result.first != ePDFSuccess)
 		{
 			wcout<<"failed to append pages from RemovedItem.pdf\n";
 			status = result.first;
@@ -111,7 +111,7 @@ EStatusCode AppendSpecialPagesTest::Run()
 
 
 		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\Linearized.pdf",PDFPageRange());
-		if(result.first != eSuccess)
+		if(result.first != ePDFSuccess)
 		{
 			wcout<<"failed to append pages from RemovedItem.pdf\n";
 			status = result.first;
@@ -119,7 +119,7 @@ EStatusCode AppendSpecialPagesTest::Run()
 		}
 
 		status = pdfWriter.EndPDF();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed in end PDF\n";
 			break;

@@ -54,13 +54,13 @@ static const string scBaseFont = "BaseFont";
 static const string scToUnicode = "ToUnicode";
 static const string scFontDescriptor = "FontDescriptor";
 
-EStatusCode ANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
+EPDFStatusCode ANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 											WrittenFontRepresentation* inFontOccurrence,
 											ObjectsContext* inObjectsContext,
 											IANSIFontWriterHelper* inANSIFontWriterHelper,
 											const std::string& inSubsetFontName)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	FontDescriptorWriter fontDescriptorWriter;
 
 	inObjectsContext->StartNewIndirectObject(inFontOccurrence->mWrittenObjectID);
@@ -111,7 +111,7 @@ EStatusCode ANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 		fontContext->WriteObjectReferenceValue(fontDescriptorObjectID);
 
 		status = inObjectsContext->EndDictionary(fontContext);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("ANSIFontWriter::WriteFont, unexpected failure. Failed to end dictionary in font write.");
 			break;
@@ -216,9 +216,14 @@ void ANSIFontWriter::WriteEncoding(DictionaryContext* inFontContext)
 
 	inFontContext->WriteKey(scEncoding);
 	if(mDifferences.size() == 0)
+	{
 		inFontContext->WriteNameValue(scWinAnsiEncoding);
-	else	
+	}
+	else
+	{
 		mEncodingDictionaryID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
+		inFontContext->WriteObjectReferenceValue(mEncodingDictionaryID);
+	}
 }
 
 static const string scBaseEncoding = "BaseEncoding";

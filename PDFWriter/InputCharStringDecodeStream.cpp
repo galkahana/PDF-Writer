@@ -51,15 +51,15 @@ void InputCharStringDecodeStream::InitializeCharStringDecode(unsigned long inLen
 		ReadDecodedByte(dummyByte);
 }
 
-EStatusCode InputCharStringDecodeStream::ReadDecodedByte(Byte& outByte)
+EPDFStatusCode InputCharStringDecodeStream::ReadDecodedByte(Byte& outByte)
 {
 	Byte buffer;
 	
 	if(mReadFrom->Read(&buffer,1) != 1)
-		return eFailure;
+		return ePDFFailure;
 
 	outByte = DecodeByte(buffer);
-	return eSuccess;
+	return ePDFSuccess;
 }
 
 Byte InputCharStringDecodeStream::DecodeByte(Byte inByteToDecode)
@@ -72,9 +72,9 @@ Byte InputCharStringDecodeStream::DecodeByte(Byte inByteToDecode)
 LongBufferSizeType InputCharStringDecodeStream::Read(Byte* inBuffer,LongBufferSizeType inBufferSize)
 {
 	LongBufferSizeType bufferIndex = 0;
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
-	while(NotEnded() && inBufferSize > bufferIndex && eSuccess == status)
+	while(NotEnded() && inBufferSize > bufferIndex && ePDFSuccess == status)
 	{
 		status = ReadDecodedByte(inBuffer[bufferIndex]);
 		++bufferIndex;

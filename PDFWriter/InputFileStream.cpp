@@ -39,15 +39,15 @@ InputFileStream::InputFileStream(const wstring& inFilePath)
 	Open(inFilePath);
 }
 
-EStatusCode InputFileStream::Open(const wstring& inFilePath)
+EPDFStatusCode InputFileStream::Open(const wstring& inFilePath)
 {
 	SAFE_WFOPEN(mStream,inFilePath.c_str(),L"rb");
-	return NULL == mStream ? eFailure:eSuccess;
+	return NULL == mStream ? ePDFFailure:ePDFSuccess;
 }
 
-EStatusCode InputFileStream::Close()
+EPDFStatusCode InputFileStream::Close()
 {
-	EStatusCode result = fclose(mStream) == 0 ? eSuccess:eFailure;
+	EPDFStatusCode result = fclose(mStream) == 0 ? ePDFSuccess:ePDFFailure;
 
 	mStream = NULL;
 	return result;

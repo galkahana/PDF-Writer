@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "ObjectsBasicTypes.h"
 #include "OpenTypeFileInput.h"
 #include "OutputStringBufferStream.h"
@@ -47,7 +47,7 @@ public:
 	TrueTypeEmbeddedFontWriter(void);
 	~TrueTypeEmbeddedFontWriter(void);
 
-	EStatusCode WriteEmbeddedFont(	FreeTypeFaceWrapper& inFontInfo,
+	EPDFStatusCode WriteEmbeddedFont(	FreeTypeFaceWrapper& inFontInfo,
 									const UIntVector& inSubsetGlyphIDs,
 									ObjectsContext* inObjectsContext,
 									ObjectIDType& outEmbeddedFontObjectID);
@@ -78,7 +78,7 @@ private:
 	LongFilePositionType mHeadCheckSumOffset;
 	
 
-	EStatusCode CreateTrueTypeSubset(	FreeTypeFaceWrapper& inFontInfo,
+	EPDFStatusCode CreateTrueTypeSubset(	FreeTypeFaceWrapper& inFontInfo,
 										const UIntVector& inSubsetGlyphIDs,
 										bool& outNotEmbedded,
 										MyStringBuf& outFontProgram);
@@ -86,27 +86,27 @@ private:
 	void AddDependentGlyphs(UIntVector& ioSubsetGlyphIDs);
 	bool AddComponentGlyphs(unsigned int inGlyphID,UIntSet& ioComponents);
 
-	EStatusCode WriteTrueTypeHeader();
+	EPDFStatusCode WriteTrueTypeHeader();
 	unsigned short GetSmallerPower2(unsigned short inNumber);
 	unsigned long GetTag(const char* inTagName);
 	void WriteEmptyTableEntry(const char* inTag,LongFilePositionType& outEntryPosition);
-	EStatusCode WriteHead();
+	EPDFStatusCode WriteHead();
 	void WriteTableEntryData(
 							LongFilePositionType inTableEntryOffset,
 							LongFilePositionType inTableOffset,
 							unsigned long inTableLength);
-	EStatusCode WriteHHea();
-	EStatusCode WriteHMtx();
-	EStatusCode WriteMaxp();
-	EStatusCode WriteCVT();
-	EStatusCode WriteFPGM();
-	EStatusCode WritePREP();
-	EStatusCode WriteNAME();
-	EStatusCode WriteOS2();
-	EStatusCode WriteGlyf(const UIntVector& inSubsetGlyphIDs,unsigned long* inLocaTable);
-	EStatusCode WriteLoca(unsigned long* inLocaTable);
-	EStatusCode WriteCMAP();
+	EPDFStatusCode WriteHHea();
+	EPDFStatusCode WriteHMtx();
+	EPDFStatusCode WriteMaxp();
+	EPDFStatusCode WriteCVT();
+	EPDFStatusCode WriteFPGM();
+	EPDFStatusCode WritePREP();
+	EPDFStatusCode WriteNAME();
+	EPDFStatusCode WriteOS2();
+	EPDFStatusCode WriteGlyf(const UIntVector& inSubsetGlyphIDs,unsigned long* inLocaTable);
+	EPDFStatusCode WriteLoca(unsigned long* inLocaTable);
+	EPDFStatusCode WriteCMAP();
 	unsigned long GetCheckSum(LongFilePositionType inOffset,unsigned long inLength);
-	EStatusCode CreateHeadTableCheckSumAdjustment();
-	EStatusCode CreateTableCopy(const char* inTableName,LongFilePositionType inTableEntryLocation);
+	EPDFStatusCode CreateHeadTableCheckSumAdjustment();
+	EPDFStatusCode CreateTableCopy(const char* inTableName,LongFilePositionType inTableEntryLocation);
 };

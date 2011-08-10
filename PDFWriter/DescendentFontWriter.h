@@ -19,7 +19,7 @@
    
 */
 #pragma once
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "WrittenFontRepresentation.h"
 #include "ObjectsBasicTypes.h"
 #include "IFontDescriptorHelper.h"
@@ -47,7 +47,7 @@ public:
 	~DescendentFontWriter(void);
 
 	// the IDescendentFontWriter input pointer will implement the font specific differences
-	virtual EStatusCode WriteFont(	ObjectIDType inDecendentObjectID, 
+	virtual EPDFStatusCode WriteFont(	ObjectIDType inDecendentObjectID, 
 									const string& inFontName,
 									FreeTypeFaceWrapper& inFontInfo,
 									const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,

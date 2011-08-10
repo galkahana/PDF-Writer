@@ -7,5 +7,5 @@ public:
 	InputImagesAsStreamsTest(void);
 	~InputImagesAsStreamsTest(void);
 
-	virtual EStatusCode Run();
+	virtual EPDFStatusCode Run();
 };

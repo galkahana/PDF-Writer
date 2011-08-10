@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "IByteReaderWithPosition.h"
 
 #include <string>
@@ -37,8 +37,8 @@ public:
 
 	InputFileStream(const wstring& inFilePath);
 
-	EStatusCode Open(const wstring& inFilePath);
-	EStatusCode Close();
+	EPDFStatusCode Open(const wstring& inFilePath);
+	EPDFStatusCode Close();
 
 	// IByteReaderWithPosition implementation
 	virtual LongBufferSizeType Read(Byte* inBuffer,LongBufferSizeType inBufferSize);

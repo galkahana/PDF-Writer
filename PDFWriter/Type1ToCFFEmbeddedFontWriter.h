@@ -19,7 +19,7 @@
    
 */
 #pragma once
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "ObjectsBasicTypes.h"
 #include "Type1Input.h"
 #include "InputFile.h"
@@ -53,7 +53,7 @@ public:
 	Type1ToCFFEmbeddedFontWriter(void);
 	~Type1ToCFFEmbeddedFontWriter(void);
 
-	EStatusCode WriteEmbeddedFont(	FreeTypeFaceWrapper& inFontInfo,
+	EPDFStatusCode WriteEmbeddedFont(	FreeTypeFaceWrapper& inFontInfo,
 									const UIntVector& inSubsetGlyphIDs,
 									const string& inFontFile3SubType,
 									const string& inSubsetFontName,
@@ -82,19 +82,19 @@ private:
 	LongFilePositionType mPrivateSize;
 	LongFilePositionType mPrivatePosition;
 
-	EStatusCode CreateCFFSubset(	
+	EPDFStatusCode CreateCFFSubset(	
 								FreeTypeFaceWrapper& inFontInfo,
 								const UIntVector& inSubsetGlyphIDs,
 								const string& inSubsetFontName,
 								bool& outNotEmbedded,
 								MyStringBuf& outFontProgram);
-	EStatusCode AddDependentGlyphs(StringVector& ioSubsetGlyphIDs);
-	EStatusCode AddComponentGlyphs(const string& inGlyphID,StringSet& ioComponents,bool &outFoundComponents);
-	EStatusCode WriteCFFHeader();
-	EStatusCode WriteName(const string& inSubsetFontName);
+	EPDFStatusCode AddDependentGlyphs(StringVector& ioSubsetGlyphIDs);
+	EPDFStatusCode AddComponentGlyphs(const string& inGlyphID,StringSet& ioComponents,bool &outFoundComponents);
+	EPDFStatusCode WriteCFFHeader();
+	EPDFStatusCode WriteName(const string& inSubsetFontName);
 	Byte GetMostCompressedOffsetSize(unsigned long inOffset);
-	EStatusCode WriteTopIndex();
-	EStatusCode WriteTopDictSegment(MyStringBuf& ioTopDictSegment);
+	EPDFStatusCode WriteTopIndex();
+	EPDFStatusCode WriteTopDictSegment(MyStringBuf& ioTopDictSegment);
 	unsigned short AddStringToStringsArray(const string& inString);
 	BoolAndUShort FindStandardString(const string& inStringToFind);
 	void AddStringOperandIfNotEmpty(CFFPrimitiveWriter& inWriter,const string& inString,unsigned short inOperator);
@@ -102,15 +102,15 @@ private:
 	void AddNumberOperandIfNotDefault(CFFPrimitiveWriter& inWriter,double inOperand,unsigned short inOperator,double inDefault);
 	void AddDeltaVectorIfNotEmpty(CFFPrimitiveWriter& inWriter,const vector<int>& inArray,unsigned short inOperator);
 	void AddDeltaVectorIfNotEmpty(CFFPrimitiveWriter& inWriter,const vector<double>& inArray,unsigned short inOperator);
-	EStatusCode WriteStringIndex();
-	EStatusCode WriteGlobalSubrsIndex();
-	EStatusCode WriteEncodings(const StringVector& inSubsetGlyphIDs);
+	EPDFStatusCode WriteStringIndex();
+	EPDFStatusCode WriteGlobalSubrsIndex();
+	EPDFStatusCode WriteEncodings(const StringVector& inSubsetGlyphIDs);
 	void FreeTemporaryStructs();
 	void PrepareCharSetArray(const StringVector& inSubsetGlyphIDs);
-	EStatusCode WriteCharsets(const StringVector& inSubsetGlyphIDs);
-	EStatusCode WriteCharStrings(const StringVector& inSubsetGlyphIDs);
-	EStatusCode WritePrivateDictionary();
-	EStatusCode UpdateIndexesAtTopDict();
+	EPDFStatusCode WriteCharsets(const StringVector& inSubsetGlyphIDs);
+	EPDFStatusCode WriteCharStrings(const StringVector& inSubsetGlyphIDs);
+	EPDFStatusCode WritePrivateDictionary();
+	EPDFStatusCode UpdateIndexesAtTopDict();
 	void TranslateFromFreeTypeToType1(FreeTypeFaceWrapper& inFontInfo,
 									  const UIntVector& inSubsetGlyphIDs,
 									  StringVector& outGlyphNames);

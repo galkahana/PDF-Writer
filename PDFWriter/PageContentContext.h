@@ -33,7 +33,7 @@ public:
 	virtual ~PageContentContext(void);
 
 	// Finish writing a current stream, if exists and flush to the main PDF stream
-	EStatusCode FinalizeCurrentStream();
+	EPDFStatusCode FinalizeCurrentStream();
 
 	// Extensibility method, retrieves the current content stream for writing. if one does not exist - creates it.
 	PDFStream* GetCurrentPageContentStream();
@@ -49,7 +49,7 @@ private:
 	ObjectsContext* mObjectsContext;
 	PDFStream* mCurrentStream;
 
-	EStatusCode FinalizeStreamWriteAndRelease();
+	EPDFStatusCode FinalizeStreamWriteAndRelease();
 	void StartContentStreamDefinition();
 
 	// AbstractContentContext implementation

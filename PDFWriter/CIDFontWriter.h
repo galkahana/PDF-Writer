@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "WrittenFontRepresentation.h"
 #include "ObjectsBasicTypes.h"
 
@@ -44,7 +44,7 @@ public:
 	CIDFontWriter(void);
 	virtual ~CIDFontWriter(void);
 
-	EStatusCode WriteFont(	FreeTypeFaceWrapper& inFontInfo,
+	EPDFStatusCode WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 							WrittenFontRepresentation* inFontOccurrence,
 							ObjectsContext* inObjectsContext,
 							IDescendentFontWriter* inDescendentFontWriter);

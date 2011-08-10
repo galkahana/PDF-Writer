@@ -2,7 +2,7 @@
    Source File : PFBStreamTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -38,9 +38,9 @@ PFBStreamTest::~PFBStreamTest(void)
 {
 }
 
-EStatusCode PFBStreamTest::Run()
+EPDFStatusCode PFBStreamTest::Run()
 {
-	EStatusCode status;
+	EPDFStatusCode status;
 	InputFile pfbFile;
 	OutputFile decodedPFBFile;
 	InputPFBDecodeStream decodeStream;
@@ -54,7 +54,7 @@ EStatusCode PFBStreamTest::Run()
 
 		status = decodeStream.Assign(pfbFile.GetInputStream());
 		
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"Failed to assign pfb input stream";
 			break;
@@ -64,7 +64,7 @@ EStatusCode PFBStreamTest::Run()
 
 		status = traits.CopyToOutputStream(&decodeStream);
 
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"Failed to decode pfb stream";
 			break;

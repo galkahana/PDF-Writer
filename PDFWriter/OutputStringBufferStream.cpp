@@ -60,7 +60,7 @@ void OutputStringBufferStream::Assign(MyStringBuf* inControlledBuffer)
 
 LongBufferSizeType OutputStringBufferStream::Write(const Byte* inBuffer,LongBufferSizeType inSize)
 {
-	return mBuffer->sputn((const char*)inBuffer,inSize);
+	return (LongBufferSizeType)mBuffer->sputn((const char*)inBuffer,inSize);
 }
 
 LongFilePositionType OutputStringBufferStream::GetCurrentPosition()

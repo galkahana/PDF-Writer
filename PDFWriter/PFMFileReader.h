@@ -25,7 +25,7 @@
 	values
 */
 
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "InputFile.h"
 
 
@@ -115,7 +115,7 @@ public:
 	PFMFileReader(void);
 	~PFMFileReader(void);
 
-	EStatusCode Read(const wstring& inPFMFilePath);
+	EPDFStatusCode Read(const wstring& inPFMFilePath);
 
 	PFMHeader Header;
 	PFMExtension Extension;
@@ -126,13 +126,13 @@ public:
 private:
 
 	IByteReaderWithPosition* mReaderStream;
-	EStatusCode mInternalReadStatus;
+	EPDFStatusCode mInternalReadStatus;
 
-	EStatusCode ReadByte(BYTE& outByte);
-	EStatusCode ReadWord(WORD& outWORD);
-	EStatusCode ReadDWord(DWORD& outDWORD);
+	EPDFStatusCode ReadByte(BYTE& outByte);
+	EPDFStatusCode ReadWord(WORD& outWORD);
+	EPDFStatusCode ReadDWord(DWORD& outDWORD);
 
-	EStatusCode ReadHeader();
-	EStatusCode ReadExtension();
-	EStatusCode ReadExtendedFontMetrics();
+	EPDFStatusCode ReadHeader();
+	EPDFStatusCode ReadExtension();
+	EPDFStatusCode ReadExtendedFontMetrics();
 };

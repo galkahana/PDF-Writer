@@ -2,7 +2,7 @@
    Source File : FreeTypeInitializationTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -44,26 +44,26 @@ FreeTypeInitializationTest::~FreeTypeInitializationTest(void)
 {
 }
 
-EStatusCode FreeTypeInitializationTest::Run()
+EPDFStatusCode FreeTypeInitializationTest::Run()
 {
 	Singleton<Trace>::GetInstance()->SetLogSettings(L"c:\\PDFLibTests\\FreeTypeTest.txt",true);
 
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	FreeTypeWrapper ftWrapper;
 
 
 	do
 	{
 		status = ShowFaceProperties(ftWrapper,L"C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		status = ShowFaceProperties(ftWrapper,L"C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFB",L"C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFM");
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		status = ShowFaceProperties(ftWrapper,L"C:\\PDFLibTests\\TestMaterials\\fonts\\BrushScriptStd.otf");
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 	}while(false);
@@ -74,10 +74,10 @@ EStatusCode FreeTypeInitializationTest::Run()
 	return status;
 }
 
-EStatusCode FreeTypeInitializationTest::ShowFaceProperties(FreeTypeWrapper& inFreeType,const wchar_t* inFontFilePath,const wchar_t* inSecondaryFontFilePath)
+EPDFStatusCode FreeTypeInitializationTest::ShowFaceProperties(FreeTypeWrapper& inFreeType,const wchar_t* inFontFilePath,const wchar_t* inSecondaryFontFilePath)
 {
 	FT_Face face;
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	do
 	{
@@ -88,7 +88,7 @@ EStatusCode FreeTypeInitializationTest::ShowFaceProperties(FreeTypeWrapper& inFr
 			face = inFreeType.NewFace(inFontFilePath);
 		if(!face)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			wcout<<"Failed to load font from "<<inFontFilePath<<"\n";
 			break;
 		}
@@ -101,9 +101,9 @@ EStatusCode FreeTypeInitializationTest::ShowFaceProperties(FreeTypeWrapper& inFr
 	return status;
 }
 
-EStatusCode FreeTypeInitializationTest::ShowGlobalFontProperties(FreeTypeWrapper& inFreeType,FT_Face inFace)
+EPDFStatusCode FreeTypeInitializationTest::ShowGlobalFontProperties(FreeTypeWrapper& inFreeType,FT_Face inFace)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	FreeTypeFaceWrapper face(inFace,L"",false);
 
@@ -137,7 +137,7 @@ EStatusCode FreeTypeInitializationTest::ShowGlobalFontProperties(FreeTypeWrapper
 		if(FT_Get_CID_Registry_Ordering_Supplement(face,&registry,&ordering,&supplement) != 0)
 		{
 			wcout<<"Failed to read registry, ordering and supplement informaiton\n";
-			status = eFailure;
+			status = ePDFFailure;
 		}
 		wcout<<"CID Registry = "<<registry<<"\n";
 		wcout<<"CID Ordering = "<<ordering<<"\n";

@@ -34,13 +34,13 @@ OutputFile::~OutputFile(void)
 	CloseFile();
 }
 
-EStatusCode OutputFile::OpenFile(const wstring& inFilePath,bool inAppend)
+EPDFStatusCode OutputFile::OpenFile(const wstring& inFilePath,bool inAppend)
 {
-	EStatusCode status;
+	EPDFStatusCode status;
 	do
 	{
 		status = CloseFile();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG1("OutputFile::OpenFile, Unexpected Failure. Couldn't close previously open file - %s",mFilePath.c_str());
 			break;
@@ -48,7 +48,7 @@ EStatusCode OutputFile::OpenFile(const wstring& inFilePath,bool inAppend)
 	
 		OutputFileStream* outputFileStream = new OutputFileStream();
 		status = outputFileStream->Open(inFilePath,inAppend); // explicitly open, so status may be retrieved
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG1("OutputFile::OpenFile, Unexpected Failure. Cannot open file for writing - %s",inFilePath.c_str());
 			delete outputFileStream;
@@ -62,16 +62,16 @@ EStatusCode OutputFile::OpenFile(const wstring& inFilePath,bool inAppend)
 	return status;
 }
 
-EStatusCode OutputFile::CloseFile()
+EPDFStatusCode OutputFile::CloseFile()
 {
 	if(NULL == mOutputStream)
 	{
-		return eSuccess;
+		return ePDFSuccess;
 	}
 	else
 	{
 		mOutputStream->Flush();
-		EStatusCode status = mFileStream->Close(); // explicitly close, so status may be retrieved
+		EPDFStatusCode status = mFileStream->Close(); // explicitly close, so status may be retrieved
 
 		delete mOutputStream; // will delete the referenced file stream as well
 		mOutputStream = NULL;

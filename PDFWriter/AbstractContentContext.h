@@ -32,7 +32,7 @@
 
 */
 
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "PrimitiveObjectsWriter.h"
 #include "GraphicStateStack.h"
 #include "GlyphUnicodeMapping.h"
@@ -104,7 +104,7 @@ public:
 
 	// graphic state
 	void q();
-	EStatusCode Q(); // Status code returned, in case there's inbalance in "q-Q"s
+	EPDFStatusCode Q(); // Status code returned, in case there's inbalance in "q-Q"s
 	void cm(double inA, double inB, double inC, double inD, double inE, double inF);
 	void w(double inLineWidth);
 	void J(int inLineCapStyle);
@@ -170,12 +170,12 @@ public:
 	// will return error if no font was set, or that one of the glyphs
 	// didn't succeed in encoding.
 	// input parameter is UTF-16 encoded
-	EStatusCode Tj(const wstring& inText);
+	EPDFStatusCode Tj(const wstring& inText);
 
 	// The rest of the text operators, handled by the library handing of font. text is in UTF16
-	EStatusCode Quote(const wstring& inText);
-	EStatusCode DoubleQuote(double inWordSpacing, double inCharacterSpacing, const wstring& inText);
-	EStatusCode TJ(const WStringOrDoubleList& inStringsAndSpacing); 
+	EPDFStatusCode Quote(const wstring& inText);
+	EPDFStatusCode DoubleQuote(double inWordSpacing, double inCharacterSpacing, const wstring& inText);
+	EPDFStatusCode TJ(const WStringOrDoubleList& inStringsAndSpacing); 
 
 	//
 	// Text showing operators using the library handling of fonts with direct glyph selection
@@ -185,10 +185,10 @@ public:
 	// each command accepts a list of glyphs. each glyph is mapped to its matching unicode values. 
 	// a glyph may have more than one unicode value in case it reperesents a series of Characters.
 
-	EStatusCode Tj(const GlyphUnicodeMappingList& inText);
-	EStatusCode Quote(const GlyphUnicodeMappingList& inText);
-	EStatusCode DoubleQuote(double inWordSpacing, double inCharacterSpacing, const GlyphUnicodeMappingList& inText);
-	EStatusCode TJ(const GlyphUnicodeMappingListOrDoubleList& inStringsAndSpacing); 
+	EPDFStatusCode Tj(const GlyphUnicodeMappingList& inText);
+	EPDFStatusCode Quote(const GlyphUnicodeMappingList& inText);
+	EPDFStatusCode DoubleQuote(double inWordSpacing, double inCharacterSpacing, const GlyphUnicodeMappingList& inText);
+	EPDFStatusCode TJ(const GlyphUnicodeMappingListOrDoubleList& inStringsAndSpacing); 
 
 	//
 	// Text showing operators overriding library behavior
@@ -235,6 +235,6 @@ private:
 
 	void AssertProcsetAvailable(const string& inProcsetName);
 
-	EStatusCode WriteTextCommandWithEncoding(const wstring& inUnicodeText,ITextCommand* inTextCommand);
-	EStatusCode WriteTextCommandWithDirectGlyphSelection(const GlyphUnicodeMappingList& inText,ITextCommand* inTextCommand);
+	EPDFStatusCode WriteTextCommandWithEncoding(const wstring& inUnicodeText,ITextCommand* inTextCommand);
+	EPDFStatusCode WriteTextCommandWithDirectGlyphSelection(const GlyphUnicodeMappingList& inText,ITextCommand* inTextCommand);
 };

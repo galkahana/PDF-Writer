@@ -1,6 +1,6 @@
 #include "CustomLogTest.h"
 #include "TestsRunner.h"
-#include "PDFWriter.h"
+#include "HummusPDFWriter.h"
 #include "OutputFlateEncodeStream.h"
 #include "OutputFlateDecodeStream.h"
 #include "OutputStreamTraits.h"
@@ -22,29 +22,29 @@ CustomLogTest::~CustomLogTest(void)
 {
 }
 
-EStatusCode CustomLogTest::Run()
+EPDFStatusCode CustomLogTest::Run()
 {
 	// Place log in a compressed stream, for a non-file PDF
-	EStatusCode status;
+	EPDFStatusCode status;
 	OutputFlateEncodeStream flateEncodeStream;
 	OutputFlateDecodeStream flateDecodeStream;
 
 	do
 	{
-		PDFWriter pdfWriter;
+		HummusPDFWriter pdfWriter;
 		OutputFile compressedLogFile;
 		OutputStringBufferStream pdfStream;
 	
 		// setup log file with compression
 		status = compressedLogFile.OpenFile(L"c:\\PDFLibTests\\CustomLogEncrypted.txt");
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 		flateEncodeStream.Assign(compressedLogFile.GetOutputStream());
 		
 		// generate PDF
 		TRACE_LOG("Starting PDF File Writing");
 		status = pdfWriter.StartPDFForStream(&pdfStream,ePDFVersion13,LogConfiguration(true,&flateEncodeStream));
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 		TRACE_LOG("Now will add an empty page");
 		PDFPage* page = new PDFPage();
@@ -52,13 +52,13 @@ EStatusCode CustomLogTest::Run()
 		page->SetMediaBox(PDFRectangle(0,0,400,400));
 		
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		TRACE_LOG("Added page, now will close");
 
 		status = pdfWriter.EndPDFForStream();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		// since log was started by starting PDF...the ending resets it. so let's now begin again
@@ -68,7 +68,7 @@ EStatusCode CustomLogTest::Run()
 		// dump PDF to a file, so we can review it
 		OutputFile pdfFile;
 		status = pdfFile.OpenFile(L"c:\\PDFLibTests\\DumpPDFFile.pdf");
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		string pdfString = pdfStream.ToString();
@@ -89,7 +89,7 @@ EStatusCode CustomLogTest::Run()
 		OutputFile decryptedLogFile;
 
 		status = decryptedLogFile.OpenFile(L"c:\\PDFLibTests\\CustomLogDecrypted.txt");
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 
@@ -102,11 +102,11 @@ EStatusCode CustomLogTest::Run()
 
 		InputFile compressedLogFileInput;
 		status = compressedLogFileInput.OpenFile(L"c:\\PDFLibTests\\CustomLogEncrypted.txt");
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		status = traits.CopyToOutputStream(compressedLogFileInput.GetInputStream());
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		compressedLogFileInput.CloseFile();
@@ -115,7 +115,7 @@ EStatusCode CustomLogTest::Run()
 		
 	}while(false);
 
-	if(status != eSuccess)
+	if(status != ePDFSuccess)
 	{
 		// cancel ownership of subsstreams
 		flateDecodeStream.Assign(NULL);

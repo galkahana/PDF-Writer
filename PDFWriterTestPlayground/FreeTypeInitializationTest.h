@@ -2,7 +2,7 @@
    Source File : FreeTypeInitializationTest.h
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -31,10 +31,10 @@ public:
 	FreeTypeInitializationTest(void);
 	~FreeTypeInitializationTest(void);
 
-	virtual EStatusCode Run();
+	virtual EPDFStatusCode Run();
 
 
 private:
-	EStatusCode ShowFaceProperties(FreeTypeWrapper& inFreeType,const wchar_t* inFontFilePath,const wchar_t* inSecondaryFontFilePath = NULL);
-	EStatusCode ShowGlobalFontProperties(FreeTypeWrapper& inFreeType,FT_Face inFace);
+	EPDFStatusCode ShowFaceProperties(FreeTypeWrapper& inFreeType,const wchar_t* inFontFilePath,const wchar_t* inSecondaryFontFilePath = NULL);
+	EPDFStatusCode ShowGlobalFontProperties(FreeTypeWrapper& inFreeType,FT_Face inFace);
 };

@@ -21,19 +21,19 @@
 #pragma once
 
 #include "PDFEmbedParameterTypes.h"
-#include "PDFParser.h"
+#include "HummusPDFParser.h"
 #include "PDFRectangle.h"
 #include "InputFile.h"
 #include "ObjectsBasicTypes.h"
 #include "ETokenSeparator.h"
-#include "DocumentContextExtenderAdapter.h"
+#include "DocumentsContextExtenderAdapter.h"
 #include "MapIterator.h"
 
 #include <map>
 #include <list>
 #include <set>
 
-class DocumentContext;
+class DocumentsContext;
 class ObjectsContext;
 class IByteWriter;
 class PDFDictionary;
@@ -42,7 +42,7 @@ class PDFStreamInput;
 class DictionaryContext;
 class PageContentContext;
 class PDFPage;
-class IDocumentContextExtender;
+class IDocumentsContextExtender;
 class IPageEmbedInFormCommand;
 
 using namespace std;
@@ -50,7 +50,7 @@ using namespace std;
 typedef map<ObjectIDType,ObjectIDType> ObjectIDTypeToObjectIDTypeMap;
 typedef map<string,string> StringToStringMap;
 typedef set<ObjectIDType> ObjectIDTypeSet;
-typedef set<IDocumentContextExtender*> IDocumentContextExtenderSet;
+typedef set<IDocumentsContextExtender*> IDocumentsContextExtenderSet;
 
 struct ResourceTokenMarker
 {
@@ -66,89 +66,91 @@ struct ResourceTokenMarker
 
 typedef list<ResourceTokenMarker> ResourceTokenMarkerList;
 
-class PDFDocumentHandler : public DocumentContextExtenderAdapter
+class PDFDocumentHandler : public DocumentsContextExtenderAdapter
 {
 public:
 	PDFDocumentHandler(void);
 	virtual ~PDFDocumentHandler(void);
 
-	void SetOperationsContexts(DocumentContext* inDocumentcontext,ObjectsContext* inObjectsContext);
+	void SetOperationsContexts(DocumentsContext* inDocumentsContext,ObjectsContext* inObjectsContext);
 
 	// Create a list of XObjects from a PDF file.
 	// the list of objects can then be used to place the "pages" in various locations on the written
 	// PDF page.
-	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF( const wstring& inPDFFilePath,
+	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF( const wstring& inPDFFilePath,
 																const PDFPageRange& inPageRange,
 																EPDFPageBox inPageBoxToUseAsFormBox,
 																const double* inTransformationMatrix,
 																const ObjectIDTypeList& inCopyAdditionalObjects);
 
-	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
 															 const PDFPageRange& inPageRange,
 															 EPDFPageBox inPageBoxToUseAsFormBox,
 															 const double* inTransformationMatrix,
 															 const ObjectIDTypeList& inCopyAdditionalObjects);
 
-	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF( const wstring& inPDFFilePath,
+	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF( const wstring& inPDFFilePath,
 																const PDFPageRange& inPageRange,
 																const PDFRectangle& inCropBox,
 																const double* inTransformationMatrix,
 																const ObjectIDTypeList& inCopyAdditionalObjects);
 
-	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
 															 const PDFPageRange& inPageRange,
 															 const PDFRectangle& inCropBox,
 															 const double* inTransformationMatrix,
 															 const ObjectIDTypeList& inCopyAdditionalObjects);
 	
 	// appends pages from source PDF to the written PDF. returns object ID for the created pages
-	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
+	EPDFStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
 														const PDFPageRange& inPageRange,
 														const ObjectIDTypeList& inCopyAdditionalObjects);
 
-	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(IByteReaderWithPosition* inPDFStream,
+	EPDFStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(IByteReaderWithPosition* inPDFStream,
 														const PDFPageRange& inPageRange,
 														const ObjectIDTypeList& inCopyAdditionalObjects);
 
 	// MergePDFPagesToPage, merge PDF pages content to an input page. good for single-placement of a page content, cheaper than creating
 	// and XObject and later placing, when the intention is to use this graphic just once.
-	EStatusCode MergePDFPagesToPage(PDFPage* inPage,
+	EPDFStatusCode MergePDFPagesToPage(PDFPage* inPage,
 									const wstring& inPDFFilePath,
 									const PDFPageRange& inPageRange,
 									const ObjectIDTypeList& inCopyAdditionalObjects);
 
-	EStatusCode MergePDFPagesToPage(PDFPage* inPage,
+	EPDFStatusCode MergePDFPagesToPage(PDFPage* inPage,
 									IByteReaderWithPosition* inPDFStream,
 									const PDFPageRange& inPageRange,
 									const ObjectIDTypeList& inCopyAdditionalObjects);
 
 	// Event listeners for CreateFormXObjectsFromPDF and AppendPDFPagesFromPDF
-	void AddDocumentContextExtender(IDocumentContextExtender* inExtender);
-	void RemoveDocumentContextExtender(IDocumentContextExtender* inExtender);	
+	void AddDocumentsContextExtender(IDocumentsContextExtender* inExtender);
+	void RemoveDocumentsContextExtender(IDocumentsContextExtender* inExtender);	
 
-	// IDocumentContextExtender implementation
-	virtual EStatusCode OnResourcesWrite(
+	// IDocumentsContextExtender implementation
+	virtual EPDFStatusCode OnResourcesWrite(
 							ResourcesDictionary* inResources,
 							DictionaryContext* inPageResourcesDictionaryContext,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext);
+							DocumentsContext* inPDFWriterDocumentsContext);
 
 
 	// copying context handling
-	EStatusCode StartFileCopyingContext(const wstring& inPDFFilePath);
-	EStatusCode StartStreamCopyingContext(IByteReaderWithPosition* inPDFStream);
-	EStatusCodeAndObjectIDType CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
+	EPDFStatusCode StartFileCopyingContext(const wstring& inPDFFilePath);
+	EPDFStatusCode StartStreamCopyingContext(IByteReaderWithPosition* inPDFStream);
+	EPDFStatusCodeAndObjectIDType CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
 														 EPDFPageBox inPageBoxToUseAsFormBox,
 														 const double* inTransformationMatrix);
-	EStatusCodeAndObjectIDType CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
+	EPDFStatusCodeAndObjectIDType CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
 														 const PDFRectangle& inCropBox,
 														 const double* inTransformationMatrix);
-	EStatusCodeAndObjectIDType AppendPDFPageFromPDF(unsigned long inPageIndex);
-	EStatusCode MergePDFPageToPage(PDFPage* inTargetPage,unsigned long inSourcePageIndex);
-	EStatusCodeAndObjectIDType CopyObject(ObjectIDType inSourceObjectID);
-	PDFParser* GetSourceDocumentParser();
-	EStatusCodeAndObjectIDType GetCopiedObjectID(ObjectIDType inSourceObjectID);
+	EPDFStatusCodeAndObjectIDType AppendPDFPageFromPDF(unsigned long inPageIndex);
+	EPDFStatusCode MergePDFPageToPage(PDFPage* inTargetPage,unsigned long inSourcePageIndex);
+	EPDFStatusCodeAndObjectIDType CopyObject(ObjectIDType inSourceObjectID);
+	HummusPDFParser* GetSourceDocumentParser();
+	EPDFStatusCodeAndObjectIDType GetCopiedObjectID(ObjectIDType inSourceObjectID);
 	MapIterator<ObjectIDTypeToObjectIDTypeMap> GetCopiedObjectsMappingIterator();
+	EPDFStatusCodeAndObjectIDTypeList CopyDirectObject(PDFObject* inObject);
+	EPDFStatusCode CopyNewObjectsForDirectObject(const ObjectIDTypeList& inReferencedObjects);
 	void StopCopyingContext();
 
 
@@ -162,13 +164,13 @@ public:
 private:
 
 	ObjectsContext* mObjectsContext;
-	DocumentContext* mDocumentContext;
-	IDocumentContextExtenderSet mExtenders;
+	DocumentsContext* mDocumentsContext;
+	IDocumentsContextExtenderSet mExtenders;
 
 
 	InputFile mPDFFile;
 	IByteReaderWithPosition* mPDFStream;
-	PDFParser mParser;
+	HummusPDFParser mParser;
 	ObjectIDTypeToObjectIDTypeMap mSourceToTarget;
 	PDFDictionary* mWrittenPage;
 
@@ -176,17 +178,17 @@ private:
 	PDFRectangle DeterminePageBox(PDFDictionary* inDictionary,EPDFPageBox inPageBoxType);
 	void SetPDFRectangleFromPDFArray(PDFArray* inPDFArray,PDFRectangle& outPDFRectangle);
 	double GetAsDoubleValue(PDFObject* inNumberObject);
-	EStatusCode WritePageContentToSingleStream(IByteWriter* inTargetStream,PDFDictionary* inPageObject);
-	EStatusCode WritePDFStreamInputToStream(IByteWriter* inTargetStream,PDFStreamInput* inSourceStream);
-	EStatusCode CopyResourcesIndirectObjects(PDFDictionary* inPage);
+	EPDFStatusCode WritePageContentToSingleStream(IByteWriter* inTargetStream,PDFDictionary* inPageObject);
+	EPDFStatusCode WritePDFStreamInputToStream(IByteWriter* inTargetStream,PDFStreamInput* inSourceStream);
+	EPDFStatusCode CopyResourcesIndirectObjects(PDFDictionary* inPage);
 	void RegisterInDirectObjects(PDFDictionary* inDictionary,ObjectIDTypeList& outNewObjects);
 	void RegisterInDirectObjects(PDFArray* inArray,ObjectIDTypeList& outNewObjects);
-	EStatusCode WriteNewObjects(const ObjectIDTypeList& inSourceObjectIDs);
-	EStatusCode WriteNewObjects(const ObjectIDTypeList& inSourceObjectIDs,ObjectIDTypeSet& ioCopiedObjects);
-	EStatusCode CopyInDirectObject(ObjectIDType inSourceObjectID,ObjectIDType inTargetObjectID,ObjectIDTypeSet& ioCopiedObjects);
-	EStatusCode WriteObjectByType(PDFObject* inObject,ETokenSeparator inSeparator,ObjectIDTypeList& outSourceObjectsToAdd);
-	EStatusCode WriteArrayObject(PDFArray* inArray,ETokenSeparator inSeparator,ObjectIDTypeList& outSourceObjectsToAdd);
-	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+	EPDFStatusCode WriteNewObjects(const ObjectIDTypeList& inSourceObjectIDs);
+	EPDFStatusCode WriteNewObjects(const ObjectIDTypeList& inSourceObjectIDs,ObjectIDTypeSet& ioCopiedObjects);
+	EPDFStatusCode CopyInDirectObject(ObjectIDType inSourceObjectID,ObjectIDType inTargetObjectID,ObjectIDTypeSet& ioCopiedObjects);
+	EPDFStatusCode WriteObjectByType(PDFObject* inObject,ETokenSeparator inSeparator,ObjectIDTypeList& outSourceObjectsToAdd);
+	EPDFStatusCode WriteArrayObject(PDFArray* inArray,ETokenSeparator inSeparator,ObjectIDTypeList& outSourceObjectsToAdd);
+	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
 															const PDFPageRange& inPageRange,
 															IPageEmbedInFormCommand* inPageEmbedCommand,
 															const double* inTransformationMatrix,
@@ -194,47 +196,47 @@ private:
 	PDFFormXObject* CreatePDFFormXObjectForPage(PDFDictionary* inPageObject,
 												const PDFRectangle& inCropBox,
 												const double* inTransformationMatrix);
-	EStatusCode CopyInDirectObject(ObjectIDType inSourceObjectID,ObjectIDType inTargetObjectID);
+	EPDFStatusCode CopyInDirectObject(ObjectIDType inSourceObjectID,ObjectIDType inTargetObjectID);
 
 
-	EStatusCode WriteDictionaryObject(PDFDictionary* inDictionary,ObjectIDTypeList& outSourceObjectsToAdd);
-	EStatusCode WriteObjectByType(PDFObject* inObject,DictionaryContext* inDictionaryContext,ObjectIDTypeList& outSourceObjectsToAdd);
+	EPDFStatusCode WriteDictionaryObject(PDFDictionary* inDictionary,ObjectIDTypeList& outSourceObjectsToAdd);
+	EPDFStatusCode WriteObjectByType(PDFObject* inObject,DictionaryContext* inDictionaryContext,ObjectIDTypeList& outSourceObjectsToAdd);
 
 
-	EStatusCode WriteStreamObject(PDFStreamInput* inStream,ObjectIDTypeList& outSourceObjectsToAdd);
-	EStatusCodeAndObjectIDType CreatePDFPageForPage(unsigned long inPageIndex);
-	EStatusCode CopyPageContentToTargetPage(PDFPage* inPage,PDFDictionary* inPageObject);
-	EStatusCode WritePDFStreamInputToContentContext(PageContentContext* inContentContext,PDFStreamInput* inContentSource);
+	EPDFStatusCode WriteStreamObject(PDFStreamInput* inStream,ObjectIDTypeList& outSourceObjectsToAdd);
+	EPDFStatusCodeAndObjectIDType CreatePDFPageForPage(unsigned long inPageIndex);
+	EPDFStatusCode CopyPageContentToTargetPage(PDFPage* inPage,PDFDictionary* inPageObject);
+	EPDFStatusCode WritePDFStreamInputToContentContext(PageContentContext* inContentContext,PDFStreamInput* inContentSource);
 	PDFObject* QueryInheritedValue(PDFDictionary* inDictionary,string inName);
-	EStatusCode MergePDFPageForPage(PDFPage* inTargetPage,unsigned long inSourcePageIndex);
-	EStatusCode MergeResourcesToPage(PDFPage* inTargetPage,PDFDictionary* inPage,StringToStringMap& outMappedResourcesNames);
-	EStatusCodeAndObjectIDType CopyObjectToIndirectObject(PDFObject* inObject);
-	EStatusCode CopyDirectObjectToIndirectObject(PDFObject* inObject,ObjectIDType inTargetObjectID);
-	EStatusCode MergePageContentToTargetPage(PDFPage* inTargetPage,PDFDictionary* inSourcePage,const StringToStringMap& inMappedResourcesNames);
-	EStatusCode WritePDFStreamInputToContentContext(PageContentContext* inContentContext,PDFStreamInput* inContentSource,const StringToStringMap& inMappedResourcesNames);
-	EStatusCode WritePDFStreamInputToStream(IByteWriter* inTargetStream,PDFStreamInput* inSourceStream,const StringToStringMap& inMappedResourcesNames);
-	EStatusCode ScanStreamForResourcesTokens(PDFStreamInput* inSourceStream,const StringToStringMap& inMappedResourcesNames,ResourceTokenMarkerList& outResourceMarkers);
-	EStatusCode MergeAndReplaceResourcesTokens(	IByteWriter* inTargetStream,
+	EPDFStatusCode MergePDFPageForPage(PDFPage* inTargetPage,unsigned long inSourcePageIndex);
+	EPDFStatusCode MergeResourcesToPage(PDFPage* inTargetPage,PDFDictionary* inPage,StringToStringMap& outMappedResourcesNames);
+	EPDFStatusCodeAndObjectIDType CopyObjectToIndirectObject(PDFObject* inObject);
+	EPDFStatusCode CopyDirectObjectToIndirectObject(PDFObject* inObject,ObjectIDType inTargetObjectID);
+	EPDFStatusCode MergePageContentToTargetPage(PDFPage* inTargetPage,PDFDictionary* inSourcePage,const StringToStringMap& inMappedResourcesNames);
+	EPDFStatusCode WritePDFStreamInputToContentContext(PageContentContext* inContentContext,PDFStreamInput* inContentSource,const StringToStringMap& inMappedResourcesNames);
+	EPDFStatusCode WritePDFStreamInputToStream(IByteWriter* inTargetStream,PDFStreamInput* inSourceStream,const StringToStringMap& inMappedResourcesNames);
+	EPDFStatusCode ScanStreamForResourcesTokens(PDFStreamInput* inSourceStream,const StringToStringMap& inMappedResourcesNames,ResourceTokenMarkerList& outResourceMarkers);
+	EPDFStatusCode MergeAndReplaceResourcesTokens(	IByteWriter* inTargetStream,
 												PDFStreamInput* inSourceStream,
 												const StringToStringMap& inMappedResourcesNames,
 												const ResourceTokenMarkerList& inResourceMarkers);
 
-	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDFInContext(
+	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDFInContext(
 																		const PDFPageRange& inPageRange,
 																		IPageEmbedInFormCommand* inPageEmbedCommand,
 																		const double* inTransformationMatrix,
 																		const ObjectIDTypeList& inCopyAdditionalObjects);
-	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
 															const PDFPageRange& inPageRange,
 															IPageEmbedInFormCommand* inPageEmbedCommand,
 															const double* inTransformationMatrix,
 															const ObjectIDTypeList& inCopyAdditionalObjects);
-	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDFInContext(const PDFPageRange& inPageRange,
+	EPDFStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDFInContext(const PDFPageRange& inPageRange,
 																  const ObjectIDTypeList& inCopyAdditionalObjects);
-	EStatusCode MergePDFPagesToPageInContext(PDFPage* inPage,
+	EPDFStatusCode MergePDFPagesToPageInContext(PDFPage* inPage,
 											const PDFPageRange& inPageRange,
 											const ObjectIDTypeList& inCopyAdditionalObjects);
-	EStatusCode StartCopyingContext(IByteReaderWithPosition* inPDFStream);
+	EPDFStatusCode StartCopyingContext(IByteReaderWithPosition* inPDFStream);
 
 
 	string AsEncodedName(const string& inName);

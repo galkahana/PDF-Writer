@@ -2,7 +2,7 @@
    Source File : TestsRunner.h
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "ITestUnit.h"
 #include "Singleton.h"
 
@@ -49,14 +49,14 @@ public:
 	~TestsRunner(void);
 
 
-	EStatusCode RunAll();
-	EStatusCode RunTest(const wstring& inTestLabel);
-	EStatusCode RunTests(const WStringList& inTestsLabels);
-	EStatusCode RunCategory(const wstring& inCategory);
-	EStatusCode RunCategories(const WStringList& inCategories);
-	EStatusCode RunCategories(const WStringList& inCategories, const WStringSet& inTestsToExclude);
-	EStatusCode RunExcludeCategories(const WStringSet& inCategories);
-	EStatusCode RunExcludeTests(const WStringSet& inTests);
+	EPDFStatusCode RunAll();
+	EPDFStatusCode RunTest(const wstring& inTestLabel);
+	EPDFStatusCode RunTests(const WStringList& inTestsLabels);
+	EPDFStatusCode RunCategory(const wstring& inCategory);
+	EPDFStatusCode RunCategories(const WStringList& inCategories);
+	EPDFStatusCode RunCategories(const WStringList& inCategories, const WStringSet& inTestsToExclude);
+	EPDFStatusCode RunExcludeCategories(const WStringSet& inCategories);
+	EPDFStatusCode RunExcludeTests(const WStringSet& inTests);
 
 	void AddTest(const wstring& inTestLabel,ITestUnit* inTest);
 	void AddTest(const std::wstring& inTestLabel,const std::wstring& inCategory,ITestUnit* inTest);
@@ -65,8 +65,8 @@ private:
 	WStringToWStringAndTestUnitListMap mTests;
 	WStringToTestUnitMap mTestsByName;
 
-	EStatusCode RunTestsInList(const WStringAndTestUnitList& inTests);
-	EStatusCode RunSingleTest(const wstring& inTestName,ITestUnit* inTest);
+	EPDFStatusCode RunTestsInList(const WStringAndTestUnitList& inTests);
+	EPDFStatusCode RunSingleTest(const wstring& inTestName,ITestUnit* inTest);
 	void DeleteTests();
 };
 

@@ -2,7 +2,7 @@
    Source File : FlateEncryptionTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -41,9 +41,9 @@ FlateEncryptionTest::~FlateEncryptionTest(void)
 {
 }
 
-EStatusCode FlateEncryptionTest::Run()
+EPDFStatusCode FlateEncryptionTest::Run()
 {
-	EStatusCode status;
+	EPDFStatusCode status;
 
 	do
 	{
@@ -57,7 +57,7 @@ EStatusCode FlateEncryptionTest::Run()
 		if(writtenSize != strlen(aString))
 		{
 			wcout<<"Failed to write all message to output\n";
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -66,10 +66,10 @@ EStatusCode FlateEncryptionTest::Run()
 
 		OutputStreamTraits outputTraits(decoderWriterStream);
 		status = outputTraits.CopyToOutputStream(encoderReaderStream);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"Failed to copy to decrypted output\n";
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -88,7 +88,7 @@ EStatusCode FlateEncryptionTest::Run()
 		if(strcmp(aString,buffer) != 0)
 		{
 			wcout<<"decrypted content is different from encrypted content\n";
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 	}while(false);

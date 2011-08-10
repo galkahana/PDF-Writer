@@ -19,7 +19,7 @@
    
 */
 #pragma once
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "IOBasicTypes.h"
 
 using namespace IOBasicTypes;
@@ -34,15 +34,15 @@ public:
 
 	void Assign(IByteWriter* inTargetStream);
 
-	EStatusCode WriteHintMask(unsigned long inMask,unsigned long inMaskSize);
-	EStatusCode WriteIntegerOperand(long inOperand);
-	EStatusCode WriteOperator(unsigned short inOperatorCode);
+	EPDFStatusCode WriteHintMask(unsigned long inMask,unsigned long inMaskSize);
+	EPDFStatusCode WriteIntegerOperand(long inOperand);
+	EPDFStatusCode WriteOperator(unsigned short inOperatorCode);
 
 
 private:
 
 	IByteWriter* mTargetStream;
 
-	EStatusCode WriteMaskBytes(unsigned long inMask,unsigned long inMaskByteSize);
-	EStatusCode WriteByte(Byte inValue);
+	EPDFStatusCode WriteMaskBytes(unsigned long inMask,unsigned long inMaskByteSize);
+	EPDFStatusCode WriteByte(Byte inValue);
 };

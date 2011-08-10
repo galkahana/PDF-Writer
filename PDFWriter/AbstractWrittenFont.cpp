@@ -23,7 +23,7 @@
 #include "InDirectObjectsReferenceRegistry.h"
 #include "Trace.h"
 #include "DictionaryContext.h"
-#include "PDFParser.h"
+#include "HummusPDFParser.h"
 #include "PDFDictionary.h"
 #include "PDFObjectCast.h"
 #include "PDFArray.h"
@@ -294,7 +294,7 @@ void AbstractWrittenFont::AddToCIDRepresentation(	const GlyphUnicodeMappingListL
 		mCIDRepresentation->mWrittenObjectID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
 }
 
-EStatusCode AbstractWrittenFont::WriteStateInDictionary(ObjectsContext* inStateWriter,DictionaryContext* inDerivedObjectDictionary)
+EPDFStatusCode AbstractWrittenFont::WriteStateInDictionary(ObjectsContext* inStateWriter,DictionaryContext* inDerivedObjectDictionary)
 {
 
 
@@ -313,26 +313,26 @@ EStatusCode AbstractWrittenFont::WriteStateInDictionary(ObjectsContext* inStateW
 		inDerivedObjectDictionary->WriteKey("mANSIRepresentation");
 		inDerivedObjectDictionary->WriteObjectReferenceValue(mAnsiRepresentationObjectStateID);
 	}
-	return eSuccess;
+	return ePDFSuccess;
 }
 
-EStatusCode AbstractWrittenFont::WriteStateAfterDictionary(ObjectsContext* inStateWriter)
+EPDFStatusCode AbstractWrittenFont::WriteStateAfterDictionary(ObjectsContext* inStateWriter)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	do
 	{
 		if(mCIDRepresentation)
 		{
 			status = WriteWrittenFontState(mCIDRepresentation,inStateWriter,mCidRepresentationObjectStateID);
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 				break;
 		}
 
 		if(mANSIRepresentation)
 		{
 			status = WriteWrittenFontState(mANSIRepresentation,inStateWriter,mAnsiRepresentationObjectStateID);
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 				break;
 		}
 	}while(false);
@@ -342,7 +342,7 @@ EStatusCode AbstractWrittenFont::WriteStateAfterDictionary(ObjectsContext* inSta
 
 typedef list<ObjectIDType> ObjectIDTypeList;
 
-EStatusCode AbstractWrittenFont::WriteWrittenFontState(WrittenFontRepresentation* inRepresentation,
+EPDFStatusCode AbstractWrittenFont::WriteWrittenFontState(WrittenFontRepresentation* inRepresentation,
 													   ObjectsContext* inStateWriter,
 													   ObjectIDType inObjectID)
 {
@@ -384,7 +384,7 @@ EStatusCode AbstractWrittenFont::WriteWrittenFontState(WrittenFontRepresentation
 			WriteGlyphEncodingInfoState(inStateWriter,*itIDs,it->second);
 	}
 
-	return eSuccess;
+	return ePDFSuccess;
 }
 
 void AbstractWrittenFont::WriteGlyphEncodingInfoState(ObjectsContext* inStateWriter,
@@ -414,7 +414,7 @@ void AbstractWrittenFont::WriteGlyphEncodingInfoState(ObjectsContext* inStateWri
 	
 }
 
-EStatusCode AbstractWrittenFont::ReadState(PDFParser* inStateReader,PDFDictionary* inState)
+EPDFStatusCode AbstractWrittenFont::ReadState(HummusPDFParser* inStateReader,PDFDictionary* inState)
 {
 	PDFObjectCastPtr<PDFDictionary> cidRepresentationState(inStateReader->QueryDictionaryObject(inState,"mCIDRepresentation"));
 	PDFObjectCastPtr<PDFDictionary> ansiRepresentationState(inStateReader->QueryDictionaryObject(inState,"mANSIRepresentation"));
@@ -437,10 +437,10 @@ EStatusCode AbstractWrittenFont::ReadState(PDFParser* inStateReader,PDFDictionar
 	}
 	else
 		mANSIRepresentation = NULL;
-	return eSuccess;
+	return ePDFSuccess;
 }
 
-void AbstractWrittenFont::ReadWrittenFontState(PDFParser* inStateReader,PDFDictionary* inState,WrittenFontRepresentation* inRepresentation)
+void AbstractWrittenFont::ReadWrittenFontState(HummusPDFParser* inStateReader,PDFDictionary* inState,WrittenFontRepresentation* inRepresentation)
 {
 	PDFObjectCastPtr<PDFArray> glyphIDToEncodedCharState(inState->QueryDirectObject("mGlyphIDToEncodedChar"));
 
@@ -466,7 +466,7 @@ void AbstractWrittenFont::ReadWrittenFontState(PDFParser* inStateReader,PDFDicti
 	inRepresentation->mWrittenObjectID = (ObjectIDType)writtenObjectIDState->GetValue();
 }
 
-void AbstractWrittenFont::ReadGlyphEncodingInfoState(PDFParser* inStateReader,ObjectIDType inObjectID,GlyphEncodingInfo& inGlyphEncodingInfo)
+void AbstractWrittenFont::ReadGlyphEncodingInfoState(HummusPDFParser* inStateReader,ObjectIDType inObjectID,GlyphEncodingInfo& inGlyphEncodingInfo)
 {
 	PDFObjectCastPtr<PDFDictionary> glyphEncodingInfoState(inStateReader->ParseNewObject(inObjectID));
 	

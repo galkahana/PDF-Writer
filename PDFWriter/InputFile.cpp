@@ -34,13 +34,13 @@ InputFile::~InputFile(void)
 	CloseFile();
 }
 
-EStatusCode InputFile::OpenFile(const wstring& inFilePath)
+EPDFStatusCode InputFile::OpenFile(const wstring& inFilePath)
 {
-	EStatusCode status;
+	EPDFStatusCode status;
 	do
 	{
 		status = CloseFile();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG1("InputFile::OpenFile, Unexpected Failure. Couldn't close previously open file - %s",mFilePath.c_str());
 			break;
@@ -48,7 +48,7 @@ EStatusCode InputFile::OpenFile(const wstring& inFilePath)
 	
 		InputFileStream* inputFileStream = new InputFileStream();
 		status = inputFileStream->Open(inFilePath); // explicitly open, so status may be retrieved
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG1("InputFile::OpenFile, Unexpected Failure. Cannot open file for reading - %s",inFilePath.c_str());
 			delete inputFileStream;
@@ -62,15 +62,15 @@ EStatusCode InputFile::OpenFile(const wstring& inFilePath)
 	return status;
 }
 
-EStatusCode InputFile::CloseFile()
+EPDFStatusCode InputFile::CloseFile()
 {
 	if(NULL == mInputStream)
 	{
-		return eSuccess;
+		return ePDFSuccess;
 	}
 	else
 	{
-		EStatusCode status = mFileStream->Close(); // explicitly close, so status may be retrieved
+		EPDFStatusCode status = mFileStream->Close(); // explicitly close, so status may be retrieved
 
 		delete mInputStream; // will delete the referenced file stream as well
 		mInputStream = NULL;

@@ -22,23 +22,23 @@
 #include "InputFile.h"
 #include "JPEGImageParser.h"
 #include "Trace.h"
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "PDFImageXObject.h"
 #include "PDFStream.h"
 #include "OutputStreamTraits.h"
 #include "JPEGImageHandler.h"
 #include "ObjectsContext.h"
 #include "DictionaryContext.h"
-#include "IDocumentContextExtender.h"
+#include "IDocumentsContextExtender.h"
 #include "ProcsetResourcesConstants.h"
-#include "DocumentContext.h"
+#include "DocumentsContext.h"
 #include "XObjectContentContext.h"
 #include "PDFFormXObject.h"
 
 JPEGImageHandler::JPEGImageHandler(void)
 {
 	mObjectsContext = NULL;
-	mDocumentContext = NULL;
+	mDocumentsContext = NULL;
 }
 
 JPEGImageHandler::~JPEGImageHandler(void)
@@ -46,10 +46,10 @@ JPEGImageHandler::~JPEGImageHandler(void)
 }
 
 
-void JPEGImageHandler::SetOperationsContexts(DocumentContext* inDocumentContext,ObjectsContext* inObjectsContext)
+void JPEGImageHandler::SetOperationsContexts(DocumentsContext* inDocumentsContext,ObjectsContext* inObjectsContext)
 {
 	mObjectsContext = inObjectsContext;
-	mDocumentContext = inDocumentContext;
+	mDocumentsContext = inDocumentsContext;
 }
 
 PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inImageXObjectID)
@@ -95,7 +95,7 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 																				const JPEGImageInformation& inJPGImageInformation)
 {
 	InputFile JPGFile;
-	if(JPGFile.OpenFile(inJPGFilePath) != eSuccess)
+	if(JPGFile.OpenFile(inJPGFilePath) != ePDFSuccess)
 	{
 		TRACE_LOG1("JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation. Unable to open JPG file for reading, %s", inJPGFilePath.c_str());
 		return NULL;
@@ -114,7 +114,7 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 																				const JPEGImageInformation& inJPGImageInformation)
 {
 	PDFImageXObject* imageXObject = NULL;
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	do
 	{
@@ -175,28 +175,28 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 		default:
 			TRACE_LOG1("JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation, Unexpected Error, unfamilar color components count - %d",
 				inJPGImageInformation.ColorComponentsCount);
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		// Decoder - DCTDecode
 		imageContext->WriteKey(scFilter);
 		imageContext->WriteNameValue(scDCTDecode);
 
-		IDocumentContextExtenderSet::iterator it = mExtenders.begin();
-		EStatusCode status = eSuccess;
-		for(; it != mExtenders.end() && eSuccess == status; ++it)
+		IDocumentsContextExtenderSet::iterator it = mExtenders.begin();
+		EPDFStatusCode status = ePDFSuccess;
+		for(; it != mExtenders.end() && ePDFSuccess == status; ++it)
 		{
-			if((*it)->OnJPEGImageXObjectWrite(inImageXObjectID,imageContext,mObjectsContext,mDocumentContext,this) != eSuccess)
+			if((*it)->OnJPEGImageXObjectWrite(inImageXObjectID,imageContext,mObjectsContext,mDocumentsContext,this) != ePDFSuccess)
 			{
 				TRACE_LOG("JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation, unexpected failure. extender declared failure when writing image xobject.");
-				status = eFailure;
+				status = ePDFFailure;
 				break;
 			}
 		}	
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 		
 
@@ -204,7 +204,7 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 
 		OutputStreamTraits outputTraits(imageStream->GetWriteStream());
 		status = outputTraits.CopyToOutputStream(inJPGImageStream);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation. Unexpected Error, failed to copy jpg stream to output stream");
 			delete imageStream;
@@ -232,8 +232,8 @@ BoolAndJPEGImageInformation JPEGImageHandler::RetrieveImageInformation(const wst
 		do
 		{
 			InputFile JPGFile;
-			EStatusCode status = JPGFile.OpenFile(inJPGFilePath);
-			if(status != eSuccess)
+			EPDFStatusCode status = JPGFile.OpenFile(inJPGFilePath);
+			if(status != ePDFSuccess)
 			{
 				TRACE_LOG1("JPEGImageHandler::JPEGImageHandler. Unable to open JPG file for reading, %s", inJPGFilePath.c_str());
 				break;
@@ -243,14 +243,14 @@ BoolAndJPEGImageInformation JPEGImageHandler::RetrieveImageInformation(const wst
 			JPEGImageInformation imageInformation;
 			
 			status = jpgImageParser.Parse(JPGFile.GetInputStream(),imageInformation);
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
 				TRACE_LOG1("JPEGImageHandler::JPEGImageHandler. Failed to parse JPG file, %s", inJPGFilePath.c_str());
 				break;
 			}
 
 			status = JPGFile.CloseFile();
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
 				TRACE_LOG1("JPEGImageHandler::JPEGImageHandler. Failed to close JPG file, %s", inJPGFilePath.c_str());
 				break;
@@ -270,12 +270,12 @@ BoolAndJPEGImageInformation JPEGImageHandler::RetrieveImageInformation(const wst
 	return imageInformationResult;
 }
 
-void JPEGImageHandler::AddDocumentContextExtender(IDocumentContextExtender* inExtender)
+void JPEGImageHandler::AddDocumentsContextExtender(IDocumentsContextExtender* inExtender)
 {
 	mExtenders.insert(inExtender);
 }
 
-void JPEGImageHandler::RemoveDocumentContextExtender(IDocumentContextExtender* inExtender)
+void JPEGImageHandler::RemoveDocumentsContextExtender(IDocumentsContextExtender* inExtender)
 {
 	mExtenders.erase(inExtender);
 }
@@ -338,7 +338,7 @@ PDFFormXObject* JPEGImageHandler::CreateImageFormXObjectFromImageXObject(PDFImag
 
 		DoubleAndDoublePair dimensions = GetImageDimensions(inJPGImageInformation);
 
-		formXObject = mDocumentContext->StartFormXObject(PDFRectangle(0,0,dimensions.first,dimensions.second),inFormXObjectID);
+		formXObject = mDocumentsContext->StartFormXObject(PDFRectangle(0,0,dimensions.first,dimensions.second),inFormXObjectID);
 		XObjectContentContext* xobjectContentContext = formXObject->GetContentContext();
 
 		xobjectContentContext->q();
@@ -346,8 +346,8 @@ PDFFormXObject* JPEGImageHandler::CreateImageFormXObjectFromImageXObject(PDFImag
 		xobjectContentContext->Do(formXObject->GetResourcesDictionary().AddImageXObjectMapping(inImageXObject));
 		xobjectContentContext->Q();
 
-		EStatusCode status = mDocumentContext->EndFormXObjectNoRelease(formXObject);
-		if(status != eSuccess)
+		EPDFStatusCode status = mDocumentsContext->EndFormXObjectNoRelease(formXObject);
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("JPEGImageHandler::CreateImageFormXObjectFromImageXObject. Unexpected Error, could not create form XObject for image");
 			delete formXObject;
@@ -484,8 +484,8 @@ PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGStream(IByteReaderWi
 
 		LongFilePositionType recordedPosition = inJPGStream->GetCurrentPosition();
 		
-		EStatusCode status = jpgImageParser.Parse(inJPGStream,imageInformation);
-		if(status != eSuccess)
+		EPDFStatusCode status = jpgImageParser.Parse(inJPGStream,imageInformation);
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("JPEGImageHandler::CreateImageXObjectFromJPGStream. Failed to parse JPG stream");
 			break;
@@ -531,8 +531,8 @@ PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGStream(IByteReaderWith
 
 		LongFilePositionType recordedPosition = inJPGStream->GetCurrentPosition();
 		
-		EStatusCode status = jpgImageParser.Parse(inJPGStream,imageInformation);
-		if(status != eSuccess)
+		EPDFStatusCode status = jpgImageParser.Parse(inJPGStream,imageInformation);
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("JPEGImageHandler::CreateImageXObjectFromJPGStream. Failed to parse JPG stream");
 			break;

@@ -2,7 +2,7 @@
    Source File : PDFCopyingContextTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 */
 #include "PDFCopyingContextTest.h"
 #include "TestsRunner.h"
-#include "PDFWriter.h"
+#include "HummusPDFWriter.h"
 #include "PDFDocumentCopyingContext.h"
 
 #include <iostream>
@@ -35,16 +35,16 @@ PDFCopyingContextTest::~PDFCopyingContextTest(void)
 {
 }
 
-EStatusCode PDFCopyingContextTest::Run()
+EPDFStatusCode PDFCopyingContextTest::Run()
 {
-	EStatusCode status;
-	PDFWriter pdfWriter;
+	EPDFStatusCode status;
+	HummusPDFWriter pdfWriter;
 	PDFDocumentCopyingContext* copyingContext = NULL;
 
 	do
 	{
 		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\PDFCopyingContextTest.PDF",ePDFVersion13,LogConfiguration(true,L"c:\\pdflibtests\\PDFCopyingContextTest.txt"));
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to start PDF\n";
 			break;
@@ -55,12 +55,12 @@ EStatusCode PDFCopyingContextTest::Run()
 		if(!copyingContext)
 		{
 			wcout<<"failed to initialize copying context from BasicTIFFImagesTest\n";
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
-		EStatusCodeAndObjectIDType result = copyingContext->AppendPDFPageFromPDF(1);
-		if(result.first != eSuccess)
+		EPDFStatusCodeAndObjectIDType result = copyingContext->AppendPDFPageFromPDF(1);
+		if(result.first != ePDFSuccess)
 		{
 			wcout<<"failed to append page 1 from BasicTIFFImagesTest.PDF\n";
 			status = result.first;
@@ -68,7 +68,7 @@ EStatusCode PDFCopyingContextTest::Run()
 		}
 
 		result = copyingContext->AppendPDFPageFromPDF(18);
-		if(result.first != eSuccess)
+		if(result.first != ePDFSuccess)
 		{
 			wcout<<"failed to append page 18 from BasicTIFFImagesTest.PDF\n";
 			status = result.first;
@@ -76,7 +76,7 @@ EStatusCode PDFCopyingContextTest::Run()
 		}
 
 		result = copyingContext->AppendPDFPageFromPDF(4);
-		if(result.first != eSuccess)
+		if(result.first != ePDFSuccess)
 		{
 			wcout<<"failed to append page 4 from BasicTIFFImagesTest.PDF\n";
 			status = result.first;
@@ -89,7 +89,7 @@ EStatusCode PDFCopyingContextTest::Run()
 		copyingContext = NULL;
 
 		status = pdfWriter.EndPDF();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed in end PDF\n";
 			break;

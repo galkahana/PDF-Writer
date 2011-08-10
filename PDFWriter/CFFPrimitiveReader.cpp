@@ -37,97 +37,97 @@ void CFFPrimitiveReader::SetStream(IByteReaderWithPosition* inCFFFile)
 	{
 		mCurrentOffsize = 1;
 		mInitialPosition = inCFFFile->GetCurrentPosition();
-		mInternalState = eSuccess;
+		mInternalState = ePDFSuccess;
 	}
 	else
 	{
-		mInternalState = eFailure;
+		mInternalState = ePDFFailure;
 	}
 }
 
 
 void CFFPrimitiveReader::SetOffset(LongFilePositionType inNewOffset)
 {
-	if(mInternalState != eFailure)
+	if(mInternalState != ePDFFailure)
 		mCFFFile->SetPosition(mInitialPosition + inNewOffset);
 }	
 
 void CFFPrimitiveReader::Skip(LongBufferSizeType inToSkip)
 {
-	if(mInternalState != eFailure)
+	if(mInternalState != ePDFFailure)
 		mCFFFile->Skip(inToSkip);
 }
 
-EStatusCode CFFPrimitiveReader::GetInternalState()
+EPDFStatusCode CFFPrimitiveReader::GetInternalState()
 {
 	return mInternalState;
 }
 
 LongFilePositionType CFFPrimitiveReader::GetCurrentPosition()
 {
-	if(mInternalState != eFailure)
+	if(mInternalState != ePDFFailure)
 		return mCFFFile->GetCurrentPosition() - mInitialPosition;	
 	else
 		return 0;
 }
 
-EStatusCode CFFPrimitiveReader::ReadByte(Byte& outValue)
+EPDFStatusCode CFFPrimitiveReader::ReadByte(Byte& outValue)
 {
-	if(eFailure == mInternalState)
-		return eFailure;
+	if(ePDFFailure == mInternalState)
+		return ePDFFailure;
 
 	Byte buffer;
-	EStatusCode status = (mCFFFile->Read(&buffer,1) == 1 ? eSuccess : eFailure);
+	EPDFStatusCode status = (mCFFFile->Read(&buffer,1) == 1 ? ePDFSuccess : ePDFFailure);
 
-	if(eFailure == status)
-		mInternalState = eFailure;
+	if(ePDFFailure == status)
+		mInternalState = ePDFFailure;
 	outValue = buffer;
 	return status;	
 }
 
-EStatusCode CFFPrimitiveReader::Read(Byte* ioBuffer,LongBufferSizeType inBufferSize)
+EPDFStatusCode CFFPrimitiveReader::Read(Byte* ioBuffer,LongBufferSizeType inBufferSize)
 {
-	if(eFailure == mInternalState)
-		return eFailure;
+	if(ePDFFailure == mInternalState)
+		return ePDFFailure;
 
-	EStatusCode status = (mCFFFile->Read(ioBuffer,inBufferSize) == inBufferSize ? eSuccess : eFailure);
+	EPDFStatusCode status = (mCFFFile->Read(ioBuffer,inBufferSize) == inBufferSize ? ePDFSuccess : ePDFFailure);
 
-	if(eFailure == status)
-		mInternalState = eFailure;
+	if(ePDFFailure == status)
+		mInternalState = ePDFFailure;
 	return status;	
 }
 
-EStatusCode CFFPrimitiveReader::ReadCard8(Byte& outValue)
+EPDFStatusCode CFFPrimitiveReader::ReadCard8(Byte& outValue)
 {
 	return ReadByte(outValue);
 }
 
-EStatusCode CFFPrimitiveReader::ReadCard16(unsigned short& outValue)
+EPDFStatusCode CFFPrimitiveReader::ReadCard16(unsigned short& outValue)
 {
 	Byte byte1,byte2;
 
-	if(ReadByte(byte1) != eSuccess)
-		return eFailure;
+	if(ReadByte(byte1) != ePDFSuccess)
+		return ePDFFailure;
 
-	if(ReadByte(byte2) != eSuccess)
-		return eFailure;
+	if(ReadByte(byte2) != ePDFSuccess)
+		return ePDFFailure;
 
 
 	outValue = ((unsigned short)byte1 << 8) + byte2;
 
-	return eSuccess;
+	return ePDFSuccess;
 
 }
-EStatusCode CFFPrimitiveReader::Read2ByteSigned(short& outValue)
+EPDFStatusCode CFFPrimitiveReader::Read2ByteSigned(short& outValue)
 {
 	unsigned short buffer;
-	EStatusCode status = ReadCard16(buffer);
+	EPDFStatusCode status = ReadCard16(buffer);
 
-	if(status != eSuccess)
-		return eFailure;
+	if(status != ePDFSuccess)
+		return ePDFFailure;
 
 	outValue = (short)buffer;
-	return eSuccess;
+	return ePDFSuccess;
 }
 
 
@@ -137,22 +137,22 @@ void CFFPrimitiveReader::SetOffSize(Byte inOffSize)
 }
 
 
-EStatusCode CFFPrimitiveReader::ReadOffset(unsigned long& outValue)
+EPDFStatusCode CFFPrimitiveReader::ReadOffset(unsigned long& outValue)
 {
-	EStatusCode status = eFailure;
+	EPDFStatusCode status = ePDFFailure;
 
 	switch(mCurrentOffsize)
 	{
 		case 1:
 			Byte byteBuffer;
 			status = ReadCard8(byteBuffer);
-			if(eSuccess == status)
+			if(ePDFSuccess == status)
 				outValue = byteBuffer;
 			break;
 		case 2:
 			unsigned short shortBuffer;
 			status = ReadCard16(shortBuffer);
-			if(eSuccess == status)
+			if(ePDFSuccess == status)
 				outValue = shortBuffer;
 			break;
 		case 3:
@@ -167,76 +167,76 @@ EStatusCode CFFPrimitiveReader::ReadOffset(unsigned long& outValue)
 	return status;
 }
 
-EStatusCode CFFPrimitiveReader::Read3ByteUnsigned(unsigned long& outValue)
+EPDFStatusCode CFFPrimitiveReader::Read3ByteUnsigned(unsigned long& outValue)
 {
 	Byte byte1,byte2,byte3;
 
-	if(ReadByte(byte1) != eSuccess)
-		return eFailure;
+	if(ReadByte(byte1) != ePDFSuccess)
+		return ePDFFailure;
 
-	if(ReadByte(byte2) != eSuccess)
-		return eFailure;
+	if(ReadByte(byte2) != ePDFSuccess)
+		return ePDFFailure;
 
-	if(ReadByte(byte3) != eSuccess)
-		return eFailure;
+	if(ReadByte(byte3) != ePDFSuccess)
+		return ePDFFailure;
 
 	outValue = ((unsigned long)byte1 << 16) + ((unsigned long)byte2 << 8) + byte3;
 
-	return eSuccess;	
+	return ePDFSuccess;	
 }
 
-EStatusCode CFFPrimitiveReader::Read4ByteUnsigned(unsigned long& outValue)
+EPDFStatusCode CFFPrimitiveReader::Read4ByteUnsigned(unsigned long& outValue)
 {
 	Byte byte1,byte2,byte3,byte4;
 
-	if(ReadByte(byte1) != eSuccess)
-		return eFailure;
+	if(ReadByte(byte1) != ePDFSuccess)
+		return ePDFFailure;
 
-	if(ReadByte(byte2) != eSuccess)
-		return eFailure;
+	if(ReadByte(byte2) != ePDFSuccess)
+		return ePDFFailure;
 
-	if(ReadByte(byte3) != eSuccess)
-		return eFailure;
+	if(ReadByte(byte3) != ePDFSuccess)
+		return ePDFFailure;
 
-	if(ReadByte(byte4) != eSuccess)
-		return eFailure;
+	if(ReadByte(byte4) != ePDFSuccess)
+		return ePDFFailure;
 
 	outValue = ((unsigned long)byte1 << 24) + 
 				((unsigned long)byte2 << 16) + 
 					((unsigned long)byte3 << 8) + 
 											byte4;
 
-	return eSuccess;	
+	return ePDFSuccess;	
 }
 
-EStatusCode CFFPrimitiveReader::Read4ByteSigned(long& outValue)
+EPDFStatusCode CFFPrimitiveReader::Read4ByteSigned(long& outValue)
 {
 	unsigned long buffer;
-	EStatusCode status = Read4ByteUnsigned(buffer);
+	EPDFStatusCode status = Read4ByteUnsigned(buffer);
 
-	if(status != eSuccess)
-		return eFailure;
+	if(status != ePDFSuccess)
+		return ePDFFailure;
 
 	outValue = (long)buffer;
 
-	return eSuccess;
+	return ePDFSuccess;
 }
 
 
-EStatusCode CFFPrimitiveReader::ReadOffSize(Byte& outValue)
+EPDFStatusCode CFFPrimitiveReader::ReadOffSize(Byte& outValue)
 {
 	return ReadCard8(outValue);
 }
 
-EStatusCode CFFPrimitiveReader::ReadSID(unsigned short& outValue)
+EPDFStatusCode CFFPrimitiveReader::ReadSID(unsigned short& outValue)
 {
 	return ReadCard16(outValue);
 }
 
-EStatusCode CFFPrimitiveReader::ReadIntegerOperand(Byte inFirstByte,long& outValue)
+EPDFStatusCode CFFPrimitiveReader::ReadIntegerOperand(Byte inFirstByte,long& outValue)
 {
 	Byte byte0,byte1;
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	byte0 = inFirstByte;
 
@@ -246,15 +246,15 @@ EStatusCode CFFPrimitiveReader::ReadIntegerOperand(Byte inFirstByte,long& outVal
 	}
 	else if(byte0 >= 247 && byte0 <= 250)
 	{
-		if(ReadByte(byte1) != eSuccess)
-			return eFailure;
+		if(ReadByte(byte1) != ePDFSuccess)
+			return ePDFFailure;
 
 		outValue = (byte0-247) * 256 + byte1 + 108;
 	} 
 	else if (byte0 >= 251 && byte0 <= 254)
 	{
-		if(ReadByte(byte1) != eSuccess)
-			return eFailure;
+		if(ReadByte(byte1) != ePDFSuccess)
+			return ePDFFailure;
 
 		outValue = -(long)((long)byte0-251) * 256 - byte1 - 108;
 	}
@@ -269,12 +269,12 @@ EStatusCode CFFPrimitiveReader::ReadIntegerOperand(Byte inFirstByte,long& outVal
 		status = Read4ByteSigned(outValue);
 	}
 	else
-		status = eFailure;
+		status = ePDFFailure;
 
 	return status;
 }
 
-EStatusCode CFFPrimitiveReader::ReadRealOperand(double& outValue,long& outRealValueFractalEnd)
+EPDFStatusCode CFFPrimitiveReader::ReadRealOperand(double& outValue,long& outRealValueFractalEnd)
 {
 	double integerPart = 0;
 	double fractionPart = 0;
@@ -289,12 +289,12 @@ EStatusCode CFFPrimitiveReader::ReadRealOperand(double& outValue,long& outRealVa
 	outRealValueFractalEnd = 0;
 	Byte buffer;
 	Byte nibble[2];
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	do
 	{
 		status = ReadByte(buffer);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		nibble[0] = (buffer >> 4) & 0xf;
@@ -340,7 +340,7 @@ EStatusCode CFFPrimitiveReader::ReadRealOperand(double& outValue,long& outRealVa
 		}
 	}while(notDone);
 
-	if(eSuccess == status)
+	if(ePDFSuccess == status)
 	{
 		result = integerPart + fractionPart/fractionDecimal;
 		if(hasNegativePower || hasPositivePower)
@@ -357,27 +357,27 @@ bool CFFPrimitiveReader::IsDictOperator(Byte inCandidate)
 	return ((inCandidate >= 0 && inCandidate <= 27) || 31 == inCandidate);
 }	
 
-EStatusCode CFFPrimitiveReader::ReadDictOperator(Byte inFirstByte,unsigned short& outOperator)
+EPDFStatusCode CFFPrimitiveReader::ReadDictOperator(Byte inFirstByte,unsigned short& outOperator)
 {
 	if(12 == inFirstByte)
 	{
 		Byte buffer;
-		if(ReadByte(buffer) == eSuccess)
+		if(ReadByte(buffer) == ePDFSuccess)
 		{	
 			outOperator = ((unsigned short)inFirstByte << 8) | buffer;
-			return eSuccess;
+			return ePDFSuccess;
 		}
 		else
-			return eFailure;
+			return ePDFFailure;
 	}
 	else
 	{
 		outOperator = inFirstByte;
-		return eSuccess;
+		return ePDFSuccess;
 	}
 }
 
-EStatusCode CFFPrimitiveReader::ReadDictOperand(Byte inFirstByte,DictOperand& outOperand)
+EPDFStatusCode CFFPrimitiveReader::ReadDictOperand(Byte inFirstByte,DictOperand& outOperand)
 {
 	if(30 == inFirstByte) // real
 	{
@@ -394,5 +394,5 @@ EStatusCode CFFPrimitiveReader::ReadDictOperand(Byte inFirstByte,DictOperand& ou
 		return ReadIntegerOperand(inFirstByte,outOperand.IntegerValue);
 	}
 	else
-		return eFailure; // not an operand
+		return ePDFFailure; // not an operand
 }

@@ -1,5 +1,5 @@
 /*
-   Source File : DocumentContext.cpp
+   Source File : DocumentsContext.cpp
 
 
    Copyright 2011 Gal Kahana PDFWriter
@@ -18,7 +18,7 @@
 
    
 */
-#include "DocumentContext.h"
+#include "DocumentsContext.h"
 #include "ObjectsContext.h"
 #include "IByteWriterWithPosition.h"
 #include "DictionaryContext.h"
@@ -29,10 +29,10 @@
 #include "MD5Generator.h"
 #include "OutputFile.h"
 #include "Trace.h"
-#include "IDocumentContextExtender.h"
+#include "IDocumentsContextExtender.h"
 #include "PageContentContext.h"
 #include "PDFFormXObject.h"
-#include "PDFParser.h"
+#include "HummusPDFParser.h"
 #include "PDFObjectCast.h"
 #include "PDFDictionary.h"
 #include "PDFIndirectObjectReference.h"
@@ -43,16 +43,16 @@
 #include "PDFDocumentCopyingContext.h"
 #include "Ascii7Encoding.h"
 
-DocumentContext::DocumentContext()
+DocumentsContext::DocumentsContext()
 {
 	mObjectsContext = NULL;
 }
 
-DocumentContext::~DocumentContext(void)
+DocumentsContext::~DocumentsContext(void)
 {
 }
 
-void DocumentContext::SetObjectsContext(ObjectsContext* inObjectsContext)
+void DocumentsContext::SetObjectsContext(ObjectsContext* inObjectsContext)
 {
 	mObjectsContext = inObjectsContext;
 	mJPEGImageHandler.SetOperationsContexts(this,mObjectsContext);
@@ -61,41 +61,41 @@ void DocumentContext::SetObjectsContext(ObjectsContext* inObjectsContext)
 	mUsedFontsRepository.SetObjectsContext(mObjectsContext);
 }
 
-void DocumentContext::SetOutputFileInformation(OutputFile* inOutputFile)
+void DocumentsContext::SetOutputFileInformation(OutputFile* inOutputFile)
 {
 	// just save the output file path for the ID generation in the end
 	mOutputFilePath = inOutputFile->GetFilePath();
 }
 
-void DocumentContext::AddDocumentContextExtender(IDocumentContextExtender* inExtender)
+void DocumentsContext::AddDocumentsContextExtender(IDocumentsContextExtender* inExtender)
 {
 	mExtenders.insert(inExtender);
-	mJPEGImageHandler.AddDocumentContextExtender(inExtender);
-	mPDFDocumentHandler.AddDocumentContextExtender(inExtender);
+	mJPEGImageHandler.AddDocumentsContextExtender(inExtender);
+	mPDFDocumentHandler.AddDocumentsContextExtender(inExtender);
 }
 
-void DocumentContext::RemoveDocumentContextExtender(IDocumentContextExtender* inExtender)
+void DocumentsContext::RemoveDocumentsContextExtender(IDocumentsContextExtender* inExtender)
 {
 	mExtenders.erase(inExtender);
-	mJPEGImageHandler.RemoveDocumentContextExtender(inExtender);
-	mPDFDocumentHandler.RemoveDocumentContextExtender(inExtender);
+	mJPEGImageHandler.RemoveDocumentsContextExtender(inExtender);
+	mPDFDocumentHandler.RemoveDocumentsContextExtender(inExtender);
 }
 
-TrailerInformation& DocumentContext::GetTrailerInformation()
+TrailerInformation& DocumentsContext::GetTrailerInformation()
 {
 	return mTrailerInformation;
 }
 
-EStatusCode	DocumentContext::WriteHeader(EPDFVersion inPDFVersion)
+EPDFStatusCode	DocumentsContext::WriteHeader(EPDFVersion inPDFVersion)
 {
 	if(mObjectsContext)
 	{
 		WriteHeaderComment(inPDFVersion);
 		Write4BinaryBytes();
-		return eSuccess;
+		return ePDFSuccess;
 	}
 	else
-		return eFailure;
+		return ePDFFailure;
 }
 
 static const string scPDFVersion10 = "PDF-1.0";
@@ -107,7 +107,7 @@ static const string scPDFVersion15 = "PDF-1.5";
 static const string scPDFVersion16 = "PDF-1.6";
 static const string scPDFVersion17 = "PDF-1.7";
 
-void DocumentContext::WriteHeaderComment(EPDFVersion inPDFVersion)
+void DocumentsContext::WriteHeaderComment(EPDFVersion inPDFVersion)
 {
 	switch(inPDFVersion)
 	{
@@ -140,16 +140,16 @@ void DocumentContext::WriteHeaderComment(EPDFVersion inPDFVersion)
 
 static const IOBasicTypes::Byte scBinaryBytesArray[] = {'%',0xBD,0xBE,0xBC,'\r','\n'}; // might imply that i need a newline writer here....an underlying primitives-token context
 
-void DocumentContext::Write4BinaryBytes()
+void DocumentsContext::Write4BinaryBytes()
 {
 	IByteWriterWithPosition *freeContextOutput = mObjectsContext->StartFreeContext();
 	freeContextOutput->Write(scBinaryBytesArray,6);
 	mObjectsContext->EndFreeContext();
 }
 
-EStatusCode	DocumentContext::FinalizePDF()
+EPDFStatusCode	DocumentsContext::FinalizePDF()
 {
-	EStatusCode status;
+	EPDFStatusCode status;
 	LongFilePositionType xrefTablePosition;
 
 
@@ -188,7 +188,7 @@ EStatusCode	DocumentContext::FinalizePDF()
 
 
 static const string scStartXref = "startxref";
-void DocumentContext::WriteXrefReference(LongFilePositionType inXrefTablePosition)
+void DocumentsContext::WriteXrefReference(LongFilePositionType inXrefTablePosition)
 {
 	mObjectsContext->WriteKeyword(scStartXref);
 	mObjectsContext->WriteInteger(inXrefTablePosition,eTokenSeparatorEndLine);
@@ -196,7 +196,7 @@ void DocumentContext::WriteXrefReference(LongFilePositionType inXrefTablePositio
 
 static const IOBasicTypes::Byte scEOF[] = {'%','%','E','O','F'}; 
 
-void DocumentContext::WriteFinalEOF()
+void DocumentsContext::WriteFinalEOF()
 {
 	IByteWriterWithPosition *freeContextOutput = mObjectsContext->StartFreeContext();
 	freeContextOutput->Write(scEOF,5);
@@ -210,9 +210,9 @@ static const string scRoot = "Root";
 static const string scEncrypt = "Encrypt";
 static const string scInfo = "Info";
 static const string scID = "ID";
-EStatusCode DocumentContext::WriteTrailerDictionary()
+EPDFStatusCode DocumentsContext::WriteTrailerDictionary()
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	DictionaryContext* dictionaryContext;
 
 	mObjectsContext->WriteKeyword(scTrailer);
@@ -242,8 +242,8 @@ EStatusCode DocumentContext::WriteTrailerDictionary()
 		}
 		else
 		{
-			TRACE_LOG("DocumentContext::WriteTrailerDictionary, Unexpected Failure. Didn't find catalog object while writing trailer");
-			status = eFailure;
+			TRACE_LOG("DocumentsContext::WriteTrailerDictionary, Unexpected Failure. Didn't find catalog object while writing trailer");
+			status = ePDFFailure;
 			break;
 		}
 
@@ -292,7 +292,7 @@ static const string scTrapped = "Trapped";
 static const string scTrue = "True";
 static const string scFalse = "False";
 
-void DocumentContext::WriteInfoDictionary()
+void DocumentsContext::WriteInfoDictionary()
 {
 	InfoDictionary& infoDictionary = mTrailerInformation.GetInfo();
 	if(infoDictionary.IsEmpty())
@@ -370,7 +370,7 @@ void DocumentContext::WriteInfoDictionary()
 	
 }
 
-CatalogInformation& DocumentContext::GetCatalogInformation()
+CatalogInformation& DocumentsContext::GetCatalogInformation()
 {
 	return mCatalogInformation;
 }
@@ -378,9 +378,9 @@ CatalogInformation& DocumentContext::GetCatalogInformation()
 static const string scType = "Type";
 static const string scCatalog = "Catalog";
 static const string scPages = "Pages";
-EStatusCode DocumentContext::WriteCatalogObject()
+EPDFStatusCode DocumentsContext::WriteCatalogObject()
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	ObjectIDType catalogID = mObjectsContext->StartNewIndirectObject();
 	mTrailerInformation.SetRoot(catalogID); // set the catalog reference as root in the trailer
 
@@ -392,12 +392,12 @@ EStatusCode DocumentContext::WriteCatalogObject()
 	catalogContext->WriteKey(scPages);
 	catalogContext->WriteObjectReferenceValue(mCatalogInformation.GetPageTreeRoot(mObjectsContext->GetInDirectObjectsRegistry())->GetID());
 
-	IDocumentContextExtenderSet::iterator it = mExtenders.begin();
-	for(; it != mExtenders.end() && eSuccess == status; ++it)
+	IDocumentsContextExtenderSet::iterator it = mExtenders.begin();
+	for(; it != mExtenders.end() && ePDFSuccess == status; ++it)
 	{
 		status = (*it)->OnCatalogWrite(&mCatalogInformation,catalogContext,mObjectsContext,this);
-		if(status != eSuccess)
-			TRACE_LOG("DocumentContext::WriteCatalogObject, unexpected failure. extender declared failure when writing catalog.");
+		if(status != ePDFSuccess)
+			TRACE_LOG("DocumentsContext::WriteCatalogObject, unexpected failure. extender declared failure when writing catalog.");
 	}
 
 	mObjectsContext->EndDictionary(catalogContext);
@@ -406,7 +406,7 @@ EStatusCode DocumentContext::WriteCatalogObject()
 }
 
 
-void DocumentContext::WritePagesTree()
+void DocumentsContext::WritePagesTree()
 {
 	PageTree* pageTreeRoot = mCatalogInformation.GetPageTreeRoot(mObjectsContext->GetInDirectObjectsRegistry());
 
@@ -419,7 +419,7 @@ static const string scParent = "Parent";
 
 // Recursion to write a page tree node. the return result is the page nodes count, for
 // accumulation at higher levels
-int DocumentContext::WritePageTree(PageTree* inPageTreeToWrite)
+int DocumentsContext::WritePageTree(PageTree* inPageTreeToWrite)
 {
 	DictionaryContext* pagesTreeContext;
 
@@ -504,11 +504,11 @@ static const string scPage = "Page";
 static const string scMediaBox = "MediaBox";
 static const string scContents = "Contents";
 
-EStatusCodeAndObjectIDType DocumentContext::WritePage(PDFPage* inPage)
+EPDFStatusCodeAndObjectIDType DocumentsContext::WritePage(PDFPage* inPage)
 {
-	EStatusCodeAndObjectIDType result;
+	EPDFStatusCodeAndObjectIDType result;
 	
-	result.first = eSuccess;
+	result.first = ePDFSuccess;
 	result.second = mObjectsContext->StartNewIndirectObject();
 
 	DictionaryContext* pageContext = mObjectsContext->StartDictionary();
@@ -530,9 +530,9 @@ EStatusCodeAndObjectIDType DocumentContext::WritePage(PDFPage* inPage)
 		// Resource dict 
 		pageContext->WriteKey(scResources);
 		result.first = WriteResourcesDictionary(inPage->GetResourcesDictionary());
-		if(result.first != eSuccess)
+		if(result.first != ePDFSuccess)
 		{
-			TRACE_LOG("DocumentContext::WritePage, failed to write resources dictionary");
+			TRACE_LOG("DocumentsContext::WritePage, failed to write resources dictionary");
 			break;
 		}
 
@@ -571,20 +571,20 @@ EStatusCodeAndObjectIDType DocumentContext::WritePage(PDFPage* inPage)
 			}
 		}
 
-		IDocumentContextExtenderSet::iterator it = mExtenders.begin();
-		for(; it != mExtenders.end() && eSuccess == result.first; ++it)
+		IDocumentsContextExtenderSet::iterator it = mExtenders.begin();
+		for(; it != mExtenders.end() && ePDFSuccess == result.first; ++it)
 		{
 			result.first = (*it)->OnPageWrite(inPage,pageContext,mObjectsContext,this);
-			if(result.first != eSuccess)
+			if(result.first != ePDFSuccess)
 			{
-				TRACE_LOG("DocumentContext::WritePage, unexpected failure. extender declared failure when writing page.");
+				TRACE_LOG("DocumentsContext::WritePage, unexpected failure. extender declared failure when writing page.");
 				break;
 			}
 		}
 		result.first = mObjectsContext->EndDictionary(pageContext);
-		if(result.first != eSuccess)
+		if(result.first != ePDFSuccess)
 		{
-			TRACE_LOG("DocumentContext::WritePage, unexpected failure. Failed to end dictionary in page write.");
+			TRACE_LOG("DocumentsContext::WritePage, unexpected failure. Failed to end dictionary in page write.");
 			break;
 		}
 		mObjectsContext->EndIndirectObject();	
@@ -594,15 +594,15 @@ EStatusCodeAndObjectIDType DocumentContext::WritePage(PDFPage* inPage)
 }
 
 
-EStatusCodeAndObjectIDType DocumentContext::WritePageAndRelease(PDFPage* inPage)
+EPDFStatusCodeAndObjectIDType DocumentsContext::WritePageAndRelease(PDFPage* inPage)
 {
-	EStatusCodeAndObjectIDType status = WritePage(inPage);
+	EPDFStatusCodeAndObjectIDType status = WritePage(inPage);
 	delete inPage;
 	return status;
 }
 
 static const string scUnknown = "Unknown";
-string DocumentContext::GenerateMD5IDForFile()
+string DocumentsContext::GenerateMD5IDForFile()
 {
 	MD5Generator md5;
 
@@ -641,12 +641,12 @@ string DocumentContext::GenerateMD5IDForFile()
 	return md5.ToString();
 }
 
-bool DocumentContext::HasContentContext(PDFPage* inPage)
+bool DocumentsContext::HasContentContext(PDFPage* inPage)
 {
 	return inPage->GetAssociatedContentContext() != NULL;
 }
 
-PageContentContext* DocumentContext::StartPageContentContext(PDFPage* inPage)
+PageContentContext* DocumentsContext::StartPageContentContext(PDFPage* inPage)
 {
 	if(!inPage->GetAssociatedContentContext())
 	{
@@ -655,14 +655,14 @@ PageContentContext* DocumentContext::StartPageContentContext(PDFPage* inPage)
 	return inPage->GetAssociatedContentContext();
 }
 
-EStatusCode DocumentContext::PausePageContentContext(PageContentContext* inPageContext)
+EPDFStatusCode DocumentsContext::PausePageContentContext(PageContentContext* inPageContext)
 {
 	return inPageContext->FinalizeCurrentStream();
 }
 
-EStatusCode DocumentContext::EndPageContentContext(PageContentContext* inPageContext)
+EPDFStatusCode DocumentsContext::EndPageContentContext(PageContentContext* inPageContext)
 {
-	EStatusCode status = inPageContext->FinalizeCurrentStream();
+	EPDFStatusCode status = inPageContext->FinalizeCurrentStream();
 	inPageContext->GetAssociatedPage()->DisassociateContentContext();
 	delete inPageContext;
 	return status;
@@ -674,7 +674,7 @@ static const string scForm = "Form";
 static const string scBBox = "BBox";
 static const string scFormType = "FormType";
 static const string scMatrix = "Matrix";
-PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBoundingBox,ObjectIDType inFormXObjectID,const double* inMatrix)
+PDFFormXObject* DocumentsContext::StartFormXObject(const PDFRectangle& inBoundingBox,ObjectIDType inFormXObjectID,const double* inMatrix)
 {
 	PDFFormXObject* aFormXObject = NULL;
 	do
@@ -714,18 +714,18 @@ PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBounding
 		ObjectIDType formXObjectResourcesDictionaryID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
 		xobjectContext->WriteObjectReferenceValue(formXObjectResourcesDictionaryID);
 
-		IDocumentContextExtenderSet::iterator it = mExtenders.begin();
-		EStatusCode status = eSuccess;
-		for(; it != mExtenders.end() && eSuccess == status; ++it)
+		IDocumentsContextExtenderSet::iterator it = mExtenders.begin();
+		EPDFStatusCode status = ePDFSuccess;
+		for(; it != mExtenders.end() && ePDFSuccess == status; ++it)
 		{
-			if((*it)->OnFormXObjectWrite(inFormXObjectID,formXObjectResourcesDictionaryID,xobjectContext,mObjectsContext,this) != eSuccess)
+			if((*it)->OnFormXObjectWrite(inFormXObjectID,formXObjectResourcesDictionaryID,xobjectContext,mObjectsContext,this) != ePDFSuccess)
 			{
-				TRACE_LOG("DocumentContext::StartFormXObject, unexpected failure. extender declared failure when writing form xobject.");
-				status = eFailure;
+				TRACE_LOG("DocumentsContext::StartFormXObject, unexpected failure. extender declared failure when writing form xobject.");
+				status = ePDFFailure;
 				break;
 			}
 		}
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		// Now start the stream and the form XObject state
@@ -736,13 +736,13 @@ PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBounding
 }
 
 
-PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBoundingBox,const double* inMatrix)
+PDFFormXObject* DocumentsContext::StartFormXObject(const PDFRectangle& inBoundingBox,const double* inMatrix)
 {
 	ObjectIDType formXObjectID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
 	return StartFormXObject(inBoundingBox,formXObjectID,inMatrix);
 }
 
-EStatusCode DocumentContext::EndFormXObjectNoRelease(PDFFormXObject* inFormXObject)
+EPDFStatusCode DocumentsContext::EndFormXObjectNoRelease(PDFFormXObject* inFormXObject)
 {
 	mObjectsContext->EndPDFStream(inFormXObject->GetContentStream());
 
@@ -751,12 +751,12 @@ EStatusCode DocumentContext::EndFormXObjectNoRelease(PDFFormXObject* inFormXObje
 	WriteResourcesDictionary(inFormXObject->GetResourcesDictionary());
 	mObjectsContext->EndIndirectObject();
 	
-	return eSuccess;
+	return ePDFSuccess;
 }
 
-EStatusCode DocumentContext::EndFormXObjectAndRelease(PDFFormXObject* inFormXObject)
+EPDFStatusCode DocumentsContext::EndFormXObjectAndRelease(PDFFormXObject* inFormXObject)
 {
-	EStatusCode status = EndFormXObjectNoRelease(inFormXObject);
+	EPDFStatusCode status = EndFormXObjectNoRelease(inFormXObject);
 	delete inFormXObject; // will also delete the stream becuase the form XObject owns it
 	
 	return status;
@@ -770,9 +770,9 @@ static const string scColorSpaces = "ColorSpace";
 static const string scPatterns = "Pattern";
 static const string scShadings = "Shading";
 static const string scProperties = "Properties";
-EStatusCode DocumentContext::WriteResourcesDictionary(ResourcesDictionary& inResourcesDictionary)
+EPDFStatusCode DocumentsContext::WriteResourcesDictionary(ResourcesDictionary& inResourcesDictionary)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	do
 	{
@@ -847,13 +847,13 @@ EStatusCode DocumentContext::WriteResourcesDictionary(ResourcesDictionary& inRes
 		if(inResourcesDictionary.GetPropertiesCount() > 0)
 			WriteResourceDictionary(resourcesContext,scShadings,inResourcesDictionary.GetPropertiesIterator());
 
-		IDocumentContextExtenderSet::iterator it = mExtenders.begin();
-		for(; it != mExtenders.end() && eSuccess == status; ++it)
+		IDocumentsContextExtenderSet::iterator it = mExtenders.begin();
+		for(; it != mExtenders.end() && ePDFSuccess == status; ++it)
 		{
 			status = (*it)->OnResourcesWrite(&(inResourcesDictionary),resourcesContext,mObjectsContext,this);
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
-				TRACE_LOG("DocumentContext::WriteResourcesDictionary, unexpected failure. extender declared failure when writing resources.");
+				TRACE_LOG("DocumentsContext::WriteResourcesDictionary, unexpected failure. extender declared failure when writing resources.");
 				break;
 			}
 		}
@@ -864,7 +864,7 @@ EStatusCode DocumentContext::WriteResourcesDictionary(ResourcesDictionary& inRes
 	return status;
 }
 
-void DocumentContext::WriteResourceDictionary(DictionaryContext* inResourcesDictionary,
+void DocumentsContext::WriteResourceDictionary(DictionaryContext* inResourcesDictionary,
 											const string& inResourceDictionaryLabel,
 											MapIterator<ObjectIDTypeToStringMap> inMapping)
 {
@@ -877,14 +877,14 @@ void DocumentContext::WriteResourceDictionary(DictionaryContext* inResourcesDict
 	}
 
 
-	IDocumentContextExtenderSet::iterator it = mExtenders.begin();
-	EStatusCode status = eSuccess;
-	for(; it != mExtenders.end() && eSuccess == status; ++it)
+	IDocumentsContextExtenderSet::iterator it = mExtenders.begin();
+	EPDFStatusCode status = ePDFSuccess;
+	for(; it != mExtenders.end() && ePDFSuccess == status; ++it)
 	{
 		status = (*it)->OnResourceDictionaryWrite(resourceContext,inResourceDictionaryLabel,mObjectsContext,this);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
-			TRACE_LOG("DocumentContext::WriteResourceDictionary, unexpected failure. extender declared failure when writing a resource dictionary.");
+			TRACE_LOG("DocumentsContext::WriteResourceDictionary, unexpected failure. extender declared failure when writing a resource dictionary.");
 			break;
 		}
 	}
@@ -894,7 +894,7 @@ void DocumentContext::WriteResourceDictionary(DictionaryContext* inResourcesDict
 
 
 
-bool DocumentContext::IsIdentityMatrix(const double* inMatrix)
+bool DocumentsContext::IsIdentityMatrix(const double* inMatrix)
 {
 	return 
 		inMatrix[0] == 1 &&
@@ -906,39 +906,39 @@ bool DocumentContext::IsIdentityMatrix(const double* inMatrix)
 
 }
 
-PDFImageXObject* DocumentContext::CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath)
+PDFImageXObject* DocumentsContext::CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath)
 {
 	return mJPEGImageHandler.CreateImageXObjectFromJPGFile(inJPGFilePath);
 }
 
-PDFFormXObject* DocumentContext::CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath)
+PDFFormXObject* DocumentsContext::CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath)
 {
 	return mJPEGImageHandler.CreateFormXObjectFromJPGFile(inJPGFilePath);
 }
 
-JPEGImageHandler& DocumentContext::GetJPEGImageHandler()
+JPEGImageHandler& DocumentsContext::GetJPEGImageHandler()
 {
 	return mJPEGImageHandler;
 }
 
-PDFFormXObject* DocumentContext::CreateFormXObjectFromTIFFFile(	const wstring& inTIFFFilePath,
+PDFFormXObject* DocumentsContext::CreateFormXObjectFromTIFFFile(	const wstring& inTIFFFilePath,
 																const TIFFUsageParameters& inTIFFUsageParameters)
 {
 	
 	return mTIFFImageHandler.CreateFormXObjectFromTIFFFile(inTIFFFilePath,inTIFFUsageParameters);
 }
 
-PDFImageXObject* DocumentContext::CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inImageXObjectID)
+PDFImageXObject* DocumentsContext::CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inImageXObjectID)
 {
 	return mJPEGImageHandler.CreateImageXObjectFromJPGFile(inJPGFilePath,inImageXObjectID);
 }
 
-PDFFormXObject* DocumentContext::CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inFormXObjectID)
+PDFFormXObject* DocumentsContext::CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inFormXObjectID)
 {
 	return mJPEGImageHandler.CreateFormXObjectFromJPGFile(inJPGFilePath,inFormXObjectID);
 }
 
-PDFFormXObject* DocumentContext::CreateFormXObjectFromTIFFFile(	
+PDFFormXObject* DocumentsContext::CreateFormXObjectFromTIFFFile(	
 												const wstring& inTIFFFilePath,
 												ObjectIDType inFormXObjectID,
 												const TIFFUsageParameters& inTIFFUsageParameters)
@@ -947,22 +947,22 @@ PDFFormXObject* DocumentContext::CreateFormXObjectFromTIFFFile(
 }
 
 
-PDFUsedFont* DocumentContext::GetFontForFile(const wstring& inFontFilePath)
+PDFUsedFont* DocumentsContext::GetFontForFile(const wstring& inFontFilePath)
 {
 	return mUsedFontsRepository.GetFontForFile(inFontFilePath);
 }
 
-EStatusCode DocumentContext::WriteUsedFontsDefinitions()
+EPDFStatusCode DocumentsContext::WriteUsedFontsDefinitions()
 {
 	return mUsedFontsRepository.WriteUsedFontsDefinitions();
 }
 
-PDFUsedFont* DocumentContext::GetFontForFile(const wstring& inFontFilePath,const wstring& inAdditionalMeticsFilePath)
+PDFUsedFont* DocumentsContext::GetFontForFile(const wstring& inFontFilePath,const wstring& inAdditionalMeticsFilePath)
 {
 	return mUsedFontsRepository.GetFontForFile(inFontFilePath,inAdditionalMeticsFilePath);
 }
 
-EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+EPDFStatusCodeAndObjectIDTypeList DocumentsContext::CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
 																			const PDFPageRange& inPageRange,
 																			EPDFPageBox inPageBoxToUseAsFormBox,
 																			const double* inTransformationMatrix,
@@ -972,7 +972,7 @@ EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(const 
 
 }
 
-EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+EPDFStatusCodeAndObjectIDTypeList DocumentsContext::CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
 																			const PDFPageRange& inPageRange,
 																			const PDFRectangle& inCropBox,
 																			const double* inTransformationMatrix,
@@ -981,16 +981,16 @@ EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(const 
 	return mPDFDocumentHandler.CreateFormXObjectsFromPDF(inPDFFilePath,inPageRange,inCropBox,inTransformationMatrix,inCopyAdditionalObjects);	
 
 }
-EStatusCodeAndObjectIDTypeList DocumentContext::AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
+EPDFStatusCodeAndObjectIDTypeList DocumentsContext::AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
 																	  const PDFPageRange& inPageRange,
 																	  const ObjectIDTypeList& inCopyAdditionalObjects)
 {
 	return mPDFDocumentHandler.AppendPDFPagesFromPDF(inPDFFilePath,inPageRange,inCopyAdditionalObjects);	
 }
 
-EStatusCode DocumentContext::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
+EPDFStatusCode DocumentsContext::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
 {
-	EStatusCode status;
+	EPDFStatusCode status;
 
 	do
 	{
@@ -1003,7 +1003,7 @@ EStatusCode DocumentContext::WriteState(ObjectsContext* inStateWriter,ObjectIDTy
 		DictionaryContext* documentDictionary = inStateWriter->StartDictionary();
 
 		documentDictionary->WriteKey("Type");
-		documentDictionary->WriteNameValue("DocumentContext");
+		documentDictionary->WriteNameValue("DocumentsContext");
 
 		documentDictionary->WriteKey("mTrailerInformation");
 		documentDictionary->WriteObjectReferenceValue(trailerInformationID);
@@ -1021,14 +1021,14 @@ EStatusCode DocumentContext::WriteState(ObjectsContext* inStateWriter,ObjectIDTy
 		WriteCatalogInformationState(inStateWriter,catalogInformationID);
 		
 		status = mUsedFontsRepository.WriteState(inStateWriter,usedFontsRepositoryID);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 	}while(false);
 
 	return status;
 }
 
-void DocumentContext::WriteTrailerState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
+void DocumentsContext::WriteTrailerState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
 {
 	inStateWriter->StartNewIndirectObject(inObjectID);
 
@@ -1059,7 +1059,7 @@ void DocumentContext::WriteTrailerState(ObjectsContext* inStateWriter,ObjectIDTy
 	WriteTrailerInfoState(inStateWriter,infoDictionaryID);
 }
 
-void DocumentContext::WriteTrailerInfoState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
+void DocumentsContext::WriteTrailerInfoState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
 {
 	inStateWriter->StartNewIndirectObject(inObjectID);
 	DictionaryContext* infoDictionary = inStateWriter->StartDictionary();
@@ -1110,7 +1110,7 @@ void DocumentContext::WriteTrailerInfoState(ObjectsContext* inStateWriter,Object
 
 }
 
-void DocumentContext::WriteDateState(ObjectsContext* inStateWriter,const PDFDate& inDate)
+void DocumentsContext::WriteDateState(ObjectsContext* inStateWriter,const PDFDate& inDate)
 {
 	DictionaryContext* dateDictionary = inStateWriter->StartDictionary();
 
@@ -1147,7 +1147,7 @@ void DocumentContext::WriteDateState(ObjectsContext* inStateWriter,const PDFDate
 	inStateWriter->EndDictionary(dateDictionary);
 }
 
-void DocumentContext::WriteCatalogInformationState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
+void DocumentsContext::WriteCatalogInformationState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
 {
 	ObjectIDType rootNodeID;
 	if(mCatalogInformation.GetCurrentPageTreeNode())
@@ -1177,7 +1177,7 @@ void DocumentContext::WriteCatalogInformationState(ObjectsContext* inStateWriter
 	
 }
 
-void DocumentContext::WritePageTreeState(ObjectsContext* inStateWriter,ObjectIDType inObjectID,PageTree* inPageTree)
+void DocumentsContext::WritePageTreeState(ObjectsContext* inStateWriter,ObjectIDType inObjectID,PageTree* inPageTree)
 {
 	ObjectIDTypeList kidsObjectIDs;
 
@@ -1231,7 +1231,7 @@ void DocumentContext::WritePageTreeState(ObjectsContext* inStateWriter,ObjectIDT
 	}
 }
 
-EStatusCode DocumentContext::ReadState(PDFParser* inStateReader,ObjectIDType inObjectID)
+EPDFStatusCode DocumentsContext::ReadState(HummusPDFParser* inStateReader,ObjectIDType inObjectID)
 {
 	PDFObjectCastPtr<PDFDictionary> documentState(inStateReader->ParseNewObject(inObjectID));
 
@@ -1246,7 +1246,7 @@ EStatusCode DocumentContext::ReadState(PDFParser* inStateReader,ObjectIDType inO
 	return mUsedFontsRepository.ReadState(inStateReader,usedFontsInformationStateID->mObjectID);
 }
 
-void DocumentContext::ReadTrailerState(PDFParser* inStateReader,PDFDictionary* inTrailerState)
+void DocumentsContext::ReadTrailerState(HummusPDFParser* inStateReader,PDFDictionary* inTrailerState)
 {
 	PDFObjectCastPtr<PDFInteger> prevState(inTrailerState->QueryDirectObject("mPrev"));
 	mTrailerInformation.SetPrev(prevState->GetValue());
@@ -1265,7 +1265,7 @@ void DocumentContext::ReadTrailerState(PDFParser* inStateReader,PDFDictionary* i
 
 }
 
-void DocumentContext::ReadTrailerInfoState(PDFParser* inStateReader,PDFDictionary* inTrailerInfoState)
+void DocumentsContext::ReadTrailerInfoState(HummusPDFParser* inStateReader,PDFDictionary* inTrailerInfoState)
 {
 	PDFObjectCastPtr<PDFLiteralString> titleState(inTrailerInfoState->QueryDirectObject("Title"));
 	mTrailerInformation.GetInfo().Title = titleState->GetValue();
@@ -1310,7 +1310,7 @@ void DocumentContext::ReadTrailerInfoState(PDFParser* inStateReader,PDFDictionar
 	}
 }
 
-void DocumentContext::ReadDateState(PDFDictionary* inDateState,PDFDate& inDate)
+void DocumentsContext::ReadDateState(PDFDictionary* inDateState,PDFDate& inDate)
 {
 	PDFObjectCastPtr<PDFInteger> yearState(inDateState->QueryDirectObject("Year"));
 	inDate.Year = (int)yearState->GetValue();
@@ -1340,7 +1340,7 @@ void DocumentContext::ReadDateState(PDFDictionary* inDateState,PDFDate& inDate)
 	inDate.MinuteFromUTC = (int)minuteFromUTCState->GetValue();
 }
 
-void DocumentContext::ReadCatalogInformationState(PDFParser* inStateReader,PDFDictionary* inCatalogInformationState)
+void DocumentsContext::ReadCatalogInformationState(HummusPDFParser* inStateReader,PDFDictionary* inCatalogInformationState)
 {
 	PDFObjectCastPtr<PDFIndirectObjectReference> pageTreeRootState(inCatalogInformationState->QueryDirectObject("PageTreeRoot"));
 
@@ -1369,7 +1369,7 @@ void DocumentContext::ReadCatalogInformationState(PDFParser* inStateReader,PDFDi
 
 }
 
-void DocumentContext::ReadPageTreeState(PDFParser* inStateReader,PDFDictionary* inPageTreeState,PageTree* inPageTree)
+void DocumentsContext::ReadPageTreeState(HummusPDFParser* inStateReader,PDFDictionary* inPageTreeState,PageTree* inPageTree)
 {
 	PDFObjectCastPtr<PDFBoolean> isLeafParentState(inPageTreeState->QueryDirectObject("mIsLeafParent"));
 	bool isLeafParent = isLeafParentState->GetValue();
@@ -1407,11 +1407,11 @@ void DocumentContext::ReadPageTreeState(PDFParser* inStateReader,PDFDictionary* 
 	}
 }
 
-PDFDocumentCopyingContext* DocumentContext::CreatePDFCopyingContext(const wstring& inFilePath)
+PDFDocumentCopyingContext* DocumentsContext::CreatePDFCopyingContext(const wstring& inFilePath)
 {
 	PDFDocumentCopyingContext* context = new PDFDocumentCopyingContext();
 
-	if(context->Start(inFilePath,this,mObjectsContext) != eSuccess)
+	if(context->Start(inFilePath,this,mObjectsContext) != ePDFSuccess)
 	{
 		delete context;
 		return NULL;
@@ -1420,15 +1420,15 @@ PDFDocumentCopyingContext* DocumentContext::CreatePDFCopyingContext(const wstrin
 		return context;
 }
 
-EStatusCode DocumentContext::AttachURLLinktoCurrentPage(const wstring& inURL,const PDFRectangle& inLinkClickArea)
+EPDFStatusCode DocumentsContext::AttachURLLinktoCurrentPage(const wstring& inURL,const PDFRectangle& inLinkClickArea)
 {
-	EStatusCodeAndObjectIDType writeResult = WriteAnnotationAndLinkForURL(inURL,inLinkClickArea);
+	EPDFStatusCodeAndObjectIDType writeResult = WriteAnnotationAndLinkForURL(inURL,inLinkClickArea);
 
-	if(writeResult.first != eSuccess)
+	if(writeResult.first != ePDFSuccess)
 		return writeResult.first;
 
 	RegisterAnnotationReferenceForNextPageWrite(writeResult.second);
-	return eSuccess;
+	return ePDFSuccess;
 }
 
 static const string scAnnot = "Annot";
@@ -1441,9 +1441,9 @@ static const string scBS = "BS";
 static const string scAction = "Action";
 static const string scS = "S";
 static const string scURI = "URI";
-EStatusCodeAndObjectIDType DocumentContext::WriteAnnotationAndLinkForURL(const wstring& inURL,const PDFRectangle& inLinkClickArea)
+EPDFStatusCodeAndObjectIDType DocumentsContext::WriteAnnotationAndLinkForURL(const wstring& inURL,const PDFRectangle& inLinkClickArea)
 {
-	EStatusCodeAndObjectIDType result(eFailure,0);
+	EPDFStatusCodeAndObjectIDType result(ePDFFailure,0);
 
 	do
 	{
@@ -1452,7 +1452,7 @@ EStatusCodeAndObjectIDType DocumentContext::WriteAnnotationAndLinkForURL(const w
 		BoolAndString encodedResult = encoding.Encode(inURL);
 		if(!encodedResult.first)
 		{
-			TRACE_LOG1("DocumentContext::WriteAnnotationAndLinkForURL, unable to encode string to Ascii7. make sure that all charachters are valid URLs [should be ascii 7 compatible]. URL - %s",inURL.c_str());
+			TRACE_LOG1("DocumentsContext::WriteAnnotationAndLinkForURL, unable to encode string to Ascii7. make sure that all charachters are valid URLs [should be ascii 7 compatible]. URL - %s",inURL.c_str());
 			break;
 		}
 
@@ -1503,18 +1503,18 @@ EStatusCodeAndObjectIDType DocumentContext::WriteAnnotationAndLinkForURL(const w
 
 		mObjectsContext->EndDictionary(linkAnnotationContext);
 		mObjectsContext->EndIndirectObject();
-		result.first = eSuccess;
+		result.first = ePDFSuccess;
 	}while(false);
 
 	return result;
 }
 
-void DocumentContext::RegisterAnnotationReferenceForNextPageWrite(ObjectIDType inAnnotationReference)
+void DocumentsContext::RegisterAnnotationReferenceForNextPageWrite(ObjectIDType inAnnotationReference)
 {
 	mAnnotations.push_back(inAnnotationReference);
 }
 
-EStatusCode DocumentContext::MergePDFPagesToPage(PDFPage* inPage,
+EPDFStatusCode DocumentsContext::MergePDFPagesToPage(PDFPage* inPage,
 								const wstring& inPDFFilePath,
 								const PDFPageRange& inPageRange,
 								const ObjectIDTypeList& inCopyAdditionalObjects)
@@ -1525,41 +1525,41 @@ EStatusCode DocumentContext::MergePDFPagesToPage(PDFPage* inPage,
 												   inCopyAdditionalObjects);
 }
 
-PDFImageXObject* DocumentContext::CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream)
+PDFImageXObject* DocumentsContext::CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream)
 {
 	return mJPEGImageHandler.CreateImageXObjectFromJPGStream(inJPGStream);
 }
 
-PDFImageXObject* DocumentContext::CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inImageXObjectID)
+PDFImageXObject* DocumentsContext::CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inImageXObjectID)
 {
 	return mJPEGImageHandler.CreateImageXObjectFromJPGStream(inJPGStream,inImageXObjectID);
 }
 
-PDFFormXObject* DocumentContext::CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream)
+PDFFormXObject* DocumentsContext::CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream)
 {
 	return mJPEGImageHandler.CreateFormXObjectFromJPGStream(inJPGStream);
 
 }
 
-PDFFormXObject* DocumentContext::CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inFormXObjectID)
+PDFFormXObject* DocumentsContext::CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inFormXObjectID)
 {
 	return mJPEGImageHandler.CreateFormXObjectFromJPGStream(inJPGStream,inFormXObjectID);
 }
 
-PDFFormXObject* DocumentContext::CreateFormXObjectFromTIFFStream(IByteReaderWithPosition* inTIFFStream,
+PDFFormXObject* DocumentsContext::CreateFormXObjectFromTIFFStream(IByteReaderWithPosition* inTIFFStream,
 															const TIFFUsageParameters& inTIFFUsageParameters)
 {
 	return mTIFFImageHandler.CreateFormXObjectFromTIFFStream(inTIFFStream,inTIFFUsageParameters);
 }
 
-PDFFormXObject* DocumentContext::CreateFormXObjectFromTIFFStream(IByteReaderWithPosition* inTIFFStream,
+PDFFormXObject* DocumentsContext::CreateFormXObjectFromTIFFStream(IByteReaderWithPosition* inTIFFStream,
 															ObjectIDType inFormXObjectID,
 															const TIFFUsageParameters& inTIFFUsageParameters)
 {
 	return mTIFFImageHandler.CreateFormXObjectFromTIFFStream(inTIFFStream,inFormXObjectID,inTIFFUsageParameters);
 }
 
-EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+EPDFStatusCodeAndObjectIDTypeList DocumentsContext::CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
 																	const PDFPageRange& inPageRange,
 																	EPDFPageBox inPageBoxToUseAsFormBox,
 																	const double* inTransformationMatrix,
@@ -1568,7 +1568,7 @@ EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(IByteR
 	return mPDFDocumentHandler.CreateFormXObjectsFromPDF(inPDFStream,inPageRange,inPageBoxToUseAsFormBox,inTransformationMatrix,inCopyAdditionalObjects);
 }
 
-EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+EPDFStatusCodeAndObjectIDTypeList DocumentsContext::CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
 																	const PDFPageRange& inPageRange,
 																	const PDFRectangle& inCropBox,
 																	const double* inTransformationMatrix,
@@ -1577,14 +1577,14 @@ EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(IByteR
 	return mPDFDocumentHandler.CreateFormXObjectsFromPDF(inPDFStream,inPageRange,inCropBox,inTransformationMatrix,inCopyAdditionalObjects);
 }
 
-EStatusCodeAndObjectIDTypeList DocumentContext::AppendPDFPagesFromPDF(IByteReaderWithPosition* inPDFStream,
+EPDFStatusCodeAndObjectIDTypeList DocumentsContext::AppendPDFPagesFromPDF(IByteReaderWithPosition* inPDFStream,
 																const PDFPageRange& inPageRange,
 																const ObjectIDTypeList& inCopyAdditionalObjects)
 {
 	return mPDFDocumentHandler.AppendPDFPagesFromPDF(inPDFStream,inPageRange,inCopyAdditionalObjects);
 }
 
-EStatusCode DocumentContext::MergePDFPagesToPage(	PDFPage* inPage,
+EPDFStatusCode DocumentsContext::MergePDFPagesToPage(	PDFPage* inPage,
 											IByteReaderWithPosition* inPDFStream,
 											const PDFPageRange& inPageRange,
 											const ObjectIDTypeList& inCopyAdditionalObjects)
@@ -1592,11 +1592,11 @@ EStatusCode DocumentContext::MergePDFPagesToPage(	PDFPage* inPage,
 	return mPDFDocumentHandler.MergePDFPagesToPage(inPage,inPDFStream,inPageRange,inCopyAdditionalObjects);
 }
 
-PDFDocumentCopyingContext* DocumentContext::CreatePDFCopyingContext(IByteReaderWithPosition* inPDFStream)
+PDFDocumentCopyingContext* DocumentsContext::CreatePDFCopyingContext(IByteReaderWithPosition* inPDFStream)
 {
 	PDFDocumentCopyingContext* context = new PDFDocumentCopyingContext();
 
-	if(context->Start(inPDFStream,this,mObjectsContext) != eSuccess)
+	if(context->Start(inPDFStream,this,mObjectsContext) != ePDFSuccess)
 	{
 		delete context;
 		return NULL;

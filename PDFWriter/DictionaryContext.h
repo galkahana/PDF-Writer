@@ -19,7 +19,7 @@
    
 */
 #pragma once
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "ObjectsBasicTypes.h"
 #include "PDFRectangle.h"
 
@@ -38,7 +38,7 @@ public:
 	DictionaryContext(ObjectsContext* inObjectsContext,size_t inIndentLevel);
 	~DictionaryContext(void);
 
-	EStatusCode WriteKey(const string& inKey);
+	EPDFStatusCode WriteKey(const string& inKey);
 	
 	void WriteIntegerValue(long long inValue);
 	void WriteLiteralStringValue(const string& inValue);

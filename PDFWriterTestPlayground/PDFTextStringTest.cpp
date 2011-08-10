@@ -2,7 +2,7 @@
    Source File : PDFTextStringTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -33,15 +33,15 @@ PDFTextStringTest::~PDFTextStringTest(void)
 {
 }
 
-EStatusCode PDFTextStringTest::Run()
+EPDFStatusCode PDFTextStringTest::Run()
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	// Empty String test
 	PDFTextString emptyString;
 	if(emptyString.ToString() != "")
 	{
-		status = eFailure;
+		status = ePDFFailure;
 		wcout<<"wrong for empty string - "<<emptyString.ToString().c_str()<<"\n";
 	}
 
@@ -49,7 +49,7 @@ EStatusCode PDFTextStringTest::Run()
 	PDFTextString latinString(L"Hello World");
 	if(latinString.ToString() != "Hello World")
 	{
-		status = eFailure;
+		status = ePDFFailure;
 		wcout<<"wrong for empty string - "<<latinString.ToString().c_str()<<"\n";
 	}
 
@@ -59,7 +59,7 @@ EStatusCode PDFTextStringTest::Run()
 	PDFTextString latinSpecialString(aString);
 	if(latinSpecialString.ToString() != "\xA0")
 	{
-		status = eFailure;
+		status = ePDFFailure;
 		wcout<<"wrong for latin special string - "<<latinSpecialString.ToString().c_str()<<"\n";
 	}
 
@@ -69,7 +69,7 @@ EStatusCode PDFTextStringTest::Run()
 	PDFTextString latinUTF16String(bString);
 	if(latinUTF16String.ToString() != "\xFE\xFF\x20\xAB")
 	{
-		status = eFailure;
+		status = ePDFFailure;
 		wcout<<"wrong for latin UTF16 - "<<latinUTF16String.ToString().c_str()<<"\n";
 	}
 

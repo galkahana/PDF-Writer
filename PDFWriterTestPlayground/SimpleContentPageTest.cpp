@@ -2,7 +2,7 @@
    Source File : SimpleContentPageTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
    
 */
 #include "SimpleContentPageTest.h"
-#include "PDFWriter.h"
+#include "HummusPDFWriter.h"
 #include "PDFPage.h"
 #include "PDFRectangle.h"
 #include "PageContentContext.h"
@@ -41,15 +41,15 @@ SimpleContentPageTest::~SimpleContentPageTest(void)
 	Creates a single page PDF with some drawings
 */
 
-EStatusCode SimpleContentPageTest::Run()
+EPDFStatusCode SimpleContentPageTest::Run()
 {
-	PDFWriter pdfWriter;
-	EStatusCode status; 
+	HummusPDFWriter pdfWriter;
+	EPDFStatusCode status; 
 
 	do
 	{
 		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\SimpleContent.PDF",ePDFVersion13);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to start PDF\n";
 			break;
@@ -61,7 +61,7 @@ EStatusCode SimpleContentPageTest::Run()
 		PageContentContext* contentContext = pdfWriter.StartPageContentContext(page);
 		if(NULL == contentContext)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			wcout<<"failed to create content context for page\n";
 			break;
 		}
@@ -75,7 +75,7 @@ EStatusCode SimpleContentPageTest::Run()
 
 		// force stream change
 		status = pdfWriter.PausePageContentContext(contentContext);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to pause page content context\n";
 			break;
@@ -98,21 +98,21 @@ EStatusCode SimpleContentPageTest::Run()
 		contentContext->Q();
 		
 		status = pdfWriter.EndPageContentContext(contentContext);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to write page\n";
 			break;
 		}
 
 		status = pdfWriter.EndPDF();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed in end PDF\n";
 			break;

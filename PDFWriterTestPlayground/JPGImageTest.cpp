@@ -2,7 +2,7 @@
    Source File : JPGImageTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 */
 #include "JPGImageTest.h"
 #include "TestsRunner.h"
-#include "PDFWriter.h"
+#include "HummusPDFWriter.h"
 #include "PDFImageXObject.h"
 #include "PDFPage.h"
 #include "PageContentContext.h"
@@ -38,15 +38,15 @@ JPGImageTest::~JPGImageTest(void)
 {
 }
 
-EStatusCode JPGImageTest::Run()
+EPDFStatusCode JPGImageTest::Run()
 {
-	PDFWriter pdfWriter;
-	EStatusCode status; 
+	HummusPDFWriter pdfWriter;
+	EPDFStatusCode status; 
 
 	do
 	{
 		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\BasicJPGImagesTest.PDF",ePDFVersion13);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to start PDF\n";
 			break;
@@ -58,7 +58,7 @@ EStatusCode JPGImageTest::Run()
 		PageContentContext* pageContentContext = pdfWriter.StartPageContentContext(page);
 		if(NULL == pageContentContext)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			wcout<<"failed to create content context for page\n";
 		}
 
@@ -71,7 +71,7 @@ EStatusCode JPGImageTest::Run()
 
 		// pause stream to start writing the image
 		status = pdfWriter.PausePageContentContext(pageContentContext);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to pause page content context\n";
 			break;
@@ -82,7 +82,7 @@ EStatusCode JPGImageTest::Run()
 		if(!imageXObject)
 		{
 			wcout<<"failed to create image XObject from file\n";
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -97,7 +97,7 @@ EStatusCode JPGImageTest::Run()
 		// now do the same with a form xobject
 		// pause stream to start writing the image
 		status = pdfWriter.PausePageContentContext(pageContentContext);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to pause page content context ||\n";
 			break;
@@ -108,7 +108,7 @@ EStatusCode JPGImageTest::Run()
 		if(!formXObject)
 		{
 			wcout<<"failed to create form XObject from file\n";
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -121,14 +121,14 @@ EStatusCode JPGImageTest::Run()
 		delete formXObject;
 
 		status = pdfWriter.EndPageContentContext(pageContentContext);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to write page\n";
 			break;
@@ -136,7 +136,7 @@ EStatusCode JPGImageTest::Run()
 
 	
 		status = pdfWriter.EndPDF();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed in end PDF\n";
 			break;

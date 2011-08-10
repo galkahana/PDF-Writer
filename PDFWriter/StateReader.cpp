@@ -31,29 +31,29 @@ StateReader::~StateReader(void)
 {
 }
 
-EStatusCode StateReader::Start(const wstring& inStateFilePath)
+EPDFStatusCode StateReader::Start(const wstring& inStateFilePath)
 {
 	// open the new file...
-	if(mInputFile.OpenFile(inStateFilePath) != eSuccess)
+	if(mInputFile.OpenFile(inStateFilePath) != ePDFSuccess)
 	{
 		TRACE_LOG1("StateReader::Start, can't open file for state reading in %s",inStateFilePath.c_str());
-		return eFailure;
+		return ePDFFailure;
 	}
 	
-	if(mParser.StartStateFileParsing(mInputFile.GetInputStream()) != eSuccess)
+	if(mParser.StartStateFileParsing(mInputFile.GetInputStream()) != ePDFSuccess)
 	{
 		TRACE_LOG("StateReader::Start, unable to start parsing for the state reader file");
-		return eFailure;
+		return ePDFFailure;
 	}
 
 	// set the root object
 	PDFObjectCastPtr<PDFIndirectObjectReference> rootObject(mParser.GetTrailer()->QueryDirectObject("Root"));
 	mRootObject = rootObject->mObjectID;
 
-	return eSuccess;
+	return ePDFSuccess;
 }
 
-PDFParser* StateReader::GetObjectsReader()
+HummusPDFParser* StateReader::GetObjectsReader()
 {
 	return &mParser;
 

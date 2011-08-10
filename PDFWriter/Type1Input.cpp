@@ -99,9 +99,9 @@ void Type1Input::Reset()
 	Type1PrivateDictionary mPrivateDictionary;
 }
 
-EStatusCode Type1Input::ReadType1File(IByteReaderWithPosition* inType1)
+EPDFStatusCode Type1Input::ReadType1File(IByteReaderWithPosition* inType1)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	BoolAndString token;
 
 
@@ -110,11 +110,11 @@ EStatusCode Type1Input::ReadType1File(IByteReaderWithPosition* inType1)
 	do
 	{
 		status = mPFBDecoder.Assign(inType1);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		// the fun about pfb decoding is that it's pretty much token based...so let's do some tokening
-		while(mPFBDecoder.NotEnded() && eSuccess == status)
+		while(mPFBDecoder.NotEnded() && ePDFSuccess == status)
 		{
 			token = mPFBDecoder.GetNextToken();
 			status = mPFBDecoder.GetInternalState();
@@ -132,7 +132,7 @@ EStatusCode Type1Input::ReadType1File(IByteReaderWithPosition* inType1)
 			if(token.second.compare("begin") == 0)
 			{
 				status = ReadFontDictionary();
-				if(status != eSuccess)
+				if(status != ePDFSuccess)
 					break;
 			}
 
@@ -142,7 +142,7 @@ EStatusCode Type1Input::ReadType1File(IByteReaderWithPosition* inType1)
 			if(token.second.compare("/Private") == 0)
 			{
 				status = ReadPrivateDictionary();
-				if(status != eSuccess)
+				if(status != ePDFSuccess)
 					break;
 			}
 			
@@ -163,12 +163,12 @@ bool Type1Input::IsComment(const string& inToken)
 	return inToken.at(0) == '%';
 }
 
-EStatusCode Type1Input::ReadFontDictionary()
+EPDFStatusCode Type1Input::ReadFontDictionary()
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	BoolAndString token;
 
-	while(mPFBDecoder.NotEnded() && eSuccess == status)
+	while(mPFBDecoder.NotEnded() && ePDFSuccess == status)
 	{
 		token = mPFBDecoder.GetNextToken();
 		status = mPFBDecoder.GetInternalState();
@@ -230,7 +230,7 @@ EStatusCode Type1Input::ReadFontDictionary()
 		if(token.second.compare("/Encoding") == 0)
 		{
 			status = ParseEncoding();
-			if(eSuccess == status)
+			if(ePDFSuccess == status)
 				CalculateReverseEncoding();
 			continue;
 		}
@@ -244,12 +244,12 @@ EStatusCode Type1Input::ReadFontDictionary()
 	return status;
 }
 
-EStatusCode Type1Input::ReadFontInfoDictionary()
+EPDFStatusCode Type1Input::ReadFontInfoDictionary()
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	BoolAndString token;
 
-	while(mPFBDecoder.NotEnded() && eSuccess == status)
+	while(mPFBDecoder.NotEnded() && ePDFSuccess == status)
 	{
 		token = mPFBDecoder.GetNextToken();
 		status = mPFBDecoder.GetInternalState();
@@ -333,39 +333,39 @@ string Type1Input::FromPSName(const string& inPostScriptName)
 	return inPostScriptName.substr(1);
 }
 
-EStatusCode Type1Input::ParseDoubleArray(double* inArray,int inArraySize)
+EPDFStatusCode Type1Input::ParseDoubleArray(double* inArray,int inArraySize)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	// skip the [ or {
 	BoolAndString token = mPFBDecoder.GetNextToken();
 	if(!token.first)
-		return eFailure;
+		return ePDFFailure;
 
-	for(int i=0; i < inArraySize && eSuccess == status;++i)
+	for(int i=0; i < inArraySize && ePDFSuccess == status;++i)
 	{
 		token = mPFBDecoder.GetNextToken();
-		status = token.first ? eSuccess:eFailure;
+		status = token.first ? ePDFSuccess:ePDFFailure;
 		inArray[i] = Double(token.second);
 	}
 
 	// skip the last ] or }
 	token = mPFBDecoder.GetNextToken();
 	if(!token.first)
-		return eFailure;
+		return ePDFFailure;
 
 	return status;
 
 }
 
-EStatusCode Type1Input::ParseEncoding()
+EPDFStatusCode Type1Input::ParseEncoding()
 {
 	BoolAndString token = mPFBDecoder.GetNextToken();
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	int encodingIndex = 0;
 
 	if(!token.first)
-		return eFailure;
+		return ePDFFailure;
 
 	// checking for standard encoding
 	if(token.second.compare("StandardEncoding") == 0)
@@ -375,8 +375,8 @@ EStatusCode Type1Input::ParseEncoding()
 		// skip the def
 		BoolAndString token = mPFBDecoder.GetNextToken();
 		if(!token.first)
-			return eFailure;
-		return eSuccess;
+			return ePDFFailure;
+		return ePDFSuccess;
 	}
 
 	// not standard encoding, parse custom encoding
@@ -390,7 +390,7 @@ EStatusCode Type1Input::ParseEncoding()
 			break;
 	}
 	if(!token.first)
-		return eFailure;
+		return ePDFFailure;
 
 	// k. now parse the repeats of "dup index charactername put"
 	// till the first occurence of "readonly" or "def".
@@ -406,7 +406,7 @@ EStatusCode Type1Input::ParseEncoding()
 		encodingIndex = Int(token.second);
 		if(encodingIndex < 0 || encodingIndex > 255)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 		
@@ -424,8 +424,8 @@ EStatusCode Type1Input::ParseEncoding()
 		// get next row first token [dup or end]
 		token = mPFBDecoder.GetNextToken();
 	}
-	if(!token.first || status != eSuccess)
-		return eFailure;
+	if(!token.first || status != ePDFSuccess)
+		return ePDFFailure;
 
 	return status;
 }
@@ -460,13 +460,13 @@ void Type1Input::CalculateReverseEncoding()
 	}
 }
 
-EStatusCode Type1Input::ReadPrivateDictionary()
+EPDFStatusCode Type1Input::ReadPrivateDictionary()
 {
 
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	BoolAndString token;
 
-	while(mPFBDecoder.NotEnded() && eSuccess == status)
+	while(mPFBDecoder.NotEnded() && ePDFSuccess == status)
 	{
 		token = mPFBDecoder.GetNextToken();
 		status = mPFBDecoder.GetInternalState();
@@ -582,12 +582,12 @@ EStatusCode Type1Input::ReadPrivateDictionary()
 	return status;	
 }
 
-EStatusCode Type1Input::ParseIntVector(vector<int>& inVector)
+EPDFStatusCode Type1Input::ParseIntVector(vector<int>& inVector)
 {
 	// skip the [ or {
 	BoolAndString token = mPFBDecoder.GetNextToken();
 	if(!token.first)
-		return eFailure;
+		return ePDFFailure;
 
 
 	while(token.first)
@@ -598,15 +598,15 @@ EStatusCode Type1Input::ParseIntVector(vector<int>& inVector)
 
 		inVector.push_back(Int(token.second));
 	}
-	return token.first ? eSuccess:eFailure;
+	return token.first ? ePDFSuccess:ePDFFailure;
 }
 
-EStatusCode Type1Input::ParseDoubleVector(vector<double>& inVector)
+EPDFStatusCode Type1Input::ParseDoubleVector(vector<double>& inVector)
 {
 	// skip the [ or {
 	BoolAndString token = mPFBDecoder.GetNextToken();
 	if(!token.first)
-		return eFailure;
+		return ePDFFailure;
 
 
 	while(token.first)
@@ -617,17 +617,17 @@ EStatusCode Type1Input::ParseDoubleVector(vector<double>& inVector)
 
 		inVector.push_back(Double(token.second));
 	}
-	return token.first ? eSuccess:eFailure;
+	return token.first ? ePDFSuccess:ePDFFailure;
 }
 
-EStatusCode Type1Input::ParseSubrs()
+EPDFStatusCode Type1Input::ParseSubrs()
 {
 	int subrIndex;
 
 	// get the subrs count
 	BoolAndString token = mPFBDecoder.GetNextToken();
 	if(!token.first)
-		return eFailure;
+		return ePDFFailure;
 
 	mSubrsCount = (Byte)Int(token.second);
 	mSubrs = new Type1CharString[mSubrsCount];
@@ -643,7 +643,7 @@ EStatusCode Type1Input::ParseSubrs()
 			break;
 	}
 	if(!token.first)
-		return eFailure;
+		return ePDFFailure;
 
 	for(Byte i=0;i<mSubrsCount && token.first;++i)
 	{
@@ -671,12 +671,12 @@ EStatusCode Type1Input::ParseSubrs()
 		mPFBDecoder.GetNextToken();
 	}
 	if(!token.first)
-		return eFailure;
+		return ePDFFailure;
 
 	return mPFBDecoder.GetInternalState();
 }
 
-EStatusCode Type1Input::ParseCharstrings()
+EPDFStatusCode Type1Input::ParseCharstrings()
 {
 	BoolAndString token;
 	string characterName;
@@ -690,11 +690,11 @@ EStatusCode Type1Input::ParseCharstrings()
 			break;
 	}
 	if(!token.first)
-		return eFailure;
+		return ePDFFailure;
 
 	// Charstrings look like this:
 	// charactername nbytes RD ~n~binary~bytes~ ND
-	while(token.first && mPFBDecoder.GetInternalState() == eSuccess)
+	while(token.first && mPFBDecoder.GetInternalState() == ePDFSuccess)
 	{
 		token = mPFBDecoder.GetNextToken();
 
@@ -763,7 +763,7 @@ Type1CharString* Type1Input::GetGlyphCharString(const string& inCharStringName)
 }
 
 
-EStatusCode Type1Input::CalculateDependenciesForCharIndex(	Byte inCharStringIndex,
+EPDFStatusCode Type1Input::CalculateDependenciesForCharIndex(	Byte inCharStringIndex,
 															CharString1Dependencies& ioDependenciesInfo)
 {
 	CharStringType1Interpreter interpreter;
@@ -772,16 +772,16 @@ EStatusCode Type1Input::CalculateDependenciesForCharIndex(	Byte inCharStringInde
 	if(!charString)
 	{
 		TRACE_LOG("Type1Input::CalculateDependenciesForCharIndex, Exception, cannot find glyph index");
-		return eFailure;
+		return ePDFFailure;
 	}
 
 	mCurrentDependencies = &ioDependenciesInfo;
-	EStatusCode status = interpreter.Intepret(*charString,this);
+	EPDFStatusCode status = interpreter.Intepret(*charString,this);
 	mCurrentDependencies = NULL;
 	return status;
 }
 
-EStatusCode Type1Input::CalculateDependenciesForCharIndex(const string& inCharStringName,
+EPDFStatusCode Type1Input::CalculateDependenciesForCharIndex(const string& inCharStringName,
 											  CharString1Dependencies& ioDependenciesInfo)
 {
 	CharStringType1Interpreter interpreter;
@@ -790,11 +790,11 @@ EStatusCode Type1Input::CalculateDependenciesForCharIndex(const string& inCharSt
 	if(it == mCharStrings.end())
 	{
 		TRACE_LOG("Type1Input::CalculateDependenciesForCharIndex, Exception, cannot find glyph from name");
-		return eFailure;
+		return ePDFFailure;
 	}
 
 	mCurrentDependencies = &ioDependenciesInfo;
-	EStatusCode status = interpreter.Intepret(it->second,this);
+	EPDFStatusCode status = interpreter.Intepret(it->second,this);
 	mCurrentDependencies = NULL;
 	return status;
 }
@@ -814,14 +814,14 @@ Type1CharString* Type1Input::GetSubr(long inSubrIndex)
 		return mSubrs+inSubrIndex;
 }
 
-EStatusCode Type1Input::Type1Seac(const LongList& inOperandList)
+EPDFStatusCode Type1Input::Type1Seac(const LongList& inOperandList)
 {
 	LongList::const_reverse_iterator it = inOperandList.rbegin();
 
 	mCurrentDependencies->mCharCodes.insert((Byte)*it);
 	++it;
 	mCurrentDependencies->mCharCodes.insert((Byte)*it);
-	return eSuccess;
+	return ePDFSuccess;
 }
 
 bool Type1Input::IsOtherSubrSupported(long inOtherSubrsIndex)

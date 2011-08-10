@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "IByteReaderWithPosition.h"
 
 class OpenTypePrimitiveReader
@@ -33,23 +33,23 @@ public:
 	void SetOffset(LongFilePositionType inNewOffset);
 	void Skip(LongBufferSizeType inToSkip);
 	LongFilePositionType GetCurrentPosition();
-	EStatusCode GetInternalState();
+	EPDFStatusCode GetInternalState();
 
-	EStatusCode ReadBYTE(unsigned char& outValue);
-	EStatusCode ReadCHAR(char& outValue);
-	EStatusCode ReadUSHORT(unsigned short& outValue);
-	EStatusCode ReadSHORT(short& outValue);
-	EStatusCode ReadULONG(unsigned long& outValue);
-	EStatusCode ReadLONG(long& outValue);
-	EStatusCode ReadLongDateTime(long long& outValue);
-	EStatusCode ReadFixed(double& outValue);
-	EStatusCode Read(Byte* inBuffer,LongBufferSizeType inBufferSize);
+	EPDFStatusCode ReadBYTE(unsigned char& outValue);
+	EPDFStatusCode ReadCHAR(char& outValue);
+	EPDFStatusCode ReadUSHORT(unsigned short& outValue);
+	EPDFStatusCode ReadSHORT(short& outValue);
+	EPDFStatusCode ReadULONG(unsigned long& outValue);
+	EPDFStatusCode ReadLONG(long& outValue);
+	EPDFStatusCode ReadLongDateTime(long long& outValue);
+	EPDFStatusCode ReadFixed(double& outValue);
+	EPDFStatusCode Read(Byte* inBuffer,LongBufferSizeType inBufferSize);
 
 	IByteReaderWithPosition* GetReadStream();
 private:
 
 	IByteReaderWithPosition* mOpenTypeFile;
 	LongFilePositionType mInitialPosition;
-	EStatusCode mInternalState;
+	EPDFStatusCode mInternalState;
 
 };

@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "ObjectsBasicTypes.h"
 #include "OpenTypeFileInput.h"
 #include "MyStringBuf.h"
@@ -52,7 +52,7 @@ public:
 	CFFEmbeddedFontWriter(void);
 	~CFFEmbeddedFontWriter(void);
 
-	EStatusCode WriteEmbeddedFont(	FreeTypeFaceWrapper& inFontInfo,
+	EPDFStatusCode WriteEmbeddedFont(	FreeTypeFaceWrapper& inFontInfo,
 									const UIntVector& inSubsetGlyphIDs,
 									const string& inFontFile3SubType,
 									const string& inSubsetFontName,
@@ -64,7 +64,7 @@ public:
 	// for the GID in the same position in the subset glyph IDs.
 	// use it when the CFF origin is from a subset font, and the GID->CID mapping is not simply
 	// identity
-	EStatusCode WriteEmbeddedFont(	FreeTypeFaceWrapper& inFontInfo,
+	EPDFStatusCode WriteEmbeddedFont(	FreeTypeFaceWrapper& inFontInfo,
 									const UIntVector& inSubsetGlyphIDs,
 									const string& inFontFile3SubType,
 									const string& inSubsetFontName,
@@ -97,33 +97,33 @@ private:
 	LongFilePositionType mFDArrayPosition;
 	LongFilePositionType mFDSelectPosition;
 
-	EStatusCode CreateCFFSubset(	
+	EPDFStatusCode CreateCFFSubset(	
 					FreeTypeFaceWrapper& inFontInfo,
 					const UIntVector& inSubsetGlyphIDs,
 					UShortVector* inCIDMapping,
 					const string& inSubsetFontName,
 					bool& outNotEmbedded,
 					MyStringBuf& outFontProgram);
-	EStatusCode AddDependentGlyphs(UIntVector& ioSubsetGlyphIDs);
-	EStatusCode AddComponentGlyphs(unsigned int inGlyphID,UIntSet& ioComponents,bool &outFoundComponents);
-	EStatusCode WriteCFFHeader();
-	EStatusCode WriteName(const string& inSubsetFontName);
-	EStatusCode WriteTopIndex();
+	EPDFStatusCode AddDependentGlyphs(UIntVector& ioSubsetGlyphIDs);
+	EPDFStatusCode AddComponentGlyphs(unsigned int inGlyphID,UIntSet& ioComponents,bool &outFoundComponents);
+	EPDFStatusCode WriteCFFHeader();
+	EPDFStatusCode WriteName(const string& inSubsetFontName);
+	EPDFStatusCode WriteTopIndex();
 	Byte GetMostCompressedOffsetSize(unsigned long inOffset);
-	EStatusCode WriteTopDictSegment(MyStringBuf& ioTopDictSegment);
-	EStatusCode WriteStringIndex();
-	EStatusCode WriteGlobalSubrsIndex();
-	EStatusCode WriteEncodings(const UIntVector& inSubsetGlyphIDs);
-	EStatusCode WriteCharsets(const UIntVector& inSubsetGlyphIDs,UShortVector* inCIDMapping);
-	EStatusCode WriteCharStrings(const UIntVector& inSubsetGlyphIDs);
-	EStatusCode WritePrivateDictionary();
+	EPDFStatusCode WriteTopDictSegment(MyStringBuf& ioTopDictSegment);
+	EPDFStatusCode WriteStringIndex();
+	EPDFStatusCode WriteGlobalSubrsIndex();
+	EPDFStatusCode WriteEncodings(const UIntVector& inSubsetGlyphIDs);
+	EPDFStatusCode WriteCharsets(const UIntVector& inSubsetGlyphIDs,UShortVector* inCIDMapping);
+	EPDFStatusCode WriteCharStrings(const UIntVector& inSubsetGlyphIDs);
+	EPDFStatusCode WritePrivateDictionary();
 
-	EStatusCode WriteFDArray(const UIntVector& inSubsetGlyphIDs,const FontDictInfoToByteMap& inNewFontDictsIndexes);
-	EStatusCode WriteFDSelect(const UIntVector& inSubsetGlyphIDs,const FontDictInfoToByteMap& inNewFontDictsIndexes);
-	EStatusCode WritePrivateDictionaryBody(	const PrivateDictInfo& inPrivateDictionary,
+	EPDFStatusCode WriteFDArray(const UIntVector& inSubsetGlyphIDs,const FontDictInfoToByteMap& inNewFontDictsIndexes);
+	EPDFStatusCode WriteFDSelect(const UIntVector& inSubsetGlyphIDs,const FontDictInfoToByteMap& inNewFontDictsIndexes);
+	EPDFStatusCode WritePrivateDictionaryBody(	const PrivateDictInfo& inPrivateDictionary,
 											LongFilePositionType& outWriteSize,
 											LongFilePositionType& outWritePosition);
-	EStatusCode UpdateIndexesAtTopDict();
+	EPDFStatusCode UpdateIndexesAtTopDict();
 
 	void DetermineFDArrayIndexes(const UIntVector& inSubsetGlyphIDs,FontDictInfoToByteMap& outNewFontDictsIndexes);
 	

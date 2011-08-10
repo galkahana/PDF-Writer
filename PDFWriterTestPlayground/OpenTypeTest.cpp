@@ -2,7 +2,7 @@
    Source File : OpenTypeTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -40,15 +40,15 @@ OpenTypeTest::~OpenTypeTest(void)
 {
 }
 
-EStatusCode OpenTypeTest::SaveCharstringCode(unsigned short inFontIndex,unsigned short inGlyphIndex,CFFFileInput* inCFFFileInput)
+EPDFStatusCode OpenTypeTest::SaveCharstringCode(unsigned short inFontIndex,unsigned short inGlyphIndex,CFFFileInput* inCFFFileInput)
 {
 	OutputFile glyphFile;
 
-	EStatusCode status = glyphFile.OpenFile(wstring(L"C:\\PDFLibTests\\glyphCFF")  + Long(inFontIndex).ToWString() + L"_" + StringTraits(inCFFFileInput->GetGlyphName(0,inGlyphIndex)).WidenString() + L".txt");
+	EPDFStatusCode status = glyphFile.OpenFile(wstring(L"C:\\PDFLibTests\\glyphCFF")  + Long(inFontIndex).ToWString() + L"_" + StringTraits(inCFFFileInput->GetGlyphName(0,inGlyphIndex)).WidenString() + L".txt");
 
 	do
 	{
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 		
 		CharStringType2Tracer tracer;
@@ -62,21 +62,21 @@ EStatusCode OpenTypeTest::SaveCharstringCode(unsigned short inFontIndex,unsigned
 	return status;
 }
 
-EStatusCode OpenTypeTest::Run()
+EPDFStatusCode OpenTypeTest::Run()
 {
 	return TestFont();
 }
 
-EStatusCode OpenTypeTest::TestFont()
+EPDFStatusCode OpenTypeTest::TestFont()
 {
-	EStatusCode status;
+	EPDFStatusCode status;
 	InputFile otfFile;
 
 	do
 	{
 		status = otfFile.OpenFile(L"C:\\PDFLibTests\\TestMaterials\\fonts\\BrushScriptStd.otf");
 
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"cannot read bursh script font file\n";
 			break;
@@ -86,7 +86,7 @@ EStatusCode OpenTypeTest::TestFont()
 		OpenTypeFileInput openTypeReader;
 
 		status = openTypeReader.ReadOpenTypeFile(otfFile.GetInputStream());
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"could not read open type file\n";
 			break;
@@ -95,7 +95,7 @@ EStatusCode OpenTypeTest::TestFont()
 		// show just abcd and notdef
 
 		status = SaveCharstringCode(0,0,&openTypeReader.mCFF);
-		for(unsigned short i=66; i < 70 && eSuccess == status; ++i)
+		for(unsigned short i=66; i < 70 && ePDFSuccess == status; ++i)
 			status = SaveCharstringCode(0,i,&openTypeReader.mCFF);
 	}while(false);
 	return status;

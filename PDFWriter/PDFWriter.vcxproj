@@ -148,10 +148,16 @@
   <ItemGroup>
     <ClInclude Include="AdapterIByteReaderWithPositionToIReadPositionProvider.h" />
     <ClInclude Include="Ascii7Encoding.h" />
+    <ClInclude Include="DocumentsContext.h" />
+    <ClInclude Include="DocumentsContextExtenderAdapter.h" />
+    <ClInclude Include="EPDFStatusCode.h" />
+    <ClInclude Include="HummusPDFParser.h" />
+    <ClInclude Include="HummusPDFWriter.h" />
     <ClInclude Include="IByteReader.h" />
     <ClInclude Include="IByteReaderWithPosition.h" />
     <ClInclude Include="IByteWriter.h" />
     <ClInclude Include="IByteWriterWithPosition.h" />
+    <ClInclude Include="IDocumentsContextExtender.h" />
     <ClInclude Include="InputBufferedStream.h" />
     <ClInclude Include="InputByteArrayStream.h" />
     <ClInclude Include="InputFile.h" />
@@ -172,8 +178,8 @@
     <ClInclude Include="BetweenIncluding.h" />
     <ClInclude Include="CMYKRGBColor.h" />
     <ClInclude Include="EPDFVersion.h" />
-    <ClInclude Include="EStatusCode.h" />
     <ClInclude Include="MyStringBuf.h" />
+    <ClInclude Include="PDFObjectsParser.h" />
     <ClInclude Include="SafeBufferMacrosDefs.h" />
     <ClInclude Include="StringTraits.h" />
     <ClInclude Include="BoxingBase.h" />
@@ -193,12 +199,9 @@
     <ClInclude Include="WinAnsiEncoding.h" />
     <ClInclude Include="AbstractContentContext.h" />
     <ClInclude Include="CatalogInformation.h" />
-    <ClInclude Include="DocumentContext.h" />
-    <ClInclude Include="DocumentContextExtenderAdapter.h" />
     <ClInclude Include="GlyphUnicodeMapping.h" />
     <ClInclude Include="GraphicState.h" />
     <ClInclude Include="GraphicStateStack.h" />
-    <ClInclude Include="IDocumentContextExtender.h" />
     <ClInclude Include="InfoDictionary.h" />
     <ClInclude Include="PageContentContext.h" />
     <ClInclude Include="PageTree.h" />
@@ -281,8 +284,6 @@
     <ClInclude Include="PDFDocumentCopyingContext.h" />
     <ClInclude Include="PDFDocumentHandler.h" />
     <ClInclude Include="PDFEmbedParameterTypes.h" />
-    <ClInclude Include="PDFObjectParser.h" />
-    <ClInclude Include="PDFParser.h" />
     <ClInclude Include="PDFParserTokenizer.h" />
     <ClInclude Include="PDFArray.h" />
     <ClInclude Include="PDFBoolean.h" />
@@ -307,10 +308,12 @@
     <ClInclude Include="InputPredictorTIFFSubStream.h" />
     <ClInclude Include="StateReader.h" />
     <ClInclude Include="StateWriter.h" />
-    <ClInclude Include="PDFWriter.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Ascii7Encoding.cpp" />
+    <ClCompile Include="DocumentsContext.cpp" />
+    <ClCompile Include="HummusPDFParser.cpp" />
+    <ClCompile Include="HummusPDFWriter.cpp" />
     <ClCompile Include="InputBufferedStream.cpp" />
     <ClCompile Include="InputByteArrayStream.cpp" />
     <ClCompile Include="InputFile.cpp" />
@@ -336,6 +339,7 @@
     <ClCompile Include="OutputStreamTraits.cpp" />
     <ClCompile Include="OutputStringBufferStream.cpp" />
     <ClCompile Include="CMYKRGBColor.cpp" />
+    <ClCompile Include="PDFObjectsParser.cpp" />
     <ClCompile Include="StringTraits.cpp" />
     <ClCompile Include="RefCountObject.cpp" />
     <ClCompile Include="MD5Generator.cpp" />
@@ -348,7 +352,6 @@
     <ClCompile Include="WinAnsiEncoding.cpp" />
     <ClCompile Include="AbstractContentContext.cpp" />
     <ClCompile Include="CatalogInformation.cpp" />
-    <ClCompile Include="DocumentContext.cpp" />
     <ClCompile Include="GraphicState.cpp" />
     <ClCompile Include="GraphicStateStack.cpp" />
     <ClCompile Include="InfoDictionary.cpp" />
@@ -415,8 +418,6 @@
     <ClCompile Include="WrittenFontTrueType.cpp" />
     <ClCompile Include="PDFDocumentCopyingContext.cpp" />
     <ClCompile Include="PDFDocumentHandler.cpp" />
-    <ClCompile Include="PDFObjectParser.cpp" />
-    <ClCompile Include="PDFParser.cpp" />
     <ClCompile Include="PDFParserTokenizer.cpp" />
     <ClCompile Include="PDFArray.cpp" />
     <ClCompile Include="PDFBoolean.cpp" />
@@ -440,7 +441,6 @@
     <ClCompile Include="InputPredictorTIFFSubStream.cpp" />
     <ClCompile Include="StateReader.cpp" />
     <ClCompile Include="StateWriter.cpp" />
-    <ClCompile Include="PDFWriter.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -2,7 +2,7 @@
    Source File : RefCountTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -51,14 +51,14 @@ private:
 
 int MyClass::TotalObjectsCount = 0;
 
-EStatusCode RefCountTest::Run()
+EPDFStatusCode RefCountTest::Run()
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	if(MyClass::TotalObjectsCount != 0)
 	{
 		wcout<<"Total objects count is supposed to be 0 at the beginning, but it's "<<MyClass::TotalObjectsCount<<"\n";
-		status = eFailure;
+		status = ePDFFailure;
 	}
 
 	// simple 1 ref test
@@ -67,18 +67,18 @@ EStatusCode RefCountTest::Run()
 		if(MyClass::TotalObjectsCount != 1)
 		{
 			wcout<<"simple 1 ref test failed, TotalObjectCount (should be 1) = "<<MyClass::TotalObjectsCount<<"\n";
-			status = eFailure;
+			status = ePDFFailure;
 		}
 		if(firstPtr->GetID() != 1)
 		{
 			wcout<<"simple 1 ref test failed, wrond object id\n";
-			status = eFailure;
+			status = ePDFFailure;
 		}
 	}
 	if(MyClass::TotalObjectsCount != 0)
 	{
 		wcout<<"simple 1 ref test failed, TotalObjectCount (should be 0) = "<<MyClass::TotalObjectsCount<<"\n";
-		status = eFailure;
+		status = ePDFFailure;
 	}
 
 	// 2 refs to direct object
@@ -88,13 +88,13 @@ EStatusCode RefCountTest::Run()
 		if(MyClass::TotalObjectsCount != 1)
 		{
 			wcout<<"Total objects count is supposed to be 1 after creating object 2, but it's "<<MyClass::TotalObjectsCount<<"\n";
-			status = eFailure;
+			status = ePDFFailure;
 		}
 		RefCountPtr<MyClass> firstPtr(aClass);
 		if(firstPtr->GetID() != 2)
 		{
 			wcout<<"2 ref test failed, wrond object id for pointer 1\n";
-			status = eFailure;
+			status = ePDFFailure;
 		}
 
 		aClass->AddRef();
@@ -102,18 +102,18 @@ EStatusCode RefCountTest::Run()
 		if(secondPtr->GetID() != 2)
 		{
 			wcout<<"2 ref test failed, wrond object id for pointer 2\n";
-			status = eFailure;
+			status = ePDFFailure;
 		}
 		if(MyClass::TotalObjectsCount != 1)
 		{
 			wcout<<"Total objects count is supposed to be 1 after another pointer for object 2, but it's "<<MyClass::TotalObjectsCount<<"\n";
-			status = eFailure;
+			status = ePDFFailure;
 		}
 	}
 	if(MyClass::TotalObjectsCount != 0)
 	{
 		wcout<<"2 ref test failed, TotalObjectCount = "<<MyClass::TotalObjectsCount<<"\n";
-		status = eFailure;
+		status = ePDFFailure;
 	}
 
 	// assignment scenarios
@@ -123,12 +123,12 @@ EStatusCode RefCountTest::Run()
 		if(MyClass::TotalObjectsCount != 1)
 		{
 			wcout<<"Total objects count is supposed to be 1 after creating object 3, but it's "<<MyClass::TotalObjectsCount<<"\n";
-			status = eFailure;
+			status = ePDFFailure;
 		}
 		if(firstPtr->GetID() != 3)
 		{
 			wcout<<"assignment test failed, wrond object id for pointer 1\n";
-			status = eFailure;
+			status = ePDFFailure;
 		}
 
 		{
@@ -138,13 +138,13 @@ EStatusCode RefCountTest::Run()
 			if(secondPtr->GetID() != 3)
 			{
 				wcout<<"assignment test failed, wrond object id for pointer 2\n";
-				status = eFailure;
+				status = ePDFFailure;
 			}
 		}
 		if(MyClass::TotalObjectsCount != 1)
 		{
 			wcout<<"Total objects count is supposed to be 1 after smart pointer assignment object 3, but it's "<<MyClass::TotalObjectsCount<<"\n";
-			status = eFailure;
+			status = ePDFFailure;
 		}
 
 		{
@@ -154,19 +154,19 @@ EStatusCode RefCountTest::Run()
 			if(thirdPtr->GetID() != 3)
 			{
 				wcout<<"assignment test failed, wrond object id for pointer 2\n";
-				status = eFailure;
+				status = ePDFFailure;
 			}
 		}
 		if(MyClass::TotalObjectsCount != 1)
 		{
 			wcout<<"Total objects count is supposed to be 1 after pointer assignment object 3, but it's "<<MyClass::TotalObjectsCount<<"\n";
-			status = eFailure;
+			status = ePDFFailure;
 		}
 	}
 	if(MyClass::TotalObjectsCount != 0)
 	{
 		wcout<<"assignment test failed, TotalObjectCount = "<<MyClass::TotalObjectsCount<<"\n";
-		status = eFailure;
+		status = ePDFFailure;
 	}
 
 	// pointer equality
@@ -179,31 +179,31 @@ EStatusCode RefCountTest::Run()
 		if(firstPtr != secondPtr)
 		{
 			wcout<<"smart pointers equality failed (not equal)\n";
-			status = eFailure;
+			status = ePDFFailure;
 		}
 
 		if(!(firstPtr == secondPtr))
 		{
 			wcout<<"smart pointers equality failed (equal)\n";
-			status = eFailure;
+			status = ePDFFailure;
 		}
 
 		if(firstPtr != anObject)
 		{
 			wcout<<"smart pointer to pointer equality failed (not equal)\n";
-			status = eFailure;
+			status = ePDFFailure;
 		}
 
 		if(!(firstPtr == anObject))
 		{
 			wcout<<"smart pointer to pointer equality failed (equal)\n";
-			status = eFailure;
+			status = ePDFFailure;
 		}
 	}
 	if(MyClass::TotalObjectsCount != 0)
 	{
 		wcout<<"Pointer equality, TotalObjectCount = "<<MyClass::TotalObjectsCount<<"\n";
-		status = eFailure;
+		status = ePDFFailure;
 	}
 
 
@@ -214,14 +214,14 @@ EStatusCode RefCountTest::Run()
 		if(!aPtr)
 		{
 			wcout<<"Problem, should not be false!\n";
-			status = eFailure;
+			status = ePDFFailure;
 		}		
 		
 		RefCountPtr<MyClass> aNother;
 		if(!(!aNother))
 		{
 			wcout<<"Problem, should be false!\n";
-			status = eFailure;			
+			status = ePDFFailure;			
 		}
 	}
 

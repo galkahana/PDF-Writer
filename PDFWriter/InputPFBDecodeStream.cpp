@@ -26,7 +26,7 @@ InputPFBDecodeStream::InputPFBDecodeStream(void)
 {
 	mStreamToDecode = NULL;
 	mDecodeMethod = NULL;
-	mInternalState = eFailure;
+	mInternalState = ePDFFailure;
 }
 
 InputPFBDecodeStream::~InputPFBDecodeStream(void)
@@ -34,7 +34,7 @@ InputPFBDecodeStream::~InputPFBDecodeStream(void)
 	delete mStreamToDecode;
 }
 
-EStatusCode InputPFBDecodeStream::Assign(IByteReader* inStreamToDecode)
+EPDFStatusCode InputPFBDecodeStream::Assign(IByteReader* inStreamToDecode)
 {
 	mStreamToDecode = inStreamToDecode;
 
@@ -46,8 +46,8 @@ EStatusCode InputPFBDecodeStream::Assign(IByteReader* inStreamToDecode)
 	}
 	else
 	{
-		mInternalState = eFailure;
-		return eSuccess;
+		mInternalState = ePDFFailure;
+		return ePDFSuccess;
 	}
 }
 
@@ -58,30 +58,30 @@ void InputPFBDecodeStream::ResetReadStatus()
 	mCurrentType = 0;
 	mHasTokenBuffer = false;
 	mFoundEOF = false;
-	mInternalState = (mStreamToDecode != NULL) ? eSuccess:eFailure;
+	mInternalState = (mStreamToDecode != NULL) ? ePDFSuccess:ePDFFailure;
 }
 
-EStatusCode STATIC_NoDecodeRead(InputPFBDecodeStream* inThis,Byte& outByte)
+EPDFStatusCode STATIC_NoDecodeRead(InputPFBDecodeStream* inThis,Byte& outByte)
 {
 	return inThis->ReadRegularByte(outByte);
 }
 
-EStatusCode InputPFBDecodeStream::ReadRegularByte(Byte& outByte)
+EPDFStatusCode InputPFBDecodeStream::ReadRegularByte(Byte& outByte)
 {
 	if(mInSegmentReadIndex >= mSegmentSize)
 	{
-		return eFailure;
+		return ePDFFailure;
 	}
 	else
 	{
 		++mInSegmentReadIndex;
-		return (mStreamToDecode->Read(&outByte,1) != 1) ? eFailure:eSuccess;
+		return (mStreamToDecode->Read(&outByte,1) != 1) ? ePDFFailure:ePDFSuccess;
 	}
 }
 
-EStatusCode InputPFBDecodeStream::InitializeStreamSegment()
+EPDFStatusCode InputPFBDecodeStream::InitializeStreamSegment()
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	Byte buffer;
 	bool requireSegmentReread = false;
 
@@ -94,7 +94,7 @@ EStatusCode InputPFBDecodeStream::InitializeStreamSegment()
 		// verify segment header
 		if(mStreamToDecode->Read(&buffer,1) != 1)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			TRACE_LOG("InputPFBDecodeStream::InitializeStreamSegment, unable to read segment header");
 			break;
 		}
@@ -108,7 +108,7 @@ EStatusCode InputPFBDecodeStream::InitializeStreamSegment()
 		// retrieve segment type
 		if(mStreamToDecode->Read(&buffer,1) != 1)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			TRACE_LOG("InputPFBDecodeStream::InitializeStreamSegment, unable to read segment type");
 			break;
 		}
@@ -119,14 +119,14 @@ EStatusCode InputPFBDecodeStream::InitializeStreamSegment()
 			case 1:
 				{
 					status = StoreSegmentLength();
-					if(status != eSuccess)
+					if(status != ePDFSuccess)
 						break;
 					mDecodeMethod = STATIC_NoDecodeRead;
 					// if previous type was binary, flush also the trailing 0's and cleartomark
 					if(2 == mCurrentType)
 					{
 						status = FlushBinarySectionTrailingCode();
-						if(status != eSuccess)
+						if(status != ePDFSuccess)
 							break;
 
 						// flushing might lead us to section end...to save another call
@@ -140,7 +140,7 @@ EStatusCode InputPFBDecodeStream::InitializeStreamSegment()
 			case 2:
 				{
 					status = StoreSegmentLength();
-					if(status != eSuccess)
+					if(status != ePDFSuccess)
 						break;
 					status = InitializeBinaryDecode();
 					break;
@@ -154,45 +154,45 @@ EStatusCode InputPFBDecodeStream::InitializeStreamSegment()
 			default:
 				{
 					TRACE_LOG1("InputPFBDecodeStream::InitializeStreamSegment, unrecognized segment type - %d",buffer);
-					status = eFailure;
+					status = ePDFFailure;
 					break;				
 				}
 		}
 		mCurrentType = buffer;
 	}while(false);
 
-	if(eSuccess == status && requireSegmentReread)
+	if(ePDFSuccess == status && requireSegmentReread)
 		return InitializeStreamSegment();
 	else
 		return status;
 }
 
 
-EStatusCode InputPFBDecodeStream::StoreSegmentLength()
+EPDFStatusCode InputPFBDecodeStream::StoreSegmentLength()
 {
 	Byte byte1,byte2,byte3,byte4;
 
 	if(mStreamToDecode->Read(&byte1,1) != 1)
-		return eFailure;
+		return ePDFFailure;
 	if(mStreamToDecode->Read(&byte2,1) != 1)
-		return eFailure;
+		return ePDFFailure;
 	if(mStreamToDecode->Read(&byte3,1) != 1)
-		return eFailure;
+		return ePDFFailure;
 	if(mStreamToDecode->Read(&byte4,1) != 1)
-		return eFailure;
+		return ePDFFailure;
 
 	mSegmentSize = byte1 | (byte2<<8) | (byte3<<16) | (byte4<<24);
-	return eSuccess;
+	return ePDFSuccess;
 }
 
-EStatusCode InputPFBDecodeStream::FlushBinarySectionTrailingCode()
+EPDFStatusCode InputPFBDecodeStream::FlushBinarySectionTrailingCode()
 {
 	int zeroesCount = 512;
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	Byte buffer = 0;
 
 	// skip 0's
-	while(zeroesCount > 0 && eSuccess == status)
+	while(zeroesCount > 0 && ePDFSuccess == status)
 	{
 		status = ReadRegularByte(buffer);
 		if('0' == buffer)
@@ -202,10 +202,10 @@ EStatusCode InputPFBDecodeStream::FlushBinarySectionTrailingCode()
 	// now skip the final cleartomark token
 	BoolAndString nextToken =  GetNextToken();
 	if(!nextToken.first)
-		return eFailure;
+		return ePDFFailure;
 
 	if(strcmp(nextToken.second.c_str(),"cleartomark") != 0)
-		return eFailure;
+		return ePDFFailure;
 
 	// skip till next token or end of stream
 	SkipTillToken();
@@ -238,7 +238,7 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 	Byte buffer;
 	OutputStringBufferStream tokenBuffer;
 
-	if(mInternalState != eSuccess)
+	if(mInternalState != ePDFSuccess)
 	{
 		result.first = false;
 		return result;
@@ -256,7 +256,7 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 	{
 		mInternalState = InitializeStreamSegment();
 		// new segment brought to end...mark as no token
-		if(mInternalState != eSuccess || !NotEnded())
+		if(mInternalState != ePDFSuccess || !NotEnded())
 		{
 			result.first = false;
 			return result;
@@ -280,7 +280,7 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 		// now read token until it's done. there are some special cases detemining when a token is done
 		// based on the first charachter of the token [literal string, hex string , comment]
 		
-		if(GetNextByteForToken(buffer) != eSuccess)
+		if(GetNextByteForToken(buffer) != ePDFSuccess)
 		{
 			result.first = false;
 			break;
@@ -294,7 +294,7 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 				// for a comment, the token goes on till the end of line marker [not including]
 				while(IsSegmentNotEnded())
 				{
-					if(GetNextByteForToken(buffer) != eSuccess)
+					if(GetNextByteForToken(buffer) != ePDFSuccess)
 					{	
 						result.first = false;
 						break;
@@ -314,7 +314,7 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 				bool backSlashEncountered = false;
 				while(balanceLevel > 0 && IsSegmentNotEnded())
 				{
-					if(GetNextByteForToken(buffer) != eSuccess)
+					if(GetNextByteForToken(buffer) != ePDFSuccess)
 					{	
 						result.first = false;
 						break;
@@ -329,7 +329,7 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 							// for cr-ln
 							if(0xD == buffer && IsSegmentNotEnded())
 							{
-								if(GetNextByteForToken(buffer) != eSuccess)
+								if(GetNextByteForToken(buffer) != ePDFSuccess)
 								{
 									result.first = false;
 									break;
@@ -375,7 +375,7 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 				// for the purpose of the tokanizer it needs to know if this is a 
 				// hex string, so as to ignore spaces (not gonna do making sure it's hex
 				// leave that to the primitive reader, if one exists)
-				if(GetNextByteForToken(buffer) != eSuccess)
+				if(GetNextByteForToken(buffer) != ePDFSuccess)
 				{	
 					result.first = false;
 					break;
@@ -387,7 +387,7 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 					// ASCII 85 string, read all till '~>'
 					while(IsSegmentNotEnded())
 					{
-						if(GetNextByteForToken(buffer) != eSuccess)
+						if(GetNextByteForToken(buffer) != ePDFSuccess)
 						{	
 							result.first = false;
 							break;
@@ -398,7 +398,7 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 						{
 							if(!IsSegmentNotEnded())
 								break;
-							if(GetNextByteForToken(buffer) != eSuccess)
+							if(GetNextByteForToken(buffer) != ePDFSuccess)
 							{	
 								result.first = false;
 								break;
@@ -415,7 +415,7 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 					// regular ascii, read anything till '>' skipping white spaces
 					while(IsSegmentNotEnded())
 					{
-						if(GetNextByteForToken(buffer) != eSuccess)
+						if(GetNextByteForToken(buffer) != ePDFSuccess)
 						{	
 							result.first = false;
 							break;
@@ -441,7 +441,7 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 			{
 				while(IsSegmentNotEnded())
 				{
-					if(GetNextByteForToken(buffer) != eSuccess)
+					if(GetNextByteForToken(buffer) != ePDFSuccess)
 					{	
 						result.first = false;
 						break;
@@ -467,13 +467,13 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 	return result;
 }
 
-EStatusCode InputPFBDecodeStream::GetNextByteForToken(Byte& outByte)
+EPDFStatusCode InputPFBDecodeStream::GetNextByteForToken(Byte& outByte)
 {
 	if(mHasTokenBuffer)
 	{
 		outByte = mTokenBuffer;
 		mHasTokenBuffer = false;
-		return eSuccess;
+		return ePDFSuccess;
 	}
 	else
 		return mDecodeMethod(this,outByte);
@@ -498,13 +498,13 @@ void InputPFBDecodeStream::SkipTillToken()
 {
 	Byte buffer = 0;
 
-	if(mInternalState != eSuccess || !NotEnded())
+	if(mInternalState != ePDFSuccess || !NotEnded())
 		return;
 
 	// skip till hitting first non space, or segment end
 	while(IsSegmentNotEnded())
 	{
-		if(GetNextByteForToken(buffer) != eSuccess)
+		if(GetNextByteForToken(buffer) != ePDFSuccess)
 			break;
 
 		if(!IsPostScriptWhiteSpace(buffer))
@@ -515,7 +515,7 @@ void InputPFBDecodeStream::SkipTillToken()
 	}
 }
 
-EStatusCode STATIC_DecodeRead(InputPFBDecodeStream* inThis,Byte& outByte)
+EPDFStatusCode STATIC_DecodeRead(InputPFBDecodeStream* inThis,Byte& outByte)
 {
 	return inThis->ReadDecodedByte(outByte);
 }
@@ -525,36 +525,36 @@ static const int CONSTANT_2 = 22719;
 static const int RANDOMIZER_INIT = 55665;
 static const int RANDOMIZER_MODULU_VAL = 65536;
 
-EStatusCode InputPFBDecodeStream::InitializeBinaryDecode()
+EPDFStatusCode InputPFBDecodeStream::InitializeBinaryDecode()
 {
 	Byte dummyByte;
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	mDecodeMethod = STATIC_DecodeRead;
 	mRandomizer = RANDOMIZER_INIT;
 
 	// decode first 4 bytes, which are just a prefix
-	for(int i=0;i<4 && (eSuccess == status);++i)
+	for(int i=0;i<4 && (ePDFSuccess == status);++i)
 		status = ReadDecodedByte(dummyByte);
 	return status;
 }
 
-EStatusCode InputPFBDecodeStream::ReadDecodedByte(Byte& outByte)
+EPDFStatusCode InputPFBDecodeStream::ReadDecodedByte(Byte& outByte)
 {
 	Byte buffer;
 	
 	if(mInSegmentReadIndex >= mSegmentSize)
 	{
-		return eFailure;
+		return ePDFFailure;
 	}
 	else
 	{
 		++mInSegmentReadIndex;
 		if(mStreamToDecode->Read(&buffer,1) != 1)
-			return eFailure;
+			return ePDFFailure;
 
 		outByte = DecodeByte(buffer);
-		return eSuccess;
+		return ePDFSuccess;
 	}
 }
 
@@ -578,18 +578,18 @@ LongBufferSizeType InputPFBDecodeStream::Read(Byte* inBuffer,LongBufferSizeType 
 		++bufferIndex;
 	}
 
-	while(NotEnded() && inBufferSize > bufferIndex && eSuccess == mInternalState)
+	while(NotEnded() && inBufferSize > bufferIndex && ePDFSuccess == mInternalState)
 	{
 		while(mSegmentSize > mInSegmentReadIndex && 
 				inBufferSize > bufferIndex && 
-				eSuccess == mInternalState)
+				ePDFSuccess == mInternalState)
 		{
 			mInternalState = mDecodeMethod(this,inBuffer[bufferIndex]);
 			++bufferIndex;
 		}
 
 		// segment ended, initialize next segment
-		if(inBufferSize > bufferIndex && NotEnded() && eSuccess == mInternalState)
+		if(inBufferSize > bufferIndex && NotEnded() && ePDFSuccess == mInternalState)
 			mInternalState = InitializeStreamSegment();
 			
 	}
@@ -602,7 +602,7 @@ bool InputPFBDecodeStream::NotEnded()
 }
 
 
-EStatusCode InputPFBDecodeStream::GetInternalState()
+EPDFStatusCode InputPFBDecodeStream::GetInternalState()
 {
 	return mInternalState;
 }

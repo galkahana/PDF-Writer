@@ -29,7 +29,7 @@ public:
 	~TrueTypeDescendentFontWriter(void);
 
 	// IDescendentFontWriter implementation [used also as helper for the DescendentFontWriter]
-	virtual EStatusCode WriteFont(	ObjectIDType inDecendentObjectID, 
+	virtual EPDFStatusCode WriteFont(	ObjectIDType inDecendentObjectID, 
 									const string& inFontName,
 									FreeTypeFaceWrapper& inFontInfo,
 									const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,

@@ -2,7 +2,7 @@
    Source File : PDFEmbedTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 */
 #include "PDFEmbedTest.h"
 #include "TestsRunner.h"
-#include "PDFWriter.h"
+#include "HummusPDFWriter.h"
 #include "PageContentContext.h"
 #include "PDFPage.h"
 
@@ -37,23 +37,23 @@ PDFEmbedTest::~PDFEmbedTest(void)
 }
 
 
-EStatusCode PDFEmbedTest::Run()
+EPDFStatusCode PDFEmbedTest::Run()
 {
-	EStatusCode status;
-	PDFWriter pdfWriter;
+	EPDFStatusCode status;
+	HummusPDFWriter pdfWriter;
 
 	do
 	{
 		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\PDFEmbedTest.PDF",ePDFVersion13);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to start PDF\n";
 			break;
 		}	
 
 		// Create XObjects from PDF to embed
-		EStatusCodeAndObjectIDTypeList result = pdfWriter.CreateFormXObjectsFromPDF(L"C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF",PDFPageRange(),ePDFPageBoxMediaBox);
-		if(result.first != eSuccess)
+		EPDFStatusCodeAndObjectIDTypeList result = pdfWriter.CreateFormXObjectsFromPDF(L"C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF",PDFPageRange(),ePDFPageBoxMediaBox);
+		if(result.first != ePDFSuccess)
 		{
 			wcout<<"failed to create PDF XObjects from PDF file\n";
 			status = result.first;
@@ -90,21 +90,21 @@ EStatusCode PDFEmbedTest::Run()
 
 
 		status = pdfWriter.EndPageContentContext(contentContext);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to write page\n";
 			break;
 		}
 
 		status = pdfWriter.EndPDF();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed in end PDF\n";
 			break;

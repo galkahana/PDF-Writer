@@ -22,7 +22,7 @@
 
 #include "FreeTypeFaceWrapper.h"
 #include "ObjectsBasicTypes.h"
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "GlyphUnicodeMapping.h"
 #include <string>
 #include <list>
@@ -39,7 +39,7 @@ typedef list<GlyphUnicodeMappingList> GlyphUnicodeMappingListList;
 
 class IWrittenFont;
 class ObjectsContext;
-class PDFParser;
+class HummusPDFParser;
 
 class PDFUsedFont
 {
@@ -60,24 +60,24 @@ public:
 		of characters. the encoded array is a list of short values (double byte for CID, one byte for regular), and an extra
 		boolean value indicates whether they are CID or regular.
 	*/
-	EStatusCode EncodeStringForShowing(const GlyphUnicodeMappingList& inText,
+	EPDFStatusCode EncodeStringForShowing(const GlyphUnicodeMappingList& inText,
 										ObjectIDType &outFontObjectToUse,
 										UShortList& outCharactersToUse,
 										bool& outTreatCharactersAsCID);
 
 	// encode all strings. make sure that they will use the same font.
-	EStatusCode EncodeStringsForShowing(const GlyphUnicodeMappingListList& inText,
+	EPDFStatusCode EncodeStringsForShowing(const GlyphUnicodeMappingListList& inText,
 										ObjectIDType &outFontObjectToUse,
 										UShortListList& outCharactersToUse,
 										bool& outTreatCharactersAsCID);
 
-	EStatusCode WriteFontDefinition();
+	EPDFStatusCode WriteFontDefinition();
 
 	// use this method to translate text to glyphs and unicode mapping, to be later used for EncodeStringForShowing
-	EStatusCode TranslateStringToGlyphs(const wstring& inText,GlyphUnicodeMappingList& outGlyphsUnicodeMapping);
+	EPDFStatusCode TranslateStringToGlyphs(const wstring& inText,GlyphUnicodeMappingList& outGlyphsUnicodeMapping);
 
-	EStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
-	EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);
+	EPDFStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
+	EPDFStatusCode ReadState(HummusPDFParser* inStateReader,ObjectIDType inObjectID);
 
 private:
 	FreeTypeFaceWrapper mFaceWrapper;

@@ -2,7 +2,7 @@
    Source File : LinksTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
    
 */
 #include "LinksTest.h"
-#include "PDFWriter.h"
+#include "HummusPDFWriter.h"
 #include "PDFPage.h"
 #include "PDFRectangle.h"
 #include "PageContentContext.h"
@@ -36,15 +36,15 @@ LinksTest::~LinksTest(void)
 {
 }
 
-EStatusCode LinksTest::Run()
+EPDFStatusCode LinksTest::Run()
 {
-	EStatusCode status;
-	PDFWriter pdfWriter;
+	EPDFStatusCode status;
+	HummusPDFWriter pdfWriter;
 
 	do
 	{
 		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\LinksTest.PDF",ePDFVersion13,LogConfiguration(true,L"C:\\PDFLibTests\\LinksTest.log"));
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to start PDF\n";
 			break;
@@ -59,7 +59,7 @@ EStatusCode LinksTest::Run()
 		PageContentContext* contentContext = pdfWriter.StartPageContentContext(page);
 		if(NULL == contentContext)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			wcout<<"failed to create content context for page\n";
 			break;
 		}
@@ -67,7 +67,7 @@ EStatusCode LinksTest::Run()
 		PDFUsedFont* font = pdfWriter.GetFontForFile(L"C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
 		if(!font)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			wcout<<"Failed to create font object for arial.ttf\n";
 			break;
 		}
@@ -77,8 +77,8 @@ EStatusCode LinksTest::Run()
 		contentContext->k(0,0,0,1);
 		contentContext->Tf(font,1);
 		contentContext->Tm(11,0,0,11,90.024,709.54);
-		EStatusCode encodingStatus = contentContext->Tj(L"http://pdfhummus.com");
-		if(encodingStatus != eSuccess)
+		EPDFStatusCode encodingStatus = contentContext->Tj(L"http://pdfhummus.com");
+		if(encodingStatus != ePDFSuccess)
 			wcout<<"Could not find some of the glyphs for this font (arial)";
 		// continue even if failed...want to see how it looks like
 		contentContext->ET();
@@ -90,7 +90,7 @@ EStatusCode LinksTest::Run()
 		contentContext->Q();
 		
 		status = pdfWriter.EndPageContentContext(contentContext);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to end page content context\n";
 			break;
@@ -108,14 +108,14 @@ EStatusCode LinksTest::Run()
 		pdfWriter.AttachURLLinktoCurrentPage(L"http://www.soundcloud.com",PDFRectangle(90.024,200,367.524,375));
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to write page\n";
 			break;
 		}
 
 		status = pdfWriter.EndPDF();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed in end PDF\n";
 			break;

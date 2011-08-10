@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "IndirectObjectsReferenceRegistry.h"
 #include "ETokenSeparator.h"
 #include "PrimitiveObjectsWriter.h"
@@ -35,7 +35,7 @@ class DictionaryContext;
 class PDFStream;
 class IObjectsContextExtender;
 class ObjectsContext;
-class PDFParser;
+class HummusPDFParser;
 
 typedef list<DictionaryContext*> DictionaryContextList;
 
@@ -49,7 +49,7 @@ public:
 	
 
 	// Currently doing pre 1.5 xref writing
-	EStatusCode WriteXrefTable(LongFilePositionType& outWritePosition);
+	EPDFStatusCode WriteXrefTable(LongFilePositionType& outWritePosition);
 
 	// Free Context, for direct stream writing
 	IByteWriterWithPosition* StartFreeContext();
@@ -83,7 +83,7 @@ public:
 	// this context enforces some simple values
 	DictionaryContext* StartDictionary();
 	// ends dictionary context, releases the dictionary started in "StartDictionary", and now returned
-	EStatusCode EndDictionary(DictionaryContext* inDictionaryContext); 
+	EPDFStatusCode EndDictionary(DictionaryContext* inDictionaryContext); 
 
 	// Array writing, currently just writing begin and end brackets
 	void StartArray();
@@ -117,8 +117,8 @@ public:
 	string GenerateSubsetFontPrefix();
 
 
-	EStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
-	EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);
+	EPDFStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
+	EPDFStatusCode ReadState(HummusPDFParser* inStateReader,ObjectIDType inObjectID);
 
 private:
 	IObjectsContextExtender* mExtender;

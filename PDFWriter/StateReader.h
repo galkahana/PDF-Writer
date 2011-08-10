@@ -20,10 +20,10 @@
 */
 #pragma once
 
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "InputFile.h"
 #include "ObjectsBasicTypes.h"
-#include "PDFParser.h"
+#include "HummusPDFParser.h"
 
 #include <string>
 
@@ -35,14 +35,14 @@ public:
 	StateReader(void);
 	~StateReader(void);
 
-	EStatusCode Start(const wstring& inStateFilePath);
-	PDFParser* GetObjectsReader();
+	EPDFStatusCode Start(const wstring& inStateFilePath);
+	HummusPDFParser* GetObjectsReader();
 	ObjectIDType GetRootObjectID();
 	void Finish();
 
 private:
 
-	PDFParser mParser;
+	HummusPDFParser mParser;
 	InputFile mInputFile;
 	ObjectIDType mRootObject;
 };

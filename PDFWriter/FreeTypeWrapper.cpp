@@ -105,7 +105,7 @@ FT_Face FreeTypeWrapper::NewFace(const wstring& inFilePath,FT_Long inFontIndex)
 
 	do
 	{
-		if(FillOpenFaceArgumentsForWideString(inFilePath,openFaceArguments) != eSuccess)
+		if(FillOpenFaceArgumentsForWideString(inFilePath,openFaceArguments) != ePDFSuccess)
 		{
 			face = NULL;
 			break;
@@ -129,7 +129,7 @@ FT_Face FreeTypeWrapper::NewFace(const wstring& inFilePath,FT_Long inFontIndex)
 	return face;
 }
 
-EStatusCode FreeTypeWrapper::FillOpenFaceArgumentsForWideString(const wstring& inFilePath, FT_Open_Args& ioArgs)
+EPDFStatusCode FreeTypeWrapper::FillOpenFaceArgumentsForWideString(const wstring& inFilePath, FT_Open_Args& ioArgs)
 {
 	ioArgs.flags = FT_OPEN_STREAM;
 	ioArgs.memory_base = NULL;
@@ -142,12 +142,12 @@ EStatusCode FreeTypeWrapper::FillOpenFaceArgumentsForWideString(const wstring& i
 	
 	if(ioArgs.stream)
 	{
-		return eSuccess;
+		return ePDFSuccess;
 	}
 	else
 	{
 		TRACE_LOG1("FreeTypeWrapper::FillOpenFaceArgumentsForWideString, Cannot Open file for reading %s",inFilePath);
-		return eFailure;
+		return ePDFFailure;
 	}
 }
 
@@ -178,7 +178,7 @@ FT_Face FreeTypeWrapper::NewFace(const wstring& inFilePath,const wstring& inSeco
 	{
 		do
 		{
-			if(FillOpenFaceArgumentsForWideString(inSecondaryFilePath,attachStreamArguments) != eSuccess)
+			if(FillOpenFaceArgumentsForWideString(inSecondaryFilePath,attachStreamArguments) != ePDFSuccess)
 			{
 				DoneFace(face);
 				face = NULL;
@@ -257,7 +257,7 @@ FT_Stream FreeTypeWrapper::CreateFTStreamForPath(const wstring& inFilePath)
 {
 	InputFile* inputFile = new InputFile;
 
-	if(inputFile->OpenFile(inFilePath) != eSuccess)
+	if(inputFile->OpenFile(inFilePath) != ePDFSuccess)
 		return NULL;
 
 	FT_Stream aStream = new FT_StreamRec();

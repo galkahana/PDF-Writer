@@ -2,7 +2,7 @@
    Source File : TiffSpecialsTest.h
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 #pragma once
 #include "ITestUnit.h"
 
-class PDFWriter;
+class HummusPDFWriter;
 class PDFFormXObject;
 
 class TiffSpecialsTest : public ITestUnit
@@ -30,10 +30,10 @@ public:
 	TiffSpecialsTest(void);
 	virtual ~TiffSpecialsTest(void);
 
-	virtual EStatusCode Run();
+	virtual EPDFStatusCode Run();
 
 private:
-	EStatusCode CreatePageForImageAndRelease(PDFWriter& inPDFWriter,PDFFormXObject* inImageObject);
-	EStatusCode CreateBlackAndWhiteMaskImage(PDFWriter& inPDFWriter);
-	EStatusCode CreateBiLevelGrayScales(PDFWriter& inPDFWriter);
+	EPDFStatusCode CreatePageForImageAndRelease(HummusPDFWriter& inHummusPDFWriter,PDFFormXObject* inImageObject);
+	EPDFStatusCode CreateBlackAndWhiteMaskImage(HummusPDFWriter& inHummusPDFWriter);
+	EPDFStatusCode CreateBiLevelGrayScales(HummusPDFWriter& inHummusPDFWriter);
 };

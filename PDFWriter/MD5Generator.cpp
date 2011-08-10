@@ -89,13 +89,13 @@ MD5Generator::~MD5Generator(void)
 }
 
 
-EStatusCode MD5Generator::Accumulate(const string& inString)
+EPDFStatusCode MD5Generator::Accumulate(const string& inString)
 {
 	if(mIsFinalized)
-		return eFailure;
+		return ePDFFailure;
 
 	Accumulate((const uint1*)inString.c_str(),(unsigned long)inString.length());
-	return eSuccess;
+	return ePDFSuccess;
 
 }
 
@@ -317,10 +317,10 @@ void MD5Generator::II(uint4& a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uin
 }
 
 
-EStatusCode MD5Generator::Accumulate(const wstring& inString)
+EPDFStatusCode MD5Generator::Accumulate(const wstring& inString)
 {
 	if(mIsFinalized)
-		return eFailure;
+		return ePDFFailure;
 
 	uint1* buffer= new uint1[(unsigned long)inString.length()*2];
 	unsigned long index = 0;
@@ -334,7 +334,7 @@ EStatusCode MD5Generator::Accumulate(const wstring& inString)
 	}
 	Accumulate(buffer,index);
 	delete[] buffer;
-	return eSuccess;
+	return ePDFSuccess;
 }
 
 const MD5Generator::uint1 MD5Generator::PADDING[64]={

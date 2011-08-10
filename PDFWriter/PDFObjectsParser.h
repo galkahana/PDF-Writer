@@ -1,5 +1,5 @@
 /*
-   Source File : PDFObjectParser.h
+   Source File : PDFObjectsParser.h
 
 
    Copyright 2011 Gal Kahana PDFWriter
@@ -21,12 +21,12 @@
 #pragma once
 
 #include "PDFParserTokenizer.h"
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "IOBasicTypes.h"
 #include "IReadPositionProvider.h"
 
-#include <string>
 #include <list>
+#include <string>
 #include <utility>
 
 class PDFObject;
@@ -38,11 +38,11 @@ using namespace IOBasicTypes;
 typedef pair<bool,Byte> BoolAndByte;
 typedef list<string> StringList;
 
-class PDFObjectParser
+class PDFObjectsParser
 {
 public:
-	PDFObjectParser(void);
-	~PDFObjectParser(void);
+	PDFObjectsParser(void);
+	~PDFObjectsParser(void);
 
 	
 	// Assign the stream to read from (does not take ownership of the stream)

@@ -39,14 +39,14 @@ public:
 	RefCountPtr(T* inValue);
 
 	// This one will call AddRef
-	RefCountPtr(RefCountPtr<T>& inOtherPtr);
+	RefCountPtr(const RefCountPtr<T>& inOtherPtr);
 
 	// This one calls Release
 	virtual ~RefCountPtr();
 
 	// The next two call AddRef in insert
 	RefCountPtr<T>&  operator =(T* inValue); 
-	RefCountPtr<T>&  operator =(RefCountPtr<T>& inOtherPtr); 
+	RefCountPtr<T>&  operator =(const RefCountPtr<T>& inOtherPtr); 
 
 	// Will return the actual pointer
 	T* operator->();
@@ -80,7 +80,7 @@ RefCountPtr<T>::RefCountPtr(T* inValue)
 }
 
 template <typename T>
-RefCountPtr<T>::RefCountPtr(RefCountPtr<T>& inOtherPtr)
+RefCountPtr<T>::RefCountPtr(const RefCountPtr<T>& inOtherPtr)
 {
 	mValue = inOtherPtr.mValue;
 	if(mValue)
@@ -108,7 +108,7 @@ RefCountPtr<T>&  RefCountPtr<T>::operator =(T* inValue)
 }
 
 template <typename T>
-RefCountPtr<T>&  RefCountPtr<T>::operator =(RefCountPtr<T>& inOtherPtr)
+RefCountPtr<T>&  RefCountPtr<T>::operator =(const RefCountPtr<T>& inOtherPtr)
 {
 	if(mValue)
 		mValue->Release();

@@ -2,7 +2,7 @@
    Source File : FormXObjectTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
    
 */
 #include "FormXObjectTest.h"
-#include "PDFWriter.h"
+#include "HummusPDFWriter.h"
 #include "PDFPage.h"
 #include "PDFRectangle.h"
 #include "PageContentContext.h"
@@ -39,15 +39,15 @@ FormXObjectTest::~FormXObjectTest(void)
 {
 }
 
-EStatusCode FormXObjectTest::Run()
+EPDFStatusCode FormXObjectTest::Run()
 {
-	PDFWriter pdfWriter;
-	EStatusCode status; 
+	HummusPDFWriter pdfWriter;
+	EPDFStatusCode status; 
 
 	do
 	{
 		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\XObjectContent.PDF",ePDFVersion13);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to start PDF\n";
 			break;
@@ -59,7 +59,7 @@ EStatusCode FormXObjectTest::Run()
 		PageContentContext* pageContentContext = pdfWriter.StartPageContentContext(page);
 		if(NULL == pageContentContext)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			wcout<<"failed to create content context for page\n";
 		}
 
@@ -72,7 +72,7 @@ EStatusCode FormXObjectTest::Run()
 
 		// pause stream to start writing a form xobject
 		status = pdfWriter.PausePageContentContext(pageContentContext);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to pause page content context\n";
 			break;
@@ -90,7 +90,7 @@ EStatusCode FormXObjectTest::Run()
 		xobjectContentContext->Q();
 
 		status = pdfWriter.EndFormXObjectAndRelease(xobjectForm);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to write XObject form\n";
 			break;
@@ -120,14 +120,14 @@ EStatusCode FormXObjectTest::Run()
 		pageContentContext->Q();
 
 		status = pdfWriter.EndPageContentContext(pageContentContext);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to write page\n";
 			break;
@@ -140,7 +140,7 @@ EStatusCode FormXObjectTest::Run()
 		pageContentContext = pdfWriter.StartPageContentContext(page);
 		if(NULL == pageContentContext)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			wcout<<"failed to create content context for 2nd page\n";
 		}
 		
@@ -153,21 +153,21 @@ EStatusCode FormXObjectTest::Run()
 		pageContentContext->Q();
 
 		status = pdfWriter.EndPageContentContext(pageContentContext);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to end 2nd page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to write 2nd page\n";
 			break;
 		}
 
 		status = pdfWriter.EndPDF();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed in end PDF\n";
 			break;

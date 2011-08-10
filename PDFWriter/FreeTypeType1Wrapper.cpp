@@ -41,7 +41,7 @@ FreeTypeType1Wrapper::FreeTypeType1Wrapper(FT_Face inFace,const wstring& inPFMFi
 		mPSPrivateAvailable = true; 
 
 	mPFMFileInfoRelevant = 
-		(inPFMFilePath.size() != 0 && mPFMReader.Read(inPFMFilePath) != eFailure);
+		(inPFMFilePath.size() != 0 && mPFMReader.Read(inPFMFilePath) != ePDFFailure);
 }
 
 FreeTypeType1Wrapper::~FreeTypeType1Wrapper(void)

@@ -2,7 +2,7 @@
    Source File : ImagesAndFormsForwardReferenceTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 */
 #include "ImagesAndFormsForwardReferenceTest.h"
 #include "TestsRunner.h"
-#include "PDFWriter.h"
+#include "HummusPDFWriter.h"
 #include "PDFImageXObject.h"
 #include "PDFPage.h"
 #include "PageContentContext.h"
@@ -42,16 +42,16 @@ ImagesAndFormsForwardReferenceTest::~ImagesAndFormsForwardReferenceTest(void)
 {
 }
 
-EStatusCode ImagesAndFormsForwardReferenceTest::Run()
+EPDFStatusCode ImagesAndFormsForwardReferenceTest::Run()
 {
-	PDFWriter pdfWriter;
-	EStatusCode status; 
+	HummusPDFWriter pdfWriter;
+	EPDFStatusCode status; 
 
 	do
 	{
 
 		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\ImagesAndFormsForwardReferenceTest.PDF",ePDFVersion13);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to start PDF\n";
 			break;
@@ -63,7 +63,7 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 		PageContentContext* pageContentContext = pdfWriter.StartPageContentContext(page);
 		if(NULL == pageContentContext)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			wcout<<"failed to create content context for page\n";
 		}
 
@@ -102,14 +102,14 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 		pageContentContext->Q();
 
 		status = pdfWriter.EndPageContentContext(pageContentContext);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to write page\n";
 			break;
@@ -121,7 +121,7 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 		if(!imageXObject)
 		{
 			wcout<<"failed to create image XObject from file\n";
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -130,7 +130,7 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 		if(!formXObject)
 		{
 			wcout<<"failed to create form XObject from file\n";
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -138,7 +138,7 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 		if(!tiffFormXObject)
 		{
 			wcout<<"failed to create image form XObject from file, for file\n";
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -159,7 +159,7 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 		xobjectContentContext->Q();
 
 		status = pdfWriter.EndFormXObjectAndRelease(xobjectForm);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to write XObject form\n";
 			break;
@@ -167,7 +167,7 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 
 
 		status = pdfWriter.EndPDF();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed in end PDF\n";
 			break;

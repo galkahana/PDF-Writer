@@ -38,14 +38,14 @@ StateWriter::~StateWriter(void)
 }
 
 
-EStatusCode StateWriter::Start(const wstring& inStateFilePath)
+EPDFStatusCode StateWriter::Start(const wstring& inStateFilePath)
 {
 
 	// open the new file...
-	if(mOutputFile.OpenFile(inStateFilePath) != eSuccess)
+	if(mOutputFile.OpenFile(inStateFilePath) != ePDFSuccess)
 	{
 		TRACE_LOG1("StateWriter::Start, can't open file for state writing in %s",inStateFilePath.c_str());
-		return eFailure;
+		return ePDFFailure;
 	}
 	
 	// Get me a new copy of objects context, for this session
@@ -59,7 +59,7 @@ EStatusCode StateWriter::Start(const wstring& inStateFilePath)
 	// Reset the root object
 	mRootObject = 0;
 
-	return eSuccess;
+	return ePDFSuccess;
 }
 
 ObjectsContext* StateWriter::GetObjectsWriter()
@@ -67,9 +67,9 @@ ObjectsContext* StateWriter::GetObjectsWriter()
 	return mObjectsContext;
 }
 
-EStatusCode StateWriter::Finish()
+EPDFStatusCode StateWriter::Finish()
 {
-	EStatusCode status;
+	EPDFStatusCode status;
 	do
 	{
 		LongFilePositionType xrefTablePosition;
@@ -85,7 +85,7 @@ EStatusCode StateWriter::Finish()
 
 	} while(false);
 		
-	if(eSuccess == status)
+	if(ePDFSuccess == status)
 		status = mOutputFile.CloseFile();
 	else
 		mOutputFile.CloseFile();

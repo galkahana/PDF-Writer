@@ -35,11 +35,11 @@ Type1ToType2Converter::~Type1ToType2Converter(void)
 {
 }
 
-EStatusCode Type1ToType2Converter::WriteConvertedFontProgram(const string& inGlyphName,
+EPDFStatusCode Type1ToType2Converter::WriteConvertedFontProgram(const string& inGlyphName,
 															 Type1Input* inType1Input,
 															 IByteWriter* inByteWriter)
 {
-	EStatusCode status;
+	EPDFStatusCode status;
 
 	do
 	{
@@ -57,12 +57,12 @@ EStatusCode Type1ToType2Converter::WriteConvertedFontProgram(const string& inGly
 		if(!charString)
 		{
 			TRACE_LOG1("Type1ToType2Converter::WriteConvertedFontProgram, Exception, cannot find glyph name %s",inGlyphName.c_str());
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
 		status = interpreter.Intepret(*charString,this);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("Type1ToType2Converter::WriteConvertedFontProgram, Exception, failed to interpret glyph");
 			break;
@@ -79,7 +79,7 @@ EStatusCode Type1ToType2Converter::WriteConvertedFontProgram(const string& inGly
 		AddInitialWidthParameter();
 
 		status = WriteProgramToStream(inByteWriter);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("Type1ToType2Converter::WriteConvertedFontProgram, Exception, can't write program to target stream");
 			break;
@@ -124,7 +124,7 @@ unsigned long Type1ToType2Converter::GetLenIV()
 	return mHelper->GetLenIV();
 }
 
-EStatusCode Type1ToType2Converter::CallOtherSubr(const LongList& inOperandList,LongList& outPostScriptOperandStack)
+EPDFStatusCode Type1ToType2Converter::CallOtherSubr(const LongList& inOperandList,LongList& outPostScriptOperandStack)
 {
 	// should get here onther for 0 othersubr, to mark flex segment end. implement it...and also insert a node
 	// for flex
@@ -147,7 +147,7 @@ EStatusCode Type1ToType2Converter::CallOtherSubr(const LongList& inOperandList,L
 	}
 
 	// now finalize flex, by placing a type 2 flex command
-	EStatusCode status = RecordOperatorWithParameters(0x0c23,mFlexParameters);
+	EPDFStatusCode status = RecordOperatorWithParameters(0x0c23,mFlexParameters);
 
 	// cleanup flex mode
 	mFlexParameters.clear();
@@ -156,12 +156,12 @@ EStatusCode Type1ToType2Converter::CallOtherSubr(const LongList& inOperandList,L
 }
 
 
-EStatusCode Type1ToType2Converter::Type1Pop(const LongList& inOperandList,const LongList& inPostScriptOperandStack){return eSuccess;}
-EStatusCode Type1ToType2Converter::Type1SetCurrentPoint(const LongList& inOperandList){return eSuccess;}
-EStatusCode Type1ToType2Converter::Type1InterpretNumber(long inOperand){return eSuccess;}
-EStatusCode Type1ToType2Converter::Type1Div(const LongList& inOperandList){return eSuccess;}
-EStatusCode Type1ToType2Converter::Type1DotSection(const LongList& inOperandList){return eSuccess;}
-EStatusCode Type1ToType2Converter::Type1Return(const LongList& inOperandList){return eSuccess;}
+EPDFStatusCode Type1ToType2Converter::Type1Pop(const LongList& inOperandList,const LongList& inPostScriptOperandStack){return ePDFSuccess;}
+EPDFStatusCode Type1ToType2Converter::Type1SetCurrentPoint(const LongList& inOperandList){return ePDFSuccess;}
+EPDFStatusCode Type1ToType2Converter::Type1InterpretNumber(long inOperand){return ePDFSuccess;}
+EPDFStatusCode Type1ToType2Converter::Type1Div(const LongList& inOperandList){return ePDFSuccess;}
+EPDFStatusCode Type1ToType2Converter::Type1DotSection(const LongList& inOperandList){return ePDFSuccess;}
+EPDFStatusCode Type1ToType2Converter::Type1Return(const LongList& inOperandList){return ePDFSuccess;}
 
 void Type1ToType2Converter::RecordOperatorMarker(unsigned short inMarkerType)
 {
@@ -170,10 +170,10 @@ void Type1ToType2Converter::RecordOperatorMarker(unsigned short inMarkerType)
 	mConversionProgram.back().mMarkerType = inMarkerType;
 }
 
-EStatusCode Type1ToType2Converter::Type1Hsbw(const LongList& inOperandList)
+EPDFStatusCode Type1ToType2Converter::Type1Hsbw(const LongList& inOperandList)
 {
 	if(inOperandList.size() < 2)
-		return eFailure;
+		return ePDFFailure;
 
 	LongList::const_reverse_iterator it = inOperandList.rbegin();
 
@@ -182,13 +182,13 @@ EStatusCode Type1ToType2Converter::Type1Hsbw(const LongList& inOperandList)
 	++it;
 	mSideBearing[1] = 0;
 	mSideBearing[0] = *it;
-	return eSuccess;
+	return ePDFSuccess;
 }
 
-EStatusCode Type1ToType2Converter::Type1Sbw(const LongList& inOperandList)
+EPDFStatusCode Type1ToType2Converter::Type1Sbw(const LongList& inOperandList)
 {
 	if(inOperandList.size() < 4)
-		return eFailure;
+		return ePDFFailure;
 
 	LongList::const_reverse_iterator it = inOperandList.rbegin();
 
@@ -199,10 +199,10 @@ EStatusCode Type1ToType2Converter::Type1Sbw(const LongList& inOperandList)
 	mSideBearing[1] = *it;
 	++it;
 	mSideBearing[0] = *it;
-	return eSuccess;
+	return ePDFSuccess;
 }
 
-EStatusCode Type1ToType2Converter::Type1Hstem(const LongList& inOperandList)
+EPDFStatusCode Type1ToType2Converter::Type1Hstem(const LongList& inOperandList)
 {
 	LongList::const_reverse_iterator it = inOperandList.rbegin();
 
@@ -215,7 +215,7 @@ EStatusCode Type1ToType2Converter::Type1Hstem(const LongList& inOperandList)
 	return RecordOperatorWithParameters(1,inOperandList);
 }
 
-EStatusCode Type1ToType2Converter::AddHStem(long inOrigin,long inExtent)
+EPDFStatusCode Type1ToType2Converter::AddHStem(long inOrigin,long inExtent)
 {
 	Stem aStem(inOrigin,inExtent);
 	StemToSizeTMap::iterator it = mHStems.find(aStem);
@@ -225,10 +225,10 @@ EStatusCode Type1ToType2Converter::AddHStem(long inOrigin,long inExtent)
 		it = mHStems.insert(StemToSizeTMap::value_type(aStem,0)).first;
 		mOrderedHStems.push_back(it->first);
 	}
-	return eSuccess;
+	return ePDFSuccess;
 }
 
-EStatusCode Type1ToType2Converter::AddVStem(long inOrigin,long inExtent)
+EPDFStatusCode Type1ToType2Converter::AddVStem(long inOrigin,long inExtent)
 {
 	Stem aStem(inOrigin,inExtent);
 	StemToSizeTMap::iterator it = mVStems.find(aStem);
@@ -238,20 +238,20 @@ EStatusCode Type1ToType2Converter::AddVStem(long inOrigin,long inExtent)
 		it = mVStems.insert(StemToSizeTMap::value_type(aStem,0)).first;
 		mOrderedVStems.push_back(it->first);
 	}
-	return eSuccess;
+	return ePDFSuccess;
 }
 
-EStatusCode Type1ToType2Converter::RecordOperatorWithParameters(unsigned short inMarkerType,const LongList& inOperandList)
+EPDFStatusCode Type1ToType2Converter::RecordOperatorWithParameters(unsigned short inMarkerType,const LongList& inOperandList)
 {
 	ConversionNode node;
 	mConversionProgram.push_back(node);
 	mConversionProgram.back().mMarkerType = inMarkerType;
 	mConversionProgram.back().mOperands = inOperandList;
-	return eSuccess;
+	return ePDFSuccess;
 }
 
 
-EStatusCode Type1ToType2Converter::Type1Vstem(const LongList& inOperandList)
+EPDFStatusCode Type1ToType2Converter::Type1Vstem(const LongList& inOperandList)
 {
 	LongList::const_reverse_iterator it = inOperandList.rbegin();
 
@@ -264,7 +264,7 @@ EStatusCode Type1ToType2Converter::Type1Vstem(const LongList& inOperandList)
 	return RecordOperatorWithParameters(3,inOperandList);
 }
 
-EStatusCode Type1ToType2Converter::Type1VStem3(const LongList& inOperandList)
+EPDFStatusCode Type1ToType2Converter::Type1VStem3(const LongList& inOperandList)
 {
 	LongList::const_reverse_iterator it = inOperandList.rbegin();
 
@@ -287,7 +287,7 @@ EStatusCode Type1ToType2Converter::Type1VStem3(const LongList& inOperandList)
 	return RecordOperatorWithParameters(0x0c01,inOperandList);
 }
 
-EStatusCode Type1ToType2Converter::Type1HStem3(const LongList& inOperandList)
+EPDFStatusCode Type1ToType2Converter::Type1HStem3(const LongList& inOperandList)
 {
 	LongList::const_reverse_iterator it = inOperandList.rbegin();
 
@@ -310,13 +310,13 @@ EStatusCode Type1ToType2Converter::Type1HStem3(const LongList& inOperandList)
 	return RecordOperatorWithParameters(0x0c02,inOperandList);
 }
 
-EStatusCode Type1ToType2Converter::Type1VMoveto(const LongList& inOperandList)
+EPDFStatusCode Type1ToType2Converter::Type1VMoveto(const LongList& inOperandList)
 {
 	mFirstPathConstructionEncountered = true;
 	return RecordOperatorWithParameters(4,inOperandList);
 }
 
-EStatusCode Type1ToType2Converter::Type1RMoveto(const LongList& inOperandList)
+EPDFStatusCode Type1ToType2Converter::Type1RMoveto(const LongList& inOperandList)
 {
 	mFirstPathConstructionEncountered = true;
 	if(mInFlexCollectionMode)
@@ -340,7 +340,7 @@ EStatusCode Type1ToType2Converter::Type1RMoveto(const LongList& inOperandList)
 			++it;
 			mFlexParameters.push_back(*it);
 		}
-		return eSuccess;
+		return ePDFSuccess;
 	}
 	else
 	{
@@ -348,61 +348,61 @@ EStatusCode Type1ToType2Converter::Type1RMoveto(const LongList& inOperandList)
 	}
 }
 
-EStatusCode Type1ToType2Converter::Type1HMoveto(const LongList& inOperandList)
+EPDFStatusCode Type1ToType2Converter::Type1HMoveto(const LongList& inOperandList)
 {
 	mFirstPathConstructionEncountered = true;
 	return RecordOperatorWithParameters(22,inOperandList);
 }
 
-EStatusCode Type1ToType2Converter::Type1RLineto(const LongList& inOperandList)
+EPDFStatusCode Type1ToType2Converter::Type1RLineto(const LongList& inOperandList)
 {
 	mFirstPathConstructionEncountered = true;
 	return RecordOperatorWithParameters(5,inOperandList);
 }
 
-EStatusCode Type1ToType2Converter::Type1HLineto(const LongList& inOperandList)
+EPDFStatusCode Type1ToType2Converter::Type1HLineto(const LongList& inOperandList)
 {
 	mFirstPathConstructionEncountered = true;
 	return RecordOperatorWithParameters(6,inOperandList);
 }
 
-EStatusCode Type1ToType2Converter::Type1VLineto(const LongList& inOperandList)
+EPDFStatusCode Type1ToType2Converter::Type1VLineto(const LongList& inOperandList)
 {
 	mFirstPathConstructionEncountered = true;
 	return RecordOperatorWithParameters(7,inOperandList);
 }
 
-EStatusCode Type1ToType2Converter::Type1RRCurveto(const LongList& inOperandList)
+EPDFStatusCode Type1ToType2Converter::Type1RRCurveto(const LongList& inOperandList)
 {
 	mFirstPathConstructionEncountered = true;
 	return RecordOperatorWithParameters(8,inOperandList);
 }
 
-EStatusCode Type1ToType2Converter::Type1VHCurveto(const LongList& inOperandList)
+EPDFStatusCode Type1ToType2Converter::Type1VHCurveto(const LongList& inOperandList)
 {
 	mFirstPathConstructionEncountered = true;
 	return RecordOperatorWithParameters(30,inOperandList);
 }
 
-EStatusCode Type1ToType2Converter::Type1HVCurveto(const LongList& inOperandList)
+EPDFStatusCode Type1ToType2Converter::Type1HVCurveto(const LongList& inOperandList)
 {
 	mFirstPathConstructionEncountered = true;
 	return RecordOperatorWithParameters(31,inOperandList);
 }
 
-EStatusCode Type1ToType2Converter::Type1ClosePath(const LongList& inOperandList)
+EPDFStatusCode Type1ToType2Converter::Type1ClosePath(const LongList& inOperandList)
 {
 	// IMPORTANT - apparently closepath was removed for type 2. didn't notice it till now
-	return eSuccess;	
+	return ePDFSuccess;	
 }
 
-EStatusCode Type1ToType2Converter::Type1Endchar(const LongList& inOperandList)
+EPDFStatusCode Type1ToType2Converter::Type1Endchar(const LongList& inOperandList)
 {
 	RecordOperatorMarker(14);
-	return eSuccess;	
+	return ePDFSuccess;	
 }
 
-EStatusCode Type1ToType2Converter::Type1Seac(const LongList& inOperandList)
+EPDFStatusCode Type1ToType2Converter::Type1Seac(const LongList& inOperandList)
 {
 	// le'ts convert it already to the final EndChar...and stop any later recording
 	
@@ -912,14 +912,14 @@ void Type1ToType2Converter::AddInitialWidthParameter()
 	}
 }
 
-EStatusCode Type1ToType2Converter::WriteProgramToStream(IByteWriter* inByteWriter)
+EPDFStatusCode Type1ToType2Converter::WriteProgramToStream(IByteWriter* inByteWriter)
 {
 	Type2CharStringWriter commandWriter(inByteWriter);
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	ConversionNodeList::iterator it = mConversionProgram.begin();
 
-	for(; it != mConversionProgram.end() && eSuccess == status; ++it)
+	for(; it != mConversionProgram.end() && ePDFSuccess == status; ++it)
 	{
 		LongList::iterator itOperands = it->mOperands.begin();
 		
@@ -929,10 +929,10 @@ EStatusCode Type1ToType2Converter::WriteProgramToStream(IByteWriter* inByteWrite
 		}
 		else
 		{
-			for(; itOperands != it->mOperands.end() && eSuccess == status;++itOperands)
+			for(; itOperands != it->mOperands.end() && ePDFSuccess == status;++itOperands)
 				status = commandWriter.WriteIntegerOperand(*itOperands);
 			
-			if(eSuccess == status)
+			if(ePDFSuccess == status)
 			{
 				// if marker type is vstemhm, and next one is hintmask, no need to write vstemhm
 				if(23 == it->mMarkerType)

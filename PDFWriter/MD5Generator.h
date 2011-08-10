@@ -65,7 +65,7 @@
 */
 #pragma once
 
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include <string>
 
 using namespace std;
@@ -76,8 +76,8 @@ public:
 	MD5Generator(void);
 	~MD5Generator(void);
 
-	EStatusCode Accumulate(const string& inString);
-	EStatusCode Accumulate(const wstring& inString);
+	EPDFStatusCode Accumulate(const string& inString);
+	EPDFStatusCode Accumulate(const wstring& inString);
 
 	string ToString();
 

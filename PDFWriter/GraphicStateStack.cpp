@@ -38,17 +38,17 @@ void GraphicStateStack::Push()
 	mGraphicStateStack.push_back(newState);
 }
 
-EStatusCode GraphicStateStack::Pop()
+EPDFStatusCode GraphicStateStack::Pop()
 {
 	if(mGraphicStateStack.size() == 1)
 	{
 		TRACE_LOG("GraphicStateStack::Pop, exception. stack underflow, reached to the initial state");
-		return eFailure;
+		return ePDFFailure;
 	}
 	else
 	{
 		mGraphicStateStack.pop_back();
-		return eSuccess;
+		return ePDFSuccess;
 	}
 }
 

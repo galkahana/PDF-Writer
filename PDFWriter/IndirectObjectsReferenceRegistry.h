@@ -25,7 +25,7 @@
 	2. It maintains file writing information, such as whether the object was written and if so at what position
 */
 
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "ObjectsBasicTypes.h"
 #include "IOBasicTypes.h"
 #include <vector>
@@ -34,7 +34,7 @@
 using namespace IOBasicTypes;
 
 class ObjectsContext;
-class PDFParser;
+class HummusPDFParser;
 
 struct ObjectWriteInformation
 {
@@ -62,15 +62,15 @@ public:
 
 	ObjectIDType AllocateNewObjectID();
 	
-	EStatusCode MarkObjectAsWritten(ObjectIDType inObjectID,LongFilePositionType inWritePosition);
+	EPDFStatusCode MarkObjectAsWritten(ObjectIDType inObjectID,LongFilePositionType inWritePosition);
 	GetObjectWriteInformationResult GetObjectWriteInformation(ObjectIDType inObjectID) const;
 
 	ObjectIDType GetObjectsCount() const;
 	// should be used with safe object IDs. use GetObjectsCount to verify the maximum ID
 	const ObjectWriteInformation& GetNthObjectReference(ObjectIDType inObjectID) const; 
 
-	EStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
-	EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);
+	EPDFStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
+	EPDFStatusCode ReadState(HummusPDFParser* inStateReader,ObjectIDType inObjectID);
 
 private:
 	ObjectWriteInformationVector mObjectsWritesRegistry;

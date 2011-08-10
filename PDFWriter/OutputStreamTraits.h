@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "IOBasicTypes.h"
 
 class IByteWriter;
@@ -35,8 +35,8 @@ public:
 	~OutputStreamTraits(void);
 
 
-	EStatusCode CopyToOutputStream(IByteReader* inInputStream);	
-	EStatusCode CopyToOutputStream(IByteReader* inInputStream,LongBufferSizeType inLength);	
+	EPDFStatusCode CopyToOutputStream(IByteReader* inInputStream);	
+	EPDFStatusCode CopyToOutputStream(IByteReader* inInputStream,LongBufferSizeType inLength);	
 
 private:
 

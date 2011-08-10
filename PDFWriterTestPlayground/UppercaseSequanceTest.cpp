@@ -2,7 +2,7 @@
    Source File : UppercaseSequanceTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -32,9 +32,9 @@ UppercaseSequanceTest::~UppercaseSequanceTest(void)
 {
 }
 
-EStatusCode UppercaseSequanceTest::Run()
+EPDFStatusCode UppercaseSequanceTest::Run()
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	UppercaseSequance sequance;
 
 	do
@@ -43,7 +43,7 @@ EStatusCode UppercaseSequanceTest::Run()
 		if(value != "AAAAAB")
 		{
 			wcout<<"Failed in single increase. value is  "<<value.c_str()<<". should be AAAAAB\n";
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 		else
@@ -56,7 +56,7 @@ EStatusCode UppercaseSequanceTest::Run()
 		if(value != "AAAABA")
 		{
 			wcout<<"Failed in 24 increase. value is  "<<value.c_str()<<". should be AAAABA\n";
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 		else
@@ -69,7 +69,7 @@ EStatusCode UppercaseSequanceTest::Run()
 		if(value != "AAABAA")
 		{
 			wcout<<"Failed in 26*25 increase. value is  "<<value.c_str()<<". should be AAABAA\n";
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 		else

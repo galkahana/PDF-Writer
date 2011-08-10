@@ -25,7 +25,7 @@
 	more trivial, not requiring to keep track on which area one's in.
 */
 
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "IByteReader.h"
 
 #include <utility>
@@ -36,7 +36,7 @@ using namespace IOBasicTypes;
 
 class InputPFBDecodeStream;
 
-typedef EStatusCode (*DecodeMethod)(
+typedef EPDFStatusCode (*DecodeMethod)(
 	InputPFBDecodeStream* inThis,
 	Byte& outByte 
  );
@@ -51,7 +51,7 @@ public:
 
 	// Assign will set the stream to decode. it also takes ownership of the stream. if you
 	// don't want the ownership make sure to Assign(NULL) when done using the decoder.
-	EStatusCode Assign(IByteReader* inStreamToDecode);
+	EPDFStatusCode Assign(IByteReader* inStreamToDecode);
 	
 	// IByteReader implementation
 	virtual LongBufferSizeType Read(Byte* inBuffer,LongBufferSizeType inBufferSize);
@@ -68,11 +68,11 @@ public:
 	// will stop tokenizer as well
 	void SkipTillToken();
 
-	EStatusCode GetInternalState();
+	EPDFStatusCode GetInternalState();
 
 	// internal usage.
-	EStatusCode ReadDecodedByte(Byte& outByte);
-	EStatusCode ReadRegularByte(Byte& outByte);
+	EPDFStatusCode ReadDecodedByte(Byte& outByte);
+	EPDFStatusCode ReadRegularByte(Byte& outByte);
 
 private:
 	IByteReader* mStreamToDecode;
@@ -86,20 +86,20 @@ private:
 	bool mFoundEOF;
 	
 	// error flag. if set, will not allow further reading
-	EStatusCode mInternalState; 
+	EPDFStatusCode mInternalState; 
 
 	// Starts reading a stream segment, to receive the type and length of the segment
-	EStatusCode InitializeStreamSegment();
+	EPDFStatusCode InitializeStreamSegment();
 	void ResetReadStatus();
-	EStatusCode StoreSegmentLength();
-	EStatusCode FlushBinarySectionTrailingCode();
+	EPDFStatusCode StoreSegmentLength();
+	EPDFStatusCode FlushBinarySectionTrailingCode();
 	bool IsPostScriptWhiteSpace(Byte inCharacter);
 	bool IsSegmentNotEnded();
 	void SaveTokenBuffer(Byte inToSave);
 	bool IsPostScriptEntityBreaker(Byte inCharacter);
-	EStatusCode InitializeBinaryDecode();
+	EPDFStatusCode InitializeBinaryDecode();
 	Byte DecodeByte(Byte inByteToDecode);
 
-	EStatusCode GetNextByteForToken(Byte& outByte);
+	EPDFStatusCode GetNextByteForToken(Byte& outByte);
 
 };

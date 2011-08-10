@@ -19,7 +19,7 @@
    
 */
 #pragma once
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "ObjectsBasicTypes.h"
 
 #include <list>
@@ -33,11 +33,11 @@ using namespace std;
 typedef pair<unsigned long,unsigned long> ULongAndULong;
 typedef list<ULongAndULong> ULongAndULongList;
 typedef list<PDFFormXObject*> PDFFormXObjectList;
-typedef pair<EStatusCode,PDFFormXObjectList> EStatusCodeAndPDFFormXObjectList;
+typedef pair<EPDFStatusCode,PDFFormXObjectList> EPDFStatusCodeAndPDFFormXObjectList;
 
 typedef list<ObjectIDType> ObjectIDTypeList;
-typedef pair<EStatusCode,ObjectIDTypeList> EStatusCodeAndObjectIDTypeList;
-typedef pair<EStatusCode,ObjectIDType> EStatusCodeAndObjectIDType;
+typedef pair<EPDFStatusCode,ObjectIDTypeList> EPDFStatusCodeAndObjectIDTypeList;
+typedef pair<EPDFStatusCode,ObjectIDType> EPDFStatusCodeAndObjectIDType;
 
 /*
 	PDFPageRange is to be used as a method to select pages ranges. quite simply it's either "All" or "Specific".

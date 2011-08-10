@@ -1,8 +1,8 @@
 /*
-   Source File : PDFParserTest.cpp
+   Source File : HummusPDFParserTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
    
 */
-#include "PDFParserTest.h"
+#include "HummusPDFParserTest.h"
 #include "HummusPDFParser.h"
 #include "InputFile.h"
 #include "PDFObject.h"
@@ -36,15 +36,15 @@
 
 using namespace std;
 
-PDFParserTest::PDFParserTest(void)
+HummusPDFParserTest::HummusPDFParserTest(void)
 {
 }
 
-PDFParserTest::~PDFParserTest(void)
+HummusPDFParserTest::~HummusPDFParserTest(void)
 {
 }
 
-EPDFStatusCode PDFParserTest::Run()
+EPDFStatusCode HummusPDFParserTest::Run()
 {
 	EPDFStatusCode status = ePDFSuccess;
 	InputFile pdfFile;
@@ -54,6 +54,7 @@ EPDFStatusCode PDFParserTest::Run()
 	do
 	{
 		status = pdfFile.OpenFile(L"C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF");
+		//status = pdfFile.OpenFile(L"c:\\temp\\doags.pdf");
 		if(status != ePDFSuccess)
 		{
 			wcout<<"unable to open file for reading. should be in C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF\n";
@@ -93,7 +94,7 @@ EPDFStatusCode PDFParserTest::Run()
 		}
 
 		mTabLevel = 0;
-		status = outputFile.OpenFile(L"C:\\PDFLibTests\\PDFParserTestOutput.txt");
+		status = outputFile.OpenFile(L"C:\\PDFLibTests\\HummusPDFParserTestOutput.txt");
 
 		status = IterateObjectTypes(catalog.GetPtr(),parser,outputFile.GetOutputStream());
 		if(status != ePDFSuccess)
@@ -111,7 +112,7 @@ static const char* scIndirectStart = "Indirect object reference:\r\n";
 static const char* scParsedAlready = "was parsed already\r\n";
 static const char* scIteratingStreamDict = "Stream . iterating stream dictionary:\r\n";
 
-EPDFStatusCode PDFParserTest::IterateObjectTypes(PDFObject* inObject,HummusPDFParser& inParser,IByteWriter* inOutput)
+EPDFStatusCode HummusPDFParserTest::IterateObjectTypes(PDFObject* inObject,HummusPDFParser& inParser,IByteWriter* inOutput)
 {
 	PrimitiveObjectsWriter primitivesWriter;
 
@@ -189,4 +190,4 @@ EPDFStatusCode PDFParserTest::IterateObjectTypes(PDFObject* inObject,HummusPDFPa
 	
 }
 
-ADD_CATEGORIZED_TEST(PDFParserTest,"PDFEmbedding")
+ADD_CATEGORIZED_TEST(HummusPDFParserTest,"PDFEmbedding")

@@ -35,7 +35,7 @@ public:
 	CharStringType2Interpreter(void);
 	~CharStringType2Interpreter(void);
 
-	EStatusCode Intepret(const CharString& inCharStringToIntepret, IType2InterpreterImplementation* inImplementationHelper);
+	EPDFStatusCode Intepret(const CharString& inCharStringToIntepret, IType2InterpreterImplementation* inImplementationHelper);
 
 
 private:
@@ -47,12 +47,12 @@ private:
 	bool mCheckedWidth;
 
 
-	EStatusCode ProcessCharString(Byte* inCharString,LongFilePositionType inCharStringLength);
+	EPDFStatusCode ProcessCharString(Byte* inCharString,LongFilePositionType inCharStringLength);
 	bool IsOperator(Byte* inProgramCounter);
 	Byte* InterpretNumber(Byte* inProgramCounter);
 	Byte* InterpretOperator(Byte* inProgramCounter,bool& outGotEndExecutionCommand);
 
-	EStatusCode ClearNFromStack(unsigned short inCount);
+	EPDFStatusCode ClearNFromStack(unsigned short inCount);
 	void ClearStack();
 	void CheckWidth();
 

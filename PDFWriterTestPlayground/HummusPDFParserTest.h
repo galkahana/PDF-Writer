@@ -1,5 +1,5 @@
 /*
-   Source File : OpenTypeTest.h
+   Source File : HummusPDFParserTest.h
 
 
    Copyright 2011 Gal Kahana HummusPDFWriter
@@ -19,19 +19,31 @@
    
 */
 #pragma once
-#include "ITestUnit.h"
-#include "CFFFileInput.h"
 
-class OpenTypeTest : public ITestUnit
+#include "TestsRunner.h"
+#include "ObjectsBasicTypes.h"
+
+
+#include <set>
+
+class PDFObject;
+class HummusPDFParser;
+class IByteWriter;
+
+typedef set<ObjectIDType> ObjectIDTypeSet;
+
+class HummusPDFParserTest : public ITestUnit
 {
 public:
-	OpenTypeTest(void);
-	~OpenTypeTest(void);
+	HummusPDFParserTest(void);
+	virtual ~HummusPDFParserTest(void);
 
 	virtual EPDFStatusCode Run();
 
 private:
-	EPDFStatusCode SaveCharstringCode(unsigned short inFontIndex,unsigned short inGlyphIndex,CFFFileInput* inCFFFileInput);
-	EPDFStatusCode TestFont();
 
+	EPDFStatusCode IterateObjectTypes(PDFObject* inObject,HummusPDFParser& inParser,IByteWriter* inOutput);
+
+	int mTabLevel;
+	ObjectIDTypeSet mIteratedObjectIDs;
 };

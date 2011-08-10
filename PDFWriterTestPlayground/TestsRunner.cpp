@@ -2,7 +2,7 @@
    Source File : TestsRunner.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ void TestsRunner::DeleteTests()
 	mTests.clear();
 }
 
-EStatusCode TestsRunner::RunAll()
+EPDFStatusCode TestsRunner::RunAll()
 {
 	WStringAndTestUnitList testsList;
 	WStringToTestUnitMap::iterator it = mTestsByName.begin();
@@ -54,14 +54,14 @@ EStatusCode TestsRunner::RunAll()
 	return RunTestsInList(testsList);
 }
 
-EStatusCode TestsRunner::RunTestsInList(const WStringAndTestUnitList& inTests)
+EPDFStatusCode TestsRunner::RunTestsInList(const WStringAndTestUnitList& inTests)
 {
-	EStatusCode testsStatus;
+	EPDFStatusCode testsStatus;
 
 	if(inTests.size() == 0)
 	{
 		wcout<<L"No tests to run\n";
-		testsStatus = eSuccess;
+		testsStatus = ePDFSuccess;
 	}
 	else if(inTests.size() == 1)
 	{
@@ -71,17 +71,17 @@ EStatusCode TestsRunner::RunTestsInList(const WStringAndTestUnitList& inTests)
 	{
 		unsigned long failedCount = 0,succeededCount = 0;
 		WStringAndTestUnitList::const_iterator it = inTests.begin();
-		EStatusCode testStatus;
-		testsStatus = eSuccess;
+		EPDFStatusCode testStatus;
+		testsStatus = ePDFSuccess;
 
 		wcout<<L"Start tests run\n";
 		for(;it!= inTests.end();++it)
 		{
 			testStatus = RunSingleTest(it->first,it->second);
-			if(eFailure == testStatus)
+			if(ePDFFailure == testStatus)
 			{
 				++failedCount;
-				testsStatus = eFailure;
+				testsStatus = ePDFFailure;
 			}
 			else
 			{
@@ -94,13 +94,13 @@ EStatusCode TestsRunner::RunTestsInList(const WStringAndTestUnitList& inTests)
 	return testsStatus;
 }
 
-EStatusCode TestsRunner::RunSingleTest(const wstring& inTestName,ITestUnit* inTest)
+EPDFStatusCode TestsRunner::RunSingleTest(const wstring& inTestName,ITestUnit* inTest)
 {
-	EStatusCode testStatus;
+	EPDFStatusCode testStatus;
 	
 	wcout<<L"Running Test "<<inTestName<<L"\n";
 	testStatus = inTest->Run();
-	if(eFailure == testStatus)
+	if(ePDFFailure == testStatus)
 		wcout<<L"Test "<<inTestName<<L" Failed\n\n";
 	else
 		wcout<<L"Test "<<inTestName<<L" Succeeded\n\n";
@@ -123,20 +123,20 @@ void TestsRunner::AddTest(const wstring& inTestLabel,ITestUnit* inTest)
 	AddTest(inTestLabel,scGeneral,inTest);
 }
 
-EStatusCode TestsRunner::RunTest(const wstring& inTestLabel)
+EPDFStatusCode TestsRunner::RunTest(const wstring& inTestLabel)
 {
 	WStringToTestUnitMap::iterator it = mTestsByName.find(inTestLabel);
 
 	if(it == mTestsByName.end())
 	{
 		wcout<<L"Test not found\n";
-		return eSuccess;
+		return ePDFSuccess;
 	}
 	else
 		return RunSingleTest(it->first,it->second);
 }
 
-EStatusCode TestsRunner::RunTests(const WStringList& inTestsLabels)
+EPDFStatusCode TestsRunner::RunTests(const WStringList& inTestsLabels)
 {
 	WStringAndTestUnitList testsList;
 	WStringList::const_iterator it = inTestsLabels.begin();
@@ -151,20 +151,20 @@ EStatusCode TestsRunner::RunTests(const WStringList& inTestsLabels)
 	return RunTestsInList(testsList);
 }
 
-EStatusCode TestsRunner::RunCategory(const wstring& inCategory)
+EPDFStatusCode TestsRunner::RunCategory(const wstring& inCategory)
 {
 	WStringToWStringAndTestUnitListMap::iterator it = mTests.find(inCategory);
 
 	if(it == mTests.end())
 	{
 		wcout<<L"Category "<<inCategory<<L"not found\n";
-		return eSuccess;
+		return ePDFSuccess;
 	}
 	else
 		return RunTestsInList(it->second);
 }
 
-EStatusCode TestsRunner::RunCategories(const WStringList& inCategories)
+EPDFStatusCode TestsRunner::RunCategories(const WStringList& inCategories)
 {
 	WStringAndTestUnitList testsList;
 	WStringList::const_iterator it = inCategories.begin();
@@ -181,7 +181,7 @@ EStatusCode TestsRunner::RunCategories(const WStringList& inCategories)
 	return RunTestsInList(testsList);
 }
 
-EStatusCode TestsRunner::RunCategories(const WStringList& inCategories, const WStringSet& inTestsToExclude)
+EPDFStatusCode TestsRunner::RunCategories(const WStringList& inCategories, const WStringSet& inTestsToExclude)
 {
 	WStringAndTestUnitList testsList;
 	WStringList::const_iterator it = inCategories.begin();
@@ -204,7 +204,7 @@ EStatusCode TestsRunner::RunCategories(const WStringList& inCategories, const WS
 }
 
 
-EStatusCode TestsRunner::RunExcludeCategories(const WStringSet& inCategories)
+EPDFStatusCode TestsRunner::RunExcludeCategories(const WStringSet& inCategories)
 {
 	WStringAndTestUnitList testsList;
 	WStringToWStringAndTestUnitListMap::iterator it = mTests.begin();
@@ -215,7 +215,7 @@ EStatusCode TestsRunner::RunExcludeCategories(const WStringSet& inCategories)
 	return RunTestsInList(testsList);
 }
 
-EStatusCode TestsRunner::RunExcludeTests(const WStringSet& inTests)
+EPDFStatusCode TestsRunner::RunExcludeTests(const WStringSet& inTests)
 {
 	WStringAndTestUnitList testsList;
 	WStringToTestUnitMap::iterator it = mTestsByName.begin();

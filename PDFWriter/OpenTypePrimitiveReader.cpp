@@ -35,185 +35,185 @@ void OpenTypePrimitiveReader::SetOpenTypeStream(IByteReaderWithPosition* inOpenT
 	if(inOpenTypeFile)
 	{
 		mInitialPosition = inOpenTypeFile->GetCurrentPosition();
-		mInternalState = eSuccess;
+		mInternalState = ePDFSuccess;
 	}
 	else
 	{
-		mInternalState = eFailure;
+		mInternalState = ePDFFailure;
 	}
 }
 
-EStatusCode OpenTypePrimitiveReader::ReadBYTE(unsigned char& outValue)
+EPDFStatusCode OpenTypePrimitiveReader::ReadBYTE(unsigned char& outValue)
 {
-	if(eFailure == mInternalState)
-		return eFailure;
+	if(ePDFFailure == mInternalState)
+		return ePDFFailure;
 
 	Byte buffer;
-	EStatusCode status = (mOpenTypeFile->Read(&buffer,1) == 1 ? eSuccess : eFailure);
+	EPDFStatusCode status = (mOpenTypeFile->Read(&buffer,1) == 1 ? ePDFSuccess : ePDFFailure);
 
-	if(eFailure == status)
-		mInternalState = eFailure;
+	if(ePDFFailure == status)
+		mInternalState = ePDFFailure;
 	outValue = buffer;
 	return status;
 }
 
-EStatusCode OpenTypePrimitiveReader::ReadCHAR(char& outValue)
+EPDFStatusCode OpenTypePrimitiveReader::ReadCHAR(char& outValue)
 {
 	Byte buffer;
 
-	if(ReadBYTE(buffer) != eSuccess)
-		return eFailure;
+	if(ReadBYTE(buffer) != ePDFSuccess)
+		return ePDFFailure;
 
 	outValue = (char)buffer;
-	return eSuccess;
+	return ePDFSuccess;
 }
 
-EStatusCode OpenTypePrimitiveReader::ReadUSHORT(unsigned short& outValue)
+EPDFStatusCode OpenTypePrimitiveReader::ReadUSHORT(unsigned short& outValue)
 {
 	Byte byte1,byte2;
 
-	if(ReadBYTE(byte1) != eSuccess)
-		return eFailure;
+	if(ReadBYTE(byte1) != ePDFSuccess)
+		return ePDFFailure;
 
-	if(ReadBYTE(byte2) != eSuccess)
-		return eFailure;
+	if(ReadBYTE(byte2) != ePDFSuccess)
+		return ePDFFailure;
 
 
 	outValue = ((unsigned short)byte1 << 8) + byte2;
 
-	return eSuccess;
+	return ePDFSuccess;
 
 }
 
-EStatusCode OpenTypePrimitiveReader::ReadSHORT(short& outValue)
+EPDFStatusCode OpenTypePrimitiveReader::ReadSHORT(short& outValue)
 {
 	unsigned short buffer;
 
-	if(ReadUSHORT(buffer) != eSuccess)
-		return eFailure;
+	if(ReadUSHORT(buffer) != ePDFSuccess)
+		return ePDFFailure;
 
 	outValue = (short)buffer;
-	return eSuccess;
+	return ePDFSuccess;
 
 }
 
-EStatusCode OpenTypePrimitiveReader::ReadULONG(unsigned long& outValue)
+EPDFStatusCode OpenTypePrimitiveReader::ReadULONG(unsigned long& outValue)
 {
 	Byte byte1,byte2,byte3,byte4;
 
-	if(ReadBYTE(byte1) != eSuccess)
-		return eFailure;
+	if(ReadBYTE(byte1) != ePDFSuccess)
+		return ePDFFailure;
 
-	if(ReadBYTE(byte2) != eSuccess)
-		return eFailure;
+	if(ReadBYTE(byte2) != ePDFSuccess)
+		return ePDFFailure;
 
-	if(ReadBYTE(byte3) != eSuccess)
-		return eFailure;
+	if(ReadBYTE(byte3) != ePDFSuccess)
+		return ePDFFailure;
 
-	if(ReadBYTE(byte4) != eSuccess)
-		return eFailure;
+	if(ReadBYTE(byte4) != ePDFSuccess)
+		return ePDFFailure;
 
 	outValue = ((unsigned long)byte1 << 24) + ((unsigned long)byte2 << 16) + 
 									((unsigned long)byte3 << 8) + byte4;
 
-	return eSuccess;
+	return ePDFSuccess;
 }
 
-EStatusCode OpenTypePrimitiveReader::ReadLONG(long& outValue)
+EPDFStatusCode OpenTypePrimitiveReader::ReadLONG(long& outValue)
 {
 	unsigned long buffer;
 
-	if(ReadULONG(buffer) != eSuccess)
-		return eFailure;
+	if(ReadULONG(buffer) != ePDFSuccess)
+		return ePDFFailure;
 
 	outValue = (long)buffer;
-	return eSuccess;
+	return ePDFSuccess;
 }
 
-EStatusCode OpenTypePrimitiveReader::ReadLongDateTime(long long& outValue)
+EPDFStatusCode OpenTypePrimitiveReader::ReadLongDateTime(long long& outValue)
 {
 	Byte byte1,byte2,byte3,byte4,byte5,byte6,byte7,byte8;
 
-	if(ReadBYTE(byte1) != eSuccess)
-		return eFailure;
+	if(ReadBYTE(byte1) != ePDFSuccess)
+		return ePDFFailure;
 
-	if(ReadBYTE(byte2) != eSuccess)
-		return eFailure;
+	if(ReadBYTE(byte2) != ePDFSuccess)
+		return ePDFFailure;
 
-	if(ReadBYTE(byte3) != eSuccess)
-		return eFailure;
+	if(ReadBYTE(byte3) != ePDFSuccess)
+		return ePDFFailure;
 
-	if(ReadBYTE(byte4) != eSuccess)
-		return eFailure;
+	if(ReadBYTE(byte4) != ePDFSuccess)
+		return ePDFFailure;
 
-	if(ReadBYTE(byte5) != eSuccess)
-		return eFailure;
+	if(ReadBYTE(byte5) != ePDFSuccess)
+		return ePDFFailure;
 
-	if(ReadBYTE(byte6) != eSuccess)
-		return eFailure;
+	if(ReadBYTE(byte6) != ePDFSuccess)
+		return ePDFFailure;
 
-	if(ReadBYTE(byte7) != eSuccess)
-		return eFailure;
+	if(ReadBYTE(byte7) != ePDFSuccess)
+		return ePDFFailure;
 
-	if(ReadBYTE(byte8) != eSuccess)
-		return eFailure;
+	if(ReadBYTE(byte8) != ePDFSuccess)
+		return ePDFFailure;
 
 	outValue =(long long)(	((unsigned long long)byte1 << 56) + ((unsigned long long)byte2 << 48) + 
 							((unsigned long long)byte3 << 40) + ((unsigned long long)byte4 << 32) + 
 							((unsigned long long)byte5 << 24) + ((unsigned long long)byte6 << 16) + 
 							((unsigned long long)byte7 << 8) + byte8);
-	return eSuccess;	
+	return ePDFSuccess;	
 }
 
 void OpenTypePrimitiveReader::SetOffset(LongFilePositionType inNewOffset)
 {
-	if(mInternalState != eFailure)
+	if(mInternalState != ePDFFailure)
 		mOpenTypeFile->SetPosition(mInitialPosition + inNewOffset);
 }	
 
 void OpenTypePrimitiveReader::Skip(LongBufferSizeType inToSkip)
 {
-	if(mInternalState != eFailure)
+	if(mInternalState != ePDFFailure)
 		mOpenTypeFile->Skip(inToSkip);
 }
 
-EStatusCode OpenTypePrimitiveReader::GetInternalState()
+EPDFStatusCode OpenTypePrimitiveReader::GetInternalState()
 {
 	return mInternalState;
 }
 
-EStatusCode OpenTypePrimitiveReader::ReadFixed(double& outValue)
+EPDFStatusCode OpenTypePrimitiveReader::ReadFixed(double& outValue)
 {
 	unsigned short integer,fraction;
 
-	if(ReadUSHORT(integer) != eSuccess)
-		return eFailure;
+	if(ReadUSHORT(integer) != ePDFSuccess)
+		return ePDFFailure;
 
-	if(ReadUSHORT(fraction) != eSuccess)
-		return eFailure;
+	if(ReadUSHORT(fraction) != ePDFSuccess)
+		return ePDFFailure;
 
 	outValue = (double)integer + ((double)fraction) / (1<<16);
 
-	return eSuccess;
+	return ePDFSuccess;
 }
 
 LongFilePositionType OpenTypePrimitiveReader::GetCurrentPosition()
 {
-	if(mInternalState != eFailure)
+	if(mInternalState != ePDFFailure)
 		return mOpenTypeFile->GetCurrentPosition() - mInitialPosition;	
 	else
 		return 0;
 }
 
-EStatusCode OpenTypePrimitiveReader::Read(Byte* inBuffer,LongBufferSizeType inBufferSize)
+EPDFStatusCode OpenTypePrimitiveReader::Read(Byte* inBuffer,LongBufferSizeType inBufferSize)
 {
-	if(eFailure == mInternalState)
-		return eFailure;
+	if(ePDFFailure == mInternalState)
+		return ePDFFailure;
 
-	EStatusCode status = (mOpenTypeFile->Read(inBuffer,inBufferSize) == inBufferSize ? eSuccess : eFailure);
+	EPDFStatusCode status = (mOpenTypeFile->Read(inBuffer,inBufferSize) == inBufferSize ? ePDFSuccess : ePDFFailure);
 
-	if(eFailure == status)
-		mInternalState = eFailure;
+	if(ePDFFailure == status)
+		mInternalState = ePDFFailure;
 	return status;	
 }
 

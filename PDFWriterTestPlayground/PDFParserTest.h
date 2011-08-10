@@ -27,7 +27,7 @@
 #include <set>
 
 class PDFObject;
-class PDFParser;
+class HummusPDFParser;
 class IByteWriter;
 
 typedef set<ObjectIDType> ObjectIDTypeSet;
@@ -38,11 +38,11 @@ public:
 	PDFParserTest(void);
 	virtual ~PDFParserTest(void);
 
-	virtual EStatusCode Run();
+	virtual EPDFStatusCode Run();
 
 private:
 
-	EStatusCode IterateObjectTypes(PDFObject* inObject,PDFParser& inParser,IByteWriter* inOutput);
+	EPDFStatusCode IterateObjectTypes(PDFObject* inObject,HummusPDFParser& inParser,IByteWriter* inOutput);
 
 	int mTabLevel;
 	ObjectIDTypeSet mIteratedObjectIDs;

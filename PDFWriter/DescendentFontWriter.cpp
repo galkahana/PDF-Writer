@@ -44,14 +44,14 @@ static const string scBaseFont = "BaseFont";
 static const string scFontDescriptor = "FontDescriptor";
 static const string scCIDSystemInfo = "CIDSystemInfo";
 
-EStatusCode DescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID, 
+EPDFStatusCode DescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID, 
 												const string& inFontName,
 												FreeTypeFaceWrapper& inFontInfo,
 												const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
 												ObjectsContext* inObjectsContext,
 												IDescendentFontWriter* inDescendentFontWriterHelper)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	FontDescriptorWriter fontDescriptorWriter;
 	inObjectsContext->StartNewIndirectObject(inDecendentObjectID);
 	
@@ -91,7 +91,7 @@ EStatusCode DescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID,
 		inDescendentFontWriterHelper->WriteAdditionalKeys(fontContext);
 
 		status = inObjectsContext->EndDictionary(fontContext);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			TRACE_LOG("CFFANSIFontWriter::WriteFont, unexpected failure. Failed to end dictionary in font write.");
 			break;

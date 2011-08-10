@@ -2,7 +2,7 @@
    Source File : PDFObjectCastTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -36,36 +36,36 @@ PDFObjectCastTest::~PDFObjectCastTest(void)
 {
 }
 
-EStatusCode PDFObjectCastTest::Run()
+EPDFStatusCode PDFObjectCastTest::Run()
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 
 	PDFObjectCastPtr<PDFName> aNonName1(NULL);
 	if(!(!aNonName1))
 	{
 		wcout<<"Casting null to PDFName should provide NULL. fail\n";
-		status = eFailure;
+		status = ePDFFailure;
 	}
 
 	PDFObjectCastPtr<PDFName> aNonName2(new PDFDictionary());
 	if(!(!aNonName2))
 	{
 		wcout<<"Casting PDFDictionary to PDFName should provide NULL. fail\n";
-		status = eFailure;
+		status = ePDFFailure;
 	}
 
 	PDFObjectCastPtr<PDFName> aName3(new PDFName("aName"));
 	if((!aName3))
 	{
 		wcout<<"Casting PDName to PDFName should provide PDFName. fail\n";
-		status = eFailure;
+		status = ePDFFailure;
 	}
 
 	if(aName3->GetValue() != "aName")
 	{
 		wcout<<"should be aName, is "<<aName3->GetValue().c_str()<<"\n";
-		status = eFailure;
+		status = ePDFFailure;
 	}
 
 	return status;

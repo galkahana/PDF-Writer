@@ -7,5 +7,5 @@ public:
 	CustomLogTest(void);
 	~CustomLogTest(void);
 
-	virtual EStatusCode Run();
+	virtual EPDFStatusCode Run();
 };

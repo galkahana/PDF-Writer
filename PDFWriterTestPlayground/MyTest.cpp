@@ -2,7 +2,7 @@
    Source File : MyTest.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ static bool sStringSort(const StringAndInt& inLeft, const StringAndInt& inRight)
 	return strcmp(inLeft.first,inRight.first) < 0;
 }
 
-EStatusCode MyTest::Run()
+EPDFStatusCode MyTest::Run()
 {
 	StringAndIntVector stringsVector;
 	int i=0;
@@ -134,7 +134,7 @@ EStatusCode MyTest::Run()
 	}	
 	wcout<<stringsVector[N_STD_STRINGS-1].second<<"\n};\n";
 
-	return eSuccess;
+	return ePDFSuccess;
 }
 
 

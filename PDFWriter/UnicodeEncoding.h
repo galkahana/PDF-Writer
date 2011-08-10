@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include <string>
 #include <vector>
 
@@ -40,7 +40,7 @@ public:
 	UnicodeEncoding(void);
 	~UnicodeEncoding(void);
 
-	EStatusCode UTF16ToUnicode(const wstring& inText,ULongVector& outUnicodeIndexes);
+	EPDFStatusCode UTF16ToUnicode(const wstring& inText,ULongVector& outUnicodeIndexes);
 
 	bool IsSupplementary(unsigned long inUnicodeCharacter);
 	UTF16Encoding EncodeCharater(unsigned long inUnicodeCharacter);

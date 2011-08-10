@@ -18,7 +18,7 @@
 
    
 */
-#include "PDFParser.h"
+#include "HummusPDFParser.h"
 #include "IByteReaderWithPosition.h"
 #include "PDFParserTokenizer.h"
 #include "Trace.h"
@@ -47,7 +47,7 @@
 
 #include  <algorithm>
 
-PDFParser::PDFParser(void)
+HummusPDFParser::HummusPDFParser(void)
 {
 	mStream = NULL;
 	mTrailer = NULL;
@@ -55,12 +55,12 @@ PDFParser::PDFParser(void)
 	mPagesObjectIDs = NULL;
 }
 
-PDFParser::~PDFParser(void)
+HummusPDFParser::~HummusPDFParser(void)
 {
 	ResetParser();
 }
 
-void PDFParser::ResetParser()
+void HummusPDFParser::ResetParser()
 {
 	mTrailer = NULL;
 	delete[] mXrefTable;
@@ -77,9 +77,9 @@ void PDFParser::ResetParser()
 
 }
 
-EStatusCode PDFParser::StartPDFParsing(IByteReaderWithPosition* inSourceStream)
+EPDFStatusCode HummusPDFParser::StartPDFParsing(IByteReaderWithPosition* inSourceStream)
 {
-	EStatusCode status;
+	EPDFStatusCode status;
 
 	ResetParser();
 
@@ -90,7 +90,7 @@ EStatusCode PDFParser::StartPDFParsing(IByteReaderWithPosition* inSourceStream)
 	do
 	{
 		status = ParseHeaderLine();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		// initialize reading from end
@@ -99,19 +99,19 @@ EStatusCode PDFParser::StartPDFParsing(IByteReaderWithPosition* inSourceStream)
 		mLastAvailableIndex = mCurrentBufferIndex = mLinesBuffer;
 
 		status = ParseEOFLine();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		status = ParseLastXrefPosition();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		status = ParseFileDirectory(); // that would be the xref and trailer
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		status = ParsePagesObjectIDs();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 	}while(false);
@@ -119,13 +119,13 @@ EStatusCode PDFParser::StartPDFParsing(IByteReaderWithPosition* inSourceStream)
 	return status;
 }
 
-PDFObjectParser& PDFParser::GetObjectParser()
+PDFObjectsParser& HummusPDFParser::GetObjectParser()
 {
 	return mObjectParser;
 }
 
 static const string scPDFMagic = "%PDF-";
-EStatusCode PDFParser::ParseHeaderLine()
+EPDFStatusCode HummusPDFParser::ParseHeaderLine()
 {
 	PDFParserTokenizer tokenizer;
 
@@ -134,22 +134,22 @@ EStatusCode PDFParser::ParseHeaderLine()
 
 	if(!tokenizerResult.first)
 	{
-		TRACE_LOG("PDFParser::ParseHeaderLine, no tokens in PDF input. in other words - it's empty.");
-		return eFailure;
+		TRACE_LOG("HummusPDFParser::ParseHeaderLine, no tokens in PDF input. in other words - it's empty.");
+		return ePDFFailure;
 	}
 
 	if(tokenizerResult.second.compare(0,scPDFMagic.size(),scPDFMagic) != 0)
 	{
-		TRACE_LOG1("PDFParser::ParseHeaderLine, file does not begin as a PDF file. a PDF file should start with \"%PDF-\". file header = %s",tokenizerResult.second);
-		return eFailure;
+		TRACE_LOG1("HummusPDFParser::ParseHeaderLine, file does not begin as a PDF file. a PDF file should start with \"%PDF-\". file header = %s",tokenizerResult.second);
+		return ePDFFailure;
 	}
 
 	mPDFLevel = Double(tokenizerResult.second.substr(scPDFMagic.size()));
-	return eSuccess;
+	return ePDFSuccess;
 }
 
 static const string scEOF = "%%EOF";
-EStatusCode PDFParser::ParseEOFLine()
+EPDFStatusCode HummusPDFParser::ParseEOFLine()
 {
 	/* go back till you hit token. this should be the EOF. go back till line start and get the token...if it's not EOF, fail.
 	   since EOF is a comment, then if there's anything else in that line it will either be before %%EOF, which means %%EOF won't be taken, or after - 
@@ -167,27 +167,27 @@ EStatusCode PDFParser::ParseEOFLine()
 
 		if(token.first && (scEOF == token.second))
 		{
-			return eSuccess;
+			return ePDFSuccess;
 		}
 		else
 		{
-			TRACE_LOG("PDFParser::ParseEOFLine, failure, last line not %%EOF");
-			return eFailure;
+			TRACE_LOG("HummusPDFParser::ParseEOFLine, failure, last line not %%EOF");
+			return ePDFFailure;
 		}
 	}
 	else
 	{
-		TRACE_LOG("PDFParser::ParseEOFLine, Couldn't find tokens in file");
-		return eFailure;
+		TRACE_LOG("HummusPDFParser::ParseEOFLine, Couldn't find tokens in file");
+		return ePDFFailure;
 	}
 }
 
-LongBufferSizeType PDFParser::GetCurrentPositionFromEnd()
+LongBufferSizeType HummusPDFParser::GetCurrentPositionFromEnd()
 {
 	return mLastReadPositionFromEnd-(mCurrentBufferIndex-mLinesBuffer);
 }
 
-bool PDFParser::GoBackTillToken()
+bool HummusPDFParser::GoBackTillToken()
 {
 	Byte buffer;
 	bool foundToken = false;
@@ -203,7 +203,7 @@ bool PDFParser::GoBackTillToken()
 	return foundToken;
 }
 
-bool PDFParser::GoBackTillNonToken()
+bool HummusPDFParser::GoBackTillNonToken()
 {
 	Byte buffer;
 	bool foundNonToken = false;
@@ -220,7 +220,7 @@ bool PDFParser::GoBackTillNonToken()
 }
 
 static const Byte scWhiteSpaces[] = {0,0x9,0xA,0xC,0xD,0x20};
-bool PDFParser::IsPDFWhiteSpace(Byte inCharacter)
+bool HummusPDFParser::IsPDFWhiteSpace(Byte inCharacter)
 {
 	bool isWhiteSpace = false;
 	for(int i=0; i < 6 && !isWhiteSpace; ++i)
@@ -231,7 +231,7 @@ bool PDFParser::IsPDFWhiteSpace(Byte inCharacter)
 
 static const char scCR = '\r';
 static const char scLN = '\n';
-void PDFParser::GoBackTillLineStart()
+void HummusPDFParser::GoBackTillLineStart()
 {
 	Byte buffer;
 
@@ -242,7 +242,7 @@ void PDFParser::GoBackTillLineStart()
 	}
 }
 
-bool PDFParser::ReadBack(Byte& outValue)
+bool HummusPDFParser::ReadBack(Byte& outValue)
 {
 	if(IsBeginOfFile())
 		return false;
@@ -267,7 +267,7 @@ bool PDFParser::ReadBack(Byte& outValue)
 	}
 }
 
-bool PDFParser::ReadNextBufferFromEnd()
+bool HummusPDFParser::ReadNextBufferFromEnd()
 {
 	if(mEncounteredFileStart)
 	{
@@ -287,15 +287,15 @@ bool PDFParser::ReadNextBufferFromEnd()
 	}
 }
 
-bool PDFParser::IsBeginOfFile()
+bool HummusPDFParser::IsBeginOfFile()
 {
 	return mEncounteredFileStart && (mCurrentBufferIndex == mLinesBuffer);
 }
 
 static const string scStartxref = "startxref";
-EStatusCode PDFParser::ParseLastXrefPosition()
+EPDFStatusCode HummusPDFParser::ParseLastXrefPosition()
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	
 	// next two lines should be the xref position and then "startxref"
 	
@@ -305,8 +305,8 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 		// find and read xref position
 		if(!GoBackTillToken())
 		{
-			status = eFailure;
-			TRACE_LOG("PDFParser::ParseXrefPosition, couldn't find xref position token");
+			status = ePDFFailure;
+			TRACE_LOG("HummusPDFParser::ParseXrefPosition, couldn't find xref position token");
 			break;
 		}
 
@@ -325,8 +325,8 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 			// find and read startxref keyword
 			if(!GoBackTillToken())
 			{
-				status = eFailure;
-				TRACE_LOG("PDFParser::ParseXrefPosition, couldn't find startxref keyword");
+				status = ePDFFailure;
+				TRACE_LOG("HummusPDFParser::ParseXrefPosition, couldn't find startxref keyword");
 				break;
 			}
 
@@ -338,8 +338,8 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 
 			if(!startxRef || startxRef->GetValue() != scStartxref)
 			{
-				status = eFailure;
-				TRACE_LOG("PDFParser::ParseXrefPosition, syntax error in reading xref position");
+				status = ePDFFailure;
+				TRACE_LOG("HummusPDFParser::ParseXrefPosition, syntax error in reading xref position");
 				break;
 			}
 		}
@@ -355,16 +355,16 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 			
 			if(!foundStartXref)
 			{
-				status = eFailure;
-				TRACE_LOG("PDFParser::ParseXrefPosition, could not find startxref keyword");
+				status = ePDFFailure;
+				TRACE_LOG("HummusPDFParser::ParseXrefPosition, could not find startxref keyword");
 				break;
 			}
 
 			PDFObjectCastPtr<PDFInteger> xrefPosition(mObjectParser.ParseNewObject());
 			if(!xrefPosition)
 			{
-				status = eFailure;
-				TRACE_LOG("PDFParser::ParseXrefPosition, syntax error in reading xref position");
+				status = ePDFFailure;
+				TRACE_LOG("HummusPDFParser::ParseXrefPosition, syntax error in reading xref position");
 				break;
 			}		
 
@@ -378,10 +378,10 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 }
 
 static const string scTrailer = "trailer";
-EStatusCode PDFParser::ParseTrailerDictionary()
+EPDFStatusCode HummusPDFParser::ParseTrailerDictionary()
 {
 
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	bool foundTrailer = false;
 
 	do
@@ -400,8 +400,8 @@ EStatusCode PDFParser::ParseTrailerDictionary()
 
 		if(!foundTrailer)
 		{
-			status = eFailure;
-			TRACE_LOG("PDFParser::ParseTrailerDictionary, trailer not found...");
+			status = ePDFFailure;
+			TRACE_LOG("HummusPDFParser::ParseTrailerDictionary, trailer not found...");
 			break;
 		}
 
@@ -410,8 +410,8 @@ EStatusCode PDFParser::ParseTrailerDictionary()
 		PDFObjectCastPtr<PDFDictionary> dictionaryObject(mObjectParser.ParseNewObject());
 		if(!dictionaryObject)
 		{
-			status = eFailure;
-			TRACE_LOG("PDFParser::ParseTrailerDictionary, failure to parse trailer dictionary");
+			status = ePDFFailure;
+			TRACE_LOG("HummusPDFParser::ParseTrailerDictionary, failure to parse trailer dictionary");
 			break;
 		}
 
@@ -421,29 +421,29 @@ EStatusCode PDFParser::ParseTrailerDictionary()
 	return status;
 }
 
-EStatusCode PDFParser::BuildXrefTableFromTable()
+EPDFStatusCode HummusPDFParser::BuildXrefTableFromTable()
 {
-	EStatusCode status;
+	EPDFStatusCode status;
 
 	do
 	{
 		status = DetermineXrefSize();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		status = InitializeXref();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		if(mTrailer->Exists("Prev"))
 		{
 			status = ParsePreviousXrefs(mTrailer.GetPtr());
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 				break;
 		}
 
 		status = ParseXrefFromXrefTable(mXrefTable,mXrefSize,mLastXrefPosition);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		// For hybrids, check also XRefStm entry
@@ -452,9 +452,9 @@ EStatusCode PDFParser::BuildXrefTableFromTable()
 			break;
 		// if exists, merge update xref
 		status = ParseXrefFromXrefStream(mXrefTable,mXrefSize,xrefStmReference->GetValue());
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
-			TRACE_LOG("PDFParser::ParseDirectory, failure to parse xref in hybrid mode");
+			TRACE_LOG("HummusPDFParser::ParseDirectory, failure to parse xref in hybrid mode");
 			break;
 		}
 	}while(false);
@@ -462,25 +462,25 @@ EStatusCode PDFParser::BuildXrefTableFromTable()
 	return status;
 }
 
-EStatusCode PDFParser::DetermineXrefSize()
+EPDFStatusCode HummusPDFParser::DetermineXrefSize()
 {
 	PDFObjectCastPtr<PDFInteger> aSize(mTrailer->QueryDirectObject("Size"));
 
 	if(!aSize)
 	{
-		return eFailure;
+		return ePDFFailure;
 	}
 	else
 	{
 		mXrefSize = (ObjectIDType)aSize->GetValue();
-		return eSuccess;
+		return ePDFSuccess;
 	}
 }
 
-EStatusCode PDFParser::InitializeXref()
+EPDFStatusCode HummusPDFParser::InitializeXref()
 {
 	mXrefTable = new XrefEntryInput[mXrefSize];
-	return eSuccess;
+	return ePDFSuccess;
 }
 
 typedef BoxingBaseWithRW<ObjectIDType> ObjectIDTypeBox;
@@ -488,14 +488,14 @@ typedef BoxingBaseWithRW<unsigned long> ULong;
 typedef BoxingBaseWithRW<LongFilePositionType> LongFilePositionTypeBox;
 
 static const string scXref = "xref";
-EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,LongFilePositionType inXrefPosition)
+EPDFStatusCode HummusPDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,LongFilePositionType inXrefPosition)
 {
 	// K. cross ref starts at  xref position
 	// and ends with trailer (or when exahausted the number of objects...whichever first)
 	// i'm gonna tokanize them, for easier reading
 	PDFParserTokenizer tokenizer;
 	BoolAndString token;
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	ObjectIDType firstNonSectionObject;
 	Byte entry[20];
 
@@ -512,20 +512,20 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,Object
 		token = tokenizer.GetNextToken();
 		if(!token.first || token.second != scXref)
 		{
-			TRACE_LOG1("PDFParser::ParseXref, error in parsing xref, expected to find \"xref\" keyword, found = %s",token.second.c_str());
-			status = eFailure;
+			TRACE_LOG1("HummusPDFParser::ParseXref, error in parsing xref, expected to find \"xref\" keyword, found = %s",token.second.c_str());
+			status = ePDFFailure;
 			break;
 		}
 		
 		ObjectIDType currentObject = 0;
 
-		while(eSuccess == status)
+		while(ePDFSuccess == status)
 		{
 			token = tokenizer.GetNextToken();
 			if(!token.first)
 			{
-				TRACE_LOG("PDFParser::ParseXref, failed to read tokens, while reading xref");
-				status = eFailure;
+				TRACE_LOG("HummusPDFParser::ParseXref, failed to read tokens, while reading xref");
+				status = ePDFFailure;
 				break;
 			}
 			
@@ -537,8 +537,8 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,Object
 			token = tokenizer.GetNextToken();
 			if(!token.first)
 			{
-				TRACE_LOG("PDFParser::ParseXref, unable to read section size, while reading xref");
-				status = eFailure;
+				TRACE_LOG("HummusPDFParser::ParseXref, unable to read section size, while reading xref");
+				status = ePDFFailure;
 				break;
 			}
 			if(ObjectIDTypeBox(token.second) == 0)
@@ -551,8 +551,8 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,Object
 			{
 				if(mStream->Read(entry,1) != 1)
 				{
-					TRACE_LOG("PDFParser::ParseXref, failed to read xref entry");
-					status = eFailure;
+					TRACE_LOG("HummusPDFParser::ParseXref, failed to read xref entry");
+					status = ePDFFailure;
 					break;
 				}
 			}while(IsPDFWhiteSpace(entry[0]));
@@ -560,8 +560,8 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,Object
 			// now read extra 19
 			if(mStream->Read(entry+1,19) != 19)
 			{
-				TRACE_LOG("PDFParser::ParseXref, failed to read xref entry");
-				status = eFailure;
+				TRACE_LOG("HummusPDFParser::ParseXref, failed to read xref entry");
+				status = ePDFFailure;
 				break;
 			}
 			if(currentObject < inXrefSize)
@@ -579,8 +579,8 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,Object
 			{
 				if(mStream->Read(entry,20) != 20)
 				{
-					TRACE_LOG("PDFParser::ParseXref, failed to read xref entry");
-					status = eFailure;
+					TRACE_LOG("HummusPDFParser::ParseXref, failed to read xref entry");
+					status = ePDFFailure;
 					break;
 				}
 				if(currentObject < inXrefSize)
@@ -592,7 +592,7 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,Object
 				++currentObject;
 			}
 		}
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 	}while(false);	
@@ -601,17 +601,17 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,Object
 	return status;
 }
 
-PDFDictionary* PDFParser::GetTrailer()
+PDFDictionary* HummusPDFParser::GetTrailer()
 {
 	return mTrailer.GetPtr();
 }
 
-double PDFParser::GetPDFLevel()
+double HummusPDFParser::GetPDFLevel()
 {
 	return mPDFLevel;
 }
 
-PDFObject* PDFParser::ParseNewObject(ObjectIDType inObjectId)
+PDFObject* HummusPDFParser::ParseNewObject(ObjectIDType inObjectId)
 {
 	if(inObjectId >= mXrefSize)
 	{
@@ -629,13 +629,13 @@ PDFObject* PDFParser::ParseNewObject(ObjectIDType inObjectId)
 		return NULL;
 }
 
-ObjectIDType PDFParser::GetObjectsCount()
+ObjectIDType HummusPDFParser::GetObjectsCount()
 {
 	return mXrefSize;
 }
 
 static const string scObj = "obj";
-PDFObject* PDFParser::ParseExistingInDirectObject(ObjectIDType inObjectID)
+PDFObject* HummusPDFParser::ParseExistingInDirectObject(ObjectIDType inObjectID)
 {
 	PDFObject* readObject = NULL;
 
@@ -651,13 +651,13 @@ PDFObject* PDFParser::ParseExistingInDirectObject(ObjectIDType inObjectID)
 
 		if(!idObject)
 		{
-			TRACE_LOG("PDFParser::ParseExistingInDirectObject, failed to read object declaration, ID");
+			TRACE_LOG("HummusPDFParser::ParseExistingInDirectObject, failed to read object declaration, ID");
 			break;
 		}
 
 		if(idObject->GetValue() != inObjectID)
 		{
-			TRACE_LOG2("PDFParser::ParseExistingInDirectObject, failed to read object declaration, exepected ID = %ld, found %ld",
+			TRACE_LOG2("HummusPDFParser::ParseExistingInDirectObject, failed to read object declaration, exepected ID = %ld, found %ld",
 				inObjectID,idObject->GetValue());
 			break;
 		}
@@ -667,13 +667,13 @@ PDFObject* PDFParser::ParseExistingInDirectObject(ObjectIDType inObjectID)
 
 		if(!versionObject)
 		{
-			TRACE_LOG("PDFParser::ParseExistingInDirectObject, failed to read object declaration, Version");
+			TRACE_LOG("HummusPDFParser::ParseExistingInDirectObject, failed to read object declaration, Version");
 			break;
 		}
 
 		if(versionObject->GetValue() != mXrefTable[inObjectID].mRivision)
 		{
-			TRACE_LOG2("PDFParser::ParseExistingInDirectObject, failed to read object declaration, exepected version = %ld, found %ld",
+			TRACE_LOG2("HummusPDFParser::ParseExistingInDirectObject, failed to read object declaration, exepected version = %ld, found %ld",
 				mXrefTable[inObjectID].mRivision,versionObject->GetValue());
 			break;
 		}
@@ -683,13 +683,13 @@ PDFObject* PDFParser::ParseExistingInDirectObject(ObjectIDType inObjectID)
 
 		if(!objKeyword)
 		{
-			TRACE_LOG("PDFParser::ParseExistingInDirectObject, failed to read object declaration, obj keyword");
+			TRACE_LOG("HummusPDFParser::ParseExistingInDirectObject, failed to read object declaration, obj keyword");
 			break;
 		}
 
 		if(objKeyword->GetValue() != scObj)
 		{
-			TRACE_LOG1("PDFParser::ParseExistingInDirectObject, failed to read object declaration, expected obj keyword found %s",
+			TRACE_LOG1("HummusPDFParser::ParseExistingInDirectObject, failed to read object declaration, expected obj keyword found %s",
 				objKeyword->GetValue().c_str());
 			break;
 		}
@@ -701,9 +701,9 @@ PDFObject* PDFParser::ParseExistingInDirectObject(ObjectIDType inObjectID)
 	return readObject;
 }
 
-EStatusCode PDFParser::ParsePagesObjectIDs()
+EPDFStatusCode HummusPDFParser::ParsePagesObjectIDs()
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	// m.k plan is to look for the catalog, then find the pages, then initialize the array to the count at the root, and then just recursively loop
 	// the pages by order of pages and fill up the IDs. easy.
@@ -714,16 +714,16 @@ EStatusCode PDFParser::ParsePagesObjectIDs()
 		PDFObjectCastPtr<PDFIndirectObjectReference> catalogReference(mTrailer->QueryDirectObject("Root"));
 		if(!catalogReference)
 		{
-			TRACE_LOG("PDFParser::ParsePagesObjectIDs, failed to read catalog reference in trailer");
-			status = eFailure;
+			TRACE_LOG("HummusPDFParser::ParsePagesObjectIDs, failed to read catalog reference in trailer");
+			status = ePDFFailure;
 			break;
 		}
 
 		PDFObjectCastPtr<PDFDictionary> catalog(ParseNewObject(catalogReference->mObjectID));
 		if(!catalog)
 		{
-			TRACE_LOG("PDFParser::ParsePagesObjectIDs, failed to read catalog");
-			status = eFailure;
+			TRACE_LOG("HummusPDFParser::ParsePagesObjectIDs, failed to read catalog");
+			status = ePDFFailure;
 			break;
 		}
 
@@ -731,24 +731,24 @@ EStatusCode PDFParser::ParsePagesObjectIDs()
 		PDFObjectCastPtr<PDFIndirectObjectReference> pagesReference(catalog->QueryDirectObject("Pages"));
 		if(!pagesReference)
 		{
-			TRACE_LOG("PDFParser::ParsePagesObjectIDs, failed to read pages reference in catalog");
-			status = eFailure;
+			TRACE_LOG("HummusPDFParser::ParsePagesObjectIDs, failed to read pages reference in catalog");
+			status = ePDFFailure;
 			break;
 		}
 
 		PDFObjectCastPtr<PDFDictionary> pages(ParseNewObject(pagesReference->mObjectID));
 		if(!pages)
 		{
-			TRACE_LOG("PDFParser::ParsePagesObjectIDs, failed to read pages");
-			status = eFailure;
+			TRACE_LOG("HummusPDFParser::ParsePagesObjectIDs, failed to read pages");
+			status = ePDFFailure;
 			break;
 		}
 
 		PDFObjectCastPtr<PDFInteger> totalPagesCount(QueryDictionaryObject(pages.GetPtr(),"Count"));
 		if(!totalPagesCount)
 		{
-			TRACE_LOG("PDFParser::ParsePagesObjectIDs, failed to read pages count");
-			status = eFailure;
+			TRACE_LOG("HummusPDFParser::ParsePagesObjectIDs, failed to read pages count");
+			status = ePDFFailure;
 			break;
 		}
 	
@@ -763,7 +763,7 @@ EStatusCode PDFParser::ParsePagesObjectIDs()
 	return status;
 }
 
-EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID)
+EPDFStatusCode HummusPDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID)
 {
 	unsigned long currentPageIndex = 0;
 
@@ -772,21 +772,21 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 
 static const string scPage = "Page";
 static const string scPages = "Pages";
-EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID,unsigned long& ioCurrentPageIndex)
+EPDFStatusCode HummusPDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID,unsigned long& ioCurrentPageIndex)
 {
 	// recursion.
 	// if this is a page, write it's node object ID in the current page index and +1
 	// if this is a pagetree, loop it's kids, for each parsing the kid, running the recursion on it, and deleting
 
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	do
 	{
 		PDFObjectCastPtr<PDFName> objectType(inPageNode->QueryDirectObject("Type"));
 		if(!objectType)
 		{
-			TRACE_LOG("PDFParser::ParsePagesIDs, can't read object type");
-			status = eFailure;
+			TRACE_LOG("HummusPDFParser::ParsePagesIDs, can't read object type");
+			status = ePDFFailure;
 			break;
 		}
 		
@@ -795,8 +795,8 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 			// a Page
 			if(ioCurrentPageIndex >= mPagesCount)
 			{
-				TRACE_LOG("PDFParser::ParsePagesIDs, there are more pages than the page count specifies. fail.");
-				status = eFailure;
+				TRACE_LOG("HummusPDFParser::ParsePagesIDs, there are more pages than the page count specifies. fail.");
+				status = ePDFFailure;
 				break;
 			}
 
@@ -809,27 +809,27 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 			PDFObjectCastPtr<PDFArray> kidsObject(inPageNode->QueryDirectObject("Kids"));
 			if(!kidsObject)
 			{
-				TRACE_LOG("PDFParser::ParsePagesIDs, unable to find page kids array");
-				status = eFailure;
+				TRACE_LOG("HummusPDFParser::ParsePagesIDs, unable to find page kids array");
+				status = ePDFFailure;
 				break;
 			}
 
 			SingleValueContainerIterator<PDFObjectVector> it = kidsObject->GetIterator();
 			
-			while(it.MoveNext() && eSuccess == status)
+			while(it.MoveNext() && ePDFSuccess == status)
 			{
 				if(it.GetItem()->GetType() != ePDFObjectIndirectObjectReference)
 				{
-					TRACE_LOG1("PDFParser::ParsePagesIDs, unexpected type for a Kids array object, type = %s",scPDFObjectTypeLabel[it.GetItem()->GetType()]);
-					status = eFailure;
+					TRACE_LOG1("HummusPDFParser::ParsePagesIDs, unexpected type for a Kids array object, type = %s",scPDFObjectTypeLabel[it.GetItem()->GetType()]);
+					status = ePDFFailure;
 					break;
 				}
 
 				PDFObjectCastPtr<PDFDictionary> pageNodeObject(ParseNewObject(((PDFIndirectObjectReference*)it.GetItem())->mObjectID));
 				if(!pageNodeObject)
 				{
-					TRACE_LOG("PDFParser::ParsePagesIDs, unable to parse page node object from kids reference");
-					status = eFailure;
+					TRACE_LOG("HummusPDFParser::ParsePagesIDs, unable to parse page node object from kids reference");
+					status = ePDFFailure;
 					break;
 				}
 
@@ -838,8 +838,8 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 		}
 		else 
 		{
-			TRACE_LOG1("PDFParser::ParsePagesIDs, unexpected object type. should be either Page or Pages, found %s",objectType->GetValue().c_str());
-			status = eFailure;
+			TRACE_LOG1("HummusPDFParser::ParsePagesIDs, unexpected object type. should be either Page or Pages, found %s",objectType->GetValue().c_str());
+			status = ePDFFailure;
 			break;
 		}
 	}while(false);
@@ -847,12 +847,21 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 	return status;
 }
 
-unsigned long  PDFParser::GetPagesCount()
+unsigned long  HummusPDFParser::GetPagesCount()
 {
 	return mPagesCount;
 }
 
-PDFDictionary* PDFParser::ParsePage(unsigned long inPageIndex)
+ObjectIDType HummusPDFParser::GetPageObjectID(unsigned long inPageIndex)
+{
+	if(mPagesCount <= inPageIndex)
+		return 0;
+
+	return mPagesObjectIDs[inPageIndex];
+}
+
+
+PDFDictionary* HummusPDFParser::ParsePage(unsigned long inPageIndex)
 {
 	if(mPagesCount <= inPageIndex)
 		return NULL;
@@ -861,7 +870,7 @@ PDFDictionary* PDFParser::ParsePage(unsigned long inPageIndex)
 
 	if(!pageObject)
 	{
-		TRACE_LOG1("PDFParser::ParsePage, couldn't find page object for index %ld",inPageIndex);
+		TRACE_LOG1("HummusPDFParser::ParsePage, couldn't find page object for index %ld",inPageIndex);
 		return NULL;
 	}
 
@@ -874,12 +883,12 @@ PDFDictionary* PDFParser::ParsePage(unsigned long inPageIndex)
 	}
 	else
 	{
-		TRACE_LOG1("PDFParser::ParsePage, page object listed in page array for %ld is actually not a page",inPageIndex);
+		TRACE_LOG1("HummusPDFParser::ParsePage, page object listed in page array for %ld is actually not a page",inPageIndex);
 		return NULL;
 	}
 }
 
-PDFObject* PDFParser::QueryDictionaryObject(PDFDictionary* inDictionary,const string& inName)
+PDFObject* HummusPDFParser::QueryDictionaryObject(PDFDictionary* inDictionary,const string& inName)
 {
 	RefCountPtr<PDFObject> anObject(inDictionary->QueryDirectObject(inName));
 
@@ -898,7 +907,7 @@ PDFObject* PDFParser::QueryDictionaryObject(PDFDictionary* inDictionary,const st
 	}
 }
 
-PDFObject* PDFParser::QueryArrayObject(PDFArray* inArray,unsigned long inIndex)
+PDFObject* HummusPDFParser::QueryArrayObject(PDFArray* inArray,unsigned long inIndex)
 {
 	RefCountPtr<PDFObject> anObject(inArray->QueryObject(inIndex));
 
@@ -918,16 +927,16 @@ PDFObject* PDFParser::QueryArrayObject(PDFArray* inArray,unsigned long inIndex)
 
 }
 
-EStatusCode PDFParser::ParsePreviousXrefs(PDFDictionary* inTrailer)
+EPDFStatusCode HummusPDFParser::ParsePreviousXrefs(PDFDictionary* inTrailer)
 {
 	PDFObjectCastPtr<PDFInteger> previousPosition(inTrailer->QueryDirectObject("Prev"));
 	if(!previousPosition)
 	{
-		TRACE_LOG("PDFParser::ParsePreviousXrefs, unexpected, prev is not integer");
-		return eFailure;
+		TRACE_LOG("HummusPDFParser::ParsePreviousXrefs, unexpected, prev is not integer");
+		return ePDFFailure;
 	}
 
-	EStatusCode status;
+	EPDFStatusCode status;
 
 	XrefEntryInput* aTable = new XrefEntryInput[mXrefSize];
 	do
@@ -935,14 +944,14 @@ EStatusCode PDFParser::ParsePreviousXrefs(PDFDictionary* inTrailer)
 		PDFDictionary* trailerP = NULL;
 
 		status = ParseDirectory(previousPosition->GetValue(),aTable,mXrefSize,&trailerP);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 		RefCountPtr<PDFDictionary> trailer(trailerP);
 
 		if(trailer->Exists("Prev"))
 		{
 			status = ParsePreviousXrefs(trailer.GetPtr());
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 				break;
 		}
 
@@ -954,12 +963,12 @@ EStatusCode PDFParser::ParsePreviousXrefs(PDFDictionary* inTrailer)
 	return status;
 }
 
-EStatusCode PDFParser::ParseDirectory(LongFilePositionType inXrefPosition,
+EPDFStatusCode HummusPDFParser::ParseDirectory(LongFilePositionType inXrefPosition,
 									  XrefEntryInput* inXrefTable,
 									  ObjectIDType inXrefSize,
 									  PDFDictionary** outTrailer)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	
 	MovePositionInStream(inXrefPosition);
 
@@ -969,7 +978,7 @@ EStatusCode PDFParser::ParseDirectory(LongFilePositionType inXrefPosition,
 		RefCountPtr<PDFObject> anObject(mObjectParser.ParseNewObject());
 		if(!anObject)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -980,9 +989,9 @@ EStatusCode PDFParser::ParseDirectory(LongFilePositionType inXrefPosition,
 			// so i don't have to parse the trailer in advance, but rather just read the file in the natural order:
 			// first - the xref then the trailer.
 			status = ParseXrefFromXrefTable(inXrefTable,inXrefSize,inXrefPosition);
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
-				TRACE_LOG1("PDFParser::ParseDirectory, failed to parse xref table in %ld",inXrefPosition);
+				TRACE_LOG1("HummusPDFParser::ParseDirectory, failed to parse xref table in %ld",inXrefPosition);
 				break;
 			}
 
@@ -990,8 +999,8 @@ EStatusCode PDFParser::ParseDirectory(LongFilePositionType inXrefPosition,
 			PDFObjectCastPtr<PDFDictionary> trailerDictionary(mObjectParser.ParseNewObject());
 			if(!trailerDictionary)
 			{
-				status = eFailure;
-				TRACE_LOG("PDFParser::ParseDirectory, failure to parse trailer dictionary");
+				status = ePDFFailure;
+				TRACE_LOG("HummusPDFParser::ParseDirectory, failure to parse trailer dictionary");
 				break;
 			}	
 
@@ -1001,9 +1010,9 @@ EStatusCode PDFParser::ParseDirectory(LongFilePositionType inXrefPosition,
 			{
 				// if exists, merge update xref
 				status = ParseXrefFromXrefStream(inXrefTable,inXrefSize,xrefStmReference->GetValue());
-				if(status != eSuccess)
+				if(status != ePDFSuccess)
 				{
-					TRACE_LOG("PDFParser::ParseDirectory, failure to parse xref in hybrid mode");
+					TRACE_LOG("HummusPDFParser::ParseDirectory, failure to parse xref in hybrid mode");
 					break;
 				}
 			}
@@ -1019,8 +1028,8 @@ EStatusCode PDFParser::ParseDirectory(LongFilePositionType inXrefPosition,
 
 			if(!versionObject)
 			{
-				TRACE_LOG("PDFParser::ParseDirectory, failed to read xref object declaration, Version");
-				status = eFailure;
+				TRACE_LOG("HummusPDFParser::ParseDirectory, failed to read xref object declaration, Version");
+				status = ePDFFailure;
 				break;
 			}
 
@@ -1028,43 +1037,43 @@ EStatusCode PDFParser::ParseDirectory(LongFilePositionType inXrefPosition,
 
 			if(!objKeyword)
 			{
-				TRACE_LOG("PDFParser::ParseDirectory, failed to read xref object declaration, obj keyword");
-				status = eFailure;
+				TRACE_LOG("HummusPDFParser::ParseDirectory, failed to read xref object declaration, obj keyword");
+				status = ePDFFailure;
 				break;
 			}
 
 			if(objKeyword->GetValue() != scObj)
 			{
-				TRACE_LOG1("PDFParser::ParseDirectory, failed to read xref object declaration, expected obj keyword found %s",
+				TRACE_LOG1("HummusPDFParser::ParseDirectory, failed to read xref object declaration, expected obj keyword found %s",
 					objKeyword->GetValue().c_str());
-				status = eFailure;
+				status = ePDFFailure;
 				break;
 			}
 
 			PDFObjectCastPtr<PDFStreamInput> xrefStream(mObjectParser.ParseNewObject());
 			if(!xrefStream)
 			{
-				TRACE_LOG("PDFParser::BuildXrefTableAndTrailerFromXrefStream, failure to parse xref stream");
-				status = eFailure;
+				TRACE_LOG("HummusPDFParser::BuildXrefTableAndTrailerFromXrefStream, failure to parse xref stream");
+				status = ePDFFailure;
 				break;
 			}
 
 			*outTrailer = xrefStream->QueryStreamDictionary();
 
 			status = ParseXrefFromXrefStream(inXrefTable,inXrefSize,xrefStream.GetPtr());
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 				break;
 		}
 		else
 		{
-			TRACE_LOG("PDFParser::ParseDirectory,Unexpected object at xref start");
-			status = eFailure;
+			TRACE_LOG("HummusPDFParser::ParseDirectory,Unexpected object at xref start");
+			status = ePDFFailure;
 		}
 	}while(false);
 	return status;
 }	
 
-void PDFParser::MergeXrefWithMainXref(XrefEntryInput* inTableToMerge)
+void HummusPDFParser::MergeXrefWithMainXref(XrefEntryInput* inTableToMerge)
 {
 	for(ObjectIDType i = 0; i < mXrefSize; ++i)
 	{
@@ -1074,9 +1083,9 @@ void PDFParser::MergeXrefWithMainXref(XrefEntryInput* inTableToMerge)
 }
 
 
-EStatusCode PDFParser::ParseFileDirectory()
+EPDFStatusCode HummusPDFParser::ParseFileDirectory()
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 
 	MovePositionInStream(mLastXrefPosition);
@@ -1087,7 +1096,7 @@ EStatusCode PDFParser::ParseFileDirectory()
 		RefCountPtr<PDFObject> anObject(mObjectParser.ParseNewObject());
 		if(!anObject)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -1096,24 +1105,24 @@ EStatusCode PDFParser::ParseFileDirectory()
 			// this would be a normal xref case
 			// jump lines till you get to a line where the token is "trailer". then parse.
 			status = ParseTrailerDictionary();
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 				break;
 
 			status = BuildXrefTableFromTable();
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 				break;
 		}
 		else if(anObject->GetType() == ePDFObjectInteger && ((PDFInteger*)anObject.GetPtr())->GetValue() > 0)
 		{
 			// Xref stream case
 			status = BuildXrefTableAndTrailerFromXrefStream();
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 				break;
 
 		}
 		else
 		{
-			TRACE_LOG("PDFParser::ParseFileDirectory,Unexpected object at xref start");
+			TRACE_LOG("HummusPDFParser::ParseFileDirectory,Unexpected object at xref start");
 		}
 
 
@@ -1124,12 +1133,12 @@ EStatusCode PDFParser::ParseFileDirectory()
 	return status;
 }
 
-EStatusCode PDFParser::BuildXrefTableAndTrailerFromXrefStream()
+EPDFStatusCode HummusPDFParser::BuildXrefTableAndTrailerFromXrefStream()
 {
 	// xref stream is trailer and stream togather. need to parse them both.
 	// the object parser is now after the object ID. so verify that next we goot a version and the obj keyword
 	// then parse the xref stream
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	
 	PDFObjectCastPtr<PDFInteger> versionObject(mObjectParser.ParseNewObject());
 
@@ -1137,8 +1146,8 @@ EStatusCode PDFParser::BuildXrefTableAndTrailerFromXrefStream()
 	{
 		if(!versionObject)
 		{
-			TRACE_LOG("PDFParser::BuildXrefTableAndTrailerFromXrefStream, failed to read xref object declaration, Version");
-			status = eFailure;
+			TRACE_LOG("HummusPDFParser::BuildXrefTableAndTrailerFromXrefStream, failed to read xref object declaration, Version");
+			status = ePDFFailure;
 			break;
 		}
 
@@ -1146,16 +1155,16 @@ EStatusCode PDFParser::BuildXrefTableAndTrailerFromXrefStream()
 
 		if(!objKeyword)
 		{
-			TRACE_LOG("PDFParser::BuildXrefTableAndTrailerFromXrefStream, failed to read xref object declaration, obj keyword");
-			status = eFailure;
+			TRACE_LOG("HummusPDFParser::BuildXrefTableAndTrailerFromXrefStream, failed to read xref object declaration, obj keyword");
+			status = ePDFFailure;
 			break;
 		}
 
 		if(objKeyword->GetValue() != scObj)
 		{
-			TRACE_LOG1("PDFParser::BuildXrefTableAndTrailerFromXrefStream, failed to read xref object declaration, expected obj keyword found %s",
+			TRACE_LOG1("HummusPDFParser::BuildXrefTableAndTrailerFromXrefStream, failed to read xref object declaration, expected obj keyword found %s",
 				objKeyword->GetValue().c_str());
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -1163,8 +1172,8 @@ EStatusCode PDFParser::BuildXrefTableAndTrailerFromXrefStream()
 		PDFObjectCastPtr<PDFStreamInput> xrefStream(mObjectParser.ParseNewObject());
 		if(!xrefStream)
 		{
-			TRACE_LOG("PDFParser::BuildXrefTableAndTrailerFromXrefStream, failure to parse xref stream");
-			status = eFailure;
+			TRACE_LOG("HummusPDFParser::BuildXrefTableAndTrailerFromXrefStream, failure to parse xref stream");
+			status = ePDFFailure;
 			break;
 		}
 
@@ -1172,22 +1181,22 @@ EStatusCode PDFParser::BuildXrefTableAndTrailerFromXrefStream()
 		mTrailer = xrefDictionary;
 
 		status = DetermineXrefSize();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		status = InitializeXref();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		if(mTrailer->Exists("Prev"))
 		{
 			status = ParsePreviousXrefs(mTrailer.GetPtr());
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 				break;
 		}
 
 		status = ParseXrefFromXrefStream(mXrefTable,mXrefSize,xrefStream.GetPtr());
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 	}while(false);
 
@@ -1195,9 +1204,9 @@ EStatusCode PDFParser::BuildXrefTableAndTrailerFromXrefStream()
 
 }
 
-EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,LongFilePositionType inXrefPosition)
+EPDFStatusCode HummusPDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,LongFilePositionType inXrefPosition)
 {
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	
 	MovePositionInStream(inXrefPosition);
 
@@ -1207,8 +1216,8 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,Objec
 		PDFObjectCastPtr<PDFInteger> anObject(mObjectParser.ParseNewObject());
 		if(!anObject || anObject->GetValue() <= 0)
 		{
-			TRACE_LOG1("PDFParser::ParseXrefFromXrefStream, expecting object number for xref stream at %ld",inXrefPosition);
-			status = eFailure;
+			TRACE_LOG1("HummusPDFParser::ParseXrefFromXrefStream, expecting object number for xref stream at %ld",inXrefPosition);
+			status = ePDFFailure;
 			break;
 		}
 
@@ -1216,8 +1225,8 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,Objec
 
 		if(!versionObject)
 		{
-			TRACE_LOG("PDFParser::ParseXrefFromXrefStream, failed to read xref object declaration, Version");
-			status = eFailure;
+			TRACE_LOG("HummusPDFParser::ParseXrefFromXrefStream, failed to read xref object declaration, Version");
+			status = ePDFFailure;
 			break;
 		}
 
@@ -1225,24 +1234,24 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,Objec
 
 		if(!objKeyword)
 		{
-			TRACE_LOG("PDFParser::ParseXrefFromXrefStream, failed to read xref object declaration, obj keyword");
-			status = eFailure;
+			TRACE_LOG("HummusPDFParser::ParseXrefFromXrefStream, failed to read xref object declaration, obj keyword");
+			status = ePDFFailure;
 			break;
 		}
 
 		if(objKeyword->GetValue() != scObj)
 		{
-			TRACE_LOG1("PDFParser::ParseXrefFromXrefStream, failed to read xref object declaration, expected obj keyword found %s",
+			TRACE_LOG1("HummusPDFParser::ParseXrefFromXrefStream, failed to read xref object declaration, expected obj keyword found %s",
 				objKeyword->GetValue().c_str());
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
 		PDFObjectCastPtr<PDFStreamInput> xrefStream(mObjectParser.ParseNewObject());
 		if(!xrefStream)
 		{
-			TRACE_LOG("PDFParser::ParseXrefFromXrefStream, failure to parse xref stream");
-			status = eFailure;
+			TRACE_LOG("HummusPDFParser::ParseXrefFromXrefStream, failure to parse xref stream");
+			status = ePDFFailure;
 			break;
 		}
 
@@ -1251,7 +1260,7 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,Objec
 	return status;
 }
 
-EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,PDFStreamInput* inXrefStream)
+EPDFStatusCode HummusPDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,PDFStreamInput* inXrefStream)
 {
 	// 1. Setup the stream to read from the stream start location
 	// 2. Set it up with an input stream to decode if required
@@ -1259,7 +1268,7 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,Objec
 	// 4. for each subsection use the base number as starting, and count as well, to read the stream entries to the right position in the table
 	//    The entries are read using the "W" value. make sure to read even values that you don't need.
 
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	IByteReader* xrefStreamSource = CreateInputStreamReader(inXrefStream);
 	int* widthsArray = NULL;
@@ -1268,7 +1277,7 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,Objec
 	{
 		if(!xrefStreamSource)
 		{
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -1278,8 +1287,8 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,Objec
 		PDFObjectCastPtr<PDFArray> wArray(QueryDictionaryObject(streamDictionary.GetPtr(),"W"));
 		if(!wArray)
 		{
-			TRACE_LOG("PDFParser::ParseXrefFromXrefStream, W array not available. failing");
-			status = eFailure;
+			TRACE_LOG("HummusPDFParser::ParseXrefFromXrefStream, W array not available. failing");
+			status = ePDFFailure;
 			break;
 		}
 
@@ -1289,13 +1298,13 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,Objec
 			PDFObjectCastPtr<PDFInteger> widthObject(wArray->QueryObject(i));
 			if(!widthObject)
 			{
-				TRACE_LOG("PDFParser::ParseXrefFromXrefStream, wrong items in width array (supposed to have only integers)");
-				status = eFailure;
+				TRACE_LOG("HummusPDFParser::ParseXrefFromXrefStream, wrong items in width array (supposed to have only integers)");
+				status = ePDFFailure;
 				break;
 			}
 			widthsArray[i] = (int)widthObject->GetValue();
 		}
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		// read the segments from the stream
@@ -1307,8 +1316,8 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,Objec
 			PDFObjectCastPtr<PDFInteger> xrefSize(QueryDictionaryObject(streamDictionary.GetPtr(),"Size"));	
 			if(!xrefSize)
 			{
-				TRACE_LOG("PDFParser::ParseXrefFromXrefStream, xref size does not exist for this stream");
-				status = eFailure;
+				TRACE_LOG("HummusPDFParser::ParseXrefFromXrefStream, xref size does not exist for this stream");
+				status = ePDFFailure;
 				break;
 			}
 
@@ -1318,20 +1327,20 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,Objec
 		{
 			SingleValueContainerIterator<PDFObjectVector> segmentsIterator  = subsectionsIndex->GetIterator();
 			PDFObjectCastPtr<PDFInteger> segmentValue;
-			while(segmentsIterator.MoveNext() && eSuccess == status)
+			while(segmentsIterator.MoveNext() && ePDFSuccess == status)
 			{
 				segmentValue = segmentsIterator.GetItem();
 				if(!segmentValue)
 				{
-					TRACE_LOG("PDFParser::ParseXrefFromXrefStream, found non integer value in Index array of xref stream");
-					status = eFailure;
+					TRACE_LOG("HummusPDFParser::ParseXrefFromXrefStream, found non integer value in Index array of xref stream");
+					status = ePDFFailure;
 					break;
 				}
 				ObjectIDType startObject = (ObjectIDType)segmentValue->GetValue();
 				if(!segmentsIterator.MoveNext())
 				{
-					TRACE_LOG("PDFParser::ParseXrefFromXrefStream,Index array of xref stream should have an even number of values");
-					status = eFailure;
+					TRACE_LOG("HummusPDFParser::ParseXrefFromXrefStream,Index array of xref stream should have an even number of values");
+					status = ePDFFailure;
 					break;
 				}
 				
@@ -1342,8 +1351,8 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,Objec
 				segmentValue = segmentsIterator.GetItem();
 				if(!segmentValue)
 				{
-					TRACE_LOG("PDFParser::ParseXrefFromXrefStream, found non integer value in Index array of xref stream");
-					status = eFailure;
+					TRACE_LOG("HummusPDFParser::ParseXrefFromXrefStream, found non integer value in Index array of xref stream");
+					status = ePDFFailure;
 					break;
 				}
 				ObjectIDType objectsCount = (ObjectIDType)segmentValue->GetValue();
@@ -1357,13 +1366,13 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,Objec
 	return status;
 }
 
-void PDFParser::MovePositionInStream(LongFilePositionType inPosition)
+void HummusPDFParser::MovePositionInStream(LongFilePositionType inPosition)
 {
 	mStream->SetPosition(inPosition);
 	mObjectParser.ResetReadState();
 }
 
-EStatusCode PDFParser::ReadXrefStreamSegment(XrefEntryInput* inXrefTable,
+EPDFStatusCode HummusPDFParser::ReadXrefStreamSegment(XrefEntryInput* inXrefTable,
 											 ObjectIDType inSegmentStartObject,
 											 ObjectIDType inSegmentCount,
 											 IByteReader* inReadFrom,
@@ -1371,26 +1380,26 @@ EStatusCode PDFParser::ReadXrefStreamSegment(XrefEntryInput* inXrefTable,
 											 unsigned long inEntryWidthsSize)
 {
 	ObjectIDType objectToRead = inSegmentStartObject;
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	if(inEntryWidthsSize != 3)
 	{
-		TRACE_LOG("PDFParser::ReadXrefStreamSegment, can handle only 3 length entries");
-		return eFailure;
+		TRACE_LOG("HummusPDFParser::ReadXrefStreamSegment, can handle only 3 length entries");
+		return ePDFFailure;
 	}
 
 	// Note - i'm also checking that the stream is not ended. in non-finite segments, it could be that the particular
 	// stream does no define all objects...just the "updated" ones
-	for(; (objectToRead < inSegmentStartObject + inSegmentCount) && eSuccess == status && inReadFrom->NotEnded();++objectToRead)
+	for(; (objectToRead < inSegmentStartObject + inSegmentCount) && ePDFSuccess == status && inReadFrom->NotEnded();++objectToRead)
 	{
 		long long entryType;
 		status = ReadXrefSegmentValue(inReadFrom,inEntryWidths[0],entryType);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 		status = ReadXrefSegmentValue(inReadFrom,inEntryWidths[1],inXrefTable[objectToRead].mObjectPosition);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 		status = ReadXrefSegmentValue(inReadFrom,inEntryWidths[2],inXrefTable[objectToRead].mRivision);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		if(0 == entryType)
@@ -1407,44 +1416,44 @@ EStatusCode PDFParser::ReadXrefStreamSegment(XrefEntryInput* inXrefTable,
 		}
 		else
 		{
-			TRACE_LOG("PDFParser::ReadXrefStreamSegment, unfamiliar entry type. must be either 0,1 or 2");
-			status = eFailure;
+			TRACE_LOG("HummusPDFParser::ReadXrefStreamSegment, unfamiliar entry type. must be either 0,1 or 2");
+			status = ePDFFailure;
 		}
 	}
 	return status;
 }
 
-EStatusCode PDFParser::ReadXrefSegmentValue(IByteReader* inSource,int inEntrySize,long long& outValue)
+EPDFStatusCode HummusPDFParser::ReadXrefSegmentValue(IByteReader* inSource,int inEntrySize,long long& outValue)
 {
 	outValue = 0;
 	Byte buffer;
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
-	for(int i=0;i<inEntrySize && eSuccess == status;++i)
+	for(int i=0;i<inEntrySize && ePDFSuccess == status;++i)
 	{
-		status = (inSource->Read(&buffer,1) == 1 ? eSuccess : eFailure);
-		if(status != eFailure)
+		status = (inSource->Read(&buffer,1) == 1 ? ePDFSuccess : ePDFFailure);
+		if(status != ePDFFailure)
 			outValue = (outValue<<8) + buffer;
 	}
 	return status;
 }
 
-EStatusCode PDFParser::ReadXrefSegmentValue(IByteReader* inSource,int inEntrySize,ObjectIDType& outValue)
+EPDFStatusCode HummusPDFParser::ReadXrefSegmentValue(IByteReader* inSource,int inEntrySize,ObjectIDType& outValue)
 {
 	outValue = 0;
 	Byte buffer;
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
-	for(int i=0;i<inEntrySize && eSuccess == status;++i)
+	for(int i=0;i<inEntrySize && ePDFSuccess == status;++i)
 	{
-		status = (inSource->Read(&buffer,1) == 1 ? eSuccess : eFailure);
-		if(status != eFailure)
+		status = (inSource->Read(&buffer,1) == 1 ? ePDFSuccess : ePDFFailure);
+		if(status != ePDFFailure)
 			outValue = (outValue<<8) + buffer;
 	}
 	return status;
 }
 
-PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
+PDFObject* HummusPDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 {
 	// parsing an object in an object stream requires the following:
 	// 1. Setting the position to this object stream
@@ -1454,7 +1463,7 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 	// 5. Jump to the right object position (or decode till its position)
 	// 6. Read the object
 
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 	ObjectStreamHeaderEntry* objectStreamHeader;
 	IByteReader* objectSource = NULL;
 
@@ -1468,9 +1477,9 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 		PDFObjectCastPtr<PDFStreamInput> objectStream(ParseNewObject(objectStreamID));
 		if(!objectStream)
 		{
-			TRACE_LOG2("PDFParser::ParseExistingInDirectStreamObject, failed to parse object %ld. failed to find object stream for it, which should be %ld",
+			TRACE_LOG2("HummusPDFParser::ParseExistingInDirectStreamObject, failed to parse object %ld. failed to find object stream for it, which should be %ld",
 						inObjectId,mXrefTable[inObjectId].mObjectPosition);
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -1479,8 +1488,8 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 		PDFObjectCastPtr<PDFInteger> streamObjectsCount(QueryDictionaryObject(streamDictionary.GetPtr(),"N"));
 		if(!streamObjectsCount)
 		{
-			TRACE_LOG1("PDFParser::ParseExistingInDirectStreamObject, no N key in stream dictionary %ld",objectStreamID);
-			status = eFailure;
+			TRACE_LOG1("HummusPDFParser::ParseExistingInDirectStreamObject, no N key in stream dictionary %ld",objectStreamID);
+			status = ePDFFailure;
 			break;
 		}
 		ObjectIDType objectsCount = (ObjectIDType)streamObjectsCount->GetValue();
@@ -1488,8 +1497,8 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 		PDFObjectCastPtr<PDFInteger> firstStreamObjectPosition(QueryDictionaryObject(streamDictionary.GetPtr(),"First"));
 		if(!streamObjectsCount)
 		{
-			TRACE_LOG1("PDFParser::ParseExistingInDirectStreamObject, no First key in stream dictionary %ld",objectStreamID);
-			status = eFailure;
+			TRACE_LOG1("HummusPDFParser::ParseExistingInDirectStreamObject, no First key in stream dictionary %ld",objectStreamID);
+			status = ePDFFailure;
 			break;
 		}		
 
@@ -1505,7 +1514,7 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 		{
 			objectStreamHeader = new ObjectStreamHeaderEntry[objectsCount];
 			status = ParseObjectStreamHeader(objectStreamHeader,objectsCount);
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 			{
 				delete[] objectStreamHeader;
 				break;
@@ -1517,12 +1526,12 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 		// verify that i got the right object ID
 		if(objectsCount <= mXrefTable[inObjectId].mRivision || objectStreamHeader[mXrefTable[inObjectId].mRivision].mObjectNumber != inObjectId)
 		{
-			TRACE_LOG2("PDFParser::ParseXrefFromXrefStream, wrong object. expecting to find object ID %ld, and found %ld",
+			TRACE_LOG2("HummusPDFParser::ParseXrefFromXrefStream, wrong object. expecting to find object ID %ld, and found %ld",
 						inObjectId,
 						objectsCount <= mXrefTable[inObjectId].mRivision ? 
 							-1 :
 							objectStreamHeader[mXrefTable[inObjectId].mRivision].mObjectNumber);
-			status = eFailure;
+			status = ePDFFailure;
 			break;
 		}
 
@@ -1541,7 +1550,7 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 
 	mObjectParser.SetReadStream(mStream,&mCurrentPositionProvider);
 
-	if(eSuccess == status)
+	if(ePDFSuccess == status)
 	{
 		return anObject;
 	}
@@ -1553,26 +1562,26 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 	}
 }
 
-EStatusCode PDFParser::ParseObjectStreamHeader(ObjectStreamHeaderEntry* inHeaderInfo,ObjectIDType inObjectsCount)
+EPDFStatusCode HummusPDFParser::ParseObjectStreamHeader(ObjectStreamHeaderEntry* inHeaderInfo,ObjectIDType inObjectsCount)
 {
 	ObjectIDType currentObject = 0;
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
-	while(currentObject < inObjectsCount && (eSuccess == status))
+	while(currentObject < inObjectsCount && (ePDFSuccess == status))
 	{
 		PDFObjectCastPtr<PDFInteger> objectNumber(mObjectParser.ParseNewObject());
 		if(!objectNumber)
 		{
-			TRACE_LOG("PDFParser::ParseObjectStreamHeader, parsing failed when reading object number. either not enough objects, or of the wrong type");
-			status = eFailure;
+			TRACE_LOG("HummusPDFParser::ParseObjectStreamHeader, parsing failed when reading object number. either not enough objects, or of the wrong type");
+			status = ePDFFailure;
 			break;
 		}
 
 		PDFObjectCastPtr<PDFInteger> objectPosition(mObjectParser.ParseNewObject());
 		if(!objectPosition)
 		{
-			TRACE_LOG("PDFParser::ParseObjectStreamHeader, parsing failed when reading object position. either not enough objects, or of the wrong type");
-			status = eFailure;
+			TRACE_LOG("HummusPDFParser::ParseObjectStreamHeader, parsing failed when reading object position. either not enough objects, or of the wrong type");
+			status = ePDFFailure;
 			break;
 		}
 		inHeaderInfo[currentObject].mObjectNumber = (ObjectIDType)(objectNumber->GetValue());
@@ -1582,11 +1591,11 @@ EStatusCode PDFParser::ParseObjectStreamHeader(ObjectStreamHeaderEntry* inHeader
 	return status;
 }
 
-IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
+IByteReader* HummusPDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 {
 	RefCountPtr<PDFDictionary> streamDictionary(inStream->QueryStreamDictionary());
 	IByteReader* result = NULL;
-	EStatusCode status = eSuccess;
+	EPDFStatusCode status = ePDFSuccess;
 
 	do
 	{
@@ -1595,8 +1604,8 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 		PDFObjectCastPtr<PDFInteger> lengthObject(QueryDictionaryObject(streamDictionary.GetPtr(),"Length"));	
 		if(!lengthObject)
 		{
-			TRACE_LOG("PDFParser::CreateInputStreamReader, stream does not have length, failing");
-			status = eFailure;
+			TRACE_LOG("HummusPDFParser::CreateInputStreamReader, stream does not have length, failing");
+			status = ePDFFailure;
 			break;
 		}	
 
@@ -1612,8 +1621,8 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 		// check for flate
 		if(filterObject->GetType() != ePDFObjectName || ((PDFName*)(filterObject.GetPtr()))->GetValue() != "FlateDecode")
 		{
-			TRACE_LOG("PDFParser::CreateInputStreamReader, supporting only flate decode, failing");
-			status = eFailure;
+			TRACE_LOG("HummusPDFParser::CreateInputStreamReader, supporting only flate decode, failing");
+			status = ePDFFailure;
 			break;
 		}
 
@@ -1691,8 +1700,8 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 			}
 			default:
 			{
-				TRACE_LOG("PDFParser::CreateInputStreamReader, supporting only predictor of types 1,2,10,11,12,13,14,15, failing");
-				status = eFailure;
+				TRACE_LOG("HummusPDFParser::CreateInputStreamReader, supporting only predictor of types 1,2,10,11,12,13,14,15, failing");
+				status = ePDFFailure;
 				break;
 			}
 		}
@@ -1700,7 +1709,7 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 	}while(false);
 
 
-	if(status != eSuccess)
+	if(status != ePDFSuccess)
 	{
 		delete result;
 		result = NULL;
@@ -1708,9 +1717,9 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 	return result;
 }
 
-EStatusCode PDFParser::StartStateFileParsing(IByteReaderWithPosition* inSourceStream)
+EPDFStatusCode HummusPDFParser::StartStateFileParsing(IByteReaderWithPosition* inSourceStream)
 {
-	EStatusCode status;
+	EPDFStatusCode status;
 
 	ResetParser();
 
@@ -1726,15 +1735,15 @@ EStatusCode PDFParser::StartStateFileParsing(IByteReaderWithPosition* inSourceSt
 		mLastAvailableIndex = mCurrentBufferIndex = mLinesBuffer;
 
 		status = ParseEOFLine();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		status = ParseLastXrefPosition();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 		status = ParseFileDirectory(); // that would be the xref and trailer
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 			break;
 
 	}while(false);

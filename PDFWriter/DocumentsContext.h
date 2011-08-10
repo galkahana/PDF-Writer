@@ -1,5 +1,5 @@
 /*
-   Source File : DocumentContext.h
+   Source File : DocumentsContext.h
 
 
    Copyright 2011 Gal Kahana PDFWriter
@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "EPDFVersion.h"
 #include "IOBasicTypes.h"
 #include "TrailerInformation.h"
@@ -47,7 +47,7 @@ class ObjectsContext;
 class PDFPage;
 class PageTree;
 class OutputFile;
-class IDocumentContextExtender;
+class IDocumentsContextExtender;
 class PageContentContext;
 class ResourcesDictionary;
 class PDFFormXObject;
@@ -55,25 +55,25 @@ class PDFRectangle;
 class PDFImageXObject;
 class PDFUsedFont;
 class PageContentContext;
-class PDFParser;
+class HummusPDFParser;
 class PDFDictionary;
 class PDFDocumentCopyingContext;
 
-typedef set<IDocumentContextExtender*> IDocumentContextExtenderSet;
-typedef pair<EStatusCode,ObjectIDType> EStatusCodeAndObjectIDType;
+typedef set<IDocumentsContextExtender*> IDocumentsContextExtenderSet;
+typedef pair<EPDFStatusCode,ObjectIDType> EPDFStatusCodeAndObjectIDType;
 typedef list<ObjectIDType> ObjectIDTypeList;
 typedef map<ObjectIDType,string> ObjectIDTypeToStringMap;
 
-class DocumentContext
+class DocumentsContext
 {
 public:
-	DocumentContext();
-	~DocumentContext();
+	DocumentsContext();
+	~DocumentsContext();
 
 	void SetObjectsContext(ObjectsContext* inObjectsContext);
 	void SetOutputFileInformation(OutputFile* inOutputFile);
-	EStatusCode	WriteHeader(EPDFVersion inPDFVersion);
-	EStatusCode	FinalizePDF();
+	EPDFStatusCode	WriteHeader(EPDFVersion inPDFVersion);
+	EPDFStatusCode	FinalizePDF();
 
 	TrailerInformation& GetTrailerInformation();
 	CatalogInformation& GetCatalogInformation();
@@ -90,16 +90,16 @@ public:
 	// first the content before the image is written, then the content is paused, a new object that represents the image
 	// is written, and then the content continues showing the image with a "do" operator. This is also the cause for creating multiple content
 	// streams for a page (and what will happen in this implementation as well).
-	EStatusCode PausePageContentContext(PageContentContext* inPageContext);
+	EPDFStatusCode PausePageContentContext(PageContentContext* inPageContext);
 
 	// Finalize and release the page context. the current content stream is flushed to the PDF stream
-	EStatusCode EndPageContentContext(PageContentContext* inPageContext);
+	EPDFStatusCode EndPageContentContext(PageContentContext* inPageContext);
 
 	// Determine whether this page already has a content context
 	bool HasContentContext(PDFPage* inPage);
 	
-	EStatusCodeAndObjectIDType WritePage(PDFPage* inPage);
-	EStatusCodeAndObjectIDType WritePageAndRelease(PDFPage* inPage);
+	EPDFStatusCodeAndObjectIDType WritePage(PDFPage* inPage);
+	EPDFStatusCodeAndObjectIDType WritePageAndRelease(PDFPage* inPage);
 
 	// Use this to add annotation references to a page. the references will be written on the next page write (see WritePage and WritePageAndRelease)
 	void RegisterAnnotationReferenceForNextPageWrite(ObjectIDType inAnnotationReference);
@@ -107,10 +107,10 @@ public:
 	// Form XObject creation and finalization
 	PDFFormXObject* StartFormXObject(const PDFRectangle& inBoundingBox,const double* inMatrix = NULL);
 	PDFFormXObject* StartFormXObject(const PDFRectangle& inBoundingBox,ObjectIDType inFormXObjectID,const double* inMatrix = NULL);
-	EStatusCode EndFormXObjectAndRelease(PDFFormXObject* inFormXObject);
+	EPDFStatusCode EndFormXObjectAndRelease(PDFFormXObject* inFormXObject);
 
 	// no release version of ending a form XObject. owner should delete it (regular delete...nothin special)
-	EStatusCode EndFormXObjectNoRelease(PDFFormXObject* inFormXObject);
+	EPDFStatusCode EndFormXObjectNoRelease(PDFFormXObject* inFormXObject);
 
 	// Image XObject creating. 
 	// note that as oppose to other methods, create the image xobject also writes it, so there's no "WriteXXXXAndRelease" for image.
@@ -145,48 +145,48 @@ public:
 	// PDF
 	// CreateFormXObjectsFromPDF is for using input PDF pages as objects in one page or more. you can used the returned IDs to place the 
 	// created form xobjects
-	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
 															 const PDFPageRange& inPageRange,
 															 EPDFPageBox inPageBoxToUseAsFormBox,
 															 const double* inTransformationMatrix = NULL,
 															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
-	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
 															 const PDFPageRange& inPageRange,
 															 EPDFPageBox inPageBoxToUseAsFormBox,
 															 const double* inTransformationMatrix = NULL,
 															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 	
 	// CreateFormXObjectsFromPDF is an override to allow you to determine a custom crop for the page embed
-	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
 															 const PDFPageRange& inPageRange,
 															 const PDFRectangle& inCropBox,
 															 const double* inTransformationMatrix = NULL,
 															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
-	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
 															 const PDFPageRange& inPageRange,
 															 const PDFRectangle& inCropBox,
 															 const double* inTransformationMatrix = NULL,
 															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
 	// AppendPDFPagesFromPDF is for simple appending of the input PDF pages
-	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
+	EPDFStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
 														const PDFPageRange& inPageRange,
 														const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 	
-	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(IByteReaderWithPosition* inPDFStream,
+	EPDFStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(IByteReaderWithPosition* inPDFStream,
 														const PDFPageRange& inPageRange,
 														const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
 	// MergePDFPagesToPage, merge PDF pages content to an input page. good for single-placement of a page content, cheaper than creating
 	// and XObject and later placing, when the intention is to use this graphic just once.
-	EStatusCode MergePDFPagesToPage(PDFPage* inPage,
+	EPDFStatusCode MergePDFPagesToPage(PDFPage* inPage,
 									const wstring& inPDFFilePath,
 									const PDFPageRange& inPageRange,
 									const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
-	EStatusCode MergePDFPagesToPage(PDFPage* inPage,
+	EPDFStatusCode MergePDFPagesToPage(PDFPage* inPage,
 									IByteReaderWithPosition* inPDFStream,
 									const PDFPageRange& inPageRange,
 									const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
@@ -201,25 +201,25 @@ public:
 	PDFUsedFont* GetFontForFile(const wstring& inFontFilePath,const wstring& inAdditionalMeticsFilePath);
 
 	// URL should be encoded to be a valid URL, ain't gonna be checking that!
-	EStatusCode AttachURLLinktoCurrentPage(const wstring& inURL,const PDFRectangle& inLinkClickArea);
+	EPDFStatusCode AttachURLLinktoCurrentPage(const wstring& inURL,const PDFRectangle& inLinkClickArea);
 
 	// Extensibility
-	void AddDocumentContextExtender(IDocumentContextExtender* inExtender);
-	void RemoveDocumentContextExtender(IDocumentContextExtender* inExtender);
+	void AddDocumentsContextExtender(IDocumentsContextExtender* inExtender);
+	void RemoveDocumentsContextExtender(IDocumentsContextExtender* inExtender);
 
 	// JPG images handler for retrieving JPG images information
 	JPEGImageHandler& GetJPEGImageHandler();
 
 
-	EStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
-	EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);
+	EPDFStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
+	EPDFStatusCode ReadState(HummusPDFParser* inStateReader,ObjectIDType inObjectID);
 	
 private:
 	ObjectsContext* mObjectsContext;
 	TrailerInformation mTrailerInformation;
 	CatalogInformation mCatalogInformation;
 	wstring mOutputFilePath;
-	IDocumentContextExtenderSet mExtenders;
+	IDocumentsContextExtenderSet mExtenders;
 	JPEGImageHandler mJPEGImageHandler;
 	TIFFImageHandler mTIFFImageHandler;
 	PDFDocumentHandler mPDFDocumentHandler;
@@ -228,34 +228,34 @@ private:
 	
 	void WriteHeaderComment(EPDFVersion inPDFVersion);
 	void Write4BinaryBytes();
-	EStatusCode WriteCatalogObject();
-	EStatusCode WriteTrailerDictionary();
+	EPDFStatusCode WriteCatalogObject();
+	EPDFStatusCode WriteTrailerDictionary();
 	void WriteXrefReference(LongFilePositionType inXrefTablePosition);
 	void WriteFinalEOF();
 	void WriteInfoDictionary();
 	void WritePagesTree();
 	int WritePageTree(PageTree* inPageTreeToWrite);
 	string GenerateMD5IDForFile();
-	EStatusCode WriteResourcesDictionary(ResourcesDictionary& inResourcesDictionary);
+	EPDFStatusCode WriteResourcesDictionary(ResourcesDictionary& inResourcesDictionary);
 	void WriteResourceDictionary(DictionaryContext* inResourcesDictionary,
 								const string& inResourceDictionaryLabel,
 								MapIterator<ObjectIDTypeToStringMap> inMapping);
 	bool IsIdentityMatrix(const double* inMatrix);
-	EStatusCode WriteUsedFontsDefinitions();
-	EStatusCodeAndObjectIDType WriteAnnotationAndLinkForURL(const wstring& inURL,const PDFRectangle& inLinkClickArea);
+	EPDFStatusCode WriteUsedFontsDefinitions();
+	EPDFStatusCodeAndObjectIDType WriteAnnotationAndLinkForURL(const wstring& inURL,const PDFRectangle& inLinkClickArea);
 
 	void WriteTrailerState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
 	void WriteTrailerInfoState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
 	void WriteDateState(ObjectsContext* inStateWriter,const PDFDate& inDate);
 	void WriteCatalogInformationState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
-	void ReadTrailerState(PDFParser* inStateReader,PDFDictionary* inTrailerState);
-	void ReadTrailerInfoState(PDFParser* inStateReader,PDFDictionary* inTrailerInfoState);
+	void ReadTrailerState(HummusPDFParser* inStateReader,PDFDictionary* inTrailerState);
+	void ReadTrailerInfoState(HummusPDFParser* inStateReader,PDFDictionary* inTrailerInfoState);
 	void ReadDateState(PDFDictionary* inDateState,PDFDate& inDate);
-	void ReadCatalogInformationState(PDFParser* inStateReader,PDFDictionary* inCatalogInformationState);
+	void ReadCatalogInformationState(HummusPDFParser* inStateReader,PDFDictionary* inCatalogInformationState);
 
 	ObjectIDType mCurrentPageTreeIDInState;
 
 	void WritePageTreeState(ObjectsContext* inStateWriter,ObjectIDType inObjectID,PageTree* inPageTree);
-	void ReadPageTreeState(PDFParser* inStateReader,PDFDictionary* inPageTreeState,PageTree* inPageTree);
+	void ReadPageTreeState(HummusPDFParser* inStateReader,PDFDictionary* inPageTreeState,PageTree* inPageTree);
 
 };

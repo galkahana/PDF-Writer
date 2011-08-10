@@ -2,7 +2,7 @@
    Source File : EmptyPagesPDF.cpp
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2011 Gal Kahana HummusPDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
    
 */
 #include "EmptyPagesPDF.h"
-#include "PDFWriter.h"
+#include "HummusPDFWriter.h"
 #include "PDFPage.h"
 #include "PDFRectangle.h"
 #include "TestsRunner.h"
@@ -36,16 +36,16 @@ EmptyPagesPDF::~EmptyPagesPDF(void)
 {
 }
 
-EStatusCode EmptyPagesPDF::Run()
+EPDFStatusCode EmptyPagesPDF::Run()
 {
-	PDFWriter pdfWriter;
+	HummusPDFWriter pdfWriter;
 	LogConfiguration logConfiguration(false,L"C:\\PDFLibTests\\EmptyPagesLog.txt");
-	EStatusCode status; 
+	EPDFStatusCode status; 
 
 	do
 	{
 		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\EmptyPages.PDF",ePDFVersion13,logConfiguration);
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed to start PDF\n";
 			break;
@@ -55,16 +55,16 @@ EStatusCode EmptyPagesPDF::Run()
 		PDFPage* page = new PDFPage();
 		page->SetMediaBox(PDFRectangle(0,0,595,842));
 
-		for(int i=0;i<4 && eSuccess == status;++i)
+		for(int i=0;i<4 && ePDFSuccess == status;++i)
 		{
 			status = pdfWriter.WritePage(page);
-			if(status != eSuccess)
+			if(status != ePDFSuccess)
 				wcout<<"failed to write page "<<i<<"\n";
 		}
 		delete page;		
 
 		status = pdfWriter.EndPDF();
-		if(status != eSuccess)
+		if(status != ePDFSuccess)
 		{
 			wcout<<"failed in end PDF\n";
 			break;

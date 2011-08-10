@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EStatusCode.h"
+#include "EPDFStatusCode.h"
 #include "ObjectsBasicTypes.h"
 #include "GlyphUnicodeMapping.h"
 
@@ -35,7 +35,7 @@ typedef list<GlyphUnicodeMappingList> GlyphUnicodeMappingListList;
 
 class FreeTypeFaceWrapper;
 class ObjectsContext;
-class PDFParser;
+class HummusPDFParser;
 
 class IWrittenFont
 {
@@ -61,10 +61,10 @@ public:
 	/*
 		Write a font definition using the glyphs appended.
 	*/
-	virtual EStatusCode WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo) = 0;
+	virtual EPDFStatusCode WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo) = 0;
 
 	// state read and write
-	virtual EStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID) = 0;
-	virtual EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID) = 0;
+	virtual EPDFStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID) = 0;
+	virtual EPDFStatusCode ReadState(HummusPDFParser* inStateReader,ObjectIDType inObjectID) = 0;
 
 };

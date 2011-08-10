@@ -43,7 +43,7 @@ static UIntVector GetOrderedKeys(const UIntAndGlyphEncodingInfoVector& inMap)
 }
 
 
-EStatusCode TrueTypeDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID, 
+EPDFStatusCode TrueTypeDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID, 
 														const string& inFontName,
 														FreeTypeFaceWrapper& inFontInfo,
 														const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
@@ -54,9 +54,9 @@ EStatusCode TrueTypeDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObj
 	mEmbeddedFontFileObjectID = 0;
 
 	TrueTypeEmbeddedFontWriter embeddedFontWriter;
-	EStatusCode status = embeddedFontWriter.WriteEmbeddedFont(inFontInfo,GetOrderedKeys(inEncodedGlyphs),inObjectsContext,mEmbeddedFontFileObjectID);
+	EPDFStatusCode status = embeddedFontWriter.WriteEmbeddedFont(inFontInfo,GetOrderedKeys(inEncodedGlyphs),inObjectsContext,mEmbeddedFontFileObjectID);
 
-	if(eFailure == status)
+	if(ePDFFailure == status)
 		return status;
 
 	DescendentFontWriter descendentFontWriter;
