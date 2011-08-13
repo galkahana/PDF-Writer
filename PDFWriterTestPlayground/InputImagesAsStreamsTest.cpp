@@ -30,10 +30,10 @@ EPDFStatusCode InputImagesAsStreamsTest::Run()
 
 	do
 	{
-		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\ImagesInStreams.PDF",ePDFVersion13);
+		status = pdfWriter.StartPDF("C:\\PDFLibTests\\ImagesInStreams.PDF",ePDFVersion13);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to start PDF\n";
+			cout<<"failed to start PDF\n";
 			break;
 		}	
 
@@ -44,10 +44,10 @@ EPDFStatusCode InputImagesAsStreamsTest::Run()
 
 		InputFile jpgImage;
 
-		status = jpgImage.OpenFile(L"C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG");
+		status = jpgImage.OpenFile("C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG");
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to open JPG image in"<<L"C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG"<<"\n";
+			cout<<"failed to open JPG image in"<<"C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG"<<"\n";
 			break;
 		}
 
@@ -55,7 +55,7 @@ EPDFStatusCode InputImagesAsStreamsTest::Run()
 		PDFFormXObject*  formXObject = pdfWriter.CreateFormXObjectFromJPGStream(jpgImage.GetInputStream());
 		if(!formXObject)
 		{
-			wcout<<"failed to create form XObject from file\n";
+			cout<<"failed to create form XObject from file\n";
 			status = ePDFFailure;
 			break;
 		}
@@ -66,7 +66,7 @@ EPDFStatusCode InputImagesAsStreamsTest::Run()
 		if(NULL == pageContentContext)
 		{
 			status = ePDFFailure;
-			wcout<<"failed to create content context for page\n";
+			cout<<"failed to create content context for page\n";
 		}
 
 		pageContentContext->q();
@@ -79,14 +79,14 @@ EPDFStatusCode InputImagesAsStreamsTest::Run()
 		status = pdfWriter.EndPageContentContext(pageContentContext);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to end page content context\n";
+			cout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to write page\n";
+			cout<<"failed to write page\n";
 			break;
 		}
 
@@ -95,17 +95,17 @@ EPDFStatusCode InputImagesAsStreamsTest::Run()
 		page->SetMediaBox(PDFRectangle(0,0,595,842));
 
 		InputFile tiffFile;
-		status = tiffFile.OpenFile(L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\FLAG_T24.TIF");
+		status = tiffFile.OpenFile("C:\\PDFLibTests\\TestMaterials\\images\\tiff\\FLAG_T24.TIF");
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to open TIFF image in"<<L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\FLAG_T24.TIF"<<"\n";
+			cout<<"failed to open TIFF image in"<<"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\FLAG_T24.TIF"<<"\n";
 			break;
 		}
 
 		formXObject = pdfWriter.CreateFormXObjectFromTIFFStream(tiffFile.GetInputStream());
 		if(!formXObject)
 		{
-			wcout<<"failed to create image form XObject for TIFF\n";
+			cout<<"failed to create image form XObject for TIFF\n";
 			status = ePDFFailure;
 			break;
 		}
@@ -116,7 +116,7 @@ EPDFStatusCode InputImagesAsStreamsTest::Run()
 		if(NULL == pageContentContext)
 		{
 			status = ePDFFailure;
-			wcout<<"failed to create content context for page with TIFF image\n";
+			cout<<"failed to create content context for page with TIFF image\n";
 		}
 
 		// continue page drawing, place the image in 0,0 (playing...could avoid CM at all)
@@ -130,14 +130,14 @@ EPDFStatusCode InputImagesAsStreamsTest::Run()
 		status = pdfWriter.EndPageContentContext(pageContentContext);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to end page content context for TIFF\n";
+			cout<<"failed to end page content context for TIFF\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to write page, for TIFF\n";
+			cout<<"failed to write page, for TIFF\n";
 			break;
 		}
 
@@ -145,17 +145,17 @@ EPDFStatusCode InputImagesAsStreamsTest::Run()
 		
 		InputFile pdfFile;
 
-		status = pdfFile.OpenFile(L"C:\\PDFLibTests\\TestMaterials\\Original.pdf");
+		status = pdfFile.OpenFile("C:\\PDFLibTests\\TestMaterials\\Original.pdf");
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to open PDF file in"<<L"C:\\PDFLibTests\\TestMaterials\\Original.pdf"<<"\n";
+			cout<<"failed to open PDF file in"<<"C:\\PDFLibTests\\TestMaterials\\Original.pdf"<<"\n";
 			break;
 		}
 
 		status = pdfWriter.AppendPDFPagesFromPDF(pdfFile.GetInputStream(),PDFPageRange()).first;
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to append pages from Original.PDF\n";
+			cout<<"failed to append pages from Original.PDF\n";
 			break;
 		}
 
@@ -164,7 +164,7 @@ EPDFStatusCode InputImagesAsStreamsTest::Run()
 		status = pdfWriter.EndPDF();
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed in end PDF\n";
+			cout<<"failed in end PDF\n";
 			break;
 		}
 	}while(false);

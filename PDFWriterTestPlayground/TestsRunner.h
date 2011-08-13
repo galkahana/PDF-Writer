@@ -34,13 +34,13 @@ using namespace std;
 
 class ITestUnit;
 
-typedef pair<wstring,ITestUnit*> WStringAndTestUnit;
-typedef map<wstring,ITestUnit*> WStringToTestUnitMap;
-typedef list<WStringAndTestUnit> WStringAndTestUnitList;
-typedef map<wstring,WStringAndTestUnitList> WStringToWStringAndTestUnitListMap;
-typedef set<wstring> WStringSet;
+typedef pair<string,ITestUnit*> StringAndTestUnit;
+typedef map<string,ITestUnit*> StringToTestUnitMap;
+typedef list<StringAndTestUnit> StringAndTestUnitList;
+typedef map<string,StringAndTestUnitList> StringToStringAndTestUnitListMap;
+typedef set<string> StringSet;
 
-typedef list<wstring> WStringList;
+typedef list<string> StringList;
 
 class TestsRunner
 {
@@ -50,23 +50,23 @@ public:
 
 
 	EPDFStatusCode RunAll();
-	EPDFStatusCode RunTest(const wstring& inTestLabel);
-	EPDFStatusCode RunTests(const WStringList& inTestsLabels);
-	EPDFStatusCode RunCategory(const wstring& inCategory);
-	EPDFStatusCode RunCategories(const WStringList& inCategories);
-	EPDFStatusCode RunCategories(const WStringList& inCategories, const WStringSet& inTestsToExclude);
-	EPDFStatusCode RunExcludeCategories(const WStringSet& inCategories);
-	EPDFStatusCode RunExcludeTests(const WStringSet& inTests);
+	EPDFStatusCode RunTest(const string& inTestLabel);
+	EPDFStatusCode RunTests(const StringList& inTestsLabels);
+	EPDFStatusCode RunCategory(const string& inCategory);
+	EPDFStatusCode RunCategories(const StringList& inCategories);
+	EPDFStatusCode RunCategories(const StringList& inCategories, const StringSet& inTestsToExclude);
+	EPDFStatusCode RunExcludeCategories(const StringSet& inCategories);
+	EPDFStatusCode RunExcludeTests(const StringSet& inTests);
 
-	void AddTest(const wstring& inTestLabel,ITestUnit* inTest);
-	void AddTest(const std::wstring& inTestLabel,const std::wstring& inCategory,ITestUnit* inTest);
+	void AddTest(const string& inTestLabel,ITestUnit* inTest);
+	void AddTest(const std::string& inTestLabel,const std::string& inCategory,ITestUnit* inTest);
 
 private:
-	WStringToWStringAndTestUnitListMap mTests;
-	WStringToTestUnitMap mTestsByName;
+	StringToStringAndTestUnitListMap mTests;
+	StringToTestUnitMap mTestsByName;
 
-	EPDFStatusCode RunTestsInList(const WStringAndTestUnitList& inTests);
-	EPDFStatusCode RunSingleTest(const wstring& inTestName,ITestUnit* inTest);
+	EPDFStatusCode RunTestsInList(const StringAndTestUnitList& inTests);
+	EPDFStatusCode RunSingleTest(const string& inTestName,ITestUnit* inTest);
 	void DeleteTests();
 };
 
@@ -77,7 +77,7 @@ template <class T> \
 class TestRegistrar { \
 	public:  \
 		TestRegistrar(){ \
-			Singleton<TestsRunner>::GetInstance()->AddTest(L#X,new T); \
+			Singleton<TestsRunner>::GetInstance()->AddTest(#X,new T); \
 		} \
 };  \
 static TestRegistrar<X> TestRegistrar;
@@ -87,7 +87,7 @@ template <class T> \
 class TestRegistrar { \
 	public:  \
 		TestRegistrar(){ \
-		Singleton<TestsRunner>::GetInstance()->AddTest(L#X,L##CATEGORY,new T); \
+		Singleton<TestsRunner>::GetInstance()->AddTest(#X,##CATEGORY,new T); \
 		} \
 };  \
 static TestRegistrar<X> TestRegistrar;

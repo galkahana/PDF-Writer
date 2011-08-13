@@ -45,14 +45,14 @@ EPDFStatusCode InputFlateDecodeTester::Run()
 	InputFlateDecodeStream inputDecoder;
 	OutputFlateEncodeStream outputEncoder;
 
-	outputFile.OpenFile(L"C:\\pdflibtests\\source.txt");
+	outputFile.OpenFile("C:\\pdflibtests\\source.txt");
 	outputEncoder.Assign(outputFile.GetOutputStream());
 	outputEncoder.Write((IOBasicTypes::Byte*)aString.c_str(),aString.size());
 	outputEncoder.Assign(NULL);
 	outputFile.CloseFile();
 
 	InputFile inputFile;
-	inputFile.OpenFile(L"C:\\pdflibtests\\source.txt");
+	inputFile.OpenFile("C:\\pdflibtests\\source.txt");
 	inputDecoder.Assign(inputFile.GetInputStream());
 
 	bool isSame = true;
@@ -65,7 +65,7 @@ EPDFStatusCode InputFlateDecodeTester::Run()
 
 		if(amountRead != 1)
 		{
-			wcout<<"Read failes. expected "<<1<<" characters. Found"<<amountRead<<"\n";
+			cout<<"Read failes. expected "<<1<<" characters. Found"<<amountRead<<"\n";
 			isSame = false;
 			break;
 		}
@@ -78,7 +78,7 @@ EPDFStatusCode InputFlateDecodeTester::Run()
 
 	if(!isSame)
 	{
-		wcout<<"Read failes. different characters than what expected\n";
+		cout<<"Read failes. different characters than what expected\n";
 		return ePDFFailure;
 	}
 	else

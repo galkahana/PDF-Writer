@@ -20,7 +20,6 @@
 */
 #include "FreeTypeWrapper.h"
 #include "Trace.h"
-#include "StringTraits.h"
 #include "InputFile.h"
 #include "IByteReaderWithPosition.h"
 
@@ -62,50 +61,15 @@ FreeTypeWrapper::~FreeTypeWrapper(void)
 	}
 }
 
+// using my own streams, to implement UTF8 paths
 FT_Face FreeTypeWrapper::NewFace(const string& inFilePath,FT_Long inFontIndex)
-{
-	FT_Face face;
-	
-	FT_Error ftStatus = FT_New_Face(mFreeType,inFilePath.c_str(),inFontIndex,&face);
-
-	if(ftStatus)
-	{
-		TRACE_LOG2("FreeTypeWrapper::NewFace, unable to load font named %s with index %ld",StringTraits(inFilePath).WidenString().c_str(),inFontIndex);
-		TRACE_LOG2("FreeTypeWrapper::NewFace, Free Type Error, Code = %d, Message = %s",ft_errors[ftStatus].err_code,StringTraits(ft_errors[ftStatus].err_msg).WidenString().c_str());
-		face = NULL;
-	}
-	return face;
-}
-
-FT_Face FreeTypeWrapper::NewFace(const string& inFilePath,const string& inSecondaryFilePath,FT_Long inFontIndex)
-{
-	FT_Face face = NewFace(inFilePath,inFontIndex);
-	if(face)
-	{
-		FT_Error ftStatus = FT_Attach_File(face,inSecondaryFilePath.c_str());
-		if(ftStatus != 0)
-		{
-			TRACE_LOG1("FreeTypeWrapper::NewFace, unable to load secondary file %s",StringTraits(inSecondaryFilePath).WidenString().c_str());
-			TRACE_LOG2("FreeTypeWrapper::NewFace, Free Type Error, Code = %d, Message = %s",ft_errors[ftStatus].err_code,StringTraits(ft_errors[ftStatus].err_msg).WidenString().c_str());
-			DoneFace(face);
-			face = NULL;
-		}
-	}
-	return face;
-}
-
-
-// Couldn't find freetype implementation for NewFace with wide charachter paths. so 
-// using my own InputFile class i'm implementing a stream for reading a file via FreeType. Through InputFile i can
-// use wide charachter paths.
-FT_Face FreeTypeWrapper::NewFace(const wstring& inFilePath,FT_Long inFontIndex)
 {
 	FT_Face face;
 	FT_Open_Args openFaceArguments;
 
 	do
 	{
-		if(FillOpenFaceArgumentsForWideString(inFilePath,openFaceArguments) != ePDFSuccess)
+		if(FillOpenFaceArgumentsForUTF8String(inFilePath,openFaceArguments) != ePDFSuccess)
 		{
 			face = NULL;
 			break;
@@ -116,7 +80,7 @@ FT_Face FreeTypeWrapper::NewFace(const wstring& inFilePath,FT_Long inFontIndex)
 		if(ftStatus)
 		{
 			TRACE_LOG2("FreeTypeWrapper::NewFace, unable to load font named %s with index %ld",inFilePath.c_str(),inFontIndex);
-			TRACE_LOG2("FreeTypeWrapper::NewFace, Free Type Error, Code = %d, Message = %s",ft_errors[ftStatus].err_code,StringTraits(ft_errors[ftStatus].err_msg).WidenString().c_str());
+			TRACE_LOG2("FreeTypeWrapper::NewFace, Free Type Error, Code = %d, Message = %s",ft_errors[ftStatus].err_code,ft_errors[ftStatus].err_msg);
 			face = NULL;
 		}
 
@@ -129,7 +93,7 @@ FT_Face FreeTypeWrapper::NewFace(const wstring& inFilePath,FT_Long inFontIndex)
 	return face;
 }
 
-EPDFStatusCode FreeTypeWrapper::FillOpenFaceArgumentsForWideString(const wstring& inFilePath, FT_Open_Args& ioArgs)
+EPDFStatusCode FreeTypeWrapper::FillOpenFaceArgumentsForUTF8String(const string& inFilePath, FT_Open_Args& ioArgs)
 {
 	ioArgs.flags = FT_OPEN_STREAM;
 	ioArgs.memory_base = NULL;
@@ -169,7 +133,7 @@ void FreeTypeWrapper::RegisterStreamForFace(FT_Face inFace,FT_Stream inStream)
 }
 
 
-FT_Face FreeTypeWrapper::NewFace(const wstring& inFilePath,const wstring& inSecondaryFilePath,FT_Long inFontIndex)
+FT_Face FreeTypeWrapper::NewFace(const string& inFilePath,const string& inSecondaryFilePath,FT_Long inFontIndex)
 {
 	FT_Open_Args attachStreamArguments;
 
@@ -178,7 +142,7 @@ FT_Face FreeTypeWrapper::NewFace(const wstring& inFilePath,const wstring& inSeco
 	{
 		do
 		{
-			if(FillOpenFaceArgumentsForWideString(inSecondaryFilePath,attachStreamArguments) != ePDFSuccess)
+			if(FillOpenFaceArgumentsForUTF8String(inSecondaryFilePath,attachStreamArguments) != ePDFSuccess)
 			{
 				DoneFace(face);
 				face = NULL;
@@ -189,7 +153,7 @@ FT_Face FreeTypeWrapper::NewFace(const wstring& inFilePath,const wstring& inSeco
 			if(ftStatus != 0)
 			{
 				TRACE_LOG1("FreeTypeWrapper::NewFace, unable to load secondary file %s",inSecondaryFilePath.c_str());
-				TRACE_LOG2("FreeTypeWrapper::NewFace, Free Type Error, Code = %d, Message = %s",ft_errors[ftStatus].err_code,StringTraits(ft_errors[ftStatus].err_msg).WidenString().c_str());
+				TRACE_LOG2("FreeTypeWrapper::NewFace, Free Type Error, Code = %d, Message = %s",ft_errors[ftStatus].err_code,ft_errors[ftStatus].err_msg);
 				DoneFace(face);
 				face = NULL;
 			}
@@ -253,7 +217,7 @@ static void InputFileClose(FT_Stream  stream)
 	stream->descriptor.pointer = NULL;
 }
 
-FT_Stream FreeTypeWrapper::CreateFTStreamForPath(const wstring& inFilePath)
+FT_Stream FreeTypeWrapper::CreateFTStreamForPath(const string& inFilePath)
 {
 	InputFile* inputFile = new InputFile;
 

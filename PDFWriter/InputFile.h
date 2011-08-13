@@ -35,16 +35,16 @@ public:
 	InputFile(void);
 	~InputFile(void);
 
-	EPDFStatusCode OpenFile(const wstring& inFilePath);
+	EPDFStatusCode OpenFile(const string& inFilePath);
 	EPDFStatusCode CloseFile();
 
 	IByteReaderWithPosition* GetInputStream(); // returns buffered input stream
-	const wstring& GetFilePath();
+	const string& GetFilePath();
 	
 	LongFilePositionType GetFileSize();
 
 private:
-	wstring mFilePath;
+	string mFilePath;
 	InputBufferedStream* mInputStream;
 	InputFileStream* mFileStream;
 };

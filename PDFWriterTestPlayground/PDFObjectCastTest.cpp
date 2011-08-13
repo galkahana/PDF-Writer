@@ -44,27 +44,27 @@ EPDFStatusCode PDFObjectCastTest::Run()
 	PDFObjectCastPtr<PDFName> aNonName1(NULL);
 	if(!(!aNonName1))
 	{
-		wcout<<"Casting null to PDFName should provide NULL. fail\n";
+		cout<<"Casting null to PDFName should provide NULL. fail\n";
 		status = ePDFFailure;
 	}
 
 	PDFObjectCastPtr<PDFName> aNonName2(new PDFDictionary());
 	if(!(!aNonName2))
 	{
-		wcout<<"Casting PDFDictionary to PDFName should provide NULL. fail\n";
+		cout<<"Casting PDFDictionary to PDFName should provide NULL. fail\n";
 		status = ePDFFailure;
 	}
 
 	PDFObjectCastPtr<PDFName> aName3(new PDFName("aName"));
 	if((!aName3))
 	{
-		wcout<<"Casting PDName to PDFName should provide PDFName. fail\n";
+		cout<<"Casting PDName to PDFName should provide PDFName. fail\n";
 		status = ePDFFailure;
 	}
 
 	if(aName3->GetValue() != "aName")
 	{
-		wcout<<"should be aName, is "<<aName3->GetValue().c_str()<<"\n";
+		cout<<"should be aName, is "<<aName3->GetValue().c_str()<<"\n";
 		status = ePDFFailure;
 	}
 

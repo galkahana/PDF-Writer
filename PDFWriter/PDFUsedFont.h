@@ -34,7 +34,7 @@ using namespace std;
 
 typedef list<unsigned short> UShortList;
 typedef list<UShortList> UShortListList;
-typedef list<wstring> WStringList;
+typedef list<string> StringList;
 typedef list<GlyphUnicodeMappingList> GlyphUnicodeMappingListList;
 
 class IWrittenFont;
@@ -45,8 +45,8 @@ class PDFUsedFont
 {
 public:
 	PDFUsedFont(FT_Face inInputFace,
-				const wstring& inFontFilePath,
-				const wstring& inAdditionalMetricsFontFilePath,
+				const string& inFontFilePath,
+				const string& inAdditionalMetricsFontFilePath,
 				ObjectsContext* inObjectsContext);
 	virtual ~PDFUsedFont(void);
 
@@ -74,7 +74,7 @@ public:
 	EPDFStatusCode WriteFontDefinition();
 
 	// use this method to translate text to glyphs and unicode mapping, to be later used for EncodeStringForShowing
-	EPDFStatusCode TranslateStringToGlyphs(const wstring& inText,GlyphUnicodeMappingList& outGlyphsUnicodeMapping);
+	EPDFStatusCode TranslateStringToGlyphs(const string& inText,GlyphUnicodeMappingList& outGlyphsUnicodeMapping);
 
 	EPDFStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
 	EPDFStatusCode ReadState(HummusPDFParser* inStateReader,ObjectIDType inObjectID);

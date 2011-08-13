@@ -156,9 +156,6 @@
     <ClInclude Include="SafeBufferMacrosDefs.h">
       <Filter>Infrastracture\Basics</Filter>
     </ClInclude>
-    <ClInclude Include="StringTraits.h">
-      <Filter>Infrastracture\Basics</Filter>
-    </ClInclude>
     <ClInclude Include="BoxingBase.h">
       <Filter>Infrastracture\Patterns</Filter>
     </ClInclude>
@@ -444,9 +441,6 @@
     <ClInclude Include="TrueTypeDescendentFontWriter.h">
       <Filter>Text\PDF Font Definitions</Filter>
     </ClInclude>
-    <ClInclude Include="UnicodeEncoding.h">
-      <Filter>Text\PDF Font Definitions</Filter>
-    </ClInclude>
     <ClInclude Include="WrittenFontCFF.h">
       <Filter>Text\PDF Font Definitions</Filter>
     </ClInclude>
@@ -559,6 +553,9 @@
     <ClInclude Include="HummusPDFParser.h">
       <Filter>PDF Embedding</Filter>
     </ClInclude>
+    <ClInclude Include="UnicodeString.h">
+      <Filter>Infrastracture\Encoding</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="InputBufferedStream.cpp">
@@ -607,9 +604,6 @@
       <Filter>Infrastracture\IO</Filter>
     </ClCompile>
     <ClCompile Include="CMYKRGBColor.cpp">
-      <Filter>Infrastracture\Basics</Filter>
-    </ClCompile>
-    <ClCompile Include="StringTraits.cpp">
       <Filter>Infrastracture\Basics</Filter>
     </ClCompile>
     <ClCompile Include="RefCountObject.cpp">
@@ -828,9 +822,6 @@
     <ClCompile Include="TrueTypeDescendentFontWriter.cpp">
       <Filter>Text\PDF Font Definitions</Filter>
     </ClCompile>
-    <ClCompile Include="UnicodeEncoding.cpp">
-      <Filter>Text\PDF Font Definitions</Filter>
-    </ClCompile>
     <ClCompile Include="WrittenFontCFF.cpp">
       <Filter>Text\PDF Font Definitions</Filter>
     </ClCompile>
@@ -924,6 +915,9 @@
     </ClCompile>
     <ClCompile Include="HummusPDFParser.cpp">
       <Filter>PDF Embedding</Filter>
+    </ClCompile>
+    <ClCompile Include="UnicodeString.cpp">
+      <Filter>Infrastracture\Encoding</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

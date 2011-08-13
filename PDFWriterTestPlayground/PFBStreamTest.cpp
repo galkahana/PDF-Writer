@@ -47,16 +47,16 @@ EPDFStatusCode PFBStreamTest::Run()
 
 	do
 	{
-		pfbFile.OpenFile(L"C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFB");
+		pfbFile.OpenFile("C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFB");
 
-		decodedPFBFile.OpenFile(L"C:\\PDFLibTests\\decodedPFBFile.txt");
+		decodedPFBFile.OpenFile("C:\\PDFLibTests\\decodedPFBFile.txt");
 
 
 		status = decodeStream.Assign(pfbFile.GetInputStream());
 		
 		if(status != ePDFSuccess)
 		{
-			wcout<<"Failed to assign pfb input stream";
+			cout<<"Failed to assign pfb input stream";
 			break;
 		}
 
@@ -66,7 +66,7 @@ EPDFStatusCode PFBStreamTest::Run()
 
 		if(status != ePDFSuccess)
 		{
-			wcout<<"Failed to decode pfb stream";
+			cout<<"Failed to decode pfb stream";
 			break;
 		}
 	}while(false);

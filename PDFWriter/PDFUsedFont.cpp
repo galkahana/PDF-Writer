@@ -20,7 +20,7 @@
 */
 #include "PDFUsedFont.h"
 #include "IWrittenFont.h"
-#include "UnicodeEncoding.h"
+#include "UnicodeString.h"
 #include "ObjectsContext.h"
 #include "DictionaryContext.h"
 #include "HummusPDFParser.h"
@@ -29,8 +29,8 @@
 #include "PDFIndirectObjectReference.h"
 
 PDFUsedFont::PDFUsedFont(FT_Face inInputFace,
-						 const wstring& inFontFilePath,
-						 const wstring& inAdditionalMetricsFontFilePath,
+						 const string& inFontFilePath,
+						 const string& inAdditionalMetricsFontFilePath,
 						 ObjectsContext* inObjectsContext):mFaceWrapper(inInputFace,inFontFilePath,inAdditionalMetricsFontFilePath)
 {
 	mObjectsContext = inObjectsContext;
@@ -60,22 +60,22 @@ EPDFStatusCode PDFUsedFont::EncodeStringForShowing(const GlyphUnicodeMappingList
 	return ePDFSuccess;
 }
 
-EPDFStatusCode PDFUsedFont::TranslateStringToGlyphs(const wstring& inText,GlyphUnicodeMappingList& outGlyphsUnicodeMapping)
+EPDFStatusCode PDFUsedFont::TranslateStringToGlyphs(const string& inText,GlyphUnicodeMappingList& outGlyphsUnicodeMapping)
 {
 	UIntList glyphs;
-	UnicodeEncoding unicode;
-	ULongVector unicodeCharacters;
+	UnicodeString unicode;
 
-	EPDFStatusCode status = unicode.UTF16ToUnicode(inText,unicodeCharacters);
+	EPDFStatusCode status = unicode.FromUTF8(inText);
 	if(status != ePDFSuccess)
 		return status;
 
-	status = mFaceWrapper.GetGlyphsForUnicodeText(unicodeCharacters,glyphs);
 
-	ULongVector::iterator itUnicode = unicodeCharacters.begin();
+	status = mFaceWrapper.GetGlyphsForUnicodeText(unicode.GetUnicodeList(),glyphs);
+
+	ULongList::const_iterator itUnicode = unicode.GetUnicodeList().begin();
 	UIntList::iterator itGlyphs = glyphs.begin();
 
-	for(; itUnicode != unicodeCharacters.end(); ++itUnicode,++itGlyphs)
+	for(; itUnicode != unicode.GetUnicodeList().end(); ++itUnicode,++itGlyphs)
 		outGlyphsUnicodeMapping.push_back(GlyphUnicodeMapping(*itGlyphs,*itUnicode));
 
 	return status;

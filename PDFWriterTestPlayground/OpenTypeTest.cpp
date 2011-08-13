@@ -27,7 +27,6 @@
 #include "OutputFile.h"
 #include "CharStringType2Tracer.h"
 #include "IByteWriterWithPosition.h"
-#include "StringTraits.h"
 
 #include <iostream>
 
@@ -44,7 +43,7 @@ EPDFStatusCode OpenTypeTest::SaveCharstringCode(unsigned short inFontIndex,unsig
 {
 	OutputFile glyphFile;
 
-	EPDFStatusCode status = glyphFile.OpenFile(wstring(L"C:\\PDFLibTests\\glyphCFF")  + Long(inFontIndex).ToWString() + L"_" + StringTraits(inCFFFileInput->GetGlyphName(0,inGlyphIndex)).WidenString() + L".txt");
+	EPDFStatusCode status = glyphFile.OpenFile(string("C:\\PDFLibTests\\glyphCFF")  + Long(inFontIndex).ToString() + "_" + inCFFFileInput->GetGlyphName(0,inGlyphIndex) + ".txt");
 
 	do
 	{
@@ -74,11 +73,11 @@ EPDFStatusCode OpenTypeTest::TestFont()
 
 	do
 	{
-		status = otfFile.OpenFile(L"C:\\PDFLibTests\\TestMaterials\\fonts\\BrushScriptStd.otf");
+		status = otfFile.OpenFile("C:\\PDFLibTests\\TestMaterials\\fonts\\BrushScriptStd.otf");
 
 		if(status != ePDFSuccess)
 		{
-			wcout<<"cannot read bursh script font file\n";
+			cout<<"cannot read bursh script font file\n";
 			break;
 		}
 
@@ -88,7 +87,7 @@ EPDFStatusCode OpenTypeTest::TestFont()
 		status = openTypeReader.ReadOpenTypeFile(otfFile.GetInputStream());
 		if(status != ePDFSuccess)
 		{
-			wcout<<"could not read open type file\n";
+			cout<<"could not read open type file\n";
 			break;
 		}
 

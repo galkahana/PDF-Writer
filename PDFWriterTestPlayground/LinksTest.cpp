@@ -43,32 +43,32 @@ EPDFStatusCode LinksTest::Run()
 
 	do
 	{
-		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\LinksTest.PDF",ePDFVersion13,LogConfiguration(true,L"C:\\PDFLibTests\\LinksTest.log"));
+		status = pdfWriter.StartPDF("C:\\PDFLibTests\\LinksTest.PDF",ePDFVersion13,LogConfiguration(true,true,"C:\\PDFLibTests\\LinksTest.log"));
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to start PDF\n";
+			cout<<"failed to start PDF\n";
 			break;
 		}	
 
 		PDFPage* page = new PDFPage();
 		page->SetMediaBox(PDFRectangle(0,0,595,842));
 
-		PDFFormXObject* soundCloudLogo = pdfWriter.CreateFormXObjectFromJPGFile(L"c:\\PDFLibTests\\TestMaterials\\Images\\soundcloud_logo.jpg");
+		PDFFormXObject* soundCloudLogo = pdfWriter.CreateFormXObjectFromJPGFile("c:\\PDFLibTests\\TestMaterials\\Images\\soundcloud_logo.jpg");
 
 
 		PageContentContext* contentContext = pdfWriter.StartPageContentContext(page);
 		if(NULL == contentContext)
 		{
 			status = ePDFFailure;
-			wcout<<"failed to create content context for page\n";
+			cout<<"failed to create content context for page\n";
 			break;
 		}
 
-		PDFUsedFont* font = pdfWriter.GetFontForFile(L"C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
+		PDFUsedFont* font = pdfWriter.GetFontForFile("C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
 		if(!font)
 		{
 			status = ePDFFailure;
-			wcout<<"Failed to create font object for arial.ttf\n";
+			cout<<"Failed to create font object for arial.ttf\n";
 			break;
 		}
 
@@ -77,9 +77,9 @@ EPDFStatusCode LinksTest::Run()
 		contentContext->k(0,0,0,1);
 		contentContext->Tf(font,1);
 		contentContext->Tm(11,0,0,11,90.024,709.54);
-		EPDFStatusCode encodingStatus = contentContext->Tj(L"http://pdfhummus.com");
+		EPDFStatusCode encodingStatus = contentContext->Tj("http://pdfhummus.com");
 		if(encodingStatus != ePDFSuccess)
-			wcout<<"Could not find some of the glyphs for this font (arial)";
+			cout<<"Could not find some of the glyphs for this font (arial)";
 		// continue even if failed...want to see how it looks like
 		contentContext->ET();
 
@@ -92,7 +92,7 @@ EPDFStatusCode LinksTest::Run()
 		status = pdfWriter.EndPageContentContext(contentContext);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to end page content context\n";
+			cout<<"failed to end page content context\n";
 			break;
 		}
 
@@ -102,22 +102,22 @@ EPDFStatusCode LinksTest::Run()
 		// now let's attach some links.
 
 		// first, the link for the test:
-		pdfWriter.AttachURLLinktoCurrentPage(L"http://www.pdfhummus.com",PDFRectangle(87.75,694.56,198.76,720));
+		pdfWriter.AttachURLLinktoCurrentPage("http://www.pdfhummus.com",PDFRectangle(87.75,694.56,198.76,720));
 
 		// second, link for the logo.
-		pdfWriter.AttachURLLinktoCurrentPage(L"http://www.soundcloud.com",PDFRectangle(90.024,200,367.524,375));
+		pdfWriter.AttachURLLinktoCurrentPage("http://www.soundcloud.com",PDFRectangle(90.024,200,367.524,375));
 
 		status = pdfWriter.WritePageAndRelease(page);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to write page\n";
+			cout<<"failed to write page\n";
 			break;
 		}
 
 		status = pdfWriter.EndPDF();
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed in end PDF\n";
+			cout<<"failed in end PDF\n";
 			break;
 		}	
 	}while(false);

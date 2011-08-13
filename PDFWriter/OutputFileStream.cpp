@@ -35,15 +35,15 @@ OutputFileStream::~OutputFileStream(void)
 }
 
 
-OutputFileStream::OutputFileStream(const wstring& inFilePath,bool inAppend)
+OutputFileStream::OutputFileStream(const string& inFilePath,bool inAppend)
 {
 	mStream = NULL;
 	Open(inFilePath,inAppend);
 }
 
-EPDFStatusCode OutputFileStream::Open(const wstring& inFilePath,bool inAppend)
+EPDFStatusCode OutputFileStream::Open(const string& inFilePath,bool inAppend)
 {
-	SAFE_WFOPEN(mStream,inFilePath.c_str(),inAppend ? L"ab":L"wb")
+	SAFE_FOPEN(mStream,inFilePath.c_str(),inAppend ? "ab":"wb")
 
 	if(!mStream)
 		return ePDFFailure;

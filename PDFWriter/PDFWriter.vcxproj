@@ -181,7 +181,6 @@
     <ClInclude Include="MyStringBuf.h" />
     <ClInclude Include="PDFObjectsParser.h" />
     <ClInclude Include="SafeBufferMacrosDefs.h" />
-    <ClInclude Include="StringTraits.h" />
     <ClInclude Include="BoxingBase.h" />
     <ClInclude Include="ContainerIterator.h" />
     <ClInclude Include="MapIterator.h" />
@@ -196,6 +195,7 @@
     <ClInclude Include="TimersRegistry.h" />
     <ClInclude Include="PDFDocEncoding.h" />
     <ClInclude Include="StandardEncoding.h" />
+    <ClInclude Include="UnicodeString.h" />
     <ClInclude Include="WinAnsiEncoding.h" />
     <ClInclude Include="AbstractContentContext.h" />
     <ClInclude Include="CatalogInformation.h" />
@@ -277,7 +277,6 @@
     <ClInclude Include="IWrittenFont.h" />
     <ClInclude Include="TrueTypeANSIFontWriter.h" />
     <ClInclude Include="TrueTypeDescendentFontWriter.h" />
-    <ClInclude Include="UnicodeEncoding.h" />
     <ClInclude Include="WrittenFontCFF.h" />
     <ClInclude Include="WrittenFontRepresentation.h" />
     <ClInclude Include="WrittenFontTrueType.h" />
@@ -340,7 +339,6 @@
     <ClCompile Include="OutputStringBufferStream.cpp" />
     <ClCompile Include="CMYKRGBColor.cpp" />
     <ClCompile Include="PDFObjectsParser.cpp" />
-    <ClCompile Include="StringTraits.cpp" />
     <ClCompile Include="RefCountObject.cpp" />
     <ClCompile Include="MD5Generator.cpp" />
     <ClCompile Include="Log.cpp" />
@@ -349,6 +347,7 @@
     <ClCompile Include="TimersRegistry.cpp" />
     <ClCompile Include="PDFDocEncoding.cpp" />
     <ClCompile Include="StandardEncoding.cpp" />
+    <ClCompile Include="UnicodeString.cpp" />
     <ClCompile Include="WinAnsiEncoding.cpp" />
     <ClCompile Include="AbstractContentContext.cpp" />
     <ClCompile Include="CatalogInformation.cpp" />
@@ -413,7 +412,6 @@
     <ClCompile Include="FontDescriptorWriter.cpp" />
     <ClCompile Include="TrueTypeANSIFontWriter.cpp" />
     <ClCompile Include="TrueTypeDescendentFontWriter.cpp" />
-    <ClCompile Include="UnicodeEncoding.cpp" />
     <ClCompile Include="WrittenFontCFF.cpp" />
     <ClCompile Include="WrittenFontTrueType.cpp" />
     <ClCompile Include="PDFDocumentCopyingContext.cpp" />

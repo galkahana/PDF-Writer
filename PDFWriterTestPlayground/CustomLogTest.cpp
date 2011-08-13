@@ -36,7 +36,7 @@ EPDFStatusCode CustomLogTest::Run()
 		OutputStringBufferStream pdfStream;
 	
 		// setup log file with compression
-		status = compressedLogFile.OpenFile(L"c:\\PDFLibTests\\CustomLogEncrypted.txt");
+		status = compressedLogFile.OpenFile("c:\\PDFLibTests\\CustomLogEncrypted.txt");
 		if(status != ePDFSuccess)
 			break;
 		flateEncodeStream.Assign(compressedLogFile.GetOutputStream());
@@ -67,7 +67,7 @@ EPDFStatusCode CustomLogTest::Run()
 
 		// dump PDF to a file, so we can review it
 		OutputFile pdfFile;
-		status = pdfFile.OpenFile(L"c:\\PDFLibTests\\DumpPDFFile.pdf");
+		status = pdfFile.OpenFile("c:\\PDFLibTests\\DumpPDFFile.pdf");
 		if(status != ePDFSuccess)
 			break;
 
@@ -88,7 +88,7 @@ EPDFStatusCode CustomLogTest::Run()
 		// now open a new file and decompress the log into it.
 		OutputFile decryptedLogFile;
 
-		status = decryptedLogFile.OpenFile(L"c:\\PDFLibTests\\CustomLogDecrypted.txt");
+		status = decryptedLogFile.OpenFile("c:\\PDFLibTests\\CustomLogDecrypted.txt");
 		if(status != ePDFSuccess)
 			break;
 
@@ -101,7 +101,7 @@ EPDFStatusCode CustomLogTest::Run()
 		OutputStreamTraits traits(&flateDecodeStream);
 
 		InputFile compressedLogFileInput;
-		status = compressedLogFileInput.OpenFile(L"c:\\PDFLibTests\\CustomLogEncrypted.txt");
+		status = compressedLogFileInput.OpenFile("c:\\PDFLibTests\\CustomLogEncrypted.txt");
 		if(status != ePDFSuccess)
 			break;
 

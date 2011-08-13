@@ -35,7 +35,7 @@ public:
 	StateReader(void);
 	~StateReader(void);
 
-	EPDFStatusCode Start(const wstring& inStateFilePath);
+	EPDFStatusCode Start(const string& inStateFilePath);
 	HummusPDFParser* GetObjectsReader();
 	ObjectIDType GetRootObjectID();
 	void Finish();

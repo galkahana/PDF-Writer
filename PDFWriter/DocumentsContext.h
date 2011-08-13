@@ -119,23 +119,23 @@ public:
 	// JPEG - two variants
 	
 	// will return image xobject sized at 1X1
-	PDFImageXObject* CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath);
+	PDFImageXObject* CreateImageXObjectFromJPGFile(const string& inJPGFilePath);
 	PDFImageXObject* CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream);
-	PDFImageXObject* CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inImageXObjectID);
+	PDFImageXObject* CreateImageXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inImageXObjectID);
 	PDFImageXObject* CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inImageXObjectID);
 
 	// will return form XObject, which will include the xobject at it's size
-	PDFFormXObject* CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath);
+	PDFFormXObject* CreateFormXObjectFromJPGFile(const string& inJPGFilePath);
 	PDFFormXObject* CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream);
-	PDFFormXObject* CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inFormXObjectID);
+	PDFFormXObject* CreateFormXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inFormXObjectID);
 	PDFFormXObject* CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inFormXObjectID);
 
 	// TIFF
-	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const wstring& inTIFFFilePath,
+	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const string& inTIFFFilePath,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 	PDFFormXObject* CreateFormXObjectFromTIFFStream(IByteReaderWithPosition* inTIFFStream,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
-	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const wstring& inTIFFFilePath,
+	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const string& inTIFFFilePath,
 													ObjectIDType inFormXObjectID,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 	PDFFormXObject* CreateFormXObjectFromTIFFStream(	IByteReaderWithPosition* inTIFFStream,
@@ -145,7 +145,7 @@ public:
 	// PDF
 	// CreateFormXObjectsFromPDF is for using input PDF pages as objects in one page or more. you can used the returned IDs to place the 
 	// created form xobjects
-	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const string& inPDFFilePath,
 															 const PDFPageRange& inPageRange,
 															 EPDFPageBox inPageBoxToUseAsFormBox,
 															 const double* inTransformationMatrix = NULL,
@@ -158,7 +158,7 @@ public:
 															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 	
 	// CreateFormXObjectsFromPDF is an override to allow you to determine a custom crop for the page embed
-	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const string& inPDFFilePath,
 															 const PDFPageRange& inPageRange,
 															 const PDFRectangle& inCropBox,
 															 const double* inTransformationMatrix = NULL,
@@ -171,7 +171,7 @@ public:
 															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
 	// AppendPDFPagesFromPDF is for simple appending of the input PDF pages
-	EPDFStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
+	EPDFStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const string& inPDFFilePath,
 														const PDFPageRange& inPageRange,
 														const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 	
@@ -182,7 +182,7 @@ public:
 	// MergePDFPagesToPage, merge PDF pages content to an input page. good for single-placement of a page content, cheaper than creating
 	// and XObject and later placing, when the intention is to use this graphic just once.
 	EPDFStatusCode MergePDFPagesToPage(PDFPage* inPage,
-									const wstring& inPDFFilePath,
+									const string& inPDFFilePath,
 									const PDFPageRange& inPageRange,
 									const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
@@ -191,17 +191,17 @@ public:
 									const PDFPageRange& inPageRange,
 									const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
-	PDFDocumentCopyingContext* CreatePDFCopyingContext(const wstring& inPDFFilePath);
+	PDFDocumentCopyingContext* CreatePDFCopyingContext(const string& inPDFFilePath);
 
 	PDFDocumentCopyingContext* CreatePDFCopyingContext(IByteReaderWithPosition* inPDFStream);
 
 	// Font [Text]
-	PDFUsedFont* GetFontForFile(const wstring& inFontFilePath);
+	PDFUsedFont* GetFontForFile(const string& inFontFilePath);
 	// second overload is for type 1, when an additional metrics file is available
-	PDFUsedFont* GetFontForFile(const wstring& inFontFilePath,const wstring& inAdditionalMeticsFilePath);
+	PDFUsedFont* GetFontForFile(const string& inFontFilePath,const string& inAdditionalMeticsFilePath);
 
 	// URL should be encoded to be a valid URL, ain't gonna be checking that!
-	EPDFStatusCode AttachURLLinktoCurrentPage(const wstring& inURL,const PDFRectangle& inLinkClickArea);
+	EPDFStatusCode AttachURLLinktoCurrentPage(const string& inURL,const PDFRectangle& inLinkClickArea);
 
 	// Extensibility
 	void AddDocumentsContextExtender(IDocumentsContextExtender* inExtender);
@@ -218,7 +218,7 @@ private:
 	ObjectsContext* mObjectsContext;
 	TrailerInformation mTrailerInformation;
 	CatalogInformation mCatalogInformation;
-	wstring mOutputFilePath;
+	string mOutputFilePath;
 	IDocumentsContextExtenderSet mExtenders;
 	JPEGImageHandler mJPEGImageHandler;
 	TIFFImageHandler mTIFFImageHandler;
@@ -242,7 +242,7 @@ private:
 								MapIterator<ObjectIDTypeToStringMap> inMapping);
 	bool IsIdentityMatrix(const double* inMatrix);
 	EPDFStatusCode WriteUsedFontsDefinitions();
-	EPDFStatusCodeAndObjectIDType WriteAnnotationAndLinkForURL(const wstring& inURL,const PDFRectangle& inLinkClickArea);
+	EPDFStatusCodeAndObjectIDType WriteAnnotationAndLinkForURL(const string& inURL,const PDFRectangle& inLinkClickArea);
 
 	void WriteTrailerState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
 	void WriteTrailerInfoState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);

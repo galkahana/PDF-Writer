@@ -66,13 +66,13 @@ PDFDocEncoding::~PDFDocEncoding(void)
 {
 }
 
-BoolAndByte PDFDocEncoding::Encode(wchar_t inUnicodeCharacter)
+BoolAndByte PDFDocEncoding::Encode(unsigned long inUnicodeCharacter)
 {
 	BoolAndByte result(true,0);
 
-	if(	betweenIncluding<wchar_t>(inUnicodeCharacter,0x00,0x17) ||
-		betweenIncluding<wchar_t>(inUnicodeCharacter,0x20,0x7E) ||
-		betweenIncluding<wchar_t>(inUnicodeCharacter,0xA1,0xFF))
+	if(	betweenIncluding<unsigned long>(inUnicodeCharacter,0x00,0x17) ||
+		betweenIncluding<unsigned long>(inUnicodeCharacter,0x20,0x7E) ||
+		betweenIncluding<unsigned long>(inUnicodeCharacter,0xA1,0xFF))
 	{
 		result.second = (char)inUnicodeCharacter;
 	}
@@ -212,15 +212,15 @@ const char* PDFDocEncoding::GetEncodedGlyphName(IOBasicTypes::Byte inEncodedChar
 	return scGlyphNames[inEncodedCharacter];
 }
 
-wchar_t PDFDocEncoding::Decode(IOBasicTypes::Byte inEncodedCharacter)
+unsigned long PDFDocEncoding::Decode(IOBasicTypes::Byte inEncodedCharacter)
 {
-	wchar_t result;
+	unsigned long result;
 
 	if(	betweenIncluding<IOBasicTypes::Byte>(inEncodedCharacter,0x00,0x17) ||
 		betweenIncluding<IOBasicTypes::Byte>(inEncodedCharacter,0x20,0x7E) ||
 		betweenIncluding<IOBasicTypes::Byte>(inEncodedCharacter,0xA1,0xFF))
 	{
-		result = (wchar_t)inEncodedCharacter;
+		result = (unsigned long)inEncodedCharacter;
 	}
 	else 
 	{

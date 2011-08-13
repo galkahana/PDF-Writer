@@ -38,22 +38,22 @@ EmptyFileTest::~EmptyFileTest(void)
 EPDFStatusCode EmptyFileTest::Run()
 {
 	HummusPDFWriter pdfWriter;
-	LogConfiguration logConfiguration(false,L"C:\\PDFLibTests\\EmptyFileLog.txt");
+	LogConfiguration logConfiguration(true,true,"C:\\PDFLibTests\\EmptyFileLog.txt");
 	EPDFStatusCode status; 
 
 	do
 	{
-		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\test.txt",ePDFVersion13,logConfiguration);
+		status = pdfWriter.StartPDF("C:\\PDFLibTests\\test.txt",ePDFVersion13,logConfiguration);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to start PDF\n";
+			cout<<"failed to start PDF\n";
 			break;
 		}	
 		
 		status = pdfWriter.EndPDF();
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed in end PDF\n";
+			cout<<"failed in end PDF\n";
 			break;
 		}
 	}while(false);

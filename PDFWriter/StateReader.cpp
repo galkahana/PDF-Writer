@@ -31,7 +31,7 @@ StateReader::~StateReader(void)
 {
 }
 
-EPDFStatusCode StateReader::Start(const wstring& inStateFilePath)
+EPDFStatusCode StateReader::Start(const string& inStateFilePath)
 {
 	// open the new file...
 	if(mInputFile.OpenFile(inStateFilePath) != ePDFSuccess)

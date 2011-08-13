@@ -29,7 +29,7 @@
 class FreeTypeType1Wrapper : public IFreeTypeFaceExtender
 {
 public:
-	FreeTypeType1Wrapper(FT_Face inFace,const wstring& inPFMFilePath);  // NEVER EVER EVER PASS NULL!!!!1 [ok to pass empty string for PFM file]
+	FreeTypeType1Wrapper(FT_Face inFace,const string& inPFMFilePath);  // NEVER EVER EVER PASS NULL!!!!1 [ok to pass empty string for PFM file]
 	virtual ~FreeTypeType1Wrapper(void);
 
 	virtual	double GetItalicAngle();

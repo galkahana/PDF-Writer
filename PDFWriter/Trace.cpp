@@ -29,7 +29,7 @@
 Trace::Trace(void)
 {
 	mLog = NULL;
-	mLogFilePath = L"Log.txt";
+	mLogFilePath = "Log.txt";
 	mShouldLog = false;
 }
 
@@ -38,9 +38,10 @@ Trace::~Trace(void)
 	delete mLog;
 }
 
-void Trace::SetLogSettings(const wstring& inLogFilePath,bool inShouldLog)
+void Trace::SetLogSettings(const string& inLogFilePath,bool inShouldLog,bool inPlaceUTF8Bom)
 {
 	mShouldLog = inShouldLog;
+	mPlaceUTF8Bom = inPlaceUTF8Bom;
 	mLogFilePath = inLogFilePath;
 	mLogStream = NULL;
 	if(mLog != NULL)
@@ -48,7 +49,7 @@ void Trace::SetLogSettings(const wstring& inLogFilePath,bool inShouldLog)
 		delete mLog;
 		mLog = NULL;
 		if(mShouldLog)
-			mLog = new Log(mLogFilePath);
+			mLog = new Log(mLogFilePath,inPlaceUTF8Bom);
 	}
 }
 
@@ -56,6 +57,7 @@ void Trace::SetLogSettings(IByteWriter* inLogStream,bool inShouldLog)
 {
 	mShouldLog = inShouldLog;
 	mLogStream = inLogStream;
+	mPlaceUTF8Bom = false;
 	if(mLog != NULL)
 	{
 		delete mLog;
@@ -66,7 +68,7 @@ void Trace::SetLogSettings(IByteWriter* inLogStream,bool inShouldLog)
 }
 
 
-void Trace::TraceToLog(const wchar_t* inFormat,...)
+void Trace::TraceToLog(const char* inFormat,...)
 {
 	if(mShouldLog)
 	{
@@ -75,20 +77,20 @@ void Trace::TraceToLog(const wchar_t* inFormat,...)
 			if(mLogStream)
 				mLog = new Log(mLogStream);
 			else
-				mLog = new Log(mLogFilePath);
+				mLog = new Log(mLogFilePath,mPlaceUTF8Bom);
 		}
 
 		va_list argptr;
 		va_start(argptr, inFormat);
 
-		SAFE_VSWPRINTF(mBuffer,5001,inFormat,argptr);
+		SAFE_VSPRINTF(mBuffer,5001,inFormat,argptr);
 		va_end(argptr);
 
-		mLog->LogEntry(wstring(mBuffer));
+		mLog->LogEntry(string(mBuffer));
 	}
 }
 
-void Trace::TraceToLog(const wchar_t* inFormat,va_list inList)
+void Trace::TraceToLog(const char* inFormat,va_list inList)
 {
 	if(mShouldLog)
 	{
@@ -97,12 +99,12 @@ void Trace::TraceToLog(const wchar_t* inFormat,va_list inList)
 			if(mLogStream)
 				mLog = new Log(mLogStream);
 			else
-				mLog = new Log(mLogFilePath);
+				mLog = new Log(mLogFilePath,mPlaceUTF8Bom);
 		}
 
-		SAFE_VSWPRINTF(mBuffer,5001,inFormat,inList);
+		SAFE_VSPRINTF(mBuffer,5001,inFormat,inList);
 
-		mLog->LogEntry(wstring(mBuffer));
+		mLog->LogEntry(string(mBuffer));
 	}
 
 }

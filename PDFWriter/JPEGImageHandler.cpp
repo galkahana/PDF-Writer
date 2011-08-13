@@ -52,7 +52,7 @@ void JPEGImageHandler::SetOperationsContexts(DocumentsContext* inDocumentsContex
 	mDocumentsContext = inDocumentsContext;
 }
 
-PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inImageXObjectID)
+PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inImageXObjectID)
 {
 	PDFImageXObject* imageXObject = NULL;
 
@@ -90,7 +90,7 @@ static const string scDecode = "Decode";
 static const string scBitsPerComponent = "BitsPerComponent";
 static const string scFilter = "Filter";
 static const string scDCTDecode = "DCTDecode";
-PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(const wstring& inJPGFilePath,
+PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(const string& inJPGFilePath,
 																				ObjectIDType inImageXObjectID,
 																				const JPEGImageInformation& inJPGImageInformation)
 {
@@ -222,11 +222,11 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 }
 
 
-BoolAndJPEGImageInformation JPEGImageHandler::RetrieveImageInformation(const wstring& inJPGFilePath)
+BoolAndJPEGImageInformation JPEGImageHandler::RetrieveImageInformation(const string& inJPGFilePath)
 {
 	BoolAndJPEGImageInformation imageInformationResult(false,mNullInformation);
 
-	WStringToJPEGImageInformationMap::iterator it = mImagesInformationMap.find(inJPGFilePath);
+	StringToJPEGImageInformationMap::iterator it = mImagesInformationMap.find(inJPGFilePath);
 	if(it == mImagesInformationMap.end())
 	{
 		do
@@ -256,7 +256,7 @@ BoolAndJPEGImageInformation JPEGImageHandler::RetrieveImageInformation(const wst
 				break;
 			}
 
-			mImagesInformationMap.insert(WStringToJPEGImageInformationMap::value_type(inJPGFilePath,imageInformation));
+			mImagesInformationMap.insert(StringToJPEGImageInformationMap::value_type(inJPGFilePath,imageInformation));
 			imageInformationResult.first = true;
 			imageInformationResult.second = imageInformation;
 		} while(false);
@@ -281,7 +281,7 @@ void JPEGImageHandler::RemoveDocumentsContextExtender(IDocumentsContextExtender*
 }
 
 
-PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inFormXObjectID)
+PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inFormXObjectID)
 {
 	PDFImageXObject* imageXObject = NULL;
 	PDFFormXObject* imageFormXObject = NULL;
@@ -433,7 +433,7 @@ DoubleAndDoublePair JPEGImageHandler::GetImageDimensions(const JPEGImageInformat
 	return returnResult;
 }
 
-PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath)
+PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGFile(const string& inJPGFilePath)
 {
 	if(!mObjectsContext)
 	{
@@ -444,7 +444,7 @@ PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGFile(const wstring& 
 	return CreateImageXObjectFromJPGFile(inJPGFilePath,mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID());
 }
 
-PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath)
+PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGFile(const string& inJPGFilePath)
 {
 	if(!mObjectsContext)
 	{

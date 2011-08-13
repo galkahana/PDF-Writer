@@ -48,10 +48,10 @@ EPDFStatusCode SimpleContentPageTest::Run()
 
 	do
 	{
-		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\SimpleContent.PDF",ePDFVersion13);
+		status = pdfWriter.StartPDF("C:\\PDFLibTests\\SimpleContent.PDF",ePDFVersion13);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to start PDF\n";
+			cout<<"failed to start PDF\n";
 			break;
 		}	
 
@@ -62,7 +62,7 @@ EPDFStatusCode SimpleContentPageTest::Run()
 		if(NULL == contentContext)
 		{
 			status = ePDFFailure;
-			wcout<<"failed to create content context for page\n";
+			cout<<"failed to create content context for page\n";
 			break;
 		}
 
@@ -77,7 +77,7 @@ EPDFStatusCode SimpleContentPageTest::Run()
 		status = pdfWriter.PausePageContentContext(contentContext);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to pause page content context\n";
+			cout<<"failed to pause page content context\n";
 			break;
 		}
 
@@ -100,21 +100,21 @@ EPDFStatusCode SimpleContentPageTest::Run()
 		status = pdfWriter.EndPageContentContext(contentContext);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to end page content context\n";
+			cout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to write page\n";
+			cout<<"failed to write page\n";
 			break;
 		}
 
 		status = pdfWriter.EndPDF();
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed in end PDF\n";
+			cout<<"failed in end PDF\n";
 			break;
 		}
 	}while(false);

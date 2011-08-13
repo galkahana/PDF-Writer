@@ -20,6 +20,7 @@
 */
 #include "PDFTextStringTest.h"
 #include "PDFTextString.h"
+#include "UnicodeString.h"
 
 #include <iostream>
 
@@ -42,35 +43,39 @@ EPDFStatusCode PDFTextStringTest::Run()
 	if(emptyString.ToString() != "")
 	{
 		status = ePDFFailure;
-		wcout<<"wrong for empty string - "<<emptyString.ToString().c_str()<<"\n";
+		cout<<"wrong for empty string - "<<emptyString.ToString().c_str()<<"\n";
 	}
 
 	// PDFEncoded test, Latin
-	PDFTextString latinString(L"Hello World");
+	PDFTextString latinString("Hello World");
 	if(latinString.ToString() != "Hello World")
 	{
 		status = ePDFFailure;
-		wcout<<"wrong for empty string - "<<latinString.ToString().c_str()<<"\n";
+		cout<<"wrong for empty string - "<<latinString.ToString().c_str()<<"\n";
 	}
 
 	// PDFEncoded test, special char
-	wstring aString;
-	aString.push_back(0x20AC);
-	PDFTextString latinSpecialString(aString);
+	UnicodeString aString;
+	aString.GetUnicodeList().push_back(0x20AC);
+
+	PDFTextString latinSpecialString;
+	latinSpecialString.FromUTF8(aString.ToUTF8().second);
 	if(latinSpecialString.ToString() != "\xA0")
 	{
 		status = ePDFFailure;
-		wcout<<"wrong for latin special string - "<<latinSpecialString.ToString().c_str()<<"\n";
+		cout<<"wrong for latin special string - "<<latinSpecialString.ToString().c_str()<<"\n";
 	}
 
 	// UTF16 test
-	wstring bString;
-	bString.push_back(0x20AB);
-	PDFTextString latinUTF16String(bString);
+	UnicodeString bString;
+	bString.GetUnicodeList().push_back(0x20AB);
+
+	PDFTextString latinUTF16String;
+	latinUTF16String.FromUTF8(bString.ToUTF8().second);
 	if(latinUTF16String.ToString() != "\xFE\xFF\x20\xAB")
 	{
 		status = ePDFFailure;
-		wcout<<"wrong for latin UTF16 - "<<latinUTF16String.ToString().c_str()<<"\n";
+		cout<<"wrong for latin UTF16 - "<<latinUTF16String.ToString().c_str()<<"\n";
 	}
 
 	return status;

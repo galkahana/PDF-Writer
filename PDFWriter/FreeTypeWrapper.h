@@ -42,8 +42,6 @@ public:
 
 	FT_Face NewFace(const string& inFilePath,FT_Long inFontIndex = 0);
 	FT_Face NewFace(const string& inFilePath,const string& inSecondaryFilePath,FT_Long inFontIndex = 0);
-	FT_Face NewFace(const wstring& inFilePath,FT_Long inFontIndex = 0);
-	FT_Face NewFace(const wstring& inFilePath,const wstring& inSecondaryFilePath,FT_Long inFontIndex = 0);
 	FT_Error DoneFace(FT_Face ioFace);
 
 	FT_Library operator->();
@@ -54,8 +52,8 @@ private:
 	FT_Library mFreeType;
 	FTFaceToFTStreamListMap mOpenStreams;
 
-	FT_Stream CreateFTStreamForPath(const wstring& inFilePath);
-	EPDFStatusCode FillOpenFaceArgumentsForWideString(const wstring& inFilePath, FT_Open_Args& ioArgs);
+	FT_Stream CreateFTStreamForPath(const string& inFilePath);
+	EPDFStatusCode FillOpenFaceArgumentsForUTF8String(const string& inFilePath, FT_Open_Args& ioArgs);
 	void CloseOpenFaceArgumentsStream(FT_Open_Args& ioArgs);
 	void RegisterStreamForFace(FT_Face inFace,FT_Stream inStream);
 	void CleanStreamsForFace(FT_Face inFace);

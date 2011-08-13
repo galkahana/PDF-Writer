@@ -45,140 +45,140 @@ EPDFStatusCode TIFFImageTest::Run()
 
 	do
 	{
-		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\BasicTIFFImagesTest.PDF",ePDFVersion13,LogConfiguration(true,L"C:\\PDFLibTests\\TiffImageTestLog.txt"));
+		status = pdfWriter.StartPDF("C:\\PDFLibTests\\BasicTIFFImagesTest.PDF",ePDFVersion13,LogConfiguration(true,true,"C:\\PDFLibTests\\TiffImageTestLog.txt"));
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to start PDF\n";
+			cout<<"failed to start PDF\n";
 			break;
 		}	
 
 		for(int i=1;i<9 && status != ePDFFailure;++i)
-			status = AddPageForTIFF(pdfWriter,(wstring(L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\CCITT_") + Int(i).ToWString() + L".TIF").c_str());
+			status = AddPageForTIFF(pdfWriter,(string("C:\\PDFLibTests\\TestMaterials\\images\\tiff\\CCITT_") + Int(i).ToString() + ".TIF").c_str());
 		if(status != ePDFSuccess)
 			break;
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\FLAG_T24.TIF");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\FLAG_T24.TIF");
 		if(status != ePDFSuccess)
 			break;
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\G4.TIF");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\G4.TIF");
 		if(status != ePDFSuccess)
 			break;
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\G4S.TIF");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\G4S.TIF");
 		if(status != ePDFSuccess)
 			break;
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\G31D.TIF");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\G31D.TIF");
 		if(status != ePDFSuccess)
 			break;
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\G31DS.TIF");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\G31DS.TIF");
 		if(status != ePDFSuccess)
 			break;
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\G32D.TIF");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\G32D.TIF");
 		if(status != ePDFSuccess)
 			break;
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\GMARBLES.TIF");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\GMARBLES.TIF");
 		if(status != ePDFSuccess)
 			break;
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\MARBIBM.TIF");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\MARBIBM.TIF");
 		if(status != ePDFSuccess)
 			break;
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\MARBLES.TIF");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\MARBLES.TIF");
 		if(status != ePDFSuccess)
 			break;
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\XING_T24.TIF");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\XING_T24.TIF");
 		if(status != ePDFSuccess)
 			break;
 
 		// tiled image
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\cramps-tile.tif");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\cramps-tile.tif");
 		if(status != ePDFSuccess)
 			break;
 
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\cramps.tif");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\cramps.tif");
 		if(status != ePDFSuccess)
 			break;
 
 		// Looks corrupted by the tool. on mine looks good
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\dscf0013.tif");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\dscf0013.tif");
 		if(status != ePDFSuccess)
 			break;
 
 		// Creates bad PDF by tool. on mine looks good
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\fax2d.tif");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\fax2d.tif");
 		if(status != ePDFSuccess)
 			break;
 
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\g3test.tif");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\g3test.tif");
 		if(status != ePDFSuccess)
 			break;
 
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\jello.tif");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\jello.tif");
 		if(status != ePDFSuccess)
 			break;
 
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\jim___ah.tif");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\jim___ah.tif");
 		if(status != ePDFSuccess)
 			break;
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\jim___cg.tif");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\jim___cg.tif");
 		if(status != ePDFSuccess)
 			break;
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\jim___dg.tif");
-		if(status != ePDFSuccess)
-			break;
-
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\jim___gg.tif");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\jim___dg.tif");
 		if(status != ePDFSuccess)
 			break;
 
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\oxford.tif");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\jim___gg.tif");
 		if(status != ePDFSuccess)
 			break;
 
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\quad-lzw.tif");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\oxford.tif");
 		if(status != ePDFSuccess)
 			break;
 
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\quad-tile.tif");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\quad-lzw.tif");
 		if(status != ePDFSuccess)
 			break;
 
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\strike.tif");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\quad-tile.tif");
 		if(status != ePDFSuccess)
 			break;
 
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\ycbcr-cat.tif");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\strike.tif");
+		if(status != ePDFSuccess)
+			break;
+
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\ycbcr-cat.tif");
 		if(status != ePDFSuccess)
 			break;
 
 		for(int i=2;i<9 && status != ePDFFailure;i=i*2)
-			status = AddPageForTIFF(pdfWriter,(wstring(L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\flower-minisblack-") + Int(i).ToWString() + L".tif").c_str());
+			status = AddPageForTIFF(pdfWriter,(string("C:\\PDFLibTests\\TestMaterials\\images\\tiff\\flower-minisblack-") + Int(i).ToString() + ".tif").c_str());
 		if(status !=ePDFSuccess)
 			break;
 
 		for(int i=2;i<9 && status != ePDFFailure;i=i*2)
-			status = AddPageForTIFF(pdfWriter,(wstring(L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\flower-palette-") + Int(i).ToWString() + L".tif").c_str());
+			status = AddPageForTIFF(pdfWriter,(string("C:\\PDFLibTests\\TestMaterials\\images\\tiff\\flower-palette-") + Int(i).ToString() + ".tif").c_str());
 		if(status !=ePDFSuccess)
 			break;
 
 		for(int i=2;i<9 && status != ePDFFailure;i=i*2)
-			status = AddPageForTIFF(pdfWriter,(wstring(L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\flower-rgb-contig-") + Int(i).ToWString() + L".tif").c_str());
+			status = AddPageForTIFF(pdfWriter,(string("C:\\PDFLibTests\\TestMaterials\\images\\tiff\\flower-rgb-contig-") + Int(i).ToString() + ".tif").c_str());
 		if(status !=ePDFSuccess)
 			break;
 
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\flower-rgb-planar-8.tif");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\flower-rgb-planar-8.tif");
 		if(status != ePDFSuccess)
 			break;
 
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\flower-separated-contig-8.tif");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\flower-separated-contig-8.tif");
 		if(status != ePDFSuccess)
 			break;
 
-		status = AddPageForTIFF(pdfWriter,L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\flower-separated-planar-8.tif");
+		status = AddPageForTIFF(pdfWriter,"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\flower-separated-planar-8.tif");
 		if(status != ePDFSuccess)
 			break;
 
 		status = pdfWriter.EndPDF();
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed in end PDF\n";
+			cout<<"failed in end PDF\n";
 			break;
 		}
 	}while(false);
@@ -186,7 +186,7 @@ EPDFStatusCode TIFFImageTest::Run()
 	return status;	
 }
 
-EPDFStatusCode TIFFImageTest::AddPageForTIFF(HummusPDFWriter& inpdfWriter, const wchar_t* inTiffFilePath)
+EPDFStatusCode TIFFImageTest::AddPageForTIFF(HummusPDFWriter& inpdfWriter, const char* inTiffFilePath)
 {
 	EPDFStatusCode status = ePDFSuccess;
 
@@ -198,13 +198,13 @@ EPDFStatusCode TIFFImageTest::AddPageForTIFF(HummusPDFWriter& inpdfWriter, const
 		if(NULL == pageContentContext)
 		{
 			status = ePDFFailure;
-			wcout<<"failed to create content context for page, for file"<<inTiffFilePath<<"\n";
+			cout<<"failed to create content context for page, for file"<<inTiffFilePath<<"\n";
 		}
 
 		PDFFormXObject* imageFormXObject = inpdfWriter.CreateFormXObjectFromTIFFFile(inTiffFilePath);
 		if(!imageFormXObject)
 		{
-			wcout<<"failed to create image form XObject from file, for file"<<inTiffFilePath<<"\n";
+			cout<<"failed to create image form XObject from file, for file"<<inTiffFilePath<<"\n";
 			status = ePDFFailure;
 			break;
 		}
@@ -222,14 +222,14 @@ EPDFStatusCode TIFFImageTest::AddPageForTIFF(HummusPDFWriter& inpdfWriter, const
 		status = inpdfWriter.EndPageContentContext(pageContentContext);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to end page content context, for file"<<inTiffFilePath<<"\n";
+			cout<<"failed to end page content context, for file"<<inTiffFilePath<<"\n";
 			break;
 		}
 
 		status = inpdfWriter.WritePageAndRelease(page);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to write page, for file"<<inTiffFilePath<<"\n";
+			cout<<"failed to write page, for file"<<inTiffFilePath<<"\n";
 			break;
 		}
 	}while(false);

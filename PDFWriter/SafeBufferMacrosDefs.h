@@ -21,6 +21,28 @@
 #pragma once
 
 #ifdef WIN32
+	#include "UnicodeString.h"
+	#include <string>
+	#include <sstream>
+	static std::wstring UTF8ToUTF16Wide(const std::string& inUTF8String);
+
+	std::wstring UTF8ToUTF16Wide(const std::string& inUTF8String)
+	{
+		UnicodeString unicodeString;
+		unicodeString.FromUTF8(inUTF8String);
+
+		EPDFStatusCodeAndUShortList result = unicodeString.ToUTF16UShort();
+		
+		std::wstringstream stream;
+
+		UShortList::const_iterator it = result.second.begin();
+
+		for(; it != result.second.end();++it)
+			stream.put((wchar_t)*it);
+
+		return stream.str();
+	}
+
 	#define	SAFE_SPRINTF_1(BUFFER,BUFFER_SIZE,FORMAT,ARG1) sprintf_s(BUFFER,BUFFER_SIZE,FORMAT,ARG1)
 	#define	SAFE_SPRINTF_2(BUFFER,BUFFER_SIZE,FORMAT,ARG1,ARG2) sprintf_s(BUFFER,BUFFER_SIZE,FORMAT,ARG1,ARG2)
 	#define	SAFE_SPRINTF_3(BUFFER,BUFFER_SIZE,FORMAT,ARG1,ARG2,ARG3) sprintf_s(BUFFER,BUFFER_SIZE,FORMAT,ARG1,ARG2,ARG3)
@@ -36,7 +58,7 @@
 	#define SAFE_LOCAL_TIME(structuredLocalTime,currentTime) localtime_s(&structuredLocalTime,&currentTime)
 	#define SAFE_VSWPRINTF(BUFFER,BUFFER_SIZE,FORMAT,ARGLIST) vswprintf_s(BUFFER,BUFFER_SIZE,FORMAT,ARGLIST)
 	#define SAFE_VSPRINTF(BUFFER,BUFFER_SIZE,FORMAT,ARGLIST) vsprintf_s(BUFFER,BUFFER_SIZE,FORMAT,ARGLIST)
-	#define SAFE_WFOPEN(FILESTREAM_P,FILE_PATH,MODE) {if(_wfopen_s(&FILESTREAM_P,FILE_PATH,MODE) != 0) FILESTREAM_P = NULL;}
+	#define SAFE_FOPEN(FILESTREAM_P,FILE_PATH,MODE) {if(_wfopen_s(&FILESTREAM_P,UTF8ToUTF16Wide(FILE_PATH).c_str(),UTF8ToUTF16Wide(MODE).c_str()) != 0) FILESTREAM_P = NULL;}
 	#if _MSC_VER >= 1600
 		#define SAFE_SGETN(BUFFER,BUFFER_SIZE,READ_COUNT) sgetn(BUFFER,READ_COUNT)
 	#else
@@ -58,7 +80,7 @@
 	#define SAFE_LOCAL_TIME(structuredLocalTime,currentTime) structuredLocalTime = *localtime(&currentTime)
 	#define SAFE_VSWPRINTF(BUFFER,BUFFER_SIZE,FORMAT,ARGLIST) vswprintf(BUFFER,BUFFER_SIZE,FORMAT,ARGLIST)
 	#define SAFE_VSPRINTF(BUFFER,BUFFER_SIZE,FORMAT,ARGLIST) vsprintf(BUFFER,BUFFER_SIZE,FORMAT,ARGLIST)
-	#define SAFE_WFOPEN(FILESTREAM_P,FILE_PATH,MODE) {FILESTREAM_P = _wfopen(FILE_PATH),MODE);}
+	#define SAFE_FOPEN(FILESTREAM_P,FILE_PATH,MODE) {FILESTREAM_P = fopen(FILE_PATH),MODE);}
 	#define SAFE_SGETN(BUFFER,BUFFER_SIZE,READ_COUNT) sgetn(BUFFER,READ_COUNT)
 #endif
 

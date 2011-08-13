@@ -45,10 +45,10 @@ EPDFStatusCode JPGImageTest::Run()
 
 	do
 	{
-		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\BasicJPGImagesTest.PDF",ePDFVersion13);
+		status = pdfWriter.StartPDF("C:\\PDFLibTests\\BasicJPGImagesTest.PDF",ePDFVersion13);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to start PDF\n";
+			cout<<"failed to start PDF\n";
 			break;
 		}	
 
@@ -59,7 +59,7 @@ EPDFStatusCode JPGImageTest::Run()
 		if(NULL == pageContentContext)
 		{
 			status = ePDFFailure;
-			wcout<<"failed to create content context for page\n";
+			cout<<"failed to create content context for page\n";
 		}
 
 		// draw a rectangle
@@ -73,15 +73,15 @@ EPDFStatusCode JPGImageTest::Run()
 		status = pdfWriter.PausePageContentContext(pageContentContext);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to pause page content context\n";
+			cout<<"failed to pause page content context\n";
 			break;
 		}
 
 		// Create image xobject from 
-		PDFImageXObject* imageXObject  = pdfWriter.CreateImageXObjectFromJPGFile(L"C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG");
+		PDFImageXObject* imageXObject  = pdfWriter.CreateImageXObjectFromJPGFile("C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG");
 		if(!imageXObject)
 		{
-			wcout<<"failed to create image XObject from file\n";
+			cout<<"failed to create image XObject from file\n";
 			status = ePDFFailure;
 			break;
 		}
@@ -99,15 +99,15 @@ EPDFStatusCode JPGImageTest::Run()
 		status = pdfWriter.PausePageContentContext(pageContentContext);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to pause page content context ||\n";
+			cout<<"failed to pause page content context ||\n";
 			break;
 		}
 
 
-		PDFFormXObject*  formXObject = pdfWriter.CreateFormXObjectFromJPGFile(L"C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG");
+		PDFFormXObject*  formXObject = pdfWriter.CreateFormXObjectFromJPGFile("C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG");
 		if(!formXObject)
 		{
-			wcout<<"failed to create form XObject from file\n";
+			cout<<"failed to create form XObject from file\n";
 			status = ePDFFailure;
 			break;
 		}
@@ -123,14 +123,14 @@ EPDFStatusCode JPGImageTest::Run()
 		status = pdfWriter.EndPageContentContext(pageContentContext);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to end page content context\n";
+			cout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to write page\n";
+			cout<<"failed to write page\n";
 			break;
 		}
 
@@ -138,7 +138,7 @@ EPDFStatusCode JPGImageTest::Run()
 		status = pdfWriter.EndPDF();
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed in end PDF\n";
+			cout<<"failed in end PDF\n";
 			break;
 		}
 	}while(false);

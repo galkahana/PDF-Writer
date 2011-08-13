@@ -21,6 +21,7 @@
 #include "PDFTextString.h"
 #include "OutputStringBufferStream.h"
 #include "PDFDocEncoding.h"
+#include "UnicodeString.h"
 #include <sstream>
 
 using namespace IOBasicTypes;
@@ -34,21 +35,15 @@ PDFTextString::PDFTextString(const string& inString)
 	mTextString = inString;
 }
 
-
-PDFTextString::PDFTextString(const wstring& inString)
-{
-	ConvertFromUTF16(inString);
-}
-
 PDFTextString::~PDFTextString(void)
 {
 }
 
 const PDFTextString PDFTextString::Empty;
 
-PDFTextString& PDFTextString::FromUTF16(const wstring& inString)
+PDFTextString& PDFTextString::FromUTF8(const string& inString)
 {
-	ConvertFromUTF16(inString);
+	ConvertFromUTF8(inString);
 	return *this;
 }
 
@@ -73,28 +68,39 @@ PDFTextString& PDFTextString::operator=(const PDFTextString& inString)
 	return *this;
 }
 
-static const Byte scBigEndianMark[]= {0xFE,0xFF};
-
-void PDFTextString::ConvertFromUTF16(const wstring& inStringToConvert)
+void PDFTextString::ConvertFromUTF8(const string& inStringToConvert)
 {
 	OutputStringBufferStream aStringStream;
 
-	if(!ConvertUTF16ToPDFDocEncoding(inStringToConvert,aStringStream))
+	if(!ConvertUTF8ToPDFDocEncoding(inStringToConvert,aStringStream))
 	{
-		aStringStream.Reset();
-		ConvertUTF16ToUTF16BE(inStringToConvert,aStringStream);
+		// if no DOC encoding then convert to utf16BE (with BOM)
+		
+		UnicodeString unicodeString;
+		unicodeString.FromUTF8(inStringToConvert);
+		EPDFStatusCodeAndString result = unicodeString.ToUTF16BE(true);
+		
+		mTextString = result.second;
+
 	}
-	mTextString = aStringStream.ToString();
+	else
+	{
+		mTextString = aStringStream.ToString();
+	}
 }
 
-bool PDFTextString::ConvertUTF16ToPDFDocEncoding(const wstring& inStringToConvert,OutputStringBufferStream& refResult)
+bool PDFTextString::ConvertUTF8ToPDFDocEncoding(const string& inStringToConvert,OutputStringBufferStream& refResult)
 {
 	BoolAndByte encodingResult;
 	PDFDocEncoding pdfDocEncoding;
 	bool PDFEncodingOK = true;
 
-	wstring::const_iterator it = inStringToConvert.begin();
-	for(;it != inStringToConvert.end() && PDFEncodingOK;++it)
+	UnicodeString unicodeString;
+	
+	unicodeString.FromUTF8(inStringToConvert);
+
+	ULongList::const_iterator it = unicodeString.GetUnicodeList().begin();
+	for(;it != unicodeString.GetUnicodeList().end() && PDFEncodingOK;++it)
 	{
 		encodingResult = pdfDocEncoding.Encode(*it);
 		if(encodingResult.first)
@@ -106,72 +112,43 @@ bool PDFTextString::ConvertUTF16ToPDFDocEncoding(const wstring& inStringToConver
 	return PDFEncodingOK;
 }
 
-void PDFTextString::ConvertUTF16ToUTF16BE(const wstring& inStringToConvert,OutputStringBufferStream& refResult)
-{
-	Byte bigEndian[2];
-
-	refResult.Write(scBigEndianMark,2);
-	wstring::const_iterator it = inStringToConvert.begin();
-	for(;it != inStringToConvert.end();++it)
-	{
-		bigEndian[0] = Byte((*it)>>8);
-		bigEndian[1] = Byte((*it) & 0xFF);
-		refResult.Write(bigEndian,2);
-	}
-}
-
 PDFTextString& PDFTextString::operator=(const string& inString)
 {
 	mTextString = inString;
 	return *this;
 }
 
-PDFTextString& PDFTextString::operator=(const wstring& inString)
+string PDFTextString::ToUTF8String() const
 {
-	ConvertFromUTF16(inString);
-	return *this;
-}
-
-wstring PDFTextString::ToUTF16String() const
-{
-	if(mTextString.size() >= 2 && mTextString.at(0) == scBigEndianMark[0] && mTextString.at(1) == scBigEndianMark[1])
-		return ToUTF16FromUTF16BE();
+	if(mTextString.size() >= 2 && mTextString.at(0) == 0xFE && mTextString.at(1) == 0xFF)
+		return ToUTF8FromUTF16BE();
 	else
-		return ToUTF16FromPDFDocEncoding();
+		return ToUTF8FromPDFDocEncoding();
 }
 
-wstring PDFTextString::ToUTF16FromUTF16BE() const
+string PDFTextString::ToUTF8FromUTF16BE() const
 {
-	wstringstream stream;
+	UnicodeString unicodeString;
 
-	string::const_iterator it = mTextString.begin();
+	unicodeString.FromUTF16(mTextString);
 
-	// skip unicode marker
-	++it;
-	++it;
-
-	wchar_t buffer;
-
-	for(; it != mTextString.end();++it)
-	{
-		buffer = ((Byte)(*it))<<8;
-		++it;
-		buffer += ((Byte)(*it));
-		stream.put(buffer);
-	}
-	return stream.str();
+	EPDFStatusCodeAndString result = unicodeString.ToUTF8();
+	return result.second;
 }
 
 
-wstring PDFTextString::ToUTF16FromPDFDocEncoding() const
+string PDFTextString::ToUTF8FromPDFDocEncoding() const
 {
-	wstringstream stream;
+	ULongList unicodes;
+	UnicodeString decoder;
 	PDFDocEncoding pdfDocEncoding;
 
 	string::const_iterator it = mTextString.begin();
 
 	for(; it != mTextString.end();++it)
-		stream.put(pdfDocEncoding.Decode(*it));
-	return stream.str();
+		unicodes.push_back(pdfDocEncoding.Decode(*it));
 
+	decoder = unicodes;
+
+	return decoder.ToUTF8().second;
 }

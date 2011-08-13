@@ -52,7 +52,7 @@ EPDFStatusCode BoxingBaseTest::RunIntTest()
 	if((int)a != 2)
 	{
 		status = ePDFFailure;
-		wcout<<"Assignment failed\n";
+		cout<<"Assignment failed\n";
 	}
 
 	// Initialization
@@ -60,7 +60,7 @@ EPDFStatusCode BoxingBaseTest::RunIntTest()
 	if((int)b != 2)
 	{
 		status = ePDFFailure;
-		wcout<<"Initialization failed\n";
+		cout<<"Initialization failed\n";
 	}
 
 
@@ -69,15 +69,15 @@ EPDFStatusCode BoxingBaseTest::RunIntTest()
 	if((int)c != 2)
 	{
 		status = ePDFFailure;
-		wcout<<"Initialization from string failed\n";
+		cout<<"Initialization from string failed\n";
 	}
 
 	// From wide string
-	Int d(L"2");
+	Int d("2");
 	if((int)d != 2)
 	{
 		status = ePDFFailure;
-		wcout<<"Initialization from wide string failed\n";
+		cout<<"Initialization from wide string failed\n";
 	}
 
 	// string write
@@ -85,7 +85,7 @@ EPDFStatusCode BoxingBaseTest::RunIntTest()
 	if(e.ToString() != "2")
 	{
 		status = ePDFFailure;
-		wcout<<"Write to string failed\n";
+		cout<<"Write to string failed\n";
 	}
 
 	// wide string write
@@ -93,7 +93,7 @@ EPDFStatusCode BoxingBaseTest::RunIntTest()
 	if(f.ToWString() != L"2")
 	{
 		status = ePDFFailure;
-		wcout<<"Write to wide string failed\n";
+		cout<<"Write to wide string failed\n";
 	}
 
 

@@ -26,7 +26,7 @@
 using namespace std;
 using namespace IOBasicTypes;
 
-static const std::wstring scOutputFileStreamTest = L"OutputFileStreamTest";
+static const std::string scOutputFileStreamTest = "OutputFileStreamTest";
 
 
 OutputFileStreamTest::OutputFileStreamTest(void)
@@ -39,7 +39,7 @@ OutputFileStreamTest::~OutputFileStreamTest(void)
 
 EPDFStatusCode OutputFileStreamTest::Run()
 {
-	OutputFileStream stream(L"C:\\PDFLibTests\\OutputFileStreamTest.txt");
+	OutputFileStream stream("C:\\PDFLibTests\\OutputFileStreamTest.txt");
 	Byte buffer[5] = {'a','b','c','d','e'};
 
 	stream.Write(buffer,5);

@@ -37,7 +37,7 @@ public:
 	StateWriter(void);
 	virtual ~StateWriter(void);
 
-	EPDFStatusCode Start(const wstring& inStateFilePath);
+	EPDFStatusCode Start(const string& inStateFilePath);
 	ObjectsContext* GetObjectsWriter();
 	void SetRootObject(ObjectIDType inRootObjectID);
 	EPDFStatusCode Finish();

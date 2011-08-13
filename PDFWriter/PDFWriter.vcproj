@@ -493,14 +493,6 @@
 					RelativePath=".\SafeBufferMacrosDefs.h"
 					>
 				</File>
-				<File
-					RelativePath=".\StringTraits.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\StringTraits.h"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="Patterns"
@@ -615,6 +607,14 @@
 				</File>
 				<File
 					RelativePath=".\StandardEncoding.h"
+					>
+				</File>
+				<File
+					RelativePath=".\UnicodeString.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\UnicodeString.h"
 					>
 				</File>
 				<File
@@ -1259,14 +1259,6 @@
 				</File>
 				<File
 					RelativePath=".\TrueTypeDescendentFontWriter.h"
-					>
-				</File>
-				<File
-					RelativePath=".\UnicodeEncoding.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\UnicodeEncoding.h"
 					>
 				</File>
 				<File

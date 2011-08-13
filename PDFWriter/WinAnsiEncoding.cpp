@@ -65,14 +65,14 @@ WinAnsiEncoding::~WinAnsiEncoding(void)
 {
 }
 
-BoolAndByte WinAnsiEncoding::Encode(wchar_t inUnicodeCharacter)
+BoolAndByte WinAnsiEncoding::Encode(unsigned long inUnicodeCharacter)
 { 
 	BoolAndByte result(true,0);
 
-	if(	betweenIncluding<wchar_t>(inUnicodeCharacter,0x00,0x17) ||
-		betweenIncluding<wchar_t>(inUnicodeCharacter,0x20,0x7E) ||
-		betweenIncluding<wchar_t>(inUnicodeCharacter,0xA1,0xB1) ||
-		betweenIncluding<wchar_t>(inUnicodeCharacter,0xB3,0xFF))
+	if(	betweenIncluding<unsigned long>(inUnicodeCharacter,0x00,0x17) ||
+		betweenIncluding<unsigned long>(inUnicodeCharacter,0x20,0x7E) ||
+		betweenIncluding<unsigned long>(inUnicodeCharacter,0xA1,0xB1) ||
+		betweenIncluding<unsigned long>(inUnicodeCharacter,0xB3,0xFF))
 	{
 		result.second = (char)inUnicodeCharacter;
 	}

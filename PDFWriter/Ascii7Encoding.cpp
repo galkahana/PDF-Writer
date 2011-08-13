@@ -29,12 +29,12 @@ Ascii7Encoding::~Ascii7Encoding(void)
 {
 }
 
-BoolAndString Ascii7Encoding::Encode(const wstring& inString)
+BoolAndString Ascii7Encoding::Encode(const string& inString)
 {
 	OutputStringBufferStream asciiString;
 	bool encodingGood = true;
 	IOBasicTypes::Byte buffer;
-	wstring::const_iterator it = inString.begin();
+	string::const_iterator it = inString.begin();
 
 	for(;it != inString.end() && encodingGood;++it)
 	{

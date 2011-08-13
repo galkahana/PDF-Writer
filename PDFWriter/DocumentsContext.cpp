@@ -906,12 +906,12 @@ bool DocumentsContext::IsIdentityMatrix(const double* inMatrix)
 
 }
 
-PDFImageXObject* DocumentsContext::CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath)
+PDFImageXObject* DocumentsContext::CreateImageXObjectFromJPGFile(const string& inJPGFilePath)
 {
 	return mJPEGImageHandler.CreateImageXObjectFromJPGFile(inJPGFilePath);
 }
 
-PDFFormXObject* DocumentsContext::CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath)
+PDFFormXObject* DocumentsContext::CreateFormXObjectFromJPGFile(const string& inJPGFilePath)
 {
 	return mJPEGImageHandler.CreateFormXObjectFromJPGFile(inJPGFilePath);
 }
@@ -921,25 +921,25 @@ JPEGImageHandler& DocumentsContext::GetJPEGImageHandler()
 	return mJPEGImageHandler;
 }
 
-PDFFormXObject* DocumentsContext::CreateFormXObjectFromTIFFFile(	const wstring& inTIFFFilePath,
+PDFFormXObject* DocumentsContext::CreateFormXObjectFromTIFFFile(	const string& inTIFFFilePath,
 																const TIFFUsageParameters& inTIFFUsageParameters)
 {
 	
 	return mTIFFImageHandler.CreateFormXObjectFromTIFFFile(inTIFFFilePath,inTIFFUsageParameters);
 }
 
-PDFImageXObject* DocumentsContext::CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inImageXObjectID)
+PDFImageXObject* DocumentsContext::CreateImageXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inImageXObjectID)
 {
 	return mJPEGImageHandler.CreateImageXObjectFromJPGFile(inJPGFilePath,inImageXObjectID);
 }
 
-PDFFormXObject* DocumentsContext::CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inFormXObjectID)
+PDFFormXObject* DocumentsContext::CreateFormXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inFormXObjectID)
 {
 	return mJPEGImageHandler.CreateFormXObjectFromJPGFile(inJPGFilePath,inFormXObjectID);
 }
 
 PDFFormXObject* DocumentsContext::CreateFormXObjectFromTIFFFile(	
-												const wstring& inTIFFFilePath,
+												const string& inTIFFFilePath,
 												ObjectIDType inFormXObjectID,
 												const TIFFUsageParameters& inTIFFUsageParameters)
 {
@@ -947,7 +947,7 @@ PDFFormXObject* DocumentsContext::CreateFormXObjectFromTIFFFile(
 }
 
 
-PDFUsedFont* DocumentsContext::GetFontForFile(const wstring& inFontFilePath)
+PDFUsedFont* DocumentsContext::GetFontForFile(const string& inFontFilePath)
 {
 	return mUsedFontsRepository.GetFontForFile(inFontFilePath);
 }
@@ -957,12 +957,12 @@ EPDFStatusCode DocumentsContext::WriteUsedFontsDefinitions()
 	return mUsedFontsRepository.WriteUsedFontsDefinitions();
 }
 
-PDFUsedFont* DocumentsContext::GetFontForFile(const wstring& inFontFilePath,const wstring& inAdditionalMeticsFilePath)
+PDFUsedFont* DocumentsContext::GetFontForFile(const string& inFontFilePath,const string& inAdditionalMeticsFilePath)
 {
 	return mUsedFontsRepository.GetFontForFile(inFontFilePath,inAdditionalMeticsFilePath);
 }
 
-EPDFStatusCodeAndObjectIDTypeList DocumentsContext::CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+EPDFStatusCodeAndObjectIDTypeList DocumentsContext::CreateFormXObjectsFromPDF(const string& inPDFFilePath,
 																			const PDFPageRange& inPageRange,
 																			EPDFPageBox inPageBoxToUseAsFormBox,
 																			const double* inTransformationMatrix,
@@ -972,7 +972,7 @@ EPDFStatusCodeAndObjectIDTypeList DocumentsContext::CreateFormXObjectsFromPDF(co
 
 }
 
-EPDFStatusCodeAndObjectIDTypeList DocumentsContext::CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+EPDFStatusCodeAndObjectIDTypeList DocumentsContext::CreateFormXObjectsFromPDF(const string& inPDFFilePath,
 																			const PDFPageRange& inPageRange,
 																			const PDFRectangle& inCropBox,
 																			const double* inTransformationMatrix,
@@ -981,7 +981,7 @@ EPDFStatusCodeAndObjectIDTypeList DocumentsContext::CreateFormXObjectsFromPDF(co
 	return mPDFDocumentHandler.CreateFormXObjectsFromPDF(inPDFFilePath,inPageRange,inCropBox,inTransformationMatrix,inCopyAdditionalObjects);	
 
 }
-EPDFStatusCodeAndObjectIDTypeList DocumentsContext::AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
+EPDFStatusCodeAndObjectIDTypeList DocumentsContext::AppendPDFPagesFromPDF(const string& inPDFFilePath,
 																	  const PDFPageRange& inPageRange,
 																	  const ObjectIDTypeList& inCopyAdditionalObjects)
 {
@@ -1407,7 +1407,7 @@ void DocumentsContext::ReadPageTreeState(HummusPDFParser* inStateReader,PDFDicti
 	}
 }
 
-PDFDocumentCopyingContext* DocumentsContext::CreatePDFCopyingContext(const wstring& inFilePath)
+PDFDocumentCopyingContext* DocumentsContext::CreatePDFCopyingContext(const string& inFilePath)
 {
 	PDFDocumentCopyingContext* context = new PDFDocumentCopyingContext();
 
@@ -1420,7 +1420,7 @@ PDFDocumentCopyingContext* DocumentsContext::CreatePDFCopyingContext(const wstri
 		return context;
 }
 
-EPDFStatusCode DocumentsContext::AttachURLLinktoCurrentPage(const wstring& inURL,const PDFRectangle& inLinkClickArea)
+EPDFStatusCode DocumentsContext::AttachURLLinktoCurrentPage(const string& inURL,const PDFRectangle& inLinkClickArea)
 {
 	EPDFStatusCodeAndObjectIDType writeResult = WriteAnnotationAndLinkForURL(inURL,inLinkClickArea);
 
@@ -1441,7 +1441,7 @@ static const string scBS = "BS";
 static const string scAction = "Action";
 static const string scS = "S";
 static const string scURI = "URI";
-EPDFStatusCodeAndObjectIDType DocumentsContext::WriteAnnotationAndLinkForURL(const wstring& inURL,const PDFRectangle& inLinkClickArea)
+EPDFStatusCodeAndObjectIDType DocumentsContext::WriteAnnotationAndLinkForURL(const string& inURL,const PDFRectangle& inLinkClickArea)
 {
 	EPDFStatusCodeAndObjectIDType result(ePDFFailure,0);
 
@@ -1515,7 +1515,7 @@ void DocumentsContext::RegisterAnnotationReferenceForNextPageWrite(ObjectIDType 
 }
 
 EPDFStatusCode DocumentsContext::MergePDFPagesToPage(PDFPage* inPage,
-								const wstring& inPDFFilePath,
+								const string& inPDFFilePath,
 								const PDFPageRange& inPageRange,
 								const ObjectIDTypeList& inCopyAdditionalObjects)
 {

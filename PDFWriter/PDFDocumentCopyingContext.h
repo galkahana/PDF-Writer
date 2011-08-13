@@ -40,7 +40,7 @@ public:
 	PDFDocumentCopyingContext();
 	~PDFDocumentCopyingContext(void);
 
-	EPDFStatusCode Start(const wstring& inPDFFilePath,
+	EPDFStatusCode Start(const string& inPDFFilePath,
 					  DocumentsContext* inDocumentsContext,
 					  ObjectsContext* inObjectsContext);
 

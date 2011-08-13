@@ -50,10 +50,10 @@ EPDFStatusCode ImagesAndFormsForwardReferenceTest::Run()
 	do
 	{
 
-		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\ImagesAndFormsForwardReferenceTest.PDF",ePDFVersion13);
+		status = pdfWriter.StartPDF("C:\\PDFLibTests\\ImagesAndFormsForwardReferenceTest.PDF",ePDFVersion13);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to start PDF\n";
+			cout<<"failed to start PDF\n";
 			break;
 		}	
 
@@ -64,7 +64,7 @@ EPDFStatusCode ImagesAndFormsForwardReferenceTest::Run()
 		if(NULL == pageContentContext)
 		{
 			status = ePDFFailure;
-			wcout<<"failed to create content context for page\n";
+			cout<<"failed to create content context for page\n";
 		}
 
 
@@ -104,40 +104,40 @@ EPDFStatusCode ImagesAndFormsForwardReferenceTest::Run()
 		status = pdfWriter.EndPageContentContext(pageContentContext);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to end page content context\n";
+			cout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to write page\n";
+			cout<<"failed to write page\n";
 			break;
 		}
 
 
 		// Create image xobject  
-		PDFImageXObject* imageXObject  = pdfWriter.CreateImageXObjectFromJPGFile(L"C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG",imageXObjectID);
+		PDFImageXObject* imageXObject  = pdfWriter.CreateImageXObjectFromJPGFile("C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG",imageXObjectID);
 		if(!imageXObject)
 		{
-			wcout<<"failed to create image XObject from file\n";
+			cout<<"failed to create image XObject from file\n";
 			status = ePDFFailure;
 			break;
 		}
 
 		// now create form xobject
-		PDFFormXObject*  formXObject = pdfWriter.CreateFormXObjectFromJPGFile(L"C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG",formXObjectID);
+		PDFFormXObject*  formXObject = pdfWriter.CreateFormXObjectFromJPGFile("C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG",formXObjectID);
 		if(!formXObject)
 		{
-			wcout<<"failed to create form XObject from file\n";
+			cout<<"failed to create form XObject from file\n";
 			status = ePDFFailure;
 			break;
 		}
 
-		PDFFormXObject* tiffFormXObject = pdfWriter.CreateFormXObjectFromTIFFFile(L"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\jim___ah.tif",tiffFormXObjectID);
+		PDFFormXObject* tiffFormXObject = pdfWriter.CreateFormXObjectFromTIFFFile("C:\\PDFLibTests\\TestMaterials\\images\\tiff\\jim___ah.tif",tiffFormXObjectID);
 		if(!tiffFormXObject)
 		{
-			wcout<<"failed to create image form XObject from file, for file\n";
+			cout<<"failed to create image form XObject from file, for file\n";
 			status = ePDFFailure;
 			break;
 		}
@@ -161,7 +161,7 @@ EPDFStatusCode ImagesAndFormsForwardReferenceTest::Run()
 		status = pdfWriter.EndFormXObjectAndRelease(xobjectForm);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to write XObject form\n";
+			cout<<"failed to write XObject form\n";
 			break;
 		}
 
@@ -169,7 +169,7 @@ EPDFStatusCode ImagesAndFormsForwardReferenceTest::Run()
 		status = pdfWriter.EndPDF();
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed in end PDF\n";
+			cout<<"failed in end PDF\n";
 			break;
 		}
 	}while(false);

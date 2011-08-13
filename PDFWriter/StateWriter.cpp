@@ -38,7 +38,7 @@ StateWriter::~StateWriter(void)
 }
 
 
-EPDFStatusCode StateWriter::Start(const wstring& inStateFilePath)
+EPDFStatusCode StateWriter::Start(const string& inStateFilePath)
 {
 
 	// open the new file...

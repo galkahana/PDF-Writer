@@ -60,14 +60,10 @@ struct SomethingOrDouble
 };
 
 typedef SomethingOrDouble<string> StringOrDouble;
-typedef SomethingOrDouble<wstring> WStringOrDouble;
 typedef SomethingOrDouble<GlyphUnicodeMappingList> GlyphUnicodeMappingListOrDouble;
 
 typedef list<StringOrDouble> StringOrDoubleList;
-typedef list<WStringOrDouble> WStringOrDoubleList;
 typedef list<GlyphUnicodeMappingListOrDouble> GlyphUnicodeMappingListOrDoubleList;
-
-typedef list<wstring> WStringList;
 
 class AbstractContentContext
 {
@@ -169,13 +165,13 @@ public:
 	// place text to the current set font with Tf
 	// will return error if no font was set, or that one of the glyphs
 	// didn't succeed in encoding.
-	// input parameter is UTF-16 encoded
-	EPDFStatusCode Tj(const wstring& inText);
+	// input parameter is UTF-8 encoded
+	EPDFStatusCode Tj(const string& inText);
 
-	// The rest of the text operators, handled by the library handing of font. text is in UTF16
-	EPDFStatusCode Quote(const wstring& inText);
-	EPDFStatusCode DoubleQuote(double inWordSpacing, double inCharacterSpacing, const wstring& inText);
-	EPDFStatusCode TJ(const WStringOrDoubleList& inStringsAndSpacing); 
+	// The rest of the text operators, handled by the library handing of font. text is in UTF8
+	EPDFStatusCode Quote(const string& inText);
+	EPDFStatusCode DoubleQuote(double inWordSpacing, double inCharacterSpacing, const string& inText);
+	EPDFStatusCode TJ(const StringOrDoubleList& inStringsAndSpacing); 
 
 	//
 	// Text showing operators using the library handling of fonts with direct glyph selection
@@ -198,23 +194,23 @@ public:
 	// font and text usage
 
 	// Low level setting of font. for the high level version, see below
-	void Tf(const string& inFontName,double inFontSize); 
+	void TfLow(const string& inFontName,double inFontSize); 
 
 	// first version of Tj writes the string in literal string paranthesis, 
 	// second version of Tj writes the string in hex string angle brackets
-	void Tj(const string& inText);
-	void TjHex(const string& inText); 
+	void TjLow(const string& inText);
+	void TjHexLow(const string& inText); 
 
-	void Quote(const string& inText); // matches the operator '
-	void QuoteHex(const string& inText);
+	void QuoteLow(const string& inText); // matches the operator '
+	void QuoteHexLow(const string& inText);
 
-	void DoubleQuote(double inWordSpacing, double inCharacterSpacing, const string& inText); // matches the operator "
-	void DoubleQuoteHex(double inWordSpacing, double inCharacterSpacing, const string& inText); 
+	void DoubleQuoteLow(double inWordSpacing, double inCharacterSpacing, const string& inText); // matches the operator "
+	void DoubleQuoteHexLow(double inWordSpacing, double inCharacterSpacing, const string& inText); 
 
 	// similar to the TJ PDF command, TJ() recieves an input an array of items which
 	// can be either a string or a double
-	void TJ(const StringOrDoubleList& inStringsAndSpacing);
-	void TJHex(const StringOrDoubleList& inStringsAndSpacing);
+	void TJLow(const StringOrDoubleList& inStringsAndSpacing);
+	void TJHexLow(const StringOrDoubleList& inStringsAndSpacing);
 
 
 protected:
@@ -235,6 +231,6 @@ private:
 
 	void AssertProcsetAvailable(const string& inProcsetName);
 
-	EPDFStatusCode WriteTextCommandWithEncoding(const wstring& inUnicodeText,ITextCommand* inTextCommand);
+	EPDFStatusCode WriteTextCommandWithEncoding(const string& inUnicodeText,ITextCommand* inTextCommand);
 	EPDFStatusCode WriteTextCommandWithDirectGlyphSelection(const GlyphUnicodeMappingList& inText,ITextCommand* inTextCommand);
 };

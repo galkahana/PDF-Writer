@@ -35,6 +35,6 @@ public:
 
 
 private:
-	EPDFStatusCode ShowFaceProperties(FreeTypeWrapper& inFreeType,const wchar_t* inFontFilePath,const wchar_t* inSecondaryFontFilePath = NULL);
+	EPDFStatusCode ShowFaceProperties(FreeTypeWrapper& inFreeType,const char* inFontFilePath,const char* inSecondaryFontFilePath = NULL);
 	EPDFStatusCode ShowGlobalFontProperties(FreeTypeWrapper& inFreeType,FT_Face inFace);
 };

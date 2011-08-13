@@ -40,10 +40,10 @@ EPDFStatusCode TrueTypeTest::Run()
 
 	do
 	{
-		status = ttfFile.OpenFile(L"C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
+		status = ttfFile.OpenFile("C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
 		if(status != ePDFSuccess)
 		{
-			wcout<<"cannot read arial font file\n";
+			cout<<"cannot read arial font file\n";
 			break;
 		}
 
@@ -52,7 +52,7 @@ EPDFStatusCode TrueTypeTest::Run()
 		status = trueTypeReader.ReadOpenTypeFile(ttfFile.GetInputStream());
 		if(status != ePDFSuccess)
 		{
-			wcout<<"could not read true type file\n";
+			cout<<"could not read true type file\n";
 			break;
 		}
 	}while(false);

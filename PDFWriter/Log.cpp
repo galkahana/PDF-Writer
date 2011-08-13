@@ -34,8 +34,9 @@ void STATIC_LogEntryToStream(Log* inThis,const Byte* inMessage, LongBufferSizeTy
 	inThis->LogEntryToStream(inMessage,inMessageSize);
 }
 
+static const Byte scUTF8Bom[3] = {0xEF,0xBB,0xBF};
 
-Log::Log(const wstring& inLogFilePath)
+Log::Log(const string& inLogFilePath,bool inPlaceUTF8Bom)
 {
 	mFilePath = inLogFilePath;
 	mLogStream = NULL;
@@ -44,19 +45,17 @@ Log::Log(const wstring& inLogFilePath)
 	// check if file exists or not...if not, create new one and place a bom in its beginning
 	FILE* logFile;
 	bool exists;
-	SAFE_WFOPEN(logFile,mFilePath.c_str(),L"r")
+	SAFE_FOPEN(logFile,mFilePath.c_str(),"r")
 	exists = (logFile!= NULL);
 	if(logFile)
 		fclose(logFile);
 
 	if(!exists)
 	{
-		// let's trick the system to tell us which bom it uses..
-		unsigned short bom = (0xFE<<8) + 0xFF;
-
-		// put unicode header
 		mLogFile.OpenFile(mFilePath);
-		mLogFile.GetOutputStream()->Write((const Byte*)&bom,2);	
+		// put utf 8 header
+		if(inPlaceUTF8Bom)
+			mLogFile.GetOutputStream()->Write(scUTF8Bom,3);	
 		mLogFile.CloseFile();
 	}
 }
@@ -74,9 +73,9 @@ Log::~Log(void)
 {
 }
 
-void Log::LogEntry(const wstring& inMessage)
+void Log::LogEntry(const string& inMessage)
 {
-	LogEntry((const Byte*)inMessage.c_str(), inMessage.length() * 2);
+	LogEntry((const Byte*)inMessage.c_str(), inMessage.length());
 }
 
 void Log::LogEntry(const Byte* inMessage, LongBufferSizeType inMessageSize)
@@ -84,7 +83,7 @@ void Log::LogEntry(const Byte* inMessage, LongBufferSizeType inMessageSize)
 	mLogMethod(this,inMessage,inMessageSize);
 }
 
-static const wchar_t scEndLine[] = L"\r\n";
+static const Byte scEndLine[2] = {'\r','\n'};
 
 void Log::LogEntryToFile(const Byte* inMessage, LongBufferSizeType inMessageSize)
 {
@@ -101,16 +100,16 @@ void Log::LogEntryToStream(const Byte* inMessage, LongBufferSizeType inMessageSi
 
 void Log::WriteLogEntryToStream(const Byte* inMessage, LongBufferSizeType inMessageSize,IByteWriter* inStream)
 {
-	wstring formattedTimeString = GetFormattedTimeString();
-	inStream->Write((const Byte*)formattedTimeString.c_str(),formattedTimeString.length()*2);
+	string formattedTimeString = GetFormattedTimeString();
+	inStream->Write((const Byte*)formattedTimeString.c_str(),formattedTimeString.length());
 	inStream->Write(inMessage,inMessageSize);
-	inStream->Write((const Byte*)scEndLine,4);
+	inStream->Write(scEndLine,2);
 }
 
-wstring Log::GetFormattedTimeString()
+string Log::GetFormattedTimeString()
 {
 	// create a local time string (date + time) that looks like this: "[ dd/mm/yyyy hh:mm:ss ] "
-	wchar_t buffer[26];
+	char buffer[26];
 	
 	time_t currentTime;
 	tm structuredLocalTime;
@@ -118,7 +117,7 @@ wstring Log::GetFormattedTimeString()
 	time(&currentTime);
 	SAFE_LOCAL_TIME(structuredLocalTime,currentTime);
 
-	SAFE_SWPRINTF_6(buffer,26,L"[ %02d/%02d/%04d %02d:%02d:%02d ] ",structuredLocalTime.tm_mday,
+	SAFE_SPRINTF_6(buffer,26,"[ %02d/%02d/%04d %02d:%02d:%02d ] ",structuredLocalTime.tm_mday,
 																	structuredLocalTime.tm_mon + 1,
 																	structuredLocalTime.tm_year + 1900,
 																	structuredLocalTime.tm_hour,

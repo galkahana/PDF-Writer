@@ -33,8 +33,8 @@ class PDFUsedFont;
 class ObjectsContext;
 class HummusPDFParser;
 
-typedef map<wstring,PDFUsedFont*> WStringToPDFUsedFontMap;
-typedef map<wstring,wstring> WStringToWStringMap;
+typedef map<string,PDFUsedFont*> StringToPDFUsedFontMap;
+typedef map<string,string> StringToStringMap;
 
 class UsedFontsRepository
 {
@@ -44,9 +44,9 @@ public:
 
 	void SetObjectsContext(ObjectsContext* inObjectsContext);
 
-	PDFUsedFont* GetFontForFile(const wstring& inFontFilePath);
+	PDFUsedFont* GetFontForFile(const string& inFontFilePath);
 	// second overload is for type 1, when an additional metrics file is available
-	PDFUsedFont* GetFontForFile(const wstring& inFontFilePath,const wstring& inOptionalMetricsFile);
+	PDFUsedFont* GetFontForFile(const string& inFontFilePath,const string& inOptionalMetricsFile);
 
 	EPDFStatusCode WriteUsedFontsDefinitions();
 
@@ -57,6 +57,6 @@ private:
 
 	ObjectsContext* mObjectsContext;
 	FreeTypeWrapper* mInputFontsInformation;
-	WStringToPDFUsedFontMap mUsedFonts;
-	WStringToWStringMap mOptionaMetricsFiles;
+	StringToPDFUsedFontMap mUsedFonts;
+	StringToStringMap mOptionaMetricsFiles;
 };

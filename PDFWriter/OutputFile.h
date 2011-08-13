@@ -35,13 +35,13 @@ public:
 	OutputFile(void);
 	~OutputFile(void);
 
-	EPDFStatusCode OpenFile(const wstring& inFilePath, bool inAppend = false);
+	EPDFStatusCode OpenFile(const string& inFilePath, bool inAppend = false);
 	EPDFStatusCode CloseFile();
 
 	IByteWriterWithPosition* GetOutputStream(); // returns buffered output stream
-	const wstring& GetFilePath();
+	const string& GetFilePath();
 private:
-	wstring mFilePath;
+	string mFilePath;
 	OutputBufferedStream* mOutputStream;
 	OutputFileStream* mFileStream;
 };

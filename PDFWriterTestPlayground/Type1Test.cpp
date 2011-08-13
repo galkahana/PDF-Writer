@@ -23,7 +23,6 @@
 #include "InputFile.h"
 #include "OutputFile.h"
 #include "CharStringType1Tracer.h"
-#include "StringTraits.h"
 #include "IByteWriterWithPosition.h"
 #include "Type1Input.h"
 #include "PSBool.h"
@@ -46,17 +45,17 @@ EPDFStatusCode Type1Test::Run()
 
 	do
 	{
-		status = type1File.OpenFile(L"C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFB");
+		status = type1File.OpenFile("C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFB");
 		if(status != ePDFSuccess)
 		{
-			wcout<<"Failed to open Helvetica input file\n";
+			cout<<"Failed to open Helvetica input file\n";
 			break;
 		}
 
 		status = type1Input.ReadType1File(type1File.GetInputStream());
 		if(status != ePDFSuccess)
 		{
-			wcout<<"Failed to read type 1 file\n";
+			cout<<"Failed to read type 1 file\n";
 			break;
 		}
 
@@ -105,88 +104,88 @@ EPDFStatusCode Type1Test::Run()
 
 void Type1Test::ShowFontDictionary(const Type1FontDictionary& inFontDictionary)
 {
-	wcout<<	L"\nShowing Font Dictionary:\n" <<
-			L"FontName = "<< StringTraits(inFontDictionary.FontName).WidenString().c_str()<<L"\n"<<
-			L"PaintType = "<<inFontDictionary.PaintType<<L"\n"<<
-			L"FontType = "<<inFontDictionary.FontType<<L"\n"<<
-			L"FontBBox = ";
+	cout<<	"\nShowing Font Dictionary:\n" <<
+			"FontName = "<< inFontDictionary.FontName.c_str()<<"\n"<<
+			"PaintType = "<<inFontDictionary.PaintType<<"\n"<<
+			"FontType = "<<inFontDictionary.FontType<<"\n"<<
+			"FontBBox = ";
 	ShowDoubleArray(inFontDictionary.FontBBox,4);
-	wcout<< L"\nFontMatrix = ";
+	cout<< "\nFontMatrix = ";
 	ShowDoubleArray(inFontDictionary.FontMatrix,6);
-	wcout<< L"\nUniqueID = "<< inFontDictionary.UniqueID<<L"\n"<<
-			L"StrokeWidth = "<< inFontDictionary.StrokeWidth<<L"\n";
+	cout<< "\nUniqueID = "<< inFontDictionary.UniqueID<<"\n"<<
+			"StrokeWidth = "<< inFontDictionary.StrokeWidth<<"\n";
 
 }
 
 void Type1Test::ShowDoubleArray(const double inDoubleArray[],int inSize)
 {
-	wcout<<L"[ ";
+	cout<<"[ ";
 	for(int i=0;i<inSize;++i)
-		wcout<<Double(inDoubleArray[i])<<L" ";
-	wcout<<L"]";
+		cout<<Double(inDoubleArray[i])<<" ";
+	cout<<"]";
 }
 
 
 void Type1Test::ShowFontInfoDictionary(const Type1FontInfoDictionary& inFontInfoDictionary)
 {
-	wcout<< L"\nShowing Font Info Dictionary:\n"<<
-			L"version = "<<StringTraits(inFontInfoDictionary.version).WidenString().c_str()<<L"\n"<<
-			L"Notice = "<<StringTraits(inFontInfoDictionary.Notice).WidenString().c_str()<<L"\n"<<
-			L"Copyright = "<<StringTraits(inFontInfoDictionary.Copyright).WidenString().c_str()<<L"\n"<<
-			L"FullName = "<<StringTraits(inFontInfoDictionary.FullName).WidenString().c_str()<<L"\n"<<
-			L"FamilyName = "<<StringTraits(inFontInfoDictionary.FamilyName).WidenString().c_str()<<L"\n"<<
-			L"Weight = "<<StringTraits(inFontInfoDictionary.Weight).WidenString().c_str()<<L"\n"<<
-			L"ItalicAngle = "<<Double(inFontInfoDictionary.ItalicAngle).ToWString().c_str()<<L"\n"<<
-			L"isFixedPitch = "<<PSBool(inFontInfoDictionary.isFixedPitch).ToWString().c_str()<<L"\n"<<
-			L"UnderlinePosition = "<<Double(inFontInfoDictionary.UnderlinePosition).ToWString().c_str()<<L"\n"<<
-			L"UndelineThickness = "<<Double(inFontInfoDictionary.UnderlineThickness).ToWString().c_str()<<L"\n";
+	cout<< "\nShowing Font Info Dictionary:\n"<<
+			"version = "<<inFontInfoDictionary.version.c_str()<<"\n"<<
+			"Notice = "<<inFontInfoDictionary.Notice.c_str()<<"\n"<<
+			"Copyright = "<<inFontInfoDictionary.Copyright.c_str()<<"\n"<<
+			"FullName = "<<inFontInfoDictionary.FullName.c_str()<<"\n"<<
+			"FamilyName = "<<inFontInfoDictionary.FamilyName.c_str()<<"\n"<<
+			"Weight = "<<inFontInfoDictionary.Weight.c_str()<<"\n"<<
+			"ItalicAngle = "<<Double(inFontInfoDictionary.ItalicAngle).ToString().c_str()<<"\n"<<
+			"isFixedPitch = "<<PSBool(inFontInfoDictionary.isFixedPitch).ToString().c_str()<<"\n"<<
+			"UnderlinePosition = "<<Double(inFontInfoDictionary.UnderlinePosition).ToString().c_str()<<"\n"<<
+			"UndelineThickness = "<<Double(inFontInfoDictionary.UnderlineThickness).ToString().c_str()<<"\n";
 }
 
 void Type1Test::ShowPrivateInfoDictionary(const Type1PrivateDictionary& inPrivateDictionary)
 {
-	wcout<< L"\nShowing Private Dictionary:\n"<<
-			L"UniqueID = "<<inPrivateDictionary.UniqueID<<L"\n"<<
-			L"BlueValues = ";
+	cout<< "\nShowing Private Dictionary:\n"<<
+			"UniqueID = "<<inPrivateDictionary.UniqueID<<"\n"<<
+			"BlueValues = ";
 	ShowIntVector(inPrivateDictionary.BlueValues);
-	wcout<< L"\nOtherBlues = ";
+	cout<< "\nOtherBlues = ";
 	ShowIntVector(inPrivateDictionary.OtherBlues);
-	wcout<< L"\nFamilyBlues = ";
+	cout<< "\nFamilyBlues = ";
 	ShowIntVector(inPrivateDictionary.FamilyBlues);
-	wcout<< L"\nFamilyOtherBlues = ";
+	cout<< "\nFamilyOtherBlues = ";
 	ShowIntVector(inPrivateDictionary.FamilyOtherBlues);
-	wcout<< L"\nBlueScale = "<<Double(inPrivateDictionary.BlueScale).ToWString().c_str()<<L"\n"<<
-			L"BlueShift = "<<inPrivateDictionary.BlueShift<<L"\n"<<
-			L"BlueFuzz = "<<inPrivateDictionary.BlueFuzz<<L"\n"<<
-			L"StdHW = "<<Double(inPrivateDictionary.StdHW).ToWString().c_str()<<L"\n"<<
-			L"StdVW = "<<Double(inPrivateDictionary.StdVW).ToWString().c_str()<<L"\n"<<
-			L"StemSnapH = ";
+	cout<< "\nBlueScale = "<<Double(inPrivateDictionary.BlueScale).ToString().c_str()<<"\n"<<
+			"BlueShift = "<<inPrivateDictionary.BlueShift<<"\n"<<
+			"BlueFuzz = "<<inPrivateDictionary.BlueFuzz<<"\n"<<
+			"StdHW = "<<Double(inPrivateDictionary.StdHW).ToString().c_str()<<"\n"<<
+			"StdVW = "<<Double(inPrivateDictionary.StdVW).ToString().c_str()<<"\n"<<
+			"StemSnapH = ";
 	ShowDoubleVector(inPrivateDictionary.StemSnapH);
-	wcout<< L"\nStemSnapW = ";
+	cout<< "\nStemSnapW = ";
 	ShowDoubleVector(inPrivateDictionary.StemSnapV);
-	wcout<< L"\nForceBold = "<<PSBool(inPrivateDictionary.ForceBold).ToWString().c_str()<<L"\n"<<
-			L"LanguageGrup = "<<inPrivateDictionary.LanguageGroup<<L"\n"<<
-			L"lenIV = "<<inPrivateDictionary.lenIV<<L"\n"<<
-			L"RndStemUp = "<<PSBool(inPrivateDictionary.RndStemUp).ToWString().c_str()<<L"\n";
+	cout<< "\nForceBold = "<<PSBool(inPrivateDictionary.ForceBold).ToString().c_str()<<"\n"<<
+			"LanguageGrup = "<<inPrivateDictionary.LanguageGroup<<"\n"<<
+			"lenIV = "<<inPrivateDictionary.lenIV<<"\n"<<
+			"RndStemUp = "<<PSBool(inPrivateDictionary.RndStemUp).ToString().c_str()<<"\n";
 }
 
 void Type1Test::ShowIntVector(const vector<int>& inVector)
 {
 	vector<int>::const_iterator it = inVector.begin();
 
-	wcout<<L"[ ";
+	cout<<"[ ";
 	for(;it != inVector.end();++it)
-		wcout<<*it<<L" ";
-	wcout<<L"]";	
+		cout<<*it<<" ";
+	cout<<"]";	
 }
 
 void Type1Test::ShowDoubleVector(const vector<double>& inVector)
 {
 	vector<double>::const_iterator it = inVector.begin();
 
-	wcout<<L"[ ";
+	cout<<"[ ";
 	for(;it != inVector.end();++it)
-		wcout<<Double(*it).ToWString().c_str()<<L" ";
-	wcout<<L"]";	
+		cout<<Double(*it).ToString().c_str()<<" ";
+	cout<<"]";	
 }
 
 EPDFStatusCode Type1Test::ShowDependencies(const string& inCharStringName,Type1Input* inType1Input)
@@ -196,26 +195,26 @@ EPDFStatusCode Type1Test::ShowDependencies(const string& inCharStringName,Type1I
 
 	if(status != ePDFSuccess)
 	{
-		wcout<<"count not calculate dependencies for glyph "<<inCharStringName.c_str()<<"\n";
+		cout<<"count not calculate dependencies for glyph "<<inCharStringName.c_str()<<"\n";
 		return ePDFFailure;
 	}
 
 	if(dependencies.mCharCodes.size() != 0 || dependencies.mOtherSubrs.size() != 0 || dependencies.mSubrs.size() != 0)
 	{
-		wcout<<"Glyph "<<inCharStringName.c_str()<<" has dependencies:\n";
+		cout<<"Glyph "<<inCharStringName.c_str()<<" has dependencies:\n";
 		ByteSet::iterator itBytes = dependencies.mCharCodes.begin();
 		for(; itBytes != dependencies.mCharCodes.end(); ++itBytes)
-			wcout<<"Seac Charcode "<<*itBytes<<"\n";
+			cout<<"Seac Charcode "<<*itBytes<<"\n";
 		UShortSet::iterator itShort = dependencies.mOtherSubrs.begin();
 		for(; itShort != dependencies.mOtherSubrs.end(); ++itShort)
-			wcout<<"Other Subr "<<*itShort<<"\n";
+			cout<<"Other Subr "<<*itShort<<"\n";
 		itShort = dependencies.mSubrs.begin();
 		for(; itShort != dependencies.mSubrs.end(); ++itShort)
-			wcout<<"Subr "<<*itShort<<"\n";
+			cout<<"Subr "<<*itShort<<"\n";
 	}
 	else
 	{
-		wcout<<"No dependencies for "<<inCharStringName.c_str()<<"\n";
+		cout<<"No dependencies for "<<inCharStringName.c_str()<<"\n";
 	}
 	return ePDFSuccess;
 }
@@ -224,7 +223,7 @@ EPDFStatusCode Type1Test::SaveCharstringCode(const string& inCharStringName,Type
 {
 	OutputFile glyphFile;
 
-	EPDFStatusCode status = glyphFile.OpenFile(wstring(L"C:\\PDFLibTests\\glyphType1_") + StringTraits(inCharStringName).WidenString() + L"_.txt");
+	EPDFStatusCode status = glyphFile.OpenFile(string("C:\\PDFLibTests\\glyphType1_") + inCharStringName + "_.txt");
 
 	do
 	{

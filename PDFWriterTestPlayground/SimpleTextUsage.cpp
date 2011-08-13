@@ -47,7 +47,7 @@ EPDFStatusCode SimpleTextUsage::Run()
 		status = RunCFFTest();
 		if(status != ePDFSuccess)
 		{
-			wcout<<"Failed CFF Test\n";
+			cout<<"Failed CFF Test\n";
 			status = ePDFFailure;
 			break;
 		}
@@ -55,7 +55,7 @@ EPDFStatusCode SimpleTextUsage::Run()
 		status = RunTrueTypeTest();
 		if(status != ePDFSuccess)
 		{
-			wcout<<"Failed True Type Test\n";
+			cout<<"Failed True Type Test\n";
 			status = ePDFFailure;
 			break;
 		}
@@ -63,7 +63,7 @@ EPDFStatusCode SimpleTextUsage::Run()
 		status = RunType1Test();
 		if(status != ePDFSuccess)
 		{
-			wcout<<"Failed Type 1 Test\n";
+			cout<<"Failed Type 1 Test\n";
 			status = ePDFFailure;
 			break;
 		}
@@ -80,10 +80,10 @@ EPDFStatusCode SimpleTextUsage::RunCFFTest()
 
 	do
 	{
-		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\SimpleTextUsageCFF.PDF",ePDFVersion13,LogConfiguration(true,L"C:\\PDFLibTests\\SimpleTextUsage.log"));
+		status = pdfWriter.StartPDF("C:\\PDFLibTests\\SimpleTextUsageCFF.PDF",ePDFVersion13,LogConfiguration(true,true,"C:\\PDFLibTests\\SimpleTextUsage.log"));
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to start PDF\n";
+			cout<<"failed to start PDF\n";
 			break;
 		}	
 
@@ -94,15 +94,15 @@ EPDFStatusCode SimpleTextUsage::RunCFFTest()
 		if(NULL == contentContext)
 		{
 			status = ePDFFailure;
-			wcout<<"failed to create content context for page\n";
+			cout<<"failed to create content context for page\n";
 			break;
 		}
 
-		PDFUsedFont* font = pdfWriter.GetFontForFile(L"C:\\PDFLibTests\\TestMaterials\\fonts\\BrushScriptStd.otf");
+		PDFUsedFont* font = pdfWriter.GetFontForFile("C:\\PDFLibTests\\TestMaterials\\fonts\\BrushScriptStd.otf");
 		if(!font)
 		{
 			status = ePDFFailure;
-			wcout<<"Failed to create font object for brushscriptstd.otf\n";
+			cout<<"Failed to create font object for brushscriptstd.otf\n";
 			break;
 		}
 
@@ -114,9 +114,9 @@ EPDFStatusCode SimpleTextUsage::RunCFFTest()
 
 		contentContext->Tm(30,0,0,30,78.4252,662.8997);
 
-		EPDFStatusCode encodingStatus = contentContext->Tj(L"abcd");
+		EPDFStatusCode encodingStatus = contentContext->Tj("abcd");
 		if(encodingStatus != ePDFSuccess)
-			wcout<<"Could not find some of the glyphs for this font (BrushScriptStd)";
+			cout<<"Could not find some of the glyphs for this font (BrushScriptStd)";
 
 		// continue even if failed...want to see how it looks like
 		contentContext->ET();
@@ -125,11 +125,11 @@ EPDFStatusCode SimpleTextUsage::RunCFFTest()
 		contentContext->BT();
 		contentContext->k(0,0,0,1);
 
-		PDFUsedFont* fontK = pdfWriter.GetFontForFile(L"C:\\PDFLibTests\\TestMaterials\\fonts\\KozGoPro-Regular.otf");
+		PDFUsedFont* fontK = pdfWriter.GetFontForFile("C:\\PDFLibTests\\TestMaterials\\fonts\\KozGoPro-Regular.otf");
 		if(!fontK)
 		{
 			status = ePDFFailure;
-			wcout<<"Failed to create font object for KozGoPro-Regular.otf\n";
+			cout<<"Failed to create font object for KozGoPro-Regular.otf\n";
 			break;
 		}
 
@@ -137,9 +137,9 @@ EPDFStatusCode SimpleTextUsage::RunCFFTest()
 
 		contentContext->Tm(30,0,0,30,78.4252,400.8997);
 
-		encodingStatus = contentContext->Tj(L"abcd");
+		encodingStatus = contentContext->Tj("abcd");
 		if(encodingStatus != ePDFSuccess)
-			wcout<<"Could not find some of the glyphs for this font (Kozuka)";
+			cout<<"Could not find some of the glyphs for this font (Kozuka)";
 
 		// continue even if failed...want to see how it looks like
 		contentContext->ET();
@@ -147,21 +147,21 @@ EPDFStatusCode SimpleTextUsage::RunCFFTest()
 		status = pdfWriter.EndPageContentContext(contentContext);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to end page content context\n";
+			cout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to write page\n";
+			cout<<"failed to write page\n";
 			break;
 		}
 
 		status = pdfWriter.EndPDF();
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed in end PDF\n";
+			cout<<"failed in end PDF\n";
 			break;
 		}
 	}while(false);
@@ -176,10 +176,10 @@ EPDFStatusCode SimpleTextUsage::RunTrueTypeTest()
 
 	do
 	{
-		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\SimpleTextUsageTrueType.PDF",ePDFVersion13,LogConfiguration(true,L"C:\\PDFLibTests\\SimpleTextUsage.log"));
+		status = pdfWriter.StartPDF("C:\\PDFLibTests\\SimpleTextUsageTrueType.PDF",ePDFVersion13,LogConfiguration(true,true,"C:\\PDFLibTests\\SimpleTextUsage.log"));
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to start PDF\n";
+			cout<<"failed to start PDF\n";
 			break;
 		}	
 
@@ -190,15 +190,15 @@ EPDFStatusCode SimpleTextUsage::RunTrueTypeTest()
 		if(NULL == contentContext)
 		{
 			status = ePDFFailure;
-			wcout<<"failed to create content context for page\n";
+			cout<<"failed to create content context for page\n";
 			break;
 		}
 
-		PDFUsedFont* font = pdfWriter.GetFontForFile(L"C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
+		PDFUsedFont* font = pdfWriter.GetFontForFile("C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
 		if(!font)
 		{
 			status = ePDFFailure;
-			wcout<<"Failed to create font object for arial.ttf\n";
+			cout<<"Failed to create font object for arial.ttf\n";
 			break;
 		}
 
@@ -211,9 +211,9 @@ EPDFStatusCode SimpleTextUsage::RunTrueTypeTest()
 
 		contentContext->Tm(30,0,0,30,78.4252,662.8997);
 
-		EPDFStatusCode encodingStatus = contentContext->Tj(L"hello world");
+		EPDFStatusCode encodingStatus = contentContext->Tj("hello world");
 		if(encodingStatus != ePDFSuccess)
-			wcout<<"Could not find some of the glyphs for this font";
+			cout<<"Could not find some of the glyphs for this font";
 
 		// continue even if failed...want to see how it looks like
 		contentContext->ET();
@@ -221,21 +221,21 @@ EPDFStatusCode SimpleTextUsage::RunTrueTypeTest()
 		status = pdfWriter.EndPageContentContext(contentContext);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to end page content context\n";
+			cout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to write page\n";
+			cout<<"failed to write page\n";
 			break;
 		}
 
 		status = pdfWriter.EndPDF();
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed in end PDF\n";
+			cout<<"failed in end PDF\n";
 			break;
 		}
 	}while(false);
@@ -249,10 +249,10 @@ EPDFStatusCode SimpleTextUsage::RunType1Test()
 
 	do
 	{
-		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\SimpleTextUsageType1.PDF",ePDFVersion13,LogConfiguration(true,L"C:\\PDFLibTests\\SimpleTextUsage.log"));
+		status = pdfWriter.StartPDF("C:\\PDFLibTests\\SimpleTextUsageType1.PDF",ePDFVersion13,LogConfiguration(true,true,"C:\\PDFLibTests\\SimpleTextUsage.log"));
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to start PDF\n";
+			cout<<"failed to start PDF\n";
 			break;
 		}	
 
@@ -263,16 +263,16 @@ EPDFStatusCode SimpleTextUsage::RunType1Test()
 		if(NULL == contentContext)
 		{
 			status = ePDFFailure;
-			wcout<<"failed to create content context for page\n";
+			cout<<"failed to create content context for page\n";
 			break;
 		}
 
-		PDFUsedFont* font = pdfWriter.GetFontForFile(L"C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFB",
-													 L"C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFM");
+		PDFUsedFont* font = pdfWriter.GetFontForFile("C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFB",
+													 "C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFM");
 		if(!font)
 		{
 			status = ePDFFailure;
-			wcout<<"Failed to create font object for Helvetica Neue font\n";
+			cout<<"Failed to create font object for Helvetica Neue font\n";
 			break;
 		}
 
@@ -285,9 +285,9 @@ EPDFStatusCode SimpleTextUsage::RunType1Test()
 
 		contentContext->Tm(30,0,0,30,78.4252,662.8997);
 
-		EPDFStatusCode encodingStatus = contentContext->Tj(L"abcd");
+		EPDFStatusCode encodingStatus = contentContext->Tj("abcd");
 		if(encodingStatus != ePDFSuccess)
-			wcout<<"Could not find some of the glyphs for this font";
+			cout<<"Could not find some of the glyphs for this font";
 
 		// continue even if failed...want to see how it looks like
 		contentContext->ET();
@@ -295,21 +295,21 @@ EPDFStatusCode SimpleTextUsage::RunType1Test()
 		status = pdfWriter.EndPageContentContext(contentContext);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to end page content context\n";
+			cout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to write page\n";
+			cout<<"failed to write page\n";
 			break;
 		}
 
 		status = pdfWriter.EndPDF();
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed in end PDF\n";
+			cout<<"failed in end PDF\n";
 			break;
 		}
 	}while(false);

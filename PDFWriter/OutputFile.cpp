@@ -34,7 +34,7 @@ OutputFile::~OutputFile(void)
 	CloseFile();
 }
 
-EPDFStatusCode OutputFile::OpenFile(const wstring& inFilePath,bool inAppend)
+EPDFStatusCode OutputFile::OpenFile(const string& inFilePath,bool inAppend)
 {
 	EPDFStatusCode status;
 	do
@@ -85,7 +85,7 @@ IByteWriterWithPosition* OutputFile::GetOutputStream()
 	return mOutputStream;
 }
 
-const wstring& OutputFile::GetFilePath()
+const string& OutputFile::GetFilePath()
 {
 	return mFilePath;
 }

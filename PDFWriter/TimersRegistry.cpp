@@ -29,38 +29,38 @@ TimersRegistry::~TimersRegistry(void)
 {
 }
 
-void TimersRegistry::StartMeasure(const wstring& inTimerName)
+void TimersRegistry::StartMeasure(const string& inTimerName)
 {
-	WStringToTimerMap::iterator it = mTimers.find(inTimerName);
+	StringToTimerMap::iterator it = mTimers.find(inTimerName);
 	if(it == mTimers.end())
-		it = mTimers.insert(WStringToTimerMap::value_type(inTimerName,Timer())).first;
+		it = mTimers.insert(StringToTimerMap::value_type(inTimerName,Timer())).first;
 
 	it->second.StartMeasure();
 }
 
-void TimersRegistry::StopMeasureAndAccumulate(const wstring& inTimerName)
+void TimersRegistry::StopMeasureAndAccumulate(const string& inTimerName)
 {
-	WStringToTimerMap::iterator it = mTimers.find(inTimerName);
+	StringToTimerMap::iterator it = mTimers.find(inTimerName);
 	if(it == mTimers.end())
-		it = mTimers.insert(WStringToTimerMap::value_type(inTimerName,Timer())).first;
+		it = mTimers.insert(StringToTimerMap::value_type(inTimerName,Timer())).first;
 
 	it->second.StopMeasureAndAccumulate();
 }
 
-double TimersRegistry::GetTotalMiliSeconds(const wstring& inTimerName)
+double TimersRegistry::GetTotalMiliSeconds(const string& inTimerName)
 {
-	WStringToTimerMap::iterator it = mTimers.find(inTimerName);
+	StringToTimerMap::iterator it = mTimers.find(inTimerName);
 	if(it == mTimers.end())
-		it = mTimers.insert(WStringToTimerMap::value_type(inTimerName,Timer())).first;
+		it = mTimers.insert(StringToTimerMap::value_type(inTimerName,Timer())).first;
 
 	return it->second.GetTotalMiliSeconds();
 }
 
-Timer& TimersRegistry::GetTimer(const wstring& inTimerName)
+Timer& TimersRegistry::GetTimer(const string& inTimerName)
 {
-	WStringToTimerMap::iterator it = mTimers.find(inTimerName);
+	StringToTimerMap::iterator it = mTimers.find(inTimerName);
 	if(it == mTimers.end())
-		it = mTimers.insert(WStringToTimerMap::value_type(inTimerName,Timer())).first;
+		it = mTimers.insert(StringToTimerMap::value_type(inTimerName,Timer())).first;
 
 	return it->second;
 }
@@ -72,7 +72,7 @@ void TimersRegistry::ReleaseAll()
 
 void TimersRegistry::TraceAll()
 {
-	WStringToTimerMap::iterator it = mTimers.begin();
+	StringToTimerMap::iterator it = mTimers.begin();
 	
 	TRACE_LOG("Start Tracing Timers");
 	for(; it != mTimers.end(); ++it)

@@ -35,21 +35,21 @@ TimerTest::~TimerTest(void)
 
 EPDFStatusCode TimerTest::Run()
 {
-	Singleton<Trace>::GetInstance()->SetLogSettings(L"c:\\PDFLibTests\\timersTrace.txt",true);
+	Singleton<Trace>::GetInstance()->SetLogSettings("c:\\PDFLibTests\\timersTrace.txt",true,true);
 
 	TimersRegistry timersRegistry;
 
-	timersRegistry.StartMeasure(L"TimerA");
-	timersRegistry.StartMeasure(L"TimerB");
+	timersRegistry.StartMeasure("TimerA");
+	timersRegistry.StartMeasure("TimerB");
 	Sleep(5);
-	timersRegistry.StopMeasureAndAccumulate(L"TimerA");
-	timersRegistry.StopMeasureAndAccumulate(L"TimerB");
+	timersRegistry.StopMeasureAndAccumulate("TimerA");
+	timersRegistry.StopMeasureAndAccumulate("TimerB");
 
-	timersRegistry.StartMeasure(L"TimerC");
-	timersRegistry.StartMeasure(L"TimerB");
+	timersRegistry.StartMeasure("TimerC");
+	timersRegistry.StartMeasure("TimerB");
 	Sleep(5.80);
-	timersRegistry.StopMeasureAndAccumulate(L"TimerC");
-	timersRegistry.StopMeasureAndAccumulate(L"TimerB");
+	timersRegistry.StopMeasureAndAccumulate("TimerC");
+	timersRegistry.StopMeasureAndAccumulate("TimerB");
 
 	timersRegistry.TraceAndReleaseAll();
 

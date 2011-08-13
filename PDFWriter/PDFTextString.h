@@ -42,23 +42,20 @@ public:
 	
 	PDFTextString();
 	PDFTextString(const string& inString); // initialize from an encoded string
-	PDFTextString(const wstring& inString); // initaialize from unicode string, will contvert
 	~PDFTextString(void);
 
 
-	PDFTextString& FromUTF16(const wstring& inString); // will try first to convert to PDFDocEncoded, and if unable, to UTF16BE
+	PDFTextString& FromUTF8(const string& inString); // will try first to convert to PDFDocEncoded, and if unable, to UTF16BE
 
 	bool IsEmpty() const;
 	const string& ToString() const; // string representation of the PDFTextString, to be used for writing
-	wstring ToUTF16String() const;
+	string ToUTF8String() const;
 
 	bool operator==(const PDFTextString& inString) const; //equality check is string equality based
 	PDFTextString& operator=(const PDFTextString& inString);
 
 	// set from encoded string
 	PDFTextString& operator=(const string& inString);
-	// set from unicode string
-	PDFTextString& operator=(const wstring& inString);
 
 	static const PDFTextString Empty;
 
@@ -66,9 +63,9 @@ private:
 
 	string mTextString;
 
-	void ConvertFromUTF16(const wstring& inStringToConvert);
-	bool ConvertUTF16ToPDFDocEncoding(const wstring& inStringToConvert,OutputStringBufferStream& refResult);
-	void ConvertUTF16ToUTF16BE(const wstring& inStringToConvert,OutputStringBufferStream& refResult);
-	wstring ToUTF16FromUTF16BE() const;
-	wstring ToUTF16FromPDFDocEncoding() const;
+	void ConvertFromUTF8(const string& inStringToConvert);
+	bool ConvertUTF8ToPDFDocEncoding(const string& inStringToConvert,OutputStringBufferStream& refResult);
+	void ConvertUTF8ToUTF16BE(const string& inStringToConvert,OutputStringBufferStream& refResult);
+	string ToUTF8FromUTF16BE() const;
+	string ToUTF8FromPDFDocEncoding() const;
 };

@@ -42,41 +42,41 @@ EPDFStatusCode AppendPagesTest::Run()
 	{
 	 	HummusPDFWriter pdfWriter;
 
-		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\AppendPagesTest.PDF",ePDFVersion13,LogConfiguration(true,L"c:\\pdflibtests\\AppendPagesTestLog.txt"));
+		status = pdfWriter.StartPDF("C:\\PDFLibTests\\AppendPagesTest.PDF",ePDFVersion13,LogConfiguration(true,true,"c:\\pdflibtests\\AppendPagesTestLog.txt"));
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to start PDF\n";
+			cout<<"failed to start PDF\n";
 			break;
 		}	
 
 		EPDFStatusCodeAndObjectIDTypeList result;
 		
-		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\Original.pdf",PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\Original.pdf",PDFPageRange());
 		if(result.first != ePDFSuccess)
 		{
-			wcout<<"failed to append pages from Original.PDF\n";
+			cout<<"failed to append pages from Original.PDF\n";
 			status = result.first;
 			break;
 		}
-		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF",PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF",PDFPageRange());
 		if(result.first != ePDFSuccess)
 		{
-			wcout<<"failed to append pages from XObjectContent.pdf\n";
+			cout<<"failed to append pages from XObjectContent.pdf\n";
 			status = result.first;
 			break;
 		}
 
-		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\BasicTIFFImagesTest.PDF",PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\BasicTIFFImagesTest.PDF",PDFPageRange());
 		if(result.first != ePDFSuccess)
 		{
-			wcout<<"failed to append pages from BasicTIFFImagesTest.PDF\n";
+			cout<<"failed to append pages from BasicTIFFImagesTest.PDF\n";
 			status = result.first;
 			break;
 		}
 		status = pdfWriter.EndPDF();
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed in end PDF\n";
+			cout<<"failed in end PDF\n";
 			break;
 		}
 

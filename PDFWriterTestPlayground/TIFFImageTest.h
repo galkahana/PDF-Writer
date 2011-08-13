@@ -32,5 +32,5 @@ public:
 	virtual EPDFStatusCode Run();
 
 private:
-	EPDFStatusCode AddPageForTIFF(HummusPDFWriter& inHummusPDFWriter, const wchar_t* inTiffFilePath);
+	EPDFStatusCode AddPageForTIFF(HummusPDFWriter& inHummusPDFWriter, const char* inTiffFilePath);
 };

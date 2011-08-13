@@ -27,7 +27,7 @@
 
 using namespace std;
 
-typedef map<wstring,Timer> WStringToTimerMap;
+typedef map<string,Timer> StringToTimerMap;
 
 class TimersRegistry
 {
@@ -35,17 +35,17 @@ public:
 	TimersRegistry(void);
 	~TimersRegistry(void);
 
-	void StartMeasure(const wstring& inTimerName);
-	void StopMeasureAndAccumulate(const wstring& inTimerName);
+	void StartMeasure(const string& inTimerName);
+	void StopMeasureAndAccumulate(const string& inTimerName);
 
-	double GetTotalMiliSeconds(const wstring& inTimerName);
+	double GetTotalMiliSeconds(const string& inTimerName);
 
-	Timer& GetTimer(const wstring& inTimerName);
+	Timer& GetTimer(const string& inTimerName);
 
 	void ReleaseAll();
 	void TraceAll();
 	void TraceAndReleaseAll();
 
 private:
-	WStringToTimerMap mTimers;
+	StringToTimerMap mTimers;
 };

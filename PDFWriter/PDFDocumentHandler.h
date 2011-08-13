@@ -77,7 +77,7 @@ public:
 	// Create a list of XObjects from a PDF file.
 	// the list of objects can then be used to place the "pages" in various locations on the written
 	// PDF page.
-	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF( const wstring& inPDFFilePath,
+	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF( const string& inPDFFilePath,
 																const PDFPageRange& inPageRange,
 																EPDFPageBox inPageBoxToUseAsFormBox,
 																const double* inTransformationMatrix,
@@ -89,7 +89,7 @@ public:
 															 const double* inTransformationMatrix,
 															 const ObjectIDTypeList& inCopyAdditionalObjects);
 
-	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF( const wstring& inPDFFilePath,
+	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF( const string& inPDFFilePath,
 																const PDFPageRange& inPageRange,
 																const PDFRectangle& inCropBox,
 																const double* inTransformationMatrix,
@@ -102,7 +102,7 @@ public:
 															 const ObjectIDTypeList& inCopyAdditionalObjects);
 	
 	// appends pages from source PDF to the written PDF. returns object ID for the created pages
-	EPDFStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
+	EPDFStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const string& inPDFFilePath,
 														const PDFPageRange& inPageRange,
 														const ObjectIDTypeList& inCopyAdditionalObjects);
 
@@ -113,7 +113,7 @@ public:
 	// MergePDFPagesToPage, merge PDF pages content to an input page. good for single-placement of a page content, cheaper than creating
 	// and XObject and later placing, when the intention is to use this graphic just once.
 	EPDFStatusCode MergePDFPagesToPage(PDFPage* inPage,
-									const wstring& inPDFFilePath,
+									const string& inPDFFilePath,
 									const PDFPageRange& inPageRange,
 									const ObjectIDTypeList& inCopyAdditionalObjects);
 
@@ -135,7 +135,7 @@ public:
 
 
 	// copying context handling
-	EPDFStatusCode StartFileCopyingContext(const wstring& inPDFFilePath);
+	EPDFStatusCode StartFileCopyingContext(const string& inPDFFilePath);
 	EPDFStatusCode StartStreamCopyingContext(IByteReaderWithPosition* inPDFStream);
 	EPDFStatusCodeAndObjectIDType CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
 														 EPDFPageBox inPageBoxToUseAsFormBox,
@@ -188,7 +188,7 @@ private:
 	EPDFStatusCode CopyInDirectObject(ObjectIDType inSourceObjectID,ObjectIDType inTargetObjectID,ObjectIDTypeSet& ioCopiedObjects);
 	EPDFStatusCode WriteObjectByType(PDFObject* inObject,ETokenSeparator inSeparator,ObjectIDTypeList& outSourceObjectsToAdd);
 	EPDFStatusCode WriteArrayObject(PDFArray* inArray,ETokenSeparator inSeparator,ObjectIDTypeList& outSourceObjectsToAdd);
-	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const string& inPDFFilePath,
 															const PDFPageRange& inPageRange,
 															IPageEmbedInFormCommand* inPageEmbedCommand,
 															const double* inTransformationMatrix,

@@ -57,7 +57,7 @@ void OpenTypeFileInput::FreeTables()
 	mActualGlyphs.clear();
 }
 
-EPDFStatusCode OpenTypeFileInput::ReadOpenTypeFile(const wstring& inFontFilePath)
+EPDFStatusCode OpenTypeFileInput::ReadOpenTypeFile(const string& inFontFilePath)
 {
 	InputFile fontFile;
 

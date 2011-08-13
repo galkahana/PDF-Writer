@@ -44,18 +44,18 @@ EPDFStatusCode PDFEmbedTest::Run()
 
 	do
 	{
-		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\PDFEmbedTest.PDF",ePDFVersion13);
+		status = pdfWriter.StartPDF("C:\\PDFLibTests\\PDFEmbedTest.PDF",ePDFVersion13);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to start PDF\n";
+			cout<<"failed to start PDF\n";
 			break;
 		}	
 
 		// Create XObjects from PDF to embed
-		EPDFStatusCodeAndObjectIDTypeList result = pdfWriter.CreateFormXObjectsFromPDF(L"C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF",PDFPageRange(),ePDFPageBoxMediaBox);
+		EPDFStatusCodeAndObjectIDTypeList result = pdfWriter.CreateFormXObjectsFromPDF("C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF",PDFPageRange(),ePDFPageBoxMediaBox);
 		if(result.first != ePDFSuccess)
 		{
-			wcout<<"failed to create PDF XObjects from PDF file\n";
+			cout<<"failed to create PDF XObjects from PDF file\n";
 			status = result.first;
 			break;
 		}
@@ -92,21 +92,21 @@ EPDFStatusCode PDFEmbedTest::Run()
 		status = pdfWriter.EndPageContentContext(contentContext);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to end page content context\n";
+			cout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to write page\n";
+			cout<<"failed to write page\n";
 			break;
 		}
 
 		status = pdfWriter.EndPDF();
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed in end PDF\n";
+			cout<<"failed in end PDF\n";
 			break;
 		}
 

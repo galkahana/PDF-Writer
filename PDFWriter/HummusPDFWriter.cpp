@@ -31,7 +31,7 @@
 #include "PDFIndirectObjectReference.h"
 #include "IByteWriterWithPosition.h"
 
-const LogConfiguration LogConfiguration::DefaultLogConfiguration(false,L"PDFWriterLog.txt");
+const LogConfiguration LogConfiguration::DefaultLogConfiguration(false,false,"PDFWriterLog.txt");
 
 const PDFCreationSettings PDFCreationSettings::DefaultPDFCreationSettings(true);
 
@@ -48,7 +48,7 @@ HummusPDFWriter::~HummusPDFWriter(void)
 }
 
 EPDFStatusCode HummusPDFWriter::StartPDF(
-							const wstring& inOutputFilePath,
+							const string& inOutputFilePath,
 							EPDFVersion inPDFVersion,
 							const LogConfiguration& inLogConfiguration,
 							const PDFCreationSettings& inPDFCreationSettings)
@@ -110,7 +110,7 @@ void HummusPDFWriter::SetupLog(const LogConfiguration& inLogConfiguration)
 	if(inLogConfiguration.LogStream)
 		Singleton<Trace>::GetInstance()->SetLogSettings(inLogConfiguration.LogStream,inLogConfiguration.ShouldLog);
 	else
-		Singleton<Trace>::GetInstance()->SetLogSettings(inLogConfiguration.LogFileLocation,inLogConfiguration.ShouldLog);
+		Singleton<Trace>::GetInstance()->SetLogSettings(inLogConfiguration.LogFileLocation,inLogConfiguration.ShouldLog,inLogConfiguration.StartWithBOM);
 }
 
 void HummusPDFWriter::SetupObjectsContext(const PDFCreationSettings& inPDFCreationSettings)
@@ -169,47 +169,47 @@ EPDFStatusCode HummusPDFWriter::EndFormXObjectAndRelease(PDFFormXObject* inFormX
 	return mDocumentsContext.EndFormXObjectAndRelease(inFormXObject);
 }
 
-PDFImageXObject* HummusPDFWriter::CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath)
+PDFImageXObject* HummusPDFWriter::CreateImageXObjectFromJPGFile(const string& inJPGFilePath)
 {
 	return mDocumentsContext.CreateImageXObjectFromJPGFile(inJPGFilePath); 
 }
 
-PDFFormXObject* HummusPDFWriter::CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath)
+PDFFormXObject* HummusPDFWriter::CreateFormXObjectFromJPGFile(const string& inJPGFilePath)
 {
 	return mDocumentsContext.CreateFormXObjectFromJPGFile(inJPGFilePath); 
 }
 
-PDFFormXObject* HummusPDFWriter::CreateFormXObjectFromTIFFFile(const wstring& inTIFFFilePath,const TIFFUsageParameters& inTIFFUsageParameters)
+PDFFormXObject* HummusPDFWriter::CreateFormXObjectFromTIFFFile(const string& inTIFFFilePath,const TIFFUsageParameters& inTIFFUsageParameters)
 {
 	return mDocumentsContext.CreateFormXObjectFromTIFFFile(inTIFFFilePath,inTIFFUsageParameters); 
 }
 
-PDFImageXObject* HummusPDFWriter::CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inImageXObjectID)
+PDFImageXObject* HummusPDFWriter::CreateImageXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inImageXObjectID)
 {
 	return mDocumentsContext.CreateImageXObjectFromJPGFile(inJPGFilePath,inImageXObjectID); 
 }
 
-PDFFormXObject* HummusPDFWriter::CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inImageXObjectID)
+PDFFormXObject* HummusPDFWriter::CreateFormXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inImageXObjectID)
 {
 	return mDocumentsContext.CreateFormXObjectFromJPGFile(inJPGFilePath,inImageXObjectID); 
 }
 
-PDFFormXObject* HummusPDFWriter::CreateFormXObjectFromTIFFFile(const wstring& inTIFFFilePath,ObjectIDType inFormXObjectID, const TIFFUsageParameters& inTIFFUsageParameters)
+PDFFormXObject* HummusPDFWriter::CreateFormXObjectFromTIFFFile(const string& inTIFFFilePath,ObjectIDType inFormXObjectID, const TIFFUsageParameters& inTIFFUsageParameters)
 {
 	return mDocumentsContext.CreateFormXObjectFromTIFFFile(inTIFFFilePath,inFormXObjectID,inTIFFUsageParameters); 
 }
 
-PDFUsedFont* HummusPDFWriter::GetFontForFile(const wstring& inFontFilePath)
+PDFUsedFont* HummusPDFWriter::GetFontForFile(const string& inFontFilePath)
 {
 	return mDocumentsContext.GetFontForFile(inFontFilePath);
 }
 
-PDFUsedFont* HummusPDFWriter::GetFontForFile(const wstring& inFontFilePath,const wstring& inAdditionalMeticsFilePath)
+PDFUsedFont* HummusPDFWriter::GetFontForFile(const string& inFontFilePath,const string& inAdditionalMeticsFilePath)
 {
 	return mDocumentsContext.GetFontForFile(inFontFilePath,inAdditionalMeticsFilePath);
 }
 
-EPDFStatusCodeAndObjectIDTypeList HummusPDFWriter::CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+EPDFStatusCodeAndObjectIDTypeList HummusPDFWriter::CreateFormXObjectsFromPDF(const string& inPDFFilePath,
 																	  const PDFPageRange& inPageRange,
 																	  EPDFPageBox inPageBoxToUseAsFormBox,
 																	  const double* inTransformationMatrix,
@@ -222,7 +222,7 @@ EPDFStatusCodeAndObjectIDTypeList HummusPDFWriter::CreateFormXObjectsFromPDF(con
 														inCopyAdditionalObjects);
 }
 
-EPDFStatusCodeAndObjectIDTypeList HummusPDFWriter::CreateFormXObjectsFromPDF(const wstring& inPDFFilePath,
+EPDFStatusCodeAndObjectIDTypeList HummusPDFWriter::CreateFormXObjectsFromPDF(const string& inPDFFilePath,
 																	 const PDFPageRange& inPageRange,
 																	 const PDFRectangle& inCropBox,
 																	 const double* inTransformationMatrix,
@@ -235,7 +235,7 @@ EPDFStatusCodeAndObjectIDTypeList HummusPDFWriter::CreateFormXObjectsFromPDF(con
 														inCopyAdditionalObjects);
 }
 
-EPDFStatusCodeAndObjectIDTypeList HummusPDFWriter::AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
+EPDFStatusCodeAndObjectIDTypeList HummusPDFWriter::AppendPDFPagesFromPDF(const string& inPDFFilePath,
 																const PDFPageRange& inPageRange,
 																const ObjectIDTypeList& inCopyAdditionalObjects)
 {
@@ -244,7 +244,7 @@ EPDFStatusCodeAndObjectIDTypeList HummusPDFWriter::AppendPDFPagesFromPDF(const w
 														inCopyAdditionalObjects);
 }
 
-EPDFStatusCode HummusPDFWriter::Shutdown(const wstring& inStateFilePath)
+EPDFStatusCode HummusPDFWriter::Shutdown(const string& inStateFilePath)
 {
 	EPDFStatusCode status;
 
@@ -306,8 +306,8 @@ EPDFStatusCode HummusPDFWriter::Shutdown(const wstring& inStateFilePath)
 	return status;
 }
 
-EPDFStatusCode HummusPDFWriter::ContinuePDF(const wstring& inOutputFilePath,
-								   const wstring& inStateFilePath,
+EPDFStatusCode HummusPDFWriter::ContinuePDF(const string& inOutputFilePath,
+								   const string& inStateFilePath,
 								   const LogConfiguration& inLogConfiguration)
 {
 	
@@ -325,7 +325,7 @@ EPDFStatusCode HummusPDFWriter::ContinuePDF(const wstring& inOutputFilePath,
 
 }
 
-EPDFStatusCode HummusPDFWriter::SetupState(const wstring& inStateFilePath)
+EPDFStatusCode HummusPDFWriter::SetupState(const string& inStateFilePath)
 {
 	EPDFStatusCode status;
 
@@ -361,7 +361,7 @@ EPDFStatusCode HummusPDFWriter::SetupState(const wstring& inStateFilePath)
 
 
 EPDFStatusCode HummusPDFWriter::ContinuePDFForStream(IByteWriterWithPosition* inOutputStream,
-											const wstring& inStateFilePath,
+											const string& inStateFilePath,
 			 								const LogConfiguration& inLogConfiguration)
 {
 	SetupLog(inLogConfiguration);
@@ -373,18 +373,18 @@ EPDFStatusCode HummusPDFWriter::ContinuePDFForStream(IByteWriterWithPosition* in
 }
 
 
-PDFDocumentCopyingContext* HummusPDFWriter::CreatePDFCopyingContext(const wstring& inPDFFilePath)
+PDFDocumentCopyingContext* HummusPDFWriter::CreatePDFCopyingContext(const string& inPDFFilePath)
 {
 	return mDocumentsContext.CreatePDFCopyingContext(inPDFFilePath);
 }
 
-EPDFStatusCode HummusPDFWriter::AttachURLLinktoCurrentPage(const wstring& inURL,const PDFRectangle& inLinkClickArea)
+EPDFStatusCode HummusPDFWriter::AttachURLLinktoCurrentPage(const string& inURL,const PDFRectangle& inLinkClickArea)
 {
 	return mDocumentsContext.AttachURLLinktoCurrentPage(inURL,inLinkClickArea);
 }
 
 EPDFStatusCode HummusPDFWriter::MergePDFPagesToPage(PDFPage* inPage,
-								const wstring& inPDFFilePath,
+								const string& inPDFFilePath,
 								const PDFPageRange& inPageRange,
 								const ObjectIDTypeList& inCopyAdditionalObjects)
 {

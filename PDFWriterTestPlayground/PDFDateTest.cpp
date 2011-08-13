@@ -42,7 +42,7 @@ EPDFStatusCode PDFDateTest::Run()
 	if(emptyDate.ToString() != "")
 	{
 		status = ePDFFailure;
-		wcout<<"wrong string conversion for empty date - "<<emptyDate.ToString().c_str()<<"\n";
+		cout<<"wrong string conversion for empty date - "<<emptyDate.ToString().c_str()<<"\n";
 	}
 
 	// Year only Date
@@ -51,7 +51,7 @@ EPDFStatusCode PDFDateTest::Run()
 	if(yearDate.ToString() != "D:1984")
 	{
 		status = ePDFFailure;
-		wcout<<"wrong string conversion for year date - "<<yearDate.ToString().c_str()<<"\n";
+		cout<<"wrong string conversion for year date - "<<yearDate.ToString().c_str()<<"\n";
 	}
 
 	// Day only Date
@@ -62,7 +62,7 @@ EPDFStatusCode PDFDateTest::Run()
 	if(dayDate.ToString() != "D:19840403")
 	{
 		status = ePDFFailure;
-		wcout<<"wrong string conversion for day date - "<<dayDate.ToString().c_str()<<"\n";
+		cout<<"wrong string conversion for day date - "<<dayDate.ToString().c_str()<<"\n";
 	}
 	// local Time Date
 	PDFDate localTimeDate;
@@ -75,7 +75,7 @@ EPDFStatusCode PDFDateTest::Run()
 	if(localTimeDate.ToString() != "D:19840403183045")
 	{
 		status = ePDFFailure;
-		wcout<<"wrong string conversion for local date - "<<localTimeDate.ToString().c_str()<<"\n";
+		cout<<"wrong string conversion for local date - "<<localTimeDate.ToString().c_str()<<"\n";
 	}
 	// Fully qualified Time date
 	PDFDate fullDate;
@@ -91,13 +91,13 @@ EPDFStatusCode PDFDateTest::Run()
 	if(fullDate.ToString() != "D:19840403183045-02'00'")
 	{
 		status = ePDFFailure;
-		wcout<<"wrong string conversion for full date - "<<fullDate.ToString().c_str()<<"\n";
+		cout<<"wrong string conversion for full date - "<<fullDate.ToString().c_str()<<"\n";
 	}
 
 	// Just display the current time as set by PDFDate
 	PDFDate currentDate;
 	currentDate.SetToCurrentTime();
-	wcout<<"Current time as represented in PDFDate - "<<currentDate.ToString().c_str()<<"\n";
+	cout<<"Current time as represented in PDFDate - "<<currentDate.ToString().c_str()<<"\n";
 
 	return status;
 }

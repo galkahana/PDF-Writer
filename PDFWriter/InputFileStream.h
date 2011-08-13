@@ -35,9 +35,11 @@ public:
 	InputFileStream(void);
 	virtual ~InputFileStream(void);
 
-	InputFileStream(const wstring& inFilePath);
+	// input file path is in UTF8
+	InputFileStream(const string& inFilePath);
 
-	EPDFStatusCode Open(const wstring& inFilePath);
+	// input file path is in UTF8
+	EPDFStatusCode Open(const string& inFilePath);
 	EPDFStatusCode Close();
 
 	// IByteReaderWithPosition implementation

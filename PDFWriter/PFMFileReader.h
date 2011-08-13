@@ -115,7 +115,7 @@ public:
 	PFMFileReader(void);
 	~PFMFileReader(void);
 
-	EPDFStatusCode Read(const wstring& inPFMFilePath);
+	EPDFStatusCode Read(const string& inPFMFilePath);
 
 	PFMHeader Header;
 	PFMExtension Extension;

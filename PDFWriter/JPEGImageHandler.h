@@ -37,7 +37,7 @@ class PDFFormXObject;
 class DocumentsContext;
 class IByteReaderWithPosition;
 
-typedef map<wstring,JPEGImageInformation> WStringToJPEGImageInformationMap;
+typedef map<string,JPEGImageInformation> StringToJPEGImageInformationMap;
 typedef pair<bool,JPEGImageInformation> BoolAndJPEGImageInformation;
 typedef pair<double,double> DoubleAndDoublePair;
 typedef set<IDocumentsContextExtender*> IDocumentsContextExtenderSet;
@@ -50,18 +50,18 @@ public:
 	~JPEGImageHandler(void);
 
 	// use this for retrieving image information for JPEG (useful for deciphering JPG dimensions tags)
-	BoolAndJPEGImageInformation RetrieveImageInformation(const wstring& inJPGFilePath);
+	BoolAndJPEGImageInformation RetrieveImageInformation(const string& inJPGFilePath);
 
 	// DocumentsContext::CreateImageXObjectFromJPGFile are equivelent
-	PDFImageXObject* CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath);
+	PDFImageXObject* CreateImageXObjectFromJPGFile(const string& inJPGFilePath);
 	PDFImageXObject* CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream);
-	PDFImageXObject* CreateImageXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inImageXObjectID);
+	PDFImageXObject* CreateImageXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inImageXObjectID);
 	PDFImageXObject* CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inImageXObjectID);
 	
 	// will return form XObject, which will include the xobject at it's size
-	PDFFormXObject* CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath);
+	PDFFormXObject* CreateFormXObjectFromJPGFile(const string& inJPGFilePath);
 	PDFFormXObject* CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream);
-	PDFFormXObject* CreateFormXObjectFromJPGFile(const wstring& inJPGFilePath,ObjectIDType inFormXObjectID);
+	PDFFormXObject* CreateFormXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inFormXObjectID);
 	PDFFormXObject* CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inFormXObjectID);
 
 	void SetOperationsContexts(DocumentsContext* inDocumentsContext,ObjectsContext* inObjectsContext);
@@ -70,12 +70,12 @@ public:
 
 private:
 	JPEGImageInformation mNullInformation;
-	WStringToJPEGImageInformationMap mImagesInformationMap;
+	StringToJPEGImageInformationMap mImagesInformationMap;
 	ObjectsContext* mObjectsContext;
 	DocumentsContext* mDocumentsContext;
 	IDocumentsContextExtenderSet mExtenders;
 
-	PDFImageXObject* CreateAndWriteImageXObjectFromJPGInformation(const wstring& inJPGFilePath,ObjectIDType inImageXObjectID, const JPEGImageInformation& inJPGImageInformation);
+	PDFImageXObject* CreateAndWriteImageXObjectFromJPGInformation(const string& inJPGFilePath,ObjectIDType inImageXObjectID, const JPEGImageInformation& inJPGImageInformation);
 	PDFImageXObject* CreateAndWriteImageXObjectFromJPGInformation(IByteReaderWithPosition* inJPGImageStream,ObjectIDType inImageXObjectID, const JPEGImageInformation& inJPGImageInformation);
 	PDFFormXObject* CreateImageFormXObjectFromImageXObject(PDFImageXObject* inImageXObject,ObjectIDType inFormXObjectID, const JPEGImageInformation& inJPGImageInformation);
 	DoubleAndDoublePair GetImageDimensions(const JPEGImageInformation& inJPGImageInformation);

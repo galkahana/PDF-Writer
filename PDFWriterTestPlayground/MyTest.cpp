@@ -33,7 +33,7 @@ static const char* scStandardStrings[N_STD_STRINGS] = {
 		"parenright","asterisk","plus","comma","hyphen","period","slash","zero","one","two",
 		"three","four","five","six","seven","eight","nine","colon","semicolon","less",
 		"equal","greater","question","at","A","B","C","D","E","F",
-		"G","H","I","J","K","L","M","N","O","P",
+		"G","H","I","J","K","","M","N","O","P",
 		"Q","R","S","T","U","V","W","X","Y","Z",
 		"bracketleft","backslash","bracketright","asciicircum","underscore","quoteleft","a","b","c","d",
 		"e","f","g","h","i","j","k","l","m","n",
@@ -99,40 +99,40 @@ EPDFStatusCode MyTest::Run()
 
 	sort(stringsVector.begin(),stringsVector.end(),sStringSort);
 
-	wcout<<"Sorted Strings Vector:\n";
+	cout<<"Sorted Strings Vector:\n";
 
-	wcout<<"static const char* scSortedStandardStrings[N_STD_STRINGS] = {\n";
+	cout<<"static const char* scSortedStandardStrings[N_STD_STRINGS] = {\n";
 	int j=0;
 
 	for(i=0;i<N_STD_STRINGS-1;++i)
 	{
-		wcout<<"\""<<stringsVector[i].first<<"\",";
+		cout<<"\""<<stringsVector[i].first<<"\",";
 		if(9 == j)
 		{
-			wcout<<"\n";
+			cout<<"\n";
 			j = 0;
 		}
 		else
 			++j;
 	}
-	wcout<<"\""<<stringsVector[N_STD_STRINGS-1].first<<"\"\n};\n";
+	cout<<"\""<<stringsVector[N_STD_STRINGS-1].first<<"\"\n};\n";
 
-	wcout<<"Sorted Strings Vector positions:\n";
-	wcout<<"static int scSortedStandardStringsPositions[N_STD_STRINGS] = {\n";
+	cout<<"Sorted Strings Vector positions:\n";
+	cout<<"static int scSortedStandardStringsPositions[N_STD_STRINGS] = {\n";
 	j=0;
 
 	for(i=0;i<N_STD_STRINGS-1;++i)
 	{
-		wcout<<stringsVector[i].second<<",";
+		cout<<stringsVector[i].second<<",";
 		if(9 == j)
 		{
-			wcout<<"\n";
+			cout<<"\n";
 			j = 0;
 		}
 		else
 			++j;
 	}	
-	wcout<<stringsVector[N_STD_STRINGS-1].second<<"\n};\n";
+	cout<<stringsVector[N_STD_STRINGS-1].second<<"\n};\n";
 
 	return ePDFSuccess;
 }

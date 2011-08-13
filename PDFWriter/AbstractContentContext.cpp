@@ -529,7 +529,7 @@ void AbstractContentContext::TL(double inTextLeading)
 	mPrimitiveWriter.WriteKeyword("TL");
 }
 
-void AbstractContentContext::Tf(const string& inFontName,double inFontSize)
+void AbstractContentContext::TfLow(const string& inFontName,double inFontSize)
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
@@ -628,7 +628,7 @@ void AbstractContentContext::TStar()
 }
 
 
-void AbstractContentContext::Tj(const string& inText)
+void AbstractContentContext::TjLow(const string& inText)
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
@@ -638,7 +638,7 @@ void AbstractContentContext::Tj(const string& inText)
 	mPrimitiveWriter.WriteKeyword("Tj");
 }
 
-void AbstractContentContext::TjHex(const string& inText)
+void AbstractContentContext::TjHexLow(const string& inText)
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
@@ -648,7 +648,7 @@ void AbstractContentContext::TjHex(const string& inText)
 	mPrimitiveWriter.WriteKeyword("Tj");
 }
 
-void AbstractContentContext::Quote(const string& inText)
+void AbstractContentContext::QuoteLow(const string& inText)
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
@@ -658,7 +658,7 @@ void AbstractContentContext::Quote(const string& inText)
 	mPrimitiveWriter.WriteKeyword("'");
 }
 
-void AbstractContentContext::QuoteHex(const string& inText)
+void AbstractContentContext::QuoteHexLow(const string& inText)
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
@@ -668,7 +668,7 @@ void AbstractContentContext::QuoteHex(const string& inText)
 	mPrimitiveWriter.WriteKeyword("Quote");
 }
 
-void AbstractContentContext::DoubleQuote(	double inWordSpacing, 
+void AbstractContentContext::DoubleQuoteLow(	double inWordSpacing, 
 											double inCharacterSpacing, 
 											const string& inText)
 {
@@ -682,7 +682,7 @@ void AbstractContentContext::DoubleQuote(	double inWordSpacing,
 	mPrimitiveWriter.WriteKeyword("\"");
 }
 
-void AbstractContentContext::DoubleQuoteHex(double inWordSpacing, double inCharacterSpacing, const string& inText)
+void AbstractContentContext::DoubleQuoteHexLow(double inWordSpacing, double inCharacterSpacing, const string& inText)
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
@@ -694,7 +694,7 @@ void AbstractContentContext::DoubleQuoteHex(double inWordSpacing, double inChara
 	mPrimitiveWriter.WriteKeyword("\"");
 }
 
-void AbstractContentContext::TJ(const StringOrDoubleList& inStringsAndSpacing)
+void AbstractContentContext::TJLow(const StringOrDoubleList& inStringsAndSpacing)
 {
 	StringOrDoubleList::const_iterator it = inStringsAndSpacing.begin();
 	RenewStreamConnection();
@@ -716,7 +716,7 @@ void AbstractContentContext::TJ(const StringOrDoubleList& inStringsAndSpacing)
 	mPrimitiveWriter.WriteKeyword("TJ");
 }
 
-void AbstractContentContext::TJHex(const StringOrDoubleList& inStringsAndSpacing)
+void AbstractContentContext::TJHexLow(const StringOrDoubleList& inStringsAndSpacing)
 {
 	StringOrDoubleList::const_iterator it = inStringsAndSpacing.begin();
 	RenewStreamConnection();
@@ -752,7 +752,7 @@ public:
 	virtual void WriteLiteralStringCommand(const string& inStringToWrite) = 0;
 };
 
-EPDFStatusCode AbstractContentContext::WriteTextCommandWithEncoding(const wstring& inUnicodeText,ITextCommand* inTextCommand)
+EPDFStatusCode AbstractContentContext::WriteTextCommandWithEncoding(const string& inUnicodeText,ITextCommand* inTextCommand)
 {
 	PDFUsedFont* currentFont = mGraphicStack.GetCurrentState().mFont;
 	if(!currentFont)
@@ -777,13 +777,13 @@ class TjCommand : public ITextCommand
 public:
 	TjCommand(AbstractContentContext* inContext) {mContext = inContext;}
 
-	virtual void WriteHexStringCommand(const string& inStringToWrite){mContext->TjHex(inStringToWrite);}
-	virtual void WriteLiteralStringCommand(const string& inStringToWrite){mContext->Tj(inStringToWrite);}
+	virtual void WriteHexStringCommand(const string& inStringToWrite){mContext->TjHexLow(inStringToWrite);}
+	virtual void WriteLiteralStringCommand(const string& inStringToWrite){mContext->TjLow(inStringToWrite);}
 private:
 	AbstractContentContext* mContext;
 };
 
-EPDFStatusCode AbstractContentContext::Tj(const wstring& inText)
+EPDFStatusCode AbstractContentContext::Tj(const string& inText)
 {
 	TjCommand command(this);
 	return WriteTextCommandWithEncoding(inText,&command);
@@ -794,13 +794,13 @@ class QuoteCommand : public ITextCommand
 public:
 	QuoteCommand(AbstractContentContext* inContext) {mContext = inContext;}
 
-	virtual void WriteHexStringCommand(const string& inStringToWrite){mContext->QuoteHex(inStringToWrite);}
-	virtual void WriteLiteralStringCommand(const string& inStringToWrite){mContext->Quote(inStringToWrite);}
+	virtual void WriteHexStringCommand(const string& inStringToWrite){mContext->QuoteHexLow(inStringToWrite);}
+	virtual void WriteLiteralStringCommand(const string& inStringToWrite){mContext->QuoteLow(inStringToWrite);}
 private:
 	AbstractContentContext* mContext;
 };
 
-EPDFStatusCode AbstractContentContext::Quote(const wstring& inText)
+EPDFStatusCode AbstractContentContext::Quote(const string& inText)
 {
 	QuoteCommand command(this);
 	return WriteTextCommandWithEncoding(inText,&command);
@@ -813,21 +813,21 @@ public:
 						double inWordSpacing,
 						double inCharacterSpacing) {mContext = inContext;mWordSpacing = inWordSpacing;mCharacterSpacing = inCharacterSpacing;}
 
-	virtual void WriteHexStringCommand(const string& inStringToWrite){mContext->DoubleQuoteHex(mWordSpacing,mCharacterSpacing,inStringToWrite);}
-	virtual void WriteLiteralStringCommand(const string& inStringToWrite){mContext->DoubleQuote(mWordSpacing,mCharacterSpacing,inStringToWrite);}
+	virtual void WriteHexStringCommand(const string& inStringToWrite){mContext->DoubleQuoteHexLow(mWordSpacing,mCharacterSpacing,inStringToWrite);}
+	virtual void WriteLiteralStringCommand(const string& inStringToWrite){mContext->DoubleQuoteLow(mWordSpacing,mCharacterSpacing,inStringToWrite);}
 private:
 	AbstractContentContext* mContext;
 	double mWordSpacing;
 	double mCharacterSpacing;
 };
 
-EPDFStatusCode AbstractContentContext::DoubleQuote(double inWordSpacing, double inCharacterSpacing, const wstring& inText)
+EPDFStatusCode AbstractContentContext::DoubleQuote(double inWordSpacing, double inCharacterSpacing, const string& inText)
 {
 	DoubleQuoteCommand command(this,inWordSpacing,inCharacterSpacing);
 	return WriteTextCommandWithEncoding(inText,&command);
 }
 
-EPDFStatusCode AbstractContentContext::TJ(const WStringOrDoubleList& inStringsAndSpacing)
+EPDFStatusCode AbstractContentContext::TJ(const StringOrDoubleList& inStringsAndSpacing)
 {
 	PDFUsedFont* currentFont = mGraphicStack.GetCurrentState().mFont;
 	if(!currentFont)
@@ -836,7 +836,7 @@ EPDFStatusCode AbstractContentContext::TJ(const WStringOrDoubleList& inStringsAn
 		return ePDFFailure;
 	}
 
-	WStringOrDoubleList::const_iterator it = inStringsAndSpacing.begin();
+	StringOrDoubleList::const_iterator it = inStringsAndSpacing.begin();
 	GlyphUnicodeMappingListOrDoubleList parameters;
 	EPDFStatusCode encodingStatus;
 	
@@ -892,7 +892,7 @@ EPDFStatusCode AbstractContentContext::WriteTextCommandWithDirectGlyphSelection(
 
 	if(mGraphicStack.GetCurrentState().mPlacedFontName != fontName ||
 		mGraphicStack.GetCurrentState().mPlacedFontSize != mGraphicStack.GetCurrentState().mFontSize)
-		Tf(fontName,mGraphicStack.GetCurrentState().mFontSize);
+		TfLow(fontName,mGraphicStack.GetCurrentState().mFontSize);
 	
 	// Now write the string using the text command
 	OutputStringBufferStream stringStream;
@@ -971,7 +971,7 @@ EPDFStatusCode AbstractContentContext::TJ(const GlyphUnicodeMappingListOrDoubleL
 
 	if(mGraphicStack.GetCurrentState().mPlacedFontName != fontName ||
 		mGraphicStack.GetCurrentState().mPlacedFontSize != mGraphicStack.GetCurrentState().mFontSize)
-		Tf(fontName,mGraphicStack.GetCurrentState().mFontSize);
+		TfLow(fontName,mGraphicStack.GetCurrentState().mFontSize);
 	
 	// Now write the string using the text command
 	OutputStringBufferStream stringStream;
@@ -1000,7 +1000,7 @@ EPDFStatusCode AbstractContentContext::TJ(const GlyphUnicodeMappingListOrDoubleL
 				++itEncodedList;
 			}
 		}
-		TJHex(stringOrDoubleList);
+		TJHexLow(stringOrDoubleList);
 	}
 	else
 	{
@@ -1023,7 +1023,7 @@ EPDFStatusCode AbstractContentContext::TJ(const GlyphUnicodeMappingListOrDoubleL
 				++itEncodedList;
 			}
 		}
-		TJ(stringOrDoubleList);
+		TJLow(stringOrDoubleList);
 	}
 	return ePDFSuccess;	
 }

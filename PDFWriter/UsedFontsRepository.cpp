@@ -46,7 +46,7 @@ UsedFontsRepository::UsedFontsRepository(void)
 
 UsedFontsRepository::~UsedFontsRepository(void)
 {
-	WStringToPDFUsedFontMap::iterator it = mUsedFonts.begin();
+	StringToPDFUsedFontMap::iterator it = mUsedFonts.begin();
 	for(; it != mUsedFonts.end();++it)
 		delete (it->second);
 	mUsedFonts.clear(); 
@@ -58,7 +58,7 @@ void UsedFontsRepository::SetObjectsContext(ObjectsContext* inObjectsContext)
 	mObjectsContext = inObjectsContext;
 }
 
-PDFUsedFont* UsedFontsRepository::GetFontForFile(const wstring& inFontFilePath,const wstring& inOptionalMetricsFile)
+PDFUsedFont* UsedFontsRepository::GetFontForFile(const string& inFontFilePath,const string& inOptionalMetricsFile)
 {
 	if(!mObjectsContext)
 	{
@@ -66,7 +66,7 @@ PDFUsedFont* UsedFontsRepository::GetFontForFile(const wstring& inFontFilePath,c
 		return NULL;
 	}
 
-	WStringToPDFUsedFontMap::iterator it = mUsedFonts.find(inFontFilePath);
+	StringToPDFUsedFontMap::iterator it = mUsedFonts.find(inFontFilePath);
 	if(it == mUsedFonts.end())
 	{
 		if(!mInputFontsInformation)
@@ -77,7 +77,7 @@ PDFUsedFont* UsedFontsRepository::GetFontForFile(const wstring& inFontFilePath,c
 		if(inOptionalMetricsFile.size() > 0)
 		{
 			face = mInputFontsInformation->NewFace(inFontFilePath,inOptionalMetricsFile);
-			mOptionaMetricsFiles.insert(WStringToWStringMap::value_type(inFontFilePath,inOptionalMetricsFile));
+			mOptionaMetricsFiles.insert(StringToStringMap::value_type(inFontFilePath,inOptionalMetricsFile));
 		}
 		else
 			face = mInputFontsInformation->NewFace(inFontFilePath);
@@ -85,7 +85,7 @@ PDFUsedFont* UsedFontsRepository::GetFontForFile(const wstring& inFontFilePath,c
 		{
 			TRACE_LOG1("UsedFontsRepository::GetFontForFile, Failed to load font from %s",inFontFilePath.c_str());
 			PDFUsedFont* aNull = NULL;
-			it = mUsedFonts.insert(WStringToPDFUsedFontMap::value_type(inFontFilePath,aNull)).first;
+			it = mUsedFonts.insert(StringToPDFUsedFontMap::value_type(inFontFilePath,aNull)).first;
 		}
 		else
 		{
@@ -97,7 +97,7 @@ PDFUsedFont* UsedFontsRepository::GetFontForFile(const wstring& inFontFilePath,c
 				delete usedFont;
 				usedFont = NULL;
 			}
-			it = mUsedFonts.insert(WStringToPDFUsedFontMap::value_type(inFontFilePath,usedFont)).first;
+			it = mUsedFonts.insert(StringToPDFUsedFontMap::value_type(inFontFilePath,usedFont)).first;
 
 		}
 	}
@@ -106,7 +106,7 @@ PDFUsedFont* UsedFontsRepository::GetFontForFile(const wstring& inFontFilePath,c
 
 EPDFStatusCode UsedFontsRepository::WriteUsedFontsDefinitions()
 {
-	WStringToPDFUsedFontMap::iterator it = mUsedFonts.begin();
+	StringToPDFUsedFontMap::iterator it = mUsedFonts.begin();
 	EPDFStatusCode status = ePDFSuccess;
 
 	for(; it != mUsedFonts.end() && ePDFSuccess == status; ++it)
@@ -115,9 +115,9 @@ EPDFStatusCode UsedFontsRepository::WriteUsedFontsDefinitions()
 	return status;	
 }
 
-PDFUsedFont* UsedFontsRepository::GetFontForFile(const wstring& inFontFilePath)
+PDFUsedFont* UsedFontsRepository::GetFontForFile(const string& inFontFilePath)
 {
-	return GetFontForFile(inFontFilePath,L"");
+	return GetFontForFile(inFontFilePath,"");
 }
 
 typedef list<ObjectIDType> ObjectIDTypeList;
@@ -136,7 +136,7 @@ EPDFStatusCode UsedFontsRepository::WriteState(ObjectsContext* inStateWriter,Obj
 	inStateWriter->StartArray();
 
 
-	WStringToPDFUsedFontMap::iterator it = mUsedFonts.begin();
+	StringToPDFUsedFontMap::iterator it = mUsedFonts.begin();
 
 	for(; it != mUsedFonts.end();++it)
 	{
@@ -153,7 +153,7 @@ EPDFStatusCode UsedFontsRepository::WriteState(ObjectsContext* inStateWriter,Obj
 	usedFontsRepositoryObject->WriteKey("mOptionaMetricsFiles");
 	inStateWriter->StartArray();
 
-	WStringToWStringMap::iterator itOptionals = mOptionaMetricsFiles.begin();
+	StringToStringMap::iterator itOptionals = mOptionaMetricsFiles.begin();
 	for(; itOptionals != mOptionaMetricsFiles.end();++itOptionals)
 	{
 		PDFTextString aTextString(itOptionals->first);
@@ -185,7 +185,7 @@ EPDFStatusCode UsedFontsRepository::ReadState(HummusPDFParser* inStateReader,Obj
 	EPDFStatusCode status = ePDFSuccess;
 
 	// clear current state
-	WStringToPDFUsedFontMap::iterator itUsedFonts = mUsedFonts.begin();
+	StringToPDFUsedFontMap::iterator itUsedFonts = mUsedFonts.begin();
 	for(; itUsedFonts != mUsedFonts.end();++itUsedFonts)
 		delete (itUsedFonts->second);
 	mUsedFonts.clear(); 
@@ -211,7 +211,7 @@ EPDFStatusCode UsedFontsRepository::ReadState(HummusPDFParser* inStateReader,Obj
 		aStringValue = it.GetItem();
 		aValue = aStringValue->GetValue();
 
-		mOptionaMetricsFiles.insert(WStringToWStringMap::value_type(aKey.ToUTF16String(),aValue.ToUTF16String()));
+		mOptionaMetricsFiles.insert(StringToStringMap::value_type(aKey.ToUTF8String(),aValue.ToUTF8String()));
 	}
 
 	PDFObjectCastPtr<PDFArray> usedFontsState(usedFontsRepositoryState->QueryDirectObject("mUsedFonts"));
@@ -230,7 +230,7 @@ EPDFStatusCode UsedFontsRepository::ReadState(HummusPDFParser* inStateReader,Obj
 		valueItem = it.GetItem();
 
 		PDFTextString aTextString(keyItem->GetValue());
-		wstring filePath = aTextString.ToUTF16String();
+		string filePath = aTextString.ToUTF8String();
 
 		FT_Face face;
 		face = mInputFontsInformation->NewFace(filePath);
@@ -245,11 +245,11 @@ EPDFStatusCode UsedFontsRepository::ReadState(HummusPDFParser* inStateReader,Obj
 
 		PDFUsedFont* usedFont;
 		
-		WStringToWStringMap::iterator itOptionlMetricsFile = mOptionaMetricsFiles.find(filePath);
+		StringToStringMap::iterator itOptionlMetricsFile = mOptionaMetricsFiles.find(filePath);
 		if(itOptionlMetricsFile != mOptionaMetricsFiles.end())
 			usedFont = new PDFUsedFont(face,filePath,itOptionlMetricsFile->second,mObjectsContext);
 		else
-			usedFont = new PDFUsedFont(face,filePath,L"",mObjectsContext);
+			usedFont = new PDFUsedFont(face,filePath,"",mObjectsContext);
 		if(!usedFont->IsValid())
 		{
 			TRACE_LOG1("UsedFontsRepository::ReadState, Unreckognized font format for font in %s",filePath.c_str());
@@ -260,7 +260,7 @@ EPDFStatusCode UsedFontsRepository::ReadState(HummusPDFParser* inStateReader,Obj
 		}
 
 		usedFont->ReadState(inStateReader,valueItem->mObjectID);
-		mUsedFonts.insert(WStringToPDFUsedFontMap::value_type(filePath,usedFont));
+		mUsedFonts.insert(StringToPDFUsedFontMap::value_type(filePath,usedFont));
 
 	}
 	return status;

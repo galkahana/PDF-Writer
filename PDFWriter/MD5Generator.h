@@ -77,7 +77,6 @@ public:
 	~MD5Generator(void);
 
 	EPDFStatusCode Accumulate(const string& inString);
-	EPDFStatusCode Accumulate(const wstring& inString);
 
 	string ToString();
 

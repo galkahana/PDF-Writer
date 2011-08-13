@@ -107,7 +107,7 @@ private:
 };
 
 
-EPDFStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const wstring& inPDFFilePath,
+EPDFStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const string& inPDFFilePath,
 																				const PDFPageRange& inPageRange,
 																				IPageEmbedInFormCommand* inPageEmbedCommand,
 																				const double* inTransformationMatrix,
@@ -221,7 +221,7 @@ EPDFStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDFI
 
 }
 
-EPDFStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const wstring& inPDFFilePath,
+EPDFStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const string& inPDFFilePath,
 																				const PDFPageRange& inPageRange,
 																				EPDFPageBox inPageBoxToUseAsFormBox,
 																				const double* inTransformationMatrix,
@@ -231,7 +231,7 @@ EPDFStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(
 	return CreateFormXObjectsFromPDF(inPDFFilePath,inPageRange,&embedCommand,inTransformationMatrix,inCopyAdditionalObjects);
 }
 
-EPDFStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const wstring& inPDFFilePath,
+EPDFStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const string& inPDFFilePath,
 																				const PDFPageRange& inPageRange,
 																				const PDFRectangle& inCropBox,
 																				const double* inTransformationMatrix,
@@ -916,7 +916,7 @@ EPDFStatusCode PDFDocumentHandler::OnResourcesWrite(
 	return status;
 }
 
-EPDFStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDF(const wstring& inPDFFilePath,
+EPDFStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDF(const string& inPDFFilePath,
 																		const PDFPageRange& inPageRange,
 																		const ObjectIDTypeList& inCopyAdditionalObjects)
 {
@@ -1190,7 +1190,7 @@ PDFObject* PDFDocumentHandler::QueryInheritedValue(PDFDictionary* inDictionary,s
 		return NULL;
 }
 
-EPDFStatusCode PDFDocumentHandler::StartFileCopyingContext(const wstring& inPDFFilePath)
+EPDFStatusCode PDFDocumentHandler::StartFileCopyingContext(const string& inPDFFilePath)
 {
 	if(mPDFFile.OpenFile(inPDFFilePath) != ePDFSuccess)
 	{
@@ -1386,7 +1386,7 @@ void PDFDocumentHandler::RemoveDocumentsContextExtender(IDocumentsContextExtende
 
 
 EPDFStatusCode PDFDocumentHandler::MergePDFPagesToPage(PDFPage* inPage,
-													const wstring& inPDFFilePath,
+													const string& inPDFFilePath,
 													const PDFPageRange& inPageRange,
 													const ObjectIDTypeList& inCopyAdditionalObjects)
 {

@@ -39,15 +39,15 @@ EmptyPagesPDF::~EmptyPagesPDF(void)
 EPDFStatusCode EmptyPagesPDF::Run()
 {
 	HummusPDFWriter pdfWriter;
-	LogConfiguration logConfiguration(false,L"C:\\PDFLibTests\\EmptyPagesLog.txt");
+	LogConfiguration logConfiguration(true,true,"C:\\PDFLibTests\\EmptyPagesLog.txt");
 	EPDFStatusCode status; 
 
 	do
 	{
-		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\EmptyPages.PDF",ePDFVersion13,logConfiguration);
+		status = pdfWriter.StartPDF("C:\\PDFLibTests\\EmptyPages.PDF",ePDFVersion13,logConfiguration);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to start PDF\n";
+			cout<<"failed to start PDF\n";
 			break;
 		}	
 
@@ -59,14 +59,14 @@ EPDFStatusCode EmptyPagesPDF::Run()
 		{
 			status = pdfWriter.WritePage(page);
 			if(status != ePDFSuccess)
-				wcout<<"failed to write page "<<i<<"\n";
+				cout<<"failed to write page "<<i<<"\n";
 		}
 		delete page;		
 
 		status = pdfWriter.EndPDF();
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed in end PDF\n";
+			cout<<"failed in end PDF\n";
 			break;
 		}
 	}while(false);

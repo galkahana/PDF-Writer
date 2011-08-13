@@ -19,7 +19,6 @@
    
 */
 #include "FreeTypeFaceWrapper.h"
-#include "StringTraits.h"
 #include "IFreeTypeFaceExtender.h"
 #include "FreeTypeType1Wrapper.h"
 #include "FreeTypeOpenTypeWrapper.h"
@@ -31,32 +30,32 @@
 #include FT_XFREE86_H 
 #include FT_CID_H 
 
-FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const wstring& inFontFilePath,bool inDoOwn)
+FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const string& inFontFilePath,bool inDoOwn)
 {
 	mFace = inFace;
 	mFontFilePath = inFontFilePath;
-	SetupFormatSpecificExtender(L"");	
+	SetupFormatSpecificExtender("");	
 	mDoesOwn = inDoOwn;
 }
 
-FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const wstring& inFontFilePath,const wstring& inPFMFilePath, bool inDoOwn)
+FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const string& inFontFilePath,const string& inPFMFilePath, bool inDoOwn)
 {
 	mFace = inFace;
 	mFontFilePath = inFontFilePath;
-	wstring fileExtension = GetExtension(inPFMFilePath);
-	if(fileExtension == L"PFM" || fileExtension ==  L"pfm") // just don't bother if it's not PFM
+	string fileExtension = GetExtension(inPFMFilePath);
+	if(fileExtension == "PFM" || fileExtension ==  "pfm") // just don't bother if it's not PFM
 		SetupFormatSpecificExtender(inPFMFilePath);
 	else
-		SetupFormatSpecificExtender(L"");
+		SetupFormatSpecificExtender("");
 	mDoesOwn = inDoOwn;
 }
 
-wstring FreeTypeFaceWrapper::GetExtension(const wstring& inFilePath)
+string FreeTypeFaceWrapper::GetExtension(const string& inFilePath)
 {
-	wstring::size_type dotPosition = inFilePath.rfind(L".");
+	string::size_type dotPosition = inFilePath.rfind(".");
 
 	if(inFilePath.npos == dotPosition || (inFilePath.size() - 1) == dotPosition)
-		return L"";
+		return "";
 	else
 		return inFilePath.substr(dotPosition + 1);
 }
@@ -72,7 +71,7 @@ static const char* scType1 = "Type 1";
 static const char* scTrueType = "TrueType";
 static const char* scCFF = "CFF";
 
-void FreeTypeFaceWrapper::SetupFormatSpecificExtender(const wstring& inPFMFilePath /*pass empty if non existant or irrelevant*/)
+void FreeTypeFaceWrapper::SetupFormatSpecificExtender(const string& inPFMFilePath /*pass empty if non existant or irrelevant*/)
 {
 	if(mFace)
 	{
@@ -85,7 +84,7 @@ void FreeTypeFaceWrapper::SetupFormatSpecificExtender(const wstring& inPFMFilePa
 		else
 		{
 			mFormatParticularWrapper = NULL;
-			TRACE_LOG1("Failure in FreeTypeFaceWrapper::SetupFormatSpecificExtender, could not find format specific implementation for %s",StringTraits(fontFormat).WidenString().c_str());
+			TRACE_LOG1("Failure in FreeTypeFaceWrapper::SetupFormatSpecificExtender, could not find format specific implementation for %s",fontFormat);
 		}
 	}
 	else
@@ -488,7 +487,7 @@ bool FreeTypeFaceWrapper::IsForceBold()
 	return mFormatParticularWrapper ? mFormatParticularWrapper->IsForceBold() : false;
 }
 
-EPDFStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const ULongVector& inUnicodeCharacters,UIntList& outGlyphs)
+EPDFStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const ULongList& inUnicodeCharacters,UIntList& outGlyphs)
 {
 	if(mFace)
 	{
@@ -497,7 +496,7 @@ EPDFStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const ULongVector& i
 
 		outGlyphs.clear();
 
-		ULongVector::const_iterator it = inUnicodeCharacters.begin();
+		ULongList::const_iterator it = inUnicodeCharacters.begin();
 		for(; it != inUnicodeCharacters.end() && ePDFSuccess == status; ++it)
 		{
 			glyphIndex = FT_Get_Char_Index(mFace,*it);
@@ -515,11 +514,11 @@ EPDFStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const ULongVector& i
 		return ePDFFailure;
 }
 
-EPDFStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const ULongVectorList& inUnicodeCharacters,UIntListList& outGlyphs)
+EPDFStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const ULongListList& inUnicodeCharacters,UIntListList& outGlyphs)
 {
 	UIntList glyphs;
 	EPDFStatusCode status = ePDFSuccess;
-	ULongVectorList::const_iterator it = inUnicodeCharacters.begin();
+	ULongListList::const_iterator it = inUnicodeCharacters.begin();
 
 	for(; it != inUnicodeCharacters.end(); ++it)
 	{
@@ -556,7 +555,7 @@ IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObj
 		{
 			result = NULL;
 			TRACE_LOG1("Failure in FreeTypeFaceWrapper::CreateWrittenFontObject, could not find font writer implementation for %s",
-				StringTraits(fontFormat).WidenString().c_str());
+				fontFormat);
 		}
 		return result;
 	}
@@ -564,7 +563,7 @@ IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObj
 		return NULL;	
 }
 
-const wstring& FreeTypeFaceWrapper::GetFontFilePath()
+const string& FreeTypeFaceWrapper::GetFontFilePath()
 {
 	return mFontFilePath;
 }

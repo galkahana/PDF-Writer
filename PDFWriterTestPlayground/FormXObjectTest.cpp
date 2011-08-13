@@ -46,10 +46,10 @@ EPDFStatusCode FormXObjectTest::Run()
 
 	do
 	{
-		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\XObjectContent.PDF",ePDFVersion13);
+		status = pdfWriter.StartPDF("C:\\PDFLibTests\\XObjectContent.PDF",ePDFVersion13);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to start PDF\n";
+			cout<<"failed to start PDF\n";
 			break;
 		}	
 
@@ -60,7 +60,7 @@ EPDFStatusCode FormXObjectTest::Run()
 		if(NULL == pageContentContext)
 		{
 			status = ePDFFailure;
-			wcout<<"failed to create content context for page\n";
+			cout<<"failed to create content context for page\n";
 		}
 
 		// draw a 100X100 points cyan square
@@ -74,7 +74,7 @@ EPDFStatusCode FormXObjectTest::Run()
 		status = pdfWriter.PausePageContentContext(pageContentContext);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to pause page content context\n";
+			cout<<"failed to pause page content context\n";
 			break;
 		}
 
@@ -92,7 +92,7 @@ EPDFStatusCode FormXObjectTest::Run()
 		status = pdfWriter.EndFormXObjectAndRelease(xobjectForm);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to write XObject form\n";
+			cout<<"failed to write XObject form\n";
 			break;
 		}
 
@@ -122,14 +122,14 @@ EPDFStatusCode FormXObjectTest::Run()
 		status = pdfWriter.EndPageContentContext(pageContentContext);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to end page content context\n";
+			cout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to write page\n";
+			cout<<"failed to write page\n";
 			break;
 		}
 	
@@ -141,7 +141,7 @@ EPDFStatusCode FormXObjectTest::Run()
 		if(NULL == pageContentContext)
 		{
 			status = ePDFFailure;
-			wcout<<"failed to create content context for 2nd page\n";
+			cout<<"failed to create content context for 2nd page\n";
 		}
 		
 		formXObjectName = page->GetResourcesDictionary().AddFormXObjectMapping(formObjectID);
@@ -155,21 +155,21 @@ EPDFStatusCode FormXObjectTest::Run()
 		status = pdfWriter.EndPageContentContext(pageContentContext);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to end 2nd page content context\n";
+			cout<<"failed to end 2nd page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to write 2nd page\n";
+			cout<<"failed to write 2nd page\n";
 			break;
 		}
 
 		status = pdfWriter.EndPDF();
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed in end PDF\n";
+			cout<<"failed in end PDF\n";
 			break;
 		}
 	}while(false);

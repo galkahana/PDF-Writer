@@ -31,7 +31,7 @@ PFMFileReader::~PFMFileReader(void)
 {
 }
 
-EPDFStatusCode PFMFileReader::Read(const wstring& inPFMFilePath)
+EPDFStatusCode PFMFileReader::Read(const string& inPFMFilePath)
 {
 	EPDFStatusCode status = ePDFSuccess;
 	mInternalReadStatus = ePDFSuccess;

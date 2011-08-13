@@ -40,15 +40,15 @@ using namespace std;
 typedef pair<bool,FT_Short> BoolAndFTShort;
 typedef list<unsigned int> UIntList;
 typedef list<UIntList> UIntListList;
-typedef list<wstring> WStringList;
-typedef vector<unsigned long> ULongVector;
-typedef list<ULongVector> ULongVectorList;
+typedef list<string> StringList;
+typedef list<unsigned long> ULongList;
+typedef list<ULongList> ULongListList;
 
 class FreeTypeFaceWrapper
 {
 public:
 	// first overload - all but type ones. the file path is just given for storage (later queries may want it)
-	FreeTypeFaceWrapper(FT_Face inFace,const wstring& inFontFilePath,bool inDoOwn = true);
+	FreeTypeFaceWrapper(FT_Face inFace,const string& inFontFilePath,bool inDoOwn = true);
 
 	// second overload - type 1, to allow passing pfm file path. do not bother
 	// if you don't have a PFM file. no i don't care about the godamn AFM file. just the PFM.
@@ -56,7 +56,7 @@ public:
 	// you see. i need to know if the font is serif, script 'n such. AFM - even if there
 	// does not have that kind of info. so @#$@#$ off.
 	// for any case, i'll check the file extension, and only do something about it if it has a pfm extension
-	FreeTypeFaceWrapper(FT_Face inFace,const wstring& inFontFilePath,const wstring& inPFMFilePath,bool inDoOwn = true);
+	FreeTypeFaceWrapper(FT_Face inFace,const string& inFontFilePath,const string& inPFMFilePath,bool inDoOwn = true);
 	~FreeTypeFaceWrapper(void);
 
 	FT_Error DoneFace();
@@ -66,8 +66,8 @@ public:
 
 	bool IsValid();
 
-	EPDFStatusCode GetGlyphsForUnicodeText(const ULongVector& inUnicodeCharacters,UIntList& outGlyphs);
-	EPDFStatusCode GetGlyphsForUnicodeText(const ULongVectorList& inUnicodeCharacters,UIntListList& outGlyphs);
+	EPDFStatusCode GetGlyphsForUnicodeText(const ULongList& inUnicodeCharacters,UIntList& outGlyphs);
+	EPDFStatusCode GetGlyphsForUnicodeText(const ULongListList& inUnicodeCharacters,UIntListList& outGlyphs);
 
 	double GetItalicAngle();
 	BoolAndFTShort GetCapHeight(); // aligned to pdf metrics
@@ -93,7 +93,7 @@ public:
 	// will be used externally to determine if font is symbolic or not
 	bool IsCharachterCodeAdobeStandard(FT_ULong inCharacterCode);
 
-	const wstring& GetFontFilePath();
+	const string& GetFontFilePath();
 
 
 	// use this method to align measurements from (remember the dreaded point per EM!!!).
@@ -107,7 +107,7 @@ private:
 	FT_Face mFace;
 	IFreeTypeFaceExtender* mFormatParticularWrapper;
 	bool mHaslowercase;
-	wstring mFontFilePath;
+	string mFontFilePath;
 	bool mDoesOwn;
 
 	BoolAndFTShort GetCapHeightInternal(); 
@@ -115,8 +115,8 @@ private:
 	FT_UShort GetStemVInternal(); 
 
 
-	wstring GetExtension(const wstring& inFilePath);
-	void SetupFormatSpecificExtender(const wstring& inPFMFilePath);
+	string GetExtension(const string& inFilePath);
+	void SetupFormatSpecificExtender(const string& inPFMFilePath);
 	BoolAndFTShort CapHeightFromHHeight();
 	BoolAndFTShort XHeightFromLowerXHeight();
 	BoolAndFTShort GetYBearingForUnicodeChar(unsigned short unicodeCharCode);

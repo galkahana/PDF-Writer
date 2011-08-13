@@ -48,21 +48,21 @@ EPDFStatusCode ShutDownRestartTest::Run()
 	{
 		{
 			HummusPDFWriter pdfWriterA;
-			status = pdfWriterA.StartPDF(L"C:\\PDFLibTests\\SimpleContentShutdownRestart.PDF",ePDFVersion13);
+			status = pdfWriterA.StartPDF("C:\\PDFLibTests\\SimpleContentShutdownRestart.PDF",ePDFVersion13);
 			if(status != ePDFSuccess)
 			{
-				wcout<<"failed to start PDF\n";
+				cout<<"failed to start PDF\n";
 				break;
 			}	
 
 			PDFPage* page = new PDFPage();
 			page->SetMediaBox(PDFRectangle(0,0,595,842));
 
-			PDFUsedFont* font = pdfWriterA.GetFontForFile(L"C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
+			PDFUsedFont* font = pdfWriterA.GetFontForFile("C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
 			if(!font)
 			{
 				status = ePDFFailure;
-				wcout<<"Failed to create font object for arial.ttf\n";
+				cout<<"Failed to create font object for arial.ttf\n";
 				break;
 			}
 
@@ -70,7 +70,7 @@ EPDFStatusCode ShutDownRestartTest::Run()
 			if(NULL == contentContext)
 			{
 				status = ePDFFailure;
-				wcout<<"failed to create content context for page\n";
+				cout<<"failed to create content context for page\n";
 				break;
 			}
 
@@ -85,7 +85,7 @@ EPDFStatusCode ShutDownRestartTest::Run()
 			status = pdfWriterA.PausePageContentContext(contentContext);
 			if(status != ePDFSuccess)
 			{
-				wcout<<"failed to pause page content context\n";
+				cout<<"failed to pause page content context\n";
 				break;
 			}
 
@@ -111,9 +111,9 @@ EPDFStatusCode ShutDownRestartTest::Run()
 			contentContext->Tf(font,1);
 			contentContext->Tm(30,0,0,30,78.4252,662.8997);
 
-			EPDFStatusCode encodingStatus = contentContext->Tj(L"hello world");
+			EPDFStatusCode encodingStatus = contentContext->Tj("hello world");
 			if(encodingStatus != ePDFSuccess)
-				wcout<<"Could not find some of the glyphs for this font";
+				cout<<"Could not find some of the glyphs for this font";
 
 			// continue even if failed...want to see how it looks like
 			contentContext->ET();
@@ -121,32 +121,32 @@ EPDFStatusCode ShutDownRestartTest::Run()
 			status = pdfWriterA.EndPageContentContext(contentContext);
 			if(status != ePDFSuccess)
 			{
-				wcout<<"failed to end page content context\n";
+				cout<<"failed to end page content context\n";
 				break;
 			}
 
 			status = pdfWriterA.WritePageAndRelease(page);
 			if(status != ePDFSuccess)
 			{
-				wcout<<"failed to write page\n";
+				cout<<"failed to write page\n";
 				break;
 			}
 
 
-			status = pdfWriterA.Shutdown(L"C:\\PDFLibTests\\ShutDownRestartState.txt");
+			status = pdfWriterA.Shutdown("C:\\PDFLibTests\\ShutDownRestartState.txt");
 			if(status != ePDFSuccess)
 			{
-				wcout<<"failed to shutdown library\n";
+				cout<<"failed to shutdown library\n";
 				break;
 			}
 
 		}
 		{
 			HummusPDFWriter pdfWriterB;
-			status = pdfWriterB.ContinuePDF(L"C:\\PDFLibTests\\SimpleContentShutdownRestart.PDF",L"C:\\PDFLibTests\\ShutDownRestartState.txt");
+			status = pdfWriterB.ContinuePDF("C:\\PDFLibTests\\SimpleContentShutdownRestart.PDF","C:\\PDFLibTests\\ShutDownRestartState.txt");
 			if(status != ePDFSuccess)
 			{
-				wcout<<"failed to restart library\n";
+				cout<<"failed to restart library\n";
 				break;
 			}	
 
@@ -157,7 +157,7 @@ EPDFStatusCode ShutDownRestartTest::Run()
 			if(NULL == pageContentContext)
 			{
 				status = ePDFFailure;
-				wcout<<"failed to create content context for page\n";
+				cout<<"failed to create content context for page\n";
 			}
 
 			// draw a 100X100 points cyan square
@@ -171,7 +171,7 @@ EPDFStatusCode ShutDownRestartTest::Run()
 			status = pdfWriterB.PausePageContentContext(pageContentContext);
 			if(status != ePDFSuccess)
 			{
-				wcout<<"failed to pause page content context\n";
+				cout<<"failed to pause page content context\n";
 				break;
 			}
 
@@ -189,7 +189,7 @@ EPDFStatusCode ShutDownRestartTest::Run()
 			status = pdfWriterB.EndFormXObjectAndRelease(xobjectForm);
 			if(status != ePDFSuccess)
 			{
-				wcout<<"failed to write XObject form\n";
+				cout<<"failed to write XObject form\n";
 				break;
 			}
 
@@ -219,21 +219,21 @@ EPDFStatusCode ShutDownRestartTest::Run()
 			status = pdfWriterB.EndPageContentContext(pageContentContext);
 			if(status != ePDFSuccess)
 			{
-				wcout<<"failed to end page content context\n";
+				cout<<"failed to end page content context\n";
 				break;
 			}
 
 			status = pdfWriterB.WritePageAndRelease(page);
 			if(status != ePDFSuccess)
 			{
-				wcout<<"failed to write page\n";
+				cout<<"failed to write page\n";
 				break;
 			}
 
 			status = pdfWriterB.EndPDF();
 			if(status != ePDFSuccess)
 			{
-				wcout<<"failed in end PDF\n";
+				cout<<"failed in end PDF\n";
 				break;
 			}
 		}

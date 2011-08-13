@@ -53,17 +53,17 @@ EPDFStatusCode PDFParserTest::Run()
 
 	do
 	{
-		status = pdfFile.OpenFile(L"C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF");
+		status = pdfFile.OpenFile("C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF");
 		if(status != ePDFSuccess)
 		{
-			wcout<<"unable to open file for reading. should be in C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF\n";
+			cout<<"unable to open file for reading. should be in C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF\n";
 			break;
 		}
 
 		status = parser.StartPDFParsing(pdfFile.GetInputStream());
 		if(status != ePDFSuccess)
 		{
-			wcout<<"unable to parse input file";
+			cout<<"unable to parse input file";
 			break;
 		}
 
@@ -71,14 +71,14 @@ EPDFStatusCode PDFParserTest::Run()
 
 		if(parser.GetPDFLevel() != 1.3)
 		{
-			wcout<<"expecting level 1.3, got "<<parser.GetPDFLevel()<<"\n";
+			cout<<"expecting level 1.3, got "<<parser.GetPDFLevel()<<"\n";
 			status = ePDFFailure;
 			break;
 		}
 
 		if(parser.GetPagesCount() != 2)
 		{
-			wcout<<"expecting 2 pages, got "<<parser.GetPagesCount()<<"\n";
+			cout<<"expecting 2 pages, got "<<parser.GetPagesCount()<<"\n";
 			status = ePDFFailure;
 			break;
 		}
@@ -87,18 +87,18 @@ EPDFStatusCode PDFParserTest::Run()
 		PDFObjectCastPtr<PDFDictionary> catalog(parser.QueryDictionaryObject(parser.GetTrailer(),"Root"));
 		if(!catalog)
 		{
-			wcout<<"Can't find catalog. fail\n";
+			cout<<"Can't find catalog. fail\n";
 			status = ePDFFailure;
 			break;
 		}
 
 		mTabLevel = 0;
-		status = outputFile.OpenFile(L"C:\\PDFLibTests\\PDFParserTestOutput.txt");
+		status = outputFile.OpenFile("C:\\PDFLibTests\\PDFParserTestOutput.txt");
 
 		status = IterateObjectTypes(catalog.GetPtr(),parser,outputFile.GetOutputStream());
 		if(status != ePDFSuccess)
 		{
-			wcout<<"Failed iterating object types\n";
+			cout<<"Failed iterating object types\n";
 			break;
 		}
 
@@ -129,7 +129,7 @@ EPDFStatusCode PDFParserTest::IterateObjectTypes(PDFObject* inObject,HummusPDFPa
 			RefCountPtr<PDFObject> pointedObject(inParser.ParseNewObject(((PDFIndirectObjectReference*)inObject)->mObjectID));
 			if(!pointedObject)
 			{
-				wcout<<"\nFailed to retreive object of ID ="<<((PDFIndirectObjectReference*)inObject)->mObjectID<<"\n";
+				cout<<"\nFailed to retreive object of ID ="<<((PDFIndirectObjectReference*)inObject)->mObjectID<<"\n";
 				return ePDFFailure;
 			}
 			return IterateObjectTypes(pointedObject.GetPtr(),inParser,inOutput);

@@ -34,7 +34,7 @@ InputFile::~InputFile(void)
 	CloseFile();
 }
 
-EPDFStatusCode InputFile::OpenFile(const wstring& inFilePath)
+EPDFStatusCode InputFile::OpenFile(const string& inFilePath)
 {
 	EPDFStatusCode status;
 	do
@@ -85,7 +85,7 @@ IByteReaderWithPosition* InputFile::GetInputStream()
 	return mInputStream;
 }
 
-const wstring& InputFile::GetFilePath()
+const string& InputFile::GetFilePath()
 {
 	return mFilePath;
 }

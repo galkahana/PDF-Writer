@@ -33,5 +33,5 @@ public:
 	Ascii7Encoding(void);
 	~Ascii7Encoding(void);
 
-	BoolAndString Encode(const wstring& inString);
+	BoolAndString Encode(const string& inString);
 };

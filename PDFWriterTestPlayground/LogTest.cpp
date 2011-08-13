@@ -32,20 +32,20 @@ LogTest::~LogTest(void)
 
 EPDFStatusCode LogTest::Run()
 {
-	Log log(L"C:\\PDFLibTests\\logTest.txt");
+	Log log("C:\\PDFLibTests\\logTest.txt",true);
 
-	log.LogEntry(L"testing wide string input");
+	log.LogEntry("testing wide string input");
 
-	wchar_t* aWideString = L"testing Byte input";
+	char* aString = "testing Byte input";
 
-	log.LogEntry((const Byte*)aWideString,wcslen(aWideString)*2);
+	log.LogEntry((const Byte*)aString,strlen(aString));
 
 
 	Trace trace;
 
-	trace.SetLogSettings(L"C:\\PDFLibTests\\traceTest.txt",false);
-	trace.TraceToLog(L"Tracing number %d %d",10,20);
-	trace.TraceToLog(L"Tracing some other items %s 0x%x",L"hello",20);
+	trace.SetLogSettings("C:\\PDFLibTests\\traceTest.txt",true,true);
+	trace.TraceToLog("Tracing number %d %d",10,20);
+	trace.TraceToLog("Tracing some other items %s 0x%x","hello",20);
 
 	return ePDFSuccess;
 }

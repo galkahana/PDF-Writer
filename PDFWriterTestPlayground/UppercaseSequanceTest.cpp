@@ -42,39 +42,39 @@ EPDFStatusCode UppercaseSequanceTest::Run()
 		string value = sequance.GetNextValue();
 		if(value != "AAAAAB")
 		{
-			wcout<<"Failed in single increase. value is  "<<value.c_str()<<". should be AAAAAB\n";
+			cout<<"Failed in single increase. value is  "<<value.c_str()<<". should be AAAAAB\n";
 			status = ePDFFailure;
 			break;
 		}
 		else
 		{
-			wcout<<"Success in single increase\n";
+			cout<<"Success in single increase\n";
 		}
 	
 		for(int i=0;i<25;++i)
 			value = sequance.GetNextValue();
 		if(value != "AAAABA")
 		{
-			wcout<<"Failed in 24 increase. value is  "<<value.c_str()<<". should be AAAABA\n";
+			cout<<"Failed in 24 increase. value is  "<<value.c_str()<<". should be AAAABA\n";
 			status = ePDFFailure;
 			break;
 		}
 		else
 		{
-			wcout<<"Success in 24 increase\n";
+			cout<<"Success in 24 increase\n";
 		}
 
 		for(int j=0;j < 26*25; ++j)
 			value = sequance.GetNextValue();
 		if(value != "AAABAA")
 		{
-			wcout<<"Failed in 26*25 increase. value is  "<<value.c_str()<<". should be AAABAA\n";
+			cout<<"Failed in 26*25 increase. value is  "<<value.c_str()<<". should be AAABAA\n";
 			status = ePDFFailure;
 			break;
 		}
 		else
 		{
-			wcout<<"Success in 26*25 increase\n";
+			cout<<"Success in 26*25 increase\n";
 		}
 	
 	}while(false);

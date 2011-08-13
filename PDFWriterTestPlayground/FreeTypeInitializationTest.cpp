@@ -46,7 +46,7 @@ FreeTypeInitializationTest::~FreeTypeInitializationTest(void)
 
 EPDFStatusCode FreeTypeInitializationTest::Run()
 {
-	Singleton<Trace>::GetInstance()->SetLogSettings(L"c:\\PDFLibTests\\FreeTypeTest.txt",true);
+	Singleton<Trace>::GetInstance()->SetLogSettings("c:\\PDFLibTests\\FreeTypeTest.txt",true,true);
 
 	EPDFStatusCode status = ePDFSuccess;
 	FreeTypeWrapper ftWrapper;
@@ -54,15 +54,15 @@ EPDFStatusCode FreeTypeInitializationTest::Run()
 
 	do
 	{
-		status = ShowFaceProperties(ftWrapper,L"C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
+		status = ShowFaceProperties(ftWrapper,"C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
 		if(status != ePDFSuccess)
 			break;
 
-		status = ShowFaceProperties(ftWrapper,L"C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFB",L"C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFM");
+		status = ShowFaceProperties(ftWrapper,"C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFB","C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFM");
 		if(status != ePDFSuccess)
 			break;
 
-		status = ShowFaceProperties(ftWrapper,L"C:\\PDFLibTests\\TestMaterials\\fonts\\BrushScriptStd.otf");
+		status = ShowFaceProperties(ftWrapper,"C:\\PDFLibTests\\TestMaterials\\fonts\\BrushScriptStd.otf");
 		if(status != ePDFSuccess)
 			break;
 
@@ -74,14 +74,14 @@ EPDFStatusCode FreeTypeInitializationTest::Run()
 	return status;
 }
 
-EPDFStatusCode FreeTypeInitializationTest::ShowFaceProperties(FreeTypeWrapper& inFreeType,const wchar_t* inFontFilePath,const wchar_t* inSecondaryFontFilePath)
+EPDFStatusCode FreeTypeInitializationTest::ShowFaceProperties(FreeTypeWrapper& inFreeType,const char* inFontFilePath,const char* inSecondaryFontFilePath)
 {
 	FT_Face face;
 	EPDFStatusCode status = ePDFSuccess;
 
 	do
 	{
-		wcout<<"Start Font\n";
+		cout<<"Start Font\n";
 		if(inSecondaryFontFilePath)
 			face = inFreeType.NewFace(inFontFilePath,inSecondaryFontFilePath);
 		else
@@ -89,7 +89,7 @@ EPDFStatusCode FreeTypeInitializationTest::ShowFaceProperties(FreeTypeWrapper& i
 		if(!face)
 		{
 			status = ePDFFailure;
-			wcout<<"Failed to load font from "<<inFontFilePath<<"\n";
+			cout<<"Failed to load font from "<<inFontFilePath<<"\n";
 			break;
 		}
 		status = ShowGlobalFontProperties(inFreeType,face);
@@ -97,7 +97,7 @@ EPDFStatusCode FreeTypeInitializationTest::ShowFaceProperties(FreeTypeWrapper& i
 	while(false);
 
 	inFreeType.DoneFace(face);
-	wcout<<"End Font\n\n";
+	cout<<"End Font\n\n";
 	return status;
 }
 
@@ -105,29 +105,29 @@ EPDFStatusCode FreeTypeInitializationTest::ShowGlobalFontProperties(FreeTypeWrap
 {
 	EPDFStatusCode status = ePDFSuccess;
 
-	FreeTypeFaceWrapper face(inFace,L"",false);
+	FreeTypeFaceWrapper face(inFace,"",false);
 
-	wcout<<"Font Family = "<<(face->family_name ? face->family_name : "somefont")<<"\n";
-	wcout<<"Font Style = "<<(face->style_name ? face->style_name : "somestyle")<<"\n";
-	wcout<<"Font Format = "<<FT_Get_X11_Font_Format(face)<<"\n";
-	wcout<<"Font CID Keyed (does not includes sfnts) = "<<(face->face_flags & FT_FACE_FLAG_CID_KEYED ? "yes":"no")<<"\n";
-	wcout<<"Font SFNT modeled = "<<(FT_IS_SFNT(face) ? "yes":"no")<<"\n";
+	cout<<"Font Family = "<<(face->family_name ? face->family_name : "somefont")<<"\n";
+	cout<<"Font Style = "<<(face->style_name ? face->style_name : "somestyle")<<"\n";
+	cout<<"Font Format = "<<FT_Get_X11_Font_Format(face)<<"\n";
+	cout<<"Font CID Keyed (does not includes sfnts) = "<<(face->face_flags & FT_FACE_FLAG_CID_KEYED ? "yes":"no")<<"\n";
+	cout<<"Font SFNT modeled = "<<(FT_IS_SFNT(face) ? "yes":"no")<<"\n";
 	if(FT_IS_SFNT(face))
 	{
 		FT_ULong  length = 0;
 		if(FT_Load_Sfnt_Table(face,TTAG_CFF,0,NULL,&length) == 0)
-			wcout<<"CCF table found, length is "<<length<<"\n";
+			cout<<"CCF table found, length is "<<length<<"\n";
 	}
 	
 	FT_Bool isCID;
 	
 	if(FT_Get_CID_Is_Internally_CID_Keyed(face,&isCID) != 0)
 	{
-		wcout<<"No CID information to read\n";
+		cout<<"No CID information to read\n";
 		isCID = false;
 	}
 	else
-		wcout<<"Font Internally CID (checks also sfnts) = "<<(isCID ? "yes":"no")<<"\n";
+		cout<<"Font Internally CID (checks also sfnts) = "<<(isCID ? "yes":"no")<<"\n";
 	
 	if(isCID)
 	{
@@ -136,56 +136,56 @@ EPDFStatusCode FreeTypeInitializationTest::ShowGlobalFontProperties(FreeTypeWrap
 		FT_Int supplement;
 		if(FT_Get_CID_Registry_Ordering_Supplement(face,&registry,&ordering,&supplement) != 0)
 		{
-			wcout<<"Failed to read registry, ordering and supplement informaiton\n";
+			cout<<"Failed to read registry, ordering and supplement informaiton\n";
 			status = ePDFFailure;
 		}
-		wcout<<"CID Registry = "<<registry<<"\n";
-		wcout<<"CID Ordering = "<<ordering<<"\n";
-		wcout<<"CID Supplement = "<<supplement<<"\n";
+		cout<<"CID Registry = "<<registry<<"\n";
+		cout<<"CID Ordering = "<<ordering<<"\n";
+		cout<<"CID Supplement = "<<supplement<<"\n";
 	}
 
-	wcout<<"Font BBox = ["<<face->bbox.xMin<<" "<<face->bbox.yMin<<" "<<face->bbox.xMax<<" "<<face->bbox.yMax<<"]\n";
-	wcout<<"Ascent "<<face->ascender<<"\n";
-	wcout<<"Descent "<<face->descender<<"\n";
-	wcout<<"Italic Angle = "<<face.GetItalicAngle()<<"\n";
+	cout<<"Font BBox = ["<<face->bbox.xMin<<" "<<face->bbox.yMin<<" "<<face->bbox.xMax<<" "<<face->bbox.yMax<<"]\n";
+	cout<<"Ascent "<<face->ascender<<"\n";
+	cout<<"Descent "<<face->descender<<"\n";
+	cout<<"Italic Angle = "<<face.GetItalicAngle()<<"\n";
 	BoolAndFTShort capHeightResult = face.GetCapHeight();
 	if(capHeightResult.first)
-		wcout<<"Cap Height = "<<capHeightResult.second<<"\n";
+		cout<<"Cap Height = "<<capHeightResult.second<<"\n";
 	else
-		wcout<<"No Cap Height value\n";
+		cout<<"No Cap Height value\n";
 	BoolAndFTShort xHeightResult = face.GetxHeight();
 	if(capHeightResult.first)
-		wcout<<"x Height = "<<xHeightResult.second<<"\n";
+		cout<<"x Height = "<<xHeightResult.second<<"\n";
 	else
-		wcout<<"No x Height value\n";
-	wcout<<"StemV = "<<face.GetStemV()<<"\n";
+		cout<<"No x Height value\n";
+	cout<<"StemV = "<<face.GetStemV()<<"\n";
 	EFontStretch fontStretch = face.GetFontStretch();
 	if(eFontStretchUknown == fontStretch)
-		wcout<<"Unkown Stretch";
+		cout<<"Unkown Stretch";
 	else
-		wcout<<"Stretch = "<<scFontStretchLabels[fontStretch]<<"\n";
+		cout<<"Stretch = "<<scFontStretchLabels[fontStretch]<<"\n";
 
 	FT_UShort fontWeight = face.GetFontWeight();
 	if(1000 == fontWeight)
-		wcout<<"Unknown Weight";
+		cout<<"Unknown Weight";
 	else
-		wcout<<"Weight = "<<fontWeight<<"\n";
-	wcout<<"FontFlags = "<<face.GetFontFlags()<<"\n";
+		cout<<"Weight = "<<fontWeight<<"\n";
+	cout<<"FontFlags = "<<face.GetFontFlags()<<"\n";
 	if(FT_HAS_GLYPH_NAMES(face))
 	{
 		FT_UInt glyphIndex = FT_Get_Char_Index(face,0x31);
 
-		wcout<<"Font has glyph names\n";
+		cout<<"Font has glyph names\n";
 		if(glyphIndex != 0)
 		{
 			char buffer[31];
 			if(FT_Get_Glyph_Name(face,glyphIndex,buffer,31) == 0)
-				wcout<<"Glyph name for the 1 = "<<buffer<<"\n";
+				cout<<"Glyph name for the 1 = "<<buffer<<"\n";
 		}
 	}
 	else
 	{
-		wcout<<"Font does not have glyph names\n";
+		cout<<"Font does not have glyph names\n";
 	}
 	return status;
 }

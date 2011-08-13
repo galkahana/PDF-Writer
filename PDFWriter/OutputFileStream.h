@@ -35,9 +35,11 @@ public:
 	OutputFileStream(void);
 	virtual ~OutputFileStream(void);
 
-	OutputFileStream(const wstring& inFilePath,bool inAppend = false);
+	// input file path is in UTF8
+	OutputFileStream(const string& inFilePath,bool inAppend = false);
 
-	EPDFStatusCode Open(const wstring& inFilePath,bool inAppend = false);
+	// input file path is in UTF8
+	EPDFStatusCode Open(const string& inFilePath,bool inAppend = false);
 	EPDFStatusCode Close();
 
 	// IByteWriter implementation

@@ -57,7 +57,7 @@ EPDFStatusCode RefCountTest::Run()
 
 	if(MyClass::TotalObjectsCount != 0)
 	{
-		wcout<<"Total objects count is supposed to be 0 at the beginning, but it's "<<MyClass::TotalObjectsCount<<"\n";
+		cout<<"Total objects count is supposed to be 0 at the beginning, but it's "<<MyClass::TotalObjectsCount<<"\n";
 		status = ePDFFailure;
 	}
 
@@ -66,18 +66,18 @@ EPDFStatusCode RefCountTest::Run()
 		RefCountPtr<MyClass> firstPtr(new MyClass(1));
 		if(MyClass::TotalObjectsCount != 1)
 		{
-			wcout<<"simple 1 ref test failed, TotalObjectCount (should be 1) = "<<MyClass::TotalObjectsCount<<"\n";
+			cout<<"simple 1 ref test failed, TotalObjectCount (should be 1) = "<<MyClass::TotalObjectsCount<<"\n";
 			status = ePDFFailure;
 		}
 		if(firstPtr->GetID() != 1)
 		{
-			wcout<<"simple 1 ref test failed, wrond object id\n";
+			cout<<"simple 1 ref test failed, wrond object id\n";
 			status = ePDFFailure;
 		}
 	}
 	if(MyClass::TotalObjectsCount != 0)
 	{
-		wcout<<"simple 1 ref test failed, TotalObjectCount (should be 0) = "<<MyClass::TotalObjectsCount<<"\n";
+		cout<<"simple 1 ref test failed, TotalObjectCount (should be 0) = "<<MyClass::TotalObjectsCount<<"\n";
 		status = ePDFFailure;
 	}
 
@@ -87,13 +87,13 @@ EPDFStatusCode RefCountTest::Run()
 
 		if(MyClass::TotalObjectsCount != 1)
 		{
-			wcout<<"Total objects count is supposed to be 1 after creating object 2, but it's "<<MyClass::TotalObjectsCount<<"\n";
+			cout<<"Total objects count is supposed to be 1 after creating object 2, but it's "<<MyClass::TotalObjectsCount<<"\n";
 			status = ePDFFailure;
 		}
 		RefCountPtr<MyClass> firstPtr(aClass);
 		if(firstPtr->GetID() != 2)
 		{
-			wcout<<"2 ref test failed, wrond object id for pointer 1\n";
+			cout<<"2 ref test failed, wrond object id for pointer 1\n";
 			status = ePDFFailure;
 		}
 
@@ -101,18 +101,18 @@ EPDFStatusCode RefCountTest::Run()
 		RefCountPtr<MyClass> secondPtr(aClass);
 		if(secondPtr->GetID() != 2)
 		{
-			wcout<<"2 ref test failed, wrond object id for pointer 2\n";
+			cout<<"2 ref test failed, wrond object id for pointer 2\n";
 			status = ePDFFailure;
 		}
 		if(MyClass::TotalObjectsCount != 1)
 		{
-			wcout<<"Total objects count is supposed to be 1 after another pointer for object 2, but it's "<<MyClass::TotalObjectsCount<<"\n";
+			cout<<"Total objects count is supposed to be 1 after another pointer for object 2, but it's "<<MyClass::TotalObjectsCount<<"\n";
 			status = ePDFFailure;
 		}
 	}
 	if(MyClass::TotalObjectsCount != 0)
 	{
-		wcout<<"2 ref test failed, TotalObjectCount = "<<MyClass::TotalObjectsCount<<"\n";
+		cout<<"2 ref test failed, TotalObjectCount = "<<MyClass::TotalObjectsCount<<"\n";
 		status = ePDFFailure;
 	}
 
@@ -122,12 +122,12 @@ EPDFStatusCode RefCountTest::Run()
 
 		if(MyClass::TotalObjectsCount != 1)
 		{
-			wcout<<"Total objects count is supposed to be 1 after creating object 3, but it's "<<MyClass::TotalObjectsCount<<"\n";
+			cout<<"Total objects count is supposed to be 1 after creating object 3, but it's "<<MyClass::TotalObjectsCount<<"\n";
 			status = ePDFFailure;
 		}
 		if(firstPtr->GetID() != 3)
 		{
-			wcout<<"assignment test failed, wrond object id for pointer 1\n";
+			cout<<"assignment test failed, wrond object id for pointer 1\n";
 			status = ePDFFailure;
 		}
 
@@ -137,13 +137,13 @@ EPDFStatusCode RefCountTest::Run()
 			secondPtr = firstPtr;
 			if(secondPtr->GetID() != 3)
 			{
-				wcout<<"assignment test failed, wrond object id for pointer 2\n";
+				cout<<"assignment test failed, wrond object id for pointer 2\n";
 				status = ePDFFailure;
 			}
 		}
 		if(MyClass::TotalObjectsCount != 1)
 		{
-			wcout<<"Total objects count is supposed to be 1 after smart pointer assignment object 3, but it's "<<MyClass::TotalObjectsCount<<"\n";
+			cout<<"Total objects count is supposed to be 1 after smart pointer assignment object 3, but it's "<<MyClass::TotalObjectsCount<<"\n";
 			status = ePDFFailure;
 		}
 
@@ -153,19 +153,19 @@ EPDFStatusCode RefCountTest::Run()
 			thirdPtr = firstPtr.GetPtr();
 			if(thirdPtr->GetID() != 3)
 			{
-				wcout<<"assignment test failed, wrond object id for pointer 2\n";
+				cout<<"assignment test failed, wrond object id for pointer 2\n";
 				status = ePDFFailure;
 			}
 		}
 		if(MyClass::TotalObjectsCount != 1)
 		{
-			wcout<<"Total objects count is supposed to be 1 after pointer assignment object 3, but it's "<<MyClass::TotalObjectsCount<<"\n";
+			cout<<"Total objects count is supposed to be 1 after pointer assignment object 3, but it's "<<MyClass::TotalObjectsCount<<"\n";
 			status = ePDFFailure;
 		}
 	}
 	if(MyClass::TotalObjectsCount != 0)
 	{
-		wcout<<"assignment test failed, TotalObjectCount = "<<MyClass::TotalObjectsCount<<"\n";
+		cout<<"assignment test failed, TotalObjectCount = "<<MyClass::TotalObjectsCount<<"\n";
 		status = ePDFFailure;
 	}
 
@@ -178,31 +178,31 @@ EPDFStatusCode RefCountTest::Run()
 
 		if(firstPtr != secondPtr)
 		{
-			wcout<<"smart pointers equality failed (not equal)\n";
+			cout<<"smart pointers equality failed (not equal)\n";
 			status = ePDFFailure;
 		}
 
 		if(!(firstPtr == secondPtr))
 		{
-			wcout<<"smart pointers equality failed (equal)\n";
+			cout<<"smart pointers equality failed (equal)\n";
 			status = ePDFFailure;
 		}
 
 		if(firstPtr != anObject)
 		{
-			wcout<<"smart pointer to pointer equality failed (not equal)\n";
+			cout<<"smart pointer to pointer equality failed (not equal)\n";
 			status = ePDFFailure;
 		}
 
 		if(!(firstPtr == anObject))
 		{
-			wcout<<"smart pointer to pointer equality failed (equal)\n";
+			cout<<"smart pointer to pointer equality failed (equal)\n";
 			status = ePDFFailure;
 		}
 	}
 	if(MyClass::TotalObjectsCount != 0)
 	{
-		wcout<<"Pointer equality, TotalObjectCount = "<<MyClass::TotalObjectsCount<<"\n";
+		cout<<"Pointer equality, TotalObjectCount = "<<MyClass::TotalObjectsCount<<"\n";
 		status = ePDFFailure;
 	}
 
@@ -213,14 +213,14 @@ EPDFStatusCode RefCountTest::Run()
 
 		if(!aPtr)
 		{
-			wcout<<"Problem, should not be false!\n";
+			cout<<"Problem, should not be false!\n";
 			status = ePDFFailure;
 		}		
 		
 		RefCountPtr<MyClass> aNother;
 		if(!(!aNother))
 		{
-			wcout<<"Problem, should be false!\n";
+			cout<<"Problem, should be false!\n";
 			status = ePDFFailure;			
 		}
 	}

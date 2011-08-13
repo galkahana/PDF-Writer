@@ -50,25 +50,25 @@ EPDFStatusCode FlateEncryptionTest::Run()
 		// Create encrypted copy of the message
 		char* aString = "encryptedMessage";
 
-		IByteWriter* encoderStream = new OutputFlateEncodeStream(new OutputBufferedStream(new OutputFileStream(L"c:\\PDFLibTests\\encrypted.txt")));
+		IByteWriter* encoderStream = new OutputFlateEncodeStream(new OutputBufferedStream(new OutputFileStream("c:\\PDFLibTests\\encrypted.txt")));
 
 		LongBufferSizeType writtenSize = encoderStream->Write((const IOBasicTypes::Byte*)aString,strlen(aString));
 		delete encoderStream;
 		if(writtenSize != strlen(aString))
 		{
-			wcout<<"Failed to write all message to output\n";
+			cout<<"Failed to write all message to output\n";
 			status = ePDFFailure;
 			break;
 		}
 
-		IByteReader* encoderReaderStream = new InputBufferedStream(new InputFileStream(L"c:\\PDFLibTests\\encrypted.txt"));
-		IByteWriter* decoderWriterStream = new OutputFlateDecodeStream(new OutputBufferedStream(new OutputFileStream(L"c:\\PDFLibTests\\decrypted.txt"))); 
+		IByteReader* encoderReaderStream = new InputBufferedStream(new InputFileStream("c:\\PDFLibTests\\encrypted.txt"));
+		IByteWriter* decoderWriterStream = new OutputFlateDecodeStream(new OutputBufferedStream(new OutputFileStream("c:\\PDFLibTests\\decrypted.txt"))); 
 
 		OutputStreamTraits outputTraits(decoderWriterStream);
 		status = outputTraits.CopyToOutputStream(encoderReaderStream);
 		if(status != ePDFSuccess)
 		{
-			wcout<<"Failed to copy to decrypted output\n";
+			cout<<"Failed to copy to decrypted output\n";
 			status = ePDFFailure;
 			break;
 		}
@@ -77,7 +77,7 @@ EPDFStatusCode FlateEncryptionTest::Run()
 		delete decoderWriterStream;
 
 		// now read again decrypted and compare to original message
-		IByteReader* decoderReaderStream = new InputBufferedStream(new InputFileStream(L"c:\\PDFLibTests\\decrypted.txt"));
+		IByteReader* decoderReaderStream = new InputBufferedStream(new InputFileStream("c:\\PDFLibTests\\decrypted.txt"));
 		char buffer[256];
 
 		LongBufferSizeType readSize = decoderReaderStream->Read((IOBasicTypes::Byte*)buffer,255);
@@ -87,7 +87,7 @@ EPDFStatusCode FlateEncryptionTest::Run()
 
 		if(strcmp(aString,buffer) != 0)
 		{
-			wcout<<"decrypted content is different from encrypted content\n";
+			cout<<"decrypted content is different from encrypted content\n";
 			status = ePDFFailure;
 			break;
 		}

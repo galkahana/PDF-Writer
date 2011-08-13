@@ -66,7 +66,7 @@ bool WrittenFontTrueType::AddToANSIRepresentation(	const GlyphUnicodeMappingList
 		}
 		else
 		{
-			encodingResult = winAnsiEncoding.Encode((wchar_t)(it->mUnicodeValues.front()));
+			encodingResult = winAnsiEncoding.Encode(it->mUnicodeValues.front());
 			if(encodingResult.first)
 				candidates.push_back(encodingResult.second);
 		}
@@ -153,7 +153,7 @@ bool WrittenFontTrueType::AddToANSIRepresentation(	const GlyphUnicodeMappingList
 			}
 			else
 			{
-				encodingResult = winAnsiEncoding.Encode((wchar_t)(it->mUnicodeValues.front()));
+				encodingResult = winAnsiEncoding.Encode(it->mUnicodeValues.front());
 				if(encodingResult.first)
 					candidates.push_back(encodingResult.second);
 			}

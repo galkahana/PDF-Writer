@@ -113,11 +113,11 @@ public:
 	virtual ~TIFFImageHandler(void);
 
 	// create a form XObject from an image (using form for 1. tiled images 2. to setup matrix, set color space...and leave you with just placing the image object
-	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const wstring& inTIFFFilePath,
+	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const string& inTIFFFilePath,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 	PDFFormXObject* CreateFormXObjectFromTIFFStream(IByteReaderWithPosition* inTIFFStream,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
-	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const wstring& inTIFFFilePath,
+	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const string& inTIFFFilePath,
 													ObjectIDType inFormXObjectID,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 	PDFFormXObject* CreateFormXObjectFromTIFFStream(IByteReaderWithPosition* inTIFFStream,

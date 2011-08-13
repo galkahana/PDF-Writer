@@ -316,27 +316,6 @@ void MD5Generator::II(uint4& a, uint4 b, uint4 c, uint4 d, uint4 x, uint4 s, uin
  a = RotateLeft (a, s) +b;
 }
 
-
-EPDFStatusCode MD5Generator::Accumulate(const wstring& inString)
-{
-	if(mIsFinalized)
-		return ePDFFailure;
-
-	uint1* buffer= new uint1[(unsigned long)inString.length()*2];
-	unsigned long index = 0;
-
-	// doing big endian writing of the bytes of the string
-	wstring::const_iterator it = inString.begin();
-	for(;it != inString.end();++it)
-	{
-		buffer[index++] = uint1((*it)>>8);
-		buffer[index++] = uint1((*it) & 0xFF);
-	}
-	Accumulate(buffer,index);
-	delete[] buffer;
-	return ePDFSuccess;
-}
-
 const MD5Generator::uint1 MD5Generator::PADDING[64]={
 0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

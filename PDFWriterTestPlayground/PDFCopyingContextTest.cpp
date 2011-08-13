@@ -43,18 +43,18 @@ EPDFStatusCode PDFCopyingContextTest::Run()
 
 	do
 	{
-		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\PDFCopyingContextTest.PDF",ePDFVersion13,LogConfiguration(true,L"c:\\pdflibtests\\PDFCopyingContextTest.txt"));
+		status = pdfWriter.StartPDF("C:\\PDFLibTests\\PDFCopyingContextTest.PDF",ePDFVersion13,LogConfiguration(true,true,"c:\\pdflibtests\\PDFCopyingContextTest.txt"));
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to start PDF\n";
+			cout<<"failed to start PDF\n";
 			break;
 		}	
 
 
-		copyingContext = pdfWriter.CreatePDFCopyingContext(L"C:\\PDFLibTests\\TestMaterials\\BasicTIFFImagesTest.PDF");
+		copyingContext = pdfWriter.CreatePDFCopyingContext("C:\\PDFLibTests\\TestMaterials\\BasicTIFFImagesTest.PDF");
 		if(!copyingContext)
 		{
-			wcout<<"failed to initialize copying context from BasicTIFFImagesTest\n";
+			cout<<"failed to initialize copying context from BasicTIFFImagesTest\n";
 			status = ePDFFailure;
 			break;
 		}
@@ -62,7 +62,7 @@ EPDFStatusCode PDFCopyingContextTest::Run()
 		EPDFStatusCodeAndObjectIDType result = copyingContext->AppendPDFPageFromPDF(1);
 		if(result.first != ePDFSuccess)
 		{
-			wcout<<"failed to append page 1 from BasicTIFFImagesTest.PDF\n";
+			cout<<"failed to append page 1 from BasicTIFFImagesTest.PDF\n";
 			status = result.first;
 			break;
 		}
@@ -70,7 +70,7 @@ EPDFStatusCode PDFCopyingContextTest::Run()
 		result = copyingContext->AppendPDFPageFromPDF(18);
 		if(result.first != ePDFSuccess)
 		{
-			wcout<<"failed to append page 18 from BasicTIFFImagesTest.PDF\n";
+			cout<<"failed to append page 18 from BasicTIFFImagesTest.PDF\n";
 			status = result.first;
 			break;
 		}
@@ -78,7 +78,7 @@ EPDFStatusCode PDFCopyingContextTest::Run()
 		result = copyingContext->AppendPDFPageFromPDF(4);
 		if(result.first != ePDFSuccess)
 		{
-			wcout<<"failed to append page 4 from BasicTIFFImagesTest.PDF\n";
+			cout<<"failed to append page 4 from BasicTIFFImagesTest.PDF\n";
 			status = result.first;
 			break;
 		}
@@ -91,7 +91,7 @@ EPDFStatusCode PDFCopyingContextTest::Run()
 		status = pdfWriter.EndPDF();
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed in end PDF\n";
+			cout<<"failed in end PDF\n";
 			break;
 		}
 

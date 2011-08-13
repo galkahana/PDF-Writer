@@ -37,11 +37,13 @@ class IByteWriter;
 class Log
 {
 public:
-	Log(const wstring& inLogFilePath);
+
+	// log writes are in UTF8. so i'm asking here if you want a bom
+	Log(const string& inLogFilePath,bool inPlaceUTF8Bom);
 	Log(IByteWriter* inLogStream);
 	~Log(void);
 
-	void LogEntry(const wstring& inMessage);
+	void LogEntry(const string& inMessage);
 	void LogEntry(const Byte* inMessage, LongBufferSizeType inMessageSize);
 
 
@@ -51,11 +53,11 @@ public:
 
 private:
 
-	wstring mFilePath;
+	string mFilePath;
 	OutputFile mLogFile;
 	IByteWriter* mLogStream;
 	LogFileMethod mLogMethod;
 
-	wstring GetFormattedTimeString();
+	string GetFormattedTimeString();
 	void WriteLogEntryToStream(const Byte* inMessage, LongBufferSizeType inMessageSize,IByteWriter* inStream);
 };

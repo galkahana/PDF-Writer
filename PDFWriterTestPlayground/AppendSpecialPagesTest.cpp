@@ -42,78 +42,78 @@ EPDFStatusCode AppendSpecialPagesTest::Run()
 	do
 	{
 
-		status = pdfWriter.StartPDF(L"C:\\PDFLibTests\\AppendSpecialPagesTest.PDF",ePDFVersion13,LogConfiguration(true,L"c:\\pdflibtests\\AppendSpecialPagesTestLog.txt"));
+		status = pdfWriter.StartPDF("C:\\PDFLibTests\\AppendSpecialPagesTest.PDF",ePDFVersion13,LogConfiguration(true,true,"c:\\pdflibtests\\AppendSpecialPagesTestLog.txt"));
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed to start PDF\n";
+			cout<<"failed to start PDF\n";
 			break;
 		}	
 
 		EPDFStatusCodeAndObjectIDTypeList result;
 
-		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\Protected.pdf",PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\Protected.pdf",PDFPageRange());
 		if(result.first == ePDFSuccess)
 		{
-			wcout<<"failted to NOT ALLOW embedding of protected documents\n";
+			cout<<"failted to NOT ALLOW embedding of protected documents\n";
 			status = ePDFFailure;
 			break;
 		}
 
-		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\ObjectStreamsModified.pdf",PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\ObjectStreamsModified.pdf",PDFPageRange());
 		if(result.first != ePDFSuccess)
 		{
-			wcout<<"failed to append pages from ObjectStreamsModified.pdf\n";
+			cout<<"failed to append pages from ObjectStreamsModified.pdf\n";
 			status = result.first;
 			break;
 		}
 
-		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\ObjectStreams.pdf",PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\ObjectStreams.pdf",PDFPageRange());
 		if(result.first != ePDFSuccess)
 		{
-			wcout<<"failed to append pages from ObjectStreams.pdf\n";
+			cout<<"failed to append pages from ObjectStreams.pdf\n";
 			status = result.first;
 			break;
 		}
 
 		
-		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\AddedItem.pdf",PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\AddedItem.pdf",PDFPageRange());
 		if(result.first != ePDFSuccess)
 		{
-			wcout<<"failed to append pages from AddedItem.pdf\n";
+			cout<<"failed to append pages from AddedItem.pdf\n";
 			status = result.first;
 			break;
 		}
 
-		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\AddedPage.pdf",PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\AddedPage.pdf",PDFPageRange());
 		if(result.first != ePDFSuccess)
 		{
-			wcout<<"failed to append pages from AddedPage.pdf\n";
-			status = result.first;
-			break;
-		}
-
-
-		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\MultipleChange.pdf",PDFPageRange());
-		if(result.first != ePDFSuccess)
-		{
-			wcout<<"failed to append pages from MultipleChange.pdf\n";
-			status = result.first;
-			break;
-		}
-
-		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\RemovedItem.pdf",PDFPageRange());
-		if(result.first != ePDFSuccess)
-		{
-			wcout<<"failed to append pages from RemovedItem.pdf\n";
+			cout<<"failed to append pages from AddedPage.pdf\n";
 			status = result.first;
 			break;
 		}
 
 
-		result = pdfWriter.AppendPDFPagesFromPDF(L"C:\\PDFLibTests\\TestMaterials\\Linearized.pdf",PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\MultipleChange.pdf",PDFPageRange());
 		if(result.first != ePDFSuccess)
 		{
-			wcout<<"failed to append pages from RemovedItem.pdf\n";
+			cout<<"failed to append pages from MultipleChange.pdf\n";
+			status = result.first;
+			break;
+		}
+
+		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\RemovedItem.pdf",PDFPageRange());
+		if(result.first != ePDFSuccess)
+		{
+			cout<<"failed to append pages from RemovedItem.pdf\n";
+			status = result.first;
+			break;
+		}
+
+
+		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\Linearized.pdf",PDFPageRange());
+		if(result.first != ePDFSuccess)
+		{
+			cout<<"failed to append pages from RemovedItem.pdf\n";
 			status = result.first;
 			break;
 		}
@@ -121,7 +121,7 @@ EPDFStatusCode AppendSpecialPagesTest::Run()
 		status = pdfWriter.EndPDF();
 		if(status != ePDFSuccess)
 		{
-			wcout<<"failed in end PDF\n";
+			cout<<"failed in end PDF\n";
 			break;
 		}
 

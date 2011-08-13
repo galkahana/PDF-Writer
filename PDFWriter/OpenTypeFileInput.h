@@ -198,7 +198,7 @@ public:
 	~OpenTypeFileInput(void);
 
 
-	EPDFStatusCode ReadOpenTypeFile(const wstring& inFontFilePath);
+	EPDFStatusCode ReadOpenTypeFile(const string& inFontFilePath);
 	EPDFStatusCode ReadOpenTypeFile(IByteReaderWithPosition* inTrueTypeFile);
 
 

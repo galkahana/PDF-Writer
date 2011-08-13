@@ -28,7 +28,7 @@
 #include "SafeBufferMacrosDefs.h"
 #include "CFFDescendentFontWriter.h"
 #include "IDescendentFontWriter.h"
-#include "UnicodeEncoding.h"
+#include "UnicodeString.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -213,7 +213,7 @@ static const Byte scEntryEnding[2] = {'>','\n'};
 static const Byte scAllZeros[4] = {'0','0','0','0'};
 void CIDFontWriter::WriteGlyphEntry(IByteWriter* inWriter,unsigned short inEncodedCharacter,const ULongVector& inUnicodeValues)
 {
-	UnicodeEncoding unicode;
+	UnicodeString unicode;
 	char formattingBuffer[17];
 	ULongVector::const_iterator it = inUnicodeValues.begin();
 
@@ -228,17 +228,20 @@ void CIDFontWriter::WriteGlyphEntry(IByteWriter* inWriter,unsigned short inEncod
 	{
 		for(; it != inUnicodeValues.end(); ++it)
 		{
-			if(unicode.IsSupplementary(*it))
+			unicode.GetUnicodeList().push_back(*it);
+			EPDFStatusCodeAndUShortList utf16Result = unicode.ToUTF16UShort();
+			unicode.GetUnicodeList().clear();
+
+			if(utf16Result.second.size() == 2)
 			{
-				UTF16Encoding highAndLow = unicode.EncodeCharater(*it);
 				SAFE_SPRINTF_2(formattingBuffer,17,"%04x%04x",
-																highAndLow.HighSurrogate,
-																highAndLow.LowSurrogate);
+																utf16Result.second.front(),
+																utf16Result.second.back());
 				inWriter->Write((const Byte*)formattingBuffer,8);
 			}
-			else
+			else // 1
 			{
-				SAFE_SPRINTF_1(formattingBuffer,17,"%04x",*it);
+				SAFE_SPRINTF_1(formattingBuffer,17,"%04x",utf16Result.second.front());
 				inWriter->Write((const Byte*)formattingBuffer,4);
 			}
 		}

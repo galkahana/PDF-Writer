@@ -61,51 +61,51 @@ Importing two pages, merge one and user the other as xobject, with graphics betw
 
 	if(TestOnlyMerge() != ePDFSuccess)
 	{
-		wcout<<"Failed [TestOnlyMerge()]: test for clean merging of one page \n";
+		cout<<"Failed [TestOnlyMerge()]: test for clean merging of one page \n";
 		status = ePDFFailure;
 	}
 
 	if(TestPrefixGraphicsMerge() != ePDFSuccess)
 	{
-		wcout<<"Failed [TestPrefixGraphicsMerge()]: test for merging of one page with some prior graphics \n";
+		cout<<"Failed [TestPrefixGraphicsMerge()]: test for merging of one page with some prior graphics \n";
 		status = ePDFFailure;
 	}
 
 	if(TestSuffixGraphicsMerge() != ePDFSuccess)
 	{
-		wcout<<"Failed [TestSuffixGraphicsMerge()]: test for merging of one page with some graphics after the merged page\n";
+		cout<<"Failed [TestSuffixGraphicsMerge()]: test for merging of one page with some graphics after the merged page\n";
 		status = ePDFFailure;
 	}
 
 	if(TestBothGraphicsMerge() != ePDFSuccess)
 	{
-		wcout<<"Failed [TestBothGraphicsMerge()]: test for merging of one page with some graphics before and after the merged page\n";
+		cout<<"Failed [TestBothGraphicsMerge()]: test for merging of one page with some graphics before and after the merged page\n";
 		status = ePDFFailure;
 	}
 
 	if(MergeTwoPageInSeparatePhases() != ePDFSuccess)
 	{
-		wcout<<"Failed [MergeTwoPageInSeparatePhases()]: test for merging of two pages in two separate pheases with some graphics between them\n";
+		cout<<"Failed [MergeTwoPageInSeparatePhases()]: test for merging of two pages in two separate pheases with some graphics between them\n";
 		status = ePDFFailure;
 	}
 
 	if(MergeTwoPageWithEvents() != ePDFSuccess)
 	{
-		wcout<<"Failed [MergeTwoPageWithEvents()]: test for merging of two pages with some graphics between them, using the events system\n";
+		cout<<"Failed [MergeTwoPageWithEvents()]: test for merging of two pages with some graphics between them, using the events system\n";
 		status = ePDFFailure;
 	}
 
 	if(MergePagesUsingCopyingContext() != ePDFSuccess)
 	{
-		wcout<<"Failed [MergeTwoPageUsingCopyingContext()]: test for merging of multiple pages with some graphics between them and also using some as xobjects, using the copying contexts\n";
+		cout<<"Failed [MergeTwoPageUsingCopyingContext()]: test for merging of multiple pages with some graphics between them and also using some as xobjects, using the copying contexts\n";
 		status = ePDFFailure;
 	}
 	return status;
 }
 
-static const wstring scBasePath = L"c:\\PDFLibTests\\";
-static const wstring scMergeFilePath = L"c:\\PDFLibTests\\TestMaterials\\BasicTIFFImagesTest.PDF";
-static const wstring scFontPath = L"C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf";
+static const string scBasePath = "c:\\PDFLibTests\\";
+static const string scMergeFilePath = "c:\\PDFLibTests\\TestMaterials\\BasicTIFFImagesTest.PDF";
+static const string scFontPath = "C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf";
 
 EPDFStatusCode MergePDFPages::TestOnlyMerge()
 {
@@ -114,7 +114,7 @@ EPDFStatusCode MergePDFPages::TestOnlyMerge()
 
 	do
 	{
-		status = pdfWriter.StartPDF(scBasePath + L"TestOnlyMerge.pdf",ePDFVersion13);
+		status = pdfWriter.StartPDF(scBasePath + "TestOnlyMerge.pdf",ePDFVersion13);
 		if(status != ePDFSuccess)
 			break;
 
@@ -149,7 +149,7 @@ EPDFStatusCode MergePDFPages::TestPrefixGraphicsMerge()
 
 	do
 	{
-		status = pdfWriter.StartPDF(scBasePath + L"TestPrefixGraphicsMerge.pdf",ePDFVersion13);
+		status = pdfWriter.StartPDF(scBasePath + "TestPrefixGraphicsMerge.pdf",ePDFVersion13);
 		if(status != ePDFSuccess)
 			break;
 
@@ -169,7 +169,7 @@ EPDFStatusCode MergePDFPages::TestPrefixGraphicsMerge()
 		pageContent->k(0,0,0,1);
 		pageContent->Tf(font,30);
 		pageContent->Tm(1,0,0,1,10,600);
-		status = pageContent->Tj(L"Testing file merge");
+		status = pageContent->Tj("Testing file merge");
 		if(status != ePDFSuccess)
 			break;
 		pageContent->ET();
@@ -208,7 +208,7 @@ EPDFStatusCode MergePDFPages::TestSuffixGraphicsMerge()
 
 	do
 	{
-		status = pdfWriter.StartPDF(scBasePath + L"TestSuffixGraphicsMerge.pdf",ePDFVersion13);
+		status = pdfWriter.StartPDF(scBasePath + "TestSuffixGraphicsMerge.pdf",ePDFVersion13);
 		if(status != ePDFSuccess)
 			break;
 
@@ -236,7 +236,7 @@ EPDFStatusCode MergePDFPages::TestSuffixGraphicsMerge()
 		pageContent->k(0,0,0,1);
 		pageContent->Tf(font,30);
 		pageContent->Tm(1,0,0,1,10,600);
-		status = pageContent->Tj(L"Testing file merge");
+		status = pageContent->Tj("Testing file merge");
 		if(status != ePDFSuccess)
 			break;
 		pageContent->ET();
@@ -265,7 +265,7 @@ EPDFStatusCode MergePDFPages::TestBothGraphicsMerge()
 
 	do
 	{
-		status = pdfWriter.StartPDF(scBasePath + L"TestBothGraphicsMerge.pdf",ePDFVersion13);
+		status = pdfWriter.StartPDF(scBasePath + "TestBothGraphicsMerge.pdf",ePDFVersion13);
 		if(status != ePDFSuccess)
 			break;
 
@@ -285,7 +285,7 @@ EPDFStatusCode MergePDFPages::TestBothGraphicsMerge()
 		pageContent->k(0,0,0,1);
 		pageContent->Tf(font,30);
 		pageContent->Tm(1,0,0,1,10,600);
-		status = pageContent->Tj(L"Testing file merge");
+		status = pageContent->Tj("Testing file merge");
 		if(status != ePDFSuccess)
 			break;
 		pageContent->ET();
@@ -334,7 +334,7 @@ EPDFStatusCode MergePDFPages::MergeTwoPageInSeparatePhases()
 
 	do
 	{
-		status = pdfWriter.StartPDF(scBasePath + L"MergeTwoPageInSeparatePhases.pdf",ePDFVersion13);
+		status = pdfWriter.StartPDF(scBasePath + "MergeTwoPageInSeparatePhases.pdf",ePDFVersion13);
 		if(status != ePDFSuccess)
 			break;
 
@@ -426,7 +426,7 @@ EPDFStatusCode MergePDFPages::MergeTwoPageWithEvents()
 
 	do
 	{
-		status = pdfWriter.StartPDF(scBasePath + L"MergeTwoPageWithEvents.pdf",ePDFVersion13);
+		status = pdfWriter.StartPDF(scBasePath + "MergeTwoPageWithEvents.pdf",ePDFVersion13);
 		if(status != ePDFSuccess)
 			break;
 
@@ -482,7 +482,7 @@ EPDFStatusCode MergePDFPages::MergePagesUsingCopyingContext()
 
 	do
 	{
-		status = pdfWriter.StartPDF(scBasePath + L"MergePagesUsingCopyingContext.pdf",ePDFVersion13);
+		status = pdfWriter.StartPDF(scBasePath + "MergePagesUsingCopyingContext.pdf",ePDFVersion13);
 		if(status != ePDFSuccess)
 			break;
 

@@ -83,7 +83,6 @@
 #include "PDFFormXObject.h"
 #include "SafeBufferMacrosDefs.h"
 #include "IDocumentsContextExtender.h"
-#include "StringTraits.h"
 #include "IByteReaderWithPosition.h"
 
 // tiff lib includes
@@ -271,7 +270,7 @@ struct T2P{
 
 	TIFF* input;
 	TIFF* output;
-	wstring inputFilePath;
+	string inputFilePath;
 	PDFStream* pdfStream;
 	ObjectIDType pdf_transfer_functions_gstate;
 
@@ -359,7 +358,7 @@ void ReportWarning(const char* inModel, const char* inFormat, va_list inParamete
 
 	SAFE_VSPRINTF(buffer,5001,formatter.str().c_str(),inParametersList);
 
-	Singleton<Trace>::GetInstance()->TraceToLog(StringTraits(buffer).WidenString().c_str());
+	Singleton<Trace>::GetInstance()->TraceToLog(buffer);
 }
 
 void ReportError(const char* inModel, const char* inFormat, va_list inParametersList)
@@ -370,7 +369,7 @@ void ReportError(const char* inModel, const char* inFormat, va_list inParameters
 
 	SAFE_VSPRINTF(buffer,5001,formatter.str().c_str(),inParametersList);
 
-	Singleton<Trace>::GetInstance()->TraceToLog(StringTraits(buffer).WidenString().c_str());
+	Singleton<Trace>::GetInstance()->TraceToLog(buffer);
 }
 
 TIFFImageHandler::TIFFImageHandler():mUserParameters(TIFFUsageParameters::DefaultTIFFUsageParameters)
@@ -390,7 +389,7 @@ void TIFFImageHandler::SetOperationsContexts(DocumentsContext* inContainerDocume
 	mContainerDocumentsContext = inContainerDocumentsContext;
 }
 
-PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFFile(const wstring& inTIFFFilePath,
+PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFFile(const string& inTIFFFilePath,
 																const TIFFUsageParameters& inTIFFUsageParameters)
 {
 	if(!mObjectsContext)
@@ -402,7 +401,7 @@ PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFFile(const wstring& i
 	return CreateFormXObjectFromTIFFFile(inTIFFFilePath,mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID(),inTIFFUsageParameters);
 }
 
-PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFFile(const wstring& inTIFFFilePath,
+PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFFile(const string& inTIFFFilePath,
 																ObjectIDType inFormXObjectID,
 																const TIFFUsageParameters& inTIFFUsageParameters)
 
@@ -3484,7 +3483,7 @@ PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFStream(	IByteReaderWi
 
 		InitializeConversionState();
 		mT2p->input = input;
-		mT2p->inputFilePath = L"";
+		mT2p->inputFilePath = "";
 		mT2p->pdf_page = inTIFFUsageParameters.PageIndex;
 		mUserParameters = inTIFFUsageParameters;
 

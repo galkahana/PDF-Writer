@@ -29,7 +29,7 @@ PDFDocumentCopyingContext::~PDFDocumentCopyingContext(void)
 	End();
 }
 
-EPDFStatusCode PDFDocumentCopyingContext::Start(const wstring& inPDFFilePath,
+EPDFStatusCode PDFDocumentCopyingContext::Start(const string& inPDFFilePath,
 											  DocumentsContext* inDocumentsContext,
 											  ObjectsContext* inObjectsContext)
 {

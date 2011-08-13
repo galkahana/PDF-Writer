@@ -34,6 +34,6 @@ public:
 	WinAnsiEncoding(void);
 	~WinAnsiEncoding(void);
 
-	BoolAndByte Encode(wchar_t inUnicodeCharacter);
+	BoolAndByte Encode(unsigned long inUnicodeCharacter);
 	const char* GetEncodedGlyphName(IOBasicTypes::Byte inEncodedCharacter);
 };

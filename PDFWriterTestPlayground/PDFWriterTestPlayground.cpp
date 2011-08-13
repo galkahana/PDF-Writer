@@ -27,7 +27,7 @@
 
 static void PrintUsage()
 {
-	wcout<<"Usage:\n"<<
+	cout<<"Usage:\n"<<
 		"HummusPDFWriterTestPlayground [-c category1 category2... [-xt test1 test2...]] [-t test1 test2...] [-xc category1 category2...] [-xt test1 test2...]\n\n"<<
 		"HummusPDFWriterTestPlayground runs tests.\n"<<
 		"The non parameterized version runs all tests.\n\n"<<
@@ -45,19 +45,19 @@ static void PrintUsage()
 		"	HummusPDFWriterTestPlayGround -c PDF -xt TiffImageTest.";
 }
 
-int wmain(int argc, wchar_t* argv[])
+int main(int argc, char* argv[])
 {
 	if(3 <= argc)
 	{
-		if(wcscmp(argv[1],L"-c") == 0) // categories testing
+		if(strcmp(argv[1],"-c") == 0) // categories testing
 		{
 			bool hasExclusions = false;
-			WStringList categories;
+			StringList categories;
 			int i=2;
 			
 			for(;i<argc;++i)
 			{
-				if(wcscmp(argv[i],L"-xt") == 0)
+				if(strcmp(argv[i],"-xt") == 0)
 				{
 					hasExclusions = true;
 					break;
@@ -68,7 +68,7 @@ int wmain(int argc, wchar_t* argv[])
 
 			if(hasExclusions)
 			{
-				WStringSet excludedTests;
+				StringSet excludedTests;
 				for(;i<argc;++i)
 					excludedTests.insert(argv[i]);
 				Singleton<TestsRunner>::GetInstance()->RunCategories(categories,excludedTests);
@@ -77,25 +77,25 @@ int wmain(int argc, wchar_t* argv[])
 				Singleton<TestsRunner>::GetInstance()->RunCategories(categories);
 			Singleton<TestsRunner>::Reset();
 		}
-		else if(wcscmp(argv[1],L"-t") == 0) // per test label testing
+		else if(strcmp(argv[1],"-t") == 0) // per test label testing
 		{
-			WStringList tests;
+			StringList tests;
 			for(int i=2;i<argc;++i)
 				tests.push_back(argv[i]);
 			Singleton<TestsRunner>::GetInstance()->RunTests(tests);
 			Singleton<TestsRunner>::Reset();
 		}
-		else if(wcscmp(argv[1],L"-xc") == 0) // all tests with categories exclusion
+		else if(strcmp(argv[1],"-xc") == 0) // all tests with categories exclusion
 		{
-			WStringSet categories;
+			StringSet categories;
 			for(int i=2;i<argc;++i)
 				categories.insert(argv[i]);
 			Singleton<TestsRunner>::GetInstance()->RunExcludeCategories(categories);
 			Singleton<TestsRunner>::Reset();
 		}
-		else if(wcscmp(argv[1],L"-xt") == 0) // all tests with categories exclusion
+		else if(strcmp(argv[1],"-xt") == 0) // all tests with categories exclusion
 		{
-			WStringSet tests;
+			StringSet tests;
 			for(int i=2;i<argc;++i)
 				tests.insert(argv[i]);
 			Singleton<TestsRunner>::GetInstance()->RunExcludeTests(tests);
