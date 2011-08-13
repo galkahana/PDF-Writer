@@ -23,6 +23,8 @@
 #include "CharStringType2Interpreter.h"
 #include "StandardEncoding.h"
 
+using namespace PDFHummus;
+
 #define N_STD_STRINGS 391
 static const char* scStandardStrings[N_STD_STRINGS] = {
 		".notdef","space","exclam","quotedbl","numbersign","dollar","percent","ampersand","quoteright","parenleft",
@@ -193,9 +195,9 @@ void CFFFileInput::Reset()
 	FreeData();
 }
 
-EPDFStatusCode CFFFileInput::ReadCFFFile(IByteReaderWithPosition* inCFFFile)
+EStatusCode CFFFileInput::ReadCFFFile(IByteReaderWithPosition* inCFFFile)
 {
-	EPDFStatusCode status;
+	EStatusCode status;
 
 	do
 	{
@@ -205,7 +207,7 @@ EPDFStatusCode CFFFileInput::ReadCFFFile(IByteReaderWithPosition* inCFFFile)
 		mCFFOffset = inCFFFile->GetCurrentPosition();
 
 		status = ReadHeader();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFFileInput::ReadCFFFile, Failed to read header");
 				break;
@@ -216,70 +218,70 @@ EPDFStatusCode CFFFileInput::ReadCFFFile(IByteReaderWithPosition* inCFFFile)
 			mPrimitivesReader.Skip(mHeader.hdrSize - 4);
 
 		status = ReadNameIndex();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFFileInput::ReadCFFFile Failed to read name");
 				break;
 		}
 
 		status = ReadTopDictIndex();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFFileInput::ReadCFFFile failed to read top index");
 			break;
 		}
 
 		status = ReadStringIndex();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFFileInput::ReadCFFFile failed to read top index");
 			break;
 		}
 
 		status = ReadGlobalSubrs();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFFileInput::ReadCFFFile failed to read global subrs");
 			break;
 		}
 
 		status = ReadCharStrings();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFFileInput::ReadCFFFile failed to read charstrings");
 			break;
 		}
 
 		status = ReadPrivateDicts();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFFileInput::ReadCFFFile failed to read charstrings");
 			break;
 		}
 
 		status = ReadLocalSubrs();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFFileInput::ReadCFFFile failed to read local subrs");
 			break;
 		}
 
 		status = ReadCharsets();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFFileInput::ReadCFFFile failed to read char set");
 			break;
 		}
 
 		status = ReadEncodings();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFFileInput::ReadCFFFile failed to read encodings");
 			break;
 		}
 		
 		status = ReadCIDInformation();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFFileInput::ReadCFFFile failed to read CID Information");
 			break;
@@ -289,7 +291,7 @@ EPDFStatusCode CFFFileInput::ReadCFFFile(IByteReaderWithPosition* inCFFFile)
 	return status;
 }
 
-EPDFStatusCode CFFFileInput::ReadHeader()
+EStatusCode CFFFileInput::ReadHeader()
 {
 	mPrimitivesReader.ReadCard8(mHeader.major);
 	mPrimitivesReader.ReadCard8(mHeader.minor);
@@ -299,23 +301,23 @@ EPDFStatusCode CFFFileInput::ReadHeader()
 	return mPrimitivesReader.GetInternalState();
 }
 
-EPDFStatusCode CFFFileInput::ReadIndexHeader(unsigned long** outOffsets,unsigned short& outItemsCount)
+EStatusCode CFFFileInput::ReadIndexHeader(unsigned long** outOffsets,unsigned short& outItemsCount)
 {
 	Byte offSizeForIndex;
 
-	EPDFStatusCode status = mPrimitivesReader.ReadCard16(outItemsCount);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mPrimitivesReader.ReadCard16(outItemsCount);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	if(0 == outItemsCount)
 	{
 		*outOffsets = NULL;
-		return ePDFSuccess;
+		return PDFHummus::eSuccess;
 	}
 
 	mPrimitivesReader.ReadOffSize(offSizeForIndex);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	mPrimitivesReader.SetOffSize(offSizeForIndex);
 	*outOffsets = new unsigned long[outItemsCount + 1];
@@ -326,17 +328,17 @@ EPDFStatusCode CFFFileInput::ReadIndexHeader(unsigned long** outOffsets,unsigned
 	return mPrimitivesReader.GetInternalState();
 }
 
-EPDFStatusCode CFFFileInput::ReadNameIndex()
+EStatusCode CFFFileInput::ReadNameIndex()
 {
 	mNameIndexPosition = mPrimitivesReader.GetCurrentPosition();
 	
 	unsigned long* offsets;
-	EPDFStatusCode status = ReadIndexHeader(&offsets,mFontsCount);
+	EStatusCode status = ReadIndexHeader(&offsets,mFontsCount);
 	Byte* buffer;
 	
 	do
 	{
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		if(offsets[0] != 1)
@@ -356,7 +358,7 @@ EPDFStatusCode CFFFileInput::ReadNameIndex()
 	}while(false);
 
 	delete[] offsets;
-	if(status != ePDFSuccess)
+	if(status != PDFHummus::eSuccess)
 		return status;
 	else
 		return mPrimitivesReader.GetInternalState();
@@ -372,17 +374,17 @@ BoolAndUShort CFFFileInput::GetIndexForFontName(const string& inFontName)
 		return BoolAndUShort(true,it->second);
 }
 
-EPDFStatusCode CFFFileInput::ReadTopDictIndex()
+EStatusCode CFFFileInput::ReadTopDictIndex()
 {
 	mTopDictIndexPosition = mPrimitivesReader.GetCurrentPosition();
 	
 	unsigned long* offsets;
 	unsigned short dictionariesCount;
-	EPDFStatusCode status = ReadIndexHeader(&offsets,dictionariesCount);
+	EStatusCode status = ReadIndexHeader(&offsets,dictionariesCount);
 	
 	do
 	{
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		if(offsets[0] != 1)
@@ -390,37 +392,37 @@ EPDFStatusCode CFFFileInput::ReadTopDictIndex()
 
 		mTopDictIndex = new TopDictInfo[dictionariesCount];
 
-		for(unsigned short i = 0; i < dictionariesCount && (ePDFSuccess == status); ++i)
+		for(unsigned short i = 0; i < dictionariesCount && (PDFHummus::eSuccess == status); ++i)
 			status = ReadDict(offsets[i+1] - offsets[i],mTopDictIndex[i].mTopDict);
 
 	}while(false);
 
 	delete[] offsets;
-	if(status != ePDFSuccess)
+	if(status != PDFHummus::eSuccess)
 		return status;
 	else
 		return mPrimitivesReader.GetInternalState();
 }
 
-EPDFStatusCode CFFFileInput::ReadDict(unsigned long inReadAmount,UShortToDictOperandListMap& outDict)
+EStatusCode CFFFileInput::ReadDict(unsigned long inReadAmount,UShortToDictOperandListMap& outDict)
 {
 	LongFilePositionType dictStartPosition = mPrimitivesReader.GetCurrentPosition();
 	DictOperandList operands;
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	unsigned short anOperator;
 	DictOperand anOperand;
 	Byte aBuffer;
 
-	while(ePDFSuccess == status && 
+	while(PDFHummus::eSuccess == status && 
 			(mPrimitivesReader.GetCurrentPosition() - dictStartPosition < inReadAmount))
 	{
 		status = mPrimitivesReader.ReadByte(aBuffer);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 		if(mPrimitivesReader.IsDictOperator(aBuffer))
 		{ // operator
 			status = mPrimitivesReader.ReadDictOperator(aBuffer,anOperator);
-			if(status != ePDFSuccess)
+			if(status != PDFHummus::eSuccess)
 				break;
 			outDict.insert(
 				UShortToDictOperandListMap::value_type(anOperator,operands));
@@ -429,7 +431,7 @@ EPDFStatusCode CFFFileInput::ReadDict(unsigned long inReadAmount,UShortToDictOpe
 		else // operand
 		{
 			status = mPrimitivesReader.ReadDictOperand(aBuffer,anOperand);
-			if(status != ePDFSuccess)
+			if(status != PDFHummus::eSuccess)
 				break;
 			operands.push_back(anOperand);
 		}
@@ -438,16 +440,16 @@ EPDFStatusCode CFFFileInput::ReadDict(unsigned long inReadAmount,UShortToDictOpe
 	return status;
 }
 
-EPDFStatusCode CFFFileInput::ReadStringIndex()
+EStatusCode CFFFileInput::ReadStringIndex()
 {
 	mStringIndexPosition = mPrimitivesReader.GetCurrentPosition();
 	
 	unsigned long* offsets;
-	EPDFStatusCode status = ReadIndexHeader(&offsets,mStringsCount);
+	EStatusCode status = ReadIndexHeader(&offsets,mStringsCount);
 
 	do
 	{
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		if(0 == mStringsCount)
@@ -462,17 +464,17 @@ EPDFStatusCode CFFFileInput::ReadStringIndex()
 		mStrings = new char*[mStringsCount];
 
 		unsigned short i;
-		for(i = 0; i < mStringsCount && (ePDFSuccess == status); ++i)
+		for(i = 0; i < mStringsCount && (PDFHummus::eSuccess == status); ++i)
 		{
 			mStrings[i] = new char[offsets[i+1] - offsets[i]+1];
 			status = mPrimitivesReader.Read((Byte*)mStrings[i],offsets[i+1] - offsets[i]);
-			if(status != ePDFSuccess)
+			if(status != PDFHummus::eSuccess)
 				break;
 			mStrings[i][offsets[i+1] - offsets[i]] = 0;
 		}
 
 		// failure case, null all the rest of the strings for later delete to not perofrm errors
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{	
 			for(;i<mStringsCount;++i)
 				mStrings[i] = NULL;
@@ -487,7 +489,7 @@ EPDFStatusCode CFFFileInput::ReadStringIndex()
 	}while(false);
 
 	delete[] offsets;
-	if(status != ePDFSuccess)
+	if(status != PDFHummus::eSuccess)
 		return status;
 	else
 		return mPrimitivesReader.GetInternalState();
@@ -503,22 +505,22 @@ string CFFFileInput::GetStringForSID(unsigned short inSID)
 		return "";
 }
 
-EPDFStatusCode CFFFileInput::ReadGlobalSubrs()
+EStatusCode CFFFileInput::ReadGlobalSubrs()
 {
 	mGlobalSubrsPosition = mPrimitivesReader.GetCurrentPosition();
 	mGlobalSubrs.mCharStringsType = 2; // always 2
 	return ReadSubrsFromIndex(mGlobalSubrs.mCharStringsCount,&(mGlobalSubrs.mCharStringsIndex));
 }
 
-EPDFStatusCode CFFFileInput::ReadSubrsFromIndex(unsigned short& outSubrsCount,
+EStatusCode CFFFileInput::ReadSubrsFromIndex(unsigned short& outSubrsCount,
 											CharStringsIndex* outSubrsIndex)
 {
 	unsigned long* offsets;
-	EPDFStatusCode status = ReadIndexHeader(&offsets,outSubrsCount);
+	EStatusCode status = ReadIndexHeader(&offsets,outSubrsCount);
 		
 	do
 	{
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		if(0 == outSubrsCount)
@@ -544,19 +546,19 @@ EPDFStatusCode CFFFileInput::ReadSubrsFromIndex(unsigned short& outSubrsCount,
 	}while(false);
 
 	delete[] offsets;
-	if(status != ePDFSuccess)
+	if(status != PDFHummus::eSuccess)
 		return status;
 	else
 		return mPrimitivesReader.GetInternalState();
 }
 
-EPDFStatusCode CFFFileInput::ReadCharStrings()
+EStatusCode CFFFileInput::ReadCharStrings()
 {
 	// scan all charstrings of all included fonts
 	mCharStrings = new CharStrings[mFontsCount];
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
-	for(unsigned short i=0; i < mFontsCount && (ePDFSuccess == status); ++i)
+	for(unsigned short i=0; i < mFontsCount && (PDFHummus::eSuccess == status); ++i)
 	{
 		LongFilePositionType  charStringsPosition = GetCharStringsPosition(i);	
 		mCharStrings[i].mCharStringsType = (Byte)GetCharStringType(i);
@@ -573,7 +575,7 @@ EPDFStatusCode CFFFileInput::ReadCharStrings()
 		}
 	}
 
-	if(status != ePDFSuccess)
+	if(status != PDFHummus::eSuccess)
 		return status;
 	else
 		return mPrimitivesReader.GetInternalState();
@@ -609,24 +611,24 @@ long CFFFileInput::GetCharStringType(unsigned short inFontIndex)
 	return GetSingleIntegerValue(inFontIndex,scCharstringType,2);
 }
 
-EPDFStatusCode CFFFileInput::ReadPrivateDicts()
+EStatusCode CFFFileInput::ReadPrivateDicts()
 {
 	mPrivateDicts = new PrivateDictInfo[mFontsCount];
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
-	for(unsigned short i=0; i < mFontsCount && (ePDFSuccess == status); ++i)
+	for(unsigned short i=0; i < mFontsCount && (PDFHummus::eSuccess == status); ++i)
 		status = ReadPrivateDict(mTopDictIndex[i].mTopDict,mPrivateDicts + i);
 
-	if(status != ePDFSuccess)
+	if(status != PDFHummus::eSuccess)
 		return status;
 	else
 		return mPrimitivesReader.GetInternalState();	
 }
 
 static const unsigned short scPrivate = 18;
-EPDFStatusCode CFFFileInput::ReadPrivateDict(const UShortToDictOperandListMap& inReferencingDict,PrivateDictInfo* outPrivateDict)
+EStatusCode CFFFileInput::ReadPrivateDict(const UShortToDictOperandListMap& inReferencingDict,PrivateDictInfo* outPrivateDict)
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	UShortToDictOperandListMap::const_iterator it = inReferencingDict.find(scPrivate);
 
 	outPrivateDict->mLocalSubrs = NULL;
@@ -648,24 +650,24 @@ EPDFStatusCode CFFFileInput::ReadPrivateDict(const UShortToDictOperandListMap& i
 	return status;
 }
 
-EPDFStatusCode CFFFileInput::ReadLocalSubrs()
+EStatusCode CFFFileInput::ReadLocalSubrs()
 {
 	// scan all subrs of all included fonts
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
-	for(unsigned short i=0; i < mFontsCount && (ePDFSuccess == status); ++i)
+	for(unsigned short i=0; i < mFontsCount && (PDFHummus::eSuccess == status); ++i)
 		status = ReadLocalSubrsForPrivateDict(mPrivateDicts+i,(Byte)GetCharStringType(i));
 
-	if(status != ePDFSuccess)
+	if(status != PDFHummus::eSuccess)
 		return status;
 	else
 		return mPrimitivesReader.GetInternalState();
 }
 
 static const unsigned short scSubrs = 19;
-EPDFStatusCode CFFFileInput::ReadLocalSubrsForPrivateDict(PrivateDictInfo* inPrivateDict,Byte inCharStringType)
+EStatusCode CFFFileInput::ReadLocalSubrsForPrivateDict(PrivateDictInfo* inPrivateDict,Byte inCharStringType)
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	LongFilePositionType  subrsPosition = GetSingleIntegerValueFromDict(inPrivateDict->mPrivateDict,scSubrs,0);	
 
 	if(0 == subrsPosition)
@@ -682,7 +684,7 @@ EPDFStatusCode CFFFileInput::ReadLocalSubrsForPrivateDict(PrivateDictInfo* inPri
 			mPrimitivesReader.SetOffset(inPrivateDict->mPrivateDictStart + subrsPosition);
 			status = ReadSubrsFromIndex(charStrings->mCharStringsCount,
 										&(charStrings->mCharStringsIndex));
-			if(status != ePDFSuccess)
+			if(status != PDFHummus::eSuccess)
 				TRACE_LOG("CFFFileInput::ReadLocalSubrs, failed to read local subrs");
 			else
 				it = mLocalSubrs.insert(LongFilePositionTypeToCharStringsMap::value_type(inPrivateDict->mPrivateDictStart + subrsPosition,charStrings)).first;
@@ -695,14 +697,14 @@ EPDFStatusCode CFFFileInput::ReadLocalSubrsForPrivateDict(PrivateDictInfo* inPri
 typedef map<LongFilePositionType,CharSetInfo*> LongFilePositionTypeToCharSetInfoMap;
 
 static const unsigned short scROS = 0xC1E;
-EPDFStatusCode CFFFileInput::ReadCharsets()
+EStatusCode CFFFileInput::ReadCharsets()
 {
 	// read all charsets
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	LongFilePositionTypeToCharSetInfoMap offsetToIndex;
 	LongFilePositionTypeToCharSetInfoMap::iterator it;
 
-	for(unsigned short i=0; i < mFontsCount && (ePDFSuccess == status); ++i)
+	for(unsigned short i=0; i < mFontsCount && (PDFHummus::eSuccess == status); ++i)
 	{
 		LongFilePositionType charsetPosition = GetCharsetPosition(i);
 		it = offsetToIndex.find(charsetPosition);
@@ -746,7 +748,7 @@ EPDFStatusCode CFFFileInput::ReadCharsets()
 		mTopDictIndex[i].mCharSet = it->second;
 	}
 
-	if(status != ePDFSuccess)
+	if(status != PDFHummus::eSuccess)
 		return status;
 	else
 		return mPrimitivesReader.GetInternalState();
@@ -756,14 +758,14 @@ EPDFStatusCode CFFFileInput::ReadCharsets()
 typedef map<LongFilePositionType,EncodingsInfo*> LongFilePositionTypeToEncodingsInfoMap;
 
 
-EPDFStatusCode CFFFileInput::ReadEncodings()
+EStatusCode CFFFileInput::ReadEncodings()
 {
 	// read all encodings positions
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	LongFilePositionTypeToEncodingsInfoMap offsetToEncoding;
 	LongFilePositionTypeToEncodingsInfoMap::iterator it;
 
-	for(unsigned short i=0; i < mFontsCount && (ePDFSuccess == status); ++i)
+	for(unsigned short i=0; i < mFontsCount && (PDFHummus::eSuccess == status); ++i)
 	{
 		LongFilePositionType encodingPosition = GetEncodingPosition(i);
 		it = offsetToEncoding.find(encodingPosition);
@@ -777,7 +779,7 @@ EPDFStatusCode CFFFileInput::ReadEncodings()
 		mTopDictIndex[i].mEncoding = it->second;
 	}
 
-	if(status != ePDFSuccess)
+	if(status != PDFHummus::eSuccess)
 		return status;
 	else
 		return mPrimitivesReader.GetInternalState();
@@ -880,7 +882,7 @@ void CFFFileInput::SetupSIDToGlyphMapWithStandard(	const unsigned short* inStand
 	}
 }
 
-EPDFStatusCode CFFFileInput::ReadFormat0Charset(bool inIsCID,
+EStatusCode CFFFileInput::ReadFormat0Charset(bool inIsCID,
 											 UShortToCharStringMap& ioGlyphMap,
 											 unsigned short** inSIDArray,
 											 const CharStrings& inCharStrings)
@@ -910,7 +912,7 @@ EPDFStatusCode CFFFileInput::ReadFormat0Charset(bool inIsCID,
 	return mPrimitivesReader.GetInternalState();
 }
 
-EPDFStatusCode CFFFileInput::ReadFormat1Charset(bool inIsCID,
+EStatusCode CFFFileInput::ReadFormat1Charset(bool inIsCID,
 											 UShortToCharStringMap& ioGlyphMap,
 											 unsigned short** inSIDArray,
 											 const CharStrings& inCharStrings)
@@ -950,7 +952,7 @@ EPDFStatusCode CFFFileInput::ReadFormat1Charset(bool inIsCID,
 	return mPrimitivesReader.GetInternalState();
 }
 
-EPDFStatusCode CFFFileInput::ReadFormat2Charset(bool inIsCID,
+EStatusCode CFFFileInput::ReadFormat2Charset(bool inIsCID,
 											 UShortToCharStringMap& ioGlyphMap,
 											 unsigned short** inSIDArray,
 											 const CharStrings& inCharStrings)
@@ -1003,14 +1005,14 @@ LongFilePositionType CFFFileInput::GetEncodingPosition(unsigned short inFontInde
 }
 
 
-EPDFStatusCode CFFFileInput::CalculateDependenciesForCharIndex(unsigned short inFontIndex,
+EStatusCode CFFFileInput::CalculateDependenciesForCharIndex(unsigned short inFontIndex,
 															unsigned short inCharStringIndex,
 															CharString2Dependencies& ioDependenciesInfo)
 {
 	CharStringType2Interpreter interpreter;
 
-	EPDFStatusCode status = PrepareForGlyphIntepretation(inFontIndex,inCharStringIndex);
-	if(status != ePDFFailure)
+	EStatusCode status = PrepareForGlyphIntepretation(inFontIndex,inCharStringIndex);
+	if(status != PDFHummus::eFailure)
 	{
 		mCurrentDependencies = &ioDependenciesInfo;
 		return interpreter.Intepret(*GetGlyphCharString(inFontIndex,inCharStringIndex),this);
@@ -1019,20 +1021,20 @@ EPDFStatusCode CFFFileInput::CalculateDependenciesForCharIndex(unsigned short in
 		return status;
 }
 
-EPDFStatusCode CFFFileInput::PrepareForGlyphIntepretation(	unsigned short inFontIndex,
+EStatusCode CFFFileInput::PrepareForGlyphIntepretation(	unsigned short inFontIndex,
 			 											unsigned short inCharStringIndex)
 {
 	if(inFontIndex >= mFontsCount)
 	{
 		TRACE_LOG2("CFFFileInput::PrepareForGlyphIntepretation, inFontIndex = %d is invalid. there are %d fonts in the CFF segment",inFontIndex,mFontsCount);
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 
 	if(mCharStrings[inFontIndex].mCharStringsCount <= inCharStringIndex)
 	{
 		TRACE_LOG2("CFFFileInput::PrepareForGlyphIntepretation, inCharStringIndex = %d is invalid. there are %d charsringd in the CFF segment for the requested font",
 																														inCharStringIndex,mCharStrings[inFontIndex].mCharStringsCount);
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 
 	if(2 == mCharStrings[inFontIndex].mCharStringsType)
@@ -1049,12 +1051,12 @@ EPDFStatusCode CFFFileInput::PrepareForGlyphIntepretation(	unsigned short inFont
 			mCurrentCharsetInfo = mTopDictIndex[inFontIndex].mCharSet;
 			mCurrentDependencies = NULL;
 		}
-		return ePDFSuccess;
+		return PDFHummus::eSuccess;
 	}
 	else
 	{
 		TRACE_LOG1("CFFFileInput::PrepareForGlyphIntepretation, unsupported charstring format = %d. only type 2 charstrings are supported",mCharStrings[inFontIndex].mCharStringsType);
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 }
 
@@ -1078,11 +1080,11 @@ CharString* CFFFileInput::GetGlyphCharString(unsigned short inFontIndex,
 }
 
 
-EPDFStatusCode CFFFileInput::ReadCharString(	LongFilePositionType inCharStringStart,
+EStatusCode CFFFileInput::ReadCharString(	LongFilePositionType inCharStringStart,
 											LongFilePositionType inCharStringEnd,
 											Byte** outCharString)
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	mPrimitivesReader.SetOffset(inCharStringStart);
 	*outCharString = NULL;
 
@@ -1091,12 +1093,12 @@ EPDFStatusCode CFFFileInput::ReadCharString(	LongFilePositionType inCharStringSt
 		*outCharString = new Byte[(LongBufferSizeType)(inCharStringEnd - inCharStringStart)];
 
 		status = mPrimitivesReader.Read(*outCharString,(LongBufferSizeType)(inCharStringEnd - inCharStringStart));
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 	}while(false);
 
-	if(status != ePDFSuccess && *outCharString)
+	if(status != PDFHummus::eSuccess && *outCharString)
 		delete[] *outCharString;
 
 	return status;
@@ -1144,7 +1146,7 @@ CharString* CFFFileInput::GetGlobalSubr(long inSubrIndex)
 		return NULL;
 }
 
-EPDFStatusCode CFFFileInput::Type2Endchar(const CharStringOperandList& inOperandList)
+EStatusCode CFFFileInput::Type2Endchar(const CharStringOperandList& inOperandList)
 {
 	// i'm using EndChar here to check the depracated usage, which creates
 	// dependency on another charachter. as for finalizing the intepretation, i don't
@@ -1167,13 +1169,13 @@ EPDFStatusCode CFFFileInput::Type2Endchar(const CharStringOperandList& inOperand
 		{
 			mCurrentDependencies->mCharCodes.insert(character1->mIndex);
 			mCurrentDependencies->mCharCodes.insert(character2->mIndex);
-			return ePDFSuccess;
+			return PDFHummus::eSuccess;
 		}	
 		else
-			return ePDFFailure;
+			return PDFHummus::eFailure;
 	}
 
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
 CharString* CFFFileInput::GetCharacterFromStandardEncoding(Byte inCharacterCode)
@@ -1194,24 +1196,24 @@ CharString* CFFFileInput::GetCharacterFromStandardEncoding(Byte inCharacterCode)
 		return NULL;
 }
 
-EPDFStatusCode CFFFileInput::ReadCIDInformation()
+EStatusCode CFFFileInput::ReadCIDInformation()
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
-	for(unsigned short i=0; i < mFontsCount && (ePDFSuccess == status); ++i)
+	for(unsigned short i=0; i < mFontsCount && (PDFHummus::eSuccess == status); ++i)
 	{
 		// CID font will be identified by the existance of the ROS entry
 		if(mTopDictIndex[i].mTopDict.find(scROS) != mTopDictIndex[i].mTopDict.end())
 		{
 			status = ReadFDArray(i);
-			if(status != ePDFSuccess)
+			if(status != PDFHummus::eSuccess)
 			{
 				TRACE_LOG1("CFFFileInput::ReadCIDInformation, unable to read FDArray for font index %d",i);
 				break;
 			}
 
 			status = ReadFDSelect(i);
-			if(status != ePDFSuccess)
+			if(status != PDFHummus::eSuccess)
 			{
 				TRACE_LOG1("CFFFileInput::ReadCIDInformation, unable to read FDSelect for font index %d",i);
 				break;
@@ -1223,24 +1225,24 @@ EPDFStatusCode CFFFileInput::ReadCIDInformation()
 	return status;
 }
 
-EPDFStatusCode CFFFileInput::ReadFDArray(unsigned short inFontIndex)
+EStatusCode CFFFileInput::ReadFDArray(unsigned short inFontIndex)
 {
 	LongFilePositionType fdArrayLocation = GetFDArrayPosition(inFontIndex);
 
 	// supposed to get here only for CIDs. and they must have an FDArray...so if it doesn't - fail
 	if(0 == fdArrayLocation)
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 
 	mPrimitivesReader.SetOffset(fdArrayLocation);
 	
 	unsigned long* offsets;
 	unsigned short dictionariesCount;
 	unsigned short i;
-	EPDFStatusCode status = ReadIndexHeader(&offsets,dictionariesCount);
+	EStatusCode status = ReadIndexHeader(&offsets,dictionariesCount);
 	
 	do
 	{
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		if(offsets[0] != 1)
@@ -1248,11 +1250,11 @@ EPDFStatusCode CFFFileInput::ReadFDArray(unsigned short inFontIndex)
 
 		mTopDictIndex[inFontIndex].mFDArray = new FontDictInfo[dictionariesCount];
 
-		for(i = 0; i < dictionariesCount && (ePDFSuccess == status); ++i)
+		for(i = 0; i < dictionariesCount && (PDFHummus::eSuccess == status); ++i)
 		{
 			mTopDictIndex[inFontIndex].mFDArray[i].mFontDictStart = mPrimitivesReader.GetCurrentPosition();
 			status = ReadDict(offsets[i+1] - offsets[i],mTopDictIndex[inFontIndex].mFDArray[i].mFontDict);
-			if(status != ePDFSuccess)
+			if(status != PDFHummus::eSuccess)
 			{
 				TRACE_LOG("CFFFileInput::ReadFDArray, failed to read FDArray");
 				break;
@@ -1261,10 +1263,10 @@ EPDFStatusCode CFFFileInput::ReadFDArray(unsigned short inFontIndex)
 		}
 
 		// another loop for reading the privates [should be one per font dict]. make sure to get their font subrs reference right
-		for(i = 0; i < dictionariesCount && (ePDFSuccess == status); ++i)
+		for(i = 0; i < dictionariesCount && (PDFHummus::eSuccess == status); ++i)
 		{
 			status = ReadPrivateDict(mTopDictIndex[inFontIndex].mFDArray[i].mFontDict,&(mTopDictIndex[inFontIndex].mFDArray[i].mPrivateDict));
-			if(ePDFSuccess == status)
+			if(PDFHummus::eSuccess == status)
 				status = ReadLocalSubrsForPrivateDict(&(mTopDictIndex[inFontIndex].mFDArray[i].mPrivateDict),(Byte)GetCharStringType(inFontIndex));
 				
 		}
@@ -1272,7 +1274,7 @@ EPDFStatusCode CFFFileInput::ReadFDArray(unsigned short inFontIndex)
 	}while(false);
 
 	delete[] offsets;
-	if(status != ePDFSuccess)
+	if(status != PDFHummus::eSuccess)
 		return status;
 	else
 		return mPrimitivesReader.GetInternalState();
@@ -1285,16 +1287,16 @@ LongFilePositionType CFFFileInput::GetFDArrayPosition(unsigned short inFontIndex
 	return GetSingleIntegerValue(inFontIndex,scFDArray,0);
 }
 
-EPDFStatusCode CFFFileInput::ReadFDSelect(unsigned short inFontIndex)
+EStatusCode CFFFileInput::ReadFDSelect(unsigned short inFontIndex)
 {
 	LongFilePositionType fdSelectLocation = GetFDSelectPosition(inFontIndex);
 	unsigned short glyphCount = mCharStrings[inFontIndex].mCharStringsCount;
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	Byte format;
 
 	// supposed to get here only for CIDs. and they must have an FDSelect...so if it doesn't - fail
 	if(0 == fdSelectLocation)
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 
 	mTopDictIndex[inFontIndex].mFDSelect = new FontDictInfo*[glyphCount];
 	mPrimitivesReader.SetOffset(fdSelectLocation);
@@ -1304,10 +1306,10 @@ EPDFStatusCode CFFFileInput::ReadFDSelect(unsigned short inFontIndex)
 	{
 		Byte fdIndex;
 
-		for(unsigned short i=0; i < glyphCount && ePDFSuccess == status; ++i)
+		for(unsigned short i=0; i < glyphCount && PDFHummus::eSuccess == status; ++i)
 		{
 			status = mPrimitivesReader.ReadCard8(fdIndex);
-			if(status != ePDFFailure)
+			if(status != PDFHummus::eFailure)
 				mTopDictIndex[inFontIndex].mFDSelect[i] = mTopDictIndex[inFontIndex].mFDArray+ fdIndex;
 		}
 	}
@@ -1319,16 +1321,16 @@ EPDFStatusCode CFFFileInput::ReadFDSelect(unsigned short inFontIndex)
 		Byte fdIndex;
 
 		status = mPrimitivesReader.ReadCard16(rangesCount);
-		if(status != ePDFFailure)
+		if(status != PDFHummus::eFailure)
 		{
 			unsigned short glyphIndex = 0;
 			status = mPrimitivesReader.ReadCard16(firstGlyphIndex);
-			for(unsigned short i=0; i < rangesCount && ePDFSuccess == status;++i)
+			for(unsigned short i=0; i < rangesCount && PDFHummus::eSuccess == status;++i)
 			{
 				mPrimitivesReader.ReadCard8(fdIndex);
 				mPrimitivesReader.ReadCard16(nextRangeGlyphIndex);
 				status = mPrimitivesReader.GetInternalState();
-				if(status != ePDFFailure)
+				if(status != PDFHummus::eFailure)
 					for(unsigned short j=firstGlyphIndex; j < nextRangeGlyphIndex;++j)
 						mTopDictIndex[inFontIndex].mFDSelect[j] = 
 							mTopDictIndex[inFontIndex].mFDArray + fdIndex;
@@ -1337,7 +1339,7 @@ EPDFStatusCode CFFFileInput::ReadFDSelect(unsigned short inFontIndex)
 		}
 	}
 
-	if(status != ePDFSuccess)
+	if(status != PDFHummus::eSuccess)
 		return status;
 	else
 		return mPrimitivesReader.GetInternalState();
@@ -1350,10 +1352,10 @@ LongFilePositionType CFFFileInput::GetFDSelectPosition(unsigned short inFontInde
 }
 
 
-EPDFStatusCode CFFFileInput::ReadCFFFileByIndexOrName(IByteReaderWithPosition* inCFFFile,const string& inFontName,unsigned short inFontIndex)
+EStatusCode CFFFileInput::ReadCFFFileByIndexOrName(IByteReaderWithPosition* inCFFFile,const string& inFontName,unsigned short inFontIndex)
 {
 	// read either by font name or index. read by font name if not empty, otherwise by index
-	EPDFStatusCode status;
+	EStatusCode status;
 	unsigned short fontIndex;
 
 	do
@@ -1363,7 +1365,7 @@ EPDFStatusCode CFFFileInput::ReadCFFFileByIndexOrName(IByteReaderWithPosition* i
 		mCFFOffset = inCFFFile->GetCurrentPosition();
 
 		status = ReadHeader();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFFileInput::ReadCFFFile, Failed to read header");
 			break;
@@ -1374,7 +1376,7 @@ EPDFStatusCode CFFFileInput::ReadCFFFileByIndexOrName(IByteReaderWithPosition* i
 			mPrimitivesReader.Skip(mHeader.hdrSize - 4);
 
 		status = ReadNameIndex();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFFileInput::ReadCFFFile Failed to read name");
 			break;
@@ -1405,63 +1407,63 @@ EPDFStatusCode CFFFileInput::ReadCFFFileByIndexOrName(IByteReaderWithPosition* i
 		}		
 
 		status = ReadTopDictIndex(fontIndex);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFFileInput::ReadCFFFile failed to read top index");
 			break;
 		}
 
 		status = ReadStringIndex();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFFileInput::ReadCFFFile failed to read top index");
 			break;
 		}
 
 		status = ReadGlobalSubrs();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFFileInput::ReadCFFFile failed to read global subrs");
 			break;
 		}
 
 		status = ReadCharStrings(fontIndex);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFFileInput::ReadCFFFile failed to read charstrings");
 			break;
 		}
 
 		status = ReadPrivateDicts(fontIndex);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFFileInput::ReadCFFFile failed to read charstrings");
 			break;
 		}
 
 		status = ReadLocalSubrs(fontIndex);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFFileInput::ReadCFFFile failed to read local subrs");
 			break;
 		}
 
 		status = ReadCharsets(fontIndex);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFFileInput::ReadCFFFile failed to read char set");
 			break;
 		}
 
 		status = ReadEncodings(fontIndex);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFFileInput::ReadCFFFile failed to read encodings");
 			break;
 		}
 		
 		status = ReadCIDInformation();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFFileInput::ReadCFFFile failed to read CID Information");
 			break;
@@ -1471,7 +1473,7 @@ EPDFStatusCode CFFFileInput::ReadCFFFileByIndexOrName(IByteReaderWithPosition* i
 	return status;
 }
 
-EPDFStatusCode CFFFileInput::ReadTopDictIndex(unsigned short inFontIndex)
+EStatusCode CFFFileInput::ReadTopDictIndex(unsigned short inFontIndex)
 {
 	mTopDictIndexPosition = mPrimitivesReader.GetCurrentPosition();
 
@@ -1479,11 +1481,11 @@ EPDFStatusCode CFFFileInput::ReadTopDictIndex(unsigned short inFontIndex)
 	
 	unsigned long* offsets;
 	unsigned short dictionariesCount;
-	EPDFStatusCode status = ReadIndexHeader(&offsets,dictionariesCount);
+	EStatusCode status = ReadIndexHeader(&offsets,dictionariesCount);
 	
 	do
 	{
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		// allocate all, but read just the required font
@@ -1495,17 +1497,17 @@ EPDFStatusCode CFFFileInput::ReadTopDictIndex(unsigned short inFontIndex)
 	}while(false);
 
 	delete[] offsets;
-	if(status != ePDFSuccess)
+	if(status != PDFHummus::eSuccess)
 		return status;
 	else
 		return mPrimitivesReader.GetInternalState();
 }
 
-EPDFStatusCode CFFFileInput::ReadCharStrings(unsigned short inFontIndex)
+EStatusCode CFFFileInput::ReadCharStrings(unsigned short inFontIndex)
 {
 	// allocate all, but read just the required one
 	mCharStrings = new CharStrings[mFontsCount];
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
 	LongFilePositionType  charStringsPosition = GetCharStringsPosition(inFontIndex);	
 	mCharStrings[inFontIndex].mCharStringsType = (Byte)GetCharStringType(inFontIndex);
@@ -1516,34 +1518,34 @@ EPDFStatusCode CFFFileInput::ReadCharStrings(unsigned short inFontIndex)
 									&(mCharStrings[inFontIndex].mCharStringsIndex));
 	}
 
-	if(status != ePDFSuccess)
+	if(status != PDFHummus::eSuccess)
 		return status;
 	else
 		return mPrimitivesReader.GetInternalState();
 }
 
-EPDFStatusCode CFFFileInput::ReadPrivateDicts(unsigned short inFontIndex)
+EStatusCode CFFFileInput::ReadPrivateDicts(unsigned short inFontIndex)
 {
 	// allocate all (to maintain indexing...whatever), but read just the relevant font dict
 	mPrivateDicts = new PrivateDictInfo[mFontsCount];
-	EPDFStatusCode status = ReadPrivateDict(mTopDictIndex[inFontIndex].mTopDict,mPrivateDicts + inFontIndex);
+	EStatusCode status = ReadPrivateDict(mTopDictIndex[inFontIndex].mTopDict,mPrivateDicts + inFontIndex);
 
-	if(status != ePDFSuccess)
+	if(status != PDFHummus::eSuccess)
 		return status;
 	else
 		return mPrimitivesReader.GetInternalState();	
 }
 
-EPDFStatusCode CFFFileInput::ReadLocalSubrs(unsigned short inFontIndex)
+EStatusCode CFFFileInput::ReadLocalSubrs(unsigned short inFontIndex)
 {
 	// read just the localsubrs of the font private dict
 	return ReadLocalSubrsForPrivateDict(mPrivateDicts+inFontIndex,(Byte)GetCharStringType(inFontIndex));
 }
 
-EPDFStatusCode CFFFileInput::ReadCharsets(unsigned short inFontIndex)
+EStatusCode CFFFileInput::ReadCharsets(unsigned short inFontIndex)
 {
 	// read all charsets
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
 	LongFilePositionType charsetPosition = GetCharsetPosition(inFontIndex);
 	CharSetInfo* charSet = new CharSetInfo();
@@ -1581,14 +1583,14 @@ EPDFStatusCode CFFFileInput::ReadCharsets(unsigned short inFontIndex)
 	mCharSets.push_back(charSet);
 	mTopDictIndex[inFontIndex].mCharSet = charSet;
 
-	if(status != ePDFSuccess)
+	if(status != PDFHummus::eSuccess)
 		return status;
 	else
 		return mPrimitivesReader.GetInternalState();
 }
 
 
-EPDFStatusCode CFFFileInput::ReadEncodings(unsigned short inFontIndex)
+EStatusCode CFFFileInput::ReadEncodings(unsigned short inFontIndex)
 {
 	// read all encodings positions
 	LongFilePositionType encodingPosition = GetEncodingPosition(inFontIndex);
@@ -1602,9 +1604,9 @@ EPDFStatusCode CFFFileInput::ReadEncodings(unsigned short inFontIndex)
 
 }
 
-EPDFStatusCode CFFFileInput::ReadCIDInformation(unsigned short inFontIndex)
+EStatusCode CFFFileInput::ReadCIDInformation(unsigned short inFontIndex)
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
 	// CID font will be identified by the existance of the ROS entry
 	if(mTopDictIndex[inFontIndex].mTopDict.find(scROS) != mTopDictIndex[inFontIndex].mTopDict.end())
@@ -1612,14 +1614,14 @@ EPDFStatusCode CFFFileInput::ReadCIDInformation(unsigned short inFontIndex)
 		do
 		{
 			status = ReadFDArray(inFontIndex);
-			if(status != ePDFSuccess)
+			if(status != PDFHummus::eSuccess)
 			{
 				TRACE_LOG1("CFFFileInput::ReadCIDInformation, unable to read FDArray for font index %d",inFontIndex);
 				break;
 			}
 
 			status = ReadFDSelect(inFontIndex);
-			if(status != ePDFSuccess)
+			if(status != PDFHummus::eSuccess)
 			{
 				TRACE_LOG1("CFFFileInput::ReadCIDInformation, unable to read FDSelect for font index %d",inFontIndex);
 				break;
@@ -1630,12 +1632,12 @@ EPDFStatusCode CFFFileInput::ReadCIDInformation(unsigned short inFontIndex)
 }
 
 
-EPDFStatusCode CFFFileInput::ReadCFFFile(IByteReaderWithPosition* inCFFFile,unsigned short inFontIndex)
+EStatusCode CFFFileInput::ReadCFFFile(IByteReaderWithPosition* inCFFFile,unsigned short inFontIndex)
 {
 	return ReadCFFFileByIndexOrName(inCFFFile,"",inFontIndex);
 }
 
-EPDFStatusCode CFFFileInput::ReadCFFFile(IByteReaderWithPosition* inCFFFile,const string& inFontName)
+EStatusCode CFFFileInput::ReadCFFFile(IByteReaderWithPosition* inCFFFile,const string& inFontName)
 {
 	return ReadCFFFileByIndexOrName(inCFFFile,inFontName,0);
 }

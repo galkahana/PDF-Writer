@@ -2,7 +2,7 @@
    Source File : SimpleTextUsage.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,13 +19,15 @@
    
 */
 #include "SimpleTextUsage.h"
-#include "HummusPDFWriter.h"
+#include "PDFWriter.h"
 #include "PDFPage.h"
 #include "PDFRectangle.h"
 #include "PageContentContext.h"
 #include "TestsRunner.h"
 
 #include <iostream>
+
+using namespace PDFHummus;
 
 SimpleTextUsage::SimpleTextUsage(void)
 {
@@ -38,33 +40,33 @@ SimpleTextUsage::~SimpleTextUsage(void)
 
 
 #include "Trace.h"
-EPDFStatusCode SimpleTextUsage::Run()
+EStatusCode SimpleTextUsage::Run()
 {
-	EPDFStatusCode status;
+	EStatusCode status;
 
 	do
 	{
 		status = RunCFFTest();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"Failed CFF Test\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
 		status = RunTrueTypeTest();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"Failed True Type Test\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
 		status = RunType1Test();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"Failed Type 1 Test\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -73,15 +75,15 @@ EPDFStatusCode SimpleTextUsage::Run()
 	return status;
 }
 
-EPDFStatusCode SimpleTextUsage::RunCFFTest()
+EStatusCode SimpleTextUsage::RunCFFTest()
 {
-	HummusPDFWriter pdfWriter;
-	EPDFStatusCode status; 
+	PDFWriter pdfWriter;
+	EStatusCode status; 
 
 	do
 	{
 		status = pdfWriter.StartPDF("C:\\PDFLibTests\\SimpleTextUsageCFF.PDF",ePDFVersion13,LogConfiguration(true,true,"C:\\PDFLibTests\\SimpleTextUsage.log"));
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
 			break;
@@ -93,7 +95,7 @@ EPDFStatusCode SimpleTextUsage::RunCFFTest()
 		PageContentContext* contentContext = pdfWriter.StartPageContentContext(page);
 		if(NULL == contentContext)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			cout<<"failed to create content context for page\n";
 			break;
 		}
@@ -101,7 +103,7 @@ EPDFStatusCode SimpleTextUsage::RunCFFTest()
 		PDFUsedFont* font = pdfWriter.GetFontForFile("C:\\PDFLibTests\\TestMaterials\\fonts\\BrushScriptStd.otf");
 		if(!font)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			cout<<"Failed to create font object for brushscriptstd.otf\n";
 			break;
 		}
@@ -114,8 +116,8 @@ EPDFStatusCode SimpleTextUsage::RunCFFTest()
 
 		contentContext->Tm(30,0,0,30,78.4252,662.8997);
 
-		EPDFStatusCode encodingStatus = contentContext->Tj("abcd");
-		if(encodingStatus != ePDFSuccess)
+		EStatusCode encodingStatus = contentContext->Tj("abcd");
+		if(encodingStatus != PDFHummus::eSuccess)
 			cout<<"Could not find some of the glyphs for this font (BrushScriptStd)";
 
 		// continue even if failed...want to see how it looks like
@@ -128,7 +130,7 @@ EPDFStatusCode SimpleTextUsage::RunCFFTest()
 		PDFUsedFont* fontK = pdfWriter.GetFontForFile("C:\\PDFLibTests\\TestMaterials\\fonts\\KozGoPro-Regular.otf");
 		if(!fontK)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			cout<<"Failed to create font object for KozGoPro-Regular.otf\n";
 			break;
 		}
@@ -138,28 +140,28 @@ EPDFStatusCode SimpleTextUsage::RunCFFTest()
 		contentContext->Tm(30,0,0,30,78.4252,400.8997);
 
 		encodingStatus = contentContext->Tj("abcd");
-		if(encodingStatus != ePDFSuccess)
+		if(encodingStatus != PDFHummus::eSuccess)
 			cout<<"Could not find some of the glyphs for this font (Kozuka)";
 
 		// continue even if failed...want to see how it looks like
 		contentContext->ET();
 
 		status = pdfWriter.EndPageContentContext(contentContext);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to write page\n";
 			break;
 		}
 
 		status = pdfWriter.EndPDF();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed in end PDF\n";
 			break;
@@ -169,15 +171,15 @@ EPDFStatusCode SimpleTextUsage::RunCFFTest()
 
 }
 
-EPDFStatusCode SimpleTextUsage::RunTrueTypeTest()
+EStatusCode SimpleTextUsage::RunTrueTypeTest()
 {
-	HummusPDFWriter pdfWriter;
-	EPDFStatusCode status; 
+	PDFWriter pdfWriter;
+	EStatusCode status; 
 
 	do
 	{
 		status = pdfWriter.StartPDF("C:\\PDFLibTests\\SimpleTextUsageTrueType.PDF",ePDFVersion13,LogConfiguration(true,true,"C:\\PDFLibTests\\SimpleTextUsage.log"));
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
 			break;
@@ -189,7 +191,7 @@ EPDFStatusCode SimpleTextUsage::RunTrueTypeTest()
 		PageContentContext* contentContext = pdfWriter.StartPageContentContext(page);
 		if(NULL == contentContext)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			cout<<"failed to create content context for page\n";
 			break;
 		}
@@ -197,7 +199,7 @@ EPDFStatusCode SimpleTextUsage::RunTrueTypeTest()
 		PDFUsedFont* font = pdfWriter.GetFontForFile("C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
 		if(!font)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			cout<<"Failed to create font object for arial.ttf\n";
 			break;
 		}
@@ -211,29 +213,29 @@ EPDFStatusCode SimpleTextUsage::RunTrueTypeTest()
 
 		contentContext->Tm(30,0,0,30,78.4252,662.8997);
 
-		EPDFStatusCode encodingStatus = contentContext->Tj("hello world");
-		if(encodingStatus != ePDFSuccess)
+		EStatusCode encodingStatus = contentContext->Tj("hello world");
+		if(encodingStatus != PDFHummus::eSuccess)
 			cout<<"Could not find some of the glyphs for this font";
 
 		// continue even if failed...want to see how it looks like
 		contentContext->ET();
 
 		status = pdfWriter.EndPageContentContext(contentContext);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to write page\n";
 			break;
 		}
 
 		status = pdfWriter.EndPDF();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed in end PDF\n";
 			break;
@@ -242,15 +244,15 @@ EPDFStatusCode SimpleTextUsage::RunTrueTypeTest()
 	return status;	
 }
 
-EPDFStatusCode SimpleTextUsage::RunType1Test()
+EStatusCode SimpleTextUsage::RunType1Test()
 {
-	HummusPDFWriter pdfWriter;
-	EPDFStatusCode status; 
+	PDFWriter pdfWriter;
+	EStatusCode status; 
 
 	do
 	{
 		status = pdfWriter.StartPDF("C:\\PDFLibTests\\SimpleTextUsageType1.PDF",ePDFVersion13,LogConfiguration(true,true,"C:\\PDFLibTests\\SimpleTextUsage.log"));
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
 			break;
@@ -262,7 +264,7 @@ EPDFStatusCode SimpleTextUsage::RunType1Test()
 		PageContentContext* contentContext = pdfWriter.StartPageContentContext(page);
 		if(NULL == contentContext)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			cout<<"failed to create content context for page\n";
 			break;
 		}
@@ -271,7 +273,7 @@ EPDFStatusCode SimpleTextUsage::RunType1Test()
 													 "C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFM");
 		if(!font)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			cout<<"Failed to create font object for Helvetica Neue font\n";
 			break;
 		}
@@ -285,29 +287,29 @@ EPDFStatusCode SimpleTextUsage::RunType1Test()
 
 		contentContext->Tm(30,0,0,30,78.4252,662.8997);
 
-		EPDFStatusCode encodingStatus = contentContext->Tj("abcd");
-		if(encodingStatus != ePDFSuccess)
+		EStatusCode encodingStatus = contentContext->Tj("abcd");
+		if(encodingStatus != PDFHummus::eSuccess)
 			cout<<"Could not find some of the glyphs for this font";
 
 		// continue even if failed...want to see how it looks like
 		contentContext->ET();
 
 		status = pdfWriter.EndPageContentContext(contentContext);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to write page\n";
 			break;
 		}
 
 		status = pdfWriter.EndPDF();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed in end PDF\n";
 			break;

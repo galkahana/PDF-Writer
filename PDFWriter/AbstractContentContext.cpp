@@ -28,6 +28,8 @@
 #include "OutputStringBufferStream.h"
 #include "SafeBufferMacrosDefs.h"
 
+using namespace PDFHummus;
+
 AbstractContentContext::AbstractContentContext(void)
 {
 }
@@ -220,7 +222,7 @@ void AbstractContentContext::q()
 	mGraphicStack.Push();
 }
 
-EPDFStatusCode AbstractContentContext::Q()
+EStatusCode AbstractContentContext::Q()
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
@@ -752,20 +754,20 @@ public:
 	virtual void WriteLiteralStringCommand(const string& inStringToWrite) = 0;
 };
 
-EPDFStatusCode AbstractContentContext::WriteTextCommandWithEncoding(const string& inUnicodeText,ITextCommand* inTextCommand)
+EStatusCode AbstractContentContext::WriteTextCommandWithEncoding(const string& inUnicodeText,ITextCommand* inTextCommand)
 {
 	PDFUsedFont* currentFont = mGraphicStack.GetCurrentState().mFont;
 	if(!currentFont)
 	{
 		TRACE_LOG("AbstractContentContext::WriteTextCommandWithEncoding, Cannot write text, no current font is defined");
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 
 	GlyphUnicodeMappingList glyphsAndUnicode;
-	EPDFStatusCode encodingStatus = currentFont->TranslateStringToGlyphs(inUnicodeText,glyphsAndUnicode);
+	EStatusCode encodingStatus = currentFont->TranslateStringToGlyphs(inUnicodeText,glyphsAndUnicode);
 
 	// encoding returns false if was unable to encode some of the glyphs. will display as missing characters
-	if(encodingStatus != ePDFSuccess)
+	if(encodingStatus != PDFHummus::eSuccess)
 		TRACE_LOG("AbstractContextContext::WriteTextCommandWithEncoding, was unable to find glyphs for all characters, some will appear as missing");
 
 
@@ -783,7 +785,7 @@ private:
 	AbstractContentContext* mContext;
 };
 
-EPDFStatusCode AbstractContentContext::Tj(const string& inText)
+EStatusCode AbstractContentContext::Tj(const string& inText)
 {
 	TjCommand command(this);
 	return WriteTextCommandWithEncoding(inText,&command);
@@ -800,7 +802,7 @@ private:
 	AbstractContentContext* mContext;
 };
 
-EPDFStatusCode AbstractContentContext::Quote(const string& inText)
+EStatusCode AbstractContentContext::Quote(const string& inText)
 {
 	QuoteCommand command(this);
 	return WriteTextCommandWithEncoding(inText,&command);
@@ -821,24 +823,24 @@ private:
 	double mCharacterSpacing;
 };
 
-EPDFStatusCode AbstractContentContext::DoubleQuote(double inWordSpacing, double inCharacterSpacing, const string& inText)
+EStatusCode AbstractContentContext::DoubleQuote(double inWordSpacing, double inCharacterSpacing, const string& inText)
 {
 	DoubleQuoteCommand command(this,inWordSpacing,inCharacterSpacing);
 	return WriteTextCommandWithEncoding(inText,&command);
 }
 
-EPDFStatusCode AbstractContentContext::TJ(const StringOrDoubleList& inStringsAndSpacing)
+EStatusCode AbstractContentContext::TJ(const StringOrDoubleList& inStringsAndSpacing)
 {
 	PDFUsedFont* currentFont = mGraphicStack.GetCurrentState().mFont;
 	if(!currentFont)
 	{
 		TRACE_LOG("AbstractContentContext::TJ, Cannot write text, no current font is defined");
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 
 	StringOrDoubleList::const_iterator it = inStringsAndSpacing.begin();
 	GlyphUnicodeMappingListOrDoubleList parameters;
-	EPDFStatusCode encodingStatus;
+	EStatusCode encodingStatus;
 	
 	for(; it != inStringsAndSpacing.end();++it)
 	{
@@ -852,7 +854,7 @@ EPDFStatusCode AbstractContentContext::TJ(const StringOrDoubleList& inStringsAnd
 			encodingStatus = currentFont->TranslateStringToGlyphs(it->SomeValue,glyphsAndUnicode);
 
 			// encoding returns false if was unable to encode some of the glyphs. will display as missing characters
-			if(encodingStatus != ePDFSuccess)
+			if(encodingStatus != PDFHummus::eSuccess)
 				TRACE_LOG("AbstractContextContext::TJ, was unable to find glyphs for all characters, some will appear as missing");
 			parameters.push_back(GlyphUnicodeMappingListOrDouble(glyphsAndUnicode));
 		}
@@ -861,29 +863,29 @@ EPDFStatusCode AbstractContentContext::TJ(const StringOrDoubleList& inStringsAnd
 	return TJ(parameters);
 }
 
-EPDFStatusCode AbstractContentContext::Tj(const GlyphUnicodeMappingList& inText)
+EStatusCode AbstractContentContext::Tj(const GlyphUnicodeMappingList& inText)
 {
 	TjCommand command(this);
 	return WriteTextCommandWithDirectGlyphSelection(inText,&command);
 }
 
-EPDFStatusCode AbstractContentContext::WriteTextCommandWithDirectGlyphSelection(const GlyphUnicodeMappingList& inText,ITextCommand* inTextCommand)
+EStatusCode AbstractContentContext::WriteTextCommandWithDirectGlyphSelection(const GlyphUnicodeMappingList& inText,ITextCommand* inTextCommand)
 {
 	PDFUsedFont* currentFont = mGraphicStack.GetCurrentState().mFont;
 	if(!currentFont)
 	{
 		TRACE_LOG("AbstractContentContext::WriteTextCommandWithDirectGlyphSelection, Cannot write text, no current font is defined");
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 
 	ObjectIDType fontObjectID;
 	UShortList encodedCharachtersList;
 	bool writeAsCID;	
 
-	if(currentFont->EncodeStringForShowing(inText,fontObjectID,encodedCharachtersList,writeAsCID) != ePDFSuccess)
+	if(currentFont->EncodeStringForShowing(inText,fontObjectID,encodedCharachtersList,writeAsCID) != PDFHummus::eSuccess)
 	{
 		TRACE_LOG("AbstractcontextContext::WriteTextCommandWithDirectGlyphSelection, Unexepcted failure, Cannot encode characters");
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 	
 
@@ -916,28 +918,28 @@ EPDFStatusCode AbstractContentContext::WriteTextCommandWithDirectGlyphSelection(
 		}
 		inTextCommand->WriteLiteralStringCommand(stringStream.ToString());	
 	}
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode AbstractContentContext::Quote(const GlyphUnicodeMappingList& inText)
+EStatusCode AbstractContentContext::Quote(const GlyphUnicodeMappingList& inText)
 {
 	QuoteCommand command(this);
 	return WriteTextCommandWithDirectGlyphSelection(inText,&command);
 }
 
-EPDFStatusCode AbstractContentContext::DoubleQuote(double inWordSpacing, double inCharacterSpacing, const GlyphUnicodeMappingList& inText)
+EStatusCode AbstractContentContext::DoubleQuote(double inWordSpacing, double inCharacterSpacing, const GlyphUnicodeMappingList& inText)
 {
 	DoubleQuoteCommand command(this,inWordSpacing,inCharacterSpacing);
 	return WriteTextCommandWithDirectGlyphSelection(inText,&command);
 }
 
-EPDFStatusCode AbstractContentContext::TJ(const GlyphUnicodeMappingListOrDoubleList& inStringsAndSpacing)
+EStatusCode AbstractContentContext::TJ(const GlyphUnicodeMappingListOrDoubleList& inStringsAndSpacing)
 {
 	PDFUsedFont* currentFont = mGraphicStack.GetCurrentState().mFont;
 	if(!currentFont)
 	{
 		TRACE_LOG("AbstractContentContext::TJ, Cannot write text, no current font is defined");
-		return ePDFSuccess;
+		return PDFHummus::eSuccess;
 	}
 
 	// TJ is a bit different. i want to encode all strings in the array to the same font, so that at most a single
@@ -958,10 +960,10 @@ EPDFStatusCode AbstractContentContext::TJ(const GlyphUnicodeMappingListOrDoubleL
 	UShortListList encodedCharachtersListsList;
 	bool writeAsCID;	
 
-	if(currentFont->EncodeStringsForShowing(stringsList,fontObjectID,encodedCharachtersListsList,writeAsCID)!= ePDFSuccess)
+	if(currentFont->EncodeStringsForShowing(stringsList,fontObjectID,encodedCharachtersListsList,writeAsCID)!= PDFHummus::eSuccess)
 	{
 		TRACE_LOG("AbstractContentContext::TJ, Unexepcted failure, cannot include characters for writing final representation");
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 	
 	// status only returns if strings can be coded or not. so continue with writing regardless
@@ -1025,5 +1027,5 @@ EPDFStatusCode AbstractContentContext::TJ(const GlyphUnicodeMappingListOrDoubleL
 		}
 		TJLow(stringOrDoubleList);
 	}
-	return ePDFSuccess;	
+	return PDFHummus::eSuccess;	
 }

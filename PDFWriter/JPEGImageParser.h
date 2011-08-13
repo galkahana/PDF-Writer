@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include "IOBasicTypes.h"
 
 struct JPEGImageInformation;
@@ -32,39 +32,39 @@ public:
 	JPEGImageParser(void);
 	~JPEGImageParser(void);
 
-	EPDFStatusCode Parse(IByteReaderWithPosition* inImageStream,JPEGImageInformation& outImageInformation);
+	PDFHummus::EStatusCode Parse(IByteReaderWithPosition* inImageStream,JPEGImageInformation& outImageInformation);
 
 private:
 
 	IByteReaderWithPosition* mImageStream;
 	IOBasicTypes::Byte mReadBuffer[500];
 
-	EPDFStatusCode ReadJPEGID();
-	EPDFStatusCode ReadStreamToBuffer(unsigned long inAmountToRead);
-	EPDFStatusCode ReadJpegTag(unsigned int& outTagID);
-	EPDFStatusCode ReadSOF0Data(JPEGImageInformation& outImageInformation);
+	PDFHummus::EStatusCode ReadJPEGID();
+	PDFHummus::EStatusCode ReadStreamToBuffer(unsigned long inAmountToRead);
+	PDFHummus::EStatusCode ReadJpegTag(unsigned int& outTagID);
+	PDFHummus::EStatusCode ReadSOF0Data(JPEGImageInformation& outImageInformation);
 	unsigned int GetIntValue(const IOBasicTypes::Byte* inBuffer,
 							 bool inUseLittleEndian = false);
 	void SkipStream(unsigned long inSkip);
-	EPDFStatusCode ReadJFIFData(JPEGImageInformation& outImageInformation);
-	EPDFStatusCode ReadPhotoshopData(JPEGImageInformation& outImageInformation);
-	EPDFStatusCode ReadExifData(JPEGImageInformation& outImageInformation);
-	EPDFStatusCode GetResolutionFromExif(	JPEGImageInformation& outImageInformation,
+	PDFHummus::EStatusCode ReadJFIFData(JPEGImageInformation& outImageInformation);
+	PDFHummus::EStatusCode ReadPhotoshopData(JPEGImageInformation& outImageInformation);
+	PDFHummus::EStatusCode ReadExifData(JPEGImageInformation& outImageInformation);
+	PDFHummus::EStatusCode GetResolutionFromExif(	JPEGImageInformation& outImageInformation,
 									   unsigned long inXResolutionOffset,
 									   unsigned long inYResolutionOffset,
 									   unsigned long& inoutOffset,
 									   bool inUseLittleEndian);
-	EPDFStatusCode ReadRationalValue(double& outDoubleValue,
+	PDFHummus::EStatusCode ReadRationalValue(double& outDoubleValue,
 								  bool inUseLittleEndian);
-	EPDFStatusCode ReadExifID();
-	EPDFStatusCode IsBigEndianExif(bool& outIsBigEndian);
-	EPDFStatusCode ReadIntValue(	unsigned int& outIntValue,
+	PDFHummus::EStatusCode ReadExifID();
+	PDFHummus::EStatusCode IsBigEndianExif(bool& outIsBigEndian);
+	PDFHummus::EStatusCode ReadIntValue(	unsigned int& outIntValue,
 								bool inUseLittleEndian = false);
-	EPDFStatusCode SkipTillChar(IOBasicTypes::Byte inSkipUntilValue,unsigned long& refSkipLimit);
-	EPDFStatusCode ReadLongValue(	unsigned long& outLongValue,
+	PDFHummus::EStatusCode SkipTillChar(IOBasicTypes::Byte inSkipUntilValue,unsigned long& refSkipLimit);
+	PDFHummus::EStatusCode ReadLongValue(	unsigned long& outLongValue,
 								bool inUseLittleEndian = false);
 	unsigned long GetLongValue(	const IOBasicTypes::Byte* inBuffer,
 								bool inUseLittleEndian);
 	double GetFractValue(const IOBasicTypes::Byte* inBuffer);
-	EPDFStatusCode SkipTag();
+	PDFHummus::EStatusCode SkipTag();
 };

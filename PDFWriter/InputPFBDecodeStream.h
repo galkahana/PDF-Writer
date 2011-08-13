@@ -25,7 +25,7 @@
 	more trivial, not requiring to keep track on which area one's in.
 */
 
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include "IByteReader.h"
 
 #include <utility>
@@ -36,7 +36,7 @@ using namespace IOBasicTypes;
 
 class InputPFBDecodeStream;
 
-typedef EPDFStatusCode (*DecodeMethod)(
+typedef PDFHummus::EStatusCode (*DecodeMethod)(
 	InputPFBDecodeStream* inThis,
 	Byte& outByte 
  );
@@ -51,7 +51,7 @@ public:
 
 	// Assign will set the stream to decode. it also takes ownership of the stream. if you
 	// don't want the ownership make sure to Assign(NULL) when done using the decoder.
-	EPDFStatusCode Assign(IByteReader* inStreamToDecode);
+	PDFHummus::EStatusCode Assign(IByteReader* inStreamToDecode);
 	
 	// IByteReader implementation
 	virtual LongBufferSizeType Read(Byte* inBuffer,LongBufferSizeType inBufferSize);
@@ -68,11 +68,11 @@ public:
 	// will stop tokenizer as well
 	void SkipTillToken();
 
-	EPDFStatusCode GetInternalState();
+	PDFHummus::EStatusCode GetInternalState();
 
 	// internal usage.
-	EPDFStatusCode ReadDecodedByte(Byte& outByte);
-	EPDFStatusCode ReadRegularByte(Byte& outByte);
+	PDFHummus::EStatusCode ReadDecodedByte(Byte& outByte);
+	PDFHummus::EStatusCode ReadRegularByte(Byte& outByte);
 
 private:
 	IByteReader* mStreamToDecode;
@@ -86,20 +86,20 @@ private:
 	bool mFoundEOF;
 	
 	// error flag. if set, will not allow further reading
-	EPDFStatusCode mInternalState; 
+	PDFHummus::EStatusCode mInternalState; 
 
 	// Starts reading a stream segment, to receive the type and length of the segment
-	EPDFStatusCode InitializeStreamSegment();
+	PDFHummus::EStatusCode InitializeStreamSegment();
 	void ResetReadStatus();
-	EPDFStatusCode StoreSegmentLength();
-	EPDFStatusCode FlushBinarySectionTrailingCode();
+	PDFHummus::EStatusCode StoreSegmentLength();
+	PDFHummus::EStatusCode FlushBinarySectionTrailingCode();
 	bool IsPostScriptWhiteSpace(Byte inCharacter);
 	bool IsSegmentNotEnded();
 	void SaveTokenBuffer(Byte inToSave);
 	bool IsPostScriptEntityBreaker(Byte inCharacter);
-	EPDFStatusCode InitializeBinaryDecode();
+	PDFHummus::EStatusCode InitializeBinaryDecode();
 	Byte DecodeByte(Byte inByteToDecode);
 
-	EPDFStatusCode GetNextByteForToken(Byte& outByte);
+	PDFHummus::EStatusCode GetNextByteForToken(Byte& outByte);
 
 };

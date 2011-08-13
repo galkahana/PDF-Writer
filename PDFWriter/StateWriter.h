@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include "OutputFile.h"
 #include "IOBasicTypes.h"
 #include "ObjectsBasicTypes.h"
@@ -37,10 +37,10 @@ public:
 	StateWriter(void);
 	virtual ~StateWriter(void);
 
-	EPDFStatusCode Start(const string& inStateFilePath);
+	PDFHummus::EStatusCode Start(const string& inStateFilePath);
 	ObjectsContext* GetObjectsWriter();
 	void SetRootObject(ObjectIDType inRootObjectID);
-	EPDFStatusCode Finish();
+	PDFHummus::EStatusCode Finish();
 
 private:
 

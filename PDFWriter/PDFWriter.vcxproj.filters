@@ -534,28 +534,28 @@
     <ClInclude Include="Ascii7Encoding.h">
       <Filter>Infrastracture\Encoding</Filter>
     </ClInclude>
-    <ClInclude Include="IDocumentsContextExtender.h">
-      <Filter>Document Context Level</Filter>
-    </ClInclude>
-    <ClInclude Include="DocumentsContext.h">
-      <Filter>Document Context Level</Filter>
-    </ClInclude>
-    <ClInclude Include="DocumentsContextExtenderAdapter.h">
-      <Filter>Document Context Level</Filter>
-    </ClInclude>
-    <ClInclude Include="EPDFStatusCode.h">
-      <Filter>Infrastracture\Basics</Filter>
-    </ClInclude>
-    <ClInclude Include="HummusPDFWriter.h" />
-    <ClInclude Include="PDFObjectsParser.h">
-      <Filter>PDF Embedding</Filter>
-    </ClInclude>
-    <ClInclude Include="HummusPDFParser.h">
-      <Filter>PDF Embedding</Filter>
-    </ClInclude>
     <ClInclude Include="UnicodeString.h">
       <Filter>Infrastracture\Encoding</Filter>
     </ClInclude>
+    <ClInclude Include="EStatusCode.h">
+      <Filter>Infrastracture\Basics</Filter>
+    </ClInclude>
+    <ClInclude Include="DocumentContext.h">
+      <Filter>Document Context Level</Filter>
+    </ClInclude>
+    <ClInclude Include="DocumentContextExtenderAdapter.h">
+      <Filter>Document Context Level</Filter>
+    </ClInclude>
+    <ClInclude Include="IDocumentContextExtender.h">
+      <Filter>Document Context Level</Filter>
+    </ClInclude>
+    <ClInclude Include="PDFObjectParser.h">
+      <Filter>PDF Embedding</Filter>
+    </ClInclude>
+    <ClInclude Include="PDFParser.h">
+      <Filter>PDF Embedding</Filter>
+    </ClInclude>
+    <ClInclude Include="PDFWriter.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="InputBufferedStream.cpp">
@@ -906,18 +906,18 @@
     <ClCompile Include="Ascii7Encoding.cpp">
       <Filter>Infrastracture\Encoding</Filter>
     </ClCompile>
-    <ClCompile Include="DocumentsContext.cpp">
-      <Filter>Document Context Level</Filter>
-    </ClCompile>
-    <ClCompile Include="HummusPDFWriter.cpp" />
-    <ClCompile Include="PDFObjectsParser.cpp">
-      <Filter>PDF Embedding</Filter>
-    </ClCompile>
-    <ClCompile Include="HummusPDFParser.cpp">
-      <Filter>PDF Embedding</Filter>
-    </ClCompile>
     <ClCompile Include="UnicodeString.cpp">
       <Filter>Infrastracture\Encoding</Filter>
     </ClCompile>
+    <ClCompile Include="DocumentContext.cpp">
+      <Filter>Document Context Level</Filter>
+    </ClCompile>
+    <ClCompile Include="PDFObjectParser.cpp">
+      <Filter>PDF Embedding</Filter>
+    </ClCompile>
+    <ClCompile Include="PDFParser.cpp">
+      <Filter>PDF Embedding</Filter>
+    </ClCompile>
+    <ClCompile Include="PDFWriter.cpp" />
   </ItemGroup>
 </Project>

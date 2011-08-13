@@ -2,7 +2,7 @@
    Source File : PDFTextStringTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace PDFHummus;
 
 PDFTextStringTest::PDFTextStringTest(void)
 {
@@ -34,15 +35,15 @@ PDFTextStringTest::~PDFTextStringTest(void)
 {
 }
 
-EPDFStatusCode PDFTextStringTest::Run()
+EStatusCode PDFTextStringTest::Run()
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
 	// Empty String test
 	PDFTextString emptyString;
 	if(emptyString.ToString() != "")
 	{
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 		cout<<"wrong for empty string - "<<emptyString.ToString().c_str()<<"\n";
 	}
 
@@ -50,7 +51,7 @@ EPDFStatusCode PDFTextStringTest::Run()
 	PDFTextString latinString("Hello World");
 	if(latinString.ToString() != "Hello World")
 	{
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 		cout<<"wrong for empty string - "<<latinString.ToString().c_str()<<"\n";
 	}
 
@@ -62,7 +63,7 @@ EPDFStatusCode PDFTextStringTest::Run()
 	latinSpecialString.FromUTF8(aString.ToUTF8().second);
 	if(latinSpecialString.ToString() != "\xA0")
 	{
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 		cout<<"wrong for latin special string - "<<latinSpecialString.ToString().c_str()<<"\n";
 	}
 
@@ -74,7 +75,7 @@ EPDFStatusCode PDFTextStringTest::Run()
 	latinUTF16String.FromUTF8(bString.ToUTF8().second);
 	if(latinUTF16String.ToString() != "\xFE\xFF\x20\xAB")
 	{
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 		cout<<"wrong for latin UTF16 - "<<latinUTF16String.ToString().c_str()<<"\n";
 	}
 

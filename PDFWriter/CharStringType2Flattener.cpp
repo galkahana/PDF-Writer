@@ -26,6 +26,8 @@
 
 #include <math.h>
 
+using namespace PDFHummus;
+
 CharStringType2Flattener::CharStringType2Flattener(void)
 {
 }
@@ -34,13 +36,13 @@ CharStringType2Flattener::~CharStringType2Flattener(void)
 {
 }
 
-EPDFStatusCode CharStringType2Flattener::WriteFlattenedGlyphProgram(unsigned short inFontIndex, 
+EStatusCode CharStringType2Flattener::WriteFlattenedGlyphProgram(unsigned short inFontIndex, 
 																 unsigned short inGlyphIndex, 
 																 CFFFileInput* inCFFFileInput, 
 																 IByteWriter* inWriter)
 {
 	CharStringType2Interpreter interpreter;
-	EPDFStatusCode status = inCFFFileInput->PrepareForGlyphIntepretation(inFontIndex,inGlyphIndex);
+	EStatusCode status = inCFFFileInput->PrepareForGlyphIntepretation(inFontIndex,inGlyphIndex);
 
 	mWriter = inWriter;
 	mHelper = inCFFFileInput;
@@ -49,7 +51,7 @@ EPDFStatusCode CharStringType2Flattener::WriteFlattenedGlyphProgram(unsigned sho
 
 	do
 	{
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CharStringType2Flattener::Trace, Exception, cannot prepare for glyph interpretation");
 			break;
@@ -79,34 +81,34 @@ EPDFStatusCode CharStringType2Flattener::WriteFlattenedGlyphProgram(unsigned sho
 }
 
 
-EPDFStatusCode CharStringType2Flattener::ReadCharString(LongFilePositionType inCharStringStart,
+EStatusCode CharStringType2Flattener::ReadCharString(LongFilePositionType inCharStringStart,
 						   LongFilePositionType inCharStringEnd,
 						   Byte** outCharString)
 {
 	return mHelper->ReadCharString(inCharStringStart,inCharStringEnd,outCharString);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2InterpretNumber(const CharStringOperand& inOperand)
+EStatusCode CharStringType2Flattener::Type2InterpretNumber(const CharStringOperand& inOperand)
 {
 	mOperandsToWrite.push_back(inOperand);
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Hstem(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Hstem(const CharStringOperandList& inOperandList)
 {
 	mStemsCount+= (unsigned short)(inOperandList.size() / 2);
 
 	return WriteRegularOperator(1);
 }
 
-EPDFStatusCode CharStringType2Flattener::WriteRegularOperator(unsigned short inOperatorCode)
+EStatusCode CharStringType2Flattener::WriteRegularOperator(unsigned short inOperatorCode)
 {
 	CharStringOperandList::iterator it = mOperandsToWrite.begin();
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
-	for(; it != mOperandsToWrite.end() && ePDFSuccess == status;++it)
+	for(; it != mOperandsToWrite.end() && PDFHummus::eSuccess == status;++it)
 		status = WriteCharStringOperand(*it);
-	if(status != ePDFFailure)
+	if(status != PDFHummus::eFailure)
 		status = WriteCharStringOperator(inOperatorCode);
 
 	mOperandsToWrite.clear();
@@ -114,7 +116,7 @@ EPDFStatusCode CharStringType2Flattener::WriteRegularOperator(unsigned short inO
 	return status;
 }
 
-EPDFStatusCode CharStringType2Flattener::WriteCharStringOperand(const CharStringOperand& inOperand)
+EStatusCode CharStringType2Flattener::WriteCharStringOperand(const CharStringOperand& inOperand)
 {
 	if(inOperand.IsInteger)
 	{
@@ -132,11 +134,11 @@ EPDFStatusCode CharStringType2Flattener::WriteCharStringOperand(const CharString
 			byte0 = ((value >> 8) & 0xff) + 247;
 			byte1 = value & 0xff;
 
-			if(WriteByte(byte0) != ePDFSuccess)
-				return ePDFFailure;
+			if(WriteByte(byte0) != PDFHummus::eSuccess)
+				return PDFHummus::eFailure;
 
-			if(WriteByte(byte1) != ePDFSuccess)
-				return ePDFFailure;
+			if(WriteByte(byte1) != PDFHummus::eSuccess)
+				return PDFHummus::eFailure;
 		}
 		else if(-1131 <= value && value <= -108)
 		{
@@ -147,11 +149,11 @@ EPDFStatusCode CharStringType2Flattener::WriteCharStringOperand(const CharString
 			byte0 = ((value >> 8) & 0xff) + 251;
 			byte1 = value & 0xff;
 
-			if(WriteByte(byte0) != ePDFSuccess)
-				return ePDFFailure;
+			if(WriteByte(byte0) != PDFHummus::eSuccess)
+				return PDFHummus::eFailure;
 
-			if(WriteByte(byte1) != ePDFSuccess)
-				return ePDFFailure;
+			if(WriteByte(byte1) != PDFHummus::eSuccess)
+				return PDFHummus::eFailure;
 		}
 		else if(-32768 <= value && value<= 32767)
 		{
@@ -160,17 +162,17 @@ EPDFStatusCode CharStringType2Flattener::WriteCharStringOperand(const CharString
 			byte1 = (value >> 8) & 0xff;
 			byte2 = value & 0xff;
 
-			if(WriteByte(28) != ePDFSuccess)
-				return ePDFFailure;
+			if(WriteByte(28) != PDFHummus::eSuccess)
+				return PDFHummus::eFailure;
 
-			if(WriteByte(byte1) != ePDFSuccess)
-				return ePDFFailure;
+			if(WriteByte(byte1) != PDFHummus::eSuccess)
+				return PDFHummus::eFailure;
 
-			if(WriteByte(byte2) != ePDFSuccess)
-				return ePDFFailure;
+			if(WriteByte(byte2) != PDFHummus::eSuccess)
+				return PDFHummus::eFailure;
 		}
 		else
-			return ePDFFailure;
+			return PDFHummus::eFailure;
 	}
 	else
 	{
@@ -183,296 +185,296 @@ EPDFStatusCode CharStringType2Flattener::WriteCharStringOperand(const CharString
 		if(sign)
 			integerPart = -integerPart;
 
-		if(WriteByte(Byte((integerPart>>8) & 0xff)) != ePDFSuccess)
-			return ePDFFailure;
-		if(WriteByte(Byte(integerPart & 0xff)) != ePDFSuccess)
-			return ePDFFailure;
+		if(WriteByte(Byte((integerPart>>8) & 0xff)) != PDFHummus::eSuccess)
+			return PDFHummus::eFailure;
+		if(WriteByte(Byte(integerPart & 0xff)) != PDFHummus::eSuccess)
+			return PDFHummus::eFailure;
 
-		if(WriteByte(Byte((realPart>>8) & 0xff)) != ePDFSuccess)
-			return ePDFFailure;
-		if(WriteByte(Byte(realPart & 0xff)) != ePDFSuccess)
-			return ePDFFailure;
+		if(WriteByte(Byte((realPart>>8) & 0xff)) != PDFHummus::eSuccess)
+			return PDFHummus::eFailure;
+		if(WriteByte(Byte(realPart & 0xff)) != PDFHummus::eSuccess)
+			return PDFHummus::eFailure;
 
 	}
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType2Flattener::WriteCharStringOperator(unsigned short inOperatorCode)
+EStatusCode CharStringType2Flattener::WriteCharStringOperator(unsigned short inOperatorCode)
 {
 	if((inOperatorCode & 0xff00) == 0x0c00)
 	{
-		if(WriteByte(0xc0) != ePDFSuccess)
-			return ePDFFailure;
+		if(WriteByte(0xc0) != PDFHummus::eSuccess)
+			return PDFHummus::eFailure;
 	}
 	return WriteByte(Byte(inOperatorCode & 0xff));
 }
 
-EPDFStatusCode CharStringType2Flattener::WriteByte(Byte inValue)
+EStatusCode CharStringType2Flattener::WriteByte(Byte inValue)
 {
-	return (mWriter->Write(&inValue,1) == 1 ? ePDFSuccess : ePDFFailure);
+	return (mWriter->Write(&inValue,1) == 1 ? PDFHummus::eSuccess : PDFHummus::eFailure);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Vstem(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Vstem(const CharStringOperandList& inOperandList)
 {
 	mStemsCount+= (unsigned short)(inOperandList.size() / 2);
 
 	return WriteRegularOperator(3);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Vmoveto(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Vmoveto(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(4);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Rlineto(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Rlineto(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(5);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Hlineto(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Hlineto(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(6);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Vlineto(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Vlineto(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(7);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2RRCurveto(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2RRCurveto(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(8);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Return(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Return(const CharStringOperandList& inOperandList)
 {
 	// ignore returns
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Endchar(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Endchar(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(14);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Hstemhm(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Hstemhm(const CharStringOperandList& inOperandList)
 {
 	mStemsCount+= (unsigned short)(inOperandList.size() / 2);
 
 	return WriteRegularOperator(18);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Hintmask(const CharStringOperandList& inOperandList,Byte* inProgramCounter)
+EStatusCode CharStringType2Flattener::Type2Hintmask(const CharStringOperandList& inOperandList,Byte* inProgramCounter)
 {
 	mStemsCount+= (unsigned short)(inOperandList.size() / 2);
 
-	if(WriteRegularOperator(19) != ePDFSuccess)
-		return ePDFFailure;
+	if(WriteRegularOperator(19) != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	return WriteStemMask(inProgramCounter);
 }
 
-EPDFStatusCode CharStringType2Flattener::WriteStemMask(Byte* inProgramCounter)
+EStatusCode CharStringType2Flattener::WriteStemMask(Byte* inProgramCounter)
 {
 	unsigned short maskSize = mStemsCount/8 + (mStemsCount % 8 != 0 ? 1:0);
 
-	return mWriter->Write(inProgramCounter,maskSize) != maskSize ? ePDFFailure : ePDFSuccess;
+	return mWriter->Write(inProgramCounter,maskSize) != maskSize ? PDFHummus::eFailure : PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Cntrmask(const CharStringOperandList& inOperandList,Byte* inProgramCounter)
+EStatusCode CharStringType2Flattener::Type2Cntrmask(const CharStringOperandList& inOperandList,Byte* inProgramCounter)
 {
-	if(WriteRegularOperator(20) != ePDFSuccess)
-		return ePDFFailure;
+	if(WriteRegularOperator(20) != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	return WriteStemMask(inProgramCounter);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Rmoveto(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Rmoveto(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(21);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Hmoveto(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Hmoveto(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(22);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Vstemhm(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Vstemhm(const CharStringOperandList& inOperandList)
 {
 	mStemsCount+= (unsigned short)(inOperandList.size() / 2);
 
 	return WriteRegularOperator(23);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Rcurveline(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Rcurveline(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(24);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Rlinecurve(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Rlinecurve(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(25);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Vvcurveto(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Vvcurveto(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(26);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Hvcurveto(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Hvcurveto(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(31);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Hhcurveto(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Hhcurveto(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(27);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Vhcurveto(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Vhcurveto(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(30);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Hflex(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Hflex(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c22);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Hflex1(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Hflex1(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c24);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Flex(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Flex(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c23);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Flex1(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Flex1(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c25);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2And(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2And(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c03);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Or(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Or(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c04);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Not(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Not(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c05);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Abs(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Abs(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c09);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Add(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Add(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c0a);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Sub(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Sub(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c0b);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Div(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Div(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c0c);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Neg(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Neg(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c0e);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Eq(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Eq(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c0f);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Drop(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Drop(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c12);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Put(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Put(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c14);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Get(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Get(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c15);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Ifelse(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Ifelse(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c16);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Random(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Random(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c17);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Mul(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Mul(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c18);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Sqrt(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Sqrt(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c1a);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Dup(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Dup(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c1b);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Exch(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Exch(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c1c);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Index(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Index(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c1d);
 }
 
-EPDFStatusCode CharStringType2Flattener::Type2Roll(const CharStringOperandList& inOperandList)
+EStatusCode CharStringType2Flattener::Type2Roll(const CharStringOperandList& inOperandList)
 {
 	return WriteRegularOperator(0x0c1e);
 }
 
 CharString* CharStringType2Flattener::GetLocalSubr(long inSubrIndex)
 {
-	if(WriteSubrOperator(10) != ePDFSuccess)
+	if(WriteSubrOperator(10) != PDFHummus::eSuccess)
 		return NULL;
 
 	return mHelper->GetLocalSubr(inSubrIndex);
 }
 
-EPDFStatusCode CharStringType2Flattener::WriteSubrOperator(unsigned short inOperatorCode)
+EStatusCode CharStringType2Flattener::WriteSubrOperator(unsigned short inOperatorCode)
 {
 	if(mOperandsToWrite.size() > 0)
 	{
-		EPDFStatusCode status = ePDFSuccess;
+		EStatusCode status = PDFHummus::eSuccess;
 		mOperandsToWrite.pop_back(); // pop back parameter, which is the subr index
 
 		// now continue writing all operands
 		CharStringOperandList::iterator it = mOperandsToWrite.begin();
 
-		for(; it != mOperandsToWrite.end() && ePDFSuccess == status;++it)
+		for(; it != mOperandsToWrite.end() && PDFHummus::eSuccess == status;++it)
 			status = WriteCharStringOperand(*it);
 
 		mOperandsToWrite.clear();
@@ -485,7 +487,7 @@ EPDFStatusCode CharStringType2Flattener::WriteSubrOperator(unsigned short inOper
 
 CharString* CharStringType2Flattener::GetGlobalSubr(long inSubrIndex)
 {
-	if(WriteSubrOperator(29) != ePDFSuccess)
+	if(WriteSubrOperator(29) != PDFHummus::eSuccess)
 		return NULL;
 
 	return mHelper->GetGlobalSubr(inSubrIndex);

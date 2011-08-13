@@ -1,8 +1,8 @@
 /*
-   Source File : HummusPDFWriterTestPlayground.cpp
+   Source File : PDFWriterTestPlayground.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
    
 */
-// HummusPDFWriterTestPlayground.cpp : Defines the entry point for the console application.
+// PDFWriterTestPlayground.cpp : Defines the entry point for the console application.
 //
 #include "Singleton.h"
 #include "TestsRunner.h"
@@ -28,21 +28,21 @@
 static void PrintUsage()
 {
 	cout<<"Usage:\n"<<
-		"HummusPDFWriterTestPlayground [-c category1 category2... [-xt test1 test2...]] [-t test1 test2...] [-xc category1 category2...] [-xt test1 test2...]\n\n"<<
-		"HummusPDFWriterTestPlayground runs tests.\n"<<
+		"PDFWriterTestPlayground [-c category1 category2... [-xt test1 test2...]] [-t test1 test2...] [-xc category1 category2...] [-xt test1 test2...]\n\n"<<
+		"PDFWriterTestPlayground runs tests.\n"<<
 		"The non parameterized version runs all tests.\n\n"<<
 		"Use -c to run only a group of tests assigned to specific categories. after -c name the cateogries. for example:\n"<<
-		"	HummusPDFWriterTestPlayGround -c PDF ObjectContext\n"<<
+		"	PDFWriterTestPlayGround -c PDF ObjectContext\n"<<
 		"will run only tests in the PDF or ObjectContext categories.\n\n"<<
 		"Use -t to run only a group of tests named by the next parameters. after -t name the tests. for example:\n"<<
-		"	HummusPDFWriterTestPlayGround -t PDFDateTest PDFTextStingTest\n"<<
+		"	PDFWriterTestPlayGround -t PDFDateTest PDFTextStingTest\n"<<
 		"will run only the PDFDateTest and PDFTextStringTest.\n"<<
 		"Use -xc to all but the group of tests assigned to specific categories. after -xc name the cateogries. for example:\n"<<
-		"	HummusPDFWriterTestPlayGround -xc PDF ObjectContext\n"<<
+		"	PDFWriterTestPlayGround -xc PDF ObjectContext\n"<<
 		"Use -xt to run all but a group of tests named by the next parameters. after -xt name the tests. for example:\n"<<
-		"	HummusPDFWriterTestPlayGround -t PDFDateTest PDFTextStingTest\n"<<
+		"	PDFWriterTestPlayGround -t PDFDateTest PDFTextStingTest\n"<<
 		"it is possible to use -xt after -c directive to filter particular tests for the executed categories. for example:\n"<<
-		"	HummusPDFWriterTestPlayGround -c PDF -xt TiffImageTest.";
+		"	PDFWriterTestPlayGround -c PDF -xt TiffImageTest.";
 }
 
 int main(int argc, char* argv[])

@@ -38,6 +38,7 @@
 #include <algorithm>
 
 using namespace std;
+using namespace PDFHummus;
 
 ANSIFontWriter::ANSIFontWriter(void)
 {
@@ -54,13 +55,13 @@ static const string scBaseFont = "BaseFont";
 static const string scToUnicode = "ToUnicode";
 static const string scFontDescriptor = "FontDescriptor";
 
-EPDFStatusCode ANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
+EStatusCode ANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 											WrittenFontRepresentation* inFontOccurrence,
 											ObjectsContext* inObjectsContext,
 											IANSIFontWriterHelper* inANSIFontWriterHelper,
 											const std::string& inSubsetFontName)
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	FontDescriptorWriter fontDescriptorWriter;
 
 	inObjectsContext->StartNewIndirectObject(inFontOccurrence->mWrittenObjectID);
@@ -111,7 +112,7 @@ EPDFStatusCode ANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 		fontContext->WriteObjectReferenceValue(fontDescriptorObjectID);
 
 		status = inObjectsContext->EndDictionary(fontContext);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("ANSIFontWriter::WriteFont, unexpected failure. Failed to end dictionary in font write.");
 			break;
@@ -359,7 +360,7 @@ void ANSIFontWriter::WriteGlyphEntry(IByteWriter* inWriter,unsigned short inEnco
 		for(; it != inUnicodeValues.end(); ++it)
 		{
 			unicode.GetUnicodeList().push_back(*it);
-			EPDFStatusCodeAndUShortList utf16Result = unicode.ToUTF16UShort();
+			EStatusCodeAndUShortList utf16Result = unicode.ToUTF16UShort();
 			unicode.GetUnicodeList().clear();
 
 			if(utf16Result.second.size() == 2)

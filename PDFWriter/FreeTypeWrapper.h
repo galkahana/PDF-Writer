@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 
 #include <string>
 #include <map>
@@ -53,7 +53,7 @@ private:
 	FTFaceToFTStreamListMap mOpenStreams;
 
 	FT_Stream CreateFTStreamForPath(const string& inFilePath);
-	EPDFStatusCode FillOpenFaceArgumentsForUTF8String(const string& inFilePath, FT_Open_Args& ioArgs);
+	PDFHummus::EStatusCode FillOpenFaceArgumentsForUTF8String(const string& inFilePath, FT_Open_Args& ioArgs);
 	void CloseOpenFaceArgumentsStream(FT_Open_Args& ioArgs);
 	void RegisterStreamForFace(FT_Face inFace,FT_Stream inStream);
 	void CleanStreamsForFace(FT_Face inFace);

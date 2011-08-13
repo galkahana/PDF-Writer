@@ -21,6 +21,8 @@
 #include "InputFileStream.h"
 #include "SafeBufferMacrosDefs.h"
 
+using namespace PDFHummus;
+
 InputFileStream::InputFileStream(void)
 {
 	mStream = NULL;
@@ -39,15 +41,15 @@ InputFileStream::InputFileStream(const string& inFilePath)
 	Open(inFilePath);
 }
 
-EPDFStatusCode InputFileStream::Open(const string& inFilePath)
+EStatusCode InputFileStream::Open(const string& inFilePath)
 {
 	SAFE_FOPEN(mStream,inFilePath.c_str(),"rb");
-	return NULL == mStream ? ePDFFailure:ePDFSuccess;
+	return NULL == mStream ? PDFHummus::eFailure:PDFHummus::eSuccess;
 }
 
-EPDFStatusCode InputFileStream::Close()
+EStatusCode InputFileStream::Close()
 {
-	EPDFStatusCode result = fclose(mStream) == 0 ? ePDFSuccess:ePDFFailure;
+	EStatusCode result = fclose(mStream) == 0 ? PDFHummus::eSuccess:PDFHummus::eFailure;
 
 	mStream = NULL;
 	return result;

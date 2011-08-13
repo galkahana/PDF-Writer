@@ -1,5 +1,5 @@
 /*
-   Source File : EPDFStatusCode.h
+   Source File : PDFHummus::EStatusCode.h
 
 
    Copyright 2011 Gal Kahana PDFWriter
@@ -20,8 +20,11 @@
 */
 #pragma once
 
-enum EPDFStatusCode
+namespace PDFHummus
 {
-	ePDFFailure = -1,
-	ePDFSuccess = 0
-};
+	enum EStatusCode
+	{
+		eFailure = -1,
+		eSuccess = 0
+	};
+}

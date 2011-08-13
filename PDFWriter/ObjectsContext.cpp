@@ -26,12 +26,14 @@
 #include "Trace.h"
 #include "OutputStreamTraits.h"
 #include "PDFStream.h"
-#include "HummusPDFParser.h"
+#include "PDFParser.h"
 #include "PDFObjectCast.h"
 #include "PDFDictionary.h"
 #include "PDFIndirectObjectReference.h"
 #include "PDFBoolean.h"
 #include "PDFLiteralString.h"
+
+using namespace PDFHummus;
 
 ObjectsContext::ObjectsContext(void)
 {
@@ -98,9 +100,9 @@ void ObjectsContext::EndFreeContext()
 static const IOBasicTypes::Byte scXref[] = {'x','r','e','f'};
 static const IOBasicTypes::Byte scFreeObjectEntry[] = {'0','0','0','0','0','0','0','0','0','0',' ','6','5','5','3','5',' ','f','\r','\n'};
 
-EPDFStatusCode ObjectsContext::WriteXrefTable(LongFilePositionType& outWritePosition)
+EStatusCode ObjectsContext::WriteXrefTable(LongFilePositionType& outWritePosition)
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	outWritePosition = mOutputStream->GetCurrentPosition();
 	
 	// write xref keyword
@@ -117,7 +119,7 @@ EPDFStatusCode ObjectsContext::WriteXrefTable(LongFilePositionType& outWritePosi
 	// write used objects
 	char entryBuffer[21];
 
-	for(ObjectIDType i = 1; i < mReferencesRegistry.GetObjectsCount() && (ePDFSuccess == status);++i)
+	for(ObjectIDType i = 1; i < mReferencesRegistry.GetObjectsCount() && (PDFHummus::eSuccess == status);++i)
 	{
 		const ObjectWriteInformation& objectReference = mReferencesRegistry.GetNthObjectReference(i);
 		if(objectReference.mObjectWritten)
@@ -128,7 +130,7 @@ EPDFStatusCode ObjectsContext::WriteXrefTable(LongFilePositionType& outWritePosi
 		else
 		{
 			// object not written. at this point this should not happen, and indicates a failure
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			TRACE_LOG1("ObjectsContext::WriteXrefTable, Unexpected Failure. Object of ID = %ld was not registered as written. probably means it was not written",i);
 		}
 	}
@@ -143,7 +145,7 @@ DictionaryContext* ObjectsContext::StartDictionary()
 	return newDictionary;
 }
 
-EPDFStatusCode ObjectsContext::EndDictionary(DictionaryContext* ObjectsContext)
+EStatusCode ObjectsContext::EndDictionary(DictionaryContext* ObjectsContext)
 {
 	if(mDictionaryStack.size() > 0)
 	{
@@ -151,18 +153,18 @@ EPDFStatusCode ObjectsContext::EndDictionary(DictionaryContext* ObjectsContext)
 		{
 			delete mDictionaryStack.back();
 			mDictionaryStack.pop_back();
-			return ePDFSuccess;
+			return PDFHummus::eSuccess;
 		}
 		else
 		{
 			TRACE_LOG("ObjectsContext::EndDictionary, nesting violation. Trying to close a dictionary while one of it's children is still open. First End the children");
-			return ePDFFailure;
+			return PDFHummus::eFailure;
 		}
 	}
 	else
 	{
 		TRACE_LOG("ObjectsContext::EndDictionary, stack underflow. Trying to end a dictionary when there's no open dictionaries");
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 }
 
@@ -338,9 +340,9 @@ string ObjectsContext::GenerateSubsetFontPrefix()
 	return mSubsetFontsNamesSequance.GetNextValue();
 }
 
-EPDFStatusCode ObjectsContext::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
+EStatusCode ObjectsContext::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
 {
-	EPDFStatusCode status;
+	EStatusCode status;
 		
 	do
 	{
@@ -368,7 +370,7 @@ EPDFStatusCode ObjectsContext::WriteState(ObjectsContext* inStateWriter,ObjectID
 		inStateWriter->EndIndirectObject();
 
 		status = mReferencesRegistry.WriteState(inStateWriter,referencesRegistryObjectID);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		// write subset fonts names sequance
@@ -391,7 +393,7 @@ EPDFStatusCode ObjectsContext::WriteState(ObjectsContext* inStateWriter,ObjectID
 	return status;
 }
 
-EPDFStatusCode ObjectsContext::ReadState(HummusPDFParser* inStateReader,ObjectIDType inObjectID)
+EStatusCode ObjectsContext::ReadState(PDFParser* inStateReader,ObjectIDType inObjectID)
 {
 	PDFObjectCastPtr<PDFDictionary> objectsContext(inStateReader->ParseNewObject(inObjectID));
 

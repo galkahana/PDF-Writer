@@ -7,5 +7,5 @@ public:
 	InputImagesAsStreamsTest(void);
 	~InputImagesAsStreamsTest(void);
 
-	virtual EPDFStatusCode Run();
+	virtual PDFHummus::EStatusCode Run();
 };

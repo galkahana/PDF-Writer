@@ -26,6 +26,7 @@
 
 
 using namespace IOBasicTypes;
+using namespace PDFHummus;
 
 StateWriter::StateWriter(void)
 {
@@ -38,14 +39,14 @@ StateWriter::~StateWriter(void)
 }
 
 
-EPDFStatusCode StateWriter::Start(const string& inStateFilePath)
+EStatusCode StateWriter::Start(const string& inStateFilePath)
 {
 
 	// open the new file...
-	if(mOutputFile.OpenFile(inStateFilePath) != ePDFSuccess)
+	if(mOutputFile.OpenFile(inStateFilePath) != PDFHummus::eSuccess)
 	{
 		TRACE_LOG1("StateWriter::Start, can't open file for state writing in %s",inStateFilePath.c_str());
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 	
 	// Get me a new copy of objects context, for this session
@@ -59,7 +60,7 @@ EPDFStatusCode StateWriter::Start(const string& inStateFilePath)
 	// Reset the root object
 	mRootObject = 0;
 
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
 ObjectsContext* StateWriter::GetObjectsWriter()
@@ -67,9 +68,9 @@ ObjectsContext* StateWriter::GetObjectsWriter()
 	return mObjectsContext;
 }
 
-EPDFStatusCode StateWriter::Finish()
+EStatusCode StateWriter::Finish()
 {
-	EPDFStatusCode status;
+	EStatusCode status;
 	do
 	{
 		LongFilePositionType xrefTablePosition;
@@ -85,7 +86,7 @@ EPDFStatusCode StateWriter::Finish()
 
 	} while(false);
 		
-	if(ePDFSuccess == status)
+	if(PDFHummus::eSuccess == status)
 		status = mOutputFile.CloseFile();
 	else
 		mOutputFile.CloseFile();

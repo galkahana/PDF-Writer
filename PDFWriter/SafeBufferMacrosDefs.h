@@ -31,7 +31,7 @@
 		UnicodeString unicodeString;
 		unicodeString.FromUTF8(inUTF8String);
 
-		EPDFStatusCodeAndUShortList result = unicodeString.ToUTF16UShort();
+		EStatusCodeAndUShortList result = unicodeString.ToUTF16UShort();
 		
 		std::wstringstream stream;
 

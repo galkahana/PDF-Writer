@@ -32,7 +32,7 @@
 
 */
 
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include "PrimitiveObjectsWriter.h"
 #include "GraphicStateStack.h"
 #include "GlyphUnicodeMapping.h"
@@ -100,7 +100,7 @@ public:
 
 	// graphic state
 	void q();
-	EPDFStatusCode Q(); // Status code returned, in case there's inbalance in "q-Q"s
+	PDFHummus::EStatusCode Q(); // Status code returned, in case there's inbalance in "q-Q"s
 	void cm(double inA, double inB, double inC, double inD, double inE, double inF);
 	void w(double inLineWidth);
 	void J(int inLineCapStyle);
@@ -166,12 +166,12 @@ public:
 	// will return error if no font was set, or that one of the glyphs
 	// didn't succeed in encoding.
 	// input parameter is UTF-8 encoded
-	EPDFStatusCode Tj(const string& inText);
+	PDFHummus::EStatusCode Tj(const string& inText);
 
 	// The rest of the text operators, handled by the library handing of font. text is in UTF8
-	EPDFStatusCode Quote(const string& inText);
-	EPDFStatusCode DoubleQuote(double inWordSpacing, double inCharacterSpacing, const string& inText);
-	EPDFStatusCode TJ(const StringOrDoubleList& inStringsAndSpacing); 
+	PDFHummus::EStatusCode Quote(const string& inText);
+	PDFHummus::EStatusCode DoubleQuote(double inWordSpacing, double inCharacterSpacing, const string& inText);
+	PDFHummus::EStatusCode TJ(const StringOrDoubleList& inStringsAndSpacing); 
 
 	//
 	// Text showing operators using the library handling of fonts with direct glyph selection
@@ -181,10 +181,10 @@ public:
 	// each command accepts a list of glyphs. each glyph is mapped to its matching unicode values. 
 	// a glyph may have more than one unicode value in case it reperesents a series of Characters.
 
-	EPDFStatusCode Tj(const GlyphUnicodeMappingList& inText);
-	EPDFStatusCode Quote(const GlyphUnicodeMappingList& inText);
-	EPDFStatusCode DoubleQuote(double inWordSpacing, double inCharacterSpacing, const GlyphUnicodeMappingList& inText);
-	EPDFStatusCode TJ(const GlyphUnicodeMappingListOrDoubleList& inStringsAndSpacing); 
+	PDFHummus::EStatusCode Tj(const GlyphUnicodeMappingList& inText);
+	PDFHummus::EStatusCode Quote(const GlyphUnicodeMappingList& inText);
+	PDFHummus::EStatusCode DoubleQuote(double inWordSpacing, double inCharacterSpacing, const GlyphUnicodeMappingList& inText);
+	PDFHummus::EStatusCode TJ(const GlyphUnicodeMappingListOrDoubleList& inStringsAndSpacing); 
 
 	//
 	// Text showing operators overriding library behavior
@@ -231,6 +231,6 @@ private:
 
 	void AssertProcsetAvailable(const string& inProcsetName);
 
-	EPDFStatusCode WriteTextCommandWithEncoding(const string& inUnicodeText,ITextCommand* inTextCommand);
-	EPDFStatusCode WriteTextCommandWithDirectGlyphSelection(const GlyphUnicodeMappingList& inText,ITextCommand* inTextCommand);
+	PDFHummus::EStatusCode WriteTextCommandWithEncoding(const string& inUnicodeText,ITextCommand* inTextCommand);
+	PDFHummus::EStatusCode WriteTextCommandWithDirectGlyphSelection(const GlyphUnicodeMappingList& inText,ITextCommand* inTextCommand);
 };

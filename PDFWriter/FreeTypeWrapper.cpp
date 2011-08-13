@@ -23,6 +23,9 @@
 #include "InputFile.h"
 #include "IByteReaderWithPosition.h"
 
+using namespace PDFHummus;
+
+
 #undef __FTERRORS_H__                                           
 #define FT_ERRORDEF( e, v, s )  { e, s },                       
 #define FT_ERROR_START_LIST     {                               
@@ -69,7 +72,7 @@ FT_Face FreeTypeWrapper::NewFace(const string& inFilePath,FT_Long inFontIndex)
 
 	do
 	{
-		if(FillOpenFaceArgumentsForUTF8String(inFilePath,openFaceArguments) != ePDFSuccess)
+		if(FillOpenFaceArgumentsForUTF8String(inFilePath,openFaceArguments) != PDFHummus::eSuccess)
 		{
 			face = NULL;
 			break;
@@ -93,7 +96,7 @@ FT_Face FreeTypeWrapper::NewFace(const string& inFilePath,FT_Long inFontIndex)
 	return face;
 }
 
-EPDFStatusCode FreeTypeWrapper::FillOpenFaceArgumentsForUTF8String(const string& inFilePath, FT_Open_Args& ioArgs)
+EStatusCode FreeTypeWrapper::FillOpenFaceArgumentsForUTF8String(const string& inFilePath, FT_Open_Args& ioArgs)
 {
 	ioArgs.flags = FT_OPEN_STREAM;
 	ioArgs.memory_base = NULL;
@@ -106,12 +109,12 @@ EPDFStatusCode FreeTypeWrapper::FillOpenFaceArgumentsForUTF8String(const string&
 	
 	if(ioArgs.stream)
 	{
-		return ePDFSuccess;
+		return PDFHummus::eSuccess;
 	}
 	else
 	{
 		TRACE_LOG1("FreeTypeWrapper::FillOpenFaceArgumentsForWideString, Cannot Open file for reading %s",inFilePath);
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 }
 
@@ -142,7 +145,7 @@ FT_Face FreeTypeWrapper::NewFace(const string& inFilePath,const string& inSecond
 	{
 		do
 		{
-			if(FillOpenFaceArgumentsForUTF8String(inSecondaryFilePath,attachStreamArguments) != ePDFSuccess)
+			if(FillOpenFaceArgumentsForUTF8String(inSecondaryFilePath,attachStreamArguments) != PDFHummus::eSuccess)
 			{
 				DoneFace(face);
 				face = NULL;
@@ -221,7 +224,7 @@ FT_Stream FreeTypeWrapper::CreateFTStreamForPath(const string& inFilePath)
 {
 	InputFile* inputFile = new InputFile;
 
-	if(inputFile->OpenFile(inFilePath) != ePDFSuccess)
+	if(inputFile->OpenFile(inFilePath) != PDFHummus::eSuccess)
 		return NULL;
 
 	FT_Stream aStream = new FT_StreamRec();

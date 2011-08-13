@@ -2,7 +2,7 @@
    Source File : ITestUnit.h
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 
 class ITestUnit
 {
@@ -29,6 +29,6 @@ public:
 	
 	virtual ~ITestUnit(){}
 
-	virtual EPDFStatusCode Run() = 0;
+	virtual PDFHummus::EStatusCode Run() = 0;
 
 };

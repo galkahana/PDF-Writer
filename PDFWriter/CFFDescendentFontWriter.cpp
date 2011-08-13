@@ -26,6 +26,8 @@
 #include "FreeTypeFaceWrapper.h"
 #include "Trace.h"
 
+using namespace PDFHummus;
+
 CFFDescendentFontWriter::CFFDescendentFontWriter(void)
 {
 }
@@ -41,7 +43,7 @@ static bool sEncodedGlypsSort(const UIntAndGlyphEncodingInfo& inLeft, const UInt
 
 static const string scCIDFontType0C = "CIDFontType0C";
 static const char* scType1 = "Type 1";
-EPDFStatusCode CFFDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID, 
+EStatusCode CFFDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID, 
 														const string& inFontName,
 														FreeTypeFaceWrapper& inFontInfo,
 														const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
@@ -59,7 +61,7 @@ EPDFStatusCode CFFDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjec
 	if(strcmp(scType1,fontType) == 0)
 	{
 		TRACE_LOG1("CFFDescendentFontWriter::WriteFont, Exception. identified type1 font when writing CFF CID font, font name - %s. type 1 CIDs are not supported.",inFontName.c_str());
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 
 	CFFEmbeddedFontWriter embeddedFontWriter;
@@ -76,14 +78,14 @@ EPDFStatusCode CFFDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjec
 		orderedGlyphs.push_back(it->first);
 		cidMapping.push_back(it->second.mEncodedCharacter);
 	}
-	EPDFStatusCode status = embeddedFontWriter.WriteEmbeddedFont(inFontInfo,
+	EStatusCode status = embeddedFontWriter.WriteEmbeddedFont(inFontInfo,
 												orderedGlyphs,
 												scCIDFontType0C,
 												inFontName,
 												inObjectsContext,
 												&cidMapping,
 												mEmbeddedFontFileObjectID);
-	if(status != ePDFSuccess)
+	if(status != PDFHummus::eSuccess)
 		return status;
 
 	DescendentFontWriter descendentFontWriter;

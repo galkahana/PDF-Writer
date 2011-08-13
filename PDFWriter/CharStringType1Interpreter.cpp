@@ -22,6 +22,8 @@
 #include "InputByteArrayStream.h"
 #include "Trace.h"
 
+using namespace PDFHummus;
+
 CharStringType1Interpreter::CharStringType1Interpreter(void)
 {
 }
@@ -30,9 +32,9 @@ CharStringType1Interpreter::~CharStringType1Interpreter(void)
 {
 }
 
-EPDFStatusCode CharStringType1Interpreter::Intepret(const Type1CharString& inCharStringToIntepret, IType1InterpreterImplementation* inImplementationHelper)
+EStatusCode CharStringType1Interpreter::Intepret(const Type1CharString& inCharStringToIntepret, IType1InterpreterImplementation* inImplementationHelper)
 {
-	EPDFStatusCode status;
+	EStatusCode status;
 
 	do
 	{
@@ -44,7 +46,7 @@ EPDFStatusCode CharStringType1Interpreter::Intepret(const Type1CharString& inCha
 		if(!inImplementationHelper)
 		{
 			TRACE_LOG("CharStringType1Interpreter::Intepret, null implementation helper passed. pass a proper pointer!!");
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -55,19 +57,19 @@ EPDFStatusCode CharStringType1Interpreter::Intepret(const Type1CharString& inCha
 	return status;
 }
 
-EPDFStatusCode CharStringType1Interpreter::ProcessCharString(InputCharStringDecodeStream* inCharStringToIntepret)
+EStatusCode CharStringType1Interpreter::ProcessCharString(InputCharStringDecodeStream* inCharStringToIntepret)
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	bool gotEndExecutionOperator = false;
 	Byte buffer;
 
 	while(inCharStringToIntepret->NotEnded() &&
-			ePDFSuccess == status && 
+			PDFHummus::eSuccess == status && 
 			!gotEndExecutionOperator &&
 			!mGotEndChar)
 	{
-		status = (inCharStringToIntepret->Read(&buffer,1) == 1) ? ePDFSuccess:ePDFFailure;
-		if(status != ePDFSuccess)
+		status = (inCharStringToIntepret->Read(&buffer,1) == 1) ? PDFHummus::eSuccess:PDFHummus::eFailure;
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		if(IsOperator(buffer))
@@ -84,9 +86,9 @@ bool CharStringType1Interpreter::IsOperator(Byte inBuffer)
 			
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretOperator(Byte inBuffer,InputCharStringDecodeStream* inCharStringToIntepret,bool& outGotEndExecutionCommand)
+EStatusCode CharStringType1Interpreter::InterpretOperator(Byte inBuffer,InputCharStringDecodeStream* inCharStringToIntepret,bool& outGotEndExecutionCommand)
 {
-	EPDFStatusCode status = ePDFFailure;
+	EStatusCode status = PDFHummus::eFailure;
 	unsigned short operatorValue;
 	outGotEndExecutionCommand = false;
 	Byte buffer;
@@ -94,7 +96,7 @@ EPDFStatusCode CharStringType1Interpreter::InterpretOperator(Byte inBuffer,Input
 	if(12 == inBuffer)
 	{
 		if(inCharStringToIntepret->Read(&buffer,1) != 1)
-			return ePDFFailure;
+			return PDFHummus::eFailure;
 
 		operatorValue = 0x0c00 + buffer;
 	}
@@ -186,7 +188,7 @@ EPDFStatusCode CharStringType1Interpreter::InterpretOperator(Byte inBuffer,Input
 	return status;	
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretNumber(Byte inBuffer,InputCharStringDecodeStream* inCharStringToIntepret)
+EStatusCode CharStringType1Interpreter::InterpretNumber(Byte inBuffer,InputCharStringDecodeStream* inCharStringToIntepret)
 {
 	long operand;
 
@@ -198,7 +200,7 @@ EPDFStatusCode CharStringType1Interpreter::InterpretNumber(Byte inBuffer,InputCh
 	{
 		Byte byte1;
 		if(inCharStringToIntepret->Read(&byte1,1) != 1)
-			return ePDFFailure;
+			return PDFHummus::eFailure;
 
 		operand = (inBuffer - 247) * 256 + byte1 + 108;
 	}
@@ -206,7 +208,7 @@ EPDFStatusCode CharStringType1Interpreter::InterpretNumber(Byte inBuffer,InputCh
 	{
 		Byte byte1;
 		if(inCharStringToIntepret->Read(&byte1,1) != 1)
-			return ePDFFailure;
+			return PDFHummus::eFailure;
 
 		operand = -(short)(inBuffer - 251) * 256 - byte1 - 108;
 	}
@@ -215,13 +217,13 @@ EPDFStatusCode CharStringType1Interpreter::InterpretNumber(Byte inBuffer,InputCh
 		Byte byte1,byte2,byte3,byte4;
 		
 		if(inCharStringToIntepret->Read(&byte1,1) != 1)
-			return ePDFFailure;
+			return PDFHummus::eFailure;
 		if(inCharStringToIntepret->Read(&byte2,1) != 1)
-			return ePDFFailure;
+			return PDFHummus::eFailure;
 		if(inCharStringToIntepret->Read(&byte3,1) != 1)
-			return ePDFFailure;
+			return PDFHummus::eFailure;
 		if(inCharStringToIntepret->Read(&byte4,1) != 1)
-			return ePDFFailure;
+			return PDFHummus::eFailure;
 
 
 		operand = (long)(
@@ -231,7 +233,7 @@ EPDFStatusCode CharStringType1Interpreter::InterpretNumber(Byte inBuffer,InputCh
 						(byte4));
 	}
 	else
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 
 	mOperandStack.push_back(operand);
 	return mImplementationHelper->Type1InterpretNumber(operand);
@@ -242,87 +244,87 @@ void CharStringType1Interpreter::ClearStack()
 	mOperandStack.clear();
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretHStem()
+EStatusCode CharStringType1Interpreter::InterpretHStem()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1Hstem(mOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1Hstem(mOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	ClearStack();
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretVStem()
+EStatusCode CharStringType1Interpreter::InterpretVStem()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1Vstem(mOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1Vstem(mOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	ClearStack();
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretVMoveto()
+EStatusCode CharStringType1Interpreter::InterpretVMoveto()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1VMoveto(mOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1VMoveto(mOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	ClearStack();
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretRLineto()
+EStatusCode CharStringType1Interpreter::InterpretRLineto()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1RLineto(mOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1RLineto(mOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	ClearStack();
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretHLineto()
+EStatusCode CharStringType1Interpreter::InterpretHLineto()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1HLineto(mOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1HLineto(mOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	ClearStack();
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretVLineto()
+EStatusCode CharStringType1Interpreter::InterpretVLineto()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1VLineto(mOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1VLineto(mOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	ClearStack();
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretRRCurveto()
+EStatusCode CharStringType1Interpreter::InterpretRRCurveto()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1RRCurveto(mOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1RRCurveto(mOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	ClearStack();
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretClosePath()
+EStatusCode CharStringType1Interpreter::InterpretClosePath()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1ClosePath(mOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1ClosePath(mOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	ClearStack();
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretCallSubr()
+EStatusCode CharStringType1Interpreter::InterpretCallSubr()
 {
 	Type1CharString* aCharString = mImplementationHelper->GetSubr(mOperandStack.back());
 	mOperandStack.pop_back();
@@ -332,144 +334,144 @@ EPDFStatusCode CharStringType1Interpreter::InterpretCallSubr()
 		InputByteArrayStream byteArrayStream(aCharString->Code,aCharString->CodeLength);
 		InputCharStringDecodeStream charStringStream(&byteArrayStream,mImplementationHelper->GetLenIV());
 
-		EPDFStatusCode status = ProcessCharString(&charStringStream);
-		if(status != ePDFSuccess)
-			return ePDFFailure;
+		EStatusCode status = ProcessCharString(&charStringStream);
+		if(status != PDFHummus::eSuccess)
+			return PDFHummus::eFailure;
 		else
-			return ePDFSuccess;
+			return PDFHummus::eSuccess;
 	}
 	else
 	{
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretReturn()
+EStatusCode CharStringType1Interpreter::InterpretReturn()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1Return(mOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1Return(mOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretHsbw()
+EStatusCode CharStringType1Interpreter::InterpretHsbw()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1Hsbw(mOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1Hsbw(mOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	ClearStack();
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretEndChar()
+EStatusCode CharStringType1Interpreter::InterpretEndChar()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1Endchar(mOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1Endchar(mOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	mGotEndChar = true;
 	ClearStack();
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretRMoveto()
+EStatusCode CharStringType1Interpreter::InterpretRMoveto()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1RMoveto(mOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1RMoveto(mOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	ClearStack();
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretHMoveto()
+EStatusCode CharStringType1Interpreter::InterpretHMoveto()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1HMoveto(mOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1HMoveto(mOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	ClearStack();
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretVHCurveto()
+EStatusCode CharStringType1Interpreter::InterpretVHCurveto()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1VHCurveto(mOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1VHCurveto(mOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	ClearStack();
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretHVCurveto()
+EStatusCode CharStringType1Interpreter::InterpretHVCurveto()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1HVCurveto(mOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1HVCurveto(mOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	ClearStack();
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretDotSection()
+EStatusCode CharStringType1Interpreter::InterpretDotSection()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1DotSection(mOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1DotSection(mOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	ClearStack();
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretVStem3()
+EStatusCode CharStringType1Interpreter::InterpretVStem3()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1VStem3(mOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1VStem3(mOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	ClearStack();
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretHStem3()
+EStatusCode CharStringType1Interpreter::InterpretHStem3()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1HStem3(mOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1HStem3(mOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	ClearStack();
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretSeac()
+EStatusCode CharStringType1Interpreter::InterpretSeac()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1Seac(mOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1Seac(mOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	ClearStack();
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretSbw()
+EStatusCode CharStringType1Interpreter::InterpretSbw()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1Sbw(mOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1Sbw(mOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	ClearStack();
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretDiv()
+EStatusCode CharStringType1Interpreter::InterpretDiv()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1Div(mOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1Div(mOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	long valueA;
 	long valueB;
@@ -479,20 +481,20 @@ EPDFStatusCode CharStringType1Interpreter::InterpretDiv()
 	valueA = mOperandStack.back();
 	mOperandStack.pop_back();
 	mOperandStack.push_back(valueA/valueB);
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretCallOtherSubr()
+EStatusCode CharStringType1Interpreter::InterpretCallOtherSubr()
 {
 	long otherSubrIndex = mOperandStack.back();
-	EPDFStatusCode status;
+	EStatusCode status;
 
 	if(mImplementationHelper->IsOtherSubrSupported(otherSubrIndex))
 		status = mImplementationHelper->CallOtherSubr(mOperandStack,mPostScriptOperandStack);
 	else
 		status = DefaultCallOtherSubr();
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	mOperandStack.pop_back();
 	long argumentsCount = mOperandStack.back();
@@ -500,10 +502,10 @@ EPDFStatusCode CharStringType1Interpreter::InterpretCallOtherSubr()
 	for(long i=0;i<argumentsCount;++i)
 		mOperandStack.pop_back();
 
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::DefaultCallOtherSubr()
+EStatusCode CharStringType1Interpreter::DefaultCallOtherSubr()
 {
 	/*
 		K. at first i thought of actually implementing first 4 othersubrs- flex mechanism (hint replacement just does basically nothing).
@@ -526,29 +528,29 @@ EPDFStatusCode CharStringType1Interpreter::DefaultCallOtherSubr()
 		mPostScriptOperandStack.push_back(*it);
 		++it;
 	}
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretPop()
+EStatusCode CharStringType1Interpreter::InterpretPop()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1Pop(mOperandStack,mPostScriptOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1Pop(mOperandStack,mPostScriptOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	long parameter = mPostScriptOperandStack.back();
 	mPostScriptOperandStack.pop_back();
 	mOperandStack.push_back(parameter);
 
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Interpreter::InterpretSetCurrentPoint()
+EStatusCode CharStringType1Interpreter::InterpretSetCurrentPoint()
 {
-	EPDFStatusCode status = mImplementationHelper->Type1SetCurrentPoint(mOperandStack);
-	if(status != ePDFSuccess)
-		return ePDFFailure;
+	EStatusCode status = mImplementationHelper->Type1SetCurrentPoint(mOperandStack);
+	if(status != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
 	ClearStack();
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 

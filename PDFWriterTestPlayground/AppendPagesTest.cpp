@@ -2,7 +2,7 @@
    Source File : AppendPagesTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,11 +20,12 @@
 */
 #include "AppendPagesTest.h"
 #include "TestsRunner.h"
-#include "HummusPDFWriter.h"
+#include "PDFWriter.h"
 
 #include <iostream>
 
 using namespace std;
+using namespace PDFHummus;
 
 AppendPagesTest::AppendPagesTest(void)
 {
@@ -34,32 +35,32 @@ AppendPagesTest::~AppendPagesTest(void)
 {
 }
 
-EPDFStatusCode AppendPagesTest::Run()
+EStatusCode AppendPagesTest::Run()
 {
-	EPDFStatusCode status;
+	EStatusCode status;
 
 	do
 	{
-	 	HummusPDFWriter pdfWriter;
+	 	PDFWriter pdfWriter;
 
 		status = pdfWriter.StartPDF("C:\\PDFLibTests\\AppendPagesTest.PDF",ePDFVersion13,LogConfiguration(true,true,"c:\\pdflibtests\\AppendPagesTestLog.txt"));
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
 			break;
 		}	
 
-		EPDFStatusCodeAndObjectIDTypeList result;
+		EStatusCodeAndObjectIDTypeList result;
 		
 		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\Original.pdf",PDFPageRange());
-		if(result.first != ePDFSuccess)
+		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from Original.PDF\n";
 			status = result.first;
 			break;
 		}
 		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF",PDFPageRange());
-		if(result.first != ePDFSuccess)
+		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from XObjectContent.pdf\n";
 			status = result.first;
@@ -67,14 +68,14 @@ EPDFStatusCode AppendPagesTest::Run()
 		}
 
 		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\BasicTIFFImagesTest.PDF",PDFPageRange());
-		if(result.first != ePDFSuccess)
+		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from BasicTIFFImagesTest.PDF\n";
 			status = result.first;
 			break;
 		}
 		status = pdfWriter.EndPDF();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed in end PDF\n";
 			break;

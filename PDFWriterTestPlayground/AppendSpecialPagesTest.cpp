@@ -2,7 +2,7 @@
    Source File : AppendSpecialPagesTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,11 +20,12 @@
 */
 #include "AppendSpecialPagesTest.h"
 #include "TestsRunner.h"
-#include "HummusPDFWriter.h"
+#include "PDFWriter.h"
 
 #include <iostream>
 
 using namespace std;
+using namespace PDFHummus;
 
 AppendSpecialPagesTest::AppendSpecialPagesTest(void)
 {
@@ -34,33 +35,33 @@ AppendSpecialPagesTest::~AppendSpecialPagesTest(void)
 {
 }
 
-EPDFStatusCode AppendSpecialPagesTest::Run()
+EStatusCode AppendSpecialPagesTest::Run()
 {
-	EPDFStatusCode status;
-	HummusPDFWriter pdfWriter;
+	EStatusCode status;
+	PDFWriter pdfWriter;
 
 	do
 	{
 
 		status = pdfWriter.StartPDF("C:\\PDFLibTests\\AppendSpecialPagesTest.PDF",ePDFVersion13,LogConfiguration(true,true,"c:\\pdflibtests\\AppendSpecialPagesTestLog.txt"));
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
 			break;
 		}	
 
-		EPDFStatusCodeAndObjectIDTypeList result;
+		EStatusCodeAndObjectIDTypeList result;
 
 		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\Protected.pdf",PDFPageRange());
-		if(result.first == ePDFSuccess)
+		if(result.first == PDFHummus::eSuccess)
 		{
 			cout<<"failted to NOT ALLOW embedding of protected documents\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
 		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\ObjectStreamsModified.pdf",PDFPageRange());
-		if(result.first != ePDFSuccess)
+		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from ObjectStreamsModified.pdf\n";
 			status = result.first;
@@ -68,7 +69,7 @@ EPDFStatusCode AppendSpecialPagesTest::Run()
 		}
 
 		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\ObjectStreams.pdf",PDFPageRange());
-		if(result.first != ePDFSuccess)
+		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from ObjectStreams.pdf\n";
 			status = result.first;
@@ -77,7 +78,7 @@ EPDFStatusCode AppendSpecialPagesTest::Run()
 
 		
 		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\AddedItem.pdf",PDFPageRange());
-		if(result.first != ePDFSuccess)
+		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from AddedItem.pdf\n";
 			status = result.first;
@@ -85,7 +86,7 @@ EPDFStatusCode AppendSpecialPagesTest::Run()
 		}
 
 		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\AddedPage.pdf",PDFPageRange());
-		if(result.first != ePDFSuccess)
+		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from AddedPage.pdf\n";
 			status = result.first;
@@ -94,7 +95,7 @@ EPDFStatusCode AppendSpecialPagesTest::Run()
 
 
 		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\MultipleChange.pdf",PDFPageRange());
-		if(result.first != ePDFSuccess)
+		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from MultipleChange.pdf\n";
 			status = result.first;
@@ -102,7 +103,7 @@ EPDFStatusCode AppendSpecialPagesTest::Run()
 		}
 
 		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\RemovedItem.pdf",PDFPageRange());
-		if(result.first != ePDFSuccess)
+		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from RemovedItem.pdf\n";
 			status = result.first;
@@ -111,7 +112,7 @@ EPDFStatusCode AppendSpecialPagesTest::Run()
 
 
 		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\Linearized.pdf",PDFPageRange());
-		if(result.first != ePDFSuccess)
+		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from RemovedItem.pdf\n";
 			status = result.first;
@@ -119,7 +120,7 @@ EPDFStatusCode AppendSpecialPagesTest::Run()
 		}
 
 		status = pdfWriter.EndPDF();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed in end PDF\n";
 			break;

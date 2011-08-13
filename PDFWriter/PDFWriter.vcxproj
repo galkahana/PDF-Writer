@@ -148,16 +148,14 @@
   <ItemGroup>
     <ClInclude Include="AdapterIByteReaderWithPositionToIReadPositionProvider.h" />
     <ClInclude Include="Ascii7Encoding.h" />
-    <ClInclude Include="DocumentsContext.h" />
-    <ClInclude Include="DocumentsContextExtenderAdapter.h" />
-    <ClInclude Include="EPDFStatusCode.h" />
-    <ClInclude Include="HummusPDFParser.h" />
-    <ClInclude Include="HummusPDFWriter.h" />
+    <ClInclude Include="DocumentContext.h" />
+    <ClInclude Include="DocumentContextExtenderAdapter.h" />
+    <ClInclude Include="EStatusCode.h" />
     <ClInclude Include="IByteReader.h" />
     <ClInclude Include="IByteReaderWithPosition.h" />
     <ClInclude Include="IByteWriter.h" />
     <ClInclude Include="IByteWriterWithPosition.h" />
-    <ClInclude Include="IDocumentsContextExtender.h" />
+    <ClInclude Include="IDocumentContextExtender.h" />
     <ClInclude Include="InputBufferedStream.h" />
     <ClInclude Include="InputByteArrayStream.h" />
     <ClInclude Include="InputFile.h" />
@@ -179,7 +177,9 @@
     <ClInclude Include="CMYKRGBColor.h" />
     <ClInclude Include="EPDFVersion.h" />
     <ClInclude Include="MyStringBuf.h" />
-    <ClInclude Include="PDFObjectsParser.h" />
+    <ClInclude Include="PDFObjectParser.h" />
+    <ClInclude Include="PDFParser.h" />
+    <ClInclude Include="PDFWriter.h" />
     <ClInclude Include="SafeBufferMacrosDefs.h" />
     <ClInclude Include="BoxingBase.h" />
     <ClInclude Include="ContainerIterator.h" />
@@ -310,9 +310,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Ascii7Encoding.cpp" />
-    <ClCompile Include="DocumentsContext.cpp" />
-    <ClCompile Include="HummusPDFParser.cpp" />
-    <ClCompile Include="HummusPDFWriter.cpp" />
+    <ClCompile Include="DocumentContext.cpp" />
     <ClCompile Include="InputBufferedStream.cpp" />
     <ClCompile Include="InputByteArrayStream.cpp" />
     <ClCompile Include="InputFile.cpp" />
@@ -338,7 +336,9 @@
     <ClCompile Include="OutputStreamTraits.cpp" />
     <ClCompile Include="OutputStringBufferStream.cpp" />
     <ClCompile Include="CMYKRGBColor.cpp" />
-    <ClCompile Include="PDFObjectsParser.cpp" />
+    <ClCompile Include="PDFObjectParser.cpp" />
+    <ClCompile Include="PDFParser.cpp" />
+    <ClCompile Include="PDFWriter.cpp" />
     <ClCompile Include="RefCountObject.cpp" />
     <ClCompile Include="MD5Generator.cpp" />
     <ClCompile Include="Log.cpp" />

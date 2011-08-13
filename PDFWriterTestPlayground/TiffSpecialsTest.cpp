@@ -2,7 +2,7 @@
    Source File : TiffSpecialsTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 */
 #include "TiffSpecialsTest.h"
 #include "TestsRunner.h"
-#include "HummusPDFWriter.h"
+#include "PDFWriter.h"
 #include "PDFFormXObject.h"
 #include "PDFPage.h"
 #include "PageContentContext.h"
@@ -28,6 +28,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace PDFHummus;
 
 TiffSpecialsTest::TiffSpecialsTest(void)
 {
@@ -38,16 +39,16 @@ TiffSpecialsTest::~TiffSpecialsTest(void)
 }
 
 
-EPDFStatusCode TiffSpecialsTest::Run()
+EStatusCode TiffSpecialsTest::Run()
 {
-	HummusPDFWriter pdfWriter;
-	EPDFStatusCode status; 
+	PDFWriter pdfWriter;
+	EStatusCode status; 
 	TIFFUsageParameters TIFFParameters;
 
 	do
 	{
 		status = pdfWriter.StartPDF("C:\\PDFLibTests\\TiffSpecialsTest.PDF",ePDFVersion13,LogConfiguration(true,true,"C:\\PDFLibTests\\TiffSpecialsTestLog.txt"));
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
 			break;
@@ -55,34 +56,34 @@ EPDFStatusCode TiffSpecialsTest::Run()
 
 
 		// multipage Tiff
-		for(int i=0;i<4 && (ePDFSuccess == status);++i)
+		for(int i=0;i<4 && (PDFHummus::eSuccess == status);++i)
 		{
 			TIFFParameters.PageIndex = i;
 			PDFFormXObject* imageFormXObject = pdfWriter.CreateFormXObjectFromTIFFFile("C:\\PDFLibTests\\TestMaterials\\images\\tiff\\multipage.tif",TIFFParameters);
 			if(!imageFormXObject)
 			{
 				cout<<"failed to create image form XObject from file, for file "<<"multipage.tif page "<<i<<"\n";
-				status = ePDFFailure;
+				status = PDFHummus::eFailure;
 			}
 			else
 				status = CreatePageForImageAndRelease(pdfWriter,imageFormXObject);
 		}
 
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		// Black and White mask
 		status = CreateBlackAndWhiteMaskImage(pdfWriter);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		//Create BiLevel grayscales
 		status = CreateBiLevelGrayScales(pdfWriter);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		status = pdfWriter.EndPDF();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed in end PDF\n";
 			break;
@@ -91,9 +92,9 @@ EPDFStatusCode TiffSpecialsTest::Run()
 	return status;
 }
 
-EPDFStatusCode TiffSpecialsTest::CreatePageForImageAndRelease(HummusPDFWriter& inpdfWriter,PDFFormXObject* inImageObject)
+EStatusCode TiffSpecialsTest::CreatePageForImageAndRelease(PDFWriter& inpdfWriter,PDFFormXObject* inImageObject)
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
 	do
 	{
@@ -103,7 +104,7 @@ EPDFStatusCode TiffSpecialsTest::CreatePageForImageAndRelease(HummusPDFWriter& i
 		PageContentContext* pageContentContext = inpdfWriter.StartPageContentContext(page);
 		if(NULL == pageContentContext)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			cout<<"failed to create content context for page\n";
 		}
 
@@ -118,14 +119,14 @@ EPDFStatusCode TiffSpecialsTest::CreatePageForImageAndRelease(HummusPDFWriter& i
 		delete inImageObject;
 
 		status = inpdfWriter.EndPageContentContext(pageContentContext);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to end page content context, for Image form xobject"<<inImageObject->GetObjectID()<<"\n";
 			break;
 		}
 
 		status = inpdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to write page, for image form xobject "<<inImageObject->GetObjectID()<<"\n";
 			break;
@@ -137,9 +138,9 @@ EPDFStatusCode TiffSpecialsTest::CreatePageForImageAndRelease(HummusPDFWriter& i
 
 static const string scJimBW = "C:\\PDFLibTests\\TestMaterials\\images\\tiff\\jim___ah.tif";
 
-EPDFStatusCode TiffSpecialsTest::CreateBlackAndWhiteMaskImage(HummusPDFWriter& inpdfWriter)
+EStatusCode TiffSpecialsTest::CreateBlackAndWhiteMaskImage(PDFWriter& inpdfWriter)
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	TIFFUsageParameters TIFFParameters;
 
 	do
@@ -148,7 +149,7 @@ EPDFStatusCode TiffSpecialsTest::CreateBlackAndWhiteMaskImage(HummusPDFWriter& i
 		if(!imageBW)
 		{
 			cout<<"failed to create image BW, for file "<<scJimBW<<"\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -158,7 +159,7 @@ EPDFStatusCode TiffSpecialsTest::CreateBlackAndWhiteMaskImage(HummusPDFWriter& i
 		if(!imageBWMask)
 		{
 			cout<<"failed to create image mask BW, for file "<<scJimBW<<"\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -168,7 +169,7 @@ EPDFStatusCode TiffSpecialsTest::CreateBlackAndWhiteMaskImage(HummusPDFWriter& i
 		PageContentContext* pageContentContext = inpdfWriter.StartPageContentContext(page);
 		if(NULL == pageContentContext)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			cout<<"failed to create content context for page\n";
 		}
 
@@ -189,14 +190,14 @@ EPDFStatusCode TiffSpecialsTest::CreateBlackAndWhiteMaskImage(HummusPDFWriter& i
 		delete imageBWMask;
 
 		status = inpdfWriter.EndPageContentContext(pageContentContext);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to end page content context, for Image BWs test\n";
 			break;
 		}
 
 		status = inpdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to write page, for image BWs test\n";
 			break;
@@ -208,9 +209,9 @@ EPDFStatusCode TiffSpecialsTest::CreateBlackAndWhiteMaskImage(HummusPDFWriter& i
 
 static const string scWJim = "C:\\PDFLibTests\\TestMaterials\\images\\tiff\\jim___cg.tif";
 
-EPDFStatusCode TiffSpecialsTest::CreateBiLevelGrayScales(HummusPDFWriter& inpdfWriter)
+EStatusCode TiffSpecialsTest::CreateBiLevelGrayScales(PDFWriter& inpdfWriter)
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	TIFFUsageParameters TIFFParameters;
 
 	do
@@ -221,7 +222,7 @@ EPDFStatusCode TiffSpecialsTest::CreateBiLevelGrayScales(HummusPDFWriter& inpdfW
 		if(!imageGrayScale)
 		{
 			cout<<"failed to create image form XObject from file, grayscale for file "<<scWJim;
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -233,7 +234,7 @@ EPDFStatusCode TiffSpecialsTest::CreateBiLevelGrayScales(HummusPDFWriter& inpdfW
 		if(!imageGrayScaleGreen)
 		{
 			cout<<"failed to create image form XObject from file, green n white for file "<<scWJim;
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -246,7 +247,7 @@ EPDFStatusCode TiffSpecialsTest::CreateBiLevelGrayScales(HummusPDFWriter& inpdfW
 		if(!imageGrayScaleCyanMagenta)
 		{
 			cout<<"failed to create image form XObject from file, cyan magenta n white for file "<<scWJim;
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -258,7 +259,7 @@ EPDFStatusCode TiffSpecialsTest::CreateBiLevelGrayScales(HummusPDFWriter& inpdfW
 		if(!imageGrayScaleGreenVSRed)
 		{
 			cout<<"failed to create image form XObject from file, green n red for file "<<scWJim;
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -270,7 +271,7 @@ EPDFStatusCode TiffSpecialsTest::CreateBiLevelGrayScales(HummusPDFWriter& inpdfW
 		if(!imageGrayScaleCyanVSMagenta)
 		{
 			cout<<"failed to create image form XObject from file, cyan n magenta for file "<<scWJim;
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -281,7 +282,7 @@ EPDFStatusCode TiffSpecialsTest::CreateBiLevelGrayScales(HummusPDFWriter& inpdfW
 		PageContentContext* pageContentContext = inpdfWriter.StartPageContentContext(page);
 		if(NULL == pageContentContext)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			cout<<"failed to create content context for page\n";
 		}
 
@@ -317,14 +318,14 @@ EPDFStatusCode TiffSpecialsTest::CreateBiLevelGrayScales(HummusPDFWriter& inpdfW
 		delete imageGrayScaleCyanVSMagenta;
 
 		status = inpdfWriter.EndPageContentContext(pageContentContext);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to end page content context, for bilevel grayscale images\n";
 			break;
 		}
 
 		status = inpdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to write page, for bilevel grayscale images\n";
 			break;

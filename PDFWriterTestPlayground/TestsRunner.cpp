@@ -2,7 +2,7 @@
    Source File : TestsRunner.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace PDFHummus;
 
 TestsRunner::TestsRunner(void)
 {
@@ -45,7 +46,7 @@ void TestsRunner::DeleteTests()
 	mTests.clear();
 }
 
-EPDFStatusCode TestsRunner::RunAll()
+EStatusCode TestsRunner::RunAll()
 {
 	StringAndTestUnitList testsList;
 	StringToTestUnitMap::iterator it = mTestsByName.begin();
@@ -54,14 +55,14 @@ EPDFStatusCode TestsRunner::RunAll()
 	return RunTestsInList(testsList);
 }
 
-EPDFStatusCode TestsRunner::RunTestsInList(const StringAndTestUnitList& inTests)
+EStatusCode TestsRunner::RunTestsInList(const StringAndTestUnitList& inTests)
 {
-	EPDFStatusCode testsStatus;
+	EStatusCode testsStatus;
 
 	if(inTests.size() == 0)
 	{
 		cout<<"No tests to run\n";
-		testsStatus = ePDFSuccess;
+		testsStatus = PDFHummus::eSuccess;
 	}
 	else if(inTests.size() == 1)
 	{
@@ -71,17 +72,17 @@ EPDFStatusCode TestsRunner::RunTestsInList(const StringAndTestUnitList& inTests)
 	{
 		unsigned long failedCount = 0,succeededCount = 0;
 		StringAndTestUnitList::const_iterator it = inTests.begin();
-		EPDFStatusCode testStatus;
-		testsStatus = ePDFSuccess;
+		EStatusCode testStatus;
+		testsStatus = PDFHummus::eSuccess;
 
 		cout<<"Start tests run\n";
 		for(;it!= inTests.end();++it)
 		{
 			testStatus = RunSingleTest(it->first,it->second);
-			if(ePDFFailure == testStatus)
+			if(PDFHummus::eFailure == testStatus)
 			{
 				++failedCount;
-				testsStatus = ePDFFailure;
+				testsStatus = PDFHummus::eFailure;
 			}
 			else
 			{
@@ -94,13 +95,13 @@ EPDFStatusCode TestsRunner::RunTestsInList(const StringAndTestUnitList& inTests)
 	return testsStatus;
 }
 
-EPDFStatusCode TestsRunner::RunSingleTest(const string& inTestName,ITestUnit* inTest)
+EStatusCode TestsRunner::RunSingleTest(const string& inTestName,ITestUnit* inTest)
 {
-	EPDFStatusCode testStatus;
+	EStatusCode testStatus;
 	
 	cout<<"Running Test "<<inTestName<<"\n";
 	testStatus = inTest->Run();
-	if(ePDFFailure == testStatus)
+	if(PDFHummus::eFailure == testStatus)
 		cout<<"Test "<<inTestName<<" Failed\n\n";
 	else
 		cout<<"Test "<<inTestName<<" Succeeded\n\n";
@@ -123,20 +124,20 @@ void TestsRunner::AddTest(const string& inTestLabel,ITestUnit* inTest)
 	AddTest(inTestLabel,scGeneral,inTest);
 }
 
-EPDFStatusCode TestsRunner::RunTest(const string& inTestLabel)
+EStatusCode TestsRunner::RunTest(const string& inTestLabel)
 {
 	StringToTestUnitMap::iterator it = mTestsByName.find(inTestLabel);
 
 	if(it == mTestsByName.end())
 	{
 		cout<<"Test not found\n";
-		return ePDFSuccess;
+		return PDFHummus::eSuccess;
 	}
 	else
 		return RunSingleTest(it->first,it->second);
 }
 
-EPDFStatusCode TestsRunner::RunTests(const StringList& inTestsLabels)
+EStatusCode TestsRunner::RunTests(const StringList& inTestsLabels)
 {
 	StringAndTestUnitList testsList;
 	StringList::const_iterator it = inTestsLabels.begin();
@@ -151,20 +152,20 @@ EPDFStatusCode TestsRunner::RunTests(const StringList& inTestsLabels)
 	return RunTestsInList(testsList);
 }
 
-EPDFStatusCode TestsRunner::RunCategory(const string& inCategory)
+EStatusCode TestsRunner::RunCategory(const string& inCategory)
 {
 	StringToStringAndTestUnitListMap::iterator it = mTests.find(inCategory);
 
 	if(it == mTests.end())
 	{
 		cout<<"Category "<<inCategory<<"not found\n";
-		return ePDFSuccess;
+		return PDFHummus::eSuccess;
 	}
 	else
 		return RunTestsInList(it->second);
 }
 
-EPDFStatusCode TestsRunner::RunCategories(const StringList& inCategories)
+EStatusCode TestsRunner::RunCategories(const StringList& inCategories)
 {
 	StringAndTestUnitList testsList;
 	StringList::const_iterator it = inCategories.begin();
@@ -181,7 +182,7 @@ EPDFStatusCode TestsRunner::RunCategories(const StringList& inCategories)
 	return RunTestsInList(testsList);
 }
 
-EPDFStatusCode TestsRunner::RunCategories(const StringList& inCategories, const StringSet& inTestsToExclude)
+EStatusCode TestsRunner::RunCategories(const StringList& inCategories, const StringSet& inTestsToExclude)
 {
 	StringAndTestUnitList testsList;
 	StringList::const_iterator it = inCategories.begin();
@@ -204,7 +205,7 @@ EPDFStatusCode TestsRunner::RunCategories(const StringList& inCategories, const 
 }
 
 
-EPDFStatusCode TestsRunner::RunExcludeCategories(const StringSet& inCategories)
+EStatusCode TestsRunner::RunExcludeCategories(const StringSet& inCategories)
 {
 	StringAndTestUnitList testsList;
 	StringToStringAndTestUnitListMap::iterator it = mTests.begin();
@@ -215,7 +216,7 @@ EPDFStatusCode TestsRunner::RunExcludeCategories(const StringSet& inCategories)
 	return RunTestsInList(testsList);
 }
 
-EPDFStatusCode TestsRunner::RunExcludeTests(const StringSet& inTests)
+EStatusCode TestsRunner::RunExcludeTests(const StringSet& inTests)
 {
 	StringAndTestUnitList testsList;
 	StringToTestUnitMap::iterator it = mTestsByName.begin();

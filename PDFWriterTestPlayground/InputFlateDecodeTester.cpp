@@ -2,7 +2,7 @@
    Source File : InputFlateDecodeTester.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace PDFHummus;
 
 InputFlateDecodeTester::InputFlateDecodeTester(void)
 {
@@ -37,7 +38,7 @@ InputFlateDecodeTester::~InputFlateDecodeTester(void)
 {
 }
 
-EPDFStatusCode InputFlateDecodeTester::Run()
+EStatusCode InputFlateDecodeTester::Run()
 {
 	OutputFile outputFile;
 	string aString("hello world");
@@ -79,10 +80,10 @@ EPDFStatusCode InputFlateDecodeTester::Run()
 	if(!isSame)
 	{
 		cout<<"Read failes. different characters than what expected\n";
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 	else
-		return ePDFSuccess;
+		return PDFHummus::eSuccess;
 
 }
 

@@ -37,10 +37,10 @@ public:
 	virtual ~WrittenFontCFF(void);
 
 
-	virtual EPDFStatusCode WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo);
+	virtual PDFHummus::EStatusCode WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo);
 
-	virtual EPDFStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectId);
-	virtual EPDFStatusCode ReadState(HummusPDFParser* inStateReader,ObjectIDType inObjectID);
+	virtual PDFHummus::EStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectId);
+	virtual PDFHummus::EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);
 
 private:
 	virtual bool AddToANSIRepresentation(const GlyphUnicodeMappingList& inGlyphsList,

@@ -2,7 +2,7 @@
    Source File : MyTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@
 #include <vector>
 
 #include <iostream>
+
+using namespace PDFHummus;
 
 #define N_STD_STRINGS 391
 static const char* scStandardStrings[N_STD_STRINGS] = {
@@ -89,7 +91,7 @@ static bool sStringSort(const StringAndInt& inLeft, const StringAndInt& inRight)
 	return strcmp(inLeft.first,inRight.first) < 0;
 }
 
-EPDFStatusCode MyTest::Run()
+EStatusCode MyTest::Run()
 {
 	StringAndIntVector stringsVector;
 	int i=0;
@@ -134,7 +136,7 @@ EPDFStatusCode MyTest::Run()
 	}	
 	cout<<stringsVector[N_STD_STRINGS-1].second<<"\n};\n";
 
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
 

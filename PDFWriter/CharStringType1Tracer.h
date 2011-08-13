@@ -19,7 +19,7 @@
    
 */
 #pragma once
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include "IType1InterpreterImplementation.h"
 #include "PrimitiveObjectsWriter.h"
 #include <string>
@@ -35,37 +35,37 @@ public:
 	CharStringType1Tracer(void);
 	~CharStringType1Tracer(void);
 
-	EPDFStatusCode TraceGlyphProgram(Byte inGlyphIndex, Type1Input* inType1Input, IByteWriter* inWriter);
-	EPDFStatusCode TraceGlyphProgram(const string& inGlyphName, Type1Input* inType1Input, IByteWriter* inWriter);
+	PDFHummus::EStatusCode TraceGlyphProgram(Byte inGlyphIndex, Type1Input* inType1Input, IByteWriter* inWriter);
+	PDFHummus::EStatusCode TraceGlyphProgram(const string& inGlyphName, Type1Input* inType1Input, IByteWriter* inWriter);
 
 	// IType1InterpreterImplementation
-	virtual EPDFStatusCode Type1Hstem(const LongList& inOperandList);
-	virtual EPDFStatusCode Type1Vstem(const LongList& inOperandList);
-	virtual EPDFStatusCode Type1VMoveto(const LongList& inOperandList);
-	virtual EPDFStatusCode Type1RLineto(const LongList& inOperandList);
-	virtual EPDFStatusCode Type1HLineto(const LongList& inOperandList);
-	virtual EPDFStatusCode Type1VLineto(const LongList& inOperandList);
-	virtual EPDFStatusCode Type1RRCurveto(const LongList& inOperandList);
-	virtual EPDFStatusCode Type1ClosePath(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1Hstem(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1Vstem(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1VMoveto(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1RLineto(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1HLineto(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1VLineto(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1RRCurveto(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1ClosePath(const LongList& inOperandList);
 	virtual Type1CharString* GetSubr(long inSubrIndex);
-	virtual EPDFStatusCode Type1Return(const LongList& inOperandList);
-	virtual EPDFStatusCode Type1Hsbw(const LongList& inOperandList);
-	virtual EPDFStatusCode Type1Endchar(const LongList& inOperandList);
-	virtual EPDFStatusCode Type1RMoveto(const LongList& inOperandList);
-	virtual EPDFStatusCode Type1HMoveto(const LongList& inOperandList);
-	virtual EPDFStatusCode Type1VHCurveto(const LongList& inOperandList);
-	virtual EPDFStatusCode Type1HVCurveto(const LongList& inOperandList);
-	virtual EPDFStatusCode Type1DotSection(const LongList& inOperandList);
-	virtual EPDFStatusCode Type1VStem3(const LongList& inOperandList);
-	virtual EPDFStatusCode Type1HStem3(const LongList& inOperandList);
-	virtual EPDFStatusCode Type1Seac(const LongList& inOperandList);
-	virtual EPDFStatusCode Type1Sbw(const LongList& inOperandList);
-	virtual EPDFStatusCode Type1Div(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1Return(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1Hsbw(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1Endchar(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1RMoveto(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1HMoveto(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1VHCurveto(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1HVCurveto(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1DotSection(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1VStem3(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1HStem3(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1Seac(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1Sbw(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1Div(const LongList& inOperandList);
 	virtual bool IsOtherSubrSupported(long inOtherSubrsIndex);
-	virtual EPDFStatusCode CallOtherSubr(const LongList& inOperandList,LongList& outPostScriptOperandStack);
-	virtual EPDFStatusCode Type1Pop(const LongList& inOperandList,const LongList& inPostScriptOperandStack);
-	virtual EPDFStatusCode Type1SetCurrentPoint(const LongList& inOperandList);
-	virtual EPDFStatusCode Type1InterpretNumber(long inOperand);
+	virtual PDFHummus::EStatusCode CallOtherSubr(const LongList& inOperandList,LongList& outPostScriptOperandStack);
+	virtual PDFHummus::EStatusCode Type1Pop(const LongList& inOperandList,const LongList& inPostScriptOperandStack);
+	virtual PDFHummus::EStatusCode Type1SetCurrentPoint(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1InterpretNumber(long inOperand);
 	virtual unsigned long GetLenIV();
 
 private:

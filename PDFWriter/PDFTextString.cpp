@@ -78,7 +78,7 @@ void PDFTextString::ConvertFromUTF8(const string& inStringToConvert)
 		
 		UnicodeString unicodeString;
 		unicodeString.FromUTF8(inStringToConvert);
-		EPDFStatusCodeAndString result = unicodeString.ToUTF16BE(true);
+		EStatusCodeAndString result = unicodeString.ToUTF16BE(true);
 		
 		mTextString = result.second;
 
@@ -132,7 +132,7 @@ string PDFTextString::ToUTF8FromUTF16BE() const
 
 	unicodeString.FromUTF16(mTextString);
 
-	EPDFStatusCodeAndString result = unicodeString.ToUTF8();
+	EStatusCodeAndString result = unicodeString.ToUTF8();
 	return result.second;
 }
 

@@ -25,6 +25,8 @@
 #include "ObjectsContext.h"
 #include "IndirectObjectsReferenceRegistry.h"
 
+using namespace PDFHummus;
+
 TrueTypeDescendentFontWriter::TrueTypeDescendentFontWriter(void)
 {
 }
@@ -43,7 +45,7 @@ static UIntVector GetOrderedKeys(const UIntAndGlyphEncodingInfoVector& inMap)
 }
 
 
-EPDFStatusCode TrueTypeDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID, 
+EStatusCode TrueTypeDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID, 
 														const string& inFontName,
 														FreeTypeFaceWrapper& inFontInfo,
 														const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
@@ -54,9 +56,9 @@ EPDFStatusCode TrueTypeDescendentFontWriter::WriteFont(	ObjectIDType inDecendent
 	mEmbeddedFontFileObjectID = 0;
 
 	TrueTypeEmbeddedFontWriter embeddedFontWriter;
-	EPDFStatusCode status = embeddedFontWriter.WriteEmbeddedFont(inFontInfo,GetOrderedKeys(inEncodedGlyphs),inObjectsContext,mEmbeddedFontFileObjectID);
+	EStatusCode status = embeddedFontWriter.WriteEmbeddedFont(inFontInfo,GetOrderedKeys(inEncodedGlyphs),inObjectsContext,mEmbeddedFontFileObjectID);
 
-	if(ePDFFailure == status)
+	if(PDFHummus::eFailure == status)
 		return status;
 
 	DescendentFontWriter descendentFontWriter;

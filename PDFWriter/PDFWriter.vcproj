@@ -478,11 +478,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\EPDFStatusCode.h"
+					RelativePath=".\EPDFVersion.h"
 					>
 				</File>
 				<File
-					RelativePath=".\EPDFVersion.h"
+					RelativePath=".\EStatusCode.h"
 					>
 				</File>
 				<File
@@ -647,15 +647,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\DocumentsContext.cpp"
+				RelativePath=".\DocumentContext.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\DocumentsContext.h"
+				RelativePath=".\DocumentContext.h"
 				>
 			</File>
 			<File
-				RelativePath=".\DocumentsContextExtenderAdapter.h"
+				RelativePath=".\DocumentContextExtenderAdapter.h"
 				>
 			</File>
 			<File
@@ -679,7 +679,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\IDocumentsContextExtender.h"
+				RelativePath=".\IDocumentContextExtender.h"
 				>
 			</File>
 			<File
@@ -1287,14 +1287,6 @@
 			Name="PDF Embedding"
 			>
 			<File
-				RelativePath=".\HummusPDFParser.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\HummusPDFParser.h"
-				>
-			</File>
-			<File
 				RelativePath=".\PDFDocumentCopyingContext.cpp"
 				>
 			</File>
@@ -1315,11 +1307,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\PDFObjectsParser.cpp"
+				RelativePath=".\PDFObjectParser.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\PDFObjectsParser.h"
+				RelativePath=".\PDFObjectParser.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PDFParser.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PDFParser.h"
 				>
 			</File>
 			<File
@@ -1524,11 +1524,11 @@
 			</File>
 		</Filter>
 		<File
-			RelativePath=".\HummusPDFWriter.cpp"
+			RelativePath=".\PDFWriter.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\HummusPDFWriter.h"
+			RelativePath=".\PDFWriter.h"
 			>
 		</File>
 	</Files>

@@ -2,7 +2,7 @@
    Source File : UppercaseSequanceTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace PDFHummus;
 
 UppercaseSequanceTest::UppercaseSequanceTest(void)
 {
@@ -32,9 +33,9 @@ UppercaseSequanceTest::~UppercaseSequanceTest(void)
 {
 }
 
-EPDFStatusCode UppercaseSequanceTest::Run()
+EStatusCode UppercaseSequanceTest::Run()
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	UppercaseSequance sequance;
 
 	do
@@ -43,7 +44,7 @@ EPDFStatusCode UppercaseSequanceTest::Run()
 		if(value != "AAAAAB")
 		{
 			cout<<"Failed in single increase. value is  "<<value.c_str()<<". should be AAAAAB\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 		else
@@ -56,7 +57,7 @@ EPDFStatusCode UppercaseSequanceTest::Run()
 		if(value != "AAAABA")
 		{
 			cout<<"Failed in 24 increase. value is  "<<value.c_str()<<". should be AAAABA\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 		else
@@ -69,7 +70,7 @@ EPDFStatusCode UppercaseSequanceTest::Run()
 		if(value != "AAABAA")
 		{
 			cout<<"Failed in 26*25 increase. value is  "<<value.c_str()<<". should be AAABAA\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 		else

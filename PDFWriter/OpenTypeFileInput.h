@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include "OpenTypePrimitiveReader.h"
 #include "IByteReaderWithPosition.h"
 #include "CFFFileInput.h"
@@ -198,8 +198,8 @@ public:
 	~OpenTypeFileInput(void);
 
 
-	EPDFStatusCode ReadOpenTypeFile(const string& inFontFilePath);
-	EPDFStatusCode ReadOpenTypeFile(IByteReaderWithPosition* inTrueTypeFile);
+	PDFHummus::EStatusCode ReadOpenTypeFile(const string& inFontFilePath);
+	PDFHummus::EStatusCode ReadOpenTypeFile(IByteReaderWithPosition* inTrueTypeFile);
 
 
 	EOpenTypeInputType GetOpenTypeFontType();
@@ -235,18 +235,18 @@ private:
 										 // be empty, to avoid having to change the glyphs indices. some
 										 // technique some producers use
 
-	EPDFStatusCode ReadOpenTypeHeader();
-	EPDFStatusCode ReadOpenTypeSFNT();
-	EPDFStatusCode ReadHead();
-	EPDFStatusCode ReadMaxP();
-	EPDFStatusCode ReadHHea();
-	EPDFStatusCode ReadHMtx();
-	EPDFStatusCode ReadOS2();
-	EPDFStatusCode ReadName();
-	EPDFStatusCode ReadLoca();
-	EPDFStatusCode ReadGlyfForDependencies();
+	PDFHummus::EStatusCode ReadOpenTypeHeader();
+	PDFHummus::EStatusCode ReadOpenTypeSFNT();
+	PDFHummus::EStatusCode ReadHead();
+	PDFHummus::EStatusCode ReadMaxP();
+	PDFHummus::EStatusCode ReadHHea();
+	PDFHummus::EStatusCode ReadHMtx();
+	PDFHummus::EStatusCode ReadOS2();
+	PDFHummus::EStatusCode ReadName();
+	PDFHummus::EStatusCode ReadLoca();
+	PDFHummus::EStatusCode ReadGlyfForDependencies();
 	unsigned long GetTag(const char* inTagName);
 	void FreeTables();
-	EPDFStatusCode ReadCFF();
+	PDFHummus::EStatusCode ReadCFF();
 
 };

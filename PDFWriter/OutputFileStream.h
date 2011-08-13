@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include "IByteWriterWithPosition.h"
 
 #include <string>
@@ -39,8 +39,8 @@ public:
 	OutputFileStream(const string& inFilePath,bool inAppend = false);
 
 	// input file path is in UTF8
-	EPDFStatusCode Open(const string& inFilePath,bool inAppend = false);
-	EPDFStatusCode Close();
+	PDFHummus::EStatusCode Open(const string& inFilePath,bool inAppend = false);
+	PDFHummus::EStatusCode Close();
 
 	// IByteWriter implementation
 	virtual IOBasicTypes::LongBufferSizeType Write(const IOBasicTypes::Byte* inBuffer,IOBasicTypes::LongBufferSizeType inSize);

@@ -2,7 +2,7 @@
    Source File : LogTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@
 #include "Log.h"
 #include "Trace.h"
 
+using namespace PDFHummus;
+
 LogTest::LogTest(void)
 {
 }
@@ -30,7 +32,7 @@ LogTest::~LogTest(void)
 {
 }
 
-EPDFStatusCode LogTest::Run()
+EStatusCode LogTest::Run()
 {
 	Log log("C:\\PDFLibTests\\logTest.txt",true);
 
@@ -47,7 +49,7 @@ EPDFStatusCode LogTest::Run()
 	trace.TraceToLog("Tracing number %d %d",10,20);
 	trace.TraceToLog("Tracing some other items %s 0x%x","hello",20);
 
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
 ADD_CATEGORIZED_TEST(LogTest,"IO")

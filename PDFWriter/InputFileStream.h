@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include "IByteReaderWithPosition.h"
 
 #include <string>
@@ -39,8 +39,8 @@ public:
 	InputFileStream(const string& inFilePath);
 
 	// input file path is in UTF8
-	EPDFStatusCode Open(const string& inFilePath);
-	EPDFStatusCode Close();
+	PDFHummus::EStatusCode Open(const string& inFilePath);
+	PDFHummus::EStatusCode Close();
 
 	// IByteReaderWithPosition implementation
 	virtual LongBufferSizeType Read(Byte* inBuffer,LongBufferSizeType inBufferSize);

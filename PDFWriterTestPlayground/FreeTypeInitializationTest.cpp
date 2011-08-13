@@ -2,7 +2,7 @@
    Source File : FreeTypeInitializationTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace PDFHummus;
 
 FreeTypeInitializationTest::FreeTypeInitializationTest(void)
 {
@@ -44,26 +45,26 @@ FreeTypeInitializationTest::~FreeTypeInitializationTest(void)
 {
 }
 
-EPDFStatusCode FreeTypeInitializationTest::Run()
+EStatusCode FreeTypeInitializationTest::Run()
 {
 	Singleton<Trace>::GetInstance()->SetLogSettings("c:\\PDFLibTests\\FreeTypeTest.txt",true,true);
 
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	FreeTypeWrapper ftWrapper;
 
 
 	do
 	{
 		status = ShowFaceProperties(ftWrapper,"C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		status = ShowFaceProperties(ftWrapper,"C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFB","C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFM");
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		status = ShowFaceProperties(ftWrapper,"C:\\PDFLibTests\\TestMaterials\\fonts\\BrushScriptStd.otf");
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 	}while(false);
@@ -74,10 +75,10 @@ EPDFStatusCode FreeTypeInitializationTest::Run()
 	return status;
 }
 
-EPDFStatusCode FreeTypeInitializationTest::ShowFaceProperties(FreeTypeWrapper& inFreeType,const char* inFontFilePath,const char* inSecondaryFontFilePath)
+EStatusCode FreeTypeInitializationTest::ShowFaceProperties(FreeTypeWrapper& inFreeType,const char* inFontFilePath,const char* inSecondaryFontFilePath)
 {
 	FT_Face face;
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
 	do
 	{
@@ -88,7 +89,7 @@ EPDFStatusCode FreeTypeInitializationTest::ShowFaceProperties(FreeTypeWrapper& i
 			face = inFreeType.NewFace(inFontFilePath);
 		if(!face)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			cout<<"Failed to load font from "<<inFontFilePath<<"\n";
 			break;
 		}
@@ -101,9 +102,9 @@ EPDFStatusCode FreeTypeInitializationTest::ShowFaceProperties(FreeTypeWrapper& i
 	return status;
 }
 
-EPDFStatusCode FreeTypeInitializationTest::ShowGlobalFontProperties(FreeTypeWrapper& inFreeType,FT_Face inFace)
+EStatusCode FreeTypeInitializationTest::ShowGlobalFontProperties(FreeTypeWrapper& inFreeType,FT_Face inFace)
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
 	FreeTypeFaceWrapper face(inFace,"",false);
 
@@ -137,7 +138,7 @@ EPDFStatusCode FreeTypeInitializationTest::ShowGlobalFontProperties(FreeTypeWrap
 		if(FT_Get_CID_Registry_Ordering_Supplement(face,&registry,&ordering,&supplement) != 0)
 		{
 			cout<<"Failed to read registry, ordering and supplement informaiton\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 		}
 		cout<<"CID Registry = "<<registry<<"\n";
 		cout<<"CID Ordering = "<<ordering<<"\n";

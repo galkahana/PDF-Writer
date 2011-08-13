@@ -2,7 +2,7 @@
    Source File : PDFDateTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace PDFHummus;
 
 PDFDateTest::PDFDateTest(void)
 {
@@ -33,15 +34,15 @@ PDFDateTest::~PDFDateTest(void)
 {
 }
 
-EPDFStatusCode PDFDateTest::Run()
+EStatusCode PDFDateTest::Run()
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
 	// Empty Date
 	PDFDate emptyDate;
 	if(emptyDate.ToString() != "")
 	{
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 		cout<<"wrong string conversion for empty date - "<<emptyDate.ToString().c_str()<<"\n";
 	}
 
@@ -50,7 +51,7 @@ EPDFStatusCode PDFDateTest::Run()
 	yearDate.Year = 1984;
 	if(yearDate.ToString() != "D:1984")
 	{
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 		cout<<"wrong string conversion for year date - "<<yearDate.ToString().c_str()<<"\n";
 	}
 
@@ -61,7 +62,7 @@ EPDFStatusCode PDFDateTest::Run()
 	dayDate.Day = 3;
 	if(dayDate.ToString() != "D:19840403")
 	{
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 		cout<<"wrong string conversion for day date - "<<dayDate.ToString().c_str()<<"\n";
 	}
 	// local Time Date
@@ -74,7 +75,7 @@ EPDFStatusCode PDFDateTest::Run()
 	localTimeDate.Second = 45;
 	if(localTimeDate.ToString() != "D:19840403183045")
 	{
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 		cout<<"wrong string conversion for local date - "<<localTimeDate.ToString().c_str()<<"\n";
 	}
 	// Fully qualified Time date
@@ -90,7 +91,7 @@ EPDFStatusCode PDFDateTest::Run()
 	fullDate.MinuteFromUTC = 0;
 	if(fullDate.ToString() != "D:19840403183045-02'00'")
 	{
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 		cout<<"wrong string conversion for full date - "<<fullDate.ToString().c_str()<<"\n";
 	}
 

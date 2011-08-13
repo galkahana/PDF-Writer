@@ -2,7 +2,7 @@
    Source File : OpenTypeTest.h
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -28,10 +28,10 @@ public:
 	OpenTypeTest(void);
 	~OpenTypeTest(void);
 
-	virtual EPDFStatusCode Run();
+	virtual PDFHummus::EStatusCode Run();
 
 private:
-	EPDFStatusCode SaveCharstringCode(unsigned short inFontIndex,unsigned short inGlyphIndex,CFFFileInput* inCFFFileInput);
-	EPDFStatusCode TestFont();
+	PDFHummus::EStatusCode SaveCharstringCode(unsigned short inFontIndex,unsigned short inGlyphIndex,CFFFileInput* inCFFFileInput);
+	PDFHummus::EStatusCode TestFont();
 
 };

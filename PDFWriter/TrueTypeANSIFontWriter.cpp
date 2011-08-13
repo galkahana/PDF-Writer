@@ -30,6 +30,8 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+using namespace PDFHummus;
+
 TrueTypeANSIFontWriter::TrueTypeANSIFontWriter(void)
 {
 }
@@ -39,7 +41,7 @@ TrueTypeANSIFontWriter::~TrueTypeANSIFontWriter(void)
 }
 
 static const string scPlus = "+";
-EPDFStatusCode TrueTypeANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
+EStatusCode TrueTypeANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 											WrittenFontRepresentation* inFontOccurrence,
 											ObjectsContext* inObjectsContext)
 {
@@ -47,7 +49,7 @@ EPDFStatusCode TrueTypeANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInf
 	if(!postscriptFontName)
 	{
 		TRACE_LOG("TrueTypeANSIFontWriter::WriteFont, unexpected failure. no postscript font name for font");
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 	std::string subsetFontName = inObjectsContext->GenerateSubsetFontPrefix() + scPlus + postscriptFontName;
 
@@ -57,11 +59,11 @@ EPDFStatusCode TrueTypeANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInf
 
 	TrueTypeEmbeddedFontWriter embeddedFontWriter;
 
-	EPDFStatusCode status = embeddedFontWriter.WriteEmbeddedFont(	inFontInfo,
+	EStatusCode status = embeddedFontWriter.WriteEmbeddedFont(	inFontInfo,
 																inFontOccurrence->GetGlyphIDsAsOrderedVector(),
 																inObjectsContext,
 																mEmbeddedFontFileObjectID);
-	if(ePDFFailure == status)
+	if(PDFHummus::eFailure == status)
 		return status;
 
 	ANSIFontWriter fontWriter;

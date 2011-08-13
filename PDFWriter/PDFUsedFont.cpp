@@ -23,10 +23,12 @@
 #include "UnicodeString.h"
 #include "ObjectsContext.h"
 #include "DictionaryContext.h"
-#include "HummusPDFParser.h"
+#include "PDFParser.h"
 #include "PDFObjectCast.h"
 #include "PDFDictionary.h"
 #include "PDFIndirectObjectReference.h"
+
+using namespace PDFHummus;
 
 PDFUsedFont::PDFUsedFont(FT_Face inInputFace,
 						 const string& inFontFilePath,
@@ -47,7 +49,7 @@ bool PDFUsedFont::IsValid()
 	return mFaceWrapper.IsValid();
 }
 
-EPDFStatusCode PDFUsedFont::EncodeStringForShowing(const GlyphUnicodeMappingList& inText,
+EStatusCode PDFUsedFont::EncodeStringForShowing(const GlyphUnicodeMappingList& inText,
 												ObjectIDType &outFontObjectToUse,
 												UShortList& outCharactersToUse,
 												bool& outTreatCharactersAsCID)
@@ -57,16 +59,16 @@ EPDFStatusCode PDFUsedFont::EncodeStringForShowing(const GlyphUnicodeMappingList
 
 	mWrittenFont->AppendGlyphs(inText,outCharactersToUse,outTreatCharactersAsCID,outFontObjectToUse);
 
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode PDFUsedFont::TranslateStringToGlyphs(const string& inText,GlyphUnicodeMappingList& outGlyphsUnicodeMapping)
+EStatusCode PDFUsedFont::TranslateStringToGlyphs(const string& inText,GlyphUnicodeMappingList& outGlyphsUnicodeMapping)
 {
 	UIntList glyphs;
 	UnicodeString unicode;
 
-	EPDFStatusCode status = unicode.FromUTF8(inText);
-	if(status != ePDFSuccess)
+	EStatusCode status = unicode.FromUTF8(inText);
+	if(status != PDFHummus::eSuccess)
 		return status;
 
 
@@ -81,7 +83,7 @@ EPDFStatusCode PDFUsedFont::TranslateStringToGlyphs(const string& inText,GlyphUn
 	return status;
 }
 
-EPDFStatusCode PDFUsedFont::EncodeStringsForShowing(const GlyphUnicodeMappingListList& inText,
+EStatusCode PDFUsedFont::EncodeStringsForShowing(const GlyphUnicodeMappingListList& inText,
 												ObjectIDType &outFontObjectToUse,
 												UShortListList& outCharactersToUse,
 												bool& outTreatCharactersAsCID)
@@ -91,15 +93,15 @@ EPDFStatusCode PDFUsedFont::EncodeStringsForShowing(const GlyphUnicodeMappingLis
 
 	mWrittenFont->AppendGlyphs(inText,outCharactersToUse,outTreatCharactersAsCID,outFontObjectToUse);
 
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode PDFUsedFont::WriteFontDefinition()
+EStatusCode PDFUsedFont::WriteFontDefinition()
 {
 	return mWrittenFont->WriteFontDefinition(mFaceWrapper);
 }
 
-EPDFStatusCode PDFUsedFont::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
+EStatusCode PDFUsedFont::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
 {
 	inStateWriter->StartNewIndirectObject(inObjectID);
 	DictionaryContext* pdfUsedFontObject = inStateWriter->StartDictionary();
@@ -123,24 +125,24 @@ EPDFStatusCode PDFUsedFont::WriteState(ObjectsContext* inStateWriter,ObjectIDTyp
 	if(mWrittenFont)
 		mWrittenFont->WriteState(inStateWriter,writtenFontObject);
 
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode PDFUsedFont::ReadState(HummusPDFParser* inStateReader,ObjectIDType inObjectID)
+EStatusCode PDFUsedFont::ReadState(PDFParser* inStateReader,ObjectIDType inObjectID)
 {
 	PDFObjectCastPtr<PDFDictionary> pdfUsedFontState(inStateReader->ParseNewObject(inObjectID));
 
 	PDFObjectCastPtr<PDFIndirectObjectReference> writtenFontReference(pdfUsedFontState->QueryDirectObject("mWrittenFont"));
 
 	if(!writtenFontReference)
-		return ePDFSuccess;
+		return PDFHummus::eSuccess;
 
 	if(mWrittenFont)
 		delete mWrittenFont;
 
 	mWrittenFont = mFaceWrapper.CreateWrittenFontObject(mObjectsContext);
 	if(!mWrittenFont)
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 
 	return mWrittenFont->ReadState(inStateReader,writtenFontReference->mObjectID);
 }

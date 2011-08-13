@@ -23,6 +23,8 @@
 #include "InputFile.h"
 #include "IByteReaderWithPosition.h"
 
+using namespace PDFHummus;
+
 PFMFileReader::PFMFileReader(void)
 {
 }
@@ -31,14 +33,14 @@ PFMFileReader::~PFMFileReader(void)
 {
 }
 
-EPDFStatusCode PFMFileReader::Read(const string& inPFMFilePath)
+EStatusCode PFMFileReader::Read(const string& inPFMFilePath)
 {
-	EPDFStatusCode status = ePDFSuccess;
-	mInternalReadStatus = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
+	mInternalReadStatus = PDFHummus::eSuccess;
 	InputFile pfmFile;
 
 	status = pfmFile.OpenFile(inPFMFilePath);
-	if(status != ePDFSuccess)
+	if(status != PDFHummus::eSuccess)
 	{
 		TRACE_LOG1("PFMFileReader::Read, unable to open PFM file in %s",inPFMFilePath.c_str());
 		return status;
@@ -49,15 +51,15 @@ EPDFStatusCode PFMFileReader::Read(const string& inPFMFilePath)
 		mReaderStream = pfmFile.GetInputStream();
 
 		status = ReadHeader();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		status = ReadExtension();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		status = ReadExtendedFontMetrics();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 		
 	}while(false);
@@ -66,7 +68,7 @@ EPDFStatusCode PFMFileReader::Read(const string& inPFMFilePath)
 	return status;
 }
 
-EPDFStatusCode PFMFileReader::ReadHeader()
+EStatusCode PFMFileReader::ReadHeader()
 {
 	ReadWord(Header.Version);
 	ReadDWord(Header.Size);
@@ -102,39 +104,39 @@ EPDFStatusCode PFMFileReader::ReadHeader()
 	return mInternalReadStatus;
 }
 
-EPDFStatusCode PFMFileReader::ReadByte(BYTE& outByte)
+EStatusCode PFMFileReader::ReadByte(BYTE& outByte)
 {
 	IOBasicTypes::Byte buffer;
 
-	if(mInternalReadStatus != ePDFFailure)
+	if(mInternalReadStatus != PDFHummus::eFailure)
 	{
 		if(mReaderStream->Read(&buffer,1) != 1)
-			mInternalReadStatus = ePDFFailure;
+			mInternalReadStatus = PDFHummus::eFailure;
 		else
 			outByte = buffer;
 	}
 	return mInternalReadStatus;
 }
 
-EPDFStatusCode PFMFileReader::ReadWord(WORD& outWord)
+EStatusCode PFMFileReader::ReadWord(WORD& outWord)
 {
 	IOBasicTypes::Byte buffer;
 	outWord = 0;
 
-	if(mInternalReadStatus != ePDFFailure)
+	if(mInternalReadStatus != PDFHummus::eFailure)
 	{
 		if(mReaderStream->Read(&buffer,1) != 1)
 		{
-			mInternalReadStatus = ePDFFailure;
-			return ePDFFailure;
+			mInternalReadStatus = PDFHummus::eFailure;
+			return PDFHummus::eFailure;
 		}
 
 		outWord = buffer;
 
 		if(mReaderStream->Read(&buffer,1) != 1)
 		{
-			mInternalReadStatus = ePDFFailure;
-			return ePDFFailure;
+			mInternalReadStatus = PDFHummus::eFailure;
+			return PDFHummus::eFailure;
 		}
 
 		outWord |= (((WORD)buffer) << 8);
@@ -143,41 +145,41 @@ EPDFStatusCode PFMFileReader::ReadWord(WORD& outWord)
 	return mInternalReadStatus;
 }
 
-EPDFStatusCode PFMFileReader::ReadDWord(DWORD& outDWORD)
+EStatusCode PFMFileReader::ReadDWord(DWORD& outDWORD)
 {
 	IOBasicTypes::Byte buffer;
 	outDWORD = 0;
 
-	if(mInternalReadStatus != ePDFFailure)
+	if(mInternalReadStatus != PDFHummus::eFailure)
 	{
 		if(mReaderStream->Read(&buffer,1) != 1)
 		{
-			mInternalReadStatus = ePDFFailure;
-			return ePDFFailure;
+			mInternalReadStatus = PDFHummus::eFailure;
+			return PDFHummus::eFailure;
 		}
 
 		outDWORD = buffer;
 
 		if(mReaderStream->Read(&buffer,1) != 1)
 		{
-			mInternalReadStatus = ePDFFailure;
-			return ePDFFailure;
+			mInternalReadStatus = PDFHummus::eFailure;
+			return PDFHummus::eFailure;
 		}
 
 		outDWORD |= (((DWORD)buffer) << 8);
 
 		if(mReaderStream->Read(&buffer,1) != 1)
 		{
-			mInternalReadStatus = ePDFFailure;
-			return ePDFFailure;
+			mInternalReadStatus = PDFHummus::eFailure;
+			return PDFHummus::eFailure;
 		}
 
 		outDWORD |= (((DWORD)buffer) << 16);
 
 		if(mReaderStream->Read(&buffer,1) != 1)
 		{
-			mInternalReadStatus = ePDFFailure;
-			return ePDFFailure;
+			mInternalReadStatus = PDFHummus::eFailure;
+			return PDFHummus::eFailure;
 		}
 
 		outDWORD |= (((DWORD)buffer) << 24);
@@ -186,7 +188,7 @@ EPDFStatusCode PFMFileReader::ReadDWord(DWORD& outDWORD)
 	return mInternalReadStatus;
 }
 
-EPDFStatusCode PFMFileReader::ReadExtension()
+EStatusCode PFMFileReader::ReadExtension()
 {
 	ReadWord(Extension.SizeFields);
 	ReadDWord(Extension.ExtMetricsOffset);
@@ -200,7 +202,7 @@ EPDFStatusCode PFMFileReader::ReadExtension()
 	return mInternalReadStatus;
 }
 
-EPDFStatusCode PFMFileReader::ReadExtendedFontMetrics()
+EStatusCode PFMFileReader::ReadExtendedFontMetrics()
 {
 	ReadWord(ExtendedFontMetrics.Size);
 	ReadWord(ExtendedFontMetrics.PointSize);

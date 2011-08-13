@@ -2,7 +2,7 @@
    Source File : MergePDFPages.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,15 +20,16 @@
 */
 #include "MergePDFPages.h"
 #include "TestsRunner.h"
-#include "HummusPDFWriter.h"
+#include "PDFWriter.h"
 #include "PageContentContext.h"
 #include "PDFPage.h"
-#include "DocumentsContextExtenderAdapter.h"
+#include "DocumentContextExtenderAdapter.h"
 #include "PDFDocumentCopyingContext.h"
 
 #include <iostream>
 
 using namespace std;
+using namespace PDFHummus;
 
 MergePDFPages::MergePDFPages(void)
 {
@@ -38,9 +39,9 @@ MergePDFPages::~MergePDFPages(void)
 {
 }
 
-EPDFStatusCode MergePDFPages::Run()
+EStatusCode MergePDFPages::Run()
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
 /*
 a. Regular (no copying context):
@@ -59,46 +60,46 @@ b. Copying context:
 Importing two pages, merge one and user the other as xobject, with graphics between them
 */
 
-	if(TestOnlyMerge() != ePDFSuccess)
+	if(TestOnlyMerge() != PDFHummus::eSuccess)
 	{
 		cout<<"Failed [TestOnlyMerge()]: test for clean merging of one page \n";
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 	}
 
-	if(TestPrefixGraphicsMerge() != ePDFSuccess)
+	if(TestPrefixGraphicsMerge() != PDFHummus::eSuccess)
 	{
 		cout<<"Failed [TestPrefixGraphicsMerge()]: test for merging of one page with some prior graphics \n";
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 	}
 
-	if(TestSuffixGraphicsMerge() != ePDFSuccess)
+	if(TestSuffixGraphicsMerge() != PDFHummus::eSuccess)
 	{
 		cout<<"Failed [TestSuffixGraphicsMerge()]: test for merging of one page with some graphics after the merged page\n";
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 	}
 
-	if(TestBothGraphicsMerge() != ePDFSuccess)
+	if(TestBothGraphicsMerge() != PDFHummus::eSuccess)
 	{
 		cout<<"Failed [TestBothGraphicsMerge()]: test for merging of one page with some graphics before and after the merged page\n";
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 	}
 
-	if(MergeTwoPageInSeparatePhases() != ePDFSuccess)
+	if(MergeTwoPageInSeparatePhases() != PDFHummus::eSuccess)
 	{
 		cout<<"Failed [MergeTwoPageInSeparatePhases()]: test for merging of two pages in two separate pheases with some graphics between them\n";
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 	}
 
-	if(MergeTwoPageWithEvents() != ePDFSuccess)
+	if(MergeTwoPageWithEvents() != PDFHummus::eSuccess)
 	{
 		cout<<"Failed [MergeTwoPageWithEvents()]: test for merging of two pages with some graphics between them, using the events system\n";
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 	}
 
-	if(MergePagesUsingCopyingContext() != ePDFSuccess)
+	if(MergePagesUsingCopyingContext() != PDFHummus::eSuccess)
 	{
 		cout<<"Failed [MergeTwoPageUsingCopyingContext()]: test for merging of multiple pages with some graphics between them and also using some as xobjects, using the copying contexts\n";
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 	}
 	return status;
 }
@@ -107,15 +108,15 @@ static const string scBasePath = "c:\\PDFLibTests\\";
 static const string scMergeFilePath = "c:\\PDFLibTests\\TestMaterials\\BasicTIFFImagesTest.PDF";
 static const string scFontPath = "C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf";
 
-EPDFStatusCode MergePDFPages::TestOnlyMerge()
+EStatusCode MergePDFPages::TestOnlyMerge()
 {
-	HummusPDFWriter pdfWriter;
-	EPDFStatusCode status;
+	PDFWriter pdfWriter;
+	EStatusCode status;
 
 	do
 	{
 		status = pdfWriter.StartPDF(scBasePath + "TestOnlyMerge.pdf",ePDFVersion13);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		PDFPage* page = new PDFPage();
@@ -126,15 +127,15 @@ EPDFStatusCode MergePDFPages::TestOnlyMerge()
 		singePageRange.mSpecificRanges.push_back(ULongAndULong(0,0));
 
 		status = pdfWriter.MergePDFPagesToPage(page,scMergeFilePath,singePageRange);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		status = pdfWriter.EndPDF();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 	}while(false);
 
@@ -142,15 +143,15 @@ EPDFStatusCode MergePDFPages::TestOnlyMerge()
 	return status;
 }
 
-EPDFStatusCode MergePDFPages::TestPrefixGraphicsMerge()
+EStatusCode MergePDFPages::TestPrefixGraphicsMerge()
 {
-	HummusPDFWriter pdfWriter;
-	EPDFStatusCode status;
+	PDFWriter pdfWriter;
+	EStatusCode status;
 
 	do
 	{
 		status = pdfWriter.StartPDF(scBasePath + "TestPrefixGraphicsMerge.pdf",ePDFVersion13);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		PDFPage* page = new PDFPage();
@@ -159,7 +160,7 @@ EPDFStatusCode MergePDFPages::TestPrefixGraphicsMerge()
 		PDFUsedFont* font = pdfWriter.GetFontForFile(scFontPath);
 		if(!font)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -170,7 +171,7 @@ EPDFStatusCode MergePDFPages::TestPrefixGraphicsMerge()
 		pageContent->Tf(font,30);
 		pageContent->Tm(1,0,0,1,10,600);
 		status = pageContent->Tj("Testing file merge");
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 		pageContent->ET();
 
@@ -181,19 +182,19 @@ EPDFStatusCode MergePDFPages::TestPrefixGraphicsMerge()
 		singePageRange.mSpecificRanges.push_back(ULongAndULong(0,0));
 
 		status = pdfWriter.MergePDFPagesToPage(page,scMergeFilePath,singePageRange);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		status = pdfWriter.EndPageContentContext(pageContent);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		status = pdfWriter.EndPDF();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 	}while(false);
 
@@ -201,15 +202,15 @@ EPDFStatusCode MergePDFPages::TestPrefixGraphicsMerge()
 	return status;
 }
 
-EPDFStatusCode MergePDFPages::TestSuffixGraphicsMerge()
+EStatusCode MergePDFPages::TestSuffixGraphicsMerge()
 {
-	HummusPDFWriter pdfWriter;
-	EPDFStatusCode status;
+	PDFWriter pdfWriter;
+	EStatusCode status;
 
 	do
 	{
 		status = pdfWriter.StartPDF(scBasePath + "TestSuffixGraphicsMerge.pdf",ePDFVersion13);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		PDFPage* page = new PDFPage();
@@ -220,13 +221,13 @@ EPDFStatusCode MergePDFPages::TestSuffixGraphicsMerge()
 		singePageRange.mSpecificRanges.push_back(ULongAndULong(0,0));
 
 		status = pdfWriter.MergePDFPagesToPage(page,scMergeFilePath,singePageRange);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		PDFUsedFont* font = pdfWriter.GetFontForFile(scFontPath);
 		if(!font)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -237,20 +238,20 @@ EPDFStatusCode MergePDFPages::TestSuffixGraphicsMerge()
 		pageContent->Tf(font,30);
 		pageContent->Tm(1,0,0,1,10,600);
 		status = pageContent->Tj("Testing file merge");
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 		pageContent->ET();
 
 		status = pdfWriter.EndPageContentContext(pageContent);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		status = pdfWriter.EndPDF();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 	}while(false);
 
@@ -258,15 +259,15 @@ EPDFStatusCode MergePDFPages::TestSuffixGraphicsMerge()
 	return status;
 }
 
-EPDFStatusCode MergePDFPages::TestBothGraphicsMerge()
+EStatusCode MergePDFPages::TestBothGraphicsMerge()
 {
-	HummusPDFWriter pdfWriter;
-	EPDFStatusCode status;
+	PDFWriter pdfWriter;
+	EStatusCode status;
 
 	do
 	{
 		status = pdfWriter.StartPDF(scBasePath + "TestBothGraphicsMerge.pdf",ePDFVersion13);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		PDFPage* page = new PDFPage();
@@ -275,7 +276,7 @@ EPDFStatusCode MergePDFPages::TestBothGraphicsMerge()
 		PDFUsedFont* font = pdfWriter.GetFontForFile(scFontPath);
 		if(!font)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -286,7 +287,7 @@ EPDFStatusCode MergePDFPages::TestBothGraphicsMerge()
 		pageContent->Tf(font,30);
 		pageContent->Tm(1,0,0,1,10,600);
 		status = pageContent->Tj("Testing file merge");
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 		pageContent->ET();
 
@@ -298,7 +299,7 @@ EPDFStatusCode MergePDFPages::TestBothGraphicsMerge()
 		singePageRange.mSpecificRanges.push_back(ULongAndULong(0,0));
 
 		status = pdfWriter.MergePDFPagesToPage(page,scMergeFilePath,singePageRange);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 
@@ -312,30 +313,30 @@ EPDFStatusCode MergePDFPages::TestBothGraphicsMerge()
 		pageContent->Q();
 
 		status = pdfWriter.EndPageContentContext(pageContent);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		status = pdfWriter.EndPDF();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 	}while(false);
 
 	return status;
 }
 
-EPDFStatusCode MergePDFPages::MergeTwoPageInSeparatePhases()
+EStatusCode MergePDFPages::MergeTwoPageInSeparatePhases()
 {
-	HummusPDFWriter pdfWriter;
-	EPDFStatusCode status;
+	PDFWriter pdfWriter;
+	EStatusCode status;
 
 	do
 	{
 		status = pdfWriter.StartPDF(scBasePath + "MergeTwoPageInSeparatePhases.pdf",ePDFVersion13);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		PDFPage* page = new PDFPage();
@@ -351,7 +352,7 @@ EPDFStatusCode MergePDFPages::MergeTwoPageInSeparatePhases()
 		firstPageRange.mSpecificRanges.push_back(ULongAndULong(0,0));
 
 		status = pdfWriter.MergePDFPagesToPage(page,scMergeFilePath,firstPageRange);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		pageContent->Q();
@@ -365,21 +366,21 @@ EPDFStatusCode MergePDFPages::MergeTwoPageInSeparatePhases()
 		secondPageRange.mSpecificRanges.push_back(ULongAndULong(1,1));
 
 		status = pdfWriter.MergePDFPagesToPage(page,scMergeFilePath,secondPageRange);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		pageContent->Q();
 
 		status = pdfWriter.EndPageContentContext(pageContent);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		status = pdfWriter.EndPDF();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 	}while(false);
 
@@ -388,16 +389,16 @@ EPDFStatusCode MergePDFPages::MergeTwoPageInSeparatePhases()
 }
 
 // for the next trick i'll need an event handler, in order to write the code between the pages.
-class MyPDFMergingHandler : public DocumentsContextExtenderAdapter
+class MyPDFMergingHandler : public DocumentContextExtenderAdapter
 {
 public:
 	MyPDFMergingHandler(PageContentContext* inPageContentContext) {mPageContentContext = inPageContentContext; mPageIndex = 0;}
 
-	EPDFStatusCode OnAfterMergePageFromPage(
+	EStatusCode OnAfterMergePageFromPage(
 					PDFPage* inTargetPage,
 					PDFDictionary* inPageObjectDictionary,
-					ObjectsContext* inHummusPDFWriterObjectContext,
-					DocumentsContext* inHummusPDFWriterDocumentsContext,
+					ObjectsContext* inPDFWriterObjectContext,
+					DocumentContext* inPDFWriterDocumentContext,
 					PDFDocumentHandler* inPDFDocumentHandler)
 	{
 		// implementing the after merge for page event to include the required code between the two pages
@@ -409,7 +410,7 @@ public:
 			mPageContentContext->cm(0.5,0,0,0.5,0,421);
 		}
 		++mPageIndex;
-		return ePDFSuccess;
+		return PDFHummus::eSuccess;
 	}
 
 private:
@@ -419,15 +420,15 @@ private:
 };
 
 
-EPDFStatusCode MergePDFPages::MergeTwoPageWithEvents()
+EStatusCode MergePDFPages::MergeTwoPageWithEvents()
 {
-	HummusPDFWriter pdfWriter;
-	EPDFStatusCode status;
+	PDFWriter pdfWriter;
+	EStatusCode status;
 
 	do
 	{
 		status = pdfWriter.StartPDF(scBasePath + "MergeTwoPageWithEvents.pdf",ePDFVersion13);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		PDFPage* page = new PDFPage();
@@ -446,35 +447,35 @@ EPDFStatusCode MergePDFPages::MergeTwoPageWithEvents()
 
 		// i'm using events to write the interim code, as oppose to using two merges as TestBothGraphicsMerge shows. this is more efficient, considering the embedded PDF. 
 		// but still, the easiest would be to use the copying context
-		pdfWriter.GetDocumentsContext().AddDocumentsContextExtender(&mergingHandler);
+		pdfWriter.GetDocumentContext().AddDocumentContextExtender(&mergingHandler);
 		status = pdfWriter.MergePDFPagesToPage(page,scMergeFilePath,twoPageRange);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
-		pdfWriter.GetDocumentsContext().RemoveDocumentsContextExtender(&mergingHandler);
+		pdfWriter.GetDocumentContext().RemoveDocumentContextExtender(&mergingHandler);
 
 		pageContent->Q();
 
 		status = pdfWriter.EndPageContentContext(pageContent);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		status = pdfWriter.EndPDF();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 	}while(false);
 
 	return status;
 }
 
-EPDFStatusCode MergePDFPages::MergePagesUsingCopyingContext()
+EStatusCode MergePDFPages::MergePagesUsingCopyingContext()
 {
 	// this is by far the best method if you want to merge multiple pages in a pdf - using the copying context
-	HummusPDFWriter pdfWriter;
-	EPDFStatusCode status;
+	PDFWriter pdfWriter;
+	EStatusCode status;
 
 	// in this sample we'll create two pages, from 3 pages content of the merged page.
 	// the first page will be used as a reusable object in both result pages. the second and third page will 
@@ -483,21 +484,21 @@ EPDFStatusCode MergePDFPages::MergePagesUsingCopyingContext()
 	do
 	{
 		status = pdfWriter.StartPDF(scBasePath + "MergePagesUsingCopyingContext.pdf",ePDFVersion13);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		PDFDocumentCopyingContext* copyingContext = pdfWriter.CreatePDFCopyingContext(scMergeFilePath);
 		if(!copyingContext)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 		
 		// create a reusable form xobject from the first page
-		EPDFStatusCodeAndObjectIDType result = copyingContext->CreateFormXObjectFromPDFPage(0,ePDFPageBoxMediaBox);
-		if(result.first != ePDFSuccess)
+		EStatusCodeAndObjectIDType result = copyingContext->CreateFormXObjectFromPDFPage(0,ePDFPageBoxMediaBox);
+		if(result.first != PDFHummus::eSuccess)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 		ObjectIDType reusableObjectID = result.second;
@@ -514,7 +515,7 @@ EPDFStatusCode MergePDFPages::MergePagesUsingCopyingContext()
 
 		// merge unique page at lower left
 		status = copyingContext->MergePDFPageToPage(page,1);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		pageContent->Q();
@@ -528,11 +529,11 @@ EPDFStatusCode MergePDFPages::MergePagesUsingCopyingContext()
 		pageContent->Q();
 
 		status = pdfWriter.EndPageContentContext(pageContent);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		// now let's do the second page. similar, but with the second page as the unique content
@@ -547,7 +548,7 @@ EPDFStatusCode MergePDFPages::MergePagesUsingCopyingContext()
 
 		// merge unique page at lower left
 		status = copyingContext->MergePDFPageToPage(page,2);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		pageContent->Q();
@@ -561,19 +562,19 @@ EPDFStatusCode MergePDFPages::MergePagesUsingCopyingContext()
 		pageContent->Q();
 
 		status = pdfWriter.EndPageContentContext(pageContent);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		status = pdfWriter.EndPDF();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 	}while(false);
 
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
 

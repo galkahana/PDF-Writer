@@ -2,7 +2,7 @@
    Source File : RefCountTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace PDFHummus;
 
 RefCountTest::RefCountTest(void)
 {
@@ -51,14 +52,14 @@ private:
 
 int MyClass::TotalObjectsCount = 0;
 
-EPDFStatusCode RefCountTest::Run()
+EStatusCode RefCountTest::Run()
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
 	if(MyClass::TotalObjectsCount != 0)
 	{
 		cout<<"Total objects count is supposed to be 0 at the beginning, but it's "<<MyClass::TotalObjectsCount<<"\n";
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 	}
 
 	// simple 1 ref test
@@ -67,18 +68,18 @@ EPDFStatusCode RefCountTest::Run()
 		if(MyClass::TotalObjectsCount != 1)
 		{
 			cout<<"simple 1 ref test failed, TotalObjectCount (should be 1) = "<<MyClass::TotalObjectsCount<<"\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 		}
 		if(firstPtr->GetID() != 1)
 		{
 			cout<<"simple 1 ref test failed, wrond object id\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 		}
 	}
 	if(MyClass::TotalObjectsCount != 0)
 	{
 		cout<<"simple 1 ref test failed, TotalObjectCount (should be 0) = "<<MyClass::TotalObjectsCount<<"\n";
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 	}
 
 	// 2 refs to direct object
@@ -88,13 +89,13 @@ EPDFStatusCode RefCountTest::Run()
 		if(MyClass::TotalObjectsCount != 1)
 		{
 			cout<<"Total objects count is supposed to be 1 after creating object 2, but it's "<<MyClass::TotalObjectsCount<<"\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 		}
 		RefCountPtr<MyClass> firstPtr(aClass);
 		if(firstPtr->GetID() != 2)
 		{
 			cout<<"2 ref test failed, wrond object id for pointer 1\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 		}
 
 		aClass->AddRef();
@@ -102,18 +103,18 @@ EPDFStatusCode RefCountTest::Run()
 		if(secondPtr->GetID() != 2)
 		{
 			cout<<"2 ref test failed, wrond object id for pointer 2\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 		}
 		if(MyClass::TotalObjectsCount != 1)
 		{
 			cout<<"Total objects count is supposed to be 1 after another pointer for object 2, but it's "<<MyClass::TotalObjectsCount<<"\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 		}
 	}
 	if(MyClass::TotalObjectsCount != 0)
 	{
 		cout<<"2 ref test failed, TotalObjectCount = "<<MyClass::TotalObjectsCount<<"\n";
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 	}
 
 	// assignment scenarios
@@ -123,12 +124,12 @@ EPDFStatusCode RefCountTest::Run()
 		if(MyClass::TotalObjectsCount != 1)
 		{
 			cout<<"Total objects count is supposed to be 1 after creating object 3, but it's "<<MyClass::TotalObjectsCount<<"\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 		}
 		if(firstPtr->GetID() != 3)
 		{
 			cout<<"assignment test failed, wrond object id for pointer 1\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 		}
 
 		{
@@ -138,13 +139,13 @@ EPDFStatusCode RefCountTest::Run()
 			if(secondPtr->GetID() != 3)
 			{
 				cout<<"assignment test failed, wrond object id for pointer 2\n";
-				status = ePDFFailure;
+				status = PDFHummus::eFailure;
 			}
 		}
 		if(MyClass::TotalObjectsCount != 1)
 		{
 			cout<<"Total objects count is supposed to be 1 after smart pointer assignment object 3, but it's "<<MyClass::TotalObjectsCount<<"\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 		}
 
 		{
@@ -154,19 +155,19 @@ EPDFStatusCode RefCountTest::Run()
 			if(thirdPtr->GetID() != 3)
 			{
 				cout<<"assignment test failed, wrond object id for pointer 2\n";
-				status = ePDFFailure;
+				status = PDFHummus::eFailure;
 			}
 		}
 		if(MyClass::TotalObjectsCount != 1)
 		{
 			cout<<"Total objects count is supposed to be 1 after pointer assignment object 3, but it's "<<MyClass::TotalObjectsCount<<"\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 		}
 	}
 	if(MyClass::TotalObjectsCount != 0)
 	{
 		cout<<"assignment test failed, TotalObjectCount = "<<MyClass::TotalObjectsCount<<"\n";
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 	}
 
 	// pointer equality
@@ -179,31 +180,31 @@ EPDFStatusCode RefCountTest::Run()
 		if(firstPtr != secondPtr)
 		{
 			cout<<"smart pointers equality failed (not equal)\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 		}
 
 		if(!(firstPtr == secondPtr))
 		{
 			cout<<"smart pointers equality failed (equal)\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 		}
 
 		if(firstPtr != anObject)
 		{
 			cout<<"smart pointer to pointer equality failed (not equal)\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 		}
 
 		if(!(firstPtr == anObject))
 		{
 			cout<<"smart pointer to pointer equality failed (equal)\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 		}
 	}
 	if(MyClass::TotalObjectsCount != 0)
 	{
 		cout<<"Pointer equality, TotalObjectCount = "<<MyClass::TotalObjectsCount<<"\n";
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 	}
 
 
@@ -214,14 +215,14 @@ EPDFStatusCode RefCountTest::Run()
 		if(!aPtr)
 		{
 			cout<<"Problem, should not be false!\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 		}		
 		
 		RefCountPtr<MyClass> aNother;
 		if(!(!aNother))
 		{
 			cout<<"Problem, should be false!\n";
-			status = ePDFFailure;			
+			status = PDFHummus::eFailure;			
 		}
 	}
 

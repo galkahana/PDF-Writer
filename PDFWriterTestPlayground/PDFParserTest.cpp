@@ -19,7 +19,7 @@
    
 */
 #include "PDFParserTest.h"
-#include "HummusPDFParser.h"
+#include "PDFParser.h"
 #include "InputFile.h"
 #include "PDFObject.h"
 #include "PDFDictionary.h"
@@ -35,6 +35,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace PDFHummus;
 
 PDFParserTest::PDFParserTest(void)
 {
@@ -44,24 +45,24 @@ PDFParserTest::~PDFParserTest(void)
 {
 }
 
-EPDFStatusCode PDFParserTest::Run()
+EStatusCode PDFParserTest::Run()
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	InputFile pdfFile;
-	HummusPDFParser parser;
+	PDFParser parser;
 	OutputFile outputFile;
 
 	do
 	{
 		status = pdfFile.OpenFile("C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF");
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"unable to open file for reading. should be in C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF\n";
 			break;
 		}
 
 		status = parser.StartPDFParsing(pdfFile.GetInputStream());
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"unable to parse input file";
 			break;
@@ -72,14 +73,14 @@ EPDFStatusCode PDFParserTest::Run()
 		if(parser.GetPDFLevel() != 1.3)
 		{
 			cout<<"expecting level 1.3, got "<<parser.GetPDFLevel()<<"\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
 		if(parser.GetPagesCount() != 2)
 		{
 			cout<<"expecting 2 pages, got "<<parser.GetPagesCount()<<"\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -88,7 +89,7 @@ EPDFStatusCode PDFParserTest::Run()
 		if(!catalog)
 		{
 			cout<<"Can't find catalog. fail\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -96,7 +97,7 @@ EPDFStatusCode PDFParserTest::Run()
 		status = outputFile.OpenFile("C:\\PDFLibTests\\PDFParserTestOutput.txt");
 
 		status = IterateObjectTypes(catalog.GetPtr(),parser,outputFile.GetOutputStream());
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"Failed iterating object types\n";
 			break;
@@ -111,7 +112,7 @@ static const char* scIndirectStart = "Indirect object reference:\r\n";
 static const char* scParsedAlready = "was parsed already\r\n";
 static const char* scIteratingStreamDict = "Stream . iterating stream dictionary:\r\n";
 
-EPDFStatusCode PDFParserTest::IterateObjectTypes(PDFObject* inObject,HummusPDFParser& inParser,IByteWriter* inOutput)
+EStatusCode PDFParserTest::IterateObjectTypes(PDFObject* inObject,PDFParser& inParser,IByteWriter* inOutput)
 {
 	PrimitiveObjectsWriter primitivesWriter;
 
@@ -130,7 +131,7 @@ EPDFStatusCode PDFParserTest::IterateObjectTypes(PDFObject* inObject,HummusPDFPa
 			if(!pointedObject)
 			{
 				cout<<"\nFailed to retreive object of ID ="<<((PDFIndirectObjectReference*)inObject)->mObjectID<<"\n";
-				return ePDFFailure;
+				return PDFHummus::eFailure;
 			}
 			return IterateObjectTypes(pointedObject.GetPtr(),inParser,inOutput);
 		}
@@ -139,7 +140,7 @@ EPDFStatusCode PDFParserTest::IterateObjectTypes(PDFObject* inObject,HummusPDFPa
 			for(int i=0;i<mTabLevel;++i)
 				inOutput->Write((const Byte*)"  ",2);
 			inOutput->Write((const Byte*)scParsedAlready,strlen(scParsedAlready));
-			return ePDFSuccess;
+			return PDFHummus::eSuccess;
 		}
 		
 	}
@@ -150,8 +151,8 @@ EPDFStatusCode PDFParserTest::IterateObjectTypes(PDFObject* inObject,HummusPDFPa
 		PDFObjectCastPtr<PDFArray> anArray;
 		anArray = inObject;  // do assignment here, otherwise it's considered constructor...which won't addref
 		SingleValueContainerIterator<PDFObjectVector> it = anArray->GetIterator();
-		EPDFStatusCode status = ePDFSuccess;
-		while(it.MoveNext() && ePDFSuccess == status)
+		EStatusCode status = PDFHummus::eSuccess;
+		while(it.MoveNext() && PDFHummus::eSuccess == status)
 			status = IterateObjectTypes(it.GetItem(),inParser,inOutput);
 		--mTabLevel;
 		return status;
@@ -164,11 +165,11 @@ EPDFStatusCode PDFParserTest::IterateObjectTypes(PDFObject* inObject,HummusPDFPa
 		aDictionary = inObject; // do assignment here, otherwise it's considered constructor...which won't addref
 		MapIterator<PDFNameToPDFObjectMap> it = aDictionary->GetIterator();
 
-		EPDFStatusCode status = ePDFSuccess;
-		while(it.MoveNext() && ePDFSuccess == status)
+		EStatusCode status = PDFHummus::eSuccess;
+		while(it.MoveNext() && PDFHummus::eSuccess == status)
 		{
 			status = IterateObjectTypes(it.GetKey(),inParser,inOutput);
-			if(ePDFSuccess == status)
+			if(PDFHummus::eSuccess == status)
 				status = IterateObjectTypes(it.GetValue(),inParser,inOutput);
 		}
 		--mTabLevel;
@@ -184,7 +185,7 @@ EPDFStatusCode PDFParserTest::IterateObjectTypes(PDFObject* inObject,HummusPDFPa
 	else 
 	{
 		primitivesWriter.WriteKeyword(scPDFObjectTypeLabel[inObject->GetType()]);
-		return ePDFSuccess;
+		return PDFHummus::eSuccess;
 	}
 	
 }

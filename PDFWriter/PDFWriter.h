@@ -1,5 +1,5 @@
 /*
-   Source File : HummusPDFWriter.h
+   Source File : PDFWriter.h
 
 
    Copyright 2011 Gal Kahana PDFWriter
@@ -27,7 +27,7 @@
 
 #include "EPDFVersion.h"
 #include "OutputFile.h"
-#include "DocumentsContext.h"
+#include "DocumentContext.h"
 #include "ObjectsContext.h"
 #include "PDFRectangle.h"
 #include "TIFFUsageParameters.h"
@@ -64,57 +64,57 @@ class PDFImageXObject;
 class PDFUsedFont;
 class IByteWriterWithPosition;
 
-class HummusPDFWriter
+class PDFWriter
 {
 public:
-	HummusPDFWriter(void);
-	~HummusPDFWriter(void);
+	PDFWriter(void);
+	~PDFWriter(void);
 
 	// output to file
-	EPDFStatusCode StartPDF(const string& inOutputFilePath,
+	PDFHummus::EStatusCode StartPDF(const string& inOutputFilePath,
 							EPDFVersion inPDFVersion,
 							const LogConfiguration& inLogConfiguration = LogConfiguration::DefaultLogConfiguration,
 							const PDFCreationSettings& inPDFCreationSettings = PDFCreationSettings::DefaultPDFCreationSettings);
 
-	EPDFStatusCode EndPDF();
+	PDFHummus::EStatusCode EndPDF();
 
 	// output to stream
-	EPDFStatusCode StartPDFForStream(IByteWriterWithPosition* inOutputStream,
+	PDFHummus::EStatusCode StartPDFForStream(IByteWriterWithPosition* inOutputStream,
 								  EPDFVersion inPDFVersion,
 								  const LogConfiguration& inLogConfiguration = LogConfiguration::DefaultLogConfiguration,
 								  const PDFCreationSettings& inPDFCreationSettings = PDFCreationSettings::DefaultPDFCreationSettings);
-	EPDFStatusCode EndPDFForStream();
+	PDFHummus::EStatusCode EndPDFForStream();
 
 
 	// Ending and Restarting writing session
-	EPDFStatusCode Shutdown(const string& inStateFilePath);
-	EPDFStatusCode ContinuePDF(const string& inOutputFilePath,
+	PDFHummus::EStatusCode Shutdown(const string& inStateFilePath);
+	PDFHummus::EStatusCode ContinuePDF(const string& inOutputFilePath,
 							const string& inStateFilePath,
 							const LogConfiguration& inLogConfiguration = LogConfiguration::DefaultLogConfiguration);
 	// Continue PDF in output stream workflow
-	EPDFStatusCode ContinuePDFForStream(IByteWriterWithPosition* inOutputStream,
+	PDFHummus::EStatusCode ContinuePDFForStream(IByteWriterWithPosition* inOutputStream,
 									 const string& inStateFilePath,
 				 					 const LogConfiguration& inLogConfiguration = LogConfiguration::DefaultLogConfiguration);
 
 	// Page context, for drwaing page content
 	PageContentContext* StartPageContentContext(PDFPage* inPage);
-	EPDFStatusCode PausePageContentContext(PageContentContext* inPageContext);
-	EPDFStatusCode EndPageContentContext(PageContentContext* inPageContext);
+	PDFHummus::EStatusCode PausePageContentContext(PageContentContext* inPageContext);
+	PDFHummus::EStatusCode EndPageContentContext(PageContentContext* inPageContext);
 
 
 	// Page Writing [create a new Page by creating a new instance of PDFPage. instances may be reused.
-	EPDFStatusCode WritePage(PDFPage* inPage);
-	EPDFStatusCode WritePageAndRelease(PDFPage* inPage);
+	PDFHummus::EStatusCode WritePage(PDFPage* inPage);
+	PDFHummus::EStatusCode WritePageAndRelease(PDFPage* inPage);
 
 	// same as above page writing, but also return page ID. good for extensibility, when you want to refer to the written page form some other place
-	EPDFStatusCodeAndObjectIDType WritePageAndReturnPageID(PDFPage* inPage);
-	EPDFStatusCodeAndObjectIDType WritePageReleaseAndReturnPageID(PDFPage* inPage);
+	EStatusCodeAndObjectIDType WritePageAndReturnPageID(PDFPage* inPage);
+	EStatusCodeAndObjectIDType WritePageReleaseAndReturnPageID(PDFPage* inPage);
 
 
 	// Form XObject creating and writing
 	PDFFormXObject* StartFormXObject(const PDFRectangle& inBoundingBox,const double* inMatrix = NULL);
 	PDFFormXObject* StartFormXObject(const PDFRectangle& inBoundingBox,ObjectIDType inFormXObjectID,const double* inMatrix = NULL);
-	EPDFStatusCode EndFormXObjectAndRelease(PDFFormXObject* inFormXObject);
+	PDFHummus::EStatusCode EndFormXObjectAndRelease(PDFFormXObject* inFormXObject);
 
 	// Image XObject creating [for TIFF nad JPG files]. 
 	// note that as oppose to other methods, create the image xobject also writes it, so there's no "WriteXXXXAndRelease" for image.
@@ -154,48 +154,48 @@ public:
 
 	// CreateFormXObjectsFromPDF is for using input PDF pages as objects in one page or more. you can used the returned IDs to place the 
 	// created form xobjects
-	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const string& inPDFFilePath,
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const string& inPDFFilePath,
 															 const PDFPageRange& inPageRange,
 															 EPDFPageBox inPageBoxToUseAsFormBox,
 															 const double* inTransformationMatrix = NULL,
 															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
-	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
 															 const PDFPageRange& inPageRange,
 															 EPDFPageBox inPageBoxToUseAsFormBox,
 															 const double* inTransformationMatrix = NULL,
 															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 	
 	// CreateFormXObjectsFromPDF is an override to allow you to determine a custom crop for the page embed
-	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const string& inPDFFilePath,
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const string& inPDFFilePath,
 															 const PDFPageRange& inPageRange,
 															 const PDFRectangle& inCropBox,
 															 const double* inTransformationMatrix = NULL,
 															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
-	EPDFStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
 															 const PDFPageRange& inPageRange,
 															 const PDFRectangle& inCropBox,
 															 const double* inTransformationMatrix = NULL,
 															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
 	// AppendPDFPagesFromPDF is for simple appending of the input PDF pages
-	EPDFStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const string& inPDFFilePath,
+	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const string& inPDFFilePath,
 														const PDFPageRange& inPageRange,
 														const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 	
-	EPDFStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(IByteReaderWithPosition* inPDFStream,
+	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(IByteReaderWithPosition* inPDFStream,
 														const PDFPageRange& inPageRange,
 														const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
 	// MergePDFPagesToPage, merge PDF pages content to an input page. good for single-placement of a page content, cheaper than creating
 	// and XObject and later placing, when the intention is to use this graphic just once.
-	EPDFStatusCode MergePDFPagesToPage(PDFPage* inPage,
+	PDFHummus::EStatusCode MergePDFPagesToPage(PDFPage* inPage,
 									const string& inPDFFilePath,
 									const PDFPageRange& inPageRange,
 									const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
-	EPDFStatusCode MergePDFPagesToPage(PDFPage* inPage,
+	PDFHummus::EStatusCode MergePDFPagesToPage(PDFPage* inPage,
 									IByteReaderWithPosition* inPDFStream,
 									const PDFPageRange& inPageRange,
 									const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
@@ -214,16 +214,16 @@ public:
 
 	// URL links
 	// URL should be encoded to be a valid URL, ain't gonna be checking that!
-	EPDFStatusCode AttachURLLinktoCurrentPage(const string& inURL,const PDFRectangle& inLinkClickArea);
+	PDFHummus::EStatusCode AttachURLLinktoCurrentPage(const string& inURL,const PDFRectangle& inLinkClickArea);
 
 	// Extensibility, reaching to lower levels
-	DocumentsContext& GetDocumentsContext();
+	DocumentContext& GetDocumentContext();
 	ObjectsContext& GetObjectsContext();
 	OutputFile& GetOutputFile();
 private:
 
 	ObjectsContext mObjectsContext;
-	DocumentsContext mDocumentsContext;
+	DocumentContext mDocumentContext;
 
 	// for output file workflow, this will be the valid output [stream workflow does not have a file]
 	OutputFile mOutputFile;
@@ -231,7 +231,7 @@ private:
 	void SetupLog(const LogConfiguration& inLogConfiguration);
 	void SetupObjectsContext(const PDFCreationSettings& inPDFCreationSettings);
 	void ReleaseLog();
-	EPDFStatusCode SetupState(const string& inStateFilePath);
+	PDFHummus::EStatusCode SetupState(const string& inStateFilePath);
 
 
 };

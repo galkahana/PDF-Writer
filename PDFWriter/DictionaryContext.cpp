@@ -26,6 +26,8 @@
 static const string scStartDictionary = "<<";
 static const string scEndDictionary = ">>";
 
+using namespace PDFHummus;
+
 DictionaryContext::DictionaryContext(ObjectsContext* inObjectsContext,size_t inIndentLevel)
 {
 	mObjectsContext = inObjectsContext;
@@ -44,19 +46,19 @@ DictionaryContext::~DictionaryContext(void)
 	mObjectsContext->WriteKeyword(scEndDictionary);
 }
 
-EPDFStatusCode DictionaryContext::WriteKey(const string& inKey)
+EStatusCode DictionaryContext::WriteKey(const string& inKey)
 {
 	if(mKeys.find(inKey) == mKeys.end())
 	{
 		WriteIndents();
 		mObjectsContext->WriteName(inKey);
 		mKeys.insert(inKey);
-		return ePDFSuccess;
+		return PDFHummus::eSuccess;
 	}
 	else
 	{
 		TRACE_LOG1("DictionaryContext::WriteKey, Duplicate key error. Cannot write multiple keys in the same dictionary. key reused - %s",inKey.c_str());
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 }
 

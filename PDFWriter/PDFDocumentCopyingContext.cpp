@@ -20,6 +20,8 @@
 */
 #include "PDFDocumentCopyingContext.h"
 
+using namespace PDFHummus;
+
 PDFDocumentCopyingContext::PDFDocumentCopyingContext(void)
 {
 }
@@ -29,31 +31,31 @@ PDFDocumentCopyingContext::~PDFDocumentCopyingContext(void)
 	End();
 }
 
-EPDFStatusCode PDFDocumentCopyingContext::Start(const string& inPDFFilePath,
-											  DocumentsContext* inDocumentsContext,
+EStatusCode PDFDocumentCopyingContext::Start(const string& inPDFFilePath,
+											  DocumentContext* inDocumentContext,
 											  ObjectsContext* inObjectsContext)
 {
-	mDocumentHandler.SetOperationsContexts(inDocumentsContext,inObjectsContext);
+	mDocumentHandler.SetOperationsContexts(inDocumentContext,inObjectsContext);
 	return mDocumentHandler.StartFileCopyingContext(inPDFFilePath);
 }
 
-EPDFStatusCode PDFDocumentCopyingContext::Start(IByteReaderWithPosition* inPDFStream,
-											 DocumentsContext* inDocumentsContext,
+EStatusCode PDFDocumentCopyingContext::Start(IByteReaderWithPosition* inPDFStream,
+											 DocumentContext* inDocumentContext,
 											 ObjectsContext* inObjectsContext)
 {
-	mDocumentHandler.SetOperationsContexts(inDocumentsContext,inObjectsContext);
+	mDocumentHandler.SetOperationsContexts(inDocumentContext,inObjectsContext);
 	return mDocumentHandler.StartStreamCopyingContext(inPDFStream);
 }
 
 
-EPDFStatusCodeAndObjectIDType PDFDocumentCopyingContext::CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
+EStatusCodeAndObjectIDType PDFDocumentCopyingContext::CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
 																					EPDFPageBox inPageBoxToUseAsFormBox,
 																					const double* inTransformationMatrix)
 {
 	return mDocumentHandler.CreateFormXObjectFromPDFPage(inPageIndex,inPageBoxToUseAsFormBox,inTransformationMatrix);
 }
 
-EPDFStatusCodeAndObjectIDType PDFDocumentCopyingContext::CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
+EStatusCodeAndObjectIDType PDFDocumentCopyingContext::CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
 																					 const PDFRectangle& inCropBox,
 																					 const double* inTransformationMatrix)
 {
@@ -61,22 +63,22 @@ EPDFStatusCodeAndObjectIDType PDFDocumentCopyingContext::CreateFormXObjectFromPD
 }
 
 
-EPDFStatusCodeAndObjectIDType PDFDocumentCopyingContext::AppendPDFPageFromPDF(unsigned long inPageIndex)
+EStatusCodeAndObjectIDType PDFDocumentCopyingContext::AppendPDFPageFromPDF(unsigned long inPageIndex)
 {
 	return mDocumentHandler.AppendPDFPageFromPDF(inPageIndex);
 }
 
-EPDFStatusCodeAndObjectIDType PDFDocumentCopyingContext::CopyObject(ObjectIDType inSourceObjectID)
+EStatusCodeAndObjectIDType PDFDocumentCopyingContext::CopyObject(ObjectIDType inSourceObjectID)
 {
 	return mDocumentHandler.CopyObject(inSourceObjectID);
 }
 
-EPDFStatusCodeAndObjectIDType PDFDocumentCopyingContext::GetCopiedObjectID(ObjectIDType inSourceObjectID)
+EStatusCodeAndObjectIDType PDFDocumentCopyingContext::GetCopiedObjectID(ObjectIDType inSourceObjectID)
 {
 	return mDocumentHandler.GetCopiedObjectID(inSourceObjectID);
 }
 
-HummusPDFParser* PDFDocumentCopyingContext::GetSourceDocumentParser()
+PDFParser* PDFDocumentCopyingContext::GetSourceDocumentParser()
 {
 	return mDocumentHandler.GetSourceDocumentParser();
 }
@@ -86,7 +88,7 @@ MapIterator<ObjectIDTypeToObjectIDTypeMap> PDFDocumentCopyingContext::GetCopiedO
 	return mDocumentHandler.GetCopiedObjectsMappingIterator();
 }
 
-EPDFStatusCode PDFDocumentCopyingContext::MergePDFPageToPage(PDFPage* inTargetPage,unsigned long inSourcePageIndex)
+EStatusCode PDFDocumentCopyingContext::MergePDFPageToPage(PDFPage* inTargetPage,unsigned long inSourcePageIndex)
 {
 	return mDocumentHandler.MergePDFPageToPage(inTargetPage,inSourcePageIndex);
 }
@@ -97,12 +99,12 @@ void PDFDocumentCopyingContext::End()
 	return mDocumentHandler.StopCopyingContext();
 }
 
-EPDFStatusCodeAndObjectIDTypeList PDFDocumentCopyingContext::CopyDirectObject(PDFObject* inObject)
+EStatusCodeAndObjectIDTypeList PDFDocumentCopyingContext::CopyDirectObject(PDFObject* inObject)
 {
 	return mDocumentHandler.CopyDirectObject(inObject);
 }
 
-EPDFStatusCode PDFDocumentCopyingContext::CopyNewObjectsForDirectObject(const ObjectIDTypeList& inReferencedObjects)
+EStatusCode PDFDocumentCopyingContext::CopyNewObjectsForDirectObject(const ObjectIDTypeList& inReferencedObjects)
 {
 	return mDocumentHandler.CopyNewObjectsForDirectObject(inReferencedObjects);
 }

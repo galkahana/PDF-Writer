@@ -21,6 +21,8 @@
 #include "GraphicStateStack.h"
 #include "Trace.h"
 
+using namespace PDFHummus;
+
 GraphicStateStack::GraphicStateStack(void)
 {
 	mGraphicStateStack.push_back(GraphicState());
@@ -38,17 +40,17 @@ void GraphicStateStack::Push()
 	mGraphicStateStack.push_back(newState);
 }
 
-EPDFStatusCode GraphicStateStack::Pop()
+EStatusCode GraphicStateStack::Pop()
 {
 	if(mGraphicStateStack.size() == 1)
 	{
 		TRACE_LOG("GraphicStateStack::Pop, exception. stack underflow, reached to the initial state");
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 	else
 	{
 		mGraphicStateStack.pop_back();
-		return ePDFSuccess;
+		return PDFHummus::eSuccess;
 	}
 }
 

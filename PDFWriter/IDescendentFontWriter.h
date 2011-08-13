@@ -19,7 +19,7 @@
    
 */
 #pragma once
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include "ObjectsBasicTypes.h"
 #include "WrittenFontRepresentation.h"
 
@@ -41,7 +41,7 @@ class IDescendentFontWriter
 public:
 	virtual ~IDescendentFontWriter(){};
 
-	virtual EPDFStatusCode WriteFont(	ObjectIDType inDecendentObjectID, 
+	virtual PDFHummus::EStatusCode WriteFont(	ObjectIDType inDecendentObjectID, 
 									const string& inFontName,
 									FreeTypeFaceWrapper& inFontInfo,
 									const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,

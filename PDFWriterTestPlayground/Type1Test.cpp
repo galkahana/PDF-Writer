@@ -2,7 +2,7 @@
    Source File : Type1Test.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@
 
 #include <iostream>
 
+using namespace PDFHummus;
+
 Type1Test::Type1Test(void)
 {
 }
@@ -37,23 +39,23 @@ Type1Test::~Type1Test(void)
 {
 }
 
-EPDFStatusCode Type1Test::Run()
+EStatusCode Type1Test::Run()
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	InputFile type1File;
 	Type1Input type1Input;
 
 	do
 	{
 		status = type1File.OpenFile("C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFB");
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"Failed to open Helvetica input file\n";
 			break;
 		}
 
 		status = type1Input.ReadType1File(type1File.GetInputStream());
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"Failed to read type 1 file\n";
 			break;
@@ -67,33 +69,33 @@ EPDFStatusCode Type1Test::Run()
 
 		// calculate dependencies for a,b,c,d and trace their code
 		status = ShowDependencies("a",&type1Input);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 		status = ShowDependencies("b",&type1Input);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 		status = ShowDependencies("c",&type1Input);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 		status = ShowDependencies("d",&type1Input);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 		// show just abcd and notdef
 
 		status = SaveCharstringCode(".notdef",&type1Input);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 		status = SaveCharstringCode("a",&type1Input);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 		status = SaveCharstringCode("b",&type1Input);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 		status = SaveCharstringCode("c",&type1Input);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 		status = SaveCharstringCode("d",&type1Input);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 	}while(false);
@@ -188,15 +190,15 @@ void Type1Test::ShowDoubleVector(const vector<double>& inVector)
 	cout<<"]";	
 }
 
-EPDFStatusCode Type1Test::ShowDependencies(const string& inCharStringName,Type1Input* inType1Input)
+EStatusCode Type1Test::ShowDependencies(const string& inCharStringName,Type1Input* inType1Input)
 {
 	CharString1Dependencies dependencies;
-	EPDFStatusCode status = inType1Input->CalculateDependenciesForCharIndex(inCharStringName,dependencies);
+	EStatusCode status = inType1Input->CalculateDependenciesForCharIndex(inCharStringName,dependencies);
 
-	if(status != ePDFSuccess)
+	if(status != PDFHummus::eSuccess)
 	{
 		cout<<"count not calculate dependencies for glyph "<<inCharStringName.c_str()<<"\n";
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 
 	if(dependencies.mCharCodes.size() != 0 || dependencies.mOtherSubrs.size() != 0 || dependencies.mSubrs.size() != 0)
@@ -216,18 +218,18 @@ EPDFStatusCode Type1Test::ShowDependencies(const string& inCharStringName,Type1I
 	{
 		cout<<"No dependencies for "<<inCharStringName.c_str()<<"\n";
 	}
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode Type1Test::SaveCharstringCode(const string& inCharStringName,Type1Input* inType1Input)
+EStatusCode Type1Test::SaveCharstringCode(const string& inCharStringName,Type1Input* inType1Input)
 {
 	OutputFile glyphFile;
 
-	EPDFStatusCode status = glyphFile.OpenFile(string("C:\\PDFLibTests\\glyphType1_") + inCharStringName + "_.txt");
+	EStatusCode status = glyphFile.OpenFile(string("C:\\PDFLibTests\\glyphType1_") + inCharStringName + "_.txt");
 
 	do
 	{
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 		
 		CharStringType1Tracer tracer;

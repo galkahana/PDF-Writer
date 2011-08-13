@@ -23,6 +23,8 @@
 #include "InputFileStream.h"
 #include "Trace.h"
 
+using namespace PDFHummus;
+
 InputFile::InputFile(void)
 {
 	mInputStream = NULL;
@@ -34,13 +36,13 @@ InputFile::~InputFile(void)
 	CloseFile();
 }
 
-EPDFStatusCode InputFile::OpenFile(const string& inFilePath)
+EStatusCode InputFile::OpenFile(const string& inFilePath)
 {
-	EPDFStatusCode status;
+	EStatusCode status;
 	do
 	{
 		status = CloseFile();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG1("InputFile::OpenFile, Unexpected Failure. Couldn't close previously open file - %s",mFilePath.c_str());
 			break;
@@ -48,7 +50,7 @@ EPDFStatusCode InputFile::OpenFile(const string& inFilePath)
 	
 		InputFileStream* inputFileStream = new InputFileStream();
 		status = inputFileStream->Open(inFilePath); // explicitly open, so status may be retrieved
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG1("InputFile::OpenFile, Unexpected Failure. Cannot open file for reading - %s",inFilePath.c_str());
 			delete inputFileStream;
@@ -62,15 +64,15 @@ EPDFStatusCode InputFile::OpenFile(const string& inFilePath)
 	return status;
 }
 
-EPDFStatusCode InputFile::CloseFile()
+EStatusCode InputFile::CloseFile()
 {
 	if(NULL == mInputStream)
 	{
-		return ePDFSuccess;
+		return PDFHummus::eSuccess;
 	}
 	else
 	{
-		EPDFStatusCode status = mFileStream->Close(); // explicitly close, so status may be retrieved
+		EStatusCode status = mFileStream->Close(); // explicitly close, so status may be retrieved
 
 		delete mInputStream; // will delete the referenced file stream as well
 		mInputStream = NULL;

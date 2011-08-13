@@ -2,7 +2,7 @@
    Source File : PDFObjectCastTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace PDFHummus;
 
 PDFObjectCastTest::PDFObjectCastTest(void)
 {
@@ -36,36 +37,36 @@ PDFObjectCastTest::~PDFObjectCastTest(void)
 {
 }
 
-EPDFStatusCode PDFObjectCastTest::Run()
+EStatusCode PDFObjectCastTest::Run()
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
 
 	PDFObjectCastPtr<PDFName> aNonName1(NULL);
 	if(!(!aNonName1))
 	{
 		cout<<"Casting null to PDFName should provide NULL. fail\n";
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 	}
 
 	PDFObjectCastPtr<PDFName> aNonName2(new PDFDictionary());
 	if(!(!aNonName2))
 	{
 		cout<<"Casting PDFDictionary to PDFName should provide NULL. fail\n";
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 	}
 
 	PDFObjectCastPtr<PDFName> aName3(new PDFName("aName"));
 	if((!aName3))
 	{
 		cout<<"Casting PDName to PDFName should provide PDFName. fail\n";
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 	}
 
 	if(aName3->GetValue() != "aName")
 	{
 		cout<<"should be aName, is "<<aName3->GetValue().c_str()<<"\n";
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 	}
 
 	return status;

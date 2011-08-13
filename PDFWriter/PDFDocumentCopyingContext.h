@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include "ObjectsBasicTypes.h"
 #include "PDFEmbedParameterTypes.h"
 #include "PDFDocumentHandler.h"
@@ -29,9 +29,15 @@
 
 using namespace std;
 
-class DocumentsContext;
 class ObjectsContext;
-class HummusPDFParser;
+class PDFParser;
+
+namespace PDFHummus
+{
+	class DocumentContext;
+}
+
+using namespace PDFHummus;
 
 
 class PDFDocumentCopyingContext
@@ -40,24 +46,24 @@ public:
 	PDFDocumentCopyingContext();
 	~PDFDocumentCopyingContext(void);
 
-	EPDFStatusCode Start(const string& inPDFFilePath,
-					  DocumentsContext* inDocumentsContext,
+	PDFHummus::EStatusCode Start(const string& inPDFFilePath,
+					  DocumentContext* inDocumentContext,
 					  ObjectsContext* inObjectsContext);
 
-	EPDFStatusCode Start(IByteReaderWithPosition* inPDFStream,
-					  DocumentsContext* inDocumentsContext,
+	PDFHummus::EStatusCode Start(IByteReaderWithPosition* inPDFStream,
+					  DocumentContext* inDocumentContext,
 					  ObjectsContext* inObjectsContext);
 
-	EPDFStatusCodeAndObjectIDType CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
+	EStatusCodeAndObjectIDType CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
 															 EPDFPageBox inPageBoxToUseAsFormBox,
 															 const double* inTransformationMatrix = NULL);
-	EPDFStatusCodeAndObjectIDType CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
+	EStatusCodeAndObjectIDType CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
 															 const PDFRectangle& inCropBox,
 															 const double* inTransformationMatrix = NULL);
-	EPDFStatusCodeAndObjectIDType AppendPDFPageFromPDF(unsigned long inPageIndex);
-	EPDFStatusCode MergePDFPageToPage(PDFPage* inTargetPage,unsigned long inSourcePageIndex);
+	EStatusCodeAndObjectIDType AppendPDFPageFromPDF(unsigned long inPageIndex);
+	PDFHummus::EStatusCode MergePDFPageToPage(PDFPage* inTargetPage,unsigned long inSourcePageIndex);
 	
-	EPDFStatusCodeAndObjectIDType CopyObject(ObjectIDType inSourceObjectID);
+	EStatusCodeAndObjectIDType CopyObject(ObjectIDType inSourceObjectID);
 
 	/* This one is a bit tricky:
 		It copies a direct object, and returns the objects that it references, and still require copying. 
@@ -67,15 +73,15 @@ public:
 		still...there might be referenced objects from this object to copy, hence you must later copy them. The internal
 		state of the copying context will hold object references for them till you do, so that the reference IDs remain good.
 	*/
-	EPDFStatusCodeAndObjectIDTypeList CopyDirectObject(PDFObject* inObject);
+	EStatusCodeAndObjectIDTypeList CopyDirectObject(PDFObject* inObject);
 	/*
 		Call this ONLY with the result of CopyDirectObject, to copy new objects that are reuqired for direct object. It is OK to merge a couple of results from multiple
 		CopyDirectObject to a single list. MAKE SURE THERE ARE NO DUPLICATES in that case.
 	*/
-	EPDFStatusCode CopyNewObjectsForDirectObject(const ObjectIDTypeList& inReferencedObjects);
+	PDFHummus::EStatusCode CopyNewObjectsForDirectObject(const ObjectIDTypeList& inReferencedObjects);
 
-	HummusPDFParser* GetSourceDocumentParser();
-	EPDFStatusCodeAndObjectIDType GetCopiedObjectID(ObjectIDType inSourceObjectID);
+	PDFParser* GetSourceDocumentParser();
+	EStatusCodeAndObjectIDType GetCopiedObjectID(ObjectIDType inSourceObjectID);
 	MapIterator<ObjectIDTypeToObjectIDTypeMap> GetCopiedObjectsMappingIterator();
 
 	void End();

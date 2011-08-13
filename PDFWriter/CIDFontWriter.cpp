@@ -35,6 +35,7 @@
 
 #include <algorithm>
 
+using namespace PDFHummus;
 
 CIDFontWriter::CIDFontWriter(void)
 {
@@ -53,13 +54,13 @@ static const string scPlus = "+";
 static const string scDescendantFonts = "DescendantFonts";
 static const string scToUnicode = "ToUnicode";
 
-EPDFStatusCode CIDFontWriter::WriteFont(FreeTypeFaceWrapper& inFontInfo,
+EStatusCode CIDFontWriter::WriteFont(FreeTypeFaceWrapper& inFontInfo,
 										WrittenFontRepresentation* inFontOccurrence,
 										ObjectsContext* inObjectsContext,
 										IDescendentFontWriter* inDescendentFontWriter)
 {
 
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	inObjectsContext->StartNewIndirectObject(inFontOccurrence->mWrittenObjectID);
 
 	mFontInfo = &inFontInfo;
@@ -84,7 +85,7 @@ EPDFStatusCode CIDFontWriter::WriteFont(FreeTypeFaceWrapper& inFontInfo,
 		if(!postscriptFontName)
 		{
 			TRACE_LOG("CIDFontWriter::WriteFont, unexpected failure. no postscript font name for font");
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 		std::string subsetFontName = inObjectsContext->GenerateSubsetFontPrefix() + scPlus + postscriptFontName;
@@ -108,7 +109,7 @@ EPDFStatusCode CIDFontWriter::WriteFont(FreeTypeFaceWrapper& inFontInfo,
 		fontContext->WriteObjectReferenceValue(toUnicodeMapObjectID);
 		
 		status = inObjectsContext->EndDictionary(fontContext);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CIDFontWriter::WriteFont, unexpected failure. Failed to end dictionary in font write.");
 			break;
@@ -229,7 +230,7 @@ void CIDFontWriter::WriteGlyphEntry(IByteWriter* inWriter,unsigned short inEncod
 		for(; it != inUnicodeValues.end(); ++it)
 		{
 			unicode.GetUnicodeList().push_back(*it);
-			EPDFStatusCodeAndUShortList utf16Result = unicode.ToUTF16UShort();
+			EStatusCodeAndUShortList utf16Result = unicode.ToUTF16UShort();
 			unicode.GetUnicodeList().clear();
 
 			if(utf16Result.second.size() == 2)

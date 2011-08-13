@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include "IANSIFontWriterHelper.h"
 #include "IFontDescriptorHelper.h"
 #include "ObjectsBasicTypes.h"
@@ -35,7 +35,7 @@ public:
 	TrueTypeANSIFontWriter(void);
 	~TrueTypeANSIFontWriter(void);
 
-	EPDFStatusCode WriteFont(	FreeTypeFaceWrapper& inFontInfo,
+	PDFHummus::EStatusCode WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 							WrittenFontRepresentation* inFontOccurrence,
 							ObjectsContext* inObjectsContext);
 

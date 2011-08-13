@@ -20,7 +20,7 @@
 */
 #pragma once
 #include "IType1InterpreterImplementation.h"
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include "InputCharStringDecodeStream.h"
 
 class CharStringType1Interpreter
@@ -29,7 +29,7 @@ public:
 	CharStringType1Interpreter(void);
 	~CharStringType1Interpreter(void);
 
-	EPDFStatusCode Intepret(const Type1CharString& inCharStringToIntepret, IType1InterpreterImplementation* inImplementationHelper);
+	PDFHummus::EStatusCode Intepret(const Type1CharString& inCharStringToIntepret, IType1InterpreterImplementation* inImplementationHelper);
 
 private:
 
@@ -38,38 +38,38 @@ private:
 	bool mGotEndChar;
 	LongList mPostScriptOperandStack;
 
-	EPDFStatusCode ProcessCharString(InputCharStringDecodeStream* inCharStringToIntepret);
+	PDFHummus::EStatusCode ProcessCharString(InputCharStringDecodeStream* inCharStringToIntepret);
 	bool IsOperator(Byte inBuffer);
-	EPDFStatusCode InterpretOperator(Byte inBuffer,InputCharStringDecodeStream* inCharStringToIntepret,bool& outGotEndExecutionCommand);
-	EPDFStatusCode InterpretNumber(Byte inBuffer,InputCharStringDecodeStream* inCharStringToIntepret);
+	PDFHummus::EStatusCode InterpretOperator(Byte inBuffer,InputCharStringDecodeStream* inCharStringToIntepret,bool& outGotEndExecutionCommand);
+	PDFHummus::EStatusCode InterpretNumber(Byte inBuffer,InputCharStringDecodeStream* inCharStringToIntepret);
 	void ClearStack();
-	EPDFStatusCode DefaultCallOtherSubr();
+	PDFHummus::EStatusCode DefaultCallOtherSubr();
 	
-	EPDFStatusCode InterpretHStem();
-	EPDFStatusCode InterpretVStem();
-	EPDFStatusCode InterpretVMoveto();
-	EPDFStatusCode InterpretRLineto();
-	EPDFStatusCode InterpretHLineto();
-	EPDFStatusCode InterpretVLineto();
-	EPDFStatusCode InterpretRRCurveto();
-	EPDFStatusCode InterpretClosePath();
-	EPDFStatusCode InterpretCallSubr();
-	EPDFStatusCode InterpretReturn();
-	EPDFStatusCode InterpretHsbw();
-	EPDFStatusCode InterpretEndChar();
-	EPDFStatusCode InterpretRMoveto();
-	EPDFStatusCode InterpretHMoveto();
-	EPDFStatusCode InterpretVHCurveto();
-	EPDFStatusCode InterpretHVCurveto();
-	EPDFStatusCode InterpretDotSection();
-	EPDFStatusCode InterpretVStem3();
-	EPDFStatusCode InterpretHStem3();
-	EPDFStatusCode InterpretSeac();
-	EPDFStatusCode InterpretSbw();
-	EPDFStatusCode InterpretDiv();
-	EPDFStatusCode InterpretCallOtherSubr();
-	EPDFStatusCode InterpretPop();
-	EPDFStatusCode InterpretSetCurrentPoint();
+	PDFHummus::EStatusCode InterpretHStem();
+	PDFHummus::EStatusCode InterpretVStem();
+	PDFHummus::EStatusCode InterpretVMoveto();
+	PDFHummus::EStatusCode InterpretRLineto();
+	PDFHummus::EStatusCode InterpretHLineto();
+	PDFHummus::EStatusCode InterpretVLineto();
+	PDFHummus::EStatusCode InterpretRRCurveto();
+	PDFHummus::EStatusCode InterpretClosePath();
+	PDFHummus::EStatusCode InterpretCallSubr();
+	PDFHummus::EStatusCode InterpretReturn();
+	PDFHummus::EStatusCode InterpretHsbw();
+	PDFHummus::EStatusCode InterpretEndChar();
+	PDFHummus::EStatusCode InterpretRMoveto();
+	PDFHummus::EStatusCode InterpretHMoveto();
+	PDFHummus::EStatusCode InterpretVHCurveto();
+	PDFHummus::EStatusCode InterpretHVCurveto();
+	PDFHummus::EStatusCode InterpretDotSection();
+	PDFHummus::EStatusCode InterpretVStem3();
+	PDFHummus::EStatusCode InterpretHStem3();
+	PDFHummus::EStatusCode InterpretSeac();
+	PDFHummus::EStatusCode InterpretSbw();
+	PDFHummus::EStatusCode InterpretDiv();
+	PDFHummus::EStatusCode InterpretCallOtherSubr();
+	PDFHummus::EStatusCode InterpretPop();
+	PDFHummus::EStatusCode InterpretSetCurrentPoint();
 
 };
 

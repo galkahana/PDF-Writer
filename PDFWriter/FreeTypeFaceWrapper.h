@@ -21,7 +21,7 @@
 #pragma once
 
 #include "EFontStretch.h"
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -66,8 +66,8 @@ public:
 
 	bool IsValid();
 
-	EPDFStatusCode GetGlyphsForUnicodeText(const ULongList& inUnicodeCharacters,UIntList& outGlyphs);
-	EPDFStatusCode GetGlyphsForUnicodeText(const ULongListList& inUnicodeCharacters,UIntListList& outGlyphs);
+	PDFHummus::EStatusCode GetGlyphsForUnicodeText(const ULongList& inUnicodeCharacters,UIntList& outGlyphs);
+	PDFHummus::EStatusCode GetGlyphsForUnicodeText(const ULongListList& inUnicodeCharacters,UIntListList& outGlyphs);
 
 	double GetItalicAngle();
 	BoolAndFTShort GetCapHeight(); // aligned to pdf metrics

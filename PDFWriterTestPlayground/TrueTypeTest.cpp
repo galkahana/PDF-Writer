@@ -2,7 +2,7 @@
    Source File : TrueTypeTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@
 
 #include <iostream>
 
+using namespace PDFHummus;
+
 TrueTypeTest::TrueTypeTest(void)
 {
 }
@@ -33,15 +35,15 @@ TrueTypeTest::~TrueTypeTest(void)
 {
 }
 
-EPDFStatusCode TrueTypeTest::Run()
+EStatusCode TrueTypeTest::Run()
 {
-	EPDFStatusCode status;
+	EStatusCode status;
 	InputFile ttfFile;
 
 	do
 	{
 		status = ttfFile.OpenFile("C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"cannot read arial font file\n";
 			break;
@@ -50,7 +52,7 @@ EPDFStatusCode TrueTypeTest::Run()
 		OpenTypeFileInput trueTypeReader;
 
 		status = trueTypeReader.ReadOpenTypeFile(ttfFile.GetInputStream());
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"could not read true type file\n";
 			break;

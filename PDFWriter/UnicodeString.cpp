@@ -2,6 +2,8 @@
 #include "Trace.h"
 #include <sstream>
 
+using namespace PDFHummus;
+
 UnicodeString::UnicodeString(void)
 {
 }
@@ -48,15 +50,15 @@ ULongList& UnicodeString::GetUnicodeList()
 	return mUnicodeCharacters;
 }
 
-EPDFStatusCode UnicodeString::FromUTF8(const string& inString)
+EStatusCode UnicodeString::FromUTF8(const string& inString)
 {
 	mUnicodeCharacters.clear();
 	string::const_iterator it = inString.begin();
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	unsigned long unicodeCharacter;
 
 
-	for(; it != inString.end() && ePDFSuccess == status; ++it)
+	for(; it != inString.end() && PDFHummus::eSuccess == status; ++it)
 	{
 		if((unsigned char)*it <= 0x7F)
 		{
@@ -68,7 +70,7 @@ EPDFStatusCode UnicodeString::FromUTF8(const string& inString)
 			++it;
 			if(it == inString.end() || ((unsigned char)*it>>6 != 0x2))
 			{
-				status = ePDFFailure;
+				status = PDFHummus::eFailure;
 				break;
 			}
 
@@ -77,38 +79,38 @@ EPDFStatusCode UnicodeString::FromUTF8(const string& inString)
 		else if(((unsigned char)*it>>4) == 0xE) // 3 bytes encoding
 		{
 			unicodeCharacter = (unsigned char)*it & 0xF;
-			for(int i =0 ; i < 2 && ePDFSuccess == status; ++i)
+			for(int i =0 ; i < 2 && PDFHummus::eSuccess == status; ++i)
 			{
 				++it;
 				if(it == inString.end() || ((unsigned char)*it>>6 != 0x2))
 				{
-					status = ePDFFailure;
+					status = PDFHummus::eFailure;
 					break;
 				}
 				unicodeCharacter = (unicodeCharacter << 6) | ((unsigned char)*it & 0x3F);
 			}
-			if(status != ePDFSuccess)
+			if(status != PDFHummus::eSuccess)
 				break;
 		}
 		else if(((unsigned char)*it>>3) == 0x1E) // 4 bytes encoding
 		{
 			unicodeCharacter = (unsigned char)*it & 0x7;
-			for(int i =0 ; i < 3 && ePDFSuccess == status; ++i)
+			for(int i =0 ; i < 3 && PDFHummus::eSuccess == status; ++i)
 			{
 				++it;
 				if(it == inString.end() || ((unsigned char)*it>>6 != 0x2))
 				{
-					status = ePDFFailure;
+					status = PDFHummus::eFailure;
 					break;
 				}
 				unicodeCharacter = (unicodeCharacter << 6) | ((unsigned char)*it & 0x3F);
 			}
-			if(status != ePDFSuccess)
+			if(status != PDFHummus::eSuccess)
 				break;
 		}
 		else
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -118,13 +120,13 @@ EPDFStatusCode UnicodeString::FromUTF8(const string& inString)
 	return status;
 }
 
-EPDFStatusCodeAndString UnicodeString::ToUTF8() const
+EStatusCodeAndString UnicodeString::ToUTF8() const
 {
 	ULongList::const_iterator it = mUnicodeCharacters.begin();
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	stringstream result;
 
-	for(; it != mUnicodeCharacters.end() && ePDFSuccess == status; ++it)
+	for(; it != mUnicodeCharacters.end() && PDFHummus::eSuccess == status; ++it)
 	{
 		// Encode Unicode to UTF8
 		if(*it <= 0x7F)
@@ -152,49 +154,49 @@ EPDFStatusCodeAndString UnicodeString::ToUTF8() const
 		else
 		{
 			TRACE_LOG("UnicodeString::ToUTF8, contains unicode characters that cannot be coded into UTF8");
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 		}
 	}
 	
-	return EPDFStatusCodeAndString(status,result.str());
+	return EStatusCodeAndString(status,result.str());
 }
 
-EPDFStatusCode UnicodeString::FromUTF16(const string& inString)
+EStatusCode UnicodeString::FromUTF16(const string& inString)
 {
 	return FromUTF16((const unsigned char*)inString.c_str(),(unsigned long)inString.length());
 }
 
-EPDFStatusCode UnicodeString::FromUTF16(const unsigned char* inString, unsigned long inLength)
+EStatusCode UnicodeString::FromUTF16(const unsigned char* inString, unsigned long inLength)
 {
 	// Read BOM
 	if(inLength < 2)
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 
 	if(inString[0] == 0xFE && inString[1] == 0xFF)
 		return FromUTF16BE(inString+2,inLength-2);
 	else if(inString[0] == 0xFF && inString[1] == 0xFE)
 		return FromUTF16LE(inString+2,inLength-2);
 	else
-		return ePDFFailure; // no bom
+		return PDFHummus::eFailure; // no bom
 }
 
-EPDFStatusCode UnicodeString::FromUTF16BE(const string& inString)
+EStatusCode UnicodeString::FromUTF16BE(const string& inString)
 {
 	return FromUTF16BE((const unsigned char*)inString.c_str(),(unsigned long)inString.length());
 }
 
-EPDFStatusCode UnicodeString::FromUTF16BE(const unsigned char* inString, unsigned long inLength)
+EStatusCode UnicodeString::FromUTF16BE(const unsigned char* inString, unsigned long inLength)
 {
 	mUnicodeCharacters.clear();
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
 	if(inLength % 2 != 0)
 	{
 		TRACE_LOG("UnicodeString::FromUTF16BE, invalid UTF16 string, has odd numbers of characters");
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 
-	for(unsigned long i = 0; i < inLength-1 && ePDFSuccess == status; i+=2)
+	for(unsigned long i = 0; i < inLength-1 && PDFHummus::eSuccess == status; i+=2)
 	{
 		unsigned short buffer = (((unsigned short)inString[i])<<8) + inString[i+1];
 
@@ -206,7 +208,7 @@ EPDFStatusCode UnicodeString::FromUTF16BE(const unsigned char* inString, unsigne
 			if(i>=inLength-1)
 			{
 				TRACE_LOG("UnicodeString::FromUTF16BE, fault string - high surrogat encountered without a low surrogate");
-				status = ePDFFailure;
+				status = PDFHummus::eFailure;
 				break;
 			}
 
@@ -214,7 +216,7 @@ EPDFStatusCode UnicodeString::FromUTF16BE(const unsigned char* inString, unsigne
 			if(0xDC00 > buffer|| buffer > 0xDFFF)
 			{
 				TRACE_LOG("UnicodeString::FromUTF16BE, fault string - high surrogat encountered without a low surrogate");
-				status = ePDFFailure;
+				status = PDFHummus::eFailure;
 				break;
 			}
 
@@ -229,24 +231,24 @@ EPDFStatusCode UnicodeString::FromUTF16BE(const unsigned char* inString, unsigne
 	return status;
 }
 
-EPDFStatusCode UnicodeString::FromUTF16LE(const string& inString)
+EStatusCode UnicodeString::FromUTF16LE(const string& inString)
 {
 	return FromUTF16LE((const unsigned char*)inString.c_str(),(unsigned long)inString.length());
 }
 
 
-EPDFStatusCode UnicodeString::FromUTF16LE(const unsigned char* inString, unsigned long inLength)
+EStatusCode UnicodeString::FromUTF16LE(const unsigned char* inString, unsigned long inLength)
 {
 	mUnicodeCharacters.clear();
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
 	if(inLength % 2 != 0)
 	{
 		TRACE_LOG("UnicodeString::FromUTF16LE, invalid UTF16 string, has odd numbers of characters");
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 
-	for(unsigned long i = 0; i < inLength-1 && ePDFSuccess == status; i+=2)
+	for(unsigned long i = 0; i < inLength-1 && PDFHummus::eSuccess == status; i+=2)
 	{
 		unsigned short buffer = (((unsigned short)inString[i+1])<<8) + inString[i];
 
@@ -258,7 +260,7 @@ EPDFStatusCode UnicodeString::FromUTF16LE(const unsigned char* inString, unsigne
 			if(i>=inLength-1)
 			{
 				TRACE_LOG("UnicodeString::FromUTF16LE, fault string - high surrogat encountered without a low surrogate");
-				status = ePDFFailure;
+				status = PDFHummus::eFailure;
 				break;
 			}
 
@@ -266,7 +268,7 @@ EPDFStatusCode UnicodeString::FromUTF16LE(const unsigned char* inString, unsigne
 			if(0xDC00 > buffer|| buffer > 0xDFFF)
 			{
 				TRACE_LOG("UnicodeString::FromUTF16LE, fault string - high surrogat encountered without a low surrogate");
-				status = ePDFFailure;
+				status = PDFHummus::eFailure;
 				break;
 			}
 
@@ -281,12 +283,12 @@ EPDFStatusCode UnicodeString::FromUTF16LE(const unsigned char* inString, unsigne
 	return status;
 }
 
-EPDFStatusCode UnicodeString::FromUTF16UShort(unsigned short* inShorts, unsigned long inLength)
+EStatusCode UnicodeString::FromUTF16UShort(const unsigned short* inShorts, unsigned long inLength)
 {
 	mUnicodeCharacters.clear();
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
-	for(unsigned long i = 0; i < inLength && ePDFSuccess == status; ++i)
+	for(unsigned long i = 0; i < inLength && PDFHummus::eSuccess == status; ++i)
 	{
 		if(0xD800 <= inShorts[i] && inShorts[i] <= 0xDBFF) 
 		{
@@ -295,14 +297,14 @@ EPDFStatusCode UnicodeString::FromUTF16UShort(unsigned short* inShorts, unsigned
 			if(i>=inLength)
 			{
 				TRACE_LOG("UnicodeString::FromUTF16UShort, fault string - high surrogat encountered without a low surrogate");
-				status = ePDFFailure;
+				status = PDFHummus::eFailure;
 				break;
 			}
 
 			if(0xDC00 > inShorts[i] || inShorts[i] > 0xDFFF)
 			{
 				TRACE_LOG("UnicodeString::FromUTF16UShort, fault string - high surrogat encountered without a low surrogate");
-				status = ePDFFailure;
+				status = PDFHummus::eFailure;
 				break;
 			}
 
@@ -316,10 +318,10 @@ EPDFStatusCode UnicodeString::FromUTF16UShort(unsigned short* inShorts, unsigned
 }
 
 
-EPDFStatusCodeAndString UnicodeString::ToUTF16BE(bool inPrependWithBom) const
+EStatusCodeAndString UnicodeString::ToUTF16BE(bool inPrependWithBom) const
 {
 	ULongList::const_iterator it = mUnicodeCharacters.begin();
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	stringstream result;
 
 	if(inPrependWithBom)
@@ -328,7 +330,7 @@ EPDFStatusCodeAndString UnicodeString::ToUTF16BE(bool inPrependWithBom) const
 		result.put((unsigned char)0xFF);
 	}
 
-	for(; it != mUnicodeCharacters.end() && ePDFSuccess == status; ++it)
+	for(; it != mUnicodeCharacters.end() && PDFHummus::eSuccess == status; ++it)
 	{
 		if(*it < 0xD7FF || (0xE000 < *it && *it < 0xFFFF))
 		{
@@ -347,18 +349,18 @@ EPDFStatusCodeAndString UnicodeString::ToUTF16BE(bool inPrependWithBom) const
 		}
 		else
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}	
 	}
 	
-	return EPDFStatusCodeAndString(status,result.str());
+	return EStatusCodeAndString(status,result.str());
 }
 
-EPDFStatusCodeAndString UnicodeString::ToUTF16LE(bool inPrependWithBom) const
+EStatusCodeAndString UnicodeString::ToUTF16LE(bool inPrependWithBom) const
 {
 	ULongList::const_iterator it = mUnicodeCharacters.begin();
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	stringstream result;
 
 	if(inPrependWithBom)
@@ -367,7 +369,7 @@ EPDFStatusCodeAndString UnicodeString::ToUTF16LE(bool inPrependWithBom) const
 		result.put((unsigned char)0xFE);
 	}
 
-	for(; it != mUnicodeCharacters.end() && ePDFSuccess == status; ++it)
+	for(; it != mUnicodeCharacters.end() && PDFHummus::eSuccess == status; ++it)
 	{
 		if(*it < 0xD7FF || (0xE000 < *it && *it < 0xFFFF))
 		{
@@ -386,21 +388,21 @@ EPDFStatusCodeAndString UnicodeString::ToUTF16LE(bool inPrependWithBom) const
 		}
 		else
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}	
 	}
 	
-	return EPDFStatusCodeAndString(status,result.str());
+	return EStatusCodeAndString(status,result.str());
 }
 
-EPDFStatusCodeAndUShortList UnicodeString::ToUTF16UShort() const
+EStatusCodeAndUShortList UnicodeString::ToUTF16UShort() const
 {
 	ULongList::const_iterator it = mUnicodeCharacters.begin();
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	UShortList result;
 
-	for(; it != mUnicodeCharacters.end() && ePDFSuccess == status; ++it)
+	for(; it != mUnicodeCharacters.end() && PDFHummus::eSuccess == status; ++it)
 	{
 		if(*it < 0xD7FF || (0xE000 < *it && *it < 0xFFFF))
 		{
@@ -416,12 +418,12 @@ EPDFStatusCodeAndUShortList UnicodeString::ToUTF16UShort() const
 		}
 		else
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}	
 	}
 	
-	return EPDFStatusCodeAndUShortList(status,result);
+	return EStatusCodeAndUShortList(status,result);
 }
 
 

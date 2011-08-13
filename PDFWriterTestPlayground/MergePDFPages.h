@@ -2,7 +2,7 @@
    Source File : MergePDFPages.h
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -27,16 +27,16 @@ public:
 	MergePDFPages(void);
 	~MergePDFPages(void);
 
-	virtual EPDFStatusCode Run();
+	virtual PDFHummus::EStatusCode Run();
 
 private:
 
-	EPDFStatusCode TestOnlyMerge();
-	EPDFStatusCode TestPrefixGraphicsMerge();
-	EPDFStatusCode TestSuffixGraphicsMerge();
-	EPDFStatusCode TestBothGraphicsMerge();
-	EPDFStatusCode MergeTwoPageInSeparatePhases();
-	EPDFStatusCode MergeTwoPageWithEvents();
-	EPDFStatusCode MergePagesUsingCopyingContext();
+	PDFHummus::EStatusCode TestOnlyMerge();
+	PDFHummus::EStatusCode TestPrefixGraphicsMerge();
+	PDFHummus::EStatusCode TestSuffixGraphicsMerge();
+	PDFHummus::EStatusCode TestBothGraphicsMerge();
+	PDFHummus::EStatusCode MergeTwoPageInSeparatePhases();
+	PDFHummus::EStatusCode MergeTwoPageWithEvents();
+	PDFHummus::EStatusCode MergePagesUsingCopyingContext();
 
 };

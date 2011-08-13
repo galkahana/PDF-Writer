@@ -2,7 +2,7 @@
    Source File : FormXObjectTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
    
 */
 #include "FormXObjectTest.h"
-#include "HummusPDFWriter.h"
+#include "PDFWriter.h"
 #include "PDFPage.h"
 #include "PDFRectangle.h"
 #include "PageContentContext.h"
@@ -30,6 +30,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace PDFHummus;
 
 FormXObjectTest::FormXObjectTest(void)
 {
@@ -39,15 +40,15 @@ FormXObjectTest::~FormXObjectTest(void)
 {
 }
 
-EPDFStatusCode FormXObjectTest::Run()
+EStatusCode FormXObjectTest::Run()
 {
-	HummusPDFWriter pdfWriter;
-	EPDFStatusCode status; 
+	PDFWriter pdfWriter;
+	EStatusCode status; 
 
 	do
 	{
 		status = pdfWriter.StartPDF("C:\\PDFLibTests\\XObjectContent.PDF",ePDFVersion13);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
 			break;
@@ -59,7 +60,7 @@ EPDFStatusCode FormXObjectTest::Run()
 		PageContentContext* pageContentContext = pdfWriter.StartPageContentContext(page);
 		if(NULL == pageContentContext)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			cout<<"failed to create content context for page\n";
 		}
 
@@ -72,7 +73,7 @@ EPDFStatusCode FormXObjectTest::Run()
 
 		// pause stream to start writing a form xobject
 		status = pdfWriter.PausePageContentContext(pageContentContext);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to pause page content context\n";
 			break;
@@ -90,7 +91,7 @@ EPDFStatusCode FormXObjectTest::Run()
 		xobjectContentContext->Q();
 
 		status = pdfWriter.EndFormXObjectAndRelease(xobjectForm);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to write XObject form\n";
 			break;
@@ -120,14 +121,14 @@ EPDFStatusCode FormXObjectTest::Run()
 		pageContentContext->Q();
 
 		status = pdfWriter.EndPageContentContext(pageContentContext);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to write page\n";
 			break;
@@ -140,7 +141,7 @@ EPDFStatusCode FormXObjectTest::Run()
 		pageContentContext = pdfWriter.StartPageContentContext(page);
 		if(NULL == pageContentContext)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			cout<<"failed to create content context for 2nd page\n";
 		}
 		
@@ -153,21 +154,21 @@ EPDFStatusCode FormXObjectTest::Run()
 		pageContentContext->Q();
 
 		status = pdfWriter.EndPageContentContext(pageContentContext);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to end 2nd page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to write 2nd page\n";
 			break;
 		}
 
 		status = pdfWriter.EndPDF();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed in end PDF\n";
 			break;

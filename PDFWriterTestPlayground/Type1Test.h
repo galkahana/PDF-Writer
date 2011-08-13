@@ -2,7 +2,7 @@
    Source File : Type1Test.h
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -38,11 +38,11 @@ public:
 	Type1Test(void);
 	~Type1Test(void);
 
-	virtual EPDFStatusCode Run();
+	virtual PDFHummus::EStatusCode Run();
 
 private:
-	EPDFStatusCode SaveCharstringCode(const string& inCharStringName,Type1Input* inType1Input);
-	EPDFStatusCode ShowDependencies(const string& inCharStringName,Type1Input* inType1Input);
+	PDFHummus::EStatusCode SaveCharstringCode(const string& inCharStringName,Type1Input* inType1Input);
+	PDFHummus::EStatusCode ShowDependencies(const string& inCharStringName,Type1Input* inType1Input);
 
 	void ShowFontDictionary(const Type1FontDictionary& inFontDictionary);
 	void ShowFontInfoDictionary(const Type1FontInfoDictionary& inFontInfoDictionary);

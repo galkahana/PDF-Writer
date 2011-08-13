@@ -32,15 +32,22 @@ using namespace std;
 
 class ObjectsContext;
 class PDFImageXObject;
-class IDocumentsContextExtender;
+class IDocumentContextExtender;
 class PDFFormXObject;
-class DocumentsContext;
 class IByteReaderWithPosition;
+
+namespace PDFHummus
+{
+	class DocumentContext;
+}
+
+using namespace PDFHummus;
+
 
 typedef map<string,JPEGImageInformation> StringToJPEGImageInformationMap;
 typedef pair<bool,JPEGImageInformation> BoolAndJPEGImageInformation;
 typedef pair<double,double> DoubleAndDoublePair;
-typedef set<IDocumentsContextExtender*> IDocumentsContextExtenderSet;
+typedef set<IDocumentContextExtender*> IDocumentContextExtenderSet;
 
 
 class JPEGImageHandler
@@ -52,7 +59,7 @@ public:
 	// use this for retrieving image information for JPEG (useful for deciphering JPG dimensions tags)
 	BoolAndJPEGImageInformation RetrieveImageInformation(const string& inJPGFilePath);
 
-	// DocumentsContext::CreateImageXObjectFromJPGFile are equivelent
+	// DocumentContext::CreateImageXObjectFromJPGFile are equivelent
 	PDFImageXObject* CreateImageXObjectFromJPGFile(const string& inJPGFilePath);
 	PDFImageXObject* CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream);
 	PDFImageXObject* CreateImageXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inImageXObjectID);
@@ -64,16 +71,16 @@ public:
 	PDFFormXObject* CreateFormXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inFormXObjectID);
 	PDFFormXObject* CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inFormXObjectID);
 
-	void SetOperationsContexts(DocumentsContext* inDocumentsContext,ObjectsContext* inObjectsContext);
-	void AddDocumentsContextExtender(IDocumentsContextExtender* inExtender);
-	void RemoveDocumentsContextExtender(IDocumentsContextExtender* inExtender);
+	void SetOperationsContexts(DocumentContext* inDocumentContext,ObjectsContext* inObjectsContext);
+	void AddDocumentContextExtender(IDocumentContextExtender* inExtender);
+	void RemoveDocumentContextExtender(IDocumentContextExtender* inExtender);
 
 private:
 	JPEGImageInformation mNullInformation;
 	StringToJPEGImageInformationMap mImagesInformationMap;
 	ObjectsContext* mObjectsContext;
-	DocumentsContext* mDocumentsContext;
-	IDocumentsContextExtenderSet mExtenders;
+	DocumentContext* mDocumentContext;
+	IDocumentContextExtenderSet mExtenders;
 
 	PDFImageXObject* CreateAndWriteImageXObjectFromJPGInformation(const string& inJPGFilePath,ObjectIDType inImageXObjectID, const JPEGImageInformation& inJPGImageInformation);
 	PDFImageXObject* CreateAndWriteImageXObjectFromJPGInformation(IByteReaderWithPosition* inJPGImageStream,ObjectIDType inImageXObjectID, const JPEGImageInformation& inJPGImageInformation);

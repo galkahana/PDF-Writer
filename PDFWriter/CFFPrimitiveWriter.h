@@ -19,7 +19,7 @@
    
 */
 #pragma once
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include "IByteWriter.h"
 #include "DictOperand.h"
 
@@ -33,39 +33,39 @@ public:
 
 	void SetStream(IByteWriter* inCFFOutput);
 
-	EPDFStatusCode GetInternalState();
+	PDFHummus::EStatusCode GetInternalState();
 
-	EPDFStatusCode WriteByte(Byte inValue);
-	EPDFStatusCode Write(const Byte* inBuffer,LongBufferSizeType inBufferSize);
+	PDFHummus::EStatusCode WriteByte(Byte inValue);
+	PDFHummus::EStatusCode Write(const Byte* inBuffer,LongBufferSizeType inBufferSize);
 
 	// basic CFF values
-	EPDFStatusCode WriteCard8(Byte inValue);
-	EPDFStatusCode WriteCard16(unsigned short inValue);
+	PDFHummus::EStatusCode WriteCard8(Byte inValue);
+	PDFHummus::EStatusCode WriteCard16(unsigned short inValue);
 	// set offsize to write offsets
 	void SetOffSize(Byte inOffSize);
-	EPDFStatusCode WriteOffset(unsigned long inValue);
-	EPDFStatusCode WriteOffSize(Byte inValue);
-	EPDFStatusCode WriteSID(unsigned short inValue);
+	PDFHummus::EStatusCode WriteOffset(unsigned long inValue);
+	PDFHummus::EStatusCode WriteOffSize(Byte inValue);
+	PDFHummus::EStatusCode WriteSID(unsigned short inValue);
 
 	// dict data
-	EPDFStatusCode WriteDictOperator(unsigned short inOperator);
-	EPDFStatusCode WriteDictOperand(const DictOperand& inOperand);
-	EPDFStatusCode WriteDictItems(unsigned short inOperator,const DictOperandList& inOperands);
-	EPDFStatusCode WriteIntegerOperand(long inValue);
-	EPDFStatusCode Write5ByteDictInteger(long inValue);
-	EPDFStatusCode WriteRealOperand(double inValue,long inFractalLength=10);
+	PDFHummus::EStatusCode WriteDictOperator(unsigned short inOperator);
+	PDFHummus::EStatusCode WriteDictOperand(const DictOperand& inOperand);
+	PDFHummus::EStatusCode WriteDictItems(unsigned short inOperator,const DictOperandList& inOperands);
+	PDFHummus::EStatusCode WriteIntegerOperand(long inValue);
+	PDFHummus::EStatusCode Write5ByteDictInteger(long inValue);
+	PDFHummus::EStatusCode WriteRealOperand(double inValue,long inFractalLength=10);
 
-	EPDFStatusCode Pad5Bytes();
-	EPDFStatusCode PadNBytes(unsigned short inBytesToPad);
+	PDFHummus::EStatusCode Pad5Bytes();
+	PDFHummus::EStatusCode PadNBytes(unsigned short inBytesToPad);
 
 private:
 	IByteWriter* mCFFOutput;
-	EPDFStatusCode mInternalState;
+	PDFHummus::EStatusCode mInternalState;
 	Byte mCurrentOffsize;
 
-	EPDFStatusCode Write3ByteUnsigned(unsigned long inValue);
-	EPDFStatusCode Write4ByteUnsigned(unsigned long inValue);
-	EPDFStatusCode WriteIntegerOfReal(double inIntegerValue,Byte& ioBuffer,bool& ioUsedFirst);
-	EPDFStatusCode SetOrWriteNibble(Byte inValue,Byte& ioBuffer,bool& ioUsedFirst);
+	PDFHummus::EStatusCode Write3ByteUnsigned(unsigned long inValue);
+	PDFHummus::EStatusCode Write4ByteUnsigned(unsigned long inValue);
+	PDFHummus::EStatusCode WriteIntegerOfReal(double inIntegerValue,Byte& ioBuffer,bool& ioUsedFirst);
+	PDFHummus::EStatusCode SetOrWriteNibble(Byte inValue,Byte& ioBuffer,bool& ioUsedFirst);
 
 };

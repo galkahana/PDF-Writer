@@ -2,7 +2,7 @@
    Source File : JPGImageTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 */
 #include "JPGImageTest.h"
 #include "TestsRunner.h"
-#include "HummusPDFWriter.h"
+#include "PDFWriter.h"
 #include "PDFImageXObject.h"
 #include "PDFPage.h"
 #include "PageContentContext.h"
@@ -29,6 +29,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace PDFHummus;
 
 JPGImageTest::JPGImageTest(void)
 {
@@ -38,15 +39,15 @@ JPGImageTest::~JPGImageTest(void)
 {
 }
 
-EPDFStatusCode JPGImageTest::Run()
+EStatusCode JPGImageTest::Run()
 {
-	HummusPDFWriter pdfWriter;
-	EPDFStatusCode status; 
+	PDFWriter pdfWriter;
+	EStatusCode status; 
 
 	do
 	{
 		status = pdfWriter.StartPDF("C:\\PDFLibTests\\BasicJPGImagesTest.PDF",ePDFVersion13);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
 			break;
@@ -58,7 +59,7 @@ EPDFStatusCode JPGImageTest::Run()
 		PageContentContext* pageContentContext = pdfWriter.StartPageContentContext(page);
 		if(NULL == pageContentContext)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			cout<<"failed to create content context for page\n";
 		}
 
@@ -71,7 +72,7 @@ EPDFStatusCode JPGImageTest::Run()
 
 		// pause stream to start writing the image
 		status = pdfWriter.PausePageContentContext(pageContentContext);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to pause page content context\n";
 			break;
@@ -82,7 +83,7 @@ EPDFStatusCode JPGImageTest::Run()
 		if(!imageXObject)
 		{
 			cout<<"failed to create image XObject from file\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -97,7 +98,7 @@ EPDFStatusCode JPGImageTest::Run()
 		// now do the same with a form xobject
 		// pause stream to start writing the image
 		status = pdfWriter.PausePageContentContext(pageContentContext);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to pause page content context ||\n";
 			break;
@@ -108,7 +109,7 @@ EPDFStatusCode JPGImageTest::Run()
 		if(!formXObject)
 		{
 			cout<<"failed to create form XObject from file\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -121,14 +122,14 @@ EPDFStatusCode JPGImageTest::Run()
 		delete formXObject;
 
 		status = pdfWriter.EndPageContentContext(pageContentContext);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to write page\n";
 			break;
@@ -136,7 +137,7 @@ EPDFStatusCode JPGImageTest::Run()
 
 	
 		status = pdfWriter.EndPDF();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed in end PDF\n";
 			break;

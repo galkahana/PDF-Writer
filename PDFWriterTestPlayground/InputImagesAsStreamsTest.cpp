@@ -2,7 +2,7 @@
 #include "TestsRunner.h"
 #include "InputFile.h"
 #include "TestsRunner.h"
-#include "HummusPDFWriter.h"
+#include "PDFWriter.h"
 #include "PDFPage.h"
 #include "PageContentContext.h"
 #include "PDFFormXObject.h"
@@ -10,6 +10,7 @@
 #include <string>
 #include <iostream>
 using namespace std;
+using namespace PDFHummus;
 
 InputImagesAsStreamsTest::InputImagesAsStreamsTest(void)
 {
@@ -20,18 +21,18 @@ InputImagesAsStreamsTest::~InputImagesAsStreamsTest(void)
 }
 
 
-EPDFStatusCode InputImagesAsStreamsTest::Run()
+EStatusCode InputImagesAsStreamsTest::Run()
 {
 	// A minimal test to see if images as streams work. i'm using regular file streams, just to show the point
 	// obviously this is quite a trivial case.
 
-	HummusPDFWriter pdfWriter;
-	EPDFStatusCode status; 
+	PDFWriter pdfWriter;
+	EStatusCode status; 
 
 	do
 	{
 		status = pdfWriter.StartPDF("C:\\PDFLibTests\\ImagesInStreams.PDF",ePDFVersion13);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
 			break;
@@ -45,7 +46,7 @@ EPDFStatusCode InputImagesAsStreamsTest::Run()
 		InputFile jpgImage;
 
 		status = jpgImage.OpenFile("C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG");
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to open JPG image in"<<"C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG"<<"\n";
 			break;
@@ -56,7 +57,7 @@ EPDFStatusCode InputImagesAsStreamsTest::Run()
 		if(!formXObject)
 		{
 			cout<<"failed to create form XObject from file\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -65,7 +66,7 @@ EPDFStatusCode InputImagesAsStreamsTest::Run()
 		PageContentContext* pageContentContext = pdfWriter.StartPageContentContext(page);
 		if(NULL == pageContentContext)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			cout<<"failed to create content context for page\n";
 		}
 
@@ -77,14 +78,14 @@ EPDFStatusCode InputImagesAsStreamsTest::Run()
 		delete formXObject;
 
 		status = pdfWriter.EndPageContentContext(pageContentContext);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to write page\n";
 			break;
@@ -96,7 +97,7 @@ EPDFStatusCode InputImagesAsStreamsTest::Run()
 
 		InputFile tiffFile;
 		status = tiffFile.OpenFile("C:\\PDFLibTests\\TestMaterials\\images\\tiff\\FLAG_T24.TIF");
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to open TIFF image in"<<"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\FLAG_T24.TIF"<<"\n";
 			break;
@@ -106,7 +107,7 @@ EPDFStatusCode InputImagesAsStreamsTest::Run()
 		if(!formXObject)
 		{
 			cout<<"failed to create image form XObject for TIFF\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -115,7 +116,7 @@ EPDFStatusCode InputImagesAsStreamsTest::Run()
 		pageContentContext = pdfWriter.StartPageContentContext(page);
 		if(NULL == pageContentContext)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			cout<<"failed to create content context for page with TIFF image\n";
 		}
 
@@ -128,14 +129,14 @@ EPDFStatusCode InputImagesAsStreamsTest::Run()
 		delete formXObject;
 
 		status = pdfWriter.EndPageContentContext(pageContentContext);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to end page content context for TIFF\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to write page, for TIFF\n";
 			break;
@@ -146,14 +147,14 @@ EPDFStatusCode InputImagesAsStreamsTest::Run()
 		InputFile pdfFile;
 
 		status = pdfFile.OpenFile("C:\\PDFLibTests\\TestMaterials\\Original.pdf");
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to open PDF file in"<<"C:\\PDFLibTests\\TestMaterials\\Original.pdf"<<"\n";
 			break;
 		}
 
 		status = pdfWriter.AppendPDFPagesFromPDF(pdfFile.GetInputStream(),PDFPageRange()).first;
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from Original.PDF\n";
 			break;
@@ -162,7 +163,7 @@ EPDFStatusCode InputImagesAsStreamsTest::Run()
 		pdfFile.CloseFile();
 
 		status = pdfWriter.EndPDF();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed in end PDF\n";
 			break;

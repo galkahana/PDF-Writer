@@ -19,7 +19,7 @@
    
 */
 #pragma once
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include "ObjectsBasicTypes.h"
 #include "Type1Input.h"
 #include "InputFile.h"
@@ -53,7 +53,7 @@ public:
 	Type1ToCFFEmbeddedFontWriter(void);
 	~Type1ToCFFEmbeddedFontWriter(void);
 
-	EPDFStatusCode WriteEmbeddedFont(	FreeTypeFaceWrapper& inFontInfo,
+	PDFHummus::EStatusCode WriteEmbeddedFont(	FreeTypeFaceWrapper& inFontInfo,
 									const UIntVector& inSubsetGlyphIDs,
 									const string& inFontFile3SubType,
 									const string& inSubsetFontName,
@@ -82,19 +82,19 @@ private:
 	LongFilePositionType mPrivateSize;
 	LongFilePositionType mPrivatePosition;
 
-	EPDFStatusCode CreateCFFSubset(	
+	PDFHummus::EStatusCode CreateCFFSubset(	
 								FreeTypeFaceWrapper& inFontInfo,
 								const UIntVector& inSubsetGlyphIDs,
 								const string& inSubsetFontName,
 								bool& outNotEmbedded,
 								MyStringBuf& outFontProgram);
-	EPDFStatusCode AddDependentGlyphs(StringVector& ioSubsetGlyphIDs);
-	EPDFStatusCode AddComponentGlyphs(const string& inGlyphID,StringSet& ioComponents,bool &outFoundComponents);
-	EPDFStatusCode WriteCFFHeader();
-	EPDFStatusCode WriteName(const string& inSubsetFontName);
+	PDFHummus::EStatusCode AddDependentGlyphs(StringVector& ioSubsetGlyphIDs);
+	PDFHummus::EStatusCode AddComponentGlyphs(const string& inGlyphID,StringSet& ioComponents,bool &outFoundComponents);
+	PDFHummus::EStatusCode WriteCFFHeader();
+	PDFHummus::EStatusCode WriteName(const string& inSubsetFontName);
 	Byte GetMostCompressedOffsetSize(unsigned long inOffset);
-	EPDFStatusCode WriteTopIndex();
-	EPDFStatusCode WriteTopDictSegment(MyStringBuf& ioTopDictSegment);
+	PDFHummus::EStatusCode WriteTopIndex();
+	PDFHummus::EStatusCode WriteTopDictSegment(MyStringBuf& ioTopDictSegment);
 	unsigned short AddStringToStringsArray(const string& inString);
 	BoolAndUShort FindStandardString(const string& inStringToFind);
 	void AddStringOperandIfNotEmpty(CFFPrimitiveWriter& inWriter,const string& inString,unsigned short inOperator);
@@ -102,15 +102,15 @@ private:
 	void AddNumberOperandIfNotDefault(CFFPrimitiveWriter& inWriter,double inOperand,unsigned short inOperator,double inDefault);
 	void AddDeltaVectorIfNotEmpty(CFFPrimitiveWriter& inWriter,const vector<int>& inArray,unsigned short inOperator);
 	void AddDeltaVectorIfNotEmpty(CFFPrimitiveWriter& inWriter,const vector<double>& inArray,unsigned short inOperator);
-	EPDFStatusCode WriteStringIndex();
-	EPDFStatusCode WriteGlobalSubrsIndex();
-	EPDFStatusCode WriteEncodings(const StringVector& inSubsetGlyphIDs);
+	PDFHummus::EStatusCode WriteStringIndex();
+	PDFHummus::EStatusCode WriteGlobalSubrsIndex();
+	PDFHummus::EStatusCode WriteEncodings(const StringVector& inSubsetGlyphIDs);
 	void FreeTemporaryStructs();
 	void PrepareCharSetArray(const StringVector& inSubsetGlyphIDs);
-	EPDFStatusCode WriteCharsets(const StringVector& inSubsetGlyphIDs);
-	EPDFStatusCode WriteCharStrings(const StringVector& inSubsetGlyphIDs);
-	EPDFStatusCode WritePrivateDictionary();
-	EPDFStatusCode UpdateIndexesAtTopDict();
+	PDFHummus::EStatusCode WriteCharsets(const StringVector& inSubsetGlyphIDs);
+	PDFHummus::EStatusCode WriteCharStrings(const StringVector& inSubsetGlyphIDs);
+	PDFHummus::EStatusCode WritePrivateDictionary();
+	PDFHummus::EStatusCode UpdateIndexesAtTopDict();
 	void TranslateFromFreeTypeToType1(FreeTypeFaceWrapper& inFontInfo,
 									  const UIntVector& inSubsetGlyphIDs,
 									  StringVector& outGlyphNames);

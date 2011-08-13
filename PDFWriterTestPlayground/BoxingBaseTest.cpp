@@ -2,7 +2,7 @@
    Source File : BoxingBaseTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace PDFHummus;
 
 BoxingBaseTest::BoxingBaseTest(void)
 {
@@ -34,16 +35,16 @@ BoxingBaseTest::~BoxingBaseTest(void)
 {
 }
 
-EPDFStatusCode BoxingBaseTest::Run()
+EStatusCode BoxingBaseTest::Run()
 {
-	EPDFStatusCode status = RunIntTest();
+	EStatusCode status = RunIntTest();
 
 	return status;
 }
 
-EPDFStatusCode BoxingBaseTest::RunIntTest()
+EStatusCode BoxingBaseTest::RunIntTest()
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
 		
 	// Assignment
@@ -51,7 +52,7 @@ EPDFStatusCode BoxingBaseTest::RunIntTest()
 	a = 2;
 	if((int)a != 2)
 	{
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 		cout<<"Assignment failed\n";
 	}
 
@@ -59,7 +60,7 @@ EPDFStatusCode BoxingBaseTest::RunIntTest()
 	Int b(2);
 	if((int)b != 2)
 	{
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 		cout<<"Initialization failed\n";
 	}
 
@@ -68,7 +69,7 @@ EPDFStatusCode BoxingBaseTest::RunIntTest()
 	Int c("2");
 	if((int)c != 2)
 	{
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 		cout<<"Initialization from string failed\n";
 	}
 
@@ -76,7 +77,7 @@ EPDFStatusCode BoxingBaseTest::RunIntTest()
 	Int d("2");
 	if((int)d != 2)
 	{
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 		cout<<"Initialization from wide string failed\n";
 	}
 
@@ -84,7 +85,7 @@ EPDFStatusCode BoxingBaseTest::RunIntTest()
 	Int e(2);
 	if(e.ToString() != "2")
 	{
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 		cout<<"Write to string failed\n";
 	}
 
@@ -92,7 +93,7 @@ EPDFStatusCode BoxingBaseTest::RunIntTest()
 	Int f(2);
 	if(f.ToWString() != L"2")
 	{
-		status = ePDFFailure;
+		status = PDFHummus::eFailure;
 		cout<<"Write to wide string failed\n";
 	}
 

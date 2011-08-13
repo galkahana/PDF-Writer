@@ -2,7 +2,7 @@
    Source File : PFBStreamTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace PDFHummus;
 
 PFBStreamTest::PFBStreamTest(void)
 {
@@ -38,9 +39,9 @@ PFBStreamTest::~PFBStreamTest(void)
 {
 }
 
-EPDFStatusCode PFBStreamTest::Run()
+EStatusCode PFBStreamTest::Run()
 {
-	EPDFStatusCode status;
+	EStatusCode status;
 	InputFile pfbFile;
 	OutputFile decodedPFBFile;
 	InputPFBDecodeStream decodeStream;
@@ -54,7 +55,7 @@ EPDFStatusCode PFBStreamTest::Run()
 
 		status = decodeStream.Assign(pfbFile.GetInputStream());
 		
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"Failed to assign pfb input stream";
 			break;
@@ -64,7 +65,7 @@ EPDFStatusCode PFBStreamTest::Run()
 
 		status = traits.CopyToOutputStream(&decodeStream);
 
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"Failed to decode pfb stream";
 			break;

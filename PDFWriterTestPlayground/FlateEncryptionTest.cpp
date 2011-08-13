@@ -2,7 +2,7 @@
    Source File : FlateEncryptionTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@
 
 using namespace std;
 using namespace IOBasicTypes;
+using namespace PDFHummus;
 
 FlateEncryptionTest::FlateEncryptionTest(void)
 {
@@ -41,9 +42,9 @@ FlateEncryptionTest::~FlateEncryptionTest(void)
 {
 }
 
-EPDFStatusCode FlateEncryptionTest::Run()
+EStatusCode FlateEncryptionTest::Run()
 {
-	EPDFStatusCode status;
+	EStatusCode status;
 
 	do
 	{
@@ -57,7 +58,7 @@ EPDFStatusCode FlateEncryptionTest::Run()
 		if(writtenSize != strlen(aString))
 		{
 			cout<<"Failed to write all message to output\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -66,10 +67,10 @@ EPDFStatusCode FlateEncryptionTest::Run()
 
 		OutputStreamTraits outputTraits(decoderWriterStream);
 		status = outputTraits.CopyToOutputStream(encoderReaderStream);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"Failed to copy to decrypted output\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -88,7 +89,7 @@ EPDFStatusCode FlateEncryptionTest::Run()
 		if(strcmp(aString,buffer) != 0)
 		{
 			cout<<"decrypted content is different from encrypted content\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 	}while(false);

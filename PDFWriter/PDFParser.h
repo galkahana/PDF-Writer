@@ -20,8 +20,8 @@
 */
 #pragma once
 
-#include "EPDFStatusCode.h"
-#include "PDFObjectsParser.h"
+#include "EStatusCode.h"
+#include "PDFObjectParser.h"
 #include "IOBasicTypes.h"
 #include "ObjectsBasicTypes.h"
 #include "RefCountPtr.h"
@@ -82,18 +82,18 @@ private:
 
 typedef map<ObjectIDType,ObjectStreamHeaderEntry*> ObjectIDTypeToObjectStreamHeaderEntryMap;
 
-class HummusPDFParser
+class PDFParser
 {
 public:
-	HummusPDFParser(void);
-	virtual ~HummusPDFParser(void);
+	PDFParser(void);
+	virtual ~PDFParser(void);
 
 	// sets the stream to parse, then parses for enough information to be able
 	// to parse objects later
-	EPDFStatusCode StartPDFParsing(IByteReaderWithPosition* inSourceStream);
+	PDFHummus::EStatusCode StartPDFParsing(IByteReaderWithPosition* inSourceStream);
 
 	// get a parser that can parse objects
-	PDFObjectsParser& GetObjectParser();
+	PDFObjectParser& GetObjectParser();
 
 	// below become available after initial parsing [this level is from the header]
 	double GetPDFLevel();
@@ -130,10 +130,10 @@ public:
 	// use this to explictly free used objects. quite obviously this means that you'll have to parse the file again
 	void ResetParser();
 
-	// using HummusPDFParser also for state information reading. this is a specialized version of the StartParsing for reading state
-	EPDFStatusCode StartStateFileParsing(IByteReaderWithPosition* inSourceStream);
+	// using PDFParser also for state information reading. this is a specialized version of the StartParsing for reading state
+	PDFHummus::EStatusCode StartStateFileParsing(IByteReaderWithPosition* inSourceStream);
 private:
-	PDFObjectsParser mObjectParser;
+	PDFObjectParser mObjectParser;
 	IByteReaderWithPosition* mStream;
 	AdapterIByteReaderWithPositionToIReadPositionProvider mCurrentPositionProvider;
 	
@@ -153,37 +153,37 @@ private:
 	unsigned long mPagesCount;
 	ObjectIDType* mPagesObjectIDs;
 
-	EPDFStatusCode ParseHeaderLine();
-	EPDFStatusCode ParseEOFLine();
-	EPDFStatusCode ParseLastXrefPosition();
-	EPDFStatusCode ParseTrailerDictionary();
-	EPDFStatusCode BuildXrefTableFromTable();
-	EPDFStatusCode DetermineXrefSize();
-	EPDFStatusCode InitializeXref();
-	EPDFStatusCode ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,LongFilePositionType inXrefPosition);
+	PDFHummus::EStatusCode ParseHeaderLine();
+	PDFHummus::EStatusCode ParseEOFLine();
+	PDFHummus::EStatusCode ParseLastXrefPosition();
+	PDFHummus::EStatusCode ParseTrailerDictionary();
+	PDFHummus::EStatusCode BuildXrefTableFromTable();
+	PDFHummus::EStatusCode DetermineXrefSize();
+	PDFHummus::EStatusCode InitializeXref();
+	PDFHummus::EStatusCode ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,LongFilePositionType inXrefPosition);
 	PDFObject*  ParseExistingInDirectObject(ObjectIDType inObjectID);
-	EPDFStatusCode ParsePagesObjectIDs();
-	EPDFStatusCode ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID);
-	EPDFStatusCode ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID,unsigned long& ioCurrentPageIndex);
-	EPDFStatusCode ParsePreviousXrefs(PDFDictionary* inTrailer);
+	PDFHummus::EStatusCode ParsePagesObjectIDs();
+	PDFHummus::EStatusCode ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID);
+	PDFHummus::EStatusCode ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID,unsigned long& ioCurrentPageIndex);
+	PDFHummus::EStatusCode ParsePreviousXrefs(PDFDictionary* inTrailer);
 	void MergeXrefWithMainXref(XrefEntryInput* inTableToMerge);
-	EPDFStatusCode ParseFileDirectory();
-	EPDFStatusCode BuildXrefTableAndTrailerFromXrefStream();
+	PDFHummus::EStatusCode ParseFileDirectory();
+	PDFHummus::EStatusCode BuildXrefTableAndTrailerFromXrefStream();
 	// an overload for cases where the xref stream object is already parsed
-	EPDFStatusCode ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,PDFStreamInput* inXrefStream);
+	PDFHummus::EStatusCode ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,PDFStreamInput* inXrefStream);
 	// an overload for cases where the position should hold a stream object, and it should be parsed
-	EPDFStatusCode ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,LongFilePositionType inXrefPosition);
-	EPDFStatusCode ReadXrefStreamSegment(XrefEntryInput* inXrefTable,
+	PDFHummus::EStatusCode ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,LongFilePositionType inXrefPosition);
+	PDFHummus::EStatusCode ReadXrefStreamSegment(XrefEntryInput* inXrefTable,
 									 ObjectIDType inSegmentStartObject,
 									 ObjectIDType inSegmentCount,
 									 IByteReader* inReadFrom,
 									 int* inEntryWidths,
 									 unsigned long inEntryWidthsSize);
-	EPDFStatusCode ReadXrefSegmentValue(IByteReader* inSource,int inEntrySize,long long& outValue);
-	EPDFStatusCode ReadXrefSegmentValue(IByteReader* inSource,int inEntrySize,ObjectIDType& outValue);
-	EPDFStatusCode ParseDirectory(LongFilePositionType inXrefPosition,XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,PDFDictionary** outTrailer);
+	PDFHummus::EStatusCode ReadXrefSegmentValue(IByteReader* inSource,int inEntrySize,long long& outValue);
+	PDFHummus::EStatusCode ReadXrefSegmentValue(IByteReader* inSource,int inEntrySize,ObjectIDType& outValue);
+	PDFHummus::EStatusCode ParseDirectory(LongFilePositionType inXrefPosition,XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,PDFDictionary** outTrailer);
 	PDFObject* ParseExistingInDirectStreamObject(ObjectIDType inObjectId);
-	EPDFStatusCode ParseObjectStreamHeader(ObjectStreamHeaderEntry* inHeaderInfo,ObjectIDType inObjectsCount);
+	PDFHummus::EStatusCode ParseObjectStreamHeader(ObjectStreamHeaderEntry* inHeaderInfo,ObjectIDType inObjectsCount);
 	void MovePositionInStream(LongFilePositionType inPosition);
 
 	// Backward reading

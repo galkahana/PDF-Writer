@@ -24,6 +24,8 @@
 
 #include <memory.h>
 
+using namespace PDFHummus;
+
 JPEGImageParser::JPEGImageParser(void)
 {
 }
@@ -60,9 +62,9 @@ const unsigned int scAPP1xResolutionTagID = 0x011a;
 const unsigned int scAPP1yResolutionTagID = 0x011b;
 const unsigned int scAPP1ResolutionUnitTagID = 0x0128;
 
-EPDFStatusCode JPEGImageParser::Parse(IByteReaderWithPosition* inImageStream,JPEGImageInformation& outImageInformation)
+EStatusCode JPEGImageParser::Parse(IByteReaderWithPosition* inImageStream,JPEGImageInformation& outImageInformation)
 {
-	EPDFStatusCode status = ePDFFailure;
+	EStatusCode status = PDFHummus::eFailure;
 	unsigned int tagID;
 	bool PhotoshopMarkerNotFound = true;
 	bool JFIFMarkerNotFound = true;
@@ -74,7 +76,7 @@ EPDFStatusCode JPEGImageParser::Parse(IByteReaderWithPosition* inImageStream,JPE
 	do
 	{
 		status = ReadJPEGID();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		do
@@ -82,7 +84,7 @@ EPDFStatusCode JPEGImageParser::Parse(IByteReaderWithPosition* inImageStream,JPE
 			if(!mImageStream->NotEnded())
 				break;
 			status = ReadJpegTag(tagID);
-			if(status != ePDFSuccess)
+			if(status != PDFHummus::eSuccess)
 				break;
 			switch(tagID)
 			{
@@ -125,59 +127,59 @@ EPDFStatusCode JPEGImageParser::Parse(IByteReaderWithPosition* inImageStream,JPE
 
 		if (SOFMarkerNotFound)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 		else
-			status = ePDFSuccess; 
+			status = PDFHummus::eSuccess; 
 	} 
 	while(false);
 
 	return status;
 }
 
-EPDFStatusCode JPEGImageParser::ReadJPEGID()
+EStatusCode JPEGImageParser::ReadJPEGID()
 {
-	EPDFStatusCode status = ReadStreamToBuffer(2);
+	EStatusCode status = ReadStreamToBuffer(2);
 	
-	if (status != ePDFSuccess)
+	if (status != PDFHummus::eSuccess)
 		return status;
 	
 	if (memcmp(mReadBuffer, scJPEGID, 2) != 0)
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode JPEGImageParser::ReadStreamToBuffer(unsigned long inAmountToRead)
+EStatusCode JPEGImageParser::ReadStreamToBuffer(unsigned long inAmountToRead)
 {
 	if(inAmountToRead == mImageStream->Read(mReadBuffer,inAmountToRead))
-		return ePDFSuccess;
+		return PDFHummus::eSuccess;
 	else
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 }
 
-EPDFStatusCode JPEGImageParser::ReadJpegTag(unsigned int& outTagID)
+EStatusCode JPEGImageParser::ReadJpegTag(unsigned int& outTagID)
 {
-	EPDFStatusCode status = ReadStreamToBuffer(2);
+	EStatusCode status = ReadStreamToBuffer(2);
 
-	if(ePDFSuccess == status)
+	if(PDFHummus::eSuccess == status)
 	{
 		if(scTagID == (unsigned int)mReadBuffer[0])
 			outTagID = (unsigned int)mReadBuffer[1];
 		else 
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 	}
 	return status;
 }
 
-EPDFStatusCode JPEGImageParser::ReadSOF0Data(JPEGImageInformation& outImageInformation)
+EStatusCode JPEGImageParser::ReadSOF0Data(JPEGImageInformation& outImageInformation)
 {
 	unsigned int toSkip;
-	EPDFStatusCode status;
+	EStatusCode status;
 
 	status = ReadStreamToBuffer(8);
-	if(ePDFSuccess == status)
+	if(PDFHummus::eSuccess == status)
 	{
 		toSkip = GetIntValue(mReadBuffer) - 8;
 		outImageInformation.SamplesHeight = GetIntValue(mReadBuffer + 3);
@@ -214,13 +216,13 @@ void JPEGImageParser::SkipStream(unsigned long inSkip)
 }
 
 
-EPDFStatusCode JPEGImageParser::ReadJFIFData(JPEGImageInformation& outImageInformation)
+EStatusCode JPEGImageParser::ReadJFIFData(JPEGImageInformation& outImageInformation)
 {
 	unsigned int toSkip;
-	EPDFStatusCode status;
+	EStatusCode status;
 
 	status = ReadStreamToBuffer(14);
-	if(ePDFSuccess == status)
+	if(PDFHummus::eSuccess == status)
 	{
 		outImageInformation.JFIFInformationExists = true;
 		toSkip = GetIntValue(mReadBuffer) - 14;
@@ -232,9 +234,9 @@ EPDFStatusCode JPEGImageParser::ReadJFIFData(JPEGImageInformation& outImageInfor
 	return status;
 }
 
-EPDFStatusCode JPEGImageParser::ReadPhotoshopData(JPEGImageInformation& outImageInformation)
+EStatusCode JPEGImageParser::ReadPhotoshopData(JPEGImageInformation& outImageInformation)
 {
-	EPDFStatusCode status;
+	EStatusCode status;
 	unsigned int intSkip;
 	unsigned long toSkip;
 	unsigned int nameSkip;
@@ -243,18 +245,18 @@ EPDFStatusCode JPEGImageParser::ReadPhotoshopData(JPEGImageInformation& outImage
 
 	do {
 		status = ReadIntValue(intSkip);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 		toSkip = intSkip-2;
 		status = SkipTillChar(scEOS,toSkip);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 		while(toSkip > 0 && resolutionBimNotFound)
 		{
 			SkipStream(4);
 			toSkip-=4;
 			status = ReadStreamToBuffer(3);
-			if(status !=ePDFSuccess)
+			if(status !=PDFHummus::eSuccess)
 				break;
 			toSkip-=3;
 			nameSkip = (int)mReadBuffer[2];
@@ -264,7 +266,7 @@ EPDFStatusCode JPEGImageParser::ReadPhotoshopData(JPEGImageInformation& outImage
 			toSkip-=nameSkip;
 			resolutionBimNotFound = (0 != memcmp(mReadBuffer,scResolutionBIMID,2));
 			status = ReadLongValue(dataLength);
-			if(status != ePDFSuccess)
+			if(status != PDFHummus::eSuccess)
 				break;
 			toSkip-=4;
 			if(resolutionBimNotFound)
@@ -277,7 +279,7 @@ EPDFStatusCode JPEGImageParser::ReadPhotoshopData(JPEGImageInformation& outImage
 			else
 			{
 				status = ReadStreamToBuffer(16);
-				if(status !=ePDFSuccess)
+				if(status !=PDFHummus::eSuccess)
 					break;
 				toSkip-=16;
 				outImageInformation.PhotoshopInformationExists = true;
@@ -285,15 +287,15 @@ EPDFStatusCode JPEGImageParser::ReadPhotoshopData(JPEGImageInformation& outImage
 				outImageInformation.PhotoshopYDensity = GetIntValue(mReadBuffer + 8) + GetFractValue(mReadBuffer + 10);
 			}
 		}
-		if(ePDFSuccess == status)
+		if(PDFHummus::eSuccess == status)
 			SkipStream(toSkip);
 	}while(false);
 	return status;
 }
 
-EPDFStatusCode JPEGImageParser::ReadExifData(JPEGImageInformation& outImageInformation)
+EStatusCode JPEGImageParser::ReadExifData(JPEGImageInformation& outImageInformation)
 {
-	EPDFStatusCode status;
+	EStatusCode status;
 	unsigned long ifdOffset;
 	unsigned int ifdDirectorySize, tagID, toSkip;
 	bool isBigEndian;
@@ -305,21 +307,21 @@ EPDFStatusCode JPEGImageParser::ReadExifData(JPEGImageInformation& outImageInfor
 	{
 		//read Exif Tag size
 		status = ReadIntValue(toSkip);
-		if (status != ePDFSuccess)
+		if (status != PDFHummus::eSuccess)
 			break;
 		
 		toSkip -= 2;
 
 		//read Exif ID
 		status = ReadExifID();
-		if (status != ePDFSuccess)
+		if (status != PDFHummus::eSuccess)
 			break;
 		
 		toSkip -= 6;
 
 		//read encoding
 		status = IsBigEndianExif(isBigEndian);
-		if (status != ePDFSuccess)
+		if (status != PDFHummus::eSuccess)
 			break;
 
 		toSkip -= 2;
@@ -330,7 +332,7 @@ EPDFStatusCode JPEGImageParser::ReadExifData(JPEGImageInformation& outImageInfor
 
 		//read IFD0 offset
 		status = ReadLongValue(ifdOffset, !isBigEndian);	
-		if (status != ePDFSuccess)
+		if (status != PDFHummus::eSuccess)
 			break;
 
 		toSkip -= 4;
@@ -341,7 +343,7 @@ EPDFStatusCode JPEGImageParser::ReadExifData(JPEGImageInformation& outImageInfor
 
 		//read IFD size
 		status = ReadIntValue(ifdDirectorySize, !isBigEndian);
-		if (status != ePDFSuccess)
+		if (status != PDFHummus::eSuccess)
 			break;
 
 		toSkip -= 2;
@@ -356,7 +358,7 @@ EPDFStatusCode JPEGImageParser::ReadExifData(JPEGImageInformation& outImageInfor
 			}
 
 			status = ReadIntValue(tagID, !isBigEndian);
-			if (status != ePDFSuccess)
+			if (status != PDFHummus::eSuccess)
 				break;
 
 			toSkip -= 2;
@@ -382,7 +384,7 @@ EPDFStatusCode JPEGImageParser::ReadExifData(JPEGImageInformation& outImageInfor
 			}
 
 			toSkip -= 10;
-			if (status != ePDFSuccess)
+			if (status != PDFHummus::eSuccess)
 				break;
 		}
 		
@@ -395,19 +397,19 @@ EPDFStatusCode JPEGImageParser::ReadExifData(JPEGImageInformation& outImageInfor
 		unsigned long currentOffset = ifdOffset + ifdDirectorySize * 12 + 2;
 		unsigned long tempOffset = currentOffset;
 		status = GetResolutionFromExif(outImageInformation, xResolutionOffset, yResolutionOffset, tempOffset, !isBigEndian);
-		if (status != ePDFSuccess)
+		if (status != PDFHummus::eSuccess)
 			break;
 
 		toSkip -= (tempOffset - currentOffset);
 
-		if (ePDFSuccess == status)
+		if (PDFHummus::eSuccess == status)
 			SkipStream(toSkip);
 	}
 	while(false);	
 	return status;
 }
 
-EPDFStatusCode JPEGImageParser::GetResolutionFromExif(
+EStatusCode JPEGImageParser::GetResolutionFromExif(
 							   JPEGImageInformation& outImageInformation,
 							   unsigned long inXResolutionOffset,
 							   unsigned long inYResolutionOffset,
@@ -416,7 +418,7 @@ EPDFStatusCode JPEGImageParser::GetResolutionFromExif(
 {	
 	unsigned long firstOffset = 0, secondOffset = 0;
 	bool xResolutionIsFirst = true;
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
 	outImageInformation.ExifXDensity = 0;
 	outImageInformation.ExifYDensity = 0;
@@ -449,7 +451,7 @@ EPDFStatusCode JPEGImageParser::GetResolutionFromExif(
 			xResolutionIsFirst? outImageInformation.ExifXDensity : outImageInformation.ExifYDensity, 
 			inUseLittleEndian);
 
-		if (status != ePDFSuccess)
+		if (status != PDFHummus::eSuccess)
 			break;
 
 		inoutOffset += 8;
@@ -463,7 +465,7 @@ EPDFStatusCode JPEGImageParser::GetResolutionFromExif(
 		status = ReadRationalValue(
 			xResolutionIsFirst? outImageInformation.ExifYDensity : outImageInformation.ExifXDensity, 
 			inUseLittleEndian);
-		if (status != ePDFSuccess)
+		if (status != PDFHummus::eSuccess)
 			break;
 
 		inoutOffset += 8;
@@ -471,43 +473,43 @@ EPDFStatusCode JPEGImageParser::GetResolutionFromExif(
 	return status;
 }
 
-EPDFStatusCode JPEGImageParser::ReadRationalValue(
+EStatusCode JPEGImageParser::ReadRationalValue(
 							   double& outDoubleValue,
 							   bool inUseLittleEndian)
 {
 	unsigned long numerator, denominator;
-	EPDFStatusCode status = ReadLongValue(numerator, inUseLittleEndian);
+	EStatusCode status = ReadLongValue(numerator, inUseLittleEndian);
 
-	if (status != ePDFSuccess)
+	if (status != PDFHummus::eSuccess)
 		return status;
 
 	status = ReadLongValue(denominator, inUseLittleEndian);
 
-	if (status != ePDFSuccess)
+	if (status != PDFHummus::eSuccess)
 		return status;
 
 	outDoubleValue = ((double) numerator) / ((double) denominator); 
 	return status;
 }
 
-EPDFStatusCode JPEGImageParser::ReadExifID()
+EStatusCode JPEGImageParser::ReadExifID()
 {
-	EPDFStatusCode status = ReadStreamToBuffer(6);
-	if (status != ePDFSuccess)
+	EStatusCode status = ReadStreamToBuffer(6);
+	if (status != PDFHummus::eSuccess)
 		return status;
 
 	if (memcmp(mReadBuffer, scAPP1ID, 6) != 0)
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode JPEGImageParser::IsBigEndianExif(bool& outIsBigEndian)
+EStatusCode JPEGImageParser::IsBigEndianExif(bool& outIsBigEndian)
 {	
 	unsigned int encodingType;
-	EPDFStatusCode status = ReadIntValue(encodingType);
+	EStatusCode status = ReadIntValue(encodingType);
 		
-	if (status != ePDFSuccess)
+	if (status != PDFHummus::eSuccess)
 		return status;
 	
 	if (encodingType == scAPP1BigEndian)
@@ -515,31 +517,31 @@ EPDFStatusCode JPEGImageParser::IsBigEndianExif(bool& outIsBigEndian)
 	else if (encodingType == scAPP1LittleEndian)
 		outIsBigEndian = false;
 	else
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode JPEGImageParser::ReadIntValue(
+EStatusCode JPEGImageParser::ReadIntValue(
 						unsigned int& outIntValue,
 						bool inUseLittleEndian)
 {
-	EPDFStatusCode status = ReadStreamToBuffer(2);
+	EStatusCode status = ReadStreamToBuffer(2);
 
-	if(ePDFSuccess == status)
+	if(PDFHummus::eSuccess == status)
 		outIntValue = GetIntValue(mReadBuffer, inUseLittleEndian);
 	return status;
 }
 
-EPDFStatusCode JPEGImageParser::SkipTillChar(IOBasicTypes::Byte inSkipUntilValue,unsigned long& refSkipLimit)
+EStatusCode JPEGImageParser::SkipTillChar(IOBasicTypes::Byte inSkipUntilValue,unsigned long& refSkipLimit)
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	bool charNotFound = true;
 	
-	while(charNotFound && (ePDFSuccess == status) && (refSkipLimit > 0))
+	while(charNotFound && (PDFHummus::eSuccess == status) && (refSkipLimit > 0))
 	{
 		status = ReadStreamToBuffer(1);
-		if(ePDFSuccess == status)
+		if(PDFHummus::eSuccess == status)
 		{
 			--refSkipLimit;
 			if(mReadBuffer[0] == inSkipUntilValue)
@@ -549,12 +551,12 @@ EPDFStatusCode JPEGImageParser::SkipTillChar(IOBasicTypes::Byte inSkipUntilValue
 	return status;
 }
 
-EPDFStatusCode JPEGImageParser::ReadLongValue(	unsigned long& outLongValue,
+EStatusCode JPEGImageParser::ReadLongValue(	unsigned long& outLongValue,
 											bool inUseLittleEndian)
 {
-	EPDFStatusCode status = ReadStreamToBuffer(4);
+	EStatusCode status = ReadStreamToBuffer(4);
 
-	if(ePDFSuccess == status)
+	if(PDFHummus::eSuccess == status)
 		outLongValue = GetLongValue(mReadBuffer, inUseLittleEndian);
 	return status;
 }
@@ -592,14 +594,14 @@ double JPEGImageParser::GetFractValue(const IOBasicTypes::Byte* inBuffer)
 }
 
 
-EPDFStatusCode JPEGImageParser::SkipTag()
+EStatusCode JPEGImageParser::SkipTag()
 {
-	EPDFStatusCode status;
+	EStatusCode status;
 	unsigned int toSkip;
 
 	status = ReadIntValue(toSkip);
 	// skipping -2 because int was already read
-	if(ePDFSuccess == status)
+	if(PDFHummus::eSuccess == status)
 		SkipStream(toSkip-2);
 	return status;
 }

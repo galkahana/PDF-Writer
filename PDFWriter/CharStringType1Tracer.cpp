@@ -23,6 +23,8 @@
 #include "Type1Input.h"
 #include "Trace.h"
 
+using namespace PDFHummus;
+
 CharStringType1Tracer::CharStringType1Tracer(void)
 {
 }
@@ -32,7 +34,7 @@ CharStringType1Tracer::~CharStringType1Tracer(void)
 }
 
 /*
-EPDFStatusCode CharStringType1Tracer::TraceGlyphProgram(Byte inGlyphIndex, Type1Input* inType1Input, IByteWriter* inWriter)
+EStatusCode CharStringType1Tracer::TraceGlyphProgram(Byte inGlyphIndex, Type1Input* inType1Input, IByteWriter* inWriter)
 {
 	CharStringType1Interpreter interpreter;
 
@@ -44,13 +46,13 @@ EPDFStatusCode CharStringType1Tracer::TraceGlyphProgram(Byte inGlyphIndex, Type1
 	if(!charString)
 	{
 		TRACE_LOG("CharStringType1Tracer::TraceGlyphProgram, Exception, cannot find glyph index");
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 
 	return interpreter.Intepret(*charString,this);
 }*/
 
-EPDFStatusCode CharStringType1Tracer::TraceGlyphProgram(const string& inGlyphName, Type1Input* inType1Input, IByteWriter* inWriter)
+EStatusCode CharStringType1Tracer::TraceGlyphProgram(const string& inGlyphName, Type1Input* inType1Input, IByteWriter* inWriter)
 {
 	CharStringType1Interpreter interpreter;
 
@@ -62,58 +64,58 @@ EPDFStatusCode CharStringType1Tracer::TraceGlyphProgram(const string& inGlyphNam
 	if(!charString)
 	{
 		TRACE_LOG("CharStringType1Tracer::TraceGlyphProgram, Exception, cannot find glyph name");
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 
 	return interpreter.Intepret(*charString,this);
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1Hstem(const LongList& inOperandList)
+EStatusCode CharStringType1Tracer::Type1Hstem(const LongList& inOperandList)
 {
 	mPrimitiveWriter.WriteKeyword("hstem");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1Vstem(const LongList& inOperandList)
+EStatusCode CharStringType1Tracer::Type1Vstem(const LongList& inOperandList)
 {
 	mPrimitiveWriter.WriteKeyword("vstem");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1VMoveto(const LongList& inOperandList)
+EStatusCode CharStringType1Tracer::Type1VMoveto(const LongList& inOperandList)
 {
 	mPrimitiveWriter.WriteKeyword("vmoveto");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1RLineto(const LongList& inOperandList)
+EStatusCode CharStringType1Tracer::Type1RLineto(const LongList& inOperandList)
 {
 	mPrimitiveWriter.WriteKeyword("rlineto");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1HLineto(const LongList& inOperandList)
+EStatusCode CharStringType1Tracer::Type1HLineto(const LongList& inOperandList)
 {
 	mPrimitiveWriter.WriteKeyword("hlineto");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1VLineto(const LongList& inOperandList)
+EStatusCode CharStringType1Tracer::Type1VLineto(const LongList& inOperandList)
 {
 	mPrimitiveWriter.WriteKeyword("vlineto");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1RRCurveto(const LongList& inOperandList)
+EStatusCode CharStringType1Tracer::Type1RRCurveto(const LongList& inOperandList)
 {
 	mPrimitiveWriter.WriteKeyword("rrcurveto");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1ClosePath(const LongList& inOperandList)
+EStatusCode CharStringType1Tracer::Type1ClosePath(const LongList& inOperandList)
 {
 	mPrimitiveWriter.WriteKeyword("closepath");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
 Type1CharString* CharStringType1Tracer::GetSubr(long inSubrIndex)
@@ -122,82 +124,82 @@ Type1CharString* CharStringType1Tracer::GetSubr(long inSubrIndex)
 	return mHelper->GetSubr(inSubrIndex);
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1Return(const LongList& inOperandList)
+EStatusCode CharStringType1Tracer::Type1Return(const LongList& inOperandList)
 {
 	mPrimitiveWriter.WriteKeyword("return");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1Hsbw(const LongList& inOperandList)
+EStatusCode CharStringType1Tracer::Type1Hsbw(const LongList& inOperandList)
 {
 	mPrimitiveWriter.WriteKeyword("hsbw");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1Endchar(const LongList& inOperandList)
+EStatusCode CharStringType1Tracer::Type1Endchar(const LongList& inOperandList)
 {
 	mPrimitiveWriter.WriteKeyword("endchar");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1RMoveto(const LongList& inOperandList)
+EStatusCode CharStringType1Tracer::Type1RMoveto(const LongList& inOperandList)
 {
 	mPrimitiveWriter.WriteKeyword("rmoveto");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1HMoveto(const LongList& inOperandList)
+EStatusCode CharStringType1Tracer::Type1HMoveto(const LongList& inOperandList)
 {
 	mPrimitiveWriter.WriteKeyword("hmoveto");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1VHCurveto(const LongList& inOperandList)
+EStatusCode CharStringType1Tracer::Type1VHCurveto(const LongList& inOperandList)
 {
 	mPrimitiveWriter.WriteKeyword("vhcurveto");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1HVCurveto(const LongList& inOperandList)
+EStatusCode CharStringType1Tracer::Type1HVCurveto(const LongList& inOperandList)
 {
 	mPrimitiveWriter.WriteKeyword("hvcurveto");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1DotSection(const LongList& inOperandList)
+EStatusCode CharStringType1Tracer::Type1DotSection(const LongList& inOperandList)
 {
 	mPrimitiveWriter.WriteKeyword("dotsection");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1VStem3(const LongList& inOperandList)
+EStatusCode CharStringType1Tracer::Type1VStem3(const LongList& inOperandList)
 {
 	mPrimitiveWriter.WriteKeyword("vstem3");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1HStem3(const LongList& inOperandList)
+EStatusCode CharStringType1Tracer::Type1HStem3(const LongList& inOperandList)
 {
 	mPrimitiveWriter.WriteKeyword("hstem3");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1Seac(const LongList& inOperandList)
+EStatusCode CharStringType1Tracer::Type1Seac(const LongList& inOperandList)
 {
 	mPrimitiveWriter.WriteKeyword("seac");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1Sbw(const LongList& inOperandList)
+EStatusCode CharStringType1Tracer::Type1Sbw(const LongList& inOperandList)
 {
 	mPrimitiveWriter.WriteKeyword("sbw");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1Div(const LongList& inOperandList)
+EStatusCode CharStringType1Tracer::Type1Div(const LongList& inOperandList)
 {
 	mPrimitiveWriter.WriteKeyword("div");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
 bool CharStringType1Tracer::IsOtherSubrSupported(long inOtherSubrsIndex)
@@ -206,28 +208,28 @@ bool CharStringType1Tracer::IsOtherSubrSupported(long inOtherSubrsIndex)
 	return false;
 }
 
-EPDFStatusCode CharStringType1Tracer::CallOtherSubr(const LongList& inOperandList,LongList& outPostScriptOperandStack)
+EStatusCode CharStringType1Tracer::CallOtherSubr(const LongList& inOperandList,LongList& outPostScriptOperandStack)
 {
 	// not looking to get here, due to IsOtherSubrSupported returning false
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1Pop(const LongList& inOperandList,const LongList& inPostScriptOperandStack)
+EStatusCode CharStringType1Tracer::Type1Pop(const LongList& inOperandList,const LongList& inPostScriptOperandStack)
 {
 	mPrimitiveWriter.WriteKeyword("pop");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1SetCurrentPoint(const LongList& inOperandList)
+EStatusCode CharStringType1Tracer::Type1SetCurrentPoint(const LongList& inOperandList)
 {
 	mPrimitiveWriter.WriteKeyword("setcurrentpoint");
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode CharStringType1Tracer::Type1InterpretNumber(long inOperand)
+EStatusCode CharStringType1Tracer::Type1InterpretNumber(long inOperand)
 {
 	mPrimitiveWriter.WriteInteger(inOperand);
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
 unsigned long CharStringType1Tracer::GetLenIV()

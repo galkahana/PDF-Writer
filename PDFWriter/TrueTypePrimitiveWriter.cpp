@@ -21,6 +21,8 @@
 #include "TrueTypePrimitiveWriter.h"
 #include "OutputStringBufferStream.h"
 
+using namespace PDFHummus;
+
 TrueTypePrimitiveWriter::TrueTypePrimitiveWriter(OutputStringBufferStream* inTrueTypeFile)
 {
 	SetOpenTypeStream(inTrueTypeFile);
@@ -33,77 +35,77 @@ TrueTypePrimitiveWriter::~TrueTypePrimitiveWriter(void)
 void TrueTypePrimitiveWriter::SetOpenTypeStream(OutputStringBufferStream* inTrueTypeFile)
 {
 	mTrueTypeFile = inTrueTypeFile;
-	mInternalState = (inTrueTypeFile ? ePDFSuccess:ePDFFailure);
+	mInternalState = (inTrueTypeFile ? PDFHummus::eSuccess:PDFHummus::eFailure);
 }
 
-EPDFStatusCode TrueTypePrimitiveWriter::GetInternalState()
+EStatusCode TrueTypePrimitiveWriter::GetInternalState()
 {
 	return mInternalState;
 }
 
-EPDFStatusCode TrueTypePrimitiveWriter::WriteBYTE(Byte inValue)
+EStatusCode TrueTypePrimitiveWriter::WriteBYTE(Byte inValue)
 {
-	if(ePDFFailure == mInternalState)
-		return ePDFFailure;
+	if(PDFHummus::eFailure == mInternalState)
+		return PDFHummus::eFailure;
 
-	EPDFStatusCode status = (mTrueTypeFile->Write(&inValue,1) == 1 ? ePDFSuccess : ePDFFailure);
+	EStatusCode status = (mTrueTypeFile->Write(&inValue,1) == 1 ? PDFHummus::eSuccess : PDFHummus::eFailure);
 
-	if(ePDFFailure == status)
-		mInternalState = ePDFFailure;
+	if(PDFHummus::eFailure == status)
+		mInternalState = PDFHummus::eFailure;
 	return status;	
 }
 
-EPDFStatusCode TrueTypePrimitiveWriter::WriteULONG(unsigned long inValue)
+EStatusCode TrueTypePrimitiveWriter::WriteULONG(unsigned long inValue)
 {
 	Byte byte1 = (inValue>>24) & 0xff;
 	Byte byte2 = (inValue>>16) & 0xff;
 	Byte byte3 = (inValue>>8) & 0xff;
 	Byte byte4 = inValue & 0xff;
 
-	if(WriteBYTE(byte1) != ePDFSuccess)
-		return ePDFFailure;
+	if(WriteBYTE(byte1) != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
-	if(WriteBYTE(byte2) != ePDFSuccess)
-		return ePDFFailure;
+	if(WriteBYTE(byte2) != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
-	if(WriteBYTE(byte3) != ePDFSuccess)
-		return ePDFFailure;
+	if(WriteBYTE(byte3) != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
-	if(WriteBYTE(byte4) != ePDFSuccess)
-		return ePDFFailure;
+	if(WriteBYTE(byte4) != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode TrueTypePrimitiveWriter::WriteUSHORT(unsigned short inValue)
+EStatusCode TrueTypePrimitiveWriter::WriteUSHORT(unsigned short inValue)
 {	
 	Byte byte1 = (inValue>>8) & 0xff;
 	Byte byte2 = inValue & 0xff;
 	
-	if(WriteBYTE(byte1) != ePDFSuccess)
-		return ePDFFailure;
+	if(WriteBYTE(byte1) != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
-	if(WriteBYTE(byte2) != ePDFSuccess)
-		return ePDFFailure;
+	if(WriteBYTE(byte2) != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
 
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode TrueTypePrimitiveWriter::WriteSHORT(short inValue)
+EStatusCode TrueTypePrimitiveWriter::WriteSHORT(short inValue)
 {
 	return WriteUSHORT((unsigned short)inValue);
 }
 
-EPDFStatusCode TrueTypePrimitiveWriter::Pad(int inCount)
+EStatusCode TrueTypePrimitiveWriter::Pad(int inCount)
 {
 
-	for(int i=0; i <inCount && (mInternalState == ePDFSuccess); ++i)
+	for(int i=0; i <inCount && (mInternalState == PDFHummus::eSuccess); ++i)
 		WriteBYTE(0);
 
 	return mInternalState;
 }
 
-EPDFStatusCode TrueTypePrimitiveWriter::PadTo4()
+EStatusCode TrueTypePrimitiveWriter::PadTo4()
 {
 	int padSize = (4 - (mTrueTypeFile->GetCurrentPosition() % 4)) % 4;
 

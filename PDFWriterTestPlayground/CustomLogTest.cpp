@@ -1,6 +1,6 @@
 #include "CustomLogTest.h"
 #include "TestsRunner.h"
-#include "HummusPDFWriter.h"
+#include "PDFWriter.h"
 #include "OutputFlateEncodeStream.h"
 #include "OutputFlateDecodeStream.h"
 #include "OutputStreamTraits.h"
@@ -13,6 +13,7 @@
 #include <string>
 using namespace std;
 using namespace IOBasicTypes;
+using namespace PDFHummus;
 
 CustomLogTest::CustomLogTest(void)
 {
@@ -22,29 +23,29 @@ CustomLogTest::~CustomLogTest(void)
 {
 }
 
-EPDFStatusCode CustomLogTest::Run()
+EStatusCode CustomLogTest::Run()
 {
 	// Place log in a compressed stream, for a non-file PDF
-	EPDFStatusCode status;
+	EStatusCode status;
 	OutputFlateEncodeStream flateEncodeStream;
 	OutputFlateDecodeStream flateDecodeStream;
 
 	do
 	{
-		HummusPDFWriter pdfWriter;
+		PDFWriter pdfWriter;
 		OutputFile compressedLogFile;
 		OutputStringBufferStream pdfStream;
 	
 		// setup log file with compression
 		status = compressedLogFile.OpenFile("c:\\PDFLibTests\\CustomLogEncrypted.txt");
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 		flateEncodeStream.Assign(compressedLogFile.GetOutputStream());
 		
 		// generate PDF
 		TRACE_LOG("Starting PDF File Writing");
 		status = pdfWriter.StartPDFForStream(&pdfStream,ePDFVersion13,LogConfiguration(true,&flateEncodeStream));
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 		TRACE_LOG("Now will add an empty page");
 		PDFPage* page = new PDFPage();
@@ -52,13 +53,13 @@ EPDFStatusCode CustomLogTest::Run()
 		page->SetMediaBox(PDFRectangle(0,0,400,400));
 		
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		TRACE_LOG("Added page, now will close");
 
 		status = pdfWriter.EndPDFForStream();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		// since log was started by starting PDF...the ending resets it. so let's now begin again
@@ -68,7 +69,7 @@ EPDFStatusCode CustomLogTest::Run()
 		// dump PDF to a file, so we can review it
 		OutputFile pdfFile;
 		status = pdfFile.OpenFile("c:\\PDFLibTests\\DumpPDFFile.pdf");
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		string pdfString = pdfStream.ToString();
@@ -89,7 +90,7 @@ EPDFStatusCode CustomLogTest::Run()
 		OutputFile decryptedLogFile;
 
 		status = decryptedLogFile.OpenFile("c:\\PDFLibTests\\CustomLogDecrypted.txt");
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 
@@ -102,11 +103,11 @@ EPDFStatusCode CustomLogTest::Run()
 
 		InputFile compressedLogFileInput;
 		status = compressedLogFileInput.OpenFile("c:\\PDFLibTests\\CustomLogEncrypted.txt");
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		status = traits.CopyToOutputStream(compressedLogFileInput.GetInputStream());
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 
 		compressedLogFileInput.CloseFile();
@@ -115,7 +116,7 @@ EPDFStatusCode CustomLogTest::Run()
 		
 	}while(false);
 
-	if(status != ePDFSuccess)
+	if(status != PDFHummus::eSuccess)
 	{
 		// cancel ownership of subsstreams
 		flateDecodeStream.Assign(NULL);

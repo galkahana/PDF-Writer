@@ -19,7 +19,7 @@
    
 */
 #pragma once
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include "InputPFBDecodeStream.h"
 #include "IType1InterpreterImplementation.h"
 
@@ -116,10 +116,10 @@ public:
 	Type1Input(void);
 	~Type1Input(void);
 
-	EPDFStatusCode ReadType1File(IByteReaderWithPosition* inType1File);
-	EPDFStatusCode CalculateDependenciesForCharIndex(Byte inCharStringIndex,
+	PDFHummus::EStatusCode ReadType1File(IByteReaderWithPosition* inType1File);
+	PDFHummus::EStatusCode CalculateDependenciesForCharIndex(Byte inCharStringIndex,
 												  CharString1Dependencies& ioDependenciesInfo);
-	EPDFStatusCode CalculateDependenciesForCharIndex(const string& inCharStringName,
+	PDFHummus::EStatusCode CalculateDependenciesForCharIndex(const string& inCharStringName,
 												  CharString1Dependencies& ioDependenciesInfo);
 	void Reset();
 	Type1CharString* GetGlyphCharString(const string& inCharStringName);
@@ -135,7 +135,7 @@ public:
 
 	// IType1InterpreterImplementation overrides
 	virtual Type1CharString* GetSubr(long inSubrIndex);
-	virtual EPDFStatusCode Type1Seac(const LongList& inOperandList);
+	virtual PDFHummus::EStatusCode Type1Seac(const LongList& inOperandList);
 	virtual bool IsOtherSubrSupported(long inOtherSubrsIndex);
 	virtual unsigned long GetLenIV();
 
@@ -153,16 +153,16 @@ private:
 
 	void FreeTables();
 	bool IsComment(const string& inToken);
-	EPDFStatusCode ReadFontDictionary();
-	EPDFStatusCode ReadFontInfoDictionary();
+	PDFHummus::EStatusCode ReadFontDictionary();
+	PDFHummus::EStatusCode ReadFontInfoDictionary();
 	string FromPSName(const string& inPostScriptName);
-	EPDFStatusCode ParseEncoding();
-	EPDFStatusCode ReadPrivateDictionary();
-	EPDFStatusCode ParseIntVector(vector<int>& inVector);
-	EPDFStatusCode ParseDoubleVector(vector<double>& inVector);
-	EPDFStatusCode ParseSubrs();
-	EPDFStatusCode ParseCharstrings();
-	EPDFStatusCode ParseDoubleArray(double* inArray,int inArraySize);
+	PDFHummus::EStatusCode ParseEncoding();
+	PDFHummus::EStatusCode ReadPrivateDictionary();
+	PDFHummus::EStatusCode ParseIntVector(vector<int>& inVector);
+	PDFHummus::EStatusCode ParseDoubleVector(vector<double>& inVector);
+	PDFHummus::EStatusCode ParseSubrs();
+	PDFHummus::EStatusCode ParseCharstrings();
+	PDFHummus::EStatusCode ParseDoubleArray(double* inArray,int inArraySize);
 	string FromPSString(const string& inPSString);
 	void CalculateReverseEncoding();
 };

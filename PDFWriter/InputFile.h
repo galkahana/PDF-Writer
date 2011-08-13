@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include "IByteReaderWithPosition.h"
 #include <string>
 
@@ -35,8 +35,8 @@ public:
 	InputFile(void);
 	~InputFile(void);
 
-	EPDFStatusCode OpenFile(const string& inFilePath);
-	EPDFStatusCode CloseFile();
+	PDFHummus::EStatusCode OpenFile(const string& inFilePath);
+	PDFHummus::EStatusCode CloseFile();
 
 	IByteReaderWithPosition* GetInputStream(); // returns buffered input stream
 	const string& GetFilePath();

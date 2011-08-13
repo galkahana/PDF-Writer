@@ -2,7 +2,7 @@
    Source File : TestsRunner.h
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include "ITestUnit.h"
 #include "Singleton.h"
 
@@ -49,14 +49,14 @@ public:
 	~TestsRunner(void);
 
 
-	EPDFStatusCode RunAll();
-	EPDFStatusCode RunTest(const string& inTestLabel);
-	EPDFStatusCode RunTests(const StringList& inTestsLabels);
-	EPDFStatusCode RunCategory(const string& inCategory);
-	EPDFStatusCode RunCategories(const StringList& inCategories);
-	EPDFStatusCode RunCategories(const StringList& inCategories, const StringSet& inTestsToExclude);
-	EPDFStatusCode RunExcludeCategories(const StringSet& inCategories);
-	EPDFStatusCode RunExcludeTests(const StringSet& inTests);
+	PDFHummus::EStatusCode RunAll();
+	PDFHummus::EStatusCode RunTest(const string& inTestLabel);
+	PDFHummus::EStatusCode RunTests(const StringList& inTestsLabels);
+	PDFHummus::EStatusCode RunCategory(const string& inCategory);
+	PDFHummus::EStatusCode RunCategories(const StringList& inCategories);
+	PDFHummus::EStatusCode RunCategories(const StringList& inCategories, const StringSet& inTestsToExclude);
+	PDFHummus::EStatusCode RunExcludeCategories(const StringSet& inCategories);
+	PDFHummus::EStatusCode RunExcludeTests(const StringSet& inTests);
 
 	void AddTest(const string& inTestLabel,ITestUnit* inTest);
 	void AddTest(const std::string& inTestLabel,const std::string& inCategory,ITestUnit* inTest);
@@ -65,8 +65,8 @@ private:
 	StringToStringAndTestUnitListMap mTests;
 	StringToTestUnitMap mTestsByName;
 
-	EPDFStatusCode RunTestsInList(const StringAndTestUnitList& inTests);
-	EPDFStatusCode RunSingleTest(const string& inTestName,ITestUnit* inTest);
+	PDFHummus::EStatusCode RunTestsInList(const StringAndTestUnitList& inTests);
+	PDFHummus::EStatusCode RunSingleTest(const string& inTestName,ITestUnit* inTest);
 	void DeleteTests();
 };
 

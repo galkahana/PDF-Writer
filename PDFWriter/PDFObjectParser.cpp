@@ -1,5 +1,5 @@
 /*
-   Source File : PDFObjectsParser.cpp
+   Source File : PDFObjectParser.cpp
 
 
    Copyright 2011 Gal Kahana PDFWriter
@@ -18,7 +18,7 @@
 
    
 */
-#include "PDFObjectsParser.h"
+#include "PDFObjectParser.h"
 #include "PDFObject.h"
 #include "PDFBoolean.h"
 #include "PDFLiteralString.h"
@@ -41,15 +41,17 @@
 
 #include <sstream>
 
-PDFObjectsParser::PDFObjectsParser(void)
+using namespace PDFHummus;
+
+PDFObjectParser::PDFObjectParser(void)
 {
 }
 
-PDFObjectsParser::~PDFObjectsParser(void)
+PDFObjectParser::~PDFObjectParser(void)
 {
 }
 
-void PDFObjectsParser::SetReadStream(IByteReader* inSourceStream,
+void PDFObjectParser::SetReadStream(IByteReader* inSourceStream,
 									IReadPositionProvider* inCurrentPositionProvider)
 {
 	mStream = inSourceStream;
@@ -58,7 +60,7 @@ void PDFObjectsParser::SetReadStream(IByteReader* inSourceStream,
 	ResetReadState();
 }
 
-void PDFObjectsParser::ResetReadState()
+void PDFObjectParser::ResetReadState()
 {
 	mTokenBuffer.clear();
 	mTokenizer.ResetReadState();
@@ -66,7 +68,7 @@ void PDFObjectsParser::ResetReadState()
 
 static const string scR = "R";
 static const string scStream = "stream";
-PDFObject* PDFObjectsParser::ParseNewObject()
+PDFObject* PDFObjectParser::ParseNewObject()
 {
 	PDFObject* pdfObject = NULL;
 	string token;
@@ -212,7 +214,7 @@ PDFObject* PDFObjectsParser::ParseNewObject()
 
 }
 
-bool PDFObjectsParser::GetNextToken(string& outToken)
+bool PDFObjectParser::GetNextToken(string& outToken)
 {
 	if(mTokenBuffer.size() > 0)
 	{
@@ -240,24 +242,24 @@ bool PDFObjectsParser::GetNextToken(string& outToken)
 
 static const string scTrue = "true";
 static const string scFalse = "false";
-bool PDFObjectsParser::IsBoolean(const string& inToken)
+bool PDFObjectParser::IsBoolean(const string& inToken)
 {
 	return (scTrue == inToken || scFalse == inToken);	
 }
 
-PDFObject* PDFObjectsParser::ParseBoolean(const string& inToken)
+PDFObject* PDFObjectParser::ParseBoolean(const string& inToken)
 {
 	return new PDFBoolean(scTrue == inToken);
 }
 
 static const char scLeftParanthesis = '(';
-bool PDFObjectsParser::IsLiteralString(const string& inToken)
+bool PDFObjectParser::IsLiteralString(const string& inToken)
 {
 	return inToken.at(0) == scLeftParanthesis;
 }
 
 static const char scRightParanthesis = ')';
-PDFObject* PDFObjectsParser::ParseLiteralString(const string& inToken)
+PDFObject* PDFObjectParser::ParseLiteralString(const string& inToken)
 {
 	stringbuf stringBuffer;
 	Byte buffer;
@@ -268,7 +270,7 @@ PDFObject* PDFObjectsParser::ParseLiteralString(const string& inToken)
 	// verify that last character is ')'
 	if(inToken.at(inToken.size()-1) != scRightParanthesis)
 	{
-		TRACE_LOG1("PDFObjectsParser::ParseLiteralString, exception in parsing literal string, no closing paranthesis, Expression: %s",inToken.c_str());
+		TRACE_LOG1("PDFObjectParser::ParseLiteralString, exception in parsing literal string, no closing paranthesis, Expression: %s",inToken.c_str());
 		return NULL;
 	}
 
@@ -331,7 +333,7 @@ PDFObject* PDFObjectsParser::ParseLiteralString(const string& inToken)
 }
 
 static const char scLeftAngle = '<';
-bool PDFObjectsParser::IsHexadecimalString(const string& inToken)
+bool PDFObjectParser::IsHexadecimalString(const string& inToken)
 {
 	// first char should be left angle brackets, and the one next must not (otherwise it's a dictionary start)
 	return (inToken.at(0) == scLeftAngle) && (inToken.size() < 2 || inToken.at(1) != scLeftAngle);
@@ -339,14 +341,14 @@ bool PDFObjectsParser::IsHexadecimalString(const string& inToken)
 
 
 static const char scRightAngle = '>';
-PDFObject* PDFObjectsParser::ParseHexadecimalString(const string& inToken)
+PDFObject* PDFObjectParser::ParseHexadecimalString(const string& inToken)
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	
 	// verify that last character is '>'
 	if(inToken.at(inToken.size()-1) != scRightAngle)
 	{
-		TRACE_LOG1("PDFObjectsParser::ParseHexadecimalString, exception in parsing hexadecimal string, no closing angle, Expression: %s",inToken.c_str());
+		TRACE_LOG1("PDFObjectParser::ParseHexadecimalString, exception in parsing hexadecimal string, no closing angle, Expression: %s",inToken.c_str());
 		return NULL;
 	}
 
@@ -354,28 +356,28 @@ PDFObject* PDFObjectsParser::ParseHexadecimalString(const string& inToken)
 }
 
 static const string scNull = "null";
-bool PDFObjectsParser::IsNull(const string& inToken)
+bool PDFObjectParser::IsNull(const string& inToken)
 {
 	return scNull == inToken;
 }
 
 static const char scSlash = '/';
-bool PDFObjectsParser::IsName(const string& inToken)
+bool PDFObjectParser::IsName(const string& inToken)
 {
 	return inToken.at(0) == scSlash;
 }
 
 static const char scSharp = '#';
-PDFObject* PDFObjectsParser::ParseName(const string& inToken)
+PDFObject* PDFObjectParser::ParseName(const string& inToken)
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	stringbuf stringBuffer;
 	BoolAndByte hexResult;
 	Byte buffer;
 	string::const_iterator it = inToken.begin();
 	++it; // skip initial slash
 
-	for(; it != inToken.end() && ePDFSuccess == status; ++it)
+	for(; it != inToken.end() && PDFHummus::eSuccess == status; ++it)
 	{
 		if(*it == scSharp)
 		{
@@ -383,30 +385,30 @@ PDFObject* PDFObjectsParser::ParseName(const string& inToken)
 			++it;
 			if(it == inToken.end())
 			{
-				TRACE_LOG1("PDFObjectsParser::ParseName, exception in parsing hex value for a name token. token = %s",inToken.c_str());
-				status = ePDFFailure;
+				TRACE_LOG1("PDFObjectParser::ParseName, exception in parsing hex value for a name token. token = %s",inToken.c_str());
+				status = PDFHummus::eFailure;
 				break;
 			}
 			hexResult = GetHexValue(*it);
 			if(!hexResult.first)
 			{
-				TRACE_LOG1("PDFObjectsParser::ParseName, exception in parsing hex value for a name token. token = %s",inToken.c_str());
-				status = ePDFFailure;
+				TRACE_LOG1("PDFObjectParser::ParseName, exception in parsing hex value for a name token. token = %s",inToken.c_str());
+				status = PDFHummus::eFailure;
 				break;
 			}
 			buffer=(hexResult.second << 4);
 			++it;
 			if(it == inToken.end())
 			{
-				TRACE_LOG1("PDFObjectsParser::ParseName, exception in parsing hex value for a name token. token = %s",inToken.c_str());
-				status = ePDFFailure;
+				TRACE_LOG1("PDFObjectParser::ParseName, exception in parsing hex value for a name token. token = %s",inToken.c_str());
+				status = PDFHummus::eFailure;
 				break;
 			}
 			hexResult = GetHexValue(*it);
 			if(!hexResult.first)
 			{
-				TRACE_LOG1("PDFObjectsParser::ParseName, exception in parsing hex value for a name token. token = %s",inToken.c_str());
-				status = ePDFFailure;
+				TRACE_LOG1("PDFObjectParser::ParseName, exception in parsing hex value for a name token. token = %s",inToken.c_str());
+				status = PDFHummus::eFailure;
 				break;
 			}
 			buffer+=hexResult.second;
@@ -418,7 +420,7 @@ PDFObject* PDFObjectsParser::ParseName(const string& inToken)
 		stringBuffer.sputn((const char*)&buffer,1);
 	}
 	
-	if(ePDFSuccess == status)
+	if(PDFHummus::eSuccess == status)
 		return new PDFName(stringBuffer.str());
 	else
 		return NULL;
@@ -429,7 +431,7 @@ static const char scMinus = '-';
 static const char scNine = '9';
 static const char scZero = '0';
 static const char scDot = '.';
-bool PDFObjectsParser::IsNumber(const string& inToken)
+bool PDFObjectParser::IsNumber(const string& inToken)
 {
 	// it's a number if the first char is either a sign or digit, and the rest is 
 	// digits, with the exception of a dot which can appear just once.
@@ -464,7 +466,7 @@ bool PDFObjectsParser::IsNumber(const string& inToken)
 
 typedef BoxingBaseWithRW<long long> LongLong;
 
-PDFObject* PDFObjectsParser::ParseNumber(const string& inToken)
+PDFObject* PDFObjectParser::ParseNumber(const string& inToken)
 {
 	// once we know this is a number, then parsing is easy. just determine if it's a real or integer, so as to separate classes for better accuracy
 	if(inToken.find(scDot) != inToken.npos)
@@ -474,21 +476,21 @@ PDFObject* PDFObjectsParser::ParseNumber(const string& inToken)
 }
 
 static const string scLeftSquare = "[";
-bool PDFObjectsParser::IsArray(const string& inToken)
+bool PDFObjectParser::IsArray(const string& inToken)
 {
 	return scLeftSquare == inToken;
 }
 
 static const string scRightSquare = "]";
-PDFObject* PDFObjectsParser::ParseArray()
+PDFObject* PDFObjectParser::ParseArray()
 {
 	PDFArray* anArray = new PDFArray();
 	bool arrayEndEncountered = false;
 	string token;
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
 	// easy one. just loop till you get to a closing bracket token and recurse
-	while(GetNextToken(token) && ePDFSuccess == status)
+	while(GetNextToken(token) && PDFHummus::eSuccess == status)
 	{
 		arrayEndEncountered = (scRightSquare == token);
 		if(arrayEndEncountered)
@@ -498,8 +500,8 @@ PDFObject* PDFObjectsParser::ParseArray()
 		RefCountPtr<PDFObject> anObject(ParseNewObject());
 		if(!anObject)
 		{
-			status = ePDFFailure;
-			TRACE_LOG1("PDFObjectsParser::ParseArray, failure to parse array, failed to parse a member object. token = %s",token);
+			status = PDFHummus::eFailure;
+			TRACE_LOG1("PDFObjectParser::ParseArray, failure to parse array, failed to parse a member object. token = %s",token);
 		}
 		else
 		{
@@ -507,45 +509,45 @@ PDFObject* PDFObjectsParser::ParseArray()
 		}
 	}
 
-	if(arrayEndEncountered && ePDFSuccess == status)
+	if(arrayEndEncountered && PDFHummus::eSuccess == status)
 	{
 		return anArray;
 	}
 	else
 	{
 		delete anArray;
-		TRACE_LOG1("PDFObjectsParser::ParseArray, failure to parse array, didn't find end of array or failure to parse array member object. token = %s",token);
+		TRACE_LOG1("PDFObjectParser::ParseArray, failure to parse array, didn't find end of array or failure to parse array member object. token = %s",token);
 		return NULL;
 	}
 }
 
-void PDFObjectsParser::SaveTokenToBuffer(string& inToken)
+void PDFObjectParser::SaveTokenToBuffer(string& inToken)
 {
 	mTokenBuffer.push_back(inToken);
 }
 
-void PDFObjectsParser::ReturnTokenToBuffer(string& inToken)
+void PDFObjectParser::ReturnTokenToBuffer(string& inToken)
 {
 	mTokenBuffer.push_front(inToken);
 }
 
 static const string scDoubleLeftAngle = "<<";
-bool PDFObjectsParser::IsDictionary(const string& inToken)
+bool PDFObjectParser::IsDictionary(const string& inToken)
 {
 	return scDoubleLeftAngle == inToken;
 }
 
 static const string scDoubleRightAngle = ">>";
-PDFObject* PDFObjectsParser::ParseDictionary()
+PDFObject* PDFObjectParser::ParseDictionary()
 {
 	PDFDictionary* aDictionary = new PDFDictionary();
 	PDFObject* aKey = NULL;
 	PDFObject* aValue = NULL;
 	bool dictionaryEndEncountered = false;
 	string token;
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
-	while(GetNextToken(token) && ePDFSuccess == status)
+	while(GetNextToken(token) && PDFHummus::eSuccess == status)
 	{
 		dictionaryEndEncountered = (scDoubleRightAngle == token);
 		if(dictionaryEndEncountered)
@@ -557,16 +559,16 @@ PDFObject* PDFObjectsParser::ParseDictionary()
 		PDFObjectCastPtr<PDFName> aKey(ParseNewObject());
 		if(!aKey)
 		{
-			status = ePDFFailure;
-			TRACE_LOG1("PDFObjectsParser::ParseDictionary, failure to parse key for a dictionary. token = %s",token);
+			status = PDFHummus::eFailure;
+			TRACE_LOG1("PDFObjectParser::ParseDictionary, failure to parse key for a dictionary. token = %s",token);
 			break;
 		}
 
 		// i'll consider duplicate keys as failure
 		if(aDictionary->Exists(aKey->GetValue()))
 		{
-			status = ePDFFailure;
-			TRACE_LOG1("PDFObjectsParser::ParseDictionary, failure to parse key for a dictionary, key already exists. key = %s",aKey->GetValue().c_str());
+			status = PDFHummus::eFailure;
+			TRACE_LOG1("PDFObjectParser::ParseDictionary, failure to parse key for a dictionary, key already exists. key = %s",aKey->GetValue().c_str());
 			break;
 		}
 
@@ -574,8 +576,8 @@ PDFObject* PDFObjectsParser::ParseDictionary()
 		RefCountPtr<PDFObject> aValue = ParseNewObject();
 		if(!aValue)
 		{
-			status = ePDFFailure;
-			TRACE_LOG1("PDFObjectsParser::ParseDictionary, failure to parse value for a dictionary. token = %s",token);
+			status = PDFHummus::eFailure;
+			TRACE_LOG1("PDFObjectParser::ParseDictionary, failure to parse value for a dictionary. token = %s",token);
 			break;
 		}
 	
@@ -583,25 +585,25 @@ PDFObject* PDFObjectsParser::ParseDictionary()
 		aDictionary->Insert(aKey.GetPtr(),aValue.GetPtr());
 	}
 
-	if(dictionaryEndEncountered && ePDFSuccess == status)
+	if(dictionaryEndEncountered && PDFHummus::eSuccess == status)
 	{
 		return aDictionary;
 	}
 	else
 	{
 		delete aDictionary;
-		TRACE_LOG1("PDFObjectsParser::ParseDictionary, failure to parse dictionary, didn't find end of array or failure to parse dictionary member object. token = %s",token);
+		TRACE_LOG1("PDFObjectParser::ParseDictionary, failure to parse dictionary, didn't find end of array or failure to parse dictionary member object. token = %s",token);
 		return NULL;
 	}
 }
 
 static const char scCommentStart = '%';
-bool PDFObjectsParser::IsComment(const string& inToken)
+bool PDFObjectParser::IsComment(const string& inToken)
 {
 	return inToken.at(0) == scCommentStart;
 }
 
-BoolAndByte PDFObjectsParser::GetHexValue(Byte inValue)
+BoolAndByte PDFObjectParser::GetHexValue(Byte inValue)
 {
 	if('0' <= inValue && inValue <='9')
 		return BoolAndByte(true,inValue - '0');
@@ -611,7 +613,7 @@ BoolAndByte PDFObjectsParser::GetHexValue(Byte inValue)
 		return BoolAndByte(true,inValue - 'a');
 	else
 	{
-		TRACE_LOG1("PDFObjectsParser::GetHexValue, unrecongnized hex value - %c",inValue);
+		TRACE_LOG1("PDFObjectParser::GetHexValue, unrecongnized hex value - %c",inValue);
 		return BoolAndByte(false,inValue);
 	}
 }

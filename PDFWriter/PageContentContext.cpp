@@ -24,6 +24,9 @@
 #include "PDFStream.h"
 #include "Trace.h"
 
+using namespace PDFHummus;
+
+
 PageContentContext::PageContentContext(PDFPage* inPageOfContext,ObjectsContext* inObjectsContext)
 {
 	mPageOfContext = inPageOfContext;
@@ -56,12 +59,12 @@ ResourcesDictionary* PageContentContext::GetResourcesDictionary()
 	return &(mPageOfContext->GetResourcesDictionary());
 }
 
-EPDFStatusCode PageContentContext::FinalizeCurrentStream()
+EStatusCode PageContentContext::FinalizeCurrentStream()
 {
 	if(mCurrentStream)
 		return FinalizeStreamWriteAndRelease();
 	else
-		return ePDFSuccess;
+		return PDFHummus::eSuccess;
 }
 
 PDFPage* PageContentContext::GetAssociatedPage()
@@ -69,13 +72,13 @@ PDFPage* PageContentContext::GetAssociatedPage()
 	return mPageOfContext;
 }
 
-EPDFStatusCode PageContentContext::FinalizeStreamWriteAndRelease()
+EStatusCode PageContentContext::FinalizeStreamWriteAndRelease()
 {
 	mObjectsContext->EndPDFStream(mCurrentStream);
 
 	delete mCurrentStream;
 	mCurrentStream = NULL;
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
 PDFStream* PageContentContext::GetCurrentPageContentStream()

@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include "IByteReaderWithPosition.h"
 #include "CFFPrimitiveReader.h"
 #include "IType2InterpreterImplementation.h"
@@ -178,12 +178,12 @@ public:
 	~CFFFileInput(void);
 
 	// parses the whole CFF file, with all contained fonts
-	EPDFStatusCode ReadCFFFile(IByteReaderWithPosition* inCFFFile);
+	PDFHummus::EStatusCode ReadCFFFile(IByteReaderWithPosition* inCFFFile);
 	// parses the CFF file just for the particular font according to index. Index should be 
 	// according to how it appears in the CFF
-	EPDFStatusCode ReadCFFFile(IByteReaderWithPosition* inCFFFile,unsigned short inFontIndex);
+	PDFHummus::EStatusCode ReadCFFFile(IByteReaderWithPosition* inCFFFile,unsigned short inFontIndex);
 	// parses the CFF file just for the particular named font
-	EPDFStatusCode ReadCFFFile(IByteReaderWithPosition* inCFFFile,const string& inFontName);
+	PDFHummus::EStatusCode ReadCFFFile(IByteReaderWithPosition* inCFFFile,const string& inFontName);
 
 	// call only <i> after </i> calling the read method...got it?
 	// calculate dependencies for a given charstring [it can be char, gsubr or localsubr].
@@ -192,7 +192,7 @@ public:
 	// apart from the charstring you need to pass also the relevant localsubrs for this font, in case subrs
 	// will be required. also the relevnat charstring and charset array should be passed in case
 	// the seac flavor of endchar will be encountered.
-	EPDFStatusCode CalculateDependenciesForCharIndex(unsigned short inFontIndex,
+	PDFHummus::EStatusCode CalculateDependenciesForCharIndex(unsigned short inFontIndex,
 												  unsigned short inCharStringIndex,
 												  CharString2Dependencies& ioDependenciesInfo);
 
@@ -208,19 +208,19 @@ public:
 	// the right items so that later you can use the IType2InterpreterImplementation
 	// implementation here and avoid having to mess with passing gsubrs, lsubrs etc.
 	// when interpreting just call these methods instead of yours to perform the relevant actions
-	EPDFStatusCode PrepareForGlyphIntepretation(unsigned short inFontIndex,
+	PDFHummus::EStatusCode PrepareForGlyphIntepretation(unsigned short inFontIndex,
 				 							unsigned short inCharStringIndex);
 
 	void Reset();
 
 
 	// IType2InterpreterImplementation overrides
-	virtual EPDFStatusCode ReadCharString(LongFilePositionType inCharStringStart,
+	virtual PDFHummus::EStatusCode ReadCharString(LongFilePositionType inCharStringStart,
 							   LongFilePositionType inCharStringEnd,
 							   Byte** outCharString);
 	virtual CharString* GetLocalSubr(long inSubrIndex); 
 	virtual CharString* GetGlobalSubr(long inSubrIndex);
-	virtual EPDFStatusCode Type2Endchar(const CharStringOperandList& inOperandList);
+	virtual PDFHummus::EStatusCode Type2Endchar(const CharStringOperandList& inOperandList);
 
 
 	// publicly available constructs
@@ -259,53 +259,53 @@ private:
 	CharSetInfo* mCurrentCharsetInfo;
 
 	string GetStringForSID(unsigned short inSID);	
-	EPDFStatusCode ReadHeader();
-	EPDFStatusCode ReadNameIndex();
-	EPDFStatusCode ReadIndexHeader(unsigned long** outOffsets,unsigned short& outItemsCount);
-	EPDFStatusCode ReadTopDictIndex();
-	EPDFStatusCode ReadDict(unsigned long inReadAmount,UShortToDictOperandListMap& outDict);
-	EPDFStatusCode ReadStringIndex();
-	EPDFStatusCode ReadGlobalSubrs();
-	EPDFStatusCode ReadCharStrings();
-	EPDFStatusCode ReadCharsets();
-	EPDFStatusCode ReadEncodings();
+	PDFHummus::EStatusCode ReadHeader();
+	PDFHummus::EStatusCode ReadNameIndex();
+	PDFHummus::EStatusCode ReadIndexHeader(unsigned long** outOffsets,unsigned short& outItemsCount);
+	PDFHummus::EStatusCode ReadTopDictIndex();
+	PDFHummus::EStatusCode ReadDict(unsigned long inReadAmount,UShortToDictOperandListMap& outDict);
+	PDFHummus::EStatusCode ReadStringIndex();
+	PDFHummus::EStatusCode ReadGlobalSubrs();
+	PDFHummus::EStatusCode ReadCharStrings();
+	PDFHummus::EStatusCode ReadCharsets();
+	PDFHummus::EStatusCode ReadEncodings();
 	void FreeData();
 	LongFilePositionType GetCharStringsPosition(unsigned short inFontIndex);
 	long GetSingleIntegerValue(unsigned short inFontIndex,unsigned short inKey,long inDefault);
-	EPDFStatusCode ReadSubrsFromIndex(unsigned short& outSubrsCount,CharStringsIndex* outSubrsIndex);
+	PDFHummus::EStatusCode ReadSubrsFromIndex(unsigned short& outSubrsCount,CharStringsIndex* outSubrsIndex);
 	long GetCharStringType(unsigned short inFontIndex);
-	EPDFStatusCode ReadPrivateDicts();
-	EPDFStatusCode ReadLocalSubrs();
+	PDFHummus::EStatusCode ReadPrivateDicts();
+	PDFHummus::EStatusCode ReadLocalSubrs();
 	long GetSingleIntegerValueFromDict(const UShortToDictOperandListMap& inDict,
 												 unsigned short inKey,
 												 long inDefault);
 	LongFilePositionType GetCharsetPosition(unsigned short inFontIndex);
 	LongFilePositionType GetEncodingPosition(unsigned short inFontIndex);
 	unsigned short GetBiasedIndex(unsigned short inSubroutineCollectionSize, long inSubroutineIndex);
-	EPDFStatusCode ReadFormat0Charset(bool inIsCID, UShortToCharStringMap& ioCharMap,unsigned short** inSIDArray,const CharStrings& inCharStrings);
-	EPDFStatusCode ReadFormat1Charset(bool inIsCID,UShortToCharStringMap& ioCharMap,unsigned short** inSIDArray,const CharStrings& inCharStrings);
-	EPDFStatusCode ReadFormat2Charset(bool inIsCID,UShortToCharStringMap& ioCharMap,unsigned short** inSIDArray,const CharStrings& inCharStrings);
+	PDFHummus::EStatusCode ReadFormat0Charset(bool inIsCID, UShortToCharStringMap& ioCharMap,unsigned short** inSIDArray,const CharStrings& inCharStrings);
+	PDFHummus::EStatusCode ReadFormat1Charset(bool inIsCID,UShortToCharStringMap& ioCharMap,unsigned short** inSIDArray,const CharStrings& inCharStrings);
+	PDFHummus::EStatusCode ReadFormat2Charset(bool inIsCID,UShortToCharStringMap& ioCharMap,unsigned short** inSIDArray,const CharStrings& inCharStrings);
 	void SetupSIDToGlyphMapWithStandard(const unsigned short* inStandardCharSet,
 										unsigned short inStandardCharSetLength,
 										UShortToCharStringMap& ioCharMap,
 										const CharStrings& inCharStrings);
 	CharString* GetCharacterFromStandardEncoding(Byte inCharacterCode);
-	EPDFStatusCode ReadCIDInformation();
-	EPDFStatusCode ReadFDArray(unsigned short inFontIndex);
-	EPDFStatusCode ReadFDSelect(unsigned short inFontIndex);
+	PDFHummus::EStatusCode ReadCIDInformation();
+	PDFHummus::EStatusCode ReadFDArray(unsigned short inFontIndex);
+	PDFHummus::EStatusCode ReadFDSelect(unsigned short inFontIndex);
 	LongFilePositionType GetFDArrayPosition(unsigned short inFontIndex);
-	EPDFStatusCode ReadPrivateDict(const UShortToDictOperandListMap& inReferencingDict,PrivateDictInfo* outPrivateDict);
-	EPDFStatusCode ReadLocalSubrsForPrivateDict(PrivateDictInfo* inPrivateDict,Byte inCharStringType);
+	PDFHummus::EStatusCode ReadPrivateDict(const UShortToDictOperandListMap& inReferencingDict,PrivateDictInfo* outPrivateDict);
+	PDFHummus::EStatusCode ReadLocalSubrsForPrivateDict(PrivateDictInfo* inPrivateDict,Byte inCharStringType);
 	LongFilePositionType GetFDSelectPosition(unsigned short inFontIndex);
 	BoolAndUShort GetIndexForFontName(const string& inFontName);
-	EPDFStatusCode ReadTopDictIndex(unsigned short inFontIndex);
-	EPDFStatusCode ReadCharStrings(unsigned short inFontIndex);
-	EPDFStatusCode ReadPrivateDicts(unsigned short inFontIndex);
-	EPDFStatusCode ReadLocalSubrs(unsigned short inFontIndex);
-	EPDFStatusCode ReadCharsets(unsigned short inFontIndex);
+	PDFHummus::EStatusCode ReadTopDictIndex(unsigned short inFontIndex);
+	PDFHummus::EStatusCode ReadCharStrings(unsigned short inFontIndex);
+	PDFHummus::EStatusCode ReadPrivateDicts(unsigned short inFontIndex);
+	PDFHummus::EStatusCode ReadLocalSubrs(unsigned short inFontIndex);
+	PDFHummus::EStatusCode ReadCharsets(unsigned short inFontIndex);
 	void ReadEncoding(EncodingsInfo* inEncoding,LongFilePositionType inEncodingPosition);
-	EPDFStatusCode ReadEncodings(unsigned short inFontIndex);
-	EPDFStatusCode ReadCIDInformation(unsigned short inFontIndex);
-	EPDFStatusCode ReadCFFFileByIndexOrName(IByteReaderWithPosition* inCFFFile,const string& inFontName,unsigned short inFontIndex);
+	PDFHummus::EStatusCode ReadEncodings(unsigned short inFontIndex);
+	PDFHummus::EStatusCode ReadCIDInformation(unsigned short inFontIndex);
+	PDFHummus::EStatusCode ReadCFFFileByIndexOrName(IByteReaderWithPosition* inCFFFile,const string& inFontName,unsigned short inFontIndex);
 };
 

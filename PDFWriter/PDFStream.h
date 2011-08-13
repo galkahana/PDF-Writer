@@ -25,7 +25,7 @@
 	first use PDFStream to write the stream content, then write the Stream to the PDF using ObjectContext WriteStream
 */
 
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include "IOBasicTypes.h"
 #include "ObjectsBasicTypes.h"
 #include "OutputFlateEncodeStream.h"

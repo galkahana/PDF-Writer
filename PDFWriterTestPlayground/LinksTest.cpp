@@ -2,7 +2,7 @@
    Source File : LinksTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
    
 */
 #include "LinksTest.h"
-#include "HummusPDFWriter.h"
+#include "PDFWriter.h"
 #include "PDFPage.h"
 #include "PDFRectangle.h"
 #include "PageContentContext.h"
@@ -27,6 +27,7 @@
 #include "TestsRunner.h"
 
 #include <iostream>
+using namespace PDFHummus;
 
 LinksTest::LinksTest(void)
 {
@@ -36,15 +37,15 @@ LinksTest::~LinksTest(void)
 {
 }
 
-EPDFStatusCode LinksTest::Run()
+EStatusCode LinksTest::Run()
 {
-	EPDFStatusCode status;
-	HummusPDFWriter pdfWriter;
+	EStatusCode status;
+	PDFWriter pdfWriter;
 
 	do
 	{
 		status = pdfWriter.StartPDF("C:\\PDFLibTests\\LinksTest.PDF",ePDFVersion13,LogConfiguration(true,true,"C:\\PDFLibTests\\LinksTest.log"));
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
 			break;
@@ -59,7 +60,7 @@ EPDFStatusCode LinksTest::Run()
 		PageContentContext* contentContext = pdfWriter.StartPageContentContext(page);
 		if(NULL == contentContext)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			cout<<"failed to create content context for page\n";
 			break;
 		}
@@ -67,7 +68,7 @@ EPDFStatusCode LinksTest::Run()
 		PDFUsedFont* font = pdfWriter.GetFontForFile("C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
 		if(!font)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			cout<<"Failed to create font object for arial.ttf\n";
 			break;
 		}
@@ -77,8 +78,8 @@ EPDFStatusCode LinksTest::Run()
 		contentContext->k(0,0,0,1);
 		contentContext->Tf(font,1);
 		contentContext->Tm(11,0,0,11,90.024,709.54);
-		EPDFStatusCode encodingStatus = contentContext->Tj("http://pdfhummus.com");
-		if(encodingStatus != ePDFSuccess)
+		EStatusCode encodingStatus = contentContext->Tj("http://pdfhummus.com");
+		if(encodingStatus != PDFHummus::eSuccess)
 			cout<<"Could not find some of the glyphs for this font (arial)";
 		// continue even if failed...want to see how it looks like
 		contentContext->ET();
@@ -90,7 +91,7 @@ EPDFStatusCode LinksTest::Run()
 		contentContext->Q();
 		
 		status = pdfWriter.EndPageContentContext(contentContext);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to end page content context\n";
 			break;
@@ -108,14 +109,14 @@ EPDFStatusCode LinksTest::Run()
 		pdfWriter.AttachURLLinktoCurrentPage("http://www.soundcloud.com",PDFRectangle(90.024,200,367.524,375));
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to write page\n";
 			break;
 		}
 
 		status = pdfWriter.EndPDF();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed in end PDF\n";
 			break;

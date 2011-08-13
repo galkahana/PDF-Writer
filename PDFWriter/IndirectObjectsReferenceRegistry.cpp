@@ -22,7 +22,7 @@
 #include "Trace.h"
 #include "ObjectsContext.h"
 #include "DictionaryContext.h"
-#include "HummusPDFParser.h"
+#include "PDFParser.h"
 #include "PDFObjectCast.h"
 #include "PDFDictionary.h"
 #include "PDFArray.h"
@@ -31,6 +31,8 @@
 #include "PDFBoolean.h"
 
 #include <list>
+
+using namespace PDFHummus;
 
 IndirectObjectsReferenceRegistry::IndirectObjectsReferenceRegistry(void)
 {
@@ -59,30 +61,30 @@ ObjectIDType IndirectObjectsReferenceRegistry::AllocateNewObjectID()
 }
 
 
-EPDFStatusCode IndirectObjectsReferenceRegistry::MarkObjectAsWritten(ObjectIDType inObjectID,LongFilePositionType inWritePosition)
+EStatusCode IndirectObjectsReferenceRegistry::MarkObjectAsWritten(ObjectIDType inObjectID,LongFilePositionType inWritePosition)
 {
 	if(mObjectsWritesRegistry.size() <= inObjectID)
 	{
 		TRACE_LOG1("IndirectObjectsReferenceRegistry::MarkObjectAsWritten, Out of range failure. An Object ID is marked as written, which was not allocated before. ID = %ld",inObjectID);
-		return ePDFFailure; 
+		return PDFHummus::eFailure; 
 	}
 
 	if(mObjectsWritesRegistry[inObjectID].mObjectWritten)
 	{
 		TRACE_LOG3("IndirectObjectsReferenceRegistry::MarkObjectAsWritten, Object rewrite failure. The object %ld was already marked as written at %lld. New position is %lld",
 			inObjectID,mObjectsWritesRegistry[inObjectID].mWritePosition,inWritePosition);
-		return ePDFFailure; // trying to mark as written an object that was already marked as such in the past. probably a mistake [till we have revisions]
+		return PDFHummus::eFailure; // trying to mark as written an object that was already marked as such in the past. probably a mistake [till we have revisions]
 	}
 
 	if(inWritePosition > 9999999999L) // if write position is larger than what can be represented by 10 digits, xref write will fail
 	{
 		TRACE_LOG1("IndirectObjectsReferenceRegistry::MarkObjectAsWritten, Write position out of bounds. Trying to write an object at position that cannot be represented in Xref = %lld. probably means file got too long",inWritePosition);
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 
 	mObjectsWritesRegistry[inObjectID].mWritePosition = inWritePosition;
 	mObjectsWritesRegistry[inObjectID].mObjectWritten = true;
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
 GetObjectWriteInformationResult IndirectObjectsReferenceRegistry::GetObjectWriteInformation(ObjectIDType inObjectID) const
@@ -113,7 +115,7 @@ ObjectIDType IndirectObjectsReferenceRegistry::GetObjectsCount() const
 
 typedef list<ObjectIDType> ObjectIDTypeList;
 
-EPDFStatusCode IndirectObjectsReferenceRegistry::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
+EStatusCode IndirectObjectsReferenceRegistry::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
 {
 	ObjectIDTypeList objects;
 
@@ -169,10 +171,10 @@ EPDFStatusCode IndirectObjectsReferenceRegistry::WriteState(ObjectsContext* inSt
 		inStateWriter->EndIndirectObject();
 	}
 
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-EPDFStatusCode IndirectObjectsReferenceRegistry::ReadState(HummusPDFParser* inStateReader,ObjectIDType inObjectID)
+EStatusCode IndirectObjectsReferenceRegistry::ReadState(PDFParser* inStateReader,ObjectIDType inObjectID)
 {
 	PDFObjectCastPtr<PDFDictionary> indirectObjectsDictionary(inStateReader->ParseNewObject(inObjectID));
 
@@ -203,5 +205,5 @@ EPDFStatusCode IndirectObjectsReferenceRegistry::ReadState(HummusPDFParser* inSt
 		mObjectsWritesRegistry.push_back(newObjectInformation);
 	}
 
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }

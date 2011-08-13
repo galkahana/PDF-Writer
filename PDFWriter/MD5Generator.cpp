@@ -68,6 +68,7 @@
 #include "SafeBufferMacrosDefs.h"
 
 using namespace IOBasicTypes;
+using namespace PDFHummus;
 
 MD5Generator::MD5Generator(void)
 {
@@ -89,13 +90,13 @@ MD5Generator::~MD5Generator(void)
 }
 
 
-EPDFStatusCode MD5Generator::Accumulate(const string& inString)
+EStatusCode MD5Generator::Accumulate(const string& inString)
 {
 	if(mIsFinalized)
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 
 	Accumulate((const uint1*)inString.c_str(),(unsigned long)inString.length());
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 
 }
 

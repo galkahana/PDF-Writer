@@ -21,7 +21,7 @@
 #pragma once
 
 #include "IOBasicTypes.h"
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 
 #include <utility>
 #include <string>
@@ -77,7 +77,7 @@ private:
 	void SkipTillToken();
 
 	// failure in GetNextByteForToken actually marks a true read failure, if you checked end of file before calling it...
-	EPDFStatusCode GetNextByteForToken(Byte& outByte);
+	PDFHummus::EStatusCode GetNextByteForToken(Byte& outByte);
 
 	bool IsPDFWhiteSpace(Byte inCharacter);
 	void SaveTokenBuffer(Byte inToSave);

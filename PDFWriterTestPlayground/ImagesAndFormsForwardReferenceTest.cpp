@@ -2,7 +2,7 @@
    Source File : ImagesAndFormsForwardReferenceTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 */
 #include "ImagesAndFormsForwardReferenceTest.h"
 #include "TestsRunner.h"
-#include "HummusPDFWriter.h"
+#include "PDFWriter.h"
 #include "PDFImageXObject.h"
 #include "PDFPage.h"
 #include "PageContentContext.h"
@@ -33,6 +33,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace PDFHummus;
 
 ImagesAndFormsForwardReferenceTest::ImagesAndFormsForwardReferenceTest(void)
 {
@@ -42,16 +43,16 @@ ImagesAndFormsForwardReferenceTest::~ImagesAndFormsForwardReferenceTest(void)
 {
 }
 
-EPDFStatusCode ImagesAndFormsForwardReferenceTest::Run()
+EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 {
-	HummusPDFWriter pdfWriter;
-	EPDFStatusCode status; 
+	PDFWriter pdfWriter;
+	EStatusCode status; 
 
 	do
 	{
 
 		status = pdfWriter.StartPDF("C:\\PDFLibTests\\ImagesAndFormsForwardReferenceTest.PDF",ePDFVersion13);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
 			break;
@@ -63,7 +64,7 @@ EPDFStatusCode ImagesAndFormsForwardReferenceTest::Run()
 		PageContentContext* pageContentContext = pdfWriter.StartPageContentContext(page);
 		if(NULL == pageContentContext)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			cout<<"failed to create content context for page\n";
 		}
 
@@ -102,14 +103,14 @@ EPDFStatusCode ImagesAndFormsForwardReferenceTest::Run()
 		pageContentContext->Q();
 
 		status = pdfWriter.EndPageContentContext(pageContentContext);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to write page\n";
 			break;
@@ -121,7 +122,7 @@ EPDFStatusCode ImagesAndFormsForwardReferenceTest::Run()
 		if(!imageXObject)
 		{
 			cout<<"failed to create image XObject from file\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -130,7 +131,7 @@ EPDFStatusCode ImagesAndFormsForwardReferenceTest::Run()
 		if(!formXObject)
 		{
 			cout<<"failed to create form XObject from file\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -138,7 +139,7 @@ EPDFStatusCode ImagesAndFormsForwardReferenceTest::Run()
 		if(!tiffFormXObject)
 		{
 			cout<<"failed to create image form XObject from file, for file\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
@@ -159,7 +160,7 @@ EPDFStatusCode ImagesAndFormsForwardReferenceTest::Run()
 		xobjectContentContext->Q();
 
 		status = pdfWriter.EndFormXObjectAndRelease(xobjectForm);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to write XObject form\n";
 			break;
@@ -167,7 +168,7 @@ EPDFStatusCode ImagesAndFormsForwardReferenceTest::Run()
 
 
 		status = pdfWriter.EndPDF();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed in end PDF\n";
 			break;

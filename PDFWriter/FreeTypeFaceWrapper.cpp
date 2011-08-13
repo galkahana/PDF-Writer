@@ -30,6 +30,8 @@
 #include FT_XFREE86_H 
 #include FT_CID_H 
 
+using namespace PDFHummus;
+
 FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const string& inFontFilePath,bool inDoOwn)
 {
 	mFace = inFace;
@@ -487,43 +489,43 @@ bool FreeTypeFaceWrapper::IsForceBold()
 	return mFormatParticularWrapper ? mFormatParticularWrapper->IsForceBold() : false;
 }
 
-EPDFStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const ULongList& inUnicodeCharacters,UIntList& outGlyphs)
+EStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const ULongList& inUnicodeCharacters,UIntList& outGlyphs)
 {
 	if(mFace)
 	{
 		FT_UInt glyphIndex;
-		EPDFStatusCode status = ePDFSuccess;
+		EStatusCode status = PDFHummus::eSuccess;
 
 		outGlyphs.clear();
 
 		ULongList::const_iterator it = inUnicodeCharacters.begin();
-		for(; it != inUnicodeCharacters.end() && ePDFSuccess == status; ++it)
+		for(; it != inUnicodeCharacters.end() && PDFHummus::eSuccess == status; ++it)
 		{
 			glyphIndex = FT_Get_Char_Index(mFace,*it);
 			outGlyphs.push_back(glyphIndex);
 			if(0 == glyphIndex)
 			{
 				TRACE_LOG1("FreeTypeFaceWrapper::GetGlyphsForUnicodeText, failed to find glyph for charachter 0x%04x",*it);
-				status = ePDFFailure;
+				status = PDFHummus::eFailure;
 			}
 		}
 
 		return status;
 	}
 	else
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 }
 
-EPDFStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const ULongListList& inUnicodeCharacters,UIntListList& outGlyphs)
+EStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const ULongListList& inUnicodeCharacters,UIntListList& outGlyphs)
 {
 	UIntList glyphs;
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	ULongListList::const_iterator it = inUnicodeCharacters.begin();
 
 	for(; it != inUnicodeCharacters.end(); ++it)
 	{
-		if(ePDFFailure == GetGlyphsForUnicodeText(*it,glyphs))
-			status = ePDFFailure;	
+		if(PDFHummus::eFailure == GetGlyphsForUnicodeText(*it,glyphs))
+			status = PDFHummus::eFailure;	
 		outGlyphs.push_back(glyphs);
 	}
 

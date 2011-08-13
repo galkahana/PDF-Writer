@@ -2,7 +2,7 @@
    Source File : SimpleContentPageTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
    
 */
 #include "SimpleContentPageTest.h"
-#include "HummusPDFWriter.h"
+#include "PDFWriter.h"
 #include "PDFPage.h"
 #include "PDFRectangle.h"
 #include "PageContentContext.h"
@@ -28,6 +28,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace PDFHummus;
 
 SimpleContentPageTest::SimpleContentPageTest(void)
 {
@@ -41,15 +42,15 @@ SimpleContentPageTest::~SimpleContentPageTest(void)
 	Creates a single page PDF with some drawings
 */
 
-EPDFStatusCode SimpleContentPageTest::Run()
+EStatusCode SimpleContentPageTest::Run()
 {
-	HummusPDFWriter pdfWriter;
-	EPDFStatusCode status; 
+	PDFWriter pdfWriter;
+	EStatusCode status; 
 
 	do
 	{
 		status = pdfWriter.StartPDF("C:\\PDFLibTests\\SimpleContent.PDF",ePDFVersion13);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
 			break;
@@ -61,7 +62,7 @@ EPDFStatusCode SimpleContentPageTest::Run()
 		PageContentContext* contentContext = pdfWriter.StartPageContentContext(page);
 		if(NULL == contentContext)
 		{
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			cout<<"failed to create content context for page\n";
 			break;
 		}
@@ -75,7 +76,7 @@ EPDFStatusCode SimpleContentPageTest::Run()
 
 		// force stream change
 		status = pdfWriter.PausePageContentContext(contentContext);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to pause page content context\n";
 			break;
@@ -98,21 +99,21 @@ EPDFStatusCode SimpleContentPageTest::Run()
 		contentContext->Q();
 		
 		status = pdfWriter.EndPageContentContext(contentContext);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to write page\n";
 			break;
 		}
 
 		status = pdfWriter.EndPDF();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed in end PDF\n";
 			break;

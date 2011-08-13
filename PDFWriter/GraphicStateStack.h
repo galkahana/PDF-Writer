@@ -21,7 +21,7 @@
 #pragma once
 
 #include "GraphicState.h"
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include <list>
 
 typedef std::list<GraphicState> GraphicStateList;
@@ -36,7 +36,7 @@ public:
 	void Push();
 
 	// pop one level. following a "grestore" command. returns error if stack is underflow.
-	EPDFStatusCode Pop();
+	PDFHummus::EStatusCode Pop();
 
 	GraphicState& GetCurrentState();
 

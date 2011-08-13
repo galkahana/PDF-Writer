@@ -23,6 +23,8 @@
 #include "PDFIndirectObjectReference.h"
 #include "Trace.h"
 
+using namespace PDFHummus;
+
 StateReader::StateReader(void)
 {
 }
@@ -31,29 +33,29 @@ StateReader::~StateReader(void)
 {
 }
 
-EPDFStatusCode StateReader::Start(const string& inStateFilePath)
+EStatusCode StateReader::Start(const string& inStateFilePath)
 {
 	// open the new file...
-	if(mInputFile.OpenFile(inStateFilePath) != ePDFSuccess)
+	if(mInputFile.OpenFile(inStateFilePath) != PDFHummus::eSuccess)
 	{
 		TRACE_LOG1("StateReader::Start, can't open file for state reading in %s",inStateFilePath.c_str());
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 	
-	if(mParser.StartStateFileParsing(mInputFile.GetInputStream()) != ePDFSuccess)
+	if(mParser.StartStateFileParsing(mInputFile.GetInputStream()) != PDFHummus::eSuccess)
 	{
 		TRACE_LOG("StateReader::Start, unable to start parsing for the state reader file");
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 	}
 
 	// set the root object
 	PDFObjectCastPtr<PDFIndirectObjectReference> rootObject(mParser.GetTrailer()->QueryDirectObject("Root"));
 	mRootObject = rootObject->mObjectID;
 
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
-HummusPDFParser* StateReader::GetObjectsReader()
+PDFParser* StateReader::GetObjectsReader()
 {
 	return &mParser;
 

@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include "IByteReaderWithPosition.h"
 
 #define DEFAULT_BUFFER_SIZE 256*1024

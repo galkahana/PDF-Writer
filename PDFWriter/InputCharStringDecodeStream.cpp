@@ -20,6 +20,9 @@
 */
 #include "InputCharStringDecodeStream.h"
 
+using namespace PDFHummus;
+
+
 InputCharStringDecodeStream::InputCharStringDecodeStream(IByteReader* inReadFrom,unsigned long inLenIV)
 {
 	Assign(inReadFrom,inLenIV);
@@ -51,15 +54,15 @@ void InputCharStringDecodeStream::InitializeCharStringDecode(unsigned long inLen
 		ReadDecodedByte(dummyByte);
 }
 
-EPDFStatusCode InputCharStringDecodeStream::ReadDecodedByte(Byte& outByte)
+EStatusCode InputCharStringDecodeStream::ReadDecodedByte(Byte& outByte)
 {
 	Byte buffer;
 	
 	if(mReadFrom->Read(&buffer,1) != 1)
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 
 	outByte = DecodeByte(buffer);
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
 Byte InputCharStringDecodeStream::DecodeByte(Byte inByteToDecode)
@@ -72,9 +75,9 @@ Byte InputCharStringDecodeStream::DecodeByte(Byte inByteToDecode)
 LongBufferSizeType InputCharStringDecodeStream::Read(Byte* inBuffer,LongBufferSizeType inBufferSize)
 {
 	LongBufferSizeType bufferIndex = 0;
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
-	while(NotEnded() && inBufferSize > bufferIndex && ePDFSuccess == status)
+	while(NotEnded() && inBufferSize > bufferIndex && PDFHummus::eSuccess == status)
 	{
 		status = ReadDecodedByte(inBuffer[bufferIndex]);
 		++bufferIndex;

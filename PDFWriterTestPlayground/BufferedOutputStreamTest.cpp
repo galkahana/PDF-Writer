@@ -2,7 +2,7 @@
    Source File : BufferedOutputStreamTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@
 
 using namespace std;
 using namespace IOBasicTypes;
+using namespace PDFHummus;
 
 static const std::string scBufferedOutputStreamTest = "BufferedOutputStreamTest";
 
@@ -37,7 +38,7 @@ BufferedOutputStreamTest::~BufferedOutputStreamTest(void)
 {
 }
 
-EPDFStatusCode BufferedOutputStreamTest::Run()
+EStatusCode BufferedOutputStreamTest::Run()
 {
 	IByteWriter* stream = new OutputBufferedStream(new OutputFileStream("C:\\PDFLibTests\\BufferedOutputStreamTest.txt"),2);
 	Byte buffer[5] = {'a','b','c','d','e'};
@@ -45,7 +46,7 @@ EPDFStatusCode BufferedOutputStreamTest::Run()
 	stream->Write(buffer,5);
 	delete stream;
 
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 }
 
 ADD_CATEGORIZED_TEST(BufferedOutputStreamTest,"IO")

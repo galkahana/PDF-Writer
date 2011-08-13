@@ -35,7 +35,7 @@ public:
 	CharStringType2Interpreter(void);
 	~CharStringType2Interpreter(void);
 
-	EPDFStatusCode Intepret(const CharString& inCharStringToIntepret, IType2InterpreterImplementation* inImplementationHelper);
+	PDFHummus::EStatusCode Intepret(const CharString& inCharStringToIntepret, IType2InterpreterImplementation* inImplementationHelper);
 
 
 private:
@@ -47,12 +47,12 @@ private:
 	bool mCheckedWidth;
 
 
-	EPDFStatusCode ProcessCharString(Byte* inCharString,LongFilePositionType inCharStringLength);
+	PDFHummus::EStatusCode ProcessCharString(Byte* inCharString,LongFilePositionType inCharStringLength);
 	bool IsOperator(Byte* inProgramCounter);
 	Byte* InterpretNumber(Byte* inProgramCounter);
 	Byte* InterpretOperator(Byte* inProgramCounter,bool& outGotEndExecutionCommand);
 
-	EPDFStatusCode ClearNFromStack(unsigned short inCount);
+	PDFHummus::EStatusCode ClearNFromStack(unsigned short inCount);
 	void ClearStack();
 	void CheckWidth();
 

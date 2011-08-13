@@ -27,8 +27,10 @@
 #include "DictionaryContext.h"
 #include "ObjectsContext.h"
 #include "PDFObjectCast.h"
-#include "HummusPDFParser.h"
+#include "PDFParser.h"
 #include "PDFDictionary.h"
+
+using namespace PDFHummus;
 
 WrittenFontTrueType::WrittenFontTrueType(ObjectsContext* inObjectsContext):AbstractWrittenFont(inObjectsContext)
 {
@@ -95,9 +97,9 @@ bool WrittenFontTrueType::AddToANSIRepresentation(	const GlyphUnicodeMappingList
 }
 
 
-EPDFStatusCode WrittenFontTrueType::WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo)
+EStatusCode WrittenFontTrueType::WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo)
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	do
 	{
 		if(mANSIRepresentation && mANSIRepresentation->mWrittenObjectID != 0)
@@ -105,7 +107,7 @@ EPDFStatusCode WrittenFontTrueType::WriteFontDefinition(FreeTypeFaceWrapper& inF
 			TrueTypeANSIFontWriter fontWriter;
 
 			status = fontWriter.WriteFont(inFontInfo,mANSIRepresentation,mObjectsContext);
-			if(status != ePDFSuccess)
+			if(status != PDFHummus::eSuccess)
 			{
 				TRACE_LOG("WrittenFontTrueType::WriteFontDefinition, Failed to write Ansi font definition");
 				break;
@@ -119,7 +121,7 @@ EPDFStatusCode WrittenFontTrueType::WriteFontDefinition(FreeTypeFaceWrapper& inF
 			TrueTypeDescendentFontWriter descendentFontWriter;
 
 			status = fontWriter.WriteFont(inFontInfo,mCIDRepresentation,mObjectsContext,&descendentFontWriter);
-			if(status != ePDFSuccess)
+			if(status != PDFHummus::eSuccess)
 			{
 				TRACE_LOG("WrittenFontTrueType::WriteFontDefinition, Failed to write CID font definition");
 				break;
@@ -195,7 +197,7 @@ bool WrittenFontTrueType::AddToANSIRepresentation(	const GlyphUnicodeMappingList
 	return encodingResult.first;	
 }
 
-EPDFStatusCode WrittenFontTrueType::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
+EStatusCode WrittenFontTrueType::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
 {
 	inStateWriter->StartNewIndirectObject(inObjectID);
 
@@ -204,8 +206,8 @@ EPDFStatusCode WrittenFontTrueType::WriteState(ObjectsContext* inStateWriter,Obj
 	writtenFontDictionary->WriteKey("Type");
 	writtenFontDictionary->WriteNameValue("WrittenFontTrueType");
 
-	EPDFStatusCode status = AbstractWrittenFont::WriteStateInDictionary(inStateWriter,writtenFontDictionary);
-	if(ePDFSuccess == status)
+	EStatusCode status = AbstractWrittenFont::WriteStateInDictionary(inStateWriter,writtenFontDictionary);
+	if(PDFHummus::eSuccess == status)
 	{
 		inStateWriter->EndDictionary(writtenFontDictionary);
 		inStateWriter->EndIndirectObject();
@@ -215,7 +217,7 @@ EPDFStatusCode WrittenFontTrueType::WriteState(ObjectsContext* inStateWriter,Obj
 	return status;
 }
 
-EPDFStatusCode WrittenFontTrueType::ReadState(HummusPDFParser* inStateReader,ObjectIDType inObjectID)
+EStatusCode WrittenFontTrueType::ReadState(PDFParser* inStateReader,ObjectIDType inObjectID)
 {
 	PDFObjectCastPtr<PDFDictionary> writtenFontState(inStateReader->ParseNewObject(inObjectID));
 

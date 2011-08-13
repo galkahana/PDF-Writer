@@ -7,5 +7,5 @@ public:
 	CustomLogTest(void);
 	~CustomLogTest(void);
 
-	virtual EPDFStatusCode Run();
+	virtual PDFHummus::EStatusCode Run();
 };

@@ -2,7 +2,7 @@
    Source File : SimpleTextUsage.h
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -29,11 +29,11 @@ public:
 	SimpleTextUsage(void);
 	virtual ~SimpleTextUsage(void);
 
-	virtual EPDFStatusCode Run();
+	virtual PDFHummus::EStatusCode Run();
 
 private:
 
-	EPDFStatusCode RunCFFTest();
-	EPDFStatusCode RunTrueTypeTest();
-	EPDFStatusCode RunType1Test();
+	PDFHummus::EStatusCode RunCFFTest();
+	PDFHummus::EStatusCode RunTrueTypeTest();
+	PDFHummus::EStatusCode RunType1Test();
 };

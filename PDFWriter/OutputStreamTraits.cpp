@@ -22,6 +22,8 @@
 #include "IByteWriter.h"
 #include "IByteReaderWithPosition.h"
 
+using namespace PDFHummus;
+
 OutputStreamTraits::OutputStreamTraits(IByteWriter* inOutputStream)
 {
 	mOutputStream = inOutputStream;
@@ -32,30 +34,30 @@ OutputStreamTraits::~OutputStreamTraits(void)
 }
 
 #define TENMEGS 10*1024*1024
-EPDFStatusCode OutputStreamTraits::CopyToOutputStream(IByteReader* inInputStream)
+EStatusCode OutputStreamTraits::CopyToOutputStream(IByteReader* inInputStream)
 {
 	Byte* buffer = new Byte[TENMEGS];
 	LongBufferSizeType readBytes,writeBytes;
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 
-	while(inInputStream->NotEnded() && ePDFSuccess == status)
+	while(inInputStream->NotEnded() && PDFHummus::eSuccess == status)
 	{
 		readBytes = inInputStream->Read(buffer,TENMEGS);
 		writeBytes = mOutputStream->Write(buffer,readBytes);
-		status = (readBytes == writeBytes) ? ePDFSuccess:ePDFFailure;
+		status = (readBytes == writeBytes) ? PDFHummus::eSuccess:PDFHummus::eFailure;
 	}
 	delete[] buffer;
 	return status;
 }
 
-EPDFStatusCode OutputStreamTraits::CopyToOutputStream(IByteReader* inInputStream,LongBufferSizeType inLength)
+EStatusCode OutputStreamTraits::CopyToOutputStream(IByteReader* inInputStream,LongBufferSizeType inLength)
 {
 	Byte* buffer = new Byte[inLength];
 	LongBufferSizeType readBytes,writeBytes;
 
 	readBytes = inInputStream->Read(buffer,inLength);
 	writeBytes = mOutputStream->Write(buffer,readBytes);
-	EPDFStatusCode status = (readBytes == writeBytes) ? ePDFSuccess:ePDFFailure;
+	EStatusCode status = (readBytes == writeBytes) ? PDFHummus::eSuccess:PDFHummus::eFailure;
 	delete[] buffer;
 	return status;
 }

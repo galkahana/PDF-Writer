@@ -2,7 +2,7 @@
    Source File : PDFCopyingContextTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,12 +20,13 @@
 */
 #include "PDFCopyingContextTest.h"
 #include "TestsRunner.h"
-#include "HummusPDFWriter.h"
+#include "PDFWriter.h"
 #include "PDFDocumentCopyingContext.h"
 
 #include <iostream>
 
 using namespace std;
+using namespace PDFHummus;
 
 PDFCopyingContextTest::PDFCopyingContextTest(void)
 {
@@ -35,16 +36,16 @@ PDFCopyingContextTest::~PDFCopyingContextTest(void)
 {
 }
 
-EPDFStatusCode PDFCopyingContextTest::Run()
+EStatusCode PDFCopyingContextTest::Run()
 {
-	EPDFStatusCode status;
-	HummusPDFWriter pdfWriter;
+	EStatusCode status;
+	PDFWriter pdfWriter;
 	PDFDocumentCopyingContext* copyingContext = NULL;
 
 	do
 	{
 		status = pdfWriter.StartPDF("C:\\PDFLibTests\\PDFCopyingContextTest.PDF",ePDFVersion13,LogConfiguration(true,true,"c:\\pdflibtests\\PDFCopyingContextTest.txt"));
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
 			break;
@@ -55,12 +56,12 @@ EPDFStatusCode PDFCopyingContextTest::Run()
 		if(!copyingContext)
 		{
 			cout<<"failed to initialize copying context from BasicTIFFImagesTest\n";
-			status = ePDFFailure;
+			status = PDFHummus::eFailure;
 			break;
 		}
 
-		EPDFStatusCodeAndObjectIDType result = copyingContext->AppendPDFPageFromPDF(1);
-		if(result.first != ePDFSuccess)
+		EStatusCodeAndObjectIDType result = copyingContext->AppendPDFPageFromPDF(1);
+		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append page 1 from BasicTIFFImagesTest.PDF\n";
 			status = result.first;
@@ -68,7 +69,7 @@ EPDFStatusCode PDFCopyingContextTest::Run()
 		}
 
 		result = copyingContext->AppendPDFPageFromPDF(18);
-		if(result.first != ePDFSuccess)
+		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append page 18 from BasicTIFFImagesTest.PDF\n";
 			status = result.first;
@@ -76,7 +77,7 @@ EPDFStatusCode PDFCopyingContextTest::Run()
 		}
 
 		result = copyingContext->AppendPDFPageFromPDF(4);
-		if(result.first != ePDFSuccess)
+		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append page 4 from BasicTIFFImagesTest.PDF\n";
 			status = result.first;
@@ -89,7 +90,7 @@ EPDFStatusCode PDFCopyingContextTest::Run()
 		copyingContext = NULL;
 
 		status = pdfWriter.EndPDF();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed in end PDF\n";
 			break;

@@ -2,7 +2,7 @@
    Source File : OpenTypeTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@
 
 #include <iostream>
 
+using namespace PDFHummus;
 
 OpenTypeTest::OpenTypeTest(void)
 {
@@ -39,15 +40,15 @@ OpenTypeTest::~OpenTypeTest(void)
 {
 }
 
-EPDFStatusCode OpenTypeTest::SaveCharstringCode(unsigned short inFontIndex,unsigned short inGlyphIndex,CFFFileInput* inCFFFileInput)
+EStatusCode OpenTypeTest::SaveCharstringCode(unsigned short inFontIndex,unsigned short inGlyphIndex,CFFFileInput* inCFFFileInput)
 {
 	OutputFile glyphFile;
 
-	EPDFStatusCode status = glyphFile.OpenFile(string("C:\\PDFLibTests\\glyphCFF")  + Long(inFontIndex).ToString() + "_" + inCFFFileInput->GetGlyphName(0,inGlyphIndex) + ".txt");
+	EStatusCode status = glyphFile.OpenFile(string("C:\\PDFLibTests\\glyphCFF")  + Long(inFontIndex).ToString() + "_" + inCFFFileInput->GetGlyphName(0,inGlyphIndex) + ".txt");
 
 	do
 	{
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 			break;
 		
 		CharStringType2Tracer tracer;
@@ -61,21 +62,21 @@ EPDFStatusCode OpenTypeTest::SaveCharstringCode(unsigned short inFontIndex,unsig
 	return status;
 }
 
-EPDFStatusCode OpenTypeTest::Run()
+EStatusCode OpenTypeTest::Run()
 {
 	return TestFont();
 }
 
-EPDFStatusCode OpenTypeTest::TestFont()
+EStatusCode OpenTypeTest::TestFont()
 {
-	EPDFStatusCode status;
+	EStatusCode status;
 	InputFile otfFile;
 
 	do
 	{
 		status = otfFile.OpenFile("C:\\PDFLibTests\\TestMaterials\\fonts\\BrushScriptStd.otf");
 
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"cannot read bursh script font file\n";
 			break;
@@ -85,7 +86,7 @@ EPDFStatusCode OpenTypeTest::TestFont()
 		OpenTypeFileInput openTypeReader;
 
 		status = openTypeReader.ReadOpenTypeFile(otfFile.GetInputStream());
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"could not read open type file\n";
 			break;
@@ -94,7 +95,7 @@ EPDFStatusCode OpenTypeTest::TestFont()
 		// show just abcd and notdef
 
 		status = SaveCharstringCode(0,0,&openTypeReader.mCFF);
-		for(unsigned short i=66; i < 70 && ePDFSuccess == status; ++i)
+		for(unsigned short i=66; i < 70 && PDFHummus::eSuccess == status; ++i)
 			status = SaveCharstringCode(0,i,&openTypeReader.mCFF);
 	}while(false);
 	return status;

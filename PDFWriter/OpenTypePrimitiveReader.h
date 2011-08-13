@@ -20,7 +20,7 @@
 */
 #pragma once
 
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include "IByteReaderWithPosition.h"
 
 class OpenTypePrimitiveReader
@@ -33,23 +33,23 @@ public:
 	void SetOffset(LongFilePositionType inNewOffset);
 	void Skip(LongBufferSizeType inToSkip);
 	LongFilePositionType GetCurrentPosition();
-	EPDFStatusCode GetInternalState();
+	PDFHummus::EStatusCode GetInternalState();
 
-	EPDFStatusCode ReadBYTE(unsigned char& outValue);
-	EPDFStatusCode ReadCHAR(char& outValue);
-	EPDFStatusCode ReadUSHORT(unsigned short& outValue);
-	EPDFStatusCode ReadSHORT(short& outValue);
-	EPDFStatusCode ReadULONG(unsigned long& outValue);
-	EPDFStatusCode ReadLONG(long& outValue);
-	EPDFStatusCode ReadLongDateTime(long long& outValue);
-	EPDFStatusCode ReadFixed(double& outValue);
-	EPDFStatusCode Read(Byte* inBuffer,LongBufferSizeType inBufferSize);
+	PDFHummus::EStatusCode ReadBYTE(unsigned char& outValue);
+	PDFHummus::EStatusCode ReadCHAR(char& outValue);
+	PDFHummus::EStatusCode ReadUSHORT(unsigned short& outValue);
+	PDFHummus::EStatusCode ReadSHORT(short& outValue);
+	PDFHummus::EStatusCode ReadULONG(unsigned long& outValue);
+	PDFHummus::EStatusCode ReadLONG(long& outValue);
+	PDFHummus::EStatusCode ReadLongDateTime(long long& outValue);
+	PDFHummus::EStatusCode ReadFixed(double& outValue);
+	PDFHummus::EStatusCode Read(Byte* inBuffer,LongBufferSizeType inBufferSize);
 
 	IByteReaderWithPosition* GetReadStream();
 private:
 
 	IByteReaderWithPosition* mOpenTypeFile;
 	LongFilePositionType mInitialPosition;
-	EPDFStatusCode mInternalState;
+	PDFHummus::EStatusCode mInternalState;
 
 };

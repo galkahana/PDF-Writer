@@ -29,6 +29,8 @@
 
 #include FT_CID_H 
 
+using namespace PDFHummus;
+
 DescendentFontWriter::DescendentFontWriter(void)
 {
 }
@@ -44,14 +46,14 @@ static const string scBaseFont = "BaseFont";
 static const string scFontDescriptor = "FontDescriptor";
 static const string scCIDSystemInfo = "CIDSystemInfo";
 
-EPDFStatusCode DescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID, 
+EStatusCode DescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID, 
 												const string& inFontName,
 												FreeTypeFaceWrapper& inFontInfo,
 												const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
 												ObjectsContext* inObjectsContext,
 												IDescendentFontWriter* inDescendentFontWriterHelper)
 {
-	EPDFStatusCode status = ePDFSuccess;
+	EStatusCode status = PDFHummus::eSuccess;
 	FontDescriptorWriter fontDescriptorWriter;
 	inObjectsContext->StartNewIndirectObject(inDecendentObjectID);
 	
@@ -91,7 +93,7 @@ EPDFStatusCode DescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID
 		inDescendentFontWriterHelper->WriteAdditionalKeys(fontContext);
 
 		status = inObjectsContext->EndDictionary(fontContext);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFANSIFontWriter::WriteFont, unexpected failure. Failed to end dictionary in font write.");
 			break;

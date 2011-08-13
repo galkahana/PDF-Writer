@@ -19,7 +19,7 @@
    
 */
 #pragma once
-#include "EPDFStatusCode.h"
+#include "EStatusCode.h"
 #include "IByteReaderWithPosition.h"
 #include "DictOperand.h"
 
@@ -34,36 +34,36 @@ public:
 	void SetOffset(LongFilePositionType inNewOffset);
 	void Skip(LongBufferSizeType inToSkip);
 	LongFilePositionType GetCurrentPosition();
-	EPDFStatusCode GetInternalState();
+	PDFHummus::EStatusCode GetInternalState();
 
-	EPDFStatusCode ReadByte(Byte& outValue);
-	EPDFStatusCode Read(Byte* ioBuffer,LongBufferSizeType inBufferSize);
+	PDFHummus::EStatusCode ReadByte(Byte& outValue);
+	PDFHummus::EStatusCode Read(Byte* ioBuffer,LongBufferSizeType inBufferSize);
 
 	// basic CFF values
-	EPDFStatusCode ReadCard8(Byte& outValue);
-	EPDFStatusCode ReadCard16(unsigned short& outValue);
+	PDFHummus::EStatusCode ReadCard8(Byte& outValue);
+	PDFHummus::EStatusCode ReadCard16(unsigned short& outValue);
 	// set offsize to read offsets
 	void SetOffSize(Byte inOffSize);
-	EPDFStatusCode ReadOffset(unsigned long& outValue);
-	EPDFStatusCode ReadOffSize(Byte& outValue);
-	EPDFStatusCode ReadSID(unsigned short& outValue);
+	PDFHummus::EStatusCode ReadOffset(unsigned long& outValue);
+	PDFHummus::EStatusCode ReadOffSize(Byte& outValue);
+	PDFHummus::EStatusCode ReadSID(unsigned short& outValue);
 
 	// dict data
 	bool IsDictOperator(Byte inCandidate);
-	EPDFStatusCode ReadDictOperator(Byte inFirstByte,unsigned short& outOperator);
-	EPDFStatusCode ReadDictOperand(Byte inFirstByte,DictOperand& outOperand);
+	PDFHummus::EStatusCode ReadDictOperator(Byte inFirstByte,unsigned short& outOperator);
+	PDFHummus::EStatusCode ReadDictOperand(Byte inFirstByte,DictOperand& outOperand);
 
 private:
 	IByteReaderWithPosition* mCFFFile;
 	LongFilePositionType mInitialPosition;
-	EPDFStatusCode mInternalState;
+	PDFHummus::EStatusCode mInternalState;
 	Byte mCurrentOffsize;
 
-	EPDFStatusCode Read3ByteUnsigned(unsigned long& outValue);
-	EPDFStatusCode Read4ByteUnsigned(unsigned long& outValue);
-	EPDFStatusCode Read4ByteSigned(long& outValue);
-	EPDFStatusCode Read2ByteSigned(short& outValue);
-	EPDFStatusCode ReadIntegerOperand(Byte inFirstByte,long& outValue);
+	PDFHummus::EStatusCode Read3ByteUnsigned(unsigned long& outValue);
+	PDFHummus::EStatusCode Read4ByteUnsigned(unsigned long& outValue);
+	PDFHummus::EStatusCode Read4ByteSigned(long& outValue);
+	PDFHummus::EStatusCode Read2ByteSigned(short& outValue);
+	PDFHummus::EStatusCode ReadIntegerOperand(Byte inFirstByte,long& outValue);
 	// make sure you get here after discarding the initial byte, 30.
-	EPDFStatusCode ReadRealOperand(double& outValue,long& outRealValueFractalEnd);
+	PDFHummus::EStatusCode ReadRealOperand(double& outValue,long& outRealValueFractalEnd);
 };

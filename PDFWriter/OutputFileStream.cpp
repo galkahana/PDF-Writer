@@ -22,6 +22,7 @@
 #include "SafeBufferMacrosDefs.h"
 
 using namespace IOBasicTypes;
+using namespace PDFHummus;
 
 OutputFileStream::OutputFileStream(void)
 {
@@ -41,22 +42,22 @@ OutputFileStream::OutputFileStream(const string& inFilePath,bool inAppend)
 	Open(inFilePath,inAppend);
 }
 
-EPDFStatusCode OutputFileStream::Open(const string& inFilePath,bool inAppend)
+EStatusCode OutputFileStream::Open(const string& inFilePath,bool inAppend)
 {
 	SAFE_FOPEN(mStream,inFilePath.c_str(),inAppend ? "ab":"wb")
 
 	if(!mStream)
-		return ePDFFailure;
+		return PDFHummus::eFailure;
 
 	// seek to end, so position reading gets the correct file position, even before first write
 	_fseeki64(mStream,0,SEEK_END);
 
-	return ePDFSuccess;
+	return PDFHummus::eSuccess;
 };
 
-EPDFStatusCode OutputFileStream::Close()
+EStatusCode OutputFileStream::Close()
 {
-	EPDFStatusCode result = fclose(mStream) == 0 ? ePDFSuccess:ePDFFailure;
+	EStatusCode result = fclose(mStream) == 0 ? PDFHummus::eSuccess:PDFHummus::eFailure;
 
 	mStream = NULL;
 	return result;

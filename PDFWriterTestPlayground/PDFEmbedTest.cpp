@@ -2,7 +2,7 @@
    Source File : PDFEmbedTest.cpp
 
 
-   Copyright 2011 Gal Kahana HummusPDFWriter
+   Copyright 2011 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,13 +20,14 @@
 */
 #include "PDFEmbedTest.h"
 #include "TestsRunner.h"
-#include "HummusPDFWriter.h"
+#include "PDFWriter.h"
 #include "PageContentContext.h"
 #include "PDFPage.h"
 
 #include <iostream>
 
 using namespace std;
+using namespace PDFHummus;
 
 PDFEmbedTest::PDFEmbedTest(void)
 {
@@ -37,23 +38,23 @@ PDFEmbedTest::~PDFEmbedTest(void)
 }
 
 
-EPDFStatusCode PDFEmbedTest::Run()
+EStatusCode PDFEmbedTest::Run()
 {
-	EPDFStatusCode status;
-	HummusPDFWriter pdfWriter;
+	EStatusCode status;
+	PDFWriter pdfWriter;
 
 	do
 	{
 		status = pdfWriter.StartPDF("C:\\PDFLibTests\\PDFEmbedTest.PDF",ePDFVersion13);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
 			break;
 		}	
 
 		// Create XObjects from PDF to embed
-		EPDFStatusCodeAndObjectIDTypeList result = pdfWriter.CreateFormXObjectsFromPDF("C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF",PDFPageRange(),ePDFPageBoxMediaBox);
-		if(result.first != ePDFSuccess)
+		EStatusCodeAndObjectIDTypeList result = pdfWriter.CreateFormXObjectsFromPDF("C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF",PDFPageRange(),ePDFPageBoxMediaBox);
+		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to create PDF XObjects from PDF file\n";
 			status = result.first;
@@ -90,21 +91,21 @@ EPDFStatusCode PDFEmbedTest::Run()
 
 
 		status = pdfWriter.EndPageContentContext(contentContext);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to end page content context\n";
 			break;
 		}
 
 		status = pdfWriter.WritePageAndRelease(page);
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to write page\n";
 			break;
 		}
 
 		status = pdfWriter.EndPDF();
-		if(status != ePDFSuccess)
+		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed in end PDF\n";
 			break;
