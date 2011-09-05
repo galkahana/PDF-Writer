@@ -501,7 +501,7 @@ PDFObject* PDFObjectParser::ParseArray()
 		if(!anObject)
 		{
 			status = PDFHummus::eFailure;
-			TRACE_LOG1("PDFObjectParser::ParseArray, failure to parse array, failed to parse a member object. token = %s",token);
+			TRACE_LOG1("PDFObjectParser::ParseArray, failure to parse array, failed to parse a member object. token = %s",token.c_str());
 		}
 		else
 		{
@@ -516,7 +516,7 @@ PDFObject* PDFObjectParser::ParseArray()
 	else
 	{
 		delete anArray;
-		TRACE_LOG1("PDFObjectParser::ParseArray, failure to parse array, didn't find end of array or failure to parse array member object. token = %s",token);
+		TRACE_LOG1("PDFObjectParser::ParseArray, failure to parse array, didn't find end of array or failure to parse array member object. token = %s",token.c_str());
 		return NULL;
 	}
 }
@@ -560,7 +560,7 @@ PDFObject* PDFObjectParser::ParseDictionary()
 		if(!aKey)
 		{
 			status = PDFHummus::eFailure;
-			TRACE_LOG1("PDFObjectParser::ParseDictionary, failure to parse key for a dictionary. token = %s",token);
+			TRACE_LOG1("PDFObjectParser::ParseDictionary, failure to parse key for a dictionary. token = %s",token.c_str());
 			break;
 		}
 
@@ -577,7 +577,7 @@ PDFObject* PDFObjectParser::ParseDictionary()
 		if(!aValue)
 		{
 			status = PDFHummus::eFailure;
-			TRACE_LOG1("PDFObjectParser::ParseDictionary, failure to parse value for a dictionary. token = %s",token);
+			TRACE_LOG1("PDFObjectParser::ParseDictionary, failure to parse value for a dictionary. token = %s",token.c_str());
 			break;
 		}
 	
@@ -592,7 +592,7 @@ PDFObject* PDFObjectParser::ParseDictionary()
 	else
 	{
 		delete aDictionary;
-		TRACE_LOG1("PDFObjectParser::ParseDictionary, failure to parse dictionary, didn't find end of array or failure to parse dictionary member object. token = %s",token);
+		TRACE_LOG1("PDFObjectParser::ParseDictionary, failure to parse dictionary, didn't find end of array or failure to parse dictionary member object. token = %s",token.c_str());
 		return NULL;
 	}
 }

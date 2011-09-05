@@ -38,7 +38,7 @@ BoolAndString Ascii7Encoding::Encode(const string& inString)
 
 	for(;it != inString.end() && encodingGood;++it)
 	{
-		if(*it <= 127)
+		if(((IOBasicTypes::Byte)*it) <= 127)
 		{
 			buffer = (char)*it;
 			asciiString.Write(&buffer,1);

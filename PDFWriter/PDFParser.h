@@ -31,7 +31,6 @@
 
 #include <map>
 
-using namespace IOBasicTypes;
 
 class PDFArray;
 class PDFStreamInput;
@@ -138,7 +137,7 @@ private:
 	AdapterIByteReaderWithPositionToIReadPositionProvider mCurrentPositionProvider;
 	
 	// we'll use this items for bacwkards reading. might turns this into a proper stream object
-	Byte mLinesBuffer[LINE_BUFFER_SIZE];
+	IOBasicTypes::Byte mLinesBuffer[LINE_BUFFER_SIZE];
 	IOBasicTypes::Byte* mCurrentBufferIndex;
 	IOBasicTypes::Byte* mLastAvailableIndex;
 	LongBufferSizeType mLastReadPositionFromEnd;
@@ -189,12 +188,12 @@ private:
 	// Backward reading
 	bool ReadNextBufferFromEnd();
 	LongBufferSizeType GetCurrentPositionFromEnd();
-	bool ReadBack(Byte& outValue);
+	bool ReadBack(IOBasicTypes::Byte& outValue);
 	bool IsBeginOfFile();
 
 	bool GoBackTillToken();
 	bool GoBackTillNonToken();
 	void GoBackTillLineStart();
-	bool IsPDFWhiteSpace(Byte inCharacter);
+	bool IsPDFWhiteSpace(IOBasicTypes::Byte inCharacter);
 
 };

@@ -38,7 +38,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
-#ifdef HAVE_UNISTD_H
+#if !(defined(_WIN32) || defined(WIN32))
 # include <unistd.h>
 #endif
 

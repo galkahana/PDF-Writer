@@ -562,7 +562,7 @@ TIFFPrintDirectory(TIFF* tif, FILE* fd, long flags)
 				raw_data = _TIFFmalloc(
 					_TIFFDataSize(fip->field_type)
 					* value_count);
-				tmp = raw_data;
+				tmp = (char*)raw_data;
 				mem_alloc = 1;
 				if(TIFFGetField(tif, tag, tmp,
 				tmp + _TIFFDataSize(fip->field_type)) != 1) {

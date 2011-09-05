@@ -82,7 +82,7 @@ EStatusCode CharStringType1Interpreter::ProcessCharString(InputCharStringDecodeS
 
 bool CharStringType1Interpreter::IsOperator(Byte inBuffer)
 {
-	return  (0 <= inBuffer && inBuffer <= 31);
+	return  (inBuffer <= 31);
 			
 }
 

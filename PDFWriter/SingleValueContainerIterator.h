@@ -48,18 +48,18 @@ public:
 };
 
 template <class T>
-SingleValueContainerIterator<T>::SingleValueContainerIterator(T& inContainer):ContainerIterator(inContainer)
+SingleValueContainerIterator<T>::SingleValueContainerIterator(T& inContainer) : ContainerIterator<T>(inContainer)
 {
 }
 
 template <class T>
-SingleValueContainerIterator<T>::SingleValueContainerIterator(const SingleValueContainerIterator<T>& inOtherIterator):ContainerIterator(inOtherIterator)
+SingleValueContainerIterator<T>::SingleValueContainerIterator(const SingleValueContainerIterator<T>& inOtherIterator) : ContainerIterator<T>(inOtherIterator)
 {
 }
 
 template <class T>
 typename T::value_type SingleValueContainerIterator<T>::GetItem()
 {
-	return *mCurrentPosition;
+	return *this->mCurrentPosition;
 }
 

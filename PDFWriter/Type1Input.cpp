@@ -726,11 +726,6 @@ EStatusCode Type1Input::ParseCharstrings()
 
 Type1CharString* Type1Input::GetGlyphCharString(Byte inCharStringIndex)
 {
-	if(256 <= inCharStringIndex)
-	{
-		TRACE_LOG1("Type1Input::GetGlyphCharString, inCharStringIndex = %d is invalid",inCharStringIndex);
-		return NULL;
-	}
 	string characterName;
 
 	if(eType1EncodingTypeCustom == mEncoding.EncodingType)

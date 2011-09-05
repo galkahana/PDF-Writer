@@ -1110,7 +1110,7 @@ CharString* CFFFileInput::GetLocalSubr(long inSubrIndex)
 	// also - record dependency on this subr.
 	unsigned short biasedIndex = GetBiasedIndex(mCurrentLocalSubrs->mCharStringsCount,inSubrIndex);	
 
-	if(0 <= biasedIndex && biasedIndex < mCurrentLocalSubrs->mCharStringsCount)
+	if(biasedIndex < mCurrentLocalSubrs->mCharStringsCount)
 	{
 		CharString* returnValue = mCurrentLocalSubrs->mCharStringsIndex + biasedIndex;
 		if(mCurrentDependencies)

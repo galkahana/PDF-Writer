@@ -27,7 +27,6 @@
 #include <string>
 
 using namespace std;
-using namespace IOBasicTypes;
 
 class IByteReader;
 
@@ -64,23 +63,23 @@ public:
 	// the implementation counts bytes as it goes, as such any external shifting of the stream will render the method invalid.
 	// In other words - use only if the only position movement is through GetNextToken repeated calls.
 	// Specifically "ResetReadState" resets the count
-	LongFilePositionType GetRecentTokenPosition();
+	IOBasicTypes::LongFilePositionType GetRecentTokenPosition();
 private:
 
 	IByteReader* mStream;
 	bool mHasTokenBuffer;
-	Byte mTokenBuffer;
-	LongFilePositionType mStreamPositionTracker;
-	LongFilePositionType mRecentTokenPosition;
+	IOBasicTypes::Byte mTokenBuffer;
+	IOBasicTypes::LongFilePositionType mStreamPositionTracker;
+	IOBasicTypes::LongFilePositionType mRecentTokenPosition;
 
 
 	void SkipTillToken();
 
 	// failure in GetNextByteForToken actually marks a true read failure, if you checked end of file before calling it...
-	PDFHummus::EStatusCode GetNextByteForToken(Byte& outByte);
+	PDFHummus::EStatusCode GetNextByteForToken(IOBasicTypes::Byte& outByte);
 
-	bool IsPDFWhiteSpace(Byte inCharacter);
-	void SaveTokenBuffer(Byte inToSave);
-	bool IsPDFEntityBreaker(Byte inCharacter);
+	bool IsPDFWhiteSpace(IOBasicTypes::Byte inCharacter);
+	void SaveTokenBuffer(IOBasicTypes::Byte inToSave);
+	bool IsPDFEntityBreaker(IOBasicTypes::Byte inCharacter);
 
 };

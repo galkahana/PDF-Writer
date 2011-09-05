@@ -18,7 +18,9 @@
 #define HAVE_SYS_TYPES_H 1
 
 /* Define to 1 if you have the <io.h> header file. */
+#if (defined(_WIN32) || defined(WIN32))
 #define HAVE_IO_H 1
+#endif
 
 /* Define to 1 if you have the <search.h> header file. */
 #define HAVE_SEARCH_H 1
@@ -33,10 +35,10 @@
 #define SIZEOF_LONG 4
 
 /* Signed 64-bit type */
-#define TIFF_INT64_T signed __int64
+//#define TIFF_INT64_T signed long long
 
 /* Unsigned 64-bit type */
-#define TIFF_UINT64_T unsigned __int64
+//#define TIFF_UINT64_T unsigned long long
 
 /* Set the native cpu bit order */
 #define HOST_FILLORDER FILLORDER_LSB2MSB
@@ -53,7 +55,9 @@
 # endif
 #endif
 
+#if (defined(_WIN32) || defined(WIN32))
 #define lfind _lfind
+#endif
 /*
  * Local Variables:
  * mode: c

@@ -31,6 +31,7 @@
  */
 
 #include "tif_config.h"
+#include "tiffio.h"
 
 #ifdef HAVE_FCNTL_H
 # include <fcntl.h>
@@ -64,7 +65,6 @@ extern void *lfind(const void *, const void *, size_t *, size_t,
 typedef TIFF_INT64_T  int64;
 typedef TIFF_UINT64_T uint64;
 
-#include "tiffio.h"
 #include "tif_dir.h"
 
 #ifndef STRIP_SIZE_DEFAULT

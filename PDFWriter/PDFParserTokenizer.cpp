@@ -23,6 +23,7 @@
 #include "OutputStringBufferStream.h"
 
 using namespace PDFHummus;
+using namespace IOBasicTypes;
 
 PDFParserTokenizer::PDFParserTokenizer(void)
 {

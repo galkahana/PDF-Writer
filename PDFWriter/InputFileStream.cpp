@@ -72,19 +72,19 @@ bool InputFileStream::NotEnded()
 void InputFileStream::Skip(LongBufferSizeType inSkipSize)
 {
 	if(mStream)
-		_fseeki64(mStream,inSkipSize,SEEK_CUR);
+		SAFE_FSEEK64(mStream,inSkipSize,SEEK_CUR);
 }
 
 void InputFileStream::SetPosition(LongFilePositionType inOffsetFromStart)
 {
 	if(mStream)
-		_fseeki64(mStream,inOffsetFromStart,SEEK_SET);
+		SAFE_FSEEK64(mStream,inOffsetFromStart,SEEK_SET);
 }
 
 LongFilePositionType InputFileStream::GetCurrentPosition()
 {
 	if(mStream)
-		return _ftelli64(mStream);
+		return SAFE_FTELL64(mStream);
 	else
 		return 0;
 }
@@ -94,12 +94,12 @@ LongFilePositionType InputFileStream::GetFileSize()
 	if(mStream)
 	{
 		// very messy...prefer a different means sometime
-		LongFilePositionType currentPosition = _ftelli64(mStream);
+		LongFilePositionType currentPosition = SAFE_FTELL64(mStream);
 		LongFilePositionType result;
 
-		_fseeki64(mStream,0,SEEK_END);
-		result = _ftelli64(mStream);
-		_fseeki64(mStream,currentPosition,SEEK_SET);
+		SAFE_FSEEK64(mStream,0,SEEK_END);
+		result = SAFE_FTELL64(mStream);
+		SAFE_FSEEK64(mStream,currentPosition,SEEK_SET);
 		return result;
 	}
 	else
@@ -109,6 +109,5 @@ LongFilePositionType InputFileStream::GetFileSize()
 void InputFileStream::SetPositionFromEnd(LongFilePositionType inOffsetFromEnd)
 {
 	if(mStream)
-		_fseeki64(mStream,-inOffsetFromEnd,SEEK_END);
-
+		SAFE_FSEEK64(mStream,-inOffsetFromEnd,SEEK_END);
 }

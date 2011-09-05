@@ -113,7 +113,7 @@ EStatusCode FreeTypeWrapper::FillOpenFaceArgumentsForUTF8String(const string& in
 	}
 	else
 	{
-		TRACE_LOG1("FreeTypeWrapper::FillOpenFaceArgumentsForWideString, Cannot Open file for reading %s",inFilePath);
+		TRACE_LOG1("FreeTypeWrapper::FillOpenFaceArgumentsForWideString, Cannot Open file for reading %s",inFilePath.c_str());
 		return PDFHummus::eFailure;
 	}
 }

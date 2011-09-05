@@ -50,7 +50,7 @@ EStatusCode OutputFileStream::Open(const string& inFilePath,bool inAppend)
 		return PDFHummus::eFailure;
 
 	// seek to end, so position reading gets the correct file position, even before first write
-	_fseeki64(mStream,0,SEEK_END);
+	SAFE_FSEEK64(mStream,0,SEEK_END);
 
 	return PDFHummus::eSuccess;
 };
@@ -72,5 +72,5 @@ LongBufferSizeType OutputFileStream::Write(const Byte* inBuffer,LongBufferSizeTy
 
 LongFilePositionType OutputFileStream::GetCurrentPosition()
 {
-	return mStream ? _ftelli64(mStream):0;
+	return mStream ? SAFE_FTELL64(mStream):0;
 }

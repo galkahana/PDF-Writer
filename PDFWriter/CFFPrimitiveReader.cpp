@@ -357,7 +357,7 @@ EStatusCode CFFPrimitiveReader::ReadRealOperand(double& outValue,long& outRealVa
 
 bool CFFPrimitiveReader::IsDictOperator(Byte inCandidate)
 {
-	return ((inCandidate >= 0 && inCandidate <= 27) || 31 == inCandidate);
+	return (inCandidate <= 27 || 31 == inCandidate);
 }	
 
 EStatusCode CFFPrimitiveReader::ReadDictOperator(Byte inFirstByte,unsigned short& outOperator)

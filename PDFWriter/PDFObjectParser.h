@@ -33,9 +33,8 @@ class PDFObject;
 class IByteReader;
 
 using namespace std;
-using namespace IOBasicTypes;
 
-typedef pair<bool,Byte> BoolAndByte;
+typedef pair<bool,IOBasicTypes::Byte> BoolAndByte;
 typedef list<string> StringList;
 
 class PDFObjectParser
@@ -88,7 +87,7 @@ private:
 
 	bool IsComment(const string& inToken);
 
-	BoolAndByte GetHexValue(Byte inValue);
+	BoolAndByte GetHexValue(IOBasicTypes::Byte inValue);
 
 
 };

@@ -49,23 +49,23 @@ public:
 };
 
 template <class T>
-MapIterator<T>::MapIterator(T& inMap):ContainerIterator(inMap)
+MapIterator<T>::MapIterator(T& inMap):ContainerIterator<T>(inMap)
 {
 }
 
 template <class T>
-MapIterator<T>::MapIterator(const MapIterator<T>& inOtherIterator):ContainerIterator(inOtherIterator)
+MapIterator<T>::MapIterator(const MapIterator<T>& inOtherIterator):ContainerIterator<T>(inOtherIterator)
 {
 }
 
 template <class T>
 typename T::key_type MapIterator<T>::GetKey()
 {
-	return mCurrentPosition->first;
+	return this->mCurrentPosition->first;
 }
 
 template <class T>
 typename T::mapped_type MapIterator<T>::GetValue()
 {
-	return mCurrentPosition->second;
+	return this->mCurrentPosition->second;
 }

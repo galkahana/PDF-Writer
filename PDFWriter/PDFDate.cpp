@@ -21,6 +21,11 @@
 #include "PDFDate.h"
 #include "SafeBufferMacrosDefs.h"
 #include "Trace.h"
+#if defined (__MWERKS__) || defined (__GNUC__)
+	// MAC OSX methods for providing UTC difference
+	#include <CoreFoundation/CFDate.h>
+	#include <CoreFoundation/CFTimeZone.h>
+#endif
 
 #include <ctime>
 #include <math.h>
@@ -187,8 +192,25 @@ void PDFDate::SetToCurrentTime()
 	Minute = structuredLocalTime.tm_min;
 	Second = structuredLocalTime.tm_sec;
 
-	// if unsuccesful don't provide UTC info
-	if(_get_timezone(&timeZoneSecondsDifference) == 0)
+	// if unsuccesful or method unknown don't provide UTC info (currently only knows for WIN32 and OSX
+#if defined (__MWERKS__) || defined (__GNUC__) || defined(WIN32)
+	int status;
+#ifdef WIN32 // (using MS methods)
+	status = _get_timezone(&timeZoneSecondsDifference);
+#else // gnuc or mwerks (using OSX methods)
+	CFTimeZoneRef tzRef = ::CFTimeZoneCopySystem();
+	if (tzRef)
+	{
+		CFTimeInterval intervalFromGMT = ::CFTimeZoneGetSecondsFromGMT(tzRef, currentTime);
+		::CFRelease(tzRef);
+		timeZoneSecondsDifference = intervalFromGMT;
+		status = 0;
+	}
+	else
+		status = -1;
+#endif
+
+	if(0 == status)
 	{
 		if(0 == timeZoneSecondsDifference)
 		{
@@ -205,4 +227,8 @@ void PDFDate::SetToCurrentTime()
 	{
 		TRACE_LOG("PDFDate::SetToCurrentTime, Couldn't get UTC.");
 	}
+
+#else
+	UTC = eUndefined;
+#endif
 }

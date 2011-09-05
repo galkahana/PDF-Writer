@@ -120,7 +120,7 @@ PDFTextString& PDFTextString::operator=(const string& inString)
 
 string PDFTextString::ToUTF8String() const
 {
-	if(mTextString.size() >= 2 && mTextString.at(0) == 0xFE && mTextString.at(1) == 0xFF)
+	if(mTextString.size() >= 2 && (Byte)mTextString.at(0) == 0xFE && (Byte)mTextString.at(1) == 0xFF)
 		return ToUTF8FromUTF16BE();
 	else
 		return ToUTF8FromPDFDocEncoding();

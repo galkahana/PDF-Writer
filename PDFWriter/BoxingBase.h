@@ -60,7 +60,7 @@ BoxingBase<T>::BoxingBase(const T& inValue)
 template <typename T>
 BoxingBase<T>::BoxingBase(const BoxingBase<T>& inOther)
 {
-	boxedValue = inValue;
+	boxedValue = inOther.boxedValue;
 }
 
 template <typename T>
@@ -141,7 +141,7 @@ public:
 };
 
 template <typename U, class Reader, class Writer>
-BoxingBaseWithRW<U,Reader,Writer>::BoxingBaseWithRW():BoxingBase<U>
+BoxingBaseWithRW<U,Reader,Writer>::BoxingBaseWithRW():BoxingBase<U>()
 {
 
 }
@@ -168,20 +168,20 @@ template <typename U, class Reader, class Writer>
 BoxingBaseWithRW<U,Reader,Writer>::BoxingBaseWithRW(const wstring& inReadFrom)
 {
 	Reader reader;
-	reader.Read(inReadFrom,boxedValue);
+	reader.Read(inReadFrom,this->boxedValue);
 }
 
 template <typename U, class Reader, class Writer>
 BoxingBaseWithRW<U,Reader,Writer>::BoxingBaseWithRW(const string& inReadFrom)
 {
 	Reader reader;
-	reader.Read(inReadFrom,boxedValue);
+	reader.Read(inReadFrom,this->boxedValue);
 }
 
 template <typename U, class Reader, class Writer>
 BoxingBaseWithRW<U,Reader,Writer>&  BoxingBaseWithRW<U,Reader,Writer>::operator =(const U& inValue)
 {
-	boxedValue = inValue;
+	this->boxedValue = inValue;
 	return *this;
 }
 
@@ -192,7 +192,7 @@ string BoxingBaseWithRW<U,Reader,Writer>::ToString() const
 	Writer writer;
 	string aString;
 
-	writer.Write(boxedValue,aString);
+	writer.Write(this->boxedValue,aString);
 
 	return aString;
 }
@@ -203,7 +203,7 @@ wstring BoxingBaseWithRW<U,Reader,Writer>::ToWString() const
 	Writer writer;
 	wstring aString;
 
-	writer.Write(boxedValue,aString);
+	writer.Write(this->boxedValue,aString);
 
 	return aString;
 }

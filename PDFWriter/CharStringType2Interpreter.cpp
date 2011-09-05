@@ -99,7 +99,7 @@ EStatusCode CharStringType2Interpreter::ProcessCharString(Byte* inCharString,Lon
 
 bool CharStringType2Interpreter::IsOperator(Byte* inProgramCounter)
 {
-	return  (0 <= (*inProgramCounter) && (*inProgramCounter) <= 27) || 
+	return  ((*inProgramCounter) <= 27) || 
 			(29 <= (*inProgramCounter) && (*inProgramCounter) <= 31);
 			
 }
@@ -740,7 +740,7 @@ Byte* CharStringType2Interpreter::InterpretAbs(Byte* inProgramCounter)
 	if(value.IsInteger)
 		newOperand.IntegerValue = abs(value.IntegerValue);
 	else
-		newOperand.RealValue = abs(value.RealValue);
+		newOperand.RealValue = fabs(value.RealValue);
 	mOperandStack.push_back(newOperand);
 	return inProgramCounter;
 }
