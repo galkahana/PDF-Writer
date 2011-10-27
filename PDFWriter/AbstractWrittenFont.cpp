@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "AbstractWrittenFont.h"
 #include "ObjectsContext.h"
@@ -98,7 +98,7 @@ void AbstractWrittenFont::AppendGlyphs(
 
 		outFontObjectID = mANSIRepresentation->mWrittenObjectID;
 		outEncodingIsMultiByte = false;
-		return;			
+		return;
 	}
 
 	// if not...then create a CID representation and include the chars there. from now one...every time glyphs needs to be added
@@ -109,7 +109,7 @@ void AbstractWrittenFont::AppendGlyphs(
 	outEncodingIsMultiByte = true;
 }
 
-bool AbstractWrittenFont::CanEncodeWithIncludedChars(WrittenFontRepresentation* inRepresentation, 
+bool AbstractWrittenFont::CanEncodeWithIncludedChars(WrittenFontRepresentation* inRepresentation,
 													 const GlyphUnicodeMappingList& inGlyphsList,
 													 UShortList& outEncodedCharacters)
 {
@@ -166,14 +166,14 @@ void AbstractWrittenFont::AddToCIDRepresentation(const GlyphUnicodeMappingList& 
 CFF/Type 1:
 1. Can encode as long as there is enough room in the encoding array [256 max, not including the required 0 place for notdef.]
 2. While encoding try using the WinAnsiEncoding encoding if possible for the relevant char-code value.
-Meaning, translate the Unicode value to the matching WinAnsiEncoding value. 
+Meaning, translate the Unicode value to the matching WinAnsiEncoding value.
 If no matching value found (character is not in win ANSI) use some value, giving preference to non-WinAnsiEncoding value.
 3. While writing the font description dictionaries use the FONTs glyph names to write the differences array.
-It should have something. Otherwise trace for now. I might have to write my own glyph mapping method to 
+It should have something. Otherwise trace for now. I might have to write my own glyph mapping method to
 give the font intended glyph names (as oppose as using FreeTypes, which might not be complete. Should check the bloody code)
 
 True Type:
-1. Can encoding if/f all text codes are available through WinAnsiEncoding.  
+1. Can encoding if/f all text codes are available through WinAnsiEncoding.
 [maybe should also make sure that the font has the relevant cmaps?! Or maybe I'm just assuming that...]
 2. While encoding use WinAnsiEncoding values, of course. This will necasserily work
 3. While writing the font description simply write the WinAnsiEncoding glyph name, and pray.
@@ -218,7 +218,7 @@ void AbstractWrittenFont::AppendGlyphs(	const GlyphUnicodeMappingListList& inGly
 
 		outFontObjectID = mANSIRepresentation->mWrittenObjectID;
 		outEncodingIsMultiByte = false;
-		return;			
+		return;
 	}
 
 	mCIDRepresentation = new WrittenFontRepresentation();
@@ -227,7 +227,7 @@ void AbstractWrittenFont::AppendGlyphs(	const GlyphUnicodeMappingListList& inGly
 	outEncodingIsMultiByte = true;
 }
 
-bool AbstractWrittenFont::CanEncodeWithIncludedChars(	WrittenFontRepresentation* inRepresentation, 
+bool AbstractWrittenFont::CanEncodeWithIncludedChars(	WrittenFontRepresentation* inRepresentation,
 														const GlyphUnicodeMappingListList& inGlyphsList,
 														UShortListList& outEncodedCharacters)
 {
@@ -349,7 +349,7 @@ EStatusCode AbstractWrittenFont::WriteWrittenFontState(WrittenFontRepresentation
 {
 	ObjectIDTypeList objectIDs;
 
-	inStateWriter->StartNewIndirectObject(inObjectID);	
+	inStateWriter->StartNewIndirectObject(inObjectID);
 	DictionaryContext* writtenFontObject = inStateWriter->StartDictionary();
 
 	writtenFontObject->WriteKey("Type");
@@ -363,7 +363,7 @@ EStatusCode AbstractWrittenFont::WriteWrittenFontState(WrittenFontRepresentation
 	for(; it != inRepresentation->mGlyphIDToEncodedChar.end();++it)
 	{
 		ObjectIDType objectID = inStateWriter->GetInDirectObjectsRegistry().AllocateNewObjectID();
-		
+
 		inStateWriter->WriteInteger(it->first);
 		inStateWriter->WriteIndirectObjectReference(objectID);
 		objectIDs.push_back(objectID);
@@ -392,7 +392,7 @@ void AbstractWrittenFont::WriteGlyphEncodingInfoState(ObjectsContext* inStateWri
 													  ObjectIDType inObjectID,
 													  const GlyphEncodingInfo& inGlyphEncodingInfo)
 {
-	inStateWriter->StartNewIndirectObject(inObjectID);	
+	inStateWriter->StartNewIndirectObject(inObjectID);
 	DictionaryContext* glyphEncodingInfoObject = inStateWriter->StartDictionary();
 
 	glyphEncodingInfoObject->WriteKey("Type");
@@ -403,7 +403,7 @@ void AbstractWrittenFont::WriteGlyphEncodingInfoState(ObjectsContext* inStateWri
 
 	glyphEncodingInfoObject->WriteKey("mUnicodeCharacters");
 	inStateWriter->StartArray();
-	
+
 	ULongVector::const_iterator it = inGlyphEncodingInfo.mUnicodeCharacters.begin();
 	for(; it != inGlyphEncodingInfo.mUnicodeCharacters.end();++it)
 		inStateWriter->WriteInteger(*it);
@@ -412,7 +412,7 @@ void AbstractWrittenFont::WriteGlyphEncodingInfoState(ObjectsContext* inStateWri
 
 	inStateWriter->EndDictionary(glyphEncodingInfoObject);
 	inStateWriter->EndIndirectObject();
-	
+
 }
 
 EStatusCode AbstractWrittenFont::ReadState(PDFParser* inStateReader,PDFDictionary* inState)
@@ -458,7 +458,7 @@ void AbstractWrittenFont::ReadWrittenFontState(PDFParser* inStateReader,PDFDicti
 		it.MoveNext();
 		secondState = it.GetItem();
 
-		GlyphEncodingInfo glyphEncodingInfo;		
+		GlyphEncodingInfo glyphEncodingInfo;
 		ReadGlyphEncodingInfoState(inStateReader,secondState->mObjectID,glyphEncodingInfo);
 		inRepresentation->mGlyphIDToEncodedChar.insert(UIntToGlyphEncodingInfoMap::value_type((unsigned int)firstState->GetValue(),glyphEncodingInfo));
 	}
@@ -470,7 +470,7 @@ void AbstractWrittenFont::ReadWrittenFontState(PDFParser* inStateReader,PDFDicti
 void AbstractWrittenFont::ReadGlyphEncodingInfoState(PDFParser* inStateReader,ObjectIDType inObjectID,GlyphEncodingInfo& inGlyphEncodingInfo)
 {
 	PDFObjectCastPtr<PDFDictionary> glyphEncodingInfoState(inStateReader->ParseNewObject(inObjectID));
-	
+
 	PDFObjectCastPtr<PDFInteger> encodedCharacterState(glyphEncodingInfoState->QueryDirectObject("mEncodedCharacter"));
 	inGlyphEncodingInfo.mEncodedCharacter = (unsigned short)encodedCharacterState->GetValue();
 

@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "ShutDownRestartTest.h"
 #include "PDFWriter.h"
@@ -43,7 +43,7 @@ ShutDownRestartTest::~ShutDownRestartTest(void)
 
 EStatusCode ShutDownRestartTest::Run()
 {
-	EStatusCode status; 
+	EStatusCode status;
 
 	do
 	{
@@ -54,7 +54,7 @@ EStatusCode ShutDownRestartTest::Run()
 			{
 				cout<<"failed to start PDF\n";
 				break;
-			}	
+			}
 
 			PDFPage* page = new PDFPage();
 			page->SetMediaBox(PDFRectangle(0,0,595,842));
@@ -118,7 +118,7 @@ EStatusCode ShutDownRestartTest::Run()
 
 			// continue even if failed...want to see how it looks like
 			contentContext->ET();
-				
+
 			status = pdfWriterA.EndPageContentContext(contentContext);
 			if(status != PDFHummus::eSuccess)
 			{
@@ -149,7 +149,7 @@ EStatusCode ShutDownRestartTest::Run()
 			{
 				cout<<"failed to restart library\n";
 				break;
-			}	
+			}
 
 			PDFPage* page = new PDFPage();
 			page->SetMediaBox(PDFRectangle(0,0,595,842));

@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 
 #include "PDFWriter.h"
@@ -63,7 +63,7 @@ EStatusCode PDFWriter::StartPDF(
 
 	mObjectsContext.SetOutputStream(mOutputFile.GetOutputStream());
 	mDocumentContext.SetOutputFileInformation(&mOutputFile);
-	
+
 	return mDocumentContext.WriteHeader(inPDFVersion);
 }
 
@@ -173,32 +173,32 @@ EStatusCode PDFWriter::EndFormXObjectAndRelease(PDFFormXObject* inFormXObject)
 
 PDFImageXObject* PDFWriter::CreateImageXObjectFromJPGFile(const string& inJPGFilePath)
 {
-	return mDocumentContext.CreateImageXObjectFromJPGFile(inJPGFilePath); 
+	return mDocumentContext.CreateImageXObjectFromJPGFile(inJPGFilePath);
 }
 
 PDFFormXObject* PDFWriter::CreateFormXObjectFromJPGFile(const string& inJPGFilePath)
 {
-	return mDocumentContext.CreateFormXObjectFromJPGFile(inJPGFilePath); 
+	return mDocumentContext.CreateFormXObjectFromJPGFile(inJPGFilePath);
 }
 
 PDFFormXObject* PDFWriter::CreateFormXObjectFromTIFFFile(const string& inTIFFFilePath,const TIFFUsageParameters& inTIFFUsageParameters)
 {
-	return mDocumentContext.CreateFormXObjectFromTIFFFile(inTIFFFilePath,inTIFFUsageParameters); 
+	return mDocumentContext.CreateFormXObjectFromTIFFFile(inTIFFFilePath,inTIFFUsageParameters);
 }
 
 PDFImageXObject* PDFWriter::CreateImageXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inImageXObjectID)
 {
-	return mDocumentContext.CreateImageXObjectFromJPGFile(inJPGFilePath,inImageXObjectID); 
+	return mDocumentContext.CreateImageXObjectFromJPGFile(inJPGFilePath,inImageXObjectID);
 }
 
 PDFFormXObject* PDFWriter::CreateFormXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inImageXObjectID)
 {
-	return mDocumentContext.CreateFormXObjectFromJPGFile(inJPGFilePath,inImageXObjectID); 
+	return mDocumentContext.CreateFormXObjectFromJPGFile(inJPGFilePath,inImageXObjectID);
 }
 
 PDFFormXObject* PDFWriter::CreateFormXObjectFromTIFFFile(const string& inTIFFFilePath,ObjectIDType inFormXObjectID, const TIFFUsageParameters& inTIFFUsageParameters)
 {
-	return mDocumentContext.CreateFormXObjectFromTIFFFile(inTIFFFilePath,inFormXObjectID,inTIFFUsageParameters); 
+	return mDocumentContext.CreateFormXObjectFromTIFFFile(inTIFFFilePath,inFormXObjectID,inTIFFUsageParameters);
 }
 
 PDFUsedFont* PDFWriter::GetFontForFile(const string& inFontFilePath)
@@ -312,7 +312,7 @@ EStatusCode PDFWriter::ContinuePDF(const string& inOutputFilePath,
 								   const string& inStateFilePath,
 								   const LogConfiguration& inLogConfiguration)
 {
-	
+
 
 	SetupLog(inLogConfiguration);
 	EStatusCode status = mOutputFile.OpenFile(inOutputFilePath,true);
@@ -406,7 +406,7 @@ EStatusCode PDFWriter::StartPDFForStream(IByteWriterWithPosition* inOutputStream
 	SetupObjectsContext(inPDFCreationSettings);
 
 	mObjectsContext.SetOutputStream(inOutputStream);
-	
+
 	return mDocumentContext.WriteHeader(inPDFVersion);
 }
 EStatusCode PDFWriter::EndPDFForStream()
@@ -487,6 +487,6 @@ EStatusCode PDFWriter::MergePDFPagesToPage(	PDFPage* inPage,
 
 PDFDocumentCopyingContext* PDFWriter::CreatePDFCopyingContext(IByteReaderWithPosition* inPDFStream)
 {
-	return mDocumentContext.CreatePDFCopyingContext(inPDFStream);	
+	return mDocumentContext.CreatePDFCopyingContext(inPDFStream);
 }
 

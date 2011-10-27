@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -26,7 +26,7 @@
 /*
 	This small template function is only intended to be used for automatic casting of retrieved PDFObjects to their respective actual
 	objects...and not for anything else.
-*/ 
+*/
 
 template <class T>
 T* PDFObjectCast(PDFObject* inOriginal)

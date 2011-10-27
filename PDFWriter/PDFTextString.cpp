@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "PDFTextString.h"
 #include "OutputStringBufferStream.h"
@@ -75,11 +75,11 @@ void PDFTextString::ConvertFromUTF8(const string& inStringToConvert)
 	if(!ConvertUTF8ToPDFDocEncoding(inStringToConvert,aStringStream))
 	{
 		// if no DOC encoding then convert to utf16BE (with BOM)
-		
+
 		UnicodeString unicodeString;
 		unicodeString.FromUTF8(inStringToConvert);
 		EStatusCodeAndString result = unicodeString.ToUTF16BE(true);
-		
+
 		mTextString = result.second;
 
 	}
@@ -96,7 +96,7 @@ bool PDFTextString::ConvertUTF8ToPDFDocEncoding(const string& inStringToConvert,
 	bool PDFEncodingOK = true;
 
 	UnicodeString unicodeString;
-	
+
 	unicodeString.FromUTF8(inStringToConvert);
 
 	ULongList::const_iterator it = unicodeString.GetUnicodeList().begin();

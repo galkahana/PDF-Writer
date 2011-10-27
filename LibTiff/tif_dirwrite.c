@@ -4,23 +4,23 @@
  * Copyright (c) 1988-1997 Sam Leffler
  * Copyright (c) 1991-1997 Silicon Graphics, Inc.
  *
- * Permission to use, copy, modify, distribute, and sell this software and 
+ * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation for any purpose is hereby granted without fee, provided
  * that (i) the above copyright notices and this permission notice appear in
  * all copies of the software and related documentation, and (ii) the names of
  * Sam Leffler and Silicon Graphics may not be used in any advertising or
  * publicity relating to the software without the specific, prior written
  * permission of Sam Leffler and Silicon Graphics.
- * 
- * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND, 
- * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY 
- * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  
- * 
+ *
+ * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
+ * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+ *
  * IN NO EVENT SHALL SAM LEFFLER OR SILICON GRAPHICS BE LIABLE FOR
  * ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND,
  * OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
- * WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF 
- * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE 
+ * WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF
+ * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
 
@@ -214,7 +214,7 @@ _TIFFWriteDirectory(TIFF* tif, int done)
 			    TIFFTAG_TILEOFFSETS : TIFFTAG_STRIPOFFSETS;
 			if (tag != fip->field_tag)
 				continue;
-			
+
 			dir->tdir_tag = (uint16) tag;
 			dir->tdir_type = (uint16) TIFF_LONG;
 			dir->tdir_count = (uint32) td->td_nstrips;
@@ -232,7 +232,7 @@ _TIFFWriteDirectory(TIFF* tif, int done)
 			    TIFFTAG_TILEBYTECOUNTS : TIFFTAG_STRIPBYTECOUNTS;
 			if (tag != fip->field_tag)
 				continue;
-			
+
 			dir->tdir_tag = (uint16) tag;
 			dir->tdir_type = (uint16) TIFF_LONG;
 			dir->tdir_count = (uint32) td->td_nstrips;
@@ -346,7 +346,7 @@ _TIFFWriteDirectory(TIFF* tif, int done)
 			break;
 		}
 		dir++;
-                
+
 		if( fip->field_bit != FIELD_CUSTOM )
 			ResetFieldBit(fields, fip->field_bit);
 	}
@@ -421,7 +421,7 @@ TIFFWriteDirectory(TIFF* tif)
  * but leaves all data structures in memory so that it can be
  * written again.  This will make a partially written TIFF file
  * readable before it is successfully completed/closed.
- */ 
+ */
 int
 TIFFCheckpointDirectory(TIFF* tif)
 {
@@ -503,7 +503,7 @@ _TIFFWriteCustomDirectory(TIFF* tif, toff_t *pdiroff)
 		}
 		else if (!FieldSet(fields, fip->field_bit))
 			continue;
-                
+
 		if( fip->field_bit != FIELD_CUSTOM )
 			ResetFieldBit(fields, fip->field_bit);
 	}
@@ -573,7 +573,7 @@ TIFFWriteNormalTag(TIFF* tif, TIFFDirEntry* dir, const TIFFFieldInfo* fip)
 	dir->tdir_tag = (uint16) fip->field_tag;
 	dir->tdir_type = (uint16) fip->field_type;
 	dir->tdir_count = wc;
-	
+
 	switch (fip->field_type) {
 	case TIFF_SHORT:
 	case TIFF_SSHORT:
@@ -709,7 +709,7 @@ TIFFWriteNormalTag(TIFF* tif, TIFFDirEntry* dir, const TIFFFieldInfo* fip)
 		}
 		break;
 	case TIFF_ASCII:
-		{ 
+		{
                     char* cp;
                     if (fip->field_passcount)
                     {
@@ -728,7 +728,7 @@ TIFFWriteNormalTag(TIFF* tif, TIFFDirEntry* dir, const TIFFFieldInfo* fip)
 		break;
 
         case TIFF_BYTE:
-        case TIFF_SBYTE:          
+        case TIFF_SBYTE:
 		if (fip->field_passcount) {
 			char* cp;
 			if (wc == (uint16) TIFF_VARIABLE2) {
@@ -763,7 +763,7 @@ TIFFWriteNormalTag(TIFF* tif, TIFFDirEntry* dir, const TIFFFieldInfo* fip)
 		  } else if (wc == (unsigned short) TIFF_VARIABLE2) {
 			TIFFGetField(tif, fip->field_tag, &wc2, &cp);
 			dir->tdir_count = wc2;
-		  } else 
+		  } else
 			TIFFGetField(tif, fip->field_tag, &cp);
 		  if (!TIFFWriteByteArray(tif, dir, cp))
 			return (0);
@@ -833,7 +833,7 @@ TIFFWritePerSampleShorts(TIFF* tif, ttag_t tag, TIFFDirEntry* dir)
 	TIFFGetField(tif, tag, &v);
 	for (i = 0; i < samples; i++)
 		w[i] = v;
-	
+
 	dir->tdir_tag = (uint16) tag;
 	dir->tdir_type = (uint16) TIFF_SHORT;
 	dir->tdir_count = samples;
@@ -1077,7 +1077,7 @@ TIFFWriteAnyArray(TIFF* tif,
 
 	switch (type) {
 	case TIFF_BYTE:
-		{ 
+		{
 			uint8* bp = (uint8*) w;
 			for (i = 0; i < (int) n; i++)
 				bp[i] = (uint8) v[i];
@@ -1086,7 +1086,7 @@ TIFFWriteAnyArray(TIFF* tif,
 		}
 		break;
 	case TIFF_SBYTE:
-		{ 
+		{
 			int8* bp = (int8*) w;
 			for (i = 0; i < (int) n; i++)
 				bp[i] = (int8) v[i];
@@ -1104,7 +1104,7 @@ TIFFWriteAnyArray(TIFF* tif,
 		}
 		break;
 	case TIFF_SSHORT:
-		{ 
+		{
 			int16* bp = (int16*) w;
 			for (i = 0; i < (int) n; i++)
 				bp[i] = (int16) v[i];
@@ -1131,7 +1131,7 @@ TIFFWriteAnyArray(TIFF* tif,
 		}
 		break;
 	case TIFF_FLOAT:
-		{ 
+		{
 			float* bp = (float*) w;
 			for (i = 0; i < (int) n; i++)
 				bp[i] = (float) v[i];
@@ -1238,11 +1238,11 @@ TIFFWriteData(TIFF* tif, TIFFDirEntry* dir, char* cp)
 /*
  * Similar to TIFFWriteDirectory(), but if the directory has already
  * been written once, it is relocated to the end of the file, in case it
- * has changed in size.  Note that this will result in the loss of the 
- * previously used directory space. 
- */ 
+ * has changed in size.  Note that this will result in the loss of the
+ * previously used directory space.
+ */
 
-int 
+int
 TIFFRewriteDirectory( TIFF *tif )
 {
     static const char module[] = "TIFFRewriteDirectory";
@@ -1255,17 +1255,17 @@ TIFFRewriteDirectory( TIFF *tif )
     ** Find and zero the pointer to this directory, so that TIFFLinkDirectory
     ** will cause it to be added after this directories current pre-link.
     */
-    
+
     /* Is it the first directory in the file? */
-    if (tif->tif_header.tiff_diroff == tif->tif_diroff) 
+    if (tif->tif_header.tiff_diroff == tif->tif_diroff)
     {
         tif->tif_header.tiff_diroff = 0;
         tif->tif_diroff = 0;
 
         TIFFSeekFile(tif, (toff_t)(TIFF_MAGIC_SIZE+TIFF_VERSION_SIZE),
 		     SEEK_SET);
-        if (!WriteOK(tif, &(tif->tif_header.tiff_diroff), 
-                     sizeof (tif->tif_diroff))) 
+        if (!WriteOK(tif, &(tif->tif_header.tiff_diroff),
+                     sizeof (tif->tif_diroff)))
         {
 			TIFFErrorExt(tif->tif_clientdata, tif->tif_name,
 				     "Error updating TIFF header");

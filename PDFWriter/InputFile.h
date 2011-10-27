@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -40,7 +40,7 @@ public:
 
 	IByteReaderWithPosition* GetInputStream(); // returns buffered input stream
 	const string& GetFilePath();
-	
+
 	LongFilePositionType GetFileSize();
 
 private:

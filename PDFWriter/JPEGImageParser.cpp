@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "JPEGImageParser.h"
 #include "JPEGImageInformation.h"
@@ -108,7 +108,7 @@ EStatusCode JPEGImageParser::Parse(IByteReaderWithPosition* inImageStream,JPEGIm
 				case scAPP13TagID:
 					PhotoshopMarkerNotFound = false;
 					status = ReadPhotoshopData(outImageInformation);
-					break;				
+					break;
 				case scAPP1TagID:
 					if(ExifMarkerNotFound)
 					{
@@ -131,8 +131,8 @@ EStatusCode JPEGImageParser::Parse(IByteReaderWithPosition* inImageStream,JPEGIm
 			break;
 		}
 		else
-			status = PDFHummus::eSuccess; 
-	} 
+			status = PDFHummus::eSuccess;
+	}
 	while(false);
 
 	return status;
@@ -141,13 +141,13 @@ EStatusCode JPEGImageParser::Parse(IByteReaderWithPosition* inImageStream,JPEGIm
 EStatusCode JPEGImageParser::ReadJPEGID()
 {
 	EStatusCode status = ReadStreamToBuffer(2);
-	
+
 	if (status != PDFHummus::eSuccess)
 		return status;
-	
+
 	if (memcmp(mReadBuffer, scJPEGID, 2) != 0)
 		return PDFHummus::eFailure;
-	
+
 	return PDFHummus::eSuccess;
 }
 
@@ -167,7 +167,7 @@ EStatusCode JPEGImageParser::ReadJpegTag(unsigned int& outTagID)
 	{
 		if(scTagID == (unsigned int)mReadBuffer[0])
 			outTagID = (unsigned int)mReadBuffer[1];
-		else 
+		else
 			status = PDFHummus::eFailure;
 	}
 	return status;
@@ -301,22 +301,22 @@ EStatusCode JPEGImageParser::ReadExifData(JPEGImageInformation& outImageInformat
 	bool isBigEndian;
 	unsigned long xResolutionOffset = 0;
 	unsigned long yResolutionOffset = 0;
-	unsigned int resolutionUnitValue = 0; 
+	unsigned int resolutionUnitValue = 0;
 
-	do 
+	do
 	{
 		//read Exif Tag size
 		status = ReadIntValue(toSkip);
 		if (status != PDFHummus::eSuccess)
 			break;
-		
+
 		toSkip -= 2;
 
 		//read Exif ID
 		status = ReadExifID();
 		if (status != PDFHummus::eSuccess)
 			break;
-		
+
 		toSkip -= 6;
 
 		//read encoding
@@ -327,11 +327,11 @@ EStatusCode JPEGImageParser::ReadExifData(JPEGImageInformation& outImageInformat
 		toSkip -= 2;
 
 		//skip 0x002a
-		SkipStream(2);		
+		SkipStream(2);
 		toSkip -= 2;
 
 		//read IFD0 offset
-		status = ReadLongValue(ifdOffset, !isBigEndian);	
+		status = ReadLongValue(ifdOffset, !isBigEndian);
 		if (status != PDFHummus::eSuccess)
 			break;
 
@@ -349,7 +349,7 @@ EStatusCode JPEGImageParser::ReadExifData(JPEGImageInformation& outImageInformat
 		toSkip -= 2;
 
 		for (unsigned int i = 0; i < ifdDirectorySize; i++)
-		{			
+		{
 			if (0 != xResolutionOffset && 0 != yResolutionOffset && 0 != resolutionUnitValue)
 			{
 				SkipStream(12 * (ifdDirectorySize - i));
@@ -366,15 +366,15 @@ EStatusCode JPEGImageParser::ReadExifData(JPEGImageInformation& outImageInformat
 			switch (tagID)
 			{
 				case scAPP1xResolutionTagID:
-					SkipStream(6);					
+					SkipStream(6);
 					status = ReadLongValue(xResolutionOffset, !isBigEndian);
 					break;
 				case scAPP1yResolutionTagID:
-					SkipStream(6);		
+					SkipStream(6);
 					status = ReadLongValue(yResolutionOffset, !isBigEndian);
 					break;
 				case scAPP1ResolutionUnitTagID:
-					SkipStream(6);		
+					SkipStream(6);
 					status = ReadIntValue(resolutionUnitValue, !isBigEndian);
 					SkipStream(2);
 					break;
@@ -387,10 +387,10 @@ EStatusCode JPEGImageParser::ReadExifData(JPEGImageInformation& outImageInformat
 			if (status != PDFHummus::eSuccess)
 				break;
 		}
-		
+
 		outImageInformation.ExifInformationExists = true;
-		if (resolutionUnitValue != 0) 
-			outImageInformation.ExifUnit = resolutionUnitValue;		
+		if (resolutionUnitValue != 0)
+			outImageInformation.ExifUnit = resolutionUnitValue;
 		else
 			outImageInformation.ExifUnit = 2;
 
@@ -405,7 +405,7 @@ EStatusCode JPEGImageParser::ReadExifData(JPEGImageInformation& outImageInformat
 		if (PDFHummus::eSuccess == status)
 			SkipStream(toSkip);
 	}
-	while(false);	
+	while(false);
 	return status;
 }
 
@@ -415,7 +415,7 @@ EStatusCode JPEGImageParser::GetResolutionFromExif(
 							   unsigned long inYResolutionOffset,
 							   unsigned long& inoutOffset,
 							   bool inUseLittleEndian)
-{	
+{
 	unsigned long firstOffset = 0, secondOffset = 0;
 	bool xResolutionIsFirst = true;
 	EStatusCode status = PDFHummus::eSuccess;
@@ -428,7 +428,7 @@ EStatusCode JPEGImageParser::GetResolutionFromExif(
 		firstOffset = inXResolutionOffset;
 
 		if (inYResolutionOffset != 0)
-			secondOffset = inYResolutionOffset;	
+			secondOffset = inYResolutionOffset;
 	}
 	else if (inYResolutionOffset != 0)
 	{
@@ -436,7 +436,7 @@ EStatusCode JPEGImageParser::GetResolutionFromExif(
 		xResolutionIsFirst = false;
 
 		if (inXResolutionOffset != 0)
-			secondOffset = inXResolutionOffset;	
+			secondOffset = inXResolutionOffset;
 	}
 
 	do
@@ -448,7 +448,7 @@ EStatusCode JPEGImageParser::GetResolutionFromExif(
 		inoutOffset += (firstOffset - inoutOffset);
 
 		status = ReadRationalValue(
-			xResolutionIsFirst? outImageInformation.ExifXDensity : outImageInformation.ExifYDensity, 
+			xResolutionIsFirst? outImageInformation.ExifXDensity : outImageInformation.ExifYDensity,
 			inUseLittleEndian);
 
 		if (status != PDFHummus::eSuccess)
@@ -463,7 +463,7 @@ EStatusCode JPEGImageParser::GetResolutionFromExif(
 		inoutOffset += (secondOffset - firstOffset - 8);
 
 		status = ReadRationalValue(
-			xResolutionIsFirst? outImageInformation.ExifYDensity : outImageInformation.ExifXDensity, 
+			xResolutionIsFirst? outImageInformation.ExifYDensity : outImageInformation.ExifXDensity,
 			inUseLittleEndian);
 		if (status != PDFHummus::eSuccess)
 			break;
@@ -488,7 +488,7 @@ EStatusCode JPEGImageParser::ReadRationalValue(
 	if (status != PDFHummus::eSuccess)
 		return status;
 
-	outDoubleValue = ((double) numerator) / ((double) denominator); 
+	outDoubleValue = ((double) numerator) / ((double) denominator);
 	return status;
 }
 
@@ -505,13 +505,13 @@ EStatusCode JPEGImageParser::ReadExifID()
 }
 
 EStatusCode JPEGImageParser::IsBigEndianExif(bool& outIsBigEndian)
-{	
+{
 	unsigned int encodingType;
 	EStatusCode status = ReadIntValue(encodingType);
-		
+
 	if (status != PDFHummus::eSuccess)
 		return status;
-	
+
 	if (encodingType == scAPP1BigEndian)
 		outIsBigEndian = true;
 	else if (encodingType == scAPP1LittleEndian)
@@ -537,7 +537,7 @@ EStatusCode JPEGImageParser::SkipTillChar(IOBasicTypes::Byte inSkipUntilValue,un
 {
 	EStatusCode status = PDFHummus::eSuccess;
 	bool charNotFound = true;
-	
+
 	while(charNotFound && (PDFHummus::eSuccess == status) && (refSkipLimit > 0))
 	{
 		status = ReadStreamToBuffer(1);

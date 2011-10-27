@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "WrittenFontTrueType.h"
 #include "WinAnsiEncoding.h"
@@ -42,7 +42,7 @@ WrittenFontTrueType::~WrittenFontTrueType(void)
 
 /*
 here's what i'm deciding on:
-1. Can encoding if/f all text codes are available through WinAnsiEncoding.  
+1. Can encoding if/f all text codes are available through WinAnsiEncoding.
 [maybe should also make sure that the font has the relevant cmaps?! Or maybe I'm just assuming that...]
 2. While encoding use WinAnsiEncoding values, of course. This will necasserily work
 3. While writing the font description simply write the WinAnsiEncoding glyph name, and pray.*/
@@ -57,7 +57,7 @@ bool WrittenFontTrueType::AddToANSIRepresentation(	const GlyphUnicodeMappingList
 	UShortList candidates;
 	BoolAndByte encodingResult(true,0);
 	WinAnsiEncoding winAnsiEncoding;
-	GlyphUnicodeMappingList::const_iterator it = inGlyphsList.begin(); 
+	GlyphUnicodeMappingList::const_iterator it = inGlyphsList.begin();
 
 	for(; it != inGlyphsList.end() && encodingResult.first; ++it)
 	{
@@ -140,8 +140,8 @@ bool WrittenFontTrueType::AddToANSIRepresentation(	const GlyphUnicodeMappingList
 	UShortList candidates;
 	BoolAndByte encodingResult(true,0);
 	WinAnsiEncoding winAnsiEncoding;
-	GlyphUnicodeMappingListList::const_iterator itList = inGlyphsList.begin(); 
-	GlyphUnicodeMappingList::const_iterator it; 
+	GlyphUnicodeMappingListList::const_iterator itList = inGlyphsList.begin();
+	GlyphUnicodeMappingList::const_iterator it;
 
 	for(; itList != inGlyphsList.end() && encodingResult.first; ++itList)
 	{
@@ -194,7 +194,7 @@ bool WrittenFontTrueType::AddToANSIRepresentation(	const GlyphUnicodeMappingList
 		outEncodedCharacters = candidatesList;
 	}
 
-	return encodingResult.first;	
+	return encodingResult.first;
 }
 
 EStatusCode WrittenFontTrueType::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)

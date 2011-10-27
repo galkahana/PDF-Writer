@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "PDFParserTest.h"
 #include "PDFParser.h"
@@ -142,7 +142,7 @@ EStatusCode PDFParserTest::IterateObjectTypes(PDFObject* inObject,PDFParser& inP
 			inOutput->Write((const Byte*)scParsedAlready,strlen(scParsedAlready));
 			return PDFHummus::eSuccess;
 		}
-		
+
 	}
 	else if(inObject->GetType() == ePDFObjectArray)
 	{
@@ -182,12 +182,12 @@ EStatusCode PDFParserTest::IterateObjectTypes(PDFObject* inObject,PDFParser& inP
 		PDFObjectCastPtr<PDFDictionary> aDictionary(((PDFStreamInput*)inObject)->QueryStreamDictionary());
 		return IterateObjectTypes(aDictionary.GetPtr(),inParser,inOutput);
 	}
-	else 
+	else
 	{
 		primitivesWriter.WriteKeyword(scPDFObjectTypeLabel[inObject->GetType()]);
 		return PDFHummus::eSuccess;
 	}
-	
+
 }
 
 ADD_CATEGORIZED_TEST(PDFParserTest,"PDFEmbedding")

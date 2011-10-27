@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "PageTree.h"
 #include "IndirectObjectsReferenceRegistry.h"
@@ -105,7 +105,7 @@ PageTree* PageTree::CreateBrotherOrCousin(IndirectObjectsReferenceRegistry& inOb
 		{
 			mParent = new PageTree(inObjectsRegistry);
 			mParent->AddNodeToTree(this,inObjectsRegistry); // will surely succeed - first one
-		}		
+		}
 		PageTree* brotherOrCousin = mParent->CreateBrotherOrCousin(inObjectsRegistry);
 		PageTree* nephew = brotherOrCousin->CreateBrotherOrCousin(inObjectsRegistry); // will surely create brother - first one
 		return nephew;

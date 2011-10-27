@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "WrittenFontCFF.h"
 #include "Trace.h"
@@ -37,9 +37,9 @@ using namespace PDFHummus;
 WrittenFontCFF::WrittenFontCFF(ObjectsContext* inObjectsContext,bool inIsCID):AbstractWrittenFont(inObjectsContext)
 {
 	mAvailablePositionsCount = 255;
-	mFreeList.push_back(UCharAndUChar(1,255)); 
+	mFreeList.push_back(UCharAndUChar(1,255));
 	// 1st place is reserved for .notdef/0 glyph index. we'll use 0s in the array in all other places as indication for avialability
-	for(int i=0;i<256;++i) 
+	for(int i=0;i<256;++i)
 		mAssignedPositions[i] = 0;
 	mIsCID = inIsCID;
 }
@@ -99,7 +99,7 @@ unsigned short WrittenFontCFF::EncodeGlyph(unsigned int inGlyph,const ULongVecto
 			encoding = AllocateFromFreeList(inGlyph);
 		mAssignedPositions[encoding] = inGlyph;
 		it = mANSIRepresentation->mGlyphIDToEncodedChar.insert(
-				UIntToGlyphEncodingInfoMap::value_type(inGlyph,GlyphEncodingInfo(encoding,inCharacters))).first;			
+				UIntToGlyphEncodingInfoMap::value_type(inGlyph,GlyphEncodingInfo(encoding,inCharacters))).first;
 		--mAvailablePositionsCount;
 	}
 	return it->second.mEncodedCharacter;
@@ -143,7 +143,7 @@ unsigned char WrittenFontCFF::AllocateFromFreeList(unsigned int inGlyph)
 	// just allocate the first available position
 	UCharAndUCharList::iterator it=mFreeList.begin();
 	unsigned char result = it->first;
-	
+
 	if(it->first == it->second)
 		mFreeList.erase(it);
 	else
@@ -300,7 +300,7 @@ EStatusCode WrittenFontCFF::ReadState(PDFParser* inStateReader,ObjectIDType inOb
 	PDFObjectCastPtr<PDFArray> assignedPositionsState(writtenFontState->QueryDirectObject("mAssignedPositions"));
 	it =  assignedPositionsState->GetIterator();
 	int i=0;
-	
+
 	PDFObjectCastPtr<PDFInteger> assignedPositionItem;
 	while(it.MoveNext())
 	{

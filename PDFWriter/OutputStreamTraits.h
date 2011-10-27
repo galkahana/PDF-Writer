@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -35,8 +35,8 @@ public:
 	~OutputStreamTraits(void);
 
 
-	PDFHummus::EStatusCode CopyToOutputStream(IByteReader* inInputStream);	
-	PDFHummus::EStatusCode CopyToOutputStream(IByteReader* inInputStream,LongBufferSizeType inLength);	
+	PDFHummus::EStatusCode CopyToOutputStream(IByteReader* inInputStream);
+	PDFHummus::EStatusCode CopyToOutputStream(IByteReader* inInputStream,LongBufferSizeType inLength);
 
 private:
 

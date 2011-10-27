@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "TrueTypePrimitiveWriter.h"
 #include "OutputStringBufferStream.h"
@@ -52,7 +52,7 @@ EStatusCode TrueTypePrimitiveWriter::WriteBYTE(Byte inValue)
 
 	if(PDFHummus::eFailure == status)
 		mInternalState = PDFHummus::eFailure;
-	return status;	
+	return status;
 }
 
 EStatusCode TrueTypePrimitiveWriter::WriteULONG(unsigned long inValue)
@@ -78,10 +78,10 @@ EStatusCode TrueTypePrimitiveWriter::WriteULONG(unsigned long inValue)
 }
 
 EStatusCode TrueTypePrimitiveWriter::WriteUSHORT(unsigned short inValue)
-{	
+{
 	Byte byte1 = (inValue>>8) & 0xff;
 	Byte byte2 = inValue & 0xff;
-	
+
 	if(WriteBYTE(byte1) != PDFHummus::eSuccess)
 		return PDFHummus::eFailure;
 

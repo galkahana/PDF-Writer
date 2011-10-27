@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -57,17 +57,17 @@ private:
 	ObjectIDType mAnsiRepresentationObjectStateID;
 
 
-	bool CanEncodeWithIncludedChars(WrittenFontRepresentation* inRepresentation, 
+	bool CanEncodeWithIncludedChars(WrittenFontRepresentation* inRepresentation,
 									const GlyphUnicodeMappingList& inGlyphsList,
 									UShortList& outEncodedCharacters);
-	bool CanEncodeWithIncludedChars(WrittenFontRepresentation* inRepresentation, 
+	bool CanEncodeWithIncludedChars(WrittenFontRepresentation* inRepresentation,
 									const GlyphUnicodeMappingListList& inGlyphsList,
 									UShortListList& outEncodedCharacters);
 
 	void AddToCIDRepresentation(const GlyphUnicodeMappingList& inGlyphsList,UShortList& outEncodedCharacters);
 	void AddToCIDRepresentation(const GlyphUnicodeMappingListList& inGlyphsList,UShortListList& outEncodedCharacters);
-	
-	// Aha! This method remains virtual for sub implementations to 
+
+	// Aha! This method remains virtual for sub implementations to
 	// override. Adding to an ANSI representation is dependent on the output format,
 	// where True Type has some different ruling from OpenType(CFF)/Type1
 	virtual bool AddToANSIRepresentation(

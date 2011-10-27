@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 #include "IType1InterpreterImplementation.h"
@@ -44,7 +44,7 @@ private:
 	PDFHummus::EStatusCode InterpretNumber(Byte inBuffer,InputCharStringDecodeStream* inCharStringToIntepret);
 	void ClearStack();
 	PDFHummus::EStatusCode DefaultCallOtherSubr();
-	
+
 	PDFHummus::EStatusCode InterpretHStem();
 	PDFHummus::EStatusCode InterpretVStem();
 	PDFHummus::EStatusCode InterpretVMoveto();

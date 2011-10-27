@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -52,7 +52,7 @@ public:
 
 	// second overload - type 1, to allow passing pfm file path. do not bother
 	// if you don't have a PFM file. no i don't care about the godamn AFM file. just the PFM.
-	// if you don't have a PFM i'll manage. again - i don't need the @#$@#$ AFM file. 
+	// if you don't have a PFM i'll manage. again - i don't need the @#$@#$ AFM file.
 	// you see. i need to know if the font is serif, script 'n such. AFM - even if there
 	// does not have that kind of info. so @#$@#$ off.
 	// for any case, i'll check the file extension, and only do something about it if it has a pfm extension
@@ -110,9 +110,9 @@ private:
 	string mFontFilePath;
 	bool mDoesOwn;
 
-	BoolAndFTShort GetCapHeightInternal(); 
-	BoolAndFTShort GetxHeightInternal(); 
-	FT_UShort GetStemVInternal(); 
+	BoolAndFTShort GetCapHeightInternal();
+	BoolAndFTShort GetxHeightInternal();
+	FT_UShort GetStemVInternal();
 
 
 	string GetExtension(const string& inFilePath);

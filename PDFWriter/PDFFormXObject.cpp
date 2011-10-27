@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "PDFFormXObject.h"
 #include "PDFStream.h"
@@ -28,7 +28,7 @@ PDFFormXObject::PDFFormXObject(ObjectIDType inFormXObjectID,PDFStream* inXObject
 	mXObjectID = inFormXObjectID;
 	mResourcesDictionaryID = inFormXObjectResourcesDictionaryID;
 	mContentStream = inXObjectStream;
-	mContentContext = new XObjectContentContext(this);	
+	mContentContext = new XObjectContentContext(this);
 }
 
 PDFFormXObject::~PDFFormXObject(void)

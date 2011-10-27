@@ -77,7 +77,7 @@ FT_BEGIN_HEADER
     get_mm_, set_mm_design_, set_mm_blend_, get_mm_var_, set_var_design_     \
   };
 
-#else /* FT_CONFIG_OPTION_PIC */ 
+#else /* FT_CONFIG_OPTION_PIC */
 
 #define FT_DEFINE_SERVICE_MULTIMASTERSREC(class_, get_mm_, set_mm_design_,   \
         set_mm_blend_, get_mm_var_, set_var_design_)                         \
@@ -89,9 +89,9 @@ FT_BEGIN_HEADER
     clazz->set_mm_blend = set_mm_blend_;                                     \
     clazz->get_mm_var = get_mm_var_;                                         \
     clazz->set_var_design = set_var_design_;                                 \
-  } 
+  }
 
-#endif /* FT_CONFIG_OPTION_PIC */ 
+#endif /* FT_CONFIG_OPTION_PIC */
 
   /* */
 

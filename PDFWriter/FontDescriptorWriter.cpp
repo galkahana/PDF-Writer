@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "FontDescriptorWriter.h"
 #include "FreeTypeFaceWrapper.h"
@@ -58,7 +58,7 @@ void FontDescriptorWriter::WriteFontDescriptor(	ObjectIDType inFontDescriptorObj
 
 	inObjectsContext->StartNewIndirectObject(inFontDescriptorObjectID);
 	fontDescriptorDictionary = inObjectsContext->StartDictionary();
-	
+
 	// FontName
 	fontDescriptorDictionary->WriteKey(scFontName);
 	fontDescriptorDictionary->WriteNameValue(inFontPostscriptName);
@@ -154,7 +154,7 @@ unsigned int FontDescriptorWriter::CalculateFlags(	FreeTypeFaceWrapper* inFontIn
 		flags |= (1<<18);
 
 	return flags;
-	
+
 }
 
 bool FontDescriptorWriter::IsSymbolic(	FreeTypeFaceWrapper* inFontInfo,
@@ -163,7 +163,7 @@ bool FontDescriptorWriter::IsSymbolic(	FreeTypeFaceWrapper* inFontInfo,
 	bool hasOnlyAdobeStandard = true;
 
 	UIntAndGlyphEncodingInfoVector::const_iterator it = inEncodedGlyphs.begin()+1; // skip 0 character
-	
+
 	for(; it != inEncodedGlyphs.end() && hasOnlyAdobeStandard; ++it)
 	{
 		ULongVector::const_iterator itCharacters = it->second.mUnicodeCharacters.begin();

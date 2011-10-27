@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "PFBStreamTest.h"
 #include "InputFile.h"
@@ -54,7 +54,7 @@ EStatusCode PFBStreamTest::Run()
 
 
 		status = decodeStream.Assign(pfbFile.GetInputStream());
-		
+
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"Failed to assign pfb input stream";

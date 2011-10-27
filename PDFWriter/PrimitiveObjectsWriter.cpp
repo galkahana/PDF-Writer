@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "PrimitiveObjectsWriter.h"
 #include "SafeBufferMacrosDefs.h"
@@ -59,7 +59,7 @@ void PrimitiveObjectsWriter::WriteName(const string& inName,ETokenSeparator inSe
 {
 /*
 from the pdf reference:
-This syntax is required to represent any of the delimiter or white-space characters or the number sign character itself; 
+This syntax is required to represent any of the delimiter or white-space characters or the number sign character itself;
 it is recommended but not required for characters whose codes are outside the range 33 (!) to 126 (~).
 */
 
@@ -73,8 +73,8 @@ it is recommended but not required for characters whose codes are outside the ra
 
 		if(aValue < 33 || aValue > 126)
 		{
-			SAFE_SPRINTF_1((char*)buffer,5,"#%02x",aValue); 
-			mStreamForWriting->Write(buffer,strlen((char*)buffer));		
+			SAFE_SPRINTF_1((char*)buffer,5,"#%02x",aValue);
+			mStreamForWriting->Write(buffer,strlen((char*)buffer));
 		}
 		else
 		{
@@ -123,15 +123,15 @@ void PrimitiveObjectsWriter::WriteLiteralString(const string& inString,ETokenSep
 		}
 		else if (aValue < 32 || aValue > 126) // grabbing all nonprintable chars
 		{
-			SAFE_SPRINTF_1((char*)buffer,5,"\\%03o",aValue); 
-			mStreamForWriting->Write(buffer,4);		
+			SAFE_SPRINTF_1((char*)buffer,5,"\\%03o",aValue);
+			mStreamForWriting->Write(buffer,4);
 		}
 		else
 		{
 			buffer[0] = aValue;
 			mStreamForWriting->Write(buffer,1);
 		}
-		
+
 	}
 	mStreamForWriting->Write(scRightParanthesis,1);
 	WriteTokenSeparator(inSeparate);
@@ -178,7 +178,7 @@ void PrimitiveObjectsWriter::WriteBoolean(bool inBoolean,ETokenSeparator inSepar
 static const IOBasicTypes::Byte scNull[4] = {'n','u','l','l'};
 void PrimitiveObjectsWriter::WriteNull(ETokenSeparator inSeparate)
 {
-	mStreamForWriting->Write(scNull,4);	
+	mStreamForWriting->Write(scNull,4);
 	WriteTokenSeparator(inSeparate);
 }
 

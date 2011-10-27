@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -28,7 +28,7 @@ class AdapterIByteReaderWithPositionToIReadPositionProvider : public IReadPositi
 public:
 	AdapterIByteReaderWithPositionToIReadPositionProvider(){mStream = NULL;}
 	AdapterIByteReaderWithPositionToIReadPositionProvider(IByteReaderWithPosition* inStream){mStream = inStream;}
-	
+
 	void Assign(IByteReaderWithPosition* inStream){mStream = inStream;}
 
 	// IReadPositionProvider implementation
@@ -36,5 +36,5 @@ public:
 
 private:
 	IByteReaderWithPosition* mStream;
-	
+
 };

@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "EmptyFileTest.h"
 #include "PDFWriter.h"
@@ -40,7 +40,7 @@ EStatusCode EmptyFileTest::Run()
 {
 	PDFWriter pdfWriter;
 	LogConfiguration logConfiguration(true,true,"C:\\PDFLibTests\\EmptyFileLog.txt");
-	EStatusCode status; 
+	EStatusCode status;
 
 	do
 	{
@@ -49,8 +49,8 @@ EStatusCode EmptyFileTest::Run()
 		{
 			cout<<"failed to start PDF\n";
 			break;
-		}	
-		
+		}
+
 		status = pdfWriter.EndPDF();
 		if(status != PDFHummus::eSuccess)
 		{

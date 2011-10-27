@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "RefCountTest.h"
 #include "RefCountPtr.h"
@@ -43,7 +43,7 @@ public:
 
 	MyClass(int inID){mID = inID; ++TotalObjectsCount;}
 	virtual ~MyClass(){--TotalObjectsCount;}
-	
+
 	int GetID(){return mID;}
 
 private:
@@ -173,7 +173,7 @@ EStatusCode RefCountTest::Run()
 	// pointer equality
 	{
 		MyClass* anObject = new MyClass(4);
-		
+
 		RefCountPtr<MyClass> firstPtr(anObject);
 		RefCountPtr<MyClass> secondPtr = firstPtr;
 
@@ -216,13 +216,13 @@ EStatusCode RefCountTest::Run()
 		{
 			cout<<"Problem, should not be false!\n";
 			status = PDFHummus::eFailure;
-		}		
-		
+		}
+
 		RefCountPtr<MyClass> aNother;
 		if(!(!aNother))
 		{
 			cout<<"Problem, should be false!\n";
-			status = PDFHummus::eFailure;			
+			status = PDFHummus::eFailure;
 		}
 	}
 

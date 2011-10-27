@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -39,7 +39,7 @@ struct GlyphEncodingInfo
 
 	GlyphEncodingInfo(unsigned short inEncodedCharacter,unsigned long inUnicodeCharacter)
 	{mEncodedCharacter = inEncodedCharacter; mUnicodeCharacters.push_back(inUnicodeCharacter);}
-		
+
 	GlyphEncodingInfo(unsigned short inEncodedCharacter,ULongVector inUnicodeCharacters)
 	{mEncodedCharacter = inEncodedCharacter; mUnicodeCharacters = inUnicodeCharacters;}
 };
@@ -58,13 +58,13 @@ static UIntVector GetOrderedKeys(const UIntToGlyphEncodingInfoMap& inMap)
 
 
 struct WrittenFontRepresentation
-{	
+{
 	WrittenFontRepresentation(){mWrittenObjectID = 0;}
 
 	UIntToGlyphEncodingInfoMap mGlyphIDToEncodedChar;
 	ObjectIDType mWrittenObjectID;
 
-	UIntVector GetGlyphIDsAsOrderedVector() 
+	UIntVector GetGlyphIDsAsOrderedVector()
 		{
 			return GetOrderedKeys(mGlyphIDToEncodedChar);
 		}

@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "JPEGImageHandler.h"
 #include "InputFile.h"
@@ -59,7 +59,7 @@ PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGFile(const string& i
 {
 	PDFImageXObject* imageXObject = NULL;
 
-	do 
+	do
 	{
 		// retrieve image information
 		BoolAndJPEGImageInformation imageInformationResult = RetrieveImageInformation(inJPGFilePath);
@@ -74,7 +74,7 @@ PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGFile(const string& i
 
 	} while(false);
 
-	return imageXObject;  	
+	return imageXObject;
 
 }
 
@@ -111,7 +111,7 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 	return imageXObject;
 }
 
-																				
+
 PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(IByteReaderWithPosition* inJPGImageStream,
 																				ObjectIDType inImageXObjectID,
 																				const JPEGImageInformation& inJPGImageInformation)
@@ -129,7 +129,7 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 
 		mObjectsContext->StartNewIndirectObject(inImageXObjectID);
 		DictionaryContext* imageContext = mObjectsContext->StartDictionary();
-	
+
 		// type
 		imageContext->WriteKey(scType);
 		imageContext->WriteNameValue(scXObject);
@@ -162,7 +162,7 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 				break;
 		case 4:
 				imageContext->WriteNameValue(scDeviceCMYK);
-				
+
 				// Decode array
 				imageContext->WriteKey(scDecode);
 				mObjectsContext->StartArray();
@@ -198,10 +198,10 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 				status = PDFHummus::eFailure;
 				break;
 			}
-		}	
+		}
 		if(status != PDFHummus::eSuccess)
 			break;
-		
+
 
 		PDFStream* imageStream = mObjectsContext->StartUnfilteredPDFStream(imageContext);
 
@@ -213,13 +213,13 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 			delete imageStream;
 			break;
 		}
-	
+
 		mObjectsContext->EndPDFStream(imageStream);
 		delete imageStream;
 
 		imageXObject = new PDFImageXObject(inImageXObjectID,1 == inJPGImageInformation.ColorComponentsCount ? KProcsetImageB:KProcsetImageC);
 	}while(false);
-	
+
 
 	return imageXObject;
 }
@@ -244,7 +244,7 @@ BoolAndJPEGImageInformation JPEGImageHandler::RetrieveImageInformation(const str
 
 			JPEGImageParser jpgImageParser;
 			JPEGImageInformation imageInformation;
-			
+
 			status = jpgImageParser.Parse(JPGFile.GetInputStream(),imageInformation);
 			if(status != PDFHummus::eSuccess)
 			{
@@ -289,7 +289,7 @@ PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGFile(const string& inJ
 	PDFImageXObject* imageXObject = NULL;
 	PDFFormXObject* imageFormXObject = NULL;
 
-	do 
+	do
 	{
 		if(!mObjectsContext)
 		{
@@ -325,7 +325,7 @@ PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGFile(const string& inJ
 	} while(false);
 
 	delete imageXObject;
-	return imageFormXObject;  	
+	return imageFormXObject;
 }
 
 PDFFormXObject* JPEGImageHandler::CreateImageFormXObjectFromImageXObject(PDFImageXObject* inImageXObject,ObjectIDType inFormXObjectID, const JPEGImageInformation& inJPGImageInformation)
@@ -356,7 +356,7 @@ PDFFormXObject* JPEGImageHandler::CreateImageFormXObjectFromImageXObject(PDFImag
 			delete formXObject;
 			formXObject = NULL;
 			break;
-		}	
+		}
 
 
 	}while(false);
@@ -474,7 +474,7 @@ PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGStream(IByteReaderWi
 {
 	PDFImageXObject* imageXObject = NULL;
 
-	do 
+	do
 	{
 		if(!mObjectsContext)
 		{
@@ -486,7 +486,7 @@ PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGStream(IByteReaderWi
 		JPEGImageInformation imageInformation;
 
 		LongFilePositionType recordedPosition = inJPGStream->GetCurrentPosition();
-		
+
 		EStatusCode status = jpgImageParser.Parse(inJPGStream,imageInformation);
 		if(status != PDFHummus::eSuccess)
 		{
@@ -501,7 +501,7 @@ PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGStream(IByteReaderWi
 
 	} while(false);
 
-	return imageXObject;  	
+	return imageXObject;
 
 }
 
@@ -521,7 +521,7 @@ PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGStream(IByteReaderWith
 	PDFFormXObject* imageFormXObject = NULL;
 	PDFImageXObject* imageXObject = NULL;
 
-	do 
+	do
 	{
 		if(!mObjectsContext)
 		{
@@ -533,7 +533,7 @@ PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGStream(IByteReaderWith
 		JPEGImageInformation imageInformation;
 
 		LongFilePositionType recordedPosition = inJPGStream->GetCurrentPosition();
-		
+
 		EStatusCode status = jpgImageParser.Parse(inJPGStream,imageInformation);
 		if(status != PDFHummus::eSuccess)
 		{
@@ -562,5 +562,5 @@ PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGStream(IByteReaderWith
 	} while(false);
 
 	delete imageXObject;
-	return imageFormXObject;  
+	return imageFormXObject;
 }

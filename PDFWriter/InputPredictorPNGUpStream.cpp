@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "InputPredictorPNGUpStream.h"
 
@@ -43,7 +43,7 @@ InputPredictorPNGUpStream::~InputPredictorPNGUpStream(void)
 }
 
 InputPredictorPNGUpStream::InputPredictorPNGUpStream(IByteReader* inSourceStream,IOBasicTypes::LongBufferSizeType inColumns)
-{	
+{
 	mSourceStream = NULL;
 	mBuffer = NULL;
 	mIndex = NULL;
@@ -57,7 +57,7 @@ InputPredictorPNGUpStream::InputPredictorPNGUpStream(IByteReader* inSourceStream
 LongBufferSizeType InputPredictorPNGUpStream::Read(Byte* inBuffer,LongBufferSizeType inBufferSize)
 {
 	LongBufferSizeType readBytes = 0;
-	
+
 
 	// exhaust what's in the buffer currently
 	while(mBufferSize > (LongBufferSizeType)(mIndex - mBuffer) && readBytes < inBufferSize)

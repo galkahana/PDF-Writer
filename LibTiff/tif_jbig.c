@@ -4,23 +4,23 @@
  * Copyright (c) 1988-1997 Sam Leffler
  * Copyright (c) 1991-1997 Silicon Graphics, Inc.
  *
- * Permission to use, copy, modify, distribute, and sell this software and 
+ * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation for any purpose is hereby granted without fee, provided
  * that (i) the above copyright notices and this permission notice appear in
  * all copies of the software and related documentation, and (ii) the names of
  * Sam Leffler and Silicon Graphics may not be used in any advertising or
  * publicity relating to the software without the specific, prior written
  * permission of Sam Leffler and Silicon Graphics.
- * 
- * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND, 
- * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY 
- * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  
- * 
+ *
+ * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
+ * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+ *
  * IN NO EVENT SHALL SAM LEFFLER OR SILICON GRAPHICS BE LIABLE FOR
  * ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND,
  * OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
- * WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF 
- * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE 
+ * WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF
+ * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
 
@@ -29,7 +29,7 @@
  *
  * JBIG Compression Algorithm Support.
  * Contributed by Lee Howard <faxguy@deanox.com>
- * 
+ *
  */
 
 #include "tiffiop.h"
@@ -55,7 +55,7 @@ typedef struct
 #define FIELD_RECVTIME          (FIELD_CODEC+2)
 #define FIELD_FAXDCS            (FIELD_CODEC+3)
 
-static const TIFFFieldInfo jbigFieldInfo[] = 
+static const TIFFFieldInfo jbigFieldInfo[] =
 {
         {TIFFTAG_FAXRECVPARAMS,  1,  1, TIFF_LONG,  FIELD_RECVPARAMS, TRUE, FALSE, "FaxRecvParams"},
         {TIFFTAG_FAXSUBADDRESS, -1, -1, TIFF_ASCII, FIELD_SUBADDRESS, TRUE, FALSE, "FaxSubAddress"},
@@ -96,7 +96,7 @@ static int JBIGDecode(TIFF* tif, tidata_t buffer, tsize_t size, tsample_t s)
          * will fail.  It is generally only needed for received fax images
          * that do not contain the actual length of the image in the BIE
          * header.  I do not log when an error occurs because that will cause
-         * problems when converting JBIG encoded TIFF's to 
+         * problems when converting JBIG encoded TIFF's to
          * PostScript.  As long as the actual image length is contained in the
          * BIE header jbg_dec_in should succeed.
          */
@@ -120,7 +120,7 @@ static int JBIGDecode(TIFF* tif, tidata_t buffer, tsize_t size, tsample_t s)
 			 );
                 return 0;
         }
-        
+
         pImage = jbg_dec_getimage(&decoder, 0);
         _TIFFmemcpy(buffer, pImage, jbg_dec_getsize(&decoder));
         jbg_dec_free(&decoder);
@@ -141,7 +141,7 @@ static int JBIGSetupEncode(TIFF* tif)
 static int JBIGCopyEncodedData(TIFF* tif, tidata_t pp, tsize_t cc, tsample_t s)
 {
         (void) s;
-        while (cc > 0) 
+        while (cc > 0)
         {
                 tsize_t n = cc;
 
@@ -185,14 +185,14 @@ static int JBIGEncode(TIFF* tif, tidata_t buffer, tsize_t size, tsample_t s)
 
 	(void) size, (void) s;
 
-        jbg_enc_init(&encoder, 
-                     dir->td_imagewidth, 
-                     dir->td_imagelength, 
-                     1, 
+        jbg_enc_init(&encoder,
+                     dir->td_imagewidth,
+                     dir->td_imagelength,
+                     1,
                      &buffer,
                      JBIGOutputBie,
                      tif);
-        /* 
+        /*
          * jbg_enc_out does the "real" encoding.  As data is encoded,
          * JBIGOutputBie is called, which writes the data to the directory.
          */
@@ -224,29 +224,29 @@ static void JBIGPrintDir(TIFF* tif, FILE* fd, long flags)
 
         if (TIFFFieldSet(tif, FIELD_RECVPARAMS))
         {
-                fprintf(fd, 
+                fprintf(fd,
                         "  Fax Receive Parameters: %08lx\n",
                         (unsigned long)codec->recvparams);
         }
 
         if (TIFFFieldSet(tif, FIELD_SUBADDRESS))
         {
-                fprintf(fd, 
-                        "  Fax SubAddress: %s\n", 
+                fprintf(fd,
+                        "  Fax SubAddress: %s\n",
                         codec->subaddress);
         }
 
         if (TIFFFieldSet(tif, FIELD_RECVTIME))
         {
-                fprintf(fd, 
+                fprintf(fd,
                         "  Fax Receive Time: %lu secs\n",
                         (unsigned long)codec->recvtime);
         }
 
         if (TIFFFieldSet(tif, FIELD_FAXDCS))
         {
-                fprintf(fd, 
-                        "  Fax DCS: %s\n", 
+                fprintf(fd,
+                        "  Fax DCS: %s\n",
                         codec->faxdcs);
         }
 }
@@ -260,7 +260,7 @@ static int JBIGVGetField(TIFF* tif, ttag_t tag, va_list ap)
                 case TIFFTAG_FAXRECVPARAMS:
                         *va_arg(ap, uint32*) = codec->recvparams;
                         break;
-                
+
                 case TIFFTAG_FAXSUBADDRESS:
                         *va_arg(ap, char**) = codec->subaddress;
                         break;
@@ -343,7 +343,7 @@ int TIFFInitJBIG(TIFF* tif, int scheme)
         codec->faxdcs = NULL;
         codec->recvtime = 0;
 
-	/* 
+	/*
 	 * Override parent get/set field methods.
 	 */
         codec->vgetparent = tif->tif_tagmethods.vgetfield;
@@ -366,7 +366,7 @@ int TIFFInitJBIG(TIFF* tif, int scheme)
 
         tif->tif_setupencode = JBIGSetupEncode;
         tif->tif_encodestrip = JBIGEncode;
-        
+
         tif->tif_cleanup = JBIGCleanup;
 
         return 1;

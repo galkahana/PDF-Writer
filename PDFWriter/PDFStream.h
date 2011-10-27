@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 /*
@@ -63,7 +63,7 @@ private:
 	bool mCompressStream;
 	OutputFlateEncodeStream mFlateEncodingStream;
 	IByteWriterWithPosition* mOutputStream;
-	ObjectIDType mExtendObjectID;	
+	ObjectIDType mExtendObjectID;
 	LongFilePositionType mStreamLength;
 	LongFilePositionType mStreamStartPosition;
 	IByteWriter* mWriteStream;

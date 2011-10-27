@@ -16,22 +16,22 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
  Additional Copyright Information:
 
  Gal Kahana 8/5/2010. my code is completely copied/adapted from this:
 
- MD5.CC - source code for the C++/object oriented translation and 
+ MD5.CC - source code for the C++/object oriented translation and
           modification of MD5.
 
- Translation and modification (c) 1995 by Mordechai T. Abzug 
+ Translation and modification (c) 1995 by Mordechai T. Abzug
 
- This translation/ modification is provided "as is," without express or 
+ This translation/ modification is provided "as is," without express or
  implied warranty of any kind.
 
- The translator/ modifier does not claim (1) that MD5 will do what you think 
- it does; (2) that this translation/ modification is accurate; or (3) that 
- this software is "merchantible."  (Language for this disclaimer partially 
+ The translator/ modifier does not claim (1) that MD5 will do what you think
+ it does; (2) that this translation/ modification is accurate; or (3) that
+ this software is "merchantible."  (Language for this disclaimer partially
  copied from the disclaimer below).
 
  the code is based on:
@@ -124,7 +124,7 @@ void MD5Generator::Accumulate(const uint1* inBlock,unsigned long inBlockSize)
     Transform(mBuffer);
 
     // now, transform each 64-byte piece of the input, bypassing the buffer
-    for (input_index = buffer_space; input_index + 63 < inBlockSize; 
+    for (input_index = buffer_space; input_index + 63 < inBlockSize;
 	 input_index += 64)
       Transform(inBlock+input_index);
 
@@ -245,7 +245,7 @@ void MD5Generator::Transform(const uint1 *inBuffer)
   mState[3] += d;
 
   // Zeroize sensitive information.
-  memset ( (uint1 *) x, 0, sizeof(x));	
+  memset ( (uint1 *) x, 0, sizeof(x));
 }
 
 // Decodes input (unsigned char) into output (UINT4). Assumes len is
@@ -292,7 +292,7 @@ unsigned int MD5Generator::I(uint4 x, uint4 y, uint4 z)
 
 // FF, GG, HH, and II transformations for rounds 1, 2, 3, and 4.
 // Rotation is separate from addition to prevent recomputation.
-void MD5Generator::FF(uint4& a, uint4 b, uint4 c, uint4 d, uint4 x, 
+void MD5Generator::FF(uint4& a, uint4 b, uint4 c, uint4 d, uint4 x,
 		    uint4  s, uint4 ac)
 {
  a += F(b, c, d) + x + ac;
@@ -350,11 +350,11 @@ string MD5Generator::ToString()
 		mIsFinalized = true;
 		SetFinalStringToHex();
 	}
-	
+
 	return MD5FinalString;
 }
 
-void MD5Generator::Encode(uint1 *output, uint4 *input, uint4 len) 
+void MD5Generator::Encode(uint1 *output, uint4 *input, uint4 len)
 {
 
   unsigned int i, j;
@@ -371,8 +371,8 @@ void MD5Generator::SetFinalStringToHex()
 {
 	OutputStringBufferStream stringStream;
 	char formattedHex[3];
-	
-	
+
+
 	for (int i=0; i<16; i++)
 	{
 		SAFE_SPRINTF_1(formattedHex,3,"%02x",mDigest[i]);

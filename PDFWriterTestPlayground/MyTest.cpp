@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "MyTest.h"
 #include "TestsRunner.h"
@@ -133,7 +133,7 @@ EStatusCode MyTest::Run()
 		}
 		else
 			++j;
-	}	
+	}
 	cout<<stringsVector[N_STD_STRINGS-1].second<<"\n};\n";
 
 	return PDFHummus::eSuccess;

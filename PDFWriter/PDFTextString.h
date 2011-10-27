@@ -16,13 +16,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 /*
-	Representing a PDF text string. In accordance with PDF specifications 1.7, section 3.8.1 of text string. 
-	encodes a double byte Unicode text to a PDF text string, 
-	either using PDFDocEncoded or UTF-16BE encoded string with a leading byte order marker. 
+	Representing a PDF text string. In accordance with PDF specifications 1.7, section 3.8.1 of text string.
+	encodes a double byte Unicode text to a PDF text string,
+	either using PDFDocEncoded or UTF-16BE encoded string with a leading byte order marker.
 	if possible, the string is encoded using PDFDocEncoded. otherwise UTF16BE is used.
 	when encoding, it is made sure that all charachters that require escaping, get escaped.
 */
@@ -39,7 +39,7 @@ typedef pair<bool,IOBasicTypes::Byte> ConvertToPDFDocEncodingResult;
 class PDFTextString
 {
 public:
-	
+
 	PDFTextString();
 	PDFTextString(const string& inString); // initialize from an encoded string
 	~PDFTextString(void);

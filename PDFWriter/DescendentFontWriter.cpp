@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "DescendentFontWriter.h"
 #include "FreeTypeFaceWrapper.h"
@@ -27,7 +27,7 @@
 #include "IByteWriter.h"
 #include "DictionaryContext.h"
 
-#include FT_CID_H 
+#include FT_CID_H
 
 using namespace PDFHummus;
 
@@ -46,7 +46,7 @@ static const string scBaseFont = "BaseFont";
 static const string scFontDescriptor = "FontDescriptor";
 static const string scCIDSystemInfo = "CIDSystemInfo";
 
-EStatusCode DescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID, 
+EStatusCode DescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID,
 												const string& inFontName,
 												FreeTypeFaceWrapper& inFontInfo,
 												const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
@@ -56,7 +56,7 @@ EStatusCode DescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID,
 	EStatusCode status = PDFHummus::eSuccess;
 	FontDescriptorWriter fontDescriptorWriter;
 	inObjectsContext->StartNewIndirectObject(inDecendentObjectID);
-	
+
 	mFontInfo = &inFontInfo;
 	mObjectsContext = inObjectsContext;
 	mCIDSetObjectID = 0;
@@ -99,16 +99,16 @@ EStatusCode DescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID,
 			break;
 		}
 
-		inObjectsContext->EndIndirectObject();	
+		inObjectsContext->EndIndirectObject();
 
-		WriteCIDSystemInfo(cidSystemInfoObjectID); 
+		WriteCIDSystemInfo(cidSystemInfoObjectID);
 		mWriterHelper = inDescendentFontWriterHelper; // save the helper pointer, to write the font program reference in the descriptor
 		fontDescriptorWriter.WriteFontDescriptor(fontDescriptorObjectID,inFontName,&inFontInfo,inEncodedGlyphs,inObjectsContext,this);
 
 		if(mCIDSetObjectID) // set by descriptor writer callback
 			WriteCIDSet(inEncodedGlyphs);
 	}while(false);
-	return status;	
+	return status;
 }
 
 static const string scDW = "DW";
@@ -178,7 +178,7 @@ void DescendentFontWriter::WriteWidths(const UIntAndGlyphEncodingInfoVector& inE
 				}
 
 			}
-			
+
 		}
 		if(widthsList.size() > 0)
 			WriteWidthsItem(allWidthsSame,widthsList,firstCIDInList,previousCIDInList);
@@ -217,9 +217,9 @@ void DescendentFontWriter::WriteCIDSystemInfo(ObjectIDType inCIDSystemInfoObject
 	const char* registry;
 	const char* ordering;
 	FT_Int supplement;
-	
+
 	if(FT_Get_CID_Is_Internally_CID_Keyed(*mFontInfo,&isCID) != 0)
-		isCID = false;	
+		isCID = false;
 	if(isCID && FT_Get_CID_Registry_Ordering_Supplement(*mFontInfo,&registry,&ordering,&supplement) != 0)
 		isCID = false;
 
@@ -256,9 +256,9 @@ void DescendentFontWriter::WriteCharSet(	DictionaryContext* inDescriptorContext,
 											FreeTypeFaceWrapper* inFontInfo,
 											const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs)
 {
-	// use this hook to Write the CIDSet key, and later write the CIDSet stream. 
-	// ignoring input values for now, assuming they are the same as the ones 
-	// used in the font. 
+	// use this hook to Write the CIDSet key, and later write the CIDSet stream.
+	// ignoring input values for now, assuming they are the same as the ones
+	// used in the font.
 
 	// CIDSet
 	inDescriptorContext->WriteKey(scCIDSet);
@@ -269,12 +269,12 @@ void DescendentFontWriter::WriteCharSet(	DictionaryContext* inDescriptorContext,
 void DescendentFontWriter::WriteCIDSet(const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs)
 {
 	mObjectsContext->StartNewIndirectObject(mCIDSetObjectID);
-	PDFStream* pdfStream = mObjectsContext->StartPDFStream();	
+	PDFStream* pdfStream = mObjectsContext->StartPDFStream();
 	IByteWriter* cidSetWritingContext = pdfStream->GetWriteStream();
 	Byte buffer;
 	UIntAndGlyphEncodingInfoVector::const_iterator it = inEncodedGlyphs.begin();
 	unsigned int upperLimit = inEncodedGlyphs.back().first;
-	
+
 	for(unsigned int i=0; i < upperLimit; i+=8)
 	{
 		buffer = (it->first == i) ? 1:0;

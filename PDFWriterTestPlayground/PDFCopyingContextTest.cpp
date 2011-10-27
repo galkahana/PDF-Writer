@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "PDFCopyingContextTest.h"
 #include "TestsRunner.h"
@@ -49,7 +49,7 @@ EStatusCode PDFCopyingContextTest::Run()
 		{
 			cout<<"failed to start PDF\n";
 			break;
-		}	
+		}
 
 
 		copyingContext = pdfWriter.CreatePDFCopyingContext("C:\\PDFLibTests\\TestMaterials\\BasicTIFFImagesTest.PDF");

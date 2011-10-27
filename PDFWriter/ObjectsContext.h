@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -46,7 +46,7 @@ public:
 	~ObjectsContext(void);
 
 	void SetOutputStream(IByteWriterWithPosition* inOutputStream);
-	
+
 
 	// Currently doing pre 1.5 xref writing
 	PDFHummus::EStatusCode WriteXrefTable(LongFilePositionType& outWritePosition);
@@ -57,7 +57,7 @@ public:
 
 	// Get objects management object
 	IndirectObjectsReferenceRegistry& GetInDirectObjectsRegistry();
-	
+
 	// Token Writing
 
 	void WriteTokenSeparator(ETokenSeparator inSeparate);
@@ -83,7 +83,7 @@ public:
 	// this context enforces some simple values
 	DictionaryContext* StartDictionary();
 	// ends dictionary context, releases the dictionary started in "StartDictionary", and now returned
-	PDFHummus::EStatusCode EndDictionary(DictionaryContext* inDictionaryContext); 
+	PDFHummus::EStatusCode EndDictionary(DictionaryContext* inDictionaryContext);
 
 	// Array writing, currently just writing begin and end brackets
 	void StartArray();
@@ -110,7 +110,7 @@ public:
 
 	// Extensibility
 	void SetObjectsContextExtender(IObjectsContextExtender* inExtender);
-	
+
 
 	// as the obly common context around...i'm using the objects context to create
 	// subset fonts prefixes. might want to consider a more relevant object...

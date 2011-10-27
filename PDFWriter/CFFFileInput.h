@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -71,7 +71,7 @@ enum ECharSetType
 typedef map<unsigned short,CharString*> UShortToCharStringMap;
 
 struct CharSetInfo
-{	
+{
 	CharSetInfo() {mSIDs = NULL;}
 
 	ECharSetType mType;
@@ -105,7 +105,7 @@ struct EncodingsInfo
 	Byte mEncodingsCount;
 	Byte* mEncoding;
 	UShortToByteList mSupplements;
-	
+
 };
 
 struct PrivateDictInfo
@@ -153,7 +153,7 @@ typedef vector<EncodingsInfo*> EncodingsInfoVector;
 class StringLess : public binary_function<const char*,const char*,bool>
 {
 public:
-	bool operator( ) (const char* left, 
+	bool operator( ) (const char* left,
 						const char* right ) const
 	{
 		return strcmp(left,right) < 0;
@@ -179,7 +179,7 @@ public:
 
 	// parses the whole CFF file, with all contained fonts
 	PDFHummus::EStatusCode ReadCFFFile(IByteReaderWithPosition* inCFFFile);
-	// parses the CFF file just for the particular font according to index. Index should be 
+	// parses the CFF file just for the particular font according to index. Index should be
 	// according to how it appears in the CFF
 	PDFHummus::EStatusCode ReadCFFFile(IByteReaderWithPosition* inCFFFile,unsigned short inFontIndex);
 	// parses the CFF file just for the particular named font
@@ -204,7 +204,7 @@ public:
 				 				   unsigned short inCharStringIndex);
 
 	// use this wonderful little fellow when interpreting a charstring with
-	// CharStringType2Intepreter. This will set the CFFFileInput with 
+	// CharStringType2Intepreter. This will set the CFFFileInput with
 	// the right items so that later you can use the IType2InterpreterImplementation
 	// implementation here and avoid having to mess with passing gsubrs, lsubrs etc.
 	// when interpreting just call these methods instead of yours to perform the relevant actions
@@ -218,13 +218,13 @@ public:
 	virtual PDFHummus::EStatusCode ReadCharString(LongFilePositionType inCharStringStart,
 							   LongFilePositionType inCharStringEnd,
 							   Byte** outCharString);
-	virtual CharString* GetLocalSubr(long inSubrIndex); 
+	virtual CharString* GetLocalSubr(long inSubrIndex);
 	virtual CharString* GetGlobalSubr(long inSubrIndex);
 	virtual PDFHummus::EStatusCode Type2Endchar(const CharStringOperandList& inOperandList);
 
 
 	// publicly available constructs
-	
+
 	// mCFFOffset should be added to any position here when referring to the beginning if the file containing this
 	// segment. for instance, cff could be part of an OTF file definition, in which case the position is not 0.
 	LongFilePositionType mCFFOffset;
@@ -258,7 +258,7 @@ private:
 	CharStringList mAdditionalGlyphs;
 	CharSetInfo* mCurrentCharsetInfo;
 
-	string GetStringForSID(unsigned short inSID);	
+	string GetStringForSID(unsigned short inSID);
 	PDFHummus::EStatusCode ReadHeader();
 	PDFHummus::EStatusCode ReadNameIndex();
 	PDFHummus::EStatusCode ReadIndexHeader(unsigned long** outOffsets,unsigned short& outItemsCount);

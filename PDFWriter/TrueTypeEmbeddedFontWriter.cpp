@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "TrueTypeEmbeddedFontWriter.h"
 #include "FreeTypeFaceWrapper.h"
@@ -44,7 +44,7 @@ TrueTypeEmbeddedFontWriter::~TrueTypeEmbeddedFontWriter(void)
 }
 
 static const string scLength1 = "Length1";
-EStatusCode TrueTypeEmbeddedFontWriter::WriteEmbeddedFont(	
+EStatusCode TrueTypeEmbeddedFontWriter::WriteEmbeddedFont(
 								FreeTypeFaceWrapper& inFontInfo,
 								const UIntVector& inSubsetGlyphIDs,
 								ObjectsContext* inObjectsContext,
@@ -61,7 +61,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteEmbeddedFont(
 		{
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::WriteEmbeddedFont, failed to write embedded font program");
 			break;
-		}	
+		}
 
 		if(notEmbedded)
 		{
@@ -72,7 +72,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteEmbeddedFont(
 		}
 
 		outEmbeddedFontObjectID = inObjectsContext->StartNewIndirectObject();
-		
+
 		DictionaryContext* fontProgramDictionaryContext = inObjectsContext->StartDictionary();
 
 		// Length1 (decompressed true type program length)
@@ -132,7 +132,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, font file is not true type, so there is an exceptions here. expecting true types only");
 			break;
 		}
-	
+
 		// see if font may be embedded
 		if(!FSType(mTrueTypeInput.mOS2.fsType).CanEmbed())
 		{
@@ -152,10 +152,10 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 		// padding with 0 length glyphs (their loca entries just don't move).
 		// don't worry - it's perfectly kosher.
 		// so - bottom line - the glyphs count will actually be 1 more than the maxium glyph index.
-		// and from here i'll just place the glyphs in their original indexes, and fill in the 
+		// and from here i'll just place the glyphs in their original indexes, and fill in the
 		// vacant glyphs with empties.
 		mSubsetFontGlyphsCount = subsetGlyphIDs.back() + 1;
-		
+
 		mFontFileStream.Assign(&outFontProgram);
 		mPrimitivesWriter.SetOpenTypeStream(&mFontFileStream);
 
@@ -225,7 +225,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 			if(status != PDFHummus::eSuccess)
 			{
 				TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to write prep table");
-				break;	
+				break;
 			}
 		}
 
@@ -233,21 +233,21 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to write name table");
-			break;	
+			break;
 		}
 
 		status = WriteOS2();
 		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to write os2 table");
-			break;	
+			break;
 		}
 
 		status = WriteCMAP();
 		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to write cmap table");
-			break;	
+			break;
 		}
 
 		locaTable = new unsigned long[mSubsetFontGlyphsCount+1];
@@ -293,7 +293,7 @@ void TrueTypeEmbeddedFontWriter::AddDependentGlyphs(UIntVector& ioSubsetGlyphIDs
 		ioSubsetGlyphIDs.clear();
 		for(itNewGlyphs = glyphsSet.begin(); itNewGlyphs != glyphsSet.end(); ++itNewGlyphs)
 			ioSubsetGlyphIDs.push_back(*itNewGlyphs);
-		
+
 		sort(ioSubsetGlyphIDs.begin(),ioSubsetGlyphIDs.end());
 	}
 }
@@ -308,8 +308,8 @@ bool TrueTypeEmbeddedFontWriter::AddComponentGlyphs(unsigned int inGlyphID,UIntS
 	if(glyfTableEntry != NULL && glyfTableEntry->mComponentGlyphs.size() > 0)
 	{
 		isComposite = true;
-		for(itComponentGlyphs = glyfTableEntry->mComponentGlyphs.begin(); 
-				itComponentGlyphs != glyfTableEntry->mComponentGlyphs.end(); 
+		for(itComponentGlyphs = glyfTableEntry->mComponentGlyphs.begin();
+				itComponentGlyphs != glyfTableEntry->mComponentGlyphs.end();
 				++itComponentGlyphs)
 		{
 				ioComponents.insert(*itComponentGlyphs);
@@ -321,7 +321,7 @@ bool TrueTypeEmbeddedFontWriter::AddComponentGlyphs(unsigned int inGlyphID,UIntS
 
 unsigned short TrueTypeEmbeddedFontWriter::GetSmallerPower2(unsigned short inNumber)
 {
-	unsigned short comparer = inNumber > 0xff ? 0x8000:0x80; 
+	unsigned short comparer = inNumber > 0xff ? 0x8000:0x80;
 	// that's 1 binary at the leftmost of the short or byte (most times there are less than 255 tables)
 	unsigned int i= inNumber > 0xff ? 15 : 7;
 
@@ -338,10 +338,10 @@ unsigned short TrueTypeEmbeddedFontWriter::GetSmallerPower2(unsigned short inNum
 
 EStatusCode TrueTypeEmbeddedFontWriter::WriteTrueTypeHeader()
 {
-	// prepare space for tables to write. will write (at maximum) - 
+	// prepare space for tables to write. will write (at maximum) -
 	// cmap, cvt, fpgm, glyf, head, hhea, hmtx, loca, maxp, name, os/2, prep
 
-	unsigned short tableCount = 
+	unsigned short tableCount =
 		8	// needs - head, hhea,hmtx, maxp, loca, glyf, name, os/2
 		+
 		(mTrueTypeInput.mCVTExists ? 1:0) + // cvt
@@ -375,7 +375,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteTrueTypeHeader()
 	mPrimitivesWriter.PadTo4();
 
 	return mPrimitivesWriter.GetInternalState();
-}	
+}
 
 void TrueTypeEmbeddedFontWriter::WriteEmptyTableEntry(const char* inTag,LongFilePositionType& outEntryPosition)
 {
@@ -395,13 +395,13 @@ unsigned long TrueTypeEmbeddedFontWriter::GetTag(const char* inTagName)
 	for(;i<4;++i)
 		buffer[i] = 0x20;
 
-	return	((unsigned long)buffer[0]<<24) + ((unsigned long)buffer[1]<<16) + 
+	return	((unsigned long)buffer[0]<<24) + ((unsigned long)buffer[1]<<16) +
 			((unsigned long)buffer[2]<<8) + buffer[3];
 }
 
 EStatusCode TrueTypeEmbeddedFontWriter::WriteHead()
 {
-	// copy as is, then adjust loca table format to long (that's what i'm always writing), 
+	// copy as is, then adjust loca table format to long (that's what i'm always writing),
 	// set the checksum
 	// and store the offset to the checksum
 
@@ -431,7 +431,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteHead()
 	WriteTableEntryData(mHEADEntryWritingOffset,startTableOffset,tableEntry->Length);
 
 	// restore position to end of stream
-	mFontFileStream.SetPosition(endOfStream); 
+	mFontFileStream.SetPosition(endOfStream);
 
 	return mPrimitivesWriter.GetInternalState();
 }
@@ -498,16 +498,16 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteHHea()
 	WriteTableEntryData(mHHEAEntryWritingOffset,startTableOffset,tableEntry->Length);
 
 	// restore position to end of stream
-	mFontFileStream.SetPosition(endOfStream); 
+	mFontFileStream.SetPosition(endOfStream);
 
-	return mPrimitivesWriter.GetInternalState();	
+	return mPrimitivesWriter.GetInternalState();
 }
 
 EStatusCode TrueTypeEmbeddedFontWriter::WriteHMtx()
 {
 	// k. basically i'm supposed to fill this up till the max glyph count.
 	// so i'll just use the original table (keeping an eye on the NumberOfHMetrics)
-	// filling with the original values (doesn't really matter for empty glyphs) till the 
+	// filling with the original values (doesn't really matter for empty glyphs) till the
 	// glyph count
 
 	LongFilePositionType startTableOffset;
@@ -536,9 +536,9 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteHMtx()
 						(unsigned long)(endOfTable - startTableOffset));
 
 	// restore position to end of stream
-	mFontFileStream.SetPosition(endOfStream); 
+	mFontFileStream.SetPosition(endOfStream);
 
-	return mPrimitivesWriter.GetInternalState();	
+	return mPrimitivesWriter.GetInternalState();
 }
 
 EStatusCode TrueTypeEmbeddedFontWriter::WriteMaxp()
@@ -566,7 +566,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteMaxp()
 	WriteTableEntryData(mMAXPEntryWritingOffset,startTableOffset,tableEntry->Length);
 
 	// restore position to end of stream
-	mFontFileStream.SetPosition(endOfStream); 
+	mFontFileStream.SetPosition(endOfStream);
 
 	return mPrimitivesWriter.GetInternalState();
 }
@@ -605,7 +605,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteGlyf(const UIntVector& inSubsetGlyp
 			inLocaTable[i] = inLocaTable[previousGlyphIndexEnd];
 		if(mTrueTypeInput.mGlyf[glyphIndex] != NULL)
 		{
-			mTrueTypeFile.GetInputStream()->SetPosition(tableEntry->Offset + 
+			mTrueTypeFile.GetInputStream()->SetPosition(tableEntry->Offset +
 															mTrueTypeInput.mLoca[glyphIndex]);
 			streamCopier.CopyToOutputStream(mTrueTypeFile.GetInputStream(),
 				mTrueTypeInput.mLoca[(glyphIndex) + 1] - mTrueTypeInput.mLoca[glyphIndex]);
@@ -624,9 +624,9 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteGlyf(const UIntVector& inSubsetGlyp
 						(unsigned long)(endOfTable - startTableOffset));
 
 	// restore position to end of stream
-	mFontFileStream.SetPosition(endOfStream); 
+	mFontFileStream.SetPosition(endOfStream);
 
-	return mPrimitivesWriter.GetInternalState();	
+	return mPrimitivesWriter.GetInternalState();
 }
 
 EStatusCode TrueTypeEmbeddedFontWriter::WriteLoca(unsigned long* inLocaTable)
@@ -650,9 +650,9 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteLoca(unsigned long* inLocaTable)
 						(unsigned long)(endOfTable - startTableOffset));
 
 	// restore position to end of stream
-	mFontFileStream.SetPosition(endOfStream); 
+	mFontFileStream.SetPosition(endOfStream);
 
-	return mPrimitivesWriter.GetInternalState();	
+	return mPrimitivesWriter.GetInternalState();
 }
 
 EStatusCode TrueTypeEmbeddedFontWriter::CreateHeadTableCheckSumAdjustment()
@@ -660,7 +660,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateHeadTableCheckSumAdjustment()
 	LongFilePositionType endStream = mFontFileStream.GetCurrentPosition();
     unsigned long checkSum = 0xb1b0afba - GetCheckSum(0, (unsigned long)endStream);
 
-	mFontFileStream.SetPosition(mHeadCheckSumOffset); 
+	mFontFileStream.SetPosition(mHeadCheckSumOffset);
 	mPrimitivesWriter.WriteULONG(checkSum);
 	mFontFileStream.SetPosition(endStream); // restoring position just for kicks
 
@@ -704,7 +704,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTableCopy(const char* inTableName,
 	WriteTableEntryData(inTableEntryLocation,startTableOffset,tableEntry->Length);
 
 	// restore position to end of stream
-	mFontFileStream.SetPosition(endOfStream); 
+	mFontFileStream.SetPosition(endOfStream);
 
 	return mPrimitivesWriter.GetInternalState();
 

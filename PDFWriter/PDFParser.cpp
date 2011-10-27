@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "PDFParser.h"
 #include "IByteReaderWithPosition.h"
@@ -153,8 +153,8 @@ static const string scEOF = "%%EOF";
 EStatusCode PDFParser::ParseEOFLine()
 {
 	/* go back till you hit token. this should be the EOF. go back till line start and get the token...if it's not EOF, fail.
-	   since EOF is a comment, then if there's anything else in that line it will either be before %%EOF, which means %%EOF won't be taken, or after - 
-	   in which case it'd be part of the comment. in any case - if it's not exactly EOF, there will be a failure. but i am allowing 
+	   since EOF is a comment, then if there's anything else in that line it will either be before %%EOF, which means %%EOF won't be taken, or after -
+	   in which case it'd be part of the comment. in any case - if it's not exactly EOF, there will be a failure. but i am allowing
 	   extra empty lines after %%EOF
 	*/
 	if(GoBackTillToken())
@@ -297,9 +297,9 @@ static const string scStartxref = "startxref";
 EStatusCode PDFParser::ParseLastXrefPosition()
 {
 	EStatusCode status = PDFHummus::eSuccess;
-	
+
 	// next two lines should be the xref position and then "startxref"
-	
+
 	do
 	{
 
@@ -315,7 +315,7 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 
 		// now go forward, and here i'm guessing a bit, till you get to either and integer, or the startxref keyword
 		mStream->SetPositionFromEnd(GetCurrentPositionFromEnd());
-		
+
 		mObjectParser.ResetReadState();
 		RefCountPtr<PDFObject> anObject(mObjectParser.ParseNewObject());
 
@@ -333,7 +333,7 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 
 			GoBackTillLineStart();
 			mStream->SetPositionFromEnd(GetCurrentPositionFromEnd());
-			
+
 			mObjectParser.ResetReadState();
 			PDFObjectCastPtr<PDFSymbol> startxRef(mObjectParser.ParseNewObject());
 
@@ -353,7 +353,7 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 				PDFObjectCastPtr<PDFSymbol> startxRef(mObjectParser.ParseNewObject());
 				foundStartXref = startxRef.GetPtr() && (startxRef->GetValue() == scStartxref);
 			}
-			
+
 			if(!foundStartXref)
 			{
 				status = PDFHummus::eFailure;
@@ -367,7 +367,7 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 				status = PDFHummus::eFailure;
 				TRACE_LOG("PDFParser::ParseXrefPosition, syntax error in reading xref position");
 				break;
-			}		
+			}
 
 			mLastXrefPosition = xrefPosition->GetValue();
 		}
@@ -389,7 +389,7 @@ EStatusCode PDFParser::ParseTrailerDictionary()
 	{
 		PDFParserTokenizer aTokenizer;
 		aTokenizer.SetReadStream(mStream);
-		
+
 		do
 		{
 			BoolAndString token = aTokenizer.GetNextToken();
@@ -517,7 +517,7 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,Object
 			status = PDFHummus::eFailure;
 			break;
 		}
-		
+
 		ObjectIDType currentObject = 0;
 
 		while(PDFHummus::eSuccess == status)
@@ -529,7 +529,7 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,Object
 				status = PDFHummus::eFailure;
 				break;
 			}
-			
+
 			// token may be either start of section or "trailer"
 			if(scTrailer == token.second)
 				break;
@@ -575,7 +575,7 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,Object
 
 
 
-			// now parse the section. 
+			// now parse the section.
 			while(currentObject < firstNonSectionObject && currentObject < inXrefSize)
 			{
 				if(mStream->Read(entry,20) != 20)
@@ -596,7 +596,7 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,Object
 		if(status != PDFHummus::eSuccess)
 			break;
 
-	}while(false);	
+	}while(false);
 	mObjectParser.ResetReadState(); // cause read without consulting with the tokenizer...so now there shouldn't be available tokens
 
 	return status;
@@ -708,7 +708,7 @@ EStatusCode PDFParser::ParsePagesObjectIDs()
 
 	// m.k plan is to look for the catalog, then find the pages, then initialize the array to the count at the root, and then just recursively loop
 	// the pages by order of pages and fill up the IDs. easy.
-	
+
 	do
 	{
 		// get catalogue, verify indirect reference
@@ -752,7 +752,7 @@ EStatusCode PDFParser::ParsePagesObjectIDs()
 			status = PDFHummus::eFailure;
 			break;
 		}
-	
+
 		mPagesCount = (unsigned long)totalPagesCount->GetValue();
 		mPagesObjectIDs = new ObjectIDType[mPagesCount];
 
@@ -790,7 +790,7 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 			status = PDFHummus::eFailure;
 			break;
 		}
-		
+
 		if(scPage == objectType->GetValue())
 		{
 			// a Page
@@ -816,7 +816,7 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 			}
 
 			SingleValueContainerIterator<PDFObjectVector> it = kidsObject->GetIterator();
-			
+
 			while(it.MoveNext() && PDFHummus::eSuccess == status)
 			{
 				if(it.GetItem()->GetType() != ePDFObjectIndirectObjectReference)
@@ -837,7 +837,7 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 				status = ParsePagesIDs(pageNodeObject.GetPtr(),((PDFIndirectObjectReference*)it.GetItem())->mObjectID,ioCurrentPageIndex);
 			}
 		}
-		else 
+		else
 		{
 			TRACE_LOG1("PDFParser::ParsePagesIDs, unexpected object type. should be either Page or Pages, found %s",objectType->GetValue().c_str());
 			status = PDFHummus::eFailure;
@@ -914,7 +914,7 @@ PDFObject* PDFParser::QueryArrayObject(PDFArray* inArray,unsigned long inIndex)
 
 	if(anObject.GetPtr() == NULL)
 		return NULL;
-	
+
 	if(anObject->GetType() == ePDFObjectIndirectObjectReference)
 	{
 		PDFObject* theActualObject = ParseNewObject(((PDFIndirectObjectReference*)anObject.GetPtr())->mObjectID);
@@ -970,7 +970,7 @@ EStatusCode PDFParser::ParseDirectory(LongFilePositionType inXrefPosition,
 									  PDFDictionary** outTrailer)
 {
 	EStatusCode status = PDFHummus::eSuccess;
-	
+
 	MovePositionInStream(inXrefPosition);
 
 	do
@@ -1003,7 +1003,7 @@ EStatusCode PDFParser::ParseDirectory(LongFilePositionType inXrefPosition,
 				status = PDFHummus::eFailure;
 				TRACE_LOG("PDFParser::ParseDirectory, failure to parse trailer dictionary");
 				break;
-			}	
+			}
 
 			// For hybrids, check also XRefStm entry
 			PDFObjectCastPtr<PDFInteger> xrefStmReference(trailerDictionary->QueryDirectObject("XRefStem"));
@@ -1072,7 +1072,7 @@ EStatusCode PDFParser::ParseDirectory(LongFilePositionType inXrefPosition,
 		}
 	}while(false);
 	return status;
-}	
+}
 
 void PDFParser::MergeXrefWithMainXref(XrefEntryInput* inTableToMerge)
 {
@@ -1140,7 +1140,7 @@ EStatusCode PDFParser::BuildXrefTableAndTrailerFromXrefStream()
 	// the object parser is now after the object ID. so verify that next we goot a version and the obj keyword
 	// then parse the xref stream
 	EStatusCode status = PDFHummus::eSuccess;
-	
+
 	PDFObjectCastPtr<PDFInteger> versionObject(mObjectParser.ParseNewObject());
 
 	do
@@ -1208,7 +1208,7 @@ EStatusCode PDFParser::BuildXrefTableAndTrailerFromXrefStream()
 EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,LongFilePositionType inXrefPosition)
 {
 	EStatusCode status = PDFHummus::eSuccess;
-	
+
 	MovePositionInStream(inXrefPosition);
 
 	do
@@ -1273,7 +1273,7 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,Objec
 
 	IByteReader* xrefStreamSource = CreateInputStreamReader(inXrefStream);
 	int* widthsArray = NULL;
-	
+
 	do
 	{
 		if(!xrefStreamSource)
@@ -1283,7 +1283,7 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,Objec
 		}
 
 		RefCountPtr<PDFDictionary> streamDictionary(inXrefStream->QueryStreamDictionary());
-	
+
 		// setup w array
 		PDFObjectCastPtr<PDFArray> wArray(QueryDictionaryObject(streamDictionary.GetPtr(),"W"));
 		if(!wArray)
@@ -1314,7 +1314,7 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,Objec
 
 		if(!subsectionsIndex)
 		{
-			PDFObjectCastPtr<PDFInteger> xrefSize(QueryDictionaryObject(streamDictionary.GetPtr(),"Size"));	
+			PDFObjectCastPtr<PDFInteger> xrefSize(QueryDictionaryObject(streamDictionary.GetPtr(),"Size"));
 			if(!xrefSize)
 			{
 				TRACE_LOG("PDFParser::ParseXrefFromXrefStream, xref size does not exist for this stream");
@@ -1344,7 +1344,7 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,Objec
 					status = PDFHummus::eFailure;
 					break;
 				}
-				
+
 				// if startobject is past what's interesting just stop the loop
 				if(startObject >= inXrefSize)
 					break;
@@ -1501,7 +1501,7 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 			TRACE_LOG1("PDFParser::ParseExistingInDirectStreamObject, no First key in stream dictionary %ld",objectStreamID);
 			status = PDFHummus::eFailure;
 			break;
-		}		
+		}
 
 		objectSource = CreateInputStreamReader(objectStream.GetPtr());
 		skipperStream.Assign(objectSource);
@@ -1510,7 +1510,7 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 		mObjectParser.SetReadStream(&skipperStream,&skipperStream);
 
 		ObjectIDTypeToObjectStreamHeaderEntryMap::iterator it = mObjectStreamsCache.find(objectStreamID);
-		
+
 		if(it == mObjectStreamsCache.end())
 		{
 			objectStreamHeader = new ObjectStreamHeaderEntry[objectsCount];
@@ -1529,7 +1529,7 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 		{
 			TRACE_LOG2("PDFParser::ParseXrefFromXrefStream, wrong object. expecting to find object ID %ld, and found %ld",
 						inObjectId,
-						objectsCount <= mXrefTable[inObjectId].mRivision ? 
+						objectsCount <= mXrefTable[inObjectId].mRivision ?
 							-1 :
 							objectStreamHeader[mXrefTable[inObjectId].mRivision].mObjectNumber);
 			status = PDFHummus::eFailure;
@@ -1539,12 +1539,12 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 		// when parsing the header, should be at position already..so don't skip if already there [using GetCurrentPosition to see if parsed some]
 		if(mXrefTable[inObjectId].mRivision != 0 || skipperStream.GetCurrentPosition() == 0)
 		{
-			LongFilePositionType objectPositionInStream = objectStreamHeader[mXrefTable[inObjectId].mRivision].mObjectOffset + 
+			LongFilePositionType objectPositionInStream = objectStreamHeader[mXrefTable[inObjectId].mRivision].mObjectOffset +
 														  firstStreamObjectPosition->GetValue();
 			skipperStream.SkipTo(objectPositionInStream);
 			mObjectParser.ResetReadState();
 		}
-		
+
 		anObject = mObjectParser.ParseNewObject();
 
 	}while(false);
@@ -1602,13 +1602,13 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 	{
 
 		// setup stream according to length and possible filter
-		PDFObjectCastPtr<PDFInteger> lengthObject(QueryDictionaryObject(streamDictionary.GetPtr(),"Length"));	
+		PDFObjectCastPtr<PDFInteger> lengthObject(QueryDictionaryObject(streamDictionary.GetPtr(),"Length"));
 		if(!lengthObject)
 		{
 			TRACE_LOG("PDFParser::CreateInputStreamReader, stream does not have length, failing");
 			status = PDFHummus::eFailure;
 			break;
-		}	
+		}
 
 		result = new InputLimitedStream(mStream,lengthObject->GetValue(),false);
 
@@ -1617,7 +1617,7 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 		{
 			// no filter, so stop here
 			break;
-		} 
+		}
 
 		// check for flate
 		if(filterObject->GetType() != ePDFObjectName || ((PDFName*)(filterObject.GetPtr()))->GetValue() != "FlateDecode")
@@ -1639,7 +1639,7 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 
 		// read predictor, and apply the relevant predictor function
 		PDFObjectCastPtr<PDFInteger> predictor(QueryDictionaryObject(decodeParams.GetPtr(),"Predictor"));
-		
+
 		if(!predictor || predictor->GetValue() == 1)
 		{
 			// no predictor or default, stop here
@@ -1647,7 +1647,7 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 		}
 
 		PDFObjectCastPtr<PDFInteger> columns(QueryDictionaryObject(decodeParams.GetPtr(),"Columns"));
-		LongBufferSizeType columnsValue = columns.GetPtr() ? 
+		LongBufferSizeType columnsValue = columns.GetPtr() ?
 															(IOBasicTypes::LongBufferSizeType)columns->GetValue() :
 															1;
 
@@ -1658,7 +1658,7 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 				PDFObjectCastPtr<PDFInteger> colors(QueryDictionaryObject(decodeParams.GetPtr(),"Colors"));
 				PDFObjectCastPtr<PDFInteger> bitsPerComponent(QueryDictionaryObject(decodeParams.GetPtr(),"BitsPerComponent"));
 				result = new InputPredictorTIFFSubStream(result,
-														 colors.GetPtr() ? 
+														 colors.GetPtr() ?
 															(IOBasicTypes::LongBufferSizeType)colors->GetValue() :
 															1,
 														 bitsPerComponent.GetPtr() ?
@@ -1706,7 +1706,7 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 				break;
 			}
 		}
-		
+
 	}while(false);
 
 
@@ -1749,5 +1749,5 @@ EStatusCode PDFParser::StartStateFileParsing(IByteReaderWithPosition* inSourceSt
 
 	}while(false);
 
-	return status;	
+	return status;
 }

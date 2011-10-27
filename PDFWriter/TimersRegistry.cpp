@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "TimersRegistry.h"
 #include "Trace.h"
@@ -73,7 +73,7 @@ void TimersRegistry::ReleaseAll()
 void TimersRegistry::TraceAll()
 {
 	StringToTimerMap::iterator it = mTimers.begin();
-	
+
 	TRACE_LOG("Start Tracing Timers");
 	for(; it != mTimers.end(); ++it)
 	{

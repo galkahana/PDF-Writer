@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -26,7 +26,7 @@
 	Constructors assume that the object was AddRefed, and will make sure that on Ptr destructin Release is called.
 	other operators take care of various scenarios/
 
-*/ 
+*/
 
 
 template <typename T>
@@ -45,18 +45,18 @@ public:
 	virtual ~RefCountPtr();
 
 	// The next two call AddRef in insert
-	RefCountPtr<T>&  operator =(T* inValue); 
-	RefCountPtr<T>&  operator =(const RefCountPtr<T>& inOtherPtr); 
+	RefCountPtr<T>&  operator =(T* inValue);
+	RefCountPtr<T>&  operator =(const RefCountPtr<T>& inOtherPtr);
 
 	// Will return the actual pointer
 	T* operator->();
 
 	// equality/inequality for included pointer
-	bool operator ==(T* inOtherValue); 
-	bool operator ==(RefCountPtr<T>& inOtherPtr); 
+	bool operator ==(T* inOtherValue);
+	bool operator ==(RefCountPtr<T>& inOtherPtr);
 
-	bool operator !=(T* inOtherValue); 
-	bool operator !=(RefCountPtr<T>& inOtherPtr); 
+	bool operator !=(T* inOtherValue);
+	bool operator !=(RefCountPtr<T>& inOtherPtr);
 
 	// get pointer directly
 	T* GetPtr();

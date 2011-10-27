@@ -35,13 +35,13 @@ EStatusCode CustomLogTest::Run()
 		PDFWriter pdfWriter;
 		OutputFile compressedLogFile;
 		OutputStringBufferStream pdfStream;
-	
+
 		// setup log file with compression
 		status = compressedLogFile.OpenFile("c:\\PDFLibTests\\CustomLogEncrypted.txt");
 		if(status != PDFHummus::eSuccess)
 			break;
 		flateEncodeStream.Assign(compressedLogFile.GetOutputStream());
-		
+
 		// generate PDF
 		TRACE_LOG("Starting PDF File Writing");
 		status = pdfWriter.StartPDFForStream(&pdfStream,ePDFVersion13,LogConfiguration(true,&flateEncodeStream));
@@ -51,7 +51,7 @@ EStatusCode CustomLogTest::Run()
 		PDFPage* page = new PDFPage();
 
 		page->SetMediaBox(PDFRectangle(0,0,400,400));
-		
+
 		status = pdfWriter.WritePageAndRelease(page);
 		if(status != PDFHummus::eSuccess)
 			break;
@@ -77,7 +77,7 @@ EStatusCode CustomLogTest::Run()
 		pdfFile.CloseFile();
 
 		TRACE_LOG("PDF stream dumped");
-		
+
 		// now finalize trace compressed file
 		flateEncodeStream.Assign(NULL);
 		compressedLogFile.CloseFile();
@@ -96,7 +96,7 @@ EStatusCode CustomLogTest::Run()
 
 		// place an initial bom (cause the compressed content is unicode)
 		unsigned short bom = (0xFE<<8) + 0xFF;
-		decryptedLogFile.GetOutputStream()->Write((const Byte*)&bom,2);	
+		decryptedLogFile.GetOutputStream()->Write((const Byte*)&bom,2);
 
 		flateDecodeStream.Assign(decryptedLogFile.GetOutputStream());
 		OutputStreamTraits traits(&flateDecodeStream);
@@ -113,7 +113,7 @@ EStatusCode CustomLogTest::Run()
 		compressedLogFileInput.CloseFile();
 		flateDecodeStream.Assign(NULL);
 		decryptedLogFile.CloseFile();
-		
+
 	}while(false);
 
 	if(status != PDFHummus::eSuccess)

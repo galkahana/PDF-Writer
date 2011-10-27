@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "InputPredictorPNGSubStream.h"
 
@@ -41,7 +41,7 @@ InputPredictorPNGSubStream::~InputPredictorPNGSubStream(void)
 }
 
 InputPredictorPNGSubStream::InputPredictorPNGSubStream(IByteReader* inSourceStream,IOBasicTypes::LongBufferSizeType inColumns)
-{	
+{
 	mSourceStream = NULL;
 	mBuffer = NULL;
 	mIndex = NULL;
@@ -54,7 +54,7 @@ InputPredictorPNGSubStream::InputPredictorPNGSubStream(IByteReader* inSourceStre
 LongBufferSizeType InputPredictorPNGSubStream::Read(Byte* inBuffer,LongBufferSizeType inBufferSize)
 {
 	LongBufferSizeType readBytes = 0;
-	
+
 
 	// exhaust what's in the buffer currently
 	while(mBufferSize > (LongBufferSizeType)(mIndex - mBuffer) && readBytes < inBufferSize)

@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 // stdafx.cpp : source file that includes just the standard includes
 // PDFWriterTestPlayground.pch will be the pre-compiled header

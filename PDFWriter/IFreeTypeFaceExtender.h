@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -34,10 +34,10 @@ class IFreeTypeFaceExtender
 {
 public:
 	virtual ~IFreeTypeFaceExtender(){}
-	
+
 	// Italic Angle - if you don't know...just return 0
 	virtual	double GetItalicAngle() = 0;
-	
+
 	// CapHeight - bool should indicate whether the 2nd value is valid. this will indicate container to go look for the value by measuring the y value of H
 	virtual BoolAndFTShort GetCapHeight() = 0;
 

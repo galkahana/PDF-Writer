@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -34,7 +34,7 @@ public:
 	~TrueTypePrimitiveWriter(void);
 
 	void SetOpenTypeStream(OutputStringBufferStream* inTrueTypeFile);
-	
+
 	PDFHummus::EStatusCode GetInternalState();
 
 	PDFHummus::EStatusCode WriteBYTE(Byte inValue);

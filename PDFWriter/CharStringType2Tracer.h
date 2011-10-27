@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -38,7 +38,7 @@ public:
 	// IType2InterpreterImplementation implementation
 	virtual PDFHummus::EStatusCode ReadCharString(LongFilePositionType inCharStringStart,
 							   LongFilePositionType inCharStringEnd,
-							   Byte** outCharString);	
+							   Byte** outCharString);
 	virtual PDFHummus::EStatusCode Type2InterpretNumber(const CharStringOperand& inOperand);
 	virtual PDFHummus::EStatusCode Type2Hstem(const CharStringOperandList& inOperandList);
 	virtual PDFHummus::EStatusCode Type2Vstem(const CharStringOperandList& inOperandList);

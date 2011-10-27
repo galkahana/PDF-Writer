@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "PDFParserTokenizer.h"
 #include "IByteReader.h"
@@ -57,7 +57,7 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 	BoolAndString result;
 	Byte buffer;
 	OutputStringBufferStream tokenBuffer;
-	
+
 	if(!mStream || (!mStream->NotEnded() && !mHasTokenBuffer))
 	{
 		result.first = false;
@@ -90,14 +90,14 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 		// now determine how to continue based on the first byte of the token (there are some special cases)
 		switch(buffer)
 		{
-		
+
 			case '%':
 			{
 				// for a comment, the token goes on till the end of line marker [not including]
 				while(mStream->NotEnded())
 				{
 					if(GetNextByteForToken(buffer) != PDFHummus::eSuccess)
-					{	
+					{
 						result.first = false;
 						break;
 					}
@@ -117,11 +117,11 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 				while(balanceLevel > 0 && mStream->NotEnded())
 				{
 					if(GetNextByteForToken(buffer) != PDFHummus::eSuccess)
-					{	
+					{
 						result.first = false;
 						break;
 					}
-			
+
 					if(backSlashEncountered)
 					{
 						backSlashEncountered = false;
@@ -142,7 +142,7 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 						}
 						else
 						{
-							tokenBuffer.Write(scBackSlash,1);					
+							tokenBuffer.Write(scBackSlash,1);
 							tokenBuffer.Write(&buffer,1);
 						}
 					}
@@ -150,7 +150,7 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 					{
 						if('\\' == buffer)
 						{
-							backSlashEncountered = true; 
+							backSlashEncountered = true;
 							continue;
 						}
 						else if('(' == buffer)
@@ -177,7 +177,7 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 				}
 
 				if(GetNextByteForToken(buffer) != PDFHummus::eSuccess)
-				{	
+				{
 						result.first = false;
 						break;
 				}
@@ -191,14 +191,14 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 				}
 				else
 				{
-					// Hex string 
+					// Hex string
 
 					tokenBuffer.Write(&buffer,1);
 
 					while(mStream->NotEnded())
 					{
 						if(GetNextByteForToken(buffer) != PDFHummus::eSuccess)
-						{	
+						{
 							result.first = false;
 							break;
 						}
@@ -227,7 +227,7 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 				}
 
 				if(GetNextByteForToken(buffer) != PDFHummus::eSuccess)
-				{	
+				{
 					result.first = false;
 					break;
 				}
@@ -254,7 +254,7 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 				while(mStream->NotEnded())
 				{
 					if(GetNextByteForToken(buffer) != PDFHummus::eSuccess)
-					{	
+					{
 						result.first = false;
 						break;
 					}
@@ -271,15 +271,15 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 						tokenBuffer.Write(&buffer,1);
 				}
 				result.second = tokenBuffer.ToString();
-				
+
 				if(result.first && mStream->NotEnded() && scStream == result.second)
 				{
-					// k. a bit of a special case here for streams. the reading changes after the keyword "stream", 
+					// k. a bit of a special case here for streams. the reading changes after the keyword "stream",
 					// essentially forcing the next content to start after either CR-LF or LF. so there might be a little
 					// skip to do here.
 					// if indeed there's a "stream", so the last buffer read should have been either CR or LF, which means (respectively)
 					// that we should either skip one more "LF" or do nothing (based on what was parsed)
-					
+
 					// verify that buffer is either CR or LF, and behave accordingly
 					if(scCR == buffer) // CR. should be CR-LF
 					{
@@ -290,7 +290,7 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 					}
 					else
 						result.first = (scLF == buffer); // otherwise must be LF
-					
+
 				}
 				break;
 			}

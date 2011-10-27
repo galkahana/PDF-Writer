@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 #include "PDFObject.h"
@@ -42,7 +42,7 @@ public:
 
 	// Will add to end, calls AddRef
 	void AppendObject(PDFObject* inObject);
-	
+
 	// Returns an object for iterating the array
 	SingleValueContainerIterator<PDFObjectVector> GetIterator();
 

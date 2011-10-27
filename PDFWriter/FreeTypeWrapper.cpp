@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "FreeTypeWrapper.h"
 #include "Trace.h"
@@ -26,18 +26,18 @@
 using namespace PDFHummus;
 
 
-#undef __FTERRORS_H__                                           
-#define FT_ERRORDEF( e, v, s )  { e, s },                       
-#define FT_ERROR_START_LIST     {                               
-#define FT_ERROR_END_LIST       { 0, 0 } };                     
-                                                             
-static const struct                                                    
-{                                                               
-int          err_code;                                        
-const char*  err_msg;                                         
-} ft_errors[] =                                                 
-                                                             
-#include FT_ERRORS_H                                            
+#undef __FTERRORS_H__
+#define FT_ERRORDEF( e, v, s )  { e, s },
+#define FT_ERROR_START_LIST     {
+#define FT_ERROR_END_LIST       { 0, 0 } };
+
+static const struct
+{
+int          err_code;
+const char*  err_msg;
+} ft_errors[] =
+
+#include FT_ERRORS_H
 
 FreeTypeWrapper::FreeTypeWrapper(void)
 {
@@ -106,7 +106,7 @@ EStatusCode FreeTypeWrapper::FillOpenFaceArgumentsForUTF8String(const string& in
 	ioArgs.num_params = 0;
 	ioArgs.params = NULL;
 	ioArgs.stream = CreateFTStreamForPath(inFilePath);
-	
+
 	if(ioArgs.stream)
 	{
 		return PDFHummus::eSuccess;
@@ -169,7 +169,7 @@ FT_Face FreeTypeWrapper::NewFace(const string& inFilePath,const string& inSecond
 
 	}
 
-	return face;	
+	return face;
 }
 
 
@@ -205,9 +205,9 @@ static unsigned long InputFileReadSeek(	   FT_Stream	   stream,
 										   unsigned char*  buffer,
 										   unsigned long   count)
 {
-	IByteReaderWithPosition* inputFileStream = ((InputFile*)(stream->descriptor.pointer))->GetInputStream();	
+	IByteReaderWithPosition* inputFileStream = ((InputFile*)(stream->descriptor.pointer))->GetInputStream();
 	unsigned long readBytes = 0;
-	
+
 	inputFileStream->SetPosition(offset);
 	if(count > 0)
 		readBytes = (unsigned long)inputFileStream->Read(buffer,count);

@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 #include "EStatusCode.h"
@@ -127,7 +127,7 @@ public:
 	string GetGlyphCharStringName(Byte inCharStringIndex);
 	bool IsValidGlyphIndex(Byte inCharStringIndex);
 	Byte GetEncoding(const string& inCharStringName);
-	
+
 	// some structs for you all laddies and lasses
 	Type1FontDictionary mFontDictionary;
 	Type1FontInfoDictionary mFontInfoDictionary;

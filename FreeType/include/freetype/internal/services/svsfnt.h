@@ -77,7 +77,7 @@ FT_BEGIN_HEADER
     load_, get_, info_                                               \
   };
 
-#else /* FT_CONFIG_OPTION_PIC */ 
+#else /* FT_CONFIG_OPTION_PIC */
 
 #define FT_DEFINE_SERVICE_SFNT_TABLEREC(class_, load_, get_, info_) \
   void                                                              \
@@ -86,9 +86,9 @@ FT_BEGIN_HEADER
     clazz->load_table = load_;                                      \
     clazz->get_table = get_;                                        \
     clazz->table_info = info_;                                      \
-  } 
+  }
 
-#endif /* FT_CONFIG_OPTION_PIC */ 
+#endif /* FT_CONFIG_OPTION_PIC */
 
   /* */
 

@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -42,7 +42,7 @@ enum EPDFObjectType
 	ePDFObjectSymbol // symbol is parallel to unkown. mostly be a keyword, or simply a mistake in the file
 };
 
-static const char* scPDFObjectTypeLabel[] = 
+static const char* scPDFObjectTypeLabel[] =
 {
 	"Boolean",
 	"LiteralString",
@@ -61,8 +61,8 @@ static const char* scPDFObjectTypeLabel[] =
 class PDFObject : public RefCountObject
 {
 public:
-	PDFObject(EPDFObjectType inType); 
-	PDFObject(int inType); 
+	PDFObject(EPDFObjectType inType);
+	PDFObject(int inType);
 	virtual ~PDFObject(void);
 
 	EPDFObjectType GetType();

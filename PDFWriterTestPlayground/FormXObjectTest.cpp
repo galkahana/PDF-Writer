@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "FormXObjectTest.h"
 #include "PDFWriter.h"
@@ -43,7 +43,7 @@ FormXObjectTest::~FormXObjectTest(void)
 EStatusCode FormXObjectTest::Run()
 {
 	PDFWriter pdfWriter;
-	EStatusCode status; 
+	EStatusCode status;
 
 	do
 	{
@@ -52,7 +52,7 @@ EStatusCode FormXObjectTest::Run()
 		{
 			cout<<"failed to start PDF\n";
 			break;
-		}	
+		}
 
 		PDFPage* page = new PDFPage();
 		page->SetMediaBox(PDFRectangle(0,0,595,842));
@@ -133,7 +133,7 @@ EStatusCode FormXObjectTest::Run()
 			cout<<"failed to write page\n";
 			break;
 		}
-	
+
 		// 2nd page, just uses the form from the previous page
 		page = new PDFPage();
 		page->SetMediaBox(PDFRectangle(0,0,595,842));
@@ -144,7 +144,7 @@ EStatusCode FormXObjectTest::Run()
 			status = PDFHummus::eFailure;
 			cout<<"failed to create content context for 2nd page\n";
 		}
-		
+
 		formXObjectName = page->GetResourcesDictionary().AddFormXObjectMapping(formObjectID);
 
 		// place the form in 300,500
@@ -174,7 +174,7 @@ EStatusCode FormXObjectTest::Run()
 			break;
 		}
 	}while(false);
-	return status;	
+	return status;
 }
 
 ADD_CATEGORIZED_TEST(FormXObjectTest,"PDF")

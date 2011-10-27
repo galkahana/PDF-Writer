@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -35,7 +35,7 @@ public:
 	InputFlateDecodeStream(IByteReader* inSourceReader);
 	virtual ~InputFlateDecodeStream(void);
 
-	// Assigning passes ownership of the input stream to the decoder stream. 
+	// Assigning passes ownership of the input stream to the decoder stream.
 	// if you don't care for that, then after finishing with the decode, Assign(NULL).
 	void Assign(IByteReader* inSourceReader);
 

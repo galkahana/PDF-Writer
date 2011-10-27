@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "JPGImageTest.h"
 #include "TestsRunner.h"
@@ -42,7 +42,7 @@ JPGImageTest::~JPGImageTest(void)
 EStatusCode JPGImageTest::Run()
 {
 	PDFWriter pdfWriter;
-	EStatusCode status; 
+	EStatusCode status;
 
 	do
 	{
@@ -51,7 +51,7 @@ EStatusCode JPGImageTest::Run()
 		{
 			cout<<"failed to start PDF\n";
 			break;
-		}	
+		}
 
 		PDFPage* page = new PDFPage();
 		page->SetMediaBox(PDFRectangle(0,0,595,842));
@@ -78,7 +78,7 @@ EStatusCode JPGImageTest::Run()
 			break;
 		}
 
-		// Create image xobject from 
+		// Create image xobject from
 		PDFImageXObject* imageXObject  = pdfWriter.CreateImageXObjectFromJPGFile("C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG");
 		if(!imageXObject)
 		{
@@ -135,7 +135,7 @@ EStatusCode JPGImageTest::Run()
 			break;
 		}
 
-	
+
 		status = pdfWriter.EndPDF();
 		if(status != PDFHummus::eSuccess)
 		{
@@ -143,7 +143,7 @@ EStatusCode JPGImageTest::Run()
 			break;
 		}
 	}while(false);
-	return status;	
+	return status;
 }
 
 ADD_CATEGORIZED_TEST(JPGImageTest,"PDF Images")

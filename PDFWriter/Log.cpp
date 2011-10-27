@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "Log.h"
 #include "SafeBufferMacrosDefs.h"
@@ -55,7 +55,7 @@ Log::Log(const string& inLogFilePath,bool inPlaceUTF8Bom)
 		mLogFile.OpenFile(mFilePath);
 		// put utf 8 header
 		if(inPlaceUTF8Bom)
-			mLogFile.GetOutputStream()->Write(scUTF8Bom,3);	
+			mLogFile.GetOutputStream()->Write(scUTF8Bom,3);
 		mLogFile.CloseFile();
 	}
 }
@@ -110,7 +110,7 @@ string Log::GetFormattedTimeString()
 {
 	// create a local time string (date + time) that looks like this: "[ dd/mm/yyyy hh:mm:ss ] "
 	char buffer[26];
-	
+
 	time_t currentTime;
 	tm structuredLocalTime;
 

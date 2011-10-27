@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "CFFPrimitiveWriter.h"
 #include <math.h>
@@ -43,7 +43,7 @@ void CFFPrimitiveWriter::SetStream(IByteWriter* inCFFOutput)
 	else
 	{
 		mInternalState = PDFHummus::eFailure;
-	}	
+	}
 }
 
 EStatusCode CFFPrimitiveWriter::GetInternalState()
@@ -60,7 +60,7 @@ EStatusCode CFFPrimitiveWriter::WriteByte(Byte inValue)
 
 	if(PDFHummus::eFailure == status)
 		mInternalState = PDFHummus::eFailure;
-	return status;		
+	return status;
 }
 
 EStatusCode CFFPrimitiveWriter::Write(const Byte* inBuffer,LongBufferSizeType inBufferSize)
@@ -72,7 +72,7 @@ EStatusCode CFFPrimitiveWriter::Write(const Byte* inBuffer,LongBufferSizeType in
 
 	if(PDFHummus::eFailure == status)
 		mInternalState = PDFHummus::eFailure;
-	return status;	
+	return status;
 }
 
 EStatusCode CFFPrimitiveWriter::WriteCard8(Byte inValue)
@@ -84,14 +84,14 @@ EStatusCode CFFPrimitiveWriter::WriteCard16(unsigned short inValue)
 {
 	Byte byte1 = (inValue>>8) & 0xff;
 	Byte byte2 = inValue & 0xff;
-	
+
 	if(WriteByte(byte1) != PDFHummus::eSuccess)
 		return PDFHummus::eFailure;
 
 	if(WriteByte(byte2) != PDFHummus::eSuccess)
 		return PDFHummus::eFailure;
 
-	return PDFHummus::eSuccess;	
+	return PDFHummus::eSuccess;
 }
 
 void CFFPrimitiveWriter::SetOffSize(Byte inOffSize)
@@ -119,7 +119,7 @@ EStatusCode CFFPrimitiveWriter::WriteOffset(unsigned long inValue)
 			break;
 
 	}
-	return status;	
+	return status;
 }
 
 EStatusCode CFFPrimitiveWriter::Write3ByteUnsigned(unsigned long inValue)
@@ -127,7 +127,7 @@ EStatusCode CFFPrimitiveWriter::Write3ByteUnsigned(unsigned long inValue)
 	Byte byte1 = (inValue>>16) & 0xff;
 	Byte byte2 = (inValue>>8) & 0xff;
 	Byte byte3 = inValue & 0xff;
-	
+
 	if(WriteByte(byte1) != PDFHummus::eSuccess)
 		return PDFHummus::eFailure;
 
@@ -146,7 +146,7 @@ EStatusCode CFFPrimitiveWriter::Write4ByteUnsigned(unsigned long inValue)
 	Byte byte2 = (inValue>>16) & 0xff;
 	Byte byte3 = (inValue>>8) & 0xff;
 	Byte byte4 = inValue & 0xff;
-	
+
 	if(WriteByte(byte1) != PDFHummus::eSuccess)
 		return PDFHummus::eFailure;
 
@@ -180,7 +180,7 @@ EStatusCode CFFPrimitiveWriter::WriteDictOperator(unsigned short inOperator)
 }
 
 EStatusCode CFFPrimitiveWriter::WriteDictOperand(const DictOperand& inOperand)
-{	
+{
 	if(inOperand.IsInteger)
 		return WriteIntegerOperand(inOperand.IntegerValue);
 	else
@@ -296,7 +296,7 @@ EStatusCode CFFPrimitiveWriter::WriteRealOperand(double inValue,long inFractalLe
 	bool minusExponent = false;
 	bool plusExponent = false;
 	unsigned short exponentSize = 0;
-	
+
 	if(minusSign)
 		inValue = -inValue;
 
@@ -331,7 +331,7 @@ EStatusCode CFFPrimitiveWriter::WriteRealOperand(double inValue,long inFractalLe
 	// now let's get to work
 	if(WriteByte(30) != PDFHummus::eSuccess)
 		return PDFHummus::eFailure;
-	
+
 	// first, take care of minus sign
 	Byte buffer = minusSign ? 0xe0 : 0;
 	bool usedFirst = minusSign;
@@ -422,7 +422,7 @@ EStatusCode CFFPrimitiveWriter::WriteIntegerOfReal(double inIntegerValue,
 Byte BytesPad5[5] = {'0','0','0','0','0'};
 EStatusCode CFFPrimitiveWriter::Pad5Bytes()
 {
-	return Write(BytesPad5,5);	
+	return Write(BytesPad5,5);
 }
 
 Byte BytePad[1] = {'0'};

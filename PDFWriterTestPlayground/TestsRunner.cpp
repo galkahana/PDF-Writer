@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "TestsRunner.h"
 
@@ -91,14 +91,14 @@ EStatusCode TestsRunner::RunTestsInList(const StringAndTestUnitList& inTests)
 		}
 		cout<<"--------------------------------------------------------------\n";
 		cout<<"Test run ended: "<<succeededCount<<" tests succeeded, "<<failedCount<<" tests failed.\n";
-	}	
+	}
 	return testsStatus;
 }
 
 EStatusCode TestsRunner::RunSingleTest(const string& inTestName,ITestUnit* inTest)
 {
 	EStatusCode testStatus;
-	
+
 	cout<<"Running Test "<<inTestName<<"\n";
 	testStatus = inTest->Run();
 	if(PDFHummus::eFailure == testStatus)
@@ -111,7 +111,7 @@ EStatusCode TestsRunner::RunSingleTest(const string& inTestName,ITestUnit* inTes
 void TestsRunner::AddTest(const std::string& inTestLabel,const std::string& inCategory,ITestUnit* inTest)
 {
 	StringToStringAndTestUnitListMap::iterator it = mTests.find(inCategory);
-	
+
 	if(it == mTests.end())
 		it = mTests.insert(StringToStringAndTestUnitListMap::value_type(inCategory,StringAndTestUnitList())).first;
 	it->second.push_back(StringAndTestUnit(inTestLabel,inTest));

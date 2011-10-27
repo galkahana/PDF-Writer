@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -65,7 +65,7 @@ public:
 
 	// convert to UTF16 BE
 	EStatusCodeAndString ToUTF16BE(bool inPrependWithBom) const;
-	
+
 	// convert to UTF16 LE
 	EStatusCodeAndString ToUTF16LE(bool inPrependWithBom) const;
 

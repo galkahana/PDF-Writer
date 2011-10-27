@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -31,7 +31,7 @@
 // black and white tiff parameters
 struct TIFFBiLevelBWColorTreatment
 {
-	// AsImageMask - is this image to be drawn as regular b/w image (false), or as an image mask (true). 
+	// AsImageMask - is this image to be drawn as regular b/w image (false), or as an image mask (true).
 	// when image mask 0 will be transparent, and 1 will be in the color of OneColor
 	bool AsImageMask;
 
@@ -47,7 +47,7 @@ struct TIFFBiLevelBWColorTreatment
 
 struct TIFFBiLevelGrayscaleColorTreatment
 {
-	// AsColorMap - is this image to be drawn are regular grayscale (false), or as a combination between 2 colors, where 0 
+	// AsColorMap - is this image to be drawn are regular grayscale (false), or as a combination between 2 colors, where 0
 	// is one color, 1 is the other and any interim value is intepreted as their combination
 	bool AsColorMap;
 

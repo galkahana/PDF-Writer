@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "InputBufferedStream.h"
 #include <memory.h>
@@ -78,7 +78,7 @@ LongBufferSizeType InputBufferedStream::Read(Byte* inBuffer,LongBufferSizeType i
 			memcpy(inBuffer,mCurrentBufferIndex,mLastAvailableIndex - mCurrentBufferIndex);
 			bytesRead = mLastAvailableIndex - mCurrentBufferIndex;
 			mCurrentBufferIndex = mLastAvailableIndex;
-			
+
 			// if still need to read more than mBufferSize, read all but modulo of buffer size directly to the output buffer
 			// [so that can later read into buffer, and copy from there to the output buffer
 
@@ -88,7 +88,7 @@ LongBufferSizeType InputBufferedStream::Read(Byte* inBuffer,LongBufferSizeType i
 				LongBufferSizeType bytesToReadToBuffer = inBufferSize % mBufferSize;
 
 				bytesRead += mSourceStream->Read(inBuffer + bytesRead,inBufferSize-bytesToReadToBuffer);
-		
+
 				if(mSourceStream->NotEnded())
 				{
 					mLastAvailableIndex = mBuffer + mSourceStream->Read(mBuffer,mBufferSize);
@@ -146,7 +146,7 @@ void InputBufferedStream::SetPosition(LongFilePositionType inOffsetFromStart)
 void InputBufferedStream::SetPositionFromEnd(LongFilePositionType inOffsetFromEnd)
 {
 	mLastAvailableIndex = mCurrentBufferIndex = mBuffer;
-	mSourceStream->SetPositionFromEnd(inOffsetFromEnd);	
+	mSourceStream->SetPositionFromEnd(inOffsetFromEnd);
 }
 
 IByteReaderWithPosition* InputBufferedStream::GetSourceStream()

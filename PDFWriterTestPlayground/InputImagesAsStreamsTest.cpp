@@ -27,7 +27,7 @@ EStatusCode InputImagesAsStreamsTest::Run()
 	// obviously this is quite a trivial case.
 
 	PDFWriter pdfWriter;
-	EStatusCode status; 
+	EStatusCode status;
 
 	do
 	{
@@ -36,7 +36,7 @@ EStatusCode InputImagesAsStreamsTest::Run()
 		{
 			cout<<"failed to start PDF\n";
 			break;
-		}	
+		}
 
 		PDFPage* page = new PDFPage();
 		page->SetMediaBox(PDFRectangle(0,0,595,842));
@@ -143,7 +143,7 @@ EStatusCode InputImagesAsStreamsTest::Run()
 		}
 
 		// PDF
-		
+
 		InputFile pdfFile;
 
 		status = pdfFile.OpenFile("C:\\PDFLibTests\\TestMaterials\\Original.pdf");
@@ -169,7 +169,7 @@ EStatusCode InputImagesAsStreamsTest::Run()
 			break;
 		}
 	}while(false);
-	return status;	
+	return status;
 }
 
 

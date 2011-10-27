@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "InputPFBDecodeStream.h"
 #include "Trace.h"
@@ -157,7 +157,7 @@ EStatusCode InputPFBDecodeStream::InitializeStreamSegment()
 				{
 					TRACE_LOG1("InputPFBDecodeStream::InitializeStreamSegment, unrecognized segment type - %d",buffer);
 					status = PDFHummus::eFailure;
-					break;				
+					break;
 				}
 		}
 		mCurrentType = buffer;
@@ -281,7 +281,7 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 
 		// now read token until it's done. there are some special cases detemining when a token is done
 		// based on the first charachter of the token [literal string, hex string , comment]
-		
+
 		if(GetNextByteForToken(buffer) != PDFHummus::eSuccess)
 		{
 			result.first = false;
@@ -297,7 +297,7 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 				while(IsSegmentNotEnded())
 				{
 					if(GetNextByteForToken(buffer) != PDFHummus::eSuccess)
-					{	
+					{
 						result.first = false;
 						break;
 					}
@@ -317,11 +317,11 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 				while(balanceLevel > 0 && IsSegmentNotEnded())
 				{
 					if(GetNextByteForToken(buffer) != PDFHummus::eSuccess)
-					{	
+					{
 						result.first = false;
 						break;
 					}
-			
+
 					if(backSlashEncountered)
 					{
 						backSlashEncountered = false;
@@ -342,7 +342,7 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 						}
 						else
 						{
-							tokenBuffer.Write(scBackSlash,1);					
+							tokenBuffer.Write(scBackSlash,1);
 							tokenBuffer.Write(&buffer,1);
 						}
 					}
@@ -350,7 +350,7 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 					{
 						if('\\' == buffer)
 						{
-							backSlashEncountered = true; 
+							backSlashEncountered = true;
 							continue;
 						}
 						else if('(' == buffer)
@@ -372,13 +372,13 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 					result.second = tokenBuffer.ToString();
 					break;
 				}
-				
+
 				// this is either a ASCII base 85 string or a hex string
-				// for the purpose of the tokanizer it needs to know if this is a 
+				// for the purpose of the tokanizer it needs to know if this is a
 				// hex string, so as to ignore spaces (not gonna do making sure it's hex
 				// leave that to the primitive reader, if one exists)
 				if(GetNextByteForToken(buffer) != PDFHummus::eSuccess)
-				{	
+				{
 					result.first = false;
 					break;
 				}
@@ -390,7 +390,7 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 					while(IsSegmentNotEnded())
 					{
 						if(GetNextByteForToken(buffer) != PDFHummus::eSuccess)
-						{	
+						{
 							result.first = false;
 							break;
 						}
@@ -401,7 +401,7 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 							if(!IsSegmentNotEnded())
 								break;
 							if(GetNextByteForToken(buffer) != PDFHummus::eSuccess)
-							{	
+							{
 								result.first = false;
 								break;
 							}
@@ -418,7 +418,7 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 					while(IsSegmentNotEnded())
 					{
 						if(GetNextByteForToken(buffer) != PDFHummus::eSuccess)
-						{	
+						{
 							result.first = false;
 							break;
 						}
@@ -444,7 +444,7 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 				while(IsSegmentNotEnded())
 				{
 					if(GetNextByteForToken(buffer) != PDFHummus::eSuccess)
-					{	
+					{
 						result.first = false;
 						break;
 					}
@@ -544,7 +544,7 @@ EStatusCode InputPFBDecodeStream::InitializeBinaryDecode()
 EStatusCode InputPFBDecodeStream::ReadDecodedByte(Byte& outByte)
 {
 	Byte buffer;
-	
+
 	if(mInSegmentReadIndex >= mSegmentSize)
 	{
 		return PDFHummus::eFailure;
@@ -582,8 +582,8 @@ LongBufferSizeType InputPFBDecodeStream::Read(Byte* inBuffer,LongBufferSizeType 
 
 	while(NotEnded() && inBufferSize > bufferIndex && PDFHummus::eSuccess == mInternalState)
 	{
-		while(mSegmentSize > mInSegmentReadIndex && 
-				inBufferSize > bufferIndex && 
+		while(mSegmentSize > mInSegmentReadIndex &&
+				inBufferSize > bufferIndex &&
 				PDFHummus::eSuccess == mInternalState)
 		{
 			mInternalState = mDecodeMethod(this,inBuffer[bufferIndex]);
@@ -593,7 +593,7 @@ LongBufferSizeType InputPFBDecodeStream::Read(Byte* inBuffer,LongBufferSizeType 
 		// segment ended, initialize next segment
 		if(inBufferSize > bufferIndex && NotEnded() && PDFHummus::eSuccess == mInternalState)
 			mInternalState = InitializeStreamSegment();
-			
+
 	}
 	return bufferIndex;
 }

@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "OutputFlateDecodeStream.h"
 #ifndef NO_TRACE
@@ -86,7 +86,7 @@ void OutputFlateDecodeStream::StartEncoding()
 
 
 void OutputFlateDecodeStream::Assign(IByteWriter* inWriter,bool inInitiallyOn)
-{	
+{
 	mTargetStream = inWriter;
 	if(inInitiallyOn && mTargetStream)
 		StartEncoding();

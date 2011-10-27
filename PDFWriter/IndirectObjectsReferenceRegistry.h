@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 /*
@@ -44,7 +44,7 @@ struct ObjectWriteInformation
 	{
 		Free,
 		Used
-	};	
+	};
 
 	bool mObjectWritten;
 	LongFilePositionType mWritePosition; // value is undefined if mObjectWritten is false
@@ -61,13 +61,13 @@ public:
 	~IndirectObjectsReferenceRegistry(void);
 
 	ObjectIDType AllocateNewObjectID();
-	
+
 	PDFHummus::EStatusCode MarkObjectAsWritten(ObjectIDType inObjectID,LongFilePositionType inWritePosition);
 	GetObjectWriteInformationResult GetObjectWriteInformation(ObjectIDType inObjectID) const;
 
 	ObjectIDType GetObjectsCount() const;
 	// should be used with safe object IDs. use GetObjectsCount to verify the maximum ID
-	const ObjectWriteInformation& GetNthObjectReference(ObjectIDType inObjectID) const; 
+	const ObjectWriteInformation& GetNthObjectReference(ObjectIDType inObjectID) const;
 
 	PDFHummus::EStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
 	PDFHummus::EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);

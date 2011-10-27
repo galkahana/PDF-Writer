@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "CharStringType2Tracer.h"
 #include "CFFFileInput.h"
@@ -37,9 +37,9 @@ CharStringType2Tracer::~CharStringType2Tracer(void)
 }
 
 
-EStatusCode CharStringType2Tracer::TraceGlyphProgram(unsigned short inFontIndex, 
-													unsigned short inGlyphIndex, 
-													CFFFileInput* inCFFFileInput, 
+EStatusCode CharStringType2Tracer::TraceGlyphProgram(unsigned short inFontIndex,
+													unsigned short inGlyphIndex,
+													CFFFileInput* inCFFFileInput,
 													IByteWriter* inWriter)
 {
 	CharStringType2Interpreter interpreter;
@@ -57,7 +57,7 @@ EStatusCode CharStringType2Tracer::TraceGlyphProgram(unsigned short inFontIndex,
 			TRACE_LOG("CharStringType2Tracer::Trace, Exception, cannot prepare for glyph interpretation");
 			break;
 		}
-		
+
 		CharString* charString = inCFFFileInput->GetGlyphCharString(inFontIndex,inGlyphIndex);
 		if(!charString)
 		{

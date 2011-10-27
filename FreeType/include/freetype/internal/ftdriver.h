@@ -285,7 +285,7 @@ FT_BEGIN_HEADER
 
 #define FT_DECLARE_DRIVER(class_)    \
   FT_CALLBACK_TABLE                  \
-  const FT_Driver_ClassRec  class_;  
+  const FT_Driver_ClassRec  class_;
 
 #define FT_DEFINE_DRIVER(class_,                                             \
                          flags_, size_, name_, version_, requires_,          \
@@ -327,7 +327,7 @@ FT_BEGIN_HEADER
     select_size_                                                             \
   };
 
-#else /* FT_CONFIG_OPTION_PIC */ 
+#else /* FT_CONFIG_OPTION_PIC */
 
 #ifdef FT_CONFIG_OPTION_OLD_INTERNALS
 #define FT_DEFINE_DRIVERS_OLD_INTERNALS(a_,b_) \
@@ -409,7 +409,7 @@ FT_BEGIN_HEADER
                                                                              \
     *output_class = (FT_Module_Class*)clazz;                                 \
     return FT_Err_Ok;                                                        \
-  }                
+  }
 
 
 #endif /* FT_CONFIG_OPTION_PIC */

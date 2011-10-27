@@ -82,7 +82,7 @@ FT_BEGIN_HEADER
     get_cmap_info_                                            \
   };
 
-#else /* FT_CONFIG_OPTION_PIC */ 
+#else /* FT_CONFIG_OPTION_PIC */
 
 #define FT_DEFINE_SERVICE_TTCMAPSREC(class_, get_cmap_info_) \
   void                                                       \
@@ -91,9 +91,9 @@ FT_BEGIN_HEADER
   {                                                          \
     FT_UNUSED(library);                                      \
     clazz->get_cmap_info = get_cmap_info_;                   \
-  } 
+  }
 
-#endif /* FT_CONFIG_OPTION_PIC */ 
+#endif /* FT_CONFIG_OPTION_PIC */
 
   /* */
 

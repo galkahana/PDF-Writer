@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -32,7 +32,7 @@
 		unicodeString.FromUTF8(inUTF8String);
 
 		EStatusCodeAndUShortList result = unicodeString.ToUTF16UShort();
-		
+
 		std::wstringstream stream;
 
 		UShortList::const_iterator it = result.second.begin();

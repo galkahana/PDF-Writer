@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "SimpleTextUsage.h"
 #include "PDFWriter.h"
@@ -78,7 +78,7 @@ EStatusCode SimpleTextUsage::Run()
 EStatusCode SimpleTextUsage::RunCFFTest()
 {
 	PDFWriter pdfWriter;
-	EStatusCode status; 
+	EStatusCode status;
 
 	do
 	{
@@ -87,7 +87,7 @@ EStatusCode SimpleTextUsage::RunCFFTest()
 		{
 			cout<<"failed to start PDF\n";
 			break;
-		}	
+		}
 
 		PDFPage* page = new PDFPage();
 		page->SetMediaBox(PDFRectangle(0,0,595,842));
@@ -167,14 +167,14 @@ EStatusCode SimpleTextUsage::RunCFFTest()
 			break;
 		}
 	}while(false);
-	return status;	
+	return status;
 
 }
 
 EStatusCode SimpleTextUsage::RunTrueTypeTest()
 {
 	PDFWriter pdfWriter;
-	EStatusCode status; 
+	EStatusCode status;
 
 	do
 	{
@@ -183,7 +183,7 @@ EStatusCode SimpleTextUsage::RunTrueTypeTest()
 		{
 			cout<<"failed to start PDF\n";
 			break;
-		}	
+		}
 
 		PDFPage* page = new PDFPage();
 		page->SetMediaBox(PDFRectangle(0,0,595,842));
@@ -241,13 +241,13 @@ EStatusCode SimpleTextUsage::RunTrueTypeTest()
 			break;
 		}
 	}while(false);
-	return status;	
+	return status;
 }
 
 EStatusCode SimpleTextUsage::RunType1Test()
 {
 	PDFWriter pdfWriter;
-	EStatusCode status; 
+	EStatusCode status;
 
 	do
 	{
@@ -256,7 +256,7 @@ EStatusCode SimpleTextUsage::RunType1Test()
 		{
 			cout<<"failed to start PDF\n";
 			break;
-		}	
+		}
 
 		PDFPage* page = new PDFPage();
 		page->SetMediaBox(PDFRectangle(0,0,595,842));
@@ -315,7 +315,7 @@ EStatusCode SimpleTextUsage::RunType1Test()
 			break;
 		}
 	}while(false);
-	return status;		
+	return status;
 }
 
 ADD_CATEGORIZED_TEST(SimpleTextUsage,"PDF")

@@ -59,7 +59,7 @@ FT_BEGIN_HEADER
     get_name_, name_index_                                             \
   };
 
-#else /* FT_CONFIG_OPTION_PIC */ 
+#else /* FT_CONFIG_OPTION_PIC */
 
 #define FT_DEFINE_SERVICE_GLYPHDICTREC(class_, get_name_, name_index_) \
   void                                                                 \
@@ -69,9 +69,9 @@ FT_BEGIN_HEADER
     FT_UNUSED(library);                                                \
     clazz->get_name = get_name_;                                       \
     clazz->name_index = name_index_;                                   \
-  } 
+  }
 
-#endif /* FT_CONFIG_OPTION_PIC */ 
+#endif /* FT_CONFIG_OPTION_PIC */
 
   /* */
 

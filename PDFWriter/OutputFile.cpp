@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "OutputFile.h"
 #include "OutputBufferedStream.h"
@@ -47,7 +47,7 @@ EStatusCode OutputFile::OpenFile(const string& inFilePath,bool inAppend)
 			TRACE_LOG1("OutputFile::OpenFile, Unexpected Failure. Couldn't close previously open file - %s",mFilePath.c_str());
 			break;
 		}
-	
+
 		OutputFileStream* outputFileStream = new OutputFileStream();
 		status = outputFileStream->Open(inFilePath,inAppend); // explicitly open, so status may be retrieved
 		if(status != PDFHummus::eSuccess)

@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "DocumentContext.h"
 #include "ObjectsContext.h"
@@ -182,7 +182,7 @@ EStatusCode	DocumentContext::FinalizePDF()
 
 		WriteXrefReference(xrefTablePosition);
 		WriteFinalEOF();
-		
+
 	} while(false);
 
 	return status;
@@ -196,7 +196,7 @@ void DocumentContext::WriteXrefReference(LongFilePositionType inXrefTablePositio
 	mObjectsContext->WriteInteger(inXrefTablePosition,eTokenSeparatorEndLine);
 }
 
-static const IOBasicTypes::Byte scEOF[] = {'%','%','E','O','F'}; 
+static const IOBasicTypes::Byte scEOF[] = {'%','%','E','O','F'};
 
 void DocumentContext::WriteFinalEOF()
 {
@@ -222,13 +222,13 @@ EStatusCode DocumentContext::WriteTrailerDictionary()
 
 	do
 	{
-	
+
 		// size
 		dictionaryContext->WriteKey(scSize);
 		dictionaryContext->WriteIntegerValue(mObjectsContext->GetInDirectObjectsRegistry().GetObjectsCount());
 
 		// prev reference
-		BoolAndLongFilePositionType filePositionResult = mTrailerInformation.GetPrev(); 
+		BoolAndLongFilePositionType filePositionResult = mTrailerInformation.GetPrev();
 		if(filePositionResult.first)
 		{
 			dictionaryContext->WriteKey(scPrev);
@@ -276,7 +276,7 @@ EStatusCode DocumentContext::WriteTrailerDictionary()
 		mObjectsContext->EndLine();
 
 	}while(false);
-	
+
 	mObjectsContext->EndDictionary(dictionaryContext);
 
 	return status;
@@ -305,49 +305,49 @@ void DocumentContext::WriteInfoDictionary()
 
 	mTrailerInformation.SetInfoDictionaryReference(infoDictionaryID);
 
-	if(!infoDictionary.Title.IsEmpty()) 
+	if(!infoDictionary.Title.IsEmpty())
 	{
 		infoContext->WriteKey(scTitle);
 		infoContext->WriteLiteralStringValue(infoDictionary.Title.ToString());
 	}
-	
-	if(!infoDictionary.Author.IsEmpty()) 
+
+	if(!infoDictionary.Author.IsEmpty())
 	{
 		infoContext->WriteKey(scAuthor);
 		infoContext->WriteLiteralStringValue(infoDictionary.Author.ToString());
 	}
 
-	if(!infoDictionary.Subject.IsEmpty()) 
+	if(!infoDictionary.Subject.IsEmpty())
 	{
 		infoContext->WriteKey(scSubject);
 		infoContext->WriteLiteralStringValue(infoDictionary.Subject.ToString());
 	}
 
-	if(!infoDictionary.Keywords.IsEmpty()) 
+	if(!infoDictionary.Keywords.IsEmpty())
 	{
 		infoContext->WriteKey(scKeywords);
 		infoContext->WriteLiteralStringValue(infoDictionary.Keywords.ToString());
 	}
 
-	if(!infoDictionary.Creator.IsEmpty()) 
+	if(!infoDictionary.Creator.IsEmpty())
 	{
 		infoContext->WriteKey(scCreator);
 		infoContext->WriteLiteralStringValue(infoDictionary.Creator.ToString());
 	}
 
-	if(!infoDictionary.Producer.IsEmpty()) 
+	if(!infoDictionary.Producer.IsEmpty())
 	{
 		infoContext->WriteKey(scProducer);
 		infoContext->WriteLiteralStringValue(infoDictionary.Producer.ToString());
 	}
 
-	if(!infoDictionary.CreationDate.IsNull()) 
+	if(!infoDictionary.CreationDate.IsNull())
 	{
 		infoContext->WriteKey(scCreationDate);
 		infoContext->WriteLiteralStringValue(infoDictionary.CreationDate.ToString());
 	}
 
-	if(!infoDictionary.ModDate.IsNull()) 
+	if(!infoDictionary.ModDate.IsNull())
 	{
 		infoContext->WriteKey(scModDate);
 		infoContext->WriteLiteralStringValue(infoDictionary.ModDate.ToString());
@@ -369,7 +369,7 @@ void DocumentContext::WriteInfoDictionary()
 
 	mObjectsContext->EndDictionary(infoContext);
 	mObjectsContext->EndIndirectObject();
-	
+
 }
 
 CatalogInformation& DocumentContext::GetCatalogInformation()
@@ -434,7 +434,7 @@ int DocumentContext::WritePageTree(PageTree* inPageTreeToWrite)
 		// type
 		pagesTreeContext->WriteKey(scType);
 		pagesTreeContext->WriteNameValue(scPages);
-		
+
 		// count
 		pagesTreeContext->WriteKey(scCount);
 		pagesTreeContext->WriteIntegerValue(inPageTreeToWrite->GetNodesCount());
@@ -474,7 +474,7 @@ int DocumentContext::WritePageTree(PageTree* inPageTreeToWrite)
 		// type
 		pagesTreeContext->WriteKey(scType);
 		pagesTreeContext->WriteNameValue(scPages);
-		
+
 		// count
 		pagesTreeContext->WriteKey(scCount);
 		pagesTreeContext->WriteIntegerValue(totalPagesNodes);
@@ -509,7 +509,7 @@ static const string scContents = "Contents";
 EStatusCodeAndObjectIDType DocumentContext::WritePage(PDFPage* inPage)
 {
 	EStatusCodeAndObjectIDType result;
-	
+
 	result.first = PDFHummus::eSuccess;
 	result.second = mObjectsContext->StartNewIndirectObject();
 
@@ -522,14 +522,14 @@ EStatusCodeAndObjectIDType DocumentContext::WritePage(PDFPage* inPage)
 	// parent
 	pageContext->WriteKey(scParent);
 	pageContext->WriteObjectReferenceValue(mCatalogInformation.AddPageToPageTree(result.second,mObjectsContext->GetInDirectObjectsRegistry()));
-	
+
 	// Media Box
 	pageContext->WriteKey(scMediaBox);
 	pageContext->WriteRectangleValue(inPage->GetMediaBox());
 
 	do
 	{
-		// Resource dict 
+		// Resource dict
 		pageContext->WriteKey(scResources);
 		result.first = WriteResourcesDictionary(inPage->GetResourcesDictionary());
 		if(result.first != PDFHummus::eSuccess)
@@ -548,7 +548,7 @@ EStatusCodeAndObjectIDType DocumentContext::WritePage(PDFPage* inPage)
 			mObjectsContext->StartArray();
 			for(; it != mAnnotations.end(); ++it)
 				mObjectsContext->WriteIndirectObjectReference(*it);
-			mObjectsContext->EndArray(eTokenSeparatorEndLine);			
+			mObjectsContext->EndArray(eTokenSeparatorEndLine);
 		}
 		mAnnotations.clear();
 
@@ -563,7 +563,7 @@ EStatusCodeAndObjectIDType DocumentContext::WritePage(PDFPage* inPage)
 				mObjectsContext->StartArray();
 				while(iterator.MoveNext())
 					mObjectsContext->WriteIndirectObjectReference(iterator.GetItem());
-				mObjectsContext->EndArray();	
+				mObjectsContext->EndArray();
 				mObjectsContext->EndLine();
 			}
 			else
@@ -589,7 +589,7 @@ EStatusCodeAndObjectIDType DocumentContext::WritePage(PDFPage* inPage)
 			TRACE_LOG("DocumentContext::WritePage, unexpected failure. Failed to end dictionary in page write.");
 			break;
 		}
-		mObjectsContext->EndIndirectObject();	
+		mObjectsContext->EndIndirectObject();
 	}while(false);
 
 	return result;
@@ -710,8 +710,8 @@ PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBounding
 			mObjectsContext->EndArray(eTokenSeparatorEndLine);
 		}
 
-		// Resource dict 
-		xobjectContext->WriteKey(scResources);	
+		// Resource dict
+		xobjectContext->WriteKey(scResources);
 		// put a resources dictionary place holder
 		ObjectIDType formXObjectResourcesDictionaryID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
 		xobjectContext->WriteObjectReferenceValue(formXObjectResourcesDictionaryID);
@@ -734,7 +734,7 @@ PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBounding
 		aFormXObject =  new PDFFormXObject(inFormXObjectID,mObjectsContext->StartPDFStream(xobjectContext),formXObjectResourcesDictionaryID);
 	} while(false);
 
-	return aFormXObject;	
+	return aFormXObject;
 }
 
 
@@ -752,7 +752,7 @@ EStatusCode DocumentContext::EndFormXObjectNoRelease(PDFFormXObject* inFormXObje
 	mObjectsContext->StartNewIndirectObject(inFormXObject->GetResourcesDictionaryObjectID());
 	WriteResourcesDictionary(inFormXObject->GetResourcesDictionary());
 	mObjectsContext->EndIndirectObject();
-	
+
 	return PDFHummus::eSuccess;
 }
 
@@ -760,7 +760,7 @@ EStatusCode DocumentContext::EndFormXObjectAndRelease(PDFFormXObject* inFormXObj
 {
 	EStatusCode status = EndFormXObjectNoRelease(inFormXObject);
 	delete inFormXObject; // will also delete the stream becuase the form XObject owns it
-	
+
 	return status;
 }
 
@@ -836,7 +836,7 @@ EStatusCode DocumentContext::WriteResourcesDictionary(ResourcesDictionary& inRes
 		// Color space
 		if(inResourcesDictionary.GetColorSpacesCount() > 0)
 			WriteResourceDictionary(resourcesContext,scColorSpaces,inResourcesDictionary.GetColorSpacesIterator());
-	
+
 		// Patterns
 		if(inResourcesDictionary.GetPatternsCount() > 0)
 			WriteResourceDictionary(resourcesContext,scPatterns,inResourcesDictionary.GetPatternsIterator());
@@ -860,7 +860,7 @@ EStatusCode DocumentContext::WriteResourcesDictionary(ResourcesDictionary& inRes
 			}
 		}
 
-		mObjectsContext->EndDictionary(resourcesContext); 
+		mObjectsContext->EndDictionary(resourcesContext);
 	}while(false);
 
 	return status;
@@ -891,14 +891,14 @@ void DocumentContext::WriteResourceDictionary(DictionaryContext* inResourcesDict
 		}
 	}
 
-	mObjectsContext->EndDictionary(resourceContext);	
+	mObjectsContext->EndDictionary(resourceContext);
 }
 
 
 
 bool DocumentContext::IsIdentityMatrix(const double* inMatrix)
 {
-	return 
+	return
 		inMatrix[0] == 1 &&
 		inMatrix[1] == 0 &&
 		inMatrix[2] == 0 &&
@@ -926,7 +926,7 @@ JPEGImageHandler& DocumentContext::GetJPEGImageHandler()
 PDFFormXObject* DocumentContext::CreateFormXObjectFromTIFFFile(	const string& inTIFFFilePath,
 																const TIFFUsageParameters& inTIFFUsageParameters)
 {
-	
+
 	return mTIFFImageHandler.CreateFormXObjectFromTIFFFile(inTIFFFilePath,inTIFFUsageParameters);
 }
 
@@ -940,7 +940,7 @@ PDFFormXObject* DocumentContext::CreateFormXObjectFromJPGFile(const string& inJP
 	return mJPEGImageHandler.CreateFormXObjectFromJPGFile(inJPGFilePath,inFormXObjectID);
 }
 
-PDFFormXObject* DocumentContext::CreateFormXObjectFromTIFFFile(	
+PDFFormXObject* DocumentContext::CreateFormXObjectFromTIFFFile(
 												const string& inTIFFFilePath,
 												ObjectIDType inFormXObjectID,
 												const TIFFUsageParameters& inTIFFUsageParameters)
@@ -970,7 +970,7 @@ EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(const 
 																			const double* inTransformationMatrix,
 																			const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	return mPDFDocumentHandler.CreateFormXObjectsFromPDF(inPDFFilePath,inPageRange,inPageBoxToUseAsFormBox,inTransformationMatrix,inCopyAdditionalObjects);	
+	return mPDFDocumentHandler.CreateFormXObjectsFromPDF(inPDFFilePath,inPageRange,inPageBoxToUseAsFormBox,inTransformationMatrix,inCopyAdditionalObjects);
 
 }
 
@@ -980,14 +980,14 @@ EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(const 
 																			const double* inTransformationMatrix,
 																			const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	return mPDFDocumentHandler.CreateFormXObjectsFromPDF(inPDFFilePath,inPageRange,inCropBox,inTransformationMatrix,inCopyAdditionalObjects);	
+	return mPDFDocumentHandler.CreateFormXObjectsFromPDF(inPDFFilePath,inPageRange,inCropBox,inTransformationMatrix,inCopyAdditionalObjects);
 
 }
 EStatusCodeAndObjectIDTypeList DocumentContext::AppendPDFPagesFromPDF(const string& inPDFFilePath,
 																	  const PDFPageRange& inPageRange,
 																	  const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	return mPDFDocumentHandler.AppendPDFPagesFromPDF(inPDFFilePath,inPageRange,inCopyAdditionalObjects);	
+	return mPDFDocumentHandler.AppendPDFPagesFromPDF(inPDFFilePath,inPageRange,inCopyAdditionalObjects);
 }
 
 EStatusCode DocumentContext::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
@@ -1021,7 +1021,7 @@ EStatusCode DocumentContext::WriteState(ObjectsContext* inStateWriter,ObjectIDTy
 
 		WriteTrailerState(inStateWriter,trailerInformationID);
 		WriteCatalogInformationState(inStateWriter,catalogInformationID);
-		
+
 		status = mUsedFontsRepository.WriteState(inStateWriter,usedFontsRepositoryID);
 		if(status != PDFHummus::eSuccess)
 			break;
@@ -1176,7 +1176,7 @@ void DocumentContext::WriteCatalogInformationState(ObjectsContext* inStateWriter
 
 	inStateWriter->EndDictionary(catalogInformation);
 	inStateWriter->EndIndirectObject();
-	
+
 }
 
 void DocumentContext::WritePageTreeState(ObjectsContext* inStateWriter,ObjectIDType inObjectID,PageTree* inPageTree)
@@ -1185,7 +1185,7 @@ void DocumentContext::WritePageTreeState(ObjectsContext* inStateWriter,ObjectIDT
 
 	inStateWriter->StartNewIndirectObject(inObjectID);
 	DictionaryContext* pageTreeDictionary = inStateWriter->StartDictionary();
-	
+
 	pageTreeDictionary->WriteKey("Type");
 	pageTreeDictionary->WriteNameValue("PageTree");
 
@@ -1213,7 +1213,7 @@ void DocumentContext::WritePageTreeState(ObjectsContext* inStateWriter,ObjectIDT
 			inStateWriter->WriteIndirectObjectReference(pageNodeObjectID);
 			kidsObjectIDs.push_back(pageNodeObjectID);
 		}
-		inStateWriter->EndArray(eTokenSeparatorEndLine);		
+		inStateWriter->EndArray(eTokenSeparatorEndLine);
 	}
 
 	inStateWriter->EndDictionary(pageTreeDictionary);
@@ -1361,7 +1361,7 @@ void DocumentContext::ReadCatalogInformationState(PDFParser* inStateReader,PDFDi
 	mCurrentPageTreeIDInState = currentPageTreeState->mObjectID;
 
 	PDFObjectCastPtr<PDFDictionary> pageTreeState(inStateReader->ParseNewObject(pageTreeRootState->mObjectID));
-	
+
 	PDFObjectCastPtr<PDFInteger> pageTreeIDState(pageTreeState->QueryDirectObject("mPageTreeID"));
 	PageTree* rootNode = new PageTree((ObjectIDType)pageTreeIDState->GetValue());
 
@@ -1375,12 +1375,12 @@ void DocumentContext::ReadPageTreeState(PDFParser* inStateReader,PDFDictionary* 
 {
 	PDFObjectCastPtr<PDFBoolean> isLeafParentState(inPageTreeState->QueryDirectObject("mIsLeafParent"));
 	bool isLeafParent = isLeafParentState->GetValue();
-		
+
 	if(isLeafParent)
 	{
 		PDFObjectCastPtr<PDFArray> kidsIDsState(inPageTreeState->QueryDirectObject("mKidsIDs"));
 		PDFObjectCastPtr<PDFInteger> kidID;
-		
+
 		SingleValueContainerIterator<PDFObjectVector> it = kidsIDsState->GetIterator();
 		while(it.MoveNext())
 		{
@@ -1500,7 +1500,7 @@ EStatusCodeAndObjectIDType DocumentContext::WriteAnnotationAndLinkForURL(const s
 		// URI
 		actionContext->WriteKey(scURI);
 		actionContext->WriteLiteralStringValue(encodedResult.second);
-		
+
 		mObjectsContext->EndDictionary(actionContext);
 
 		mObjectsContext->EndDictionary(linkAnnotationContext);

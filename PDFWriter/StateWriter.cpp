@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "StateWriter.h"
 #include "ObjectsContext.h"
@@ -48,9 +48,9 @@ EStatusCode StateWriter::Start(const string& inStateFilePath)
 		TRACE_LOG1("StateWriter::Start, can't open file for state writing in %s",inStateFilePath.c_str());
 		return PDFHummus::eFailure;
 	}
-	
+
 	// Get me a new copy of objects context, for this session
-	delete mObjectsContext; 
+	delete mObjectsContext;
 	mObjectsContext = new ObjectsContext();
 	mObjectsContext->SetOutputStream(mOutputFile.GetOutputStream());
 
@@ -85,12 +85,12 @@ EStatusCode StateWriter::Finish()
 
 
 	} while(false);
-		
+
 	if(PDFHummus::eSuccess == status)
 		status = mOutputFile.CloseFile();
 	else
 		mOutputFile.CloseFile();
-	return status;	
+	return status;
 }
 
 static const string scTrailer = "trailer";
@@ -124,7 +124,7 @@ void StateWriter::WriteXrefReference(LongFilePositionType inXrefTablePosition)
 	mObjectsContext->WriteInteger(inXrefTablePosition,eTokenSeparatorEndLine);
 }
 
-static const IOBasicTypes::Byte scEOF[] = {'%','%','E','O','F'}; 
+static const IOBasicTypes::Byte scEOF[] = {'%','%','E','O','F'};
 
 void StateWriter::WriteFinalEOF()
 {

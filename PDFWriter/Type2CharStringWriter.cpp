@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "Type2CharStringWriter.h"
 #include "IByteWriter.h"
@@ -39,8 +39,8 @@ void Type2CharStringWriter::Assign(IByteWriter* inTargetStream)
 
 EStatusCode Type2CharStringWriter::WriteHintMask(unsigned long inMask,unsigned long inMaskSize)
 {
-	unsigned long maskByteSize = inMaskSize/8 + (inMaskSize % 8 != 0 ? 1:0);	
-	
+	unsigned long maskByteSize = inMaskSize/8 + (inMaskSize % 8 != 0 ? 1:0);
+
 	EStatusCode status = WriteOperator(19);
 	if(status != PDFHummus::eSuccess)
 		return status;
@@ -134,6 +134,6 @@ EStatusCode Type2CharStringWriter::WriteOperator(unsigned short inOperatorCode)
 		if(WriteByte(0xc0) != PDFHummus::eSuccess)
 			return PDFHummus::eFailure;
 	}
-	return WriteByte(Byte(inOperatorCode & 0xff));	
+	return WriteByte(Byte(inOperatorCode & 0xff));
 }
 

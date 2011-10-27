@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "FlateEncryptionTest.h"
 
@@ -63,7 +63,7 @@ EStatusCode FlateEncryptionTest::Run()
 		}
 
 		IByteReader* encoderReaderStream = new InputBufferedStream(new InputFileStream("c:\\PDFLibTests\\encrypted.txt"));
-		IByteWriter* decoderWriterStream = new OutputFlateDecodeStream(new OutputBufferedStream(new OutputFileStream("c:\\PDFLibTests\\decrypted.txt"))); 
+		IByteWriter* decoderWriterStream = new OutputFlateDecodeStream(new OutputBufferedStream(new OutputFileStream("c:\\PDFLibTests\\decrypted.txt")));
 
 		OutputStreamTraits outputTraits(decoderWriterStream);
 		status = outputTraits.CopyToOutputStream(encoderReaderStream);

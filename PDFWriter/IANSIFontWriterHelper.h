@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -31,7 +31,7 @@ public:
 	// write the sub type value (only, key is already written at this point) for the particular font into the dictionary.
 	virtual void WriteSubTypeValue(DictionaryContext* inDictionary) = 0;
 
-	// Get the relevant CharSet entry writer for the descriptor writing. 
+	// Get the relevant CharSet entry writer for the descriptor writing.
 	// always return something - even if doing nothing
 	virtual IFontDescriptorHelper* GetCharsetWriter() = 0;
 };

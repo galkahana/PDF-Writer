@@ -502,10 +502,10 @@ OJPEGVSetField(TIFF* tif, ttag_t tag, va_list ap)
 	switch(tag)
 	{
 		case TIFFTAG_JPEGIFOFFSET:
-			sp->jpeg_interchange_format=(toff_t)va_arg(ap,uint32);  
+			sp->jpeg_interchange_format=(toff_t)va_arg(ap,uint32);
 			break;
 		case TIFFTAG_JPEGIFBYTECOUNT:
-			sp->jpeg_interchange_format_length=(toff_t)va_arg(ap,uint32);  
+			sp->jpeg_interchange_format_length=(toff_t)va_arg(ap,uint32);
 			break;
 		case TIFFTAG_YCBCRSUBSAMPLING:
 			sp->subsampling_tag=1;
@@ -665,7 +665,7 @@ OJPEGPreDecode(TIFF* tif, tsample_t s)
 		if (OJPEGWriteHeaderInfo(tif)==0)
 			return(0);
 	}
-	while (sp->write_curstrile<m)          
+	while (sp->write_curstrile<m)
 	{
 		if (sp->libjpeg_jpeg_query_style==0)
 		{
@@ -1061,7 +1061,7 @@ OJPEGReadSecondarySos(TIFF* tif, tsample_t s)
 		sp->plane_sample_offset--;
 	sp->in_buffer_source=sp->sos_end[sp->plane_sample_offset].in_buffer_source;
 	sp->in_buffer_next_strile=sp->sos_end[sp->plane_sample_offset].in_buffer_next_strile;
-	sp->in_buffer_file_pos=sp->sos_end[sp->plane_sample_offset].in_buffer_file_pos;  
+	sp->in_buffer_file_pos=sp->sos_end[sp->plane_sample_offset].in_buffer_file_pos;
 	sp->in_buffer_file_pos_log=0;
 	sp->in_buffer_file_togo=sp->sos_end[sp->plane_sample_offset].in_buffer_file_togo;
 	sp->in_buffer_togo=0;
@@ -1223,7 +1223,7 @@ OJPEGReadHeaderInfoSec(TIFF* tif)
 	}
 	sp->in_buffer_source=osibsNotSetYet;
 	sp->in_buffer_next_strile=0;
-	sp->in_buffer_strile_count=tif->tif_dir.td_nstrips;   
+	sp->in_buffer_strile_count=tif->tif_dir.td_nstrips;
 	sp->in_buffer_file_togo=0;
 	sp->in_buffer_togo=0;
 	do
@@ -1905,7 +1905,7 @@ OJPEGReadBufferFill(OJPEGState* sp)
 			case osibsJpegInterchangeFormat:
 				sp->in_buffer_source=osibsStrile;
 			case osibsStrile:
-				if (sp->in_buffer_next_strile==sp->in_buffer_strile_count)  
+				if (sp->in_buffer_next_strile==sp->in_buffer_strile_count)
 					sp->in_buffer_source=osibsEof;
 				else
 				{
@@ -1913,14 +1913,14 @@ OJPEGReadBufferFill(OJPEGState* sp)
 						TIFFErrorExt(sp->tif->tif_clientdata,sp->tif->tif_name,"Strip offsets are missing");
 						return(0);
 					}
-					sp->in_buffer_file_pos=sp->tif->tif_dir.td_stripoffset[sp->in_buffer_next_strile];  
+					sp->in_buffer_file_pos=sp->tif->tif_dir.td_stripoffset[sp->in_buffer_next_strile];
 					if (sp->in_buffer_file_pos!=0)
 					{
 						if (sp->in_buffer_file_pos>=sp->file_size)
 							sp->in_buffer_file_pos=0;
 						else
 						{
-							sp->in_buffer_file_togo=sp->tif->tif_dir.td_stripbytecount[sp->in_buffer_next_strile];  
+							sp->in_buffer_file_togo=sp->tif->tif_dir.td_stripbytecount[sp->in_buffer_next_strile];
 							if (sp->in_buffer_file_togo==0)
 								sp->in_buffer_file_pos=0;
 							else if (sp->in_buffer_file_pos+sp->in_buffer_file_togo>sp->file_size)
@@ -2271,7 +2271,7 @@ OJPEGWriteStreamCompressed(TIFF* tif, void** mem, uint32* len)
 		switch(sp->in_buffer_source)
 		{
 			case osibsStrile:
-				if (sp->in_buffer_next_strile<sp->in_buffer_strile_count)  
+				if (sp->in_buffer_next_strile<sp->in_buffer_strile_count)
 					sp->out_state=ososRst;
 				else
 					sp->out_state=ososEoi;

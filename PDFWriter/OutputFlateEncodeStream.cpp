@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "OutputFlateEncodeStream.h"
 #include "Trace.h"
@@ -103,7 +103,7 @@ void OutputFlateEncodeStream::StartEncoding()
 
 
 void OutputFlateEncodeStream::Assign(IByteWriterWithPosition* inWriter,bool inInitiallyOn)
-{	
+{
 	if(mCurrentlyEncoding)
 		FinalizeEncoding();
 	mTargetStream = inWriter;

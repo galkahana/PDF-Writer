@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "BoxingBaseTest.h"
 #include "TestsRunner.h"
@@ -46,7 +46,7 @@ EStatusCode BoxingBaseTest::RunIntTest()
 {
 	EStatusCode status = PDFHummus::eSuccess;
 
-		
+
 	// Assignment
 	Int a = 3;
 	a = 2;

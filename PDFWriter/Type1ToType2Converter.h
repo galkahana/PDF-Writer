@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -52,7 +52,7 @@ struct Stem
 class StemLess : public binary_function<const Stem,const Stem,bool>
 {
 public:
-	bool operator( ) (const Stem& inLeft, 
+	bool operator( ) (const Stem& inLeft,
 						const Stem& inRight ) const
 	{
 		if(inLeft.mOrigin == inRight.mOrigin)

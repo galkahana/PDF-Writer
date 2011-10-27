@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 #include "EStatusCode.h"
@@ -39,7 +39,7 @@ public:
 	~DictionaryContext(void);
 
 	PDFHummus::EStatusCode WriteKey(const string& inKey);
-	
+
 	void WriteIntegerValue(long long inValue);
 	void WriteLiteralStringValue(const string& inValue);
 	void WriteHexStringValue(const string& inValue);

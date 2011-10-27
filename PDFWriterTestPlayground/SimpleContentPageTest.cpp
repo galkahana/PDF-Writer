@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "SimpleContentPageTest.h"
 #include "PDFWriter.h"
@@ -45,7 +45,7 @@ SimpleContentPageTest::~SimpleContentPageTest(void)
 EStatusCode SimpleContentPageTest::Run()
 {
 	PDFWriter pdfWriter;
-	EStatusCode status; 
+	EStatusCode status;
 
 	do
 	{
@@ -54,7 +54,7 @@ EStatusCode SimpleContentPageTest::Run()
 		{
 			cout<<"failed to start PDF\n";
 			break;
-		}	
+		}
 
 		PDFPage* page = new PDFPage();
 		page->SetMediaBox(PDFRectangle(0,0,595,842));
@@ -97,7 +97,7 @@ EStatusCode SimpleContentPageTest::Run()
 		contentContext->l(400,400);
 		contentContext->S();
 		contentContext->Q();
-		
+
 		status = pdfWriter.EndPageContentContext(contentContext);
 		if(status != PDFHummus::eSuccess)
 		{

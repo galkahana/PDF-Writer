@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -28,7 +28,7 @@ class IType2InterpreterImplementation
 public:
 	virtual PDFHummus::EStatusCode ReadCharString(LongFilePositionType inCharStringStart,
 							   LongFilePositionType inCharStringEnd,
-							   Byte** outCharString) = 0;	
+							   Byte** outCharString) = 0;
 
 	// events in the code
 	virtual PDFHummus::EStatusCode Type2InterpretNumber(const CharStringOperand& inOperand) = 0;
@@ -57,7 +57,7 @@ public:
 	virtual PDFHummus::EStatusCode Type2Hflex1(const CharStringOperandList& inOperandList)=0;
 	virtual PDFHummus::EStatusCode Type2Flex(const CharStringOperandList& inOperandList)=0;
 	virtual PDFHummus::EStatusCode Type2Flex1(const CharStringOperandList& inOperandList)=0;
-	
+
 	virtual PDFHummus::EStatusCode Type2And(const CharStringOperandList& inOperandList)=0;
 	virtual PDFHummus::EStatusCode Type2Or(const CharStringOperandList& inOperandList)=0;
 	virtual PDFHummus::EStatusCode Type2Not(const CharStringOperandList& inOperandList)=0;
@@ -78,10 +78,10 @@ public:
 	virtual PDFHummus::EStatusCode Type2Exch(const CharStringOperandList& inOperandList)=0;
 	virtual PDFHummus::EStatusCode Type2Index(const CharStringOperandList& inOperandList)=0;
 	virtual PDFHummus::EStatusCode Type2Roll(const CharStringOperandList& inOperandList)=0;
-	
+
 	virtual CharString* GetLocalSubr(long inSubrIndex) = 0; // you should bias the index !!
 	virtual CharString* GetGlobalSubr(long inSubrIndex) = 0;// you should bias the index !!
-	
+
 };
 
 class Type2InterpreterImplementationAdapter : public IType2InterpreterImplementation
@@ -89,7 +89,7 @@ class Type2InterpreterImplementationAdapter : public IType2InterpreterImplementa
 public:
 	virtual PDFHummus::EStatusCode ReadCharString(LongFilePositionType inCharStringStart,
 							   LongFilePositionType inCharStringEnd,
-							   Byte** outCharString){return PDFHummus::eFailure;}	
+							   Byte** outCharString){return PDFHummus::eFailure;}
 
 	virtual PDFHummus::EStatusCode Type2InterpretNumber(const CharStringOperand& inOperand) {return PDFHummus::eSuccess;};
 	virtual PDFHummus::EStatusCode Type2Hstem(const CharStringOperandList& inOperandList){return PDFHummus::eSuccess;}
@@ -137,8 +137,8 @@ public:
 	virtual PDFHummus::EStatusCode Type2Dup(const CharStringOperandList& inOperandList){return PDFHummus::eSuccess;}
 	virtual PDFHummus::EStatusCode Type2Exch(const CharStringOperandList& inOperandList){return PDFHummus::eSuccess;}
 	virtual PDFHummus::EStatusCode Type2Index(const CharStringOperandList& inOperandList){return PDFHummus::eSuccess;}
-	virtual PDFHummus::EStatusCode Type2Roll(const CharStringOperandList& inOperandList){return PDFHummus::eSuccess;}	
-	
+	virtual PDFHummus::EStatusCode Type2Roll(const CharStringOperandList& inOperandList){return PDFHummus::eSuccess;}
+
 	virtual CharString* GetLocalSubr(long inSubrIndex) {return NULL;}
 	virtual CharString* GetGlobalSubr(long inSubrIndex){return NULL;}
 };

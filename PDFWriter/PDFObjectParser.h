@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -43,7 +43,7 @@ public:
 	PDFObjectParser(void);
 	~PDFObjectParser(void);
 
-	
+
 	// Assign the stream to read from (does not take ownership of the stream)
 	void SetReadStream(IByteReader* inSourceStream,IReadPositionProvider* inCurrentPositionProvider);
 

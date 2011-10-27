@@ -16,10 +16,10 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
-/*	
+/*
 	Hey, initially this is not a full fledged PFM file reader.
 	i'm just reading the bare minimum to get some required type1 font
 	values
