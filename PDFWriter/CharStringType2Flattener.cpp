@@ -203,7 +203,7 @@ EStatusCode CharStringType2Flattener::WriteCharStringOperator(unsigned short inO
 {
 	if((inOperatorCode & 0xff00) == 0x0c00)
 	{
-		if(WriteByte(0xc0) != PDFHummus::eSuccess)
+		if(WriteByte(0x0c) != PDFHummus::eSuccess)
 			return PDFHummus::eFailure;
 	}
 	return WriteByte(Byte(inOperatorCode & 0xff));
