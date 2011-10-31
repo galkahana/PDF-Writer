@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "TrueTypeDescendentFontWriter.h"
 #include "DescendentFontWriter.h"
@@ -45,13 +45,13 @@ static UIntVector GetOrderedKeys(const UIntAndGlyphEncodingInfoVector& inMap)
 }
 
 
-EStatusCode TrueTypeDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID, 
+EStatusCode TrueTypeDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID,
 														const string& inFontName,
 														FreeTypeFaceWrapper& inFontInfo,
 														const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
 														ObjectsContext* inObjectsContext)
 {
-	// reset embedded font object ID (and flag...to whether it was actually embedded or not, which may 
+	// reset embedded font object ID (and flag...to whether it was actually embedded or not, which may
 	// happen due to font embedding restrictions)
 	mEmbeddedFontFileObjectID = 0;
 
@@ -77,13 +77,13 @@ static const string scIdentity = "Identity";
 
 void TrueTypeDescendentFontWriter::WriteAdditionalKeys(DictionaryContext* inDescendentFontContext)
 {
-	// CIDToGIDMap 
+	// CIDToGIDMap
 	inDescendentFontContext->WriteKey(scCIDToGIDMap);
 	inDescendentFontContext->WriteNameValue(scIdentity);
 }
 
 static const string scFontFile2 = "FontFile2";
-void TrueTypeDescendentFontWriter::WriteFontFileReference(	
+void TrueTypeDescendentFontWriter::WriteFontFileReference(
 										DictionaryContext* inDescriptorContext,
 										ObjectsContext* inObjectsContext)
 {

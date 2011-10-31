@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "CIDFontWriter.h"
 #include "DictionaryContext.h"
@@ -93,7 +93,7 @@ EStatusCode CIDFontWriter::WriteFont(FreeTypeFaceWrapper& inFontInfo,
 
 		WriteEncoding(fontContext);
 
-		// DescendantFonts 
+		// DescendantFonts
 		ObjectIDType descendantFontID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
 
 		fontContext->WriteKey(scDescendantFonts);
@@ -107,7 +107,7 @@ EStatusCode CIDFontWriter::WriteFont(FreeTypeFaceWrapper& inFontInfo,
 		fontContext->WriteKey(scToUnicode);
 		ObjectIDType toUnicodeMapObjectID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
 		fontContext->WriteObjectReferenceValue(toUnicodeMapObjectID);
-		
+
 		status = inObjectsContext->EndDictionary(fontContext);
 		if(status != PDFHummus::eSuccess)
 		{
@@ -188,7 +188,7 @@ void CIDFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 	else
 		primitiveWriter.WriteInteger(100);
 	primitiveWriter.WriteKeyword(scBeginBFChar);
-	
+
 	WriteGlyphEntry(cmapWriteContext,it->second.mEncodedCharacter,it->second.mUnicodeCharacters);
 	++it;
 	for(; it != mCharactersVector.end(); ++it,++i)
@@ -220,7 +220,7 @@ void CIDFontWriter::WriteGlyphEntry(IByteWriter* inWriter,unsigned short inEncod
 
 	SAFE_SPRINTF_1(formattingBuffer,17,"<%04x> <",inEncodedCharacter);
 	inWriter->Write((const Byte*)formattingBuffer,8);
-	
+
 	if(inUnicodeValues.size() == 0)
 	{
 		inWriter->Write(scAllZeros,4);

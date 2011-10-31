@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -52,7 +52,7 @@ public:
 
 	// will skip if can, which is either if not passed position (check with CanSkipTo), or if while skipping will hit EOF
 	void SkipTo(IOBasicTypes::LongFilePositionType inPositionInStream);
-	
+
 	// will skip by, or hit EOF
 	void SkipBy(IOBasicTypes::LongFilePositionType inAmountToSkipBy);
 

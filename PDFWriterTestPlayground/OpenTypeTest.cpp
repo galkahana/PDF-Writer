@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "OpenTypeTest.h"
 #include "OpenTypeFileInput.h"
@@ -50,7 +50,7 @@ EStatusCode OpenTypeTest::SaveCharstringCode(unsigned short inFontIndex,unsigned
 	{
 		if(status != PDFHummus::eSuccess)
 			break;
-		
+
 		CharStringType2Tracer tracer;
 
 		status = tracer.TraceGlyphProgram(inFontIndex,inGlyphIndex,inCFFFileInput,glyphFile.GetOutputStream());

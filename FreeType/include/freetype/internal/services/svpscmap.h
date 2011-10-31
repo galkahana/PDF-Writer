@@ -130,7 +130,7 @@ FT_BEGIN_HEADER
     adobe_std_strings_, adobe_std_encoding_, adobe_expert_encoding_          \
   };
 
-#else /* FT_CONFIG_OPTION_PIC */ 
+#else /* FT_CONFIG_OPTION_PIC */
 
 #define FT_DEFINE_SERVICE_PSCMAPSREC(class_, unicode_value_, unicodes_init_, \
         unicodes_char_index_, unicodes_char_next_, macintosh_name_,          \
@@ -148,9 +148,9 @@ FT_BEGIN_HEADER
     clazz->adobe_std_strings = adobe_std_strings_;                           \
     clazz->adobe_std_encoding = adobe_std_encoding_;                         \
     clazz->adobe_expert_encoding = adobe_expert_encoding_;                   \
-  } 
+  }
 
-#endif /* FT_CONFIG_OPTION_PIC */ 
+#endif /* FT_CONFIG_OPTION_PIC */
 
   /* */
 

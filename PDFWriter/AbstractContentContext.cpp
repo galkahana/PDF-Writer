@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "AbstractContentContext.h"
 #include "PDFStream.h"
@@ -40,12 +40,12 @@ AbstractContentContext::~AbstractContentContext(void)
 
 void AbstractContentContext::SetPDFStreamForWrite(PDFStream* inStream)
 {
-	mPrimitiveWriter.SetStreamForWriting(inStream->GetWriteStream());	
+	mPrimitiveWriter.SetStreamForWriting(inStream->GetWriteStream());
 }
 
 void AbstractContentContext::AssertProcsetAvailable(const string& inProcsetName)
 {
-	GetResourcesDictionary()->AddProcsetResource(inProcsetName);	
+	GetResourcesDictionary()->AddProcsetResource(inProcsetName);
 }
 
 
@@ -163,8 +163,8 @@ void AbstractContentContext::l(double inX,double inY)
 	mPrimitiveWriter.WriteKeyword("l");
 }
 
-void AbstractContentContext::c(	double inX1,double inY1, 
-							double inX2, double inY2, 
+void AbstractContentContext::c(	double inX1,double inY1,
+							double inX2, double inY2,
 							double inX3, double inY3)
 {
 	RenewStreamConnection();
@@ -179,7 +179,7 @@ void AbstractContentContext::c(	double inX1,double inY1,
 	mPrimitiveWriter.WriteKeyword("c");
 }
 
-void AbstractContentContext::v(	double inX2,double inY2, 
+void AbstractContentContext::v(	double inX2,double inY2,
 							double inX3, double inY3)
 {
 	RenewStreamConnection();
@@ -192,7 +192,7 @@ void AbstractContentContext::v(	double inX2,double inY2,
 	mPrimitiveWriter.WriteKeyword("v");
 }
 
-void AbstractContentContext::y(	double inX1,double inY1, 
+void AbstractContentContext::y(	double inX1,double inY1,
 							double inX3, double inY3)
 {
 	RenewStreamConnection();
@@ -487,8 +487,8 @@ void AbstractContentContext::Do(const string& inXObjectName)
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
 
-	mPrimitiveWriter.WriteName(inXObjectName);	
-	mPrimitiveWriter.WriteKeyword("Do");	
+	mPrimitiveWriter.WriteName(inXObjectName);
+	mPrimitiveWriter.WriteKeyword("Do");
 }
 
 void AbstractContentContext::Tc(double inCharacterSpace)
@@ -670,8 +670,8 @@ void AbstractContentContext::QuoteHexLow(const string& inText)
 	mPrimitiveWriter.WriteKeyword("Quote");
 }
 
-void AbstractContentContext::DoubleQuoteLow(	double inWordSpacing, 
-											double inCharacterSpacing, 
+void AbstractContentContext::DoubleQuoteLow(	double inWordSpacing,
+											double inCharacterSpacing,
 											const string& inText)
 {
 	RenewStreamConnection();
@@ -712,7 +712,7 @@ void AbstractContentContext::TJLow(const StringOrDoubleList& inStringsAndSpacing
 		else
 			mPrimitiveWriter.WriteLiteralString(it->SomeValue);
 	}
-	
+
 	mPrimitiveWriter.EndArray(eTokenSeparatorSpace);
 
 	mPrimitiveWriter.WriteKeyword("TJ");
@@ -734,7 +734,7 @@ void AbstractContentContext::TJHexLow(const StringOrDoubleList& inStringsAndSpac
 		else
 			mPrimitiveWriter.WriteHexString(it->SomeValue);
 	}
-	
+
 	mPrimitiveWriter.EndArray(eTokenSeparatorSpace);
 
 	mPrimitiveWriter.WriteKeyword("TJ");
@@ -841,7 +841,7 @@ EStatusCode AbstractContentContext::TJ(const StringOrDoubleList& inStringsAndSpa
 	StringOrDoubleList::const_iterator it = inStringsAndSpacing.begin();
 	GlyphUnicodeMappingListOrDoubleList parameters;
 	EStatusCode encodingStatus;
-	
+
 	for(; it != inStringsAndSpacing.end();++it)
 	{
 		if(it->IsDouble)
@@ -880,14 +880,14 @@ EStatusCode AbstractContentContext::WriteTextCommandWithDirectGlyphSelection(con
 
 	ObjectIDType fontObjectID;
 	UShortList encodedCharachtersList;
-	bool writeAsCID;	
+	bool writeAsCID;
 
 	if(currentFont->EncodeStringForShowing(inText,fontObjectID,encodedCharachtersList,writeAsCID) != PDFHummus::eSuccess)
 	{
 		TRACE_LOG("AbstractcontextContext::WriteTextCommandWithDirectGlyphSelection, Unexepcted failure, Cannot encode characters");
 		return PDFHummus::eFailure;
 	}
-	
+
 
 	// Write the font reference (only if required)
 	std::string fontName = GetResourcesDictionary()->AddFontMapping(fontObjectID);
@@ -895,7 +895,7 @@ EStatusCode AbstractContentContext::WriteTextCommandWithDirectGlyphSelection(con
 	if(mGraphicStack.GetCurrentState().mPlacedFontName != fontName ||
 		mGraphicStack.GetCurrentState().mPlacedFontSize != mGraphicStack.GetCurrentState().mFontSize)
 		TfLow(fontName,mGraphicStack.GetCurrentState().mFontSize);
-	
+
 	// Now write the string using the text command
 	OutputStringBufferStream stringStream;
 	char formattingBuffer[5];
@@ -916,7 +916,7 @@ EStatusCode AbstractContentContext::WriteTextCommandWithDirectGlyphSelection(con
 			formattingBuffer[0] = (*it) & 0x00ff;
 			stringStream.Write((const Byte*)formattingBuffer,1);
 		}
-		inTextCommand->WriteLiteralStringCommand(stringStream.ToString());	
+		inTextCommand->WriteLiteralStringCommand(stringStream.ToString());
 	}
 	return PDFHummus::eSuccess;
 }
@@ -949,7 +949,7 @@ EStatusCode AbstractContentContext::TJ(const GlyphUnicodeMappingListOrDoubleList
 	// first, list all the strings, so that you can encode them
 	GlyphUnicodeMappingListList stringsList;
 	GlyphUnicodeMappingListOrDoubleList::const_iterator it = inStringsAndSpacing.begin();
-	
+
 	for(; it != inStringsAndSpacing.end(); ++it)
 		if(!it->IsDouble)
 			stringsList.push_back(it->SomeValue);
@@ -958,14 +958,14 @@ EStatusCode AbstractContentContext::TJ(const GlyphUnicodeMappingListOrDoubleList
 
 	ObjectIDType fontObjectID;
 	UShortListList encodedCharachtersListsList;
-	bool writeAsCID;	
+	bool writeAsCID;
 
 	if(currentFont->EncodeStringsForShowing(stringsList,fontObjectID,encodedCharachtersListsList,writeAsCID)!= PDFHummus::eSuccess)
 	{
 		TRACE_LOG("AbstractContentContext::TJ, Unexepcted failure, cannot include characters for writing final representation");
 		return PDFHummus::eFailure;
 	}
-	
+
 	// status only returns if strings can be coded or not. so continue with writing regardless
 
 	// Write the font reference (only if required)
@@ -974,7 +974,7 @@ EStatusCode AbstractContentContext::TJ(const GlyphUnicodeMappingListOrDoubleList
 	if(mGraphicStack.GetCurrentState().mPlacedFontName != fontName ||
 		mGraphicStack.GetCurrentState().mPlacedFontSize != mGraphicStack.GetCurrentState().mFontSize)
 		TfLow(fontName,mGraphicStack.GetCurrentState().mFontSize);
-	
+
 	// Now write the string using the text command
 	OutputStringBufferStream stringStream;
 	char formattingBuffer[5];
@@ -1027,5 +1027,5 @@ EStatusCode AbstractContentContext::TJ(const GlyphUnicodeMappingListOrDoubleList
 		}
 		TJLow(stringOrDoubleList);
 	}
-	return PDFHummus::eSuccess;	
+	return PDFHummus::eSuccess;
 }

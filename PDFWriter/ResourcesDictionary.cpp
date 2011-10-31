@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "ResourcesDictionary.h"
 #include "BoxingBase.h"
@@ -104,7 +104,7 @@ string ResourcesDictionary::AddImageXObjectMapping(PDFImageXObject* inImageXObje
 void ResourcesDictionary::AddImageXObjectMappingWithName(PDFImageXObject* inImageXObject, const string& inImageXObjectName)
 {
 	mImageXObjects.insert(ObjectIDTypeToStringMap::value_type(inImageXObject->GetImageObjectID(),inImageXObjectName));
-	
+
 	StringList::const_iterator it = inImageXObject->GetRequiredProcsetResourceNames().begin();
 	for(; it != inImageXObject->GetRequiredProcsetResourceNames().end();++it)
 	{

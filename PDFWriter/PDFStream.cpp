@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "PDFStream.h"
 #include "IObjectsContextExtender.h"
@@ -28,7 +28,7 @@ PDFStream::PDFStream(bool inCompressStream,
 {
 	mExtender = inObjectsContextExtender;
 	mCompressStream = inCompressStream;
-	mExtendObjectID = inExtentObjectID;	
+	mExtendObjectID = inExtentObjectID;
 	mStreamStartPosition = inOutputStream->GetCurrentPosition();
 	mOutputStream = inOutputStream;
 	mStreamLength = 0;

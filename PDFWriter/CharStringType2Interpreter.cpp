@@ -16,13 +16,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "CharStringType2Interpreter.h"
 #include "Trace.h"
 #include <math.h>
 #include <stdlib.h>
- 
+
 using namespace PDFHummus;
 
 
@@ -54,13 +54,13 @@ EStatusCode CharStringType2Interpreter::Intepret(const CharString& inCharStringT
 			break;
 		}
 
-		status = mImplementationHelper->ReadCharString(inCharStringToIntepret.mStartPosition,inCharStringToIntepret.mEndPosition,&charString);	
+		status = mImplementationHelper->ReadCharString(inCharStringToIntepret.mStartPosition,inCharStringToIntepret.mEndPosition,&charString);
 		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG2("CharStringType2Interpreter::Intepret, failed to read charstring starting in %lld and ending in %lld",inCharStringToIntepret.mStartPosition,inCharStringToIntepret.mEndPosition);
 			break;
 		}
-		
+
 		status = ProcessCharString(charString,inCharStringToIntepret.mEndPosition - inCharStringToIntepret.mStartPosition);
 
 	}while(false);
@@ -77,7 +77,7 @@ EStatusCode CharStringType2Interpreter::ProcessCharString(Byte* inCharString,Lon
 	bool gotEndExecutionOperator = false;
 
 	while(pointer - inCharString < inCharStringLength &&
-			PDFHummus::eSuccess == status && 
+			PDFHummus::eSuccess == status &&
 			!gotEndExecutionOperator &&
 			!mGotEndChar)
 	{
@@ -99,9 +99,9 @@ EStatusCode CharStringType2Interpreter::ProcessCharString(Byte* inCharString,Lon
 
 bool CharStringType2Interpreter::IsOperator(Byte* inProgramCounter)
 {
-	return  ((*inProgramCounter) <= 27) || 
+	return  ((*inProgramCounter) <= 27) ||
 			(29 <= (*inProgramCounter) && (*inProgramCounter) <= 31);
-			
+
 }
 
 
@@ -116,7 +116,7 @@ Byte* CharStringType2Interpreter::InterpretNumber(Byte* inProgramCounter)
 		operand.IntegerValue = (short)(
 									((unsigned short)(*(newPosition+1)) << 8) + (*(newPosition+2)));
 		newPosition += 3;
-	} 
+	}
 	else if(32 <= *newPosition && *newPosition <= 246)
 	{
 		operand.IsInteger = true;
@@ -169,7 +169,7 @@ Byte* CharStringType2Interpreter::InterpretOperator(Byte* inProgramCounter,bool&
 	unsigned short operatorValue;
 	Byte* newPosition = inProgramCounter;
 	outGotEndExecutionCommand = false;
-	
+
 	if(12 == *newPosition)
 	{
 		operatorValue = 0x0c00 + *(newPosition + 1);
@@ -263,7 +263,7 @@ Byte* CharStringType2Interpreter::InterpretOperator(Byte* inProgramCounter,bool&
 		case 31: // hvcurveto
 			newPosition = InterpretHVCurveto(newPosition);
 			break;
-		
+
 		case 0x0c00: // dotsection, depracated
 			// ignore
 			break;
@@ -402,7 +402,7 @@ Byte* CharStringType2Interpreter::InterpretVMoveto(Byte* inProgramCounter)
 
 	ClearStack();
 	return inProgramCounter;
-	
+
 }
 
 Byte* CharStringType2Interpreter::InterpretRLineto(Byte* inProgramCounter)
@@ -454,8 +454,8 @@ Byte* CharStringType2Interpreter::InterpretCallSubr(Byte* inProgramCounter)
 	if(aCharString != NULL)
 	{
 		Byte* charString = NULL;
-		EStatusCode status = mImplementationHelper->ReadCharString(aCharString->mStartPosition,aCharString->mEndPosition,&charString);	
-		
+		EStatusCode status = mImplementationHelper->ReadCharString(aCharString->mStartPosition,aCharString->mEndPosition,&charString);
+
 		do
 		{
 			if(status != PDFHummus::eSuccess)
@@ -463,7 +463,7 @@ Byte* CharStringType2Interpreter::InterpretCallSubr(Byte* inProgramCounter)
 				TRACE_LOG2("CharStringType2Interpreter::InterpretCallSubr, failed to read charstring starting in %lld and ending in %lld",aCharString->mStartPosition,aCharString->mEndPosition);
 				break;
 			}
-			
+
 			status = ProcessCharString(charString,aCharString->mEndPosition - aCharString->mStartPosition);
 		}while(false);
 
@@ -614,8 +614,8 @@ Byte* CharStringType2Interpreter::InterpretCallGSubr(Byte* inProgramCounter)
 	if(aCharString != NULL)
 	{
 		Byte* charString = NULL;
-		EStatusCode status = mImplementationHelper->ReadCharString(aCharString->mStartPosition,aCharString->mEndPosition,&charString);	
-		
+		EStatusCode status = mImplementationHelper->ReadCharString(aCharString->mStartPosition,aCharString->mEndPosition,&charString);
+
 		do
 		{
 			if(status != PDFHummus::eSuccess)
@@ -623,7 +623,7 @@ Byte* CharStringType2Interpreter::InterpretCallGSubr(Byte* inProgramCounter)
 				TRACE_LOG2("CharStringType2Interpreter::InterpretCallSubr, failed to read charstring starting in %lld and ending in %lld",aCharString->mStartPosition,aCharString->mEndPosition);
 				break;
 			}
-			
+
 			status = ProcessCharString(charString,aCharString->mEndPosition - aCharString->mStartPosition);
 		}while(false);
 
@@ -676,7 +676,7 @@ Byte* CharStringType2Interpreter::InterpretAnd(Byte* inProgramCounter)
 	mOperandStack.pop_back();
 
 	newOperand.IntegerValue = (
-		(valueB.IsInteger ? valueB.IntegerValue : valueB.RealValue) && 
+		(valueB.IsInteger ? valueB.IntegerValue : valueB.RealValue) &&
 		(valueA.IsInteger ? valueA.IntegerValue : valueA.RealValue)
 		) ? 1:0;
 	mOperandStack.push_back(newOperand);
@@ -763,7 +763,7 @@ Byte* CharStringType2Interpreter::InterpretAdd(Byte* inProgramCounter)
 	if(!valueA.IsInteger || !valueB.IsInteger)
 	{
 		newOperand.IsInteger = false;
-		newOperand.RealValue = 
+		newOperand.RealValue =
 			(valueA.IsInteger ? (double)valueA.IntegerValue : valueA.RealValue)
 			+
 			(valueB.IsInteger ? (double)valueB.IntegerValue : valueB.RealValue);
@@ -795,7 +795,7 @@ Byte* CharStringType2Interpreter::InterpretSub(Byte* inProgramCounter)
 	if(!valueA.IsInteger || !valueB.IsInteger)
 	{
 		newOperand.IsInteger = false;
-		newOperand.RealValue = 
+		newOperand.RealValue =
 			(valueA.IsInteger ? (double)valueA.IntegerValue : valueA.RealValue)
 			-
 			(valueB.IsInteger ? (double)valueB.IntegerValue : valueB.RealValue);
@@ -827,7 +827,7 @@ Byte* CharStringType2Interpreter::InterpretDiv(Byte* inProgramCounter)
 	if(!valueA.IsInteger || !valueB.IsInteger)
 	{
 		newOperand.IsInteger = false;
-		newOperand.RealValue = 
+		newOperand.RealValue =
 			(valueA.IsInteger ? (double)valueA.IntegerValue : valueA.RealValue)
 			/
 			(valueB.IsInteger ? (double)valueB.IntegerValue : valueB.RealValue);
@@ -882,7 +882,7 @@ Byte* CharStringType2Interpreter::InterpretEq(Byte* inProgramCounter)
 	newOperand.IntegerValue = (
 	(valueB.IsInteger ? valueB.IntegerValue : valueB.RealValue) ==
 	(valueA.IsInteger ? valueA.IntegerValue : valueA.RealValue)
-	) ? 1:0;	
+	) ? 1:0;
 	mOperandStack.push_back(newOperand);
 	return inProgramCounter;
 }
@@ -1010,7 +1010,7 @@ Byte* CharStringType2Interpreter::InterpretMul(Byte* inProgramCounter)
 	if(!valueA.IsInteger || !valueB.IsInteger)
 	{
 		newOperand.IsInteger = false;
-		newOperand.RealValue = 
+		newOperand.RealValue =
 			(valueA.IsInteger ? (double)valueA.IntegerValue : valueA.RealValue)
 			*
 			(valueB.IsInteger ? (double)valueB.IntegerValue : valueB.RealValue);
@@ -1068,7 +1068,7 @@ Byte* CharStringType2Interpreter::InterpretExch(Byte* inProgramCounter)
 
 	mOperandStack.push_back(valueB);
 	mOperandStack.push_back(valueA);
-	
+
 	return inProgramCounter;
 }
 
@@ -1134,7 +1134,7 @@ Byte* CharStringType2Interpreter::InterpretRoll(Byte* inProgramCounter)
 		}
 
 	}
-	
+
 	for(long i=0; i < itemsCount;++i)
 	{
 		mOperandStack.push_back(mOperandStack.front());

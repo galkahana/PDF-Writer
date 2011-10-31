@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 #include "EStatusCode.h"
@@ -82,7 +82,7 @@ private:
 	LongFilePositionType mPrivateSize;
 	LongFilePositionType mPrivatePosition;
 
-	PDFHummus::EStatusCode CreateCFFSubset(	
+	PDFHummus::EStatusCode CreateCFFSubset(
 								FreeTypeFaceWrapper& inFontInfo,
 								const UIntVector& inSubsetGlyphIDs,
 								const string& inSubsetFontName,

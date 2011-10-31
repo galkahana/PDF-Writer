@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "InputCharStringDecodeStream.h"
 
@@ -57,7 +57,7 @@ void InputCharStringDecodeStream::InitializeCharStringDecode(unsigned long inLen
 EStatusCode InputCharStringDecodeStream::ReadDecodedByte(Byte& outByte)
 {
 	Byte buffer;
-	
+
 	if(mReadFrom->Read(&buffer,1) != 1)
 		return PDFHummus::eFailure;
 
@@ -82,7 +82,7 @@ LongBufferSizeType InputCharStringDecodeStream::Read(Byte* inBuffer,LongBufferSi
 		status = ReadDecodedByte(inBuffer[bufferIndex]);
 		++bufferIndex;
 	}
-	return bufferIndex;	
+	return bufferIndex;
 }
 
 bool InputCharStringDecodeStream::NotEnded()

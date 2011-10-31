@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -64,7 +64,7 @@ public:
 	PDFImageXObject* CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream);
 	PDFImageXObject* CreateImageXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inImageXObjectID);
 	PDFImageXObject* CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inImageXObjectID);
-	
+
 	// will return form XObject, which will include the xobject at it's size
 	PDFFormXObject* CreateFormXObjectFromJPGFile(const string& inJPGFilePath);
 	PDFFormXObject* CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream);

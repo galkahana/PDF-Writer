@@ -63,7 +63,7 @@ FT_BEGIN_HEADER
     get_font_private_                                            \
   };
 
-#else /* FT_CONFIG_OPTION_PIC */ 
+#else /* FT_CONFIG_OPTION_PIC */
 
 #define FT_DEFINE_SERVICE_PSINFOREC(class_, get_font_info_,      \
         ps_get_font_extra_, has_glyph_names_, get_font_private_) \
@@ -76,9 +76,9 @@ FT_BEGIN_HEADER
     clazz->ps_get_font_extra = ps_get_font_extra_;               \
     clazz->ps_has_glyph_names = has_glyph_names_;                \
     clazz->ps_get_font_private = get_font_private_;              \
-  } 
+  }
 
-#endif /* FT_CONFIG_OPTION_PIC */ 
+#endif /* FT_CONFIG_OPTION_PIC */
 
   /* */
 

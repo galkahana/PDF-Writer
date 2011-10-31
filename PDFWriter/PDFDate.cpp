@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "PDFDate.h"
 #include "SafeBufferMacrosDefs.h"
@@ -62,7 +62,7 @@ void PDFDate::SetTime(	int inYear,
 
 bool PDFDate::IsNull()
 {
-	return -1 == Year;	
+	return -1 == Year;
 }
 
 /*
@@ -161,7 +161,7 @@ string PDFDate::ToString()
 		}
 		buffer[7] = '0' + ((-1 == Month ? 1:Month) % 10);
 		buffer[6] = '0' + ((-1 == Month ? 1:Month) / 10);
-	}	
+	}
 
 	// Year [bug 10K waiting to happen!!!!111]
 	if(!wroteSomethingLater)

@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "UppercaseSequanceTest.h"
 #include "UppercaseSequance.h"
@@ -51,7 +51,7 @@ EStatusCode UppercaseSequanceTest::Run()
 		{
 			cout<<"Success in single increase\n";
 		}
-	
+
 		for(int i=0;i<25;++i)
 			value = sequance.GetNextValue();
 		if(value != "AAAABA")
@@ -77,7 +77,7 @@ EStatusCode UppercaseSequanceTest::Run()
 		{
 			cout<<"Success in 26*25 increase\n";
 		}
-	
+
 	}while(false);
 
 	return status;

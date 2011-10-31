@@ -16,55 +16,55 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
  Additional Copyright Information:
 
   The majority of this code is converted from tiff2pdf tool that comes with the
-  tifflib library. in accordance with the code instructions the header of tiff2pdf 
+  tifflib library. in accordance with the code instructions the header of tiff2pdf
   is provided here:
- 
+
   Copyright (c) 2003 Ross Finlayson
- 
-  Permission to use, copy, modify, distribute, and sell this software and 
+
+  Permission to use, copy, modify, distribute, and sell this software and
   its documentation for any purpose is hereby granted without fee, provided
   that (i) the above copyright notices and this permission notice appear in
   all copies of the software and related documentation, and (ii) the name of
   Ross Finlayson may not be used in any advertising or
   publicity relating to the software without the specific, prior written
   permission of Ross Finlayson.
-  
-  THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND, 
-  EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY 
-  WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  
-  
+
+  THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
+  WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
   IN NO EVENT SHALL ROSS FINLAYSON BE LIABLE FOR
   ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND,
   OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
-  WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF 
-  LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE 
+  WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF
+  LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
   OF THIS SOFTWARE.
 
   let's get nice libtiff copyright as well
   Copyright (c) 1991-1997 Sam Leffler
   Copyright (c) 1991-1997 Silicon Graphics, Inc.
- 
-  Permission to use, copy, modify, distribute, and sell this software and 
+
+  Permission to use, copy, modify, distribute, and sell this software and
   its documentation for any purpose is hereby granted without fee, provided
   that (i) the above copyright notices and this permission notice appear in
   all copies of the software and related documentation, and (ii) the names of
   Sam Leffler and Silicon Graphics may not be used in any advertising or
   publicity relating to the software without the specific, prior written
   permission of Sam Leffler and Silicon Graphics.
-  
-  THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND, 
-  EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY 
-  WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  
-  
+
+  THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
+  WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
   IN NO EVENT SHALL SAM LEFFLER OR SILICON GRAPHICS BE LIABLE FOR
   ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND,
   OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
-  WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF 
-  LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE 
+  WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF
+  LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
   OF THIS SOFTWARE.
 
 
@@ -89,7 +89,7 @@
 #include "tif_config.h"
 #include "tiffio.h"
 
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <search.h>
 
 using namespace PDFHummus;
@@ -128,8 +128,8 @@ typedef enum{
 	T2P_SAMPLE_ABGR_TO_RGB=0x0001, /* The unencoded samples are the result of ReadRGBAImage */
 	T2P_SAMPLE_RGBA_TO_RGB=0x0002, /* The unencoded samples are contiguous RGBA */
 	T2P_SAMPLE_RGBAA_TO_RGB=0x0004, /* The unencoded samples are RGBA with premultiplied alpha */
-	T2P_SAMPLE_YCBCR_TO_RGB=0x0008, 
-	T2P_SAMPLE_YCBCR_TO_LAB=0x0010, 
+	T2P_SAMPLE_YCBCR_TO_RGB=0x0008,
+	T2P_SAMPLE_YCBCR_TO_LAB=0x0010,
 	T2P_SAMPLE_REALIZE_PALETTE=0x0020, /* The unencoded samples are indexes into the color map */
 	T2P_SAMPLE_SIGNED_TO_UNSIGNED=0x0040, /* The unencoded samples are signed instead of unsignd */
 	T2P_SAMPLE_LAB_SIGNED_TO_UNSIGNED=0x0040, /* The L*a*b* samples have a* and b* signed */
@@ -415,7 +415,7 @@ PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFFile(const string& in
 		TRACE_LOG1("TIFFImageHandler::CreateFormXObjectFromTIFFFile. cannot open file for reading - %s",inTIFFFilePath.c_str());
 		return NULL;
 	}
-		
+
 	return CreateFormXObjectFromTIFFStream(tiffFile.GetInputStream(),inFormXObjectID,inTIFFUsageParameters);
 }
 
@@ -480,7 +480,7 @@ PDFFormXObject* TIFFImageHandler::ConvertTiff2PDF(ObjectIDType inFormXObjectID)
 		status = ReadTIFFPageInformation();
 		if(status != PDFHummus::eSuccess)
 			break;
-		
+
 
 		// Write Transfer functions
 		if(mT2p->tiff_transferfunctioncount != 0)
@@ -515,8 +515,8 @@ PDFFormXObject* TIFFImageHandler::ConvertTiff2PDF(ObjectIDType inFormXObjectID)
 					break;
 				}
 			}
-		} 
-		else 
+		}
+		else
 		{
 			anImage = WriteUntiledImageXObject();
 			if(anImage)
@@ -572,7 +572,7 @@ EStatusCode TIFFImageHandler::ReadTopLevelTiffInformation()
 			break;
 		}
 		_TIFFmemset( mT2p->tiff_pages, 0x00, directorycount * sizeof(T2P_PAGE));
-	
+
 		// allocate tile array, one for each page
 		mT2p->tiff_tiles = (T2P_TILES*) _TIFFmalloc(directorycount * sizeof(T2P_TILES));
 		if(!mT2p->tiff_tiles)
@@ -588,28 +588,28 @@ EStatusCode TIFFImageHandler::ReadTopLevelTiffInformation()
 		{
 			bool isPage = false,isPage2 = false;
 			uint32 subfiletype = 0;
-			
+
 			if(!TIFFSetDirectory(mT2p->input, i)){
 				TRACE_LOG2("Can't set directory %u of input file %s",
 							directorycount * sizeof(T2P_PAGE),mT2p->inputFilePath.c_str());
 				status = PDFHummus::eFailure;
 				break;
-			}			
+			}
 
 			if(TIFFGetField(mT2p->input, TIFFTAG_PAGENUMBER, &pagen, &paged))
 			{
 				mT2p->tiff_pages[mT2p->tiff_pagecount].page_number =
 					((pagen>paged) && (paged != 0)) ? paged : pagen;
 				isPage2 = true;
-			} 
+			}
 			else if(TIFFGetField(mT2p->input, TIFFTAG_SUBFILETYPE, &subfiletype))
 			{
 				isPage = ((subfiletype & FILETYPE_PAGE) != 0) || (subfiletype == 0);
-			} 
+			}
 			else if(TIFFGetField(mT2p->input, TIFFTAG_OSUBFILETYPE, &subfiletype))
 			{
-				isPage =	(subfiletype == OFILETYPE_IMAGE) || 
-							(subfiletype == OFILETYPE_PAGE)	 || 
+				isPage =	(subfiletype == OFILETYPE_IMAGE) ||
+							(subfiletype == OFILETYPE_PAGE)	 ||
 							(subfiletype == 0);
 			}
 			else
@@ -625,7 +625,7 @@ EStatusCode TIFFImageHandler::ReadTopLevelTiffInformation()
 				mT2p->tiff_pages[mT2p->tiff_pagecount].page_directory=i;
 				if(TIFFIsTiled(mT2p->input))
 				{
-					mT2p->tiff_pages[mT2p->tiff_pagecount].page_tilecount = 
+					mT2p->tiff_pages[mT2p->tiff_pagecount].page_tilecount =
 						TIFFNumberOfTiles(mT2p->input);
 				}
 			}
@@ -641,35 +641,35 @@ EStatusCode TIFFImageHandler::ReadTopLevelTiffInformation()
 			TIFFSetDirectory(mT2p->input, mT2p->tiff_pages[i].page_directory );
 			if((TIFFGetField(mT2p->input, TIFFTAG_PHOTOMETRIC, &xuint16)
 						&& (xuint16==PHOTOMETRIC_PALETTE))
-			   || TIFFGetField(mT2p->input, TIFFTAG_INDEXED, &xuint16)) 
+			   || TIFFGetField(mT2p->input, TIFFTAG_INDEXED, &xuint16))
 			{
 				mT2p->tiff_pages[i].page_extra++;
 			}
 			if (TIFFGetField(mT2p->input, TIFFTAG_TRANSFERFUNCTION,
 									 &(mT2p->tiff_transferfunction[0]),
 									 &(mT2p->tiff_transferfunction[1]),
-									 &(mT2p->tiff_transferfunction[2]))) 
+									 &(mT2p->tiff_transferfunction[2])))
 			{
 				if(mT2p->tiff_transferfunction[1] !=
-				   mT2p->tiff_transferfunction[0]) 
+				   mT2p->tiff_transferfunction[0])
 				{
 					mT2p->tiff_transferfunctioncount = 3;
 					mT2p->tiff_pages[i].page_extra += 4;
-				} 
-				else 
+				}
+				else
 				{
 					mT2p->tiff_transferfunctioncount = 1;
 					mT2p->tiff_pages[i].page_extra += 2;
 				}
-			} 
-			else 
+			}
+			else
 			{
 				mT2p->tiff_transferfunctioncount=0;
 			}
 			if(TIFFGetField(
-				mT2p->input, 
-				TIFFTAG_ICCPROFILE, 
-				&(mT2p->tiff_iccprofilelength), 
+				mT2p->input,
+				TIFFTAG_ICCPROFILE,
+				&(mT2p->tiff_iccprofilelength),
 				&(mT2p->tiff_iccprofile)) != 0)
 			{
 				mT2p->tiff_pages[i].page_extra++;
@@ -683,15 +683,15 @@ EStatusCode TIFFImageHandler::ReadTopLevelTiffInformation()
 			}
 			if( mT2p->tiff_tiles[i].tiles_tilecount > 0)
 			{
-				TIFFGetField(mT2p->input, 
-					TIFFTAG_TILEWIDTH, 
+				TIFFGetField(mT2p->input,
+					TIFFTAG_TILEWIDTH,
 					&(mT2p->tiff_tiles[i].tiles_tilewidth));
-				TIFFGetField(mT2p->input, 
-					TIFFTAG_TILELENGTH, 
+				TIFFGetField(mT2p->input,
+					TIFFTAG_TILELENGTH,
 					&(mT2p->tiff_tiles[i].tiles_tilelength) );
-				mT2p->tiff_tiles[i].tiles_tiles = 
+				mT2p->tiff_tiles[i].tiles_tiles =
 				(T2P_TILE*) _TIFFmalloc(
-					mT2p->tiff_tiles[i].tiles_tilecount 
+					mT2p->tiff_tiles[i].tiles_tilecount
 					* sizeof(T2P_TILE) );
 				if(!mT2p->tiff_tiles[i].tiles_tiles)
 				{
@@ -702,9 +702,9 @@ EStatusCode TIFFImageHandler::ReadTopLevelTiffInformation()
 					status = PDFHummus::eFailure;
 					break;
 				}
-			}		
+			}
 		}
-	
+
 	}while(false);
 	return status;
 }
@@ -753,9 +753,9 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
         if( TIFFIsCODECConfigured(mT2p->tiff_compression) == 0)
 		{
 			TRACE_LOG2(
-				"TIFFImageHandler::ReadTIFFPageInformation: No support for %s with compression type %u:  not configured", 
+				"TIFFImageHandler::ReadTIFFPageInformation: No support for %s with compression type %u:  not configured",
 				mT2p->inputFilePath.c_str(),
-				mT2p->tiff_compression);				
+				mT2p->tiff_compression);
 			status = PDFHummus::eFailure;
 			break;
 		}
@@ -770,15 +770,15 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 				break;
 			case 0:
 				TRACE_LOG1(
-					"TIFFImageHandler::ReadTIFFPageInformation: Image %s has 0 bits per sample, assuming 1", 
-					mT2p->inputFilePath.c_str());				
+					"TIFFImageHandler::ReadTIFFPageInformation: Image %s has 0 bits per sample, assuming 1",
+					mT2p->inputFilePath.c_str());
 				mT2p->tiff_bitspersample = 1;
 				break;
 			default:
 				TRACE_LOG2(
-					"TIFFImageHandler::ReadTIFFPageInformation: No support for %s with %u bits per sample", 
+					"TIFFImageHandler::ReadTIFFPageInformation: No support for %s with %u bits per sample",
 					mT2p->inputFilePath.c_str(),
-					mT2p->tiff_bitspersample);				
+					mT2p->tiff_bitspersample);
 				status = PDFHummus::eFailure;
 				break;
 		}
@@ -789,9 +789,9 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 		if(mT2p->tiff_samplesperpixel>4)
 		{
 			TRACE_LOG2(
-				"TIFFImageHandler::ReadTIFFPageInformation: No support for %s with %u samples per pixel", 
+				"TIFFImageHandler::ReadTIFFPageInformation: No support for %s with %u samples per pixel",
 				mT2p->inputFilePath.c_str(),
-				mT2p->tiff_samplesperpixel);				
+				mT2p->tiff_samplesperpixel);
 			status = PDFHummus::eFailure;
 			break;
 		}
@@ -799,11 +799,11 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 		if(mT2p->tiff_samplesperpixel==0)
 		{
 			TRACE_LOG1(
-				"TIFFImageHandler::ReadTIFFPageInformation: Image %s has 0 samples per pixel, assuming 1", 
-				mT2p->inputFilePath.c_str());	
+				"TIFFImageHandler::ReadTIFFPageInformation: Image %s has 0 samples per pixel, assuming 1",
+				mT2p->inputFilePath.c_str());
 			mT2p->tiff_samplesperpixel=1;
 		}
-	
+
 		if(TIFFGetField(mT2p->input, TIFFTAG_SAMPLEFORMAT, &xuint16) != 0 )
 		{
 			switch(xuint16)
@@ -814,16 +814,16 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 					break;
 				default:
 					TRACE_LOG2(
-						"TIFFImageHandler::ReadTIFFPageInformation: No support for %s with sample format %u", 
+						"TIFFImageHandler::ReadTIFFPageInformation: No support for %s with sample format %u",
 						mT2p->inputFilePath.c_str(),
-						xuint16);				
+						xuint16);
 					status = PDFHummus::eFailure;
 					break;
 			}
 		}
 		if(status != PDFHummus::eSuccess)
 				break;
-		
+
 		TIFFGetFieldDefaulted(mT2p->input, TIFFTAG_FILLORDER, &(mT2p->tiff_fillorder));
         if(TIFFGetField(mT2p->input, TIFFTAG_PHOTOMETRIC, &(mT2p->tiff_photometric)) == 0)
 		{
@@ -836,7 +836,7 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 		switch(mT2p->tiff_photometric)
 		{
 			case PHOTOMETRIC_MINISWHITE:
-			case PHOTOMETRIC_MINISBLACK: 
+			case PHOTOMETRIC_MINISBLACK:
 				if (mT2p->tiff_bitspersample==1){
 					mT2p->pdf_colorspace=T2P_CS_BILEVEL;
 					if(mT2p->tiff_photometric==PHOTOMETRIC_MINISWHITE){
@@ -846,10 +846,10 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 					mT2p->pdf_colorspace=T2P_CS_GRAY;
 					if(mT2p->tiff_photometric==PHOTOMETRIC_MINISWHITE){
 						mT2p->pdf_switchdecode ^= 1;
-					} 
+					}
 				}
 				break;
-			case PHOTOMETRIC_RGB: 
+			case PHOTOMETRIC_RGB:
 				mT2p->pdf_colorspace=T2P_CS_RGB;
 				if(mT2p->tiff_samplesperpixel == 3)
 				{
@@ -860,15 +860,15 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 					if(xuint16==1)
 						ReadPhotometricPalette();
 				}
-				if(mT2p->tiff_samplesperpixel > 3) 
+				if(mT2p->tiff_samplesperpixel > 3)
 				{
-					if(mT2p->tiff_samplesperpixel == 4) 
+					if(mT2p->tiff_samplesperpixel == 4)
 					{
 						mT2p->pdf_colorspace = T2P_CS_RGB;
 						if(TIFFGetField(mT2p->input,
 								TIFFTAG_EXTRASAMPLES,
 								&xuint16, &xuint16p)
-						   && xuint16 == 1) 
+						   && xuint16 == 1)
 						{
 							if(xuint16p[0] == EXTRASAMPLE_ASSOCALPHA)
 							{
@@ -891,8 +891,8 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 							"TIFFImageHandler::ReadTIFFPageInformation, RGB image %s has 4 samples per pixel, assuming CMYK",
 							mT2p->inputFilePath.c_str());
 						break;
-					} 
-					else 
+					}
+					else
 					{
 						TRACE_LOG2(
 							"TIFFImageHandler::ReadTIFFPageInformation, No support for RGB image %s with %u samples per pixel",
@@ -911,7 +911,7 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 					status = PDFHummus::eFailure;
 					break;
 				}
-			case PHOTOMETRIC_PALETTE: 
+			case PHOTOMETRIC_PALETTE:
 				status = ReadPhotometricPalette();
 				break;
 			case PHOTOMETRIC_SEPARATED:
@@ -935,8 +935,8 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 				if(mT2p->tiff_samplesperpixel==4)
 				{
 					mT2p->pdf_colorspace=T2P_CS_CMYK;
-				} 
-				else 
+				}
+				else
 				{
 					TRACE_LOG2(
 						"TIFFImageHandler::ReadTIFFPageInformation, No support for %s because it has %u samples per pixel",
@@ -1005,7 +1005,7 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 			{
 				case 0:
 					TRACE_LOG1(
-						"TIFFImageHandler::ReadTIFFPageInformation, Image %s has planar configuration 0, assuming 1", 
+						"TIFFImageHandler::ReadTIFFPageInformation, Image %s has planar configuration 0, assuming 1",
 						mT2p->inputFilePath.c_str());
 					mT2p->tiff_planar=PLANARCONFIG_CONTIG;
 				case PLANARCONFIG_CONTIG:
@@ -1015,7 +1015,7 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 					if(mT2p->tiff_bitspersample!=8)
 					{
 						TRACE_LOG2(
-							"TIFFImageHandler::ReadTIFFPageInformation, No support for %s with separated planar configuration and %u bits per sample", 
+							"TIFFImageHandler::ReadTIFFPageInformation, No support for %s with separated planar configuration and %u bits per sample",
 							mT2p->inputFilePath.c_str(),
 							mT2p->tiff_bitspersample);
 						status = PDFHummus::eFailure;
@@ -1024,7 +1024,7 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 					break;
 				default:
 					TRACE_LOG2(
-						"TIFFImageHandler::ReadTIFFPageInformation, No support for %s with planar configuration %u", 
+						"TIFFImageHandler::ReadTIFFPageInformation, No support for %s with planar configuration %u",
 						mT2p->inputFilePath.c_str(),
 						mT2p->tiff_planar);
 					status = PDFHummus::eFailure;
@@ -1039,7 +1039,7 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
         if(mT2p->tiff_orientation>8)
 		{
                 TRACE_LOG2("TIFFImageHandler::ReadTIFFPageInformation, Image %s has orientation %u, assuming 0",
-                            mT2p->inputFilePath.c_str(), 
+                            mT2p->inputFilePath.c_str(),
 							mT2p->tiff_orientation);
                 mT2p->tiff_orientation=0;
         }
@@ -1053,12 +1053,12 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
                 mT2p->tiff_yres=0.0;
         }
 		TIFFGetFieldDefaulted(mT2p->input, TIFFTAG_RESOLUTIONUNIT,&(mT2p->tiff_resunit));
-		if(mT2p->tiff_resunit == RESUNIT_CENTIMETER) 
+		if(mT2p->tiff_resunit == RESUNIT_CENTIMETER)
 		{
 			mT2p->tiff_xres *= 2.54F;
 			mT2p->tiff_yres *= 2.54F;
-		} 
-		else if (mT2p->tiff_resunit != RESUNIT_INCH && mT2p->pdf_centimeters != 0) 
+		}
+		else if (mT2p->tiff_resunit != RESUNIT_INCH && mT2p->pdf_centimeters != 0)
 		{
 			mT2p->tiff_xres *= 2.54F;
 			mT2p->tiff_yres *= 2.54F;
@@ -1077,7 +1077,7 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 					mT2p->pdf_compression=T2P_COMPRESS_G4;
 				}
 			}
-			if(mT2p->tiff_compression== COMPRESSION_ADOBE_DEFLATE 
+			if(mT2p->tiff_compression== COMPRESSION_ADOBE_DEFLATE
 				|| mT2p->tiff_compression==COMPRESSION_DEFLATE)
 			{
 				if(TIFFIsTiled(mT2p->input) || (TIFFNumberOfStrips(mT2p->input)==1) )
@@ -1099,8 +1099,8 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 			{
 				mT2p->tiff_samplesperpixel=4;
 				mT2p->tiff_photometric=PHOTOMETRIC_SEPARATED;
-			} 
-			else 
+			}
+			else
 			{
 				mT2p->tiff_samplesperpixel=3;
 				mT2p->tiff_photometric=PHOTOMETRIC_RGB;
@@ -1110,19 +1110,19 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 		if (TIFFGetField(mT2p->input, TIFFTAG_TRANSFERFUNCTION,
 				 &(mT2p->tiff_transferfunction[0]),
 				 &(mT2p->tiff_transferfunction[1]),
-				 &(mT2p->tiff_transferfunction[2]))) 
+				 &(mT2p->tiff_transferfunction[2])))
 		{
 			if(mT2p->tiff_transferfunction[1] !=
-			   mT2p->tiff_transferfunction[0]) 
+			   mT2p->tiff_transferfunction[0])
 			{
 				mT2p->tiff_transferfunctioncount=3;
-			} 
-			else 
+			}
+			else
 			{
 				mT2p->tiff_transferfunctioncount=1;
 			}
-		} 
-		else 
+		}
+		else
 		{
 			mT2p->tiff_transferfunctioncount=0;
 		}
@@ -1158,25 +1158,25 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 			{
 				mT2p->tiff_whitechromaticities[0]=xfloatp[0];
 				mT2p->tiff_whitechromaticities[1]=xfloatp[1];
-			} 
-			else 
+			}
+			else
 			{
 				mT2p->tiff_whitechromaticities[0]=0.3457F; /* 0.3127F; */
 				mT2p->tiff_whitechromaticities[1]=0.3585F; /* 0.3290F; */
 			}
 		}
-		if(TIFFGetField(mT2p->input, 
-			TIFFTAG_ICCPROFILE, 
-			&(mT2p->tiff_iccprofilelength), 
+		if(TIFFGetField(mT2p->input,
+			TIFFTAG_ICCPROFILE,
+			&(mT2p->tiff_iccprofilelength),
 			&(mT2p->tiff_iccprofile))!=0){
 			mT2p->pdf_colorspace = (t2p_cs_t)(mT2p->pdf_colorspace | T2P_CS_ICCBASED);
-		} 
-		else 
+		}
+		else
 		{
 			mT2p->tiff_iccprofilelength=0;
 			mT2p->tiff_iccprofile=NULL;
 		}
-		
+
 		if( mT2p->tiff_bitspersample==1 &&
 			mT2p->tiff_samplesperpixel==1)
 		{
@@ -1213,7 +1213,7 @@ EStatusCode TIFFImageHandler::ReadPhotometricPalette()
 				mT2p->inputFilePath.c_str());
 			status = PDFHummus::eFailure;
 			break;
-		} 
+		}
 		if(mT2p->pdf_palette != NULL)
 		{
 			_TIFFfree(mT2p->pdf_palette);
@@ -1273,19 +1273,19 @@ EStatusCode TIFFImageHandler::ReadPhotometricPaletteCMYK()
 				);
 			status = PDFHummus::eFailure;
 			break;
-		} 
+		}
 		if(mT2p->pdf_palette != NULL)
 		{
 			_TIFFfree(mT2p->pdf_palette);
 			mT2p->pdf_palette=NULL;
 		}
-		mT2p->pdf_palette = (unsigned char*) 
+		mT2p->pdf_palette = (unsigned char*)
 			_TIFFmalloc(mT2p->pdf_palettesize*4);
 		if(mT2p->pdf_palette==NULL)
 		{
 			TRACE_LOG2(
 				"TIFFImageHandler::ReadTIFFPageInformation, Can't allocate %u bytes of memory for t2p_read_tiff_image, %s",
-				mT2p->pdf_palettesize, 
+				mT2p->pdf_palettesize,
 				mT2p->inputFilePath.c_str()
 				);
 			status = PDFHummus::eFailure;
@@ -1321,10 +1321,10 @@ void TIFFImageHandler::ComposePDFPage()
 	uint32 tilelength=0;
 	int istiled=0;
 	float f=0;
-	
+
 	mT2p->pdf_xres = mT2p->tiff_xres;
 	mT2p->pdf_yres = mT2p->tiff_yres;
-	if(mT2p->pdf_overrideres) 
+	if(mT2p->pdf_overrideres)
 	{
 		mT2p->pdf_xres = mT2p->pdf_defaultxres;
 		mT2p->pdf_yres = mT2p->pdf_defaultyres;
@@ -1334,16 +1334,16 @@ void TIFFImageHandler::ComposePDFPage()
 	if(mT2p->pdf_yres == 0.0)
 		mT2p->pdf_yres = mT2p->pdf_defaultyres;
 	if (mT2p->tiff_resunit != RESUNIT_CENTIMETER	/* RESUNIT_NONE and */
-	    && mT2p->tiff_resunit != RESUNIT_INCH) 
+	    && mT2p->tiff_resunit != RESUNIT_INCH)
 	{	/* other cases */
 		mT2p->pdf_imagewidth = ((float)(mT2p->tiff_width))/mT2p->pdf_xres;
 		mT2p->pdf_imagelength = ((float)(mT2p->tiff_length))/mT2p->pdf_yres;
-	} 
-	else 
+	}
+	else
 	{
-		mT2p->pdf_imagewidth = 
+		mT2p->pdf_imagewidth =
 			((float)(mT2p->tiff_width))*PS_UNIT_SIZE/mT2p->pdf_xres;
-		mT2p->pdf_imagelength = 
+		mT2p->pdf_imagelength =
 			((float)(mT2p->tiff_length))*PS_UNIT_SIZE/mT2p->pdf_yres;
 	}
 	mT2p->pdf_pagewidth = mT2p->pdf_imagewidth;
@@ -1367,17 +1367,17 @@ void TIFFImageHandler::ComposePDFPage()
 	{
 		ComposePDFPageOrient(&(mT2p->pdf_imagebox), mT2p->tiff_orientation);
 		return;
-	} 
-	else 
+	}
+	else
 	{
 		tilewidth=(mT2p->tiff_tiles[mT2p->pdf_page]).tiles_tilewidth;
 		tilelength=(mT2p->tiff_tiles[mT2p->pdf_page]).tiles_tilelength;
-		tilecountx=(mT2p->tiff_width + 
-			tilewidth -1)/ 
+		tilecountx=(mT2p->tiff_width +
+			tilewidth -1)/
 			tilewidth;
 		(mT2p->tiff_tiles[mT2p->pdf_page]).tiles_tilecountx=tilecountx;
-		tilecounty=(mT2p->tiff_length + 
-			tilelength -1)/ 
+		tilecounty=(mT2p->tiff_length +
+			tilelength -1)/
 			tilelength;
 		(mT2p->tiff_tiles[mT2p->pdf_page]).tiles_tilecounty=tilecounty;
 		(mT2p->tiff_tiles[mT2p->pdf_page]).tiles_edgetilewidth=
@@ -1390,64 +1390,64 @@ void TIFFImageHandler::ComposePDFPage()
 			for(i=0;i<tilecountx-1;i++)
 			{
 				boxp=&(tiles[i2*tilecountx+i].tile_box);
-				boxp->x1 = 
-					mT2p->pdf_imagebox.x1 
+				boxp->x1 =
+					mT2p->pdf_imagebox.x1
 					+ ((float)(mT2p->pdf_imagewidth * i * tilewidth)
 					/ (float)mT2p->tiff_width);
-				boxp->x2 = 
-					mT2p->pdf_imagebox.x1 
+				boxp->x2 =
+					mT2p->pdf_imagebox.x1
 					+ ((float)(mT2p->pdf_imagewidth * (i+1) * tilewidth)
 					/ (float)mT2p->tiff_width);
-				boxp->y1 = 
-					mT2p->pdf_imagebox.y2 
+				boxp->y1 =
+					mT2p->pdf_imagebox.y2
 					- ((float)(mT2p->pdf_imagelength * (i2+1) * tilelength)
 					/ (float)mT2p->tiff_length);
-				boxp->y2 = 
-					mT2p->pdf_imagebox.y2 
+				boxp->y2 =
+					mT2p->pdf_imagebox.y2
 					- ((float)(mT2p->pdf_imagelength * i2 * tilelength)
 					/ (float)mT2p->tiff_length);
 			}
 			boxp=&(tiles[i2*tilecountx+i].tile_box);
-			boxp->x1 = 
-				mT2p->pdf_imagebox.x1 
+			boxp->x1 =
+				mT2p->pdf_imagebox.x1
 				+ ((float)(mT2p->pdf_imagewidth * i * tilewidth)
 				/ (float)mT2p->tiff_width);
 			boxp->x2 = mT2p->pdf_imagebox.x2;
-			boxp->y1 = 
-				mT2p->pdf_imagebox.y2 
+			boxp->y1 =
+				mT2p->pdf_imagebox.y2
 				- ((float)(mT2p->pdf_imagelength * (i2+1) * tilelength)
 				/ (float)mT2p->tiff_length);
-			boxp->y2 = 
-				mT2p->pdf_imagebox.y2 
+			boxp->y2 =
+				mT2p->pdf_imagebox.y2
 				- ((float)(mT2p->pdf_imagelength * i2 * tilelength)
 				/ (float)mT2p->tiff_length);
 		}
 		for(i=0;i<tilecountx-1;i++)
 		{
 			boxp=&(tiles[i2*tilecountx+i].tile_box);
-			boxp->x1 = 
-				mT2p->pdf_imagebox.x1 
+			boxp->x1 =
+				mT2p->pdf_imagebox.x1
 				+ ((float)(mT2p->pdf_imagewidth * i * tilewidth)
 				/ (float)mT2p->tiff_width);
-			boxp->x2 = 
-				mT2p->pdf_imagebox.x1 
+			boxp->x2 =
+				mT2p->pdf_imagebox.x1
 				+ ((float)(mT2p->pdf_imagewidth * (i+1) * tilewidth)
 				/ (float)mT2p->tiff_width);
 			boxp->y1 = mT2p->pdf_imagebox.y1;
-			boxp->y2 = 
-				mT2p->pdf_imagebox.y2 
+			boxp->y2 =
+				mT2p->pdf_imagebox.y2
 				- ((float)(mT2p->pdf_imagelength * i2 * tilelength)
 				/ (float)mT2p->tiff_length);
 		}
 		boxp=&(tiles[i2*tilecountx+i].tile_box);
-		boxp->x1 = 
-			mT2p->pdf_imagebox.x1 
+		boxp->x1 =
+			mT2p->pdf_imagebox.x1
 			+ ((float)(mT2p->pdf_imagewidth * i * tilewidth)
 			/ (float)mT2p->tiff_width);
 		boxp->x2 = mT2p->pdf_imagebox.x2;
 		boxp->y1 = mT2p->pdf_imagebox.y1;
-		boxp->y2 = 
-			mT2p->pdf_imagebox.y2 
+		boxp->y2 =
+			mT2p->pdf_imagebox.y2
 			- ((float)(mT2p->pdf_imagelength * i2 * tilelength)
 			/ (float)mT2p->tiff_length);
 	}
@@ -1455,7 +1455,7 @@ void TIFFImageHandler::ComposePDFPage()
 	{
 		for(i=0;i<(mT2p->tiff_tiles[mT2p->pdf_page]).tiles_tilecount;i++)
 		{
-			ComposePDFPageOrient( &(tiles[i].tile_box) , 0); 
+			ComposePDFPageOrient( &(tiles[i].tile_box) , 0);
 		}
 		return;
 	}
@@ -1493,14 +1493,14 @@ void TIFFImageHandler::ComposePDFPage()
 			boxp->y1 = f;
 			f=boxp->x2;
 			boxp->x2 = boxp->y2;
-			boxp->y2 = f; 
-			ComposePDFPageOrientFlip(boxp, mT2p->tiff_orientation); 
-		} 
-		else 
-		{
-			ComposePDFPageOrient(boxp, mT2p->tiff_orientation); 
+			boxp->y2 = f;
+			ComposePDFPageOrientFlip(boxp, mT2p->tiff_orientation);
 		}
-		
+		else
+		{
+			ComposePDFPageOrient(boxp, mT2p->tiff_orientation);
+		}
+
 	}
 
 	return;
@@ -1511,7 +1511,7 @@ void TIFFImageHandler::ComposePDFPageOrient(T2P_BOX* boxp, uint16 orientation)
 
 	float m1[9];
 	float f=0.0;
-	
+
 	if( boxp->x1 > boxp->x2)
 	{
 		f=boxp->x1;
@@ -1587,7 +1587,7 @@ void TIFFImageHandler::ComposePDFPageOrientFlip(T2P_BOX* boxp, uint16 orientatio
 {
 	float m1[9];
 	float f=0.0;
-	
+
 	if( boxp->x1 > boxp->x2)
 	{
 		f=boxp->x1;
@@ -1652,7 +1652,7 @@ ObjectIDType TIFFImageHandler::WriteTransferFunction(int i)
 {
 	ObjectIDType transferFunctionID = mObjectsContext->StartNewIndirectObject();
 	DictionaryContext* transferFunctionDictionary = mObjectsContext->StartDictionary();
-	
+
 	// Function Type
 	transferFunctionDictionary->WriteKey(scFunctionType);
 	transferFunctionDictionary->WriteIntegerValue(0);
@@ -1698,7 +1698,7 @@ ObjectIDType TIFFImageHandler::WriteTransferFunctionsExtGState(const ObjectIDTyp
 {
 	ObjectIDType gstateID = mObjectsContext->StartNewIndirectObject();
 	DictionaryContext* gstateDictionary = mObjectsContext->StartDictionary();
-	
+
 	// Type
 	gstateDictionary->WriteKey(scType);
 	gstateDictionary->WriteNameValue(scExtGState);
@@ -1714,8 +1714,8 @@ ObjectIDType TIFFImageHandler::WriteTransferFunctionsExtGState(const ObjectIDTyp
 		mObjectsContext->StartArray();
 		ObjectIDTypeList::const_iterator it = inTransferFunctions.begin();
 		for(;it != inTransferFunctions.end();++it)
-			mObjectsContext->WriteIndirectObjectReference(*it);				
-		mObjectsContext->WriteName(scIdentity);		
+			mObjectsContext->WriteIndirectObjectReference(*it);
+		mObjectsContext->WriteName(scIdentity);
 		mObjectsContext->EndArray(eTokenSeparatorEndLine);
 	}
 
@@ -1742,14 +1742,14 @@ ObjectIDType TIFFImageHandler::WriteICCCS()
 {
 	ObjectIDType ICCID = mObjectsContext->StartNewIndirectObject();
 	DictionaryContext* ICCDictionary = mObjectsContext->StartDictionary();
-	
+
 	// N
 	ICCDictionary->WriteKey(scN);
 	ICCDictionary->WriteIntegerValue(mT2p->tiff_samplesperpixel);
 
 	// Alternate
 	ICCDictionary->WriteKey(scAlternate);
-	
+
 	// NOW Write the CS
 	WriteXObjectCS(ICCDictionary);
 
@@ -1760,7 +1760,7 @@ ObjectIDType TIFFImageHandler::WriteICCCS()
 				mT2p->tiff_iccprofilelength);
 	mObjectsContext->EndPDFStream(ICCStream);
 	delete ICCStream;
-	return ICCID;	
+	return ICCID;
 }
 
 static const string scICCBased = "ICCBased";
@@ -1776,7 +1776,7 @@ void TIFFImageHandler::WriteXObjectCS(DictionaryContext* inContainerDictionary)
 	float X_W=1.0;
 	float Y_W=1.0;
 	float Z_W=1.0;
-	
+
 	if( (mT2p->pdf_colorspace & T2P_CS_ICCBASED) != 0)
 	{
 		mObjectsContext->StartArray();
@@ -1806,14 +1806,14 @@ void TIFFImageHandler::WriteXObjectCS(DictionaryContext* inContainerDictionary)
 		else
 			mObjectsContext->WriteName(scDeviceGray);
 	}
-		
+
 	if(mT2p->pdf_colorspace & T2P_CS_GRAY)
 	{
 		if(mT2p->pdf_colorspace & T2P_CS_CALGRAY)
 		{
 			WriteXObjectCALCS();
-		} 
-		else 
+		}
+		else
 		{
 			if(mUserParameters.GrayscaleTreatment.AsColorMap)
 			{
@@ -1834,8 +1834,8 @@ void TIFFImageHandler::WriteXObjectCS(DictionaryContext* inContainerDictionary)
 		if(mT2p->pdf_colorspace & T2P_CS_CALRGB)
 		{
 			WriteXObjectCALCS();
-		} 
-		else 
+		}
+		else
 		{
 			if(inContainerDictionary)
 				inContainerDictionary->WriteNameValue(scDeviceRGB);
@@ -1870,7 +1870,7 @@ void TIFFImageHandler::WriteXObjectCS(DictionaryContext* inContainerDictionary)
 		mObjectsContext->WriteDouble(Y_W);
 		mObjectsContext->WriteDouble(Z_W);
 		mObjectsContext->EndArray();
-		
+
 		X_W = 0.3457F; /* 0.3127F; */ /* D50, commented D65 */
 		Y_W = 0.3585F; /* 0.3290F; */
 		Z_W = 1.0F - (X_W + Y_W);
@@ -1890,10 +1890,10 @@ void TIFFImageHandler::WriteXObjectCS(DictionaryContext* inContainerDictionary)
 		mObjectsContext->WriteInteger(mT2p->pdf_labrange[2]);
 		mObjectsContext->WriteInteger(mT2p->pdf_labrange[3]);
 		mObjectsContext->EndArray(eTokenSeparatorEndLine);
-		
+
 		mObjectsContext->EndDictionary(labDictionary);
 		mObjectsContext->EndArray(eTokenSeparatorEndLine);
-			
+
 	}
 }
 
@@ -2037,7 +2037,7 @@ PDFImageXObject* TIFFImageHandler::WriteTileImageXObject(int inTileIndex)
 	{
 		ObjectIDType imageXObjectID = mObjectsContext->StartNewIndirectObject();
 		DictionaryContext* imageContext = mObjectsContext->StartDictionary();
-	
+
 		WriteCommonImageDictionaryProperties(imageContext);
 
 		// width
@@ -2064,7 +2064,7 @@ PDFImageXObject* TIFFImageHandler::WriteTileImageXObject(int inTileIndex)
 				TRACE_LOG("TIFFImageHandler::WriteTileImageXObject, unexpected failure. extender declared failure when writing image xobject.");
 				break;
 			}
-		}	
+		}
 
 		imageStream = mObjectsContext->StartUnfilteredPDFStream(imageContext);
 
@@ -2075,7 +2075,7 @@ PDFImageXObject* TIFFImageHandler::WriteTileImageXObject(int inTileIndex)
 
 		mObjectsContext->EndPDFStream(imageStream);
 
-		// Creating Image XObject procset value is dummy, because resources  on the 
+		// Creating Image XObject procset value is dummy, because resources  on the
 		// container will be set externally.
 		imageXObject = new PDFImageXObject(imageXObjectID);
 		AddImagesProcsets(imageXObject);
@@ -2100,7 +2100,7 @@ bool TIFFImageHandler::TileIsBottomEdge(int inTileIndex)
 				mT2p->tiff_tiles[mT2p->pdf_page].tiles_tilecount -
 				mT2p->tiff_tiles[mT2p->pdf_page].tiles_tilecountx))
 			&&
-			mT2p->tiff_tiles[mT2p->pdf_page].tiles_edgetilelength != 0);	
+			mT2p->tiff_tiles[mT2p->pdf_page].tiles_edgetilelength != 0);
 }
 
 static const string scDecode = "Decode";
@@ -2110,7 +2110,7 @@ void TIFFImageHandler::WriteImageXObjectDecode(DictionaryContext* inImageDiction
 
 	inImageDictionary->WriteKey(scDecode);
 	mObjectsContext->StartArray();
-	if((mT2p->pdf_colorspace & T2P_CS_GRAY) && 
+	if((mT2p->pdf_colorspace & T2P_CS_GRAY) &&
 		(!(mT2p->pdf_colorspace & T2P_CS_CALGRAY)) &&
 		mUserParameters.GrayscaleTreatment.AsColorMap)
 
@@ -2197,15 +2197,15 @@ void TIFFImageHandler::WriteImageXObjectFilter(DictionaryContext* inImageDiction
 				// Columns
 				decodeParmsDictionary->WriteKey(scColumns);
 				decodeParmsDictionary->WriteIntegerValue(
-					TileIsRightEdge(inTileIndex) ? 
+					TileIsRightEdge(inTileIndex) ?
 						mT2p->tiff_tiles[mT2p->pdf_page].tiles_edgetilewidth :
 						mT2p->tiff_tiles[mT2p->pdf_page].tiles_tilewidth
 					);
-			
+
 				// Rows
 				decodeParmsDictionary->WriteKey(scRows);
 				decodeParmsDictionary->WriteIntegerValue(
-					TileIsBottomEdge(inTileIndex) ? 
+					TileIsBottomEdge(inTileIndex) ?
 						mT2p->tiff_tiles[mT2p->pdf_page].tiles_edgetilelength :
 						mT2p->tiff_tiles[mT2p->pdf_page].tiles_tilelength
 					);
@@ -2257,13 +2257,13 @@ void TIFFImageHandler::CalculateTiffTileSize(int inTileIndex)
 
 	edge |= (uint16)TileIsRightEdge(inTileIndex);
 	edge |= (uint16)TileIsBottomEdge(inTileIndex);
-	
+
 	if(mT2p->pdf_transcode==T2P_TRANSCODE_RAW)
 	{
 		if(edge)
 		{
 			mT2p->tiff_datasize=TIFFTileSize(mT2p->input);
-		} else 
+		} else
 		{
 			TIFFGetField(mT2p->input, TIFFTAG_TILEBYTECOUNTS, &tbc);
 			mT2p->tiff_datasize=tbc[inTileIndex];
@@ -2278,56 +2278,56 @@ void TIFFImageHandler::CalculateTiffTileSize(int inTileIndex)
 }
 
 
-static tsize_t 
-t2p_readproc(thandle_t handle, tdata_t data, tsize_t size) 
+static tsize_t
+t2p_readproc(thandle_t handle, tdata_t data, tsize_t size)
 {
 	(void) handle, (void) data, (void) size;
 	return -1;
 }
 
-static tsize_t 
-t2p_writeproc(thandle_t handle, tdata_t data, tsize_t size) 
+static tsize_t
+t2p_writeproc(thandle_t handle, tdata_t data, tsize_t size)
 {
 	T2P *t2p = (T2P*) handle;
-	if (t2p->pdfStream) 
+	if (t2p->pdfStream)
 	{
 		tsize_t written = (tsize_t)t2p->pdfStream->GetWriteStream()->Write((const IOBasicTypes::Byte*)data,size);
 		return written;
 	}
-	return size; 
+	return size;
 }
 
-static toff_t 
-t2p_seekproc(thandle_t handle, toff_t offset, int whence) 
-{ 
+static toff_t
+t2p_seekproc(thandle_t handle, toff_t offset, int whence)
+{
 	(void) handle, (void) offset, (void) whence;
-	return offset; 
+	return offset;
 }
 
-static int 
+static int
 t2p_closeproc(thandle_t handle)
-{ 
+{
 	(void) handle;
-	return 0; 
+	return 0;
 }
 
-static toff_t 
-t2p_sizeproc(thandle_t handle) 
+static toff_t
+t2p_sizeproc(thandle_t handle)
 {
 	(void) handle;
 	return -1;
 }
 
-static int 
-t2p_mapproc(thandle_t handle, tdata_t *data, toff_t *offset) 
-{ 
+static int
+t2p_mapproc(thandle_t handle, tdata_t *data, toff_t *offset)
+{
 	(void) handle, (void) data, (void) offset;
-	return -1; 
+	return -1;
 }
 
-static void 
+static void
 t2p_unmapproc(thandle_t handle, tdata_t data, toff_t offset)
-{ 
+{
 	(void) handle, (void) data, (void) offset;
 }
 
@@ -2376,7 +2376,7 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 			{
 				TRACE_LOG2(
 					"TIFFImageHandler::WriteImageTileData, Can't allocate %u bytes of memory, for image %s",
-					mT2p->tiff_datasize, 
+					mT2p->tiff_datasize,
 					mT2p->inputFilePath.c_str());
 				status = PDFHummus::eFailure;
 				break;
@@ -2397,27 +2397,27 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 			{
 				TRACE_LOG2(
 					"TIFFImageHandler::WriteImageTileData, Can't allocate %u bytes of memory, for image %s",
-					mT2p->tiff_datasize, 
+					mT2p->tiff_datasize,
 					mT2p->inputFilePath.c_str());
 				status = PDFHummus::eFailure;
 				break;
 			}
 			read = TIFFReadEncodedTile(
-				mT2p->input, 
-				inTileIndex, 
-				(tdata_t) &buffer[bufferoffset], 
+				mT2p->input,
+				inTileIndex,
+				(tdata_t) &buffer[bufferoffset],
 				mT2p->tiff_datasize);
 			if(read==-1)
 			{
 				TRACE_LOG2(
 					"TIFFImageHandler::WriteImageTileData, Error on decoding tile %u of %s",
-					inTileIndex, 
+					inTileIndex,
 					mT2p->inputFilePath.c_str());
 				status = PDFHummus::eFailure;
 				break;
 			}
-		} 
-		else 
+		}
+		else
 		{
 
 			if(mT2p->pdf_sample == T2P_SAMPLE_PLANAR_SEPARATE_TO_CONTIG)
@@ -2431,7 +2431,7 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 				{
 					TRACE_LOG2(
 						"TIFFImageHandler::WriteImageTileData, Can't allocate %u bytes of memory, for image %s",
-						mT2p->tiff_datasize, 
+						mT2p->tiff_datasize,
 						mT2p->inputFilePath.c_str());
 					status = PDFHummus::eFailure;
 					break;
@@ -2441,7 +2441,7 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 				{
 					TRACE_LOG2(
 						"TIFFImageHandler::WriteImageTileData, Can't allocate %u bytes of memory, for image %s",
-						mT2p->tiff_datasize, 
+						mT2p->tiff_datasize,
 						mT2p->inputFilePath.c_str());
 					status = PDFHummus::eFailure;
 					break;
@@ -2449,16 +2449,16 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 				samplebufferoffset=0;
 				for(i=0;i<mT2p->tiff_samplesperpixel;i++)
 				{
-					read = 
-						TIFFReadEncodedTile(mT2p->input, 
-							inTileIndex + i*tilecount, 
-							(tdata_t) &(samplebuffer[samplebufferoffset]), 
+					read =
+						TIFFReadEncodedTile(mT2p->input,
+							inTileIndex + i*tilecount,
+							(tdata_t) &(samplebuffer[samplebufferoffset]),
 							septilesize);
 					if(read==-1)
 					{
 						TRACE_LOG2(
 							"TIFFImageHandler::WriteImageTileData, Error on decoding tile %u of %s",
-							inTileIndex + i*tilecount, 
+							inTileIndex + i*tilecount,
 							mT2p->inputFilePath.c_str());
 						_TIFFfree(samplebuffer);
 						_TIFFfree(buffer);
@@ -2469,8 +2469,8 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 				}
 				SamplePlanarSeparateToContig(
 					&(buffer[bufferoffset]),
-					samplebuffer, 
-					samplebufferoffset); 
+					samplebuffer,
+					samplebufferoffset);
 				bufferoffset+=samplebufferoffset;
 				_TIFFfree(samplebuffer);
 			}
@@ -2482,21 +2482,21 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 				{
 					TRACE_LOG2(
 						"TIFFImageHandler::WriteImageTileData, Can't allocate %u bytes of memory, for image %s",
-						mT2p->tiff_datasize, 
+						mT2p->tiff_datasize,
 						mT2p->inputFilePath.c_str());
 					status = PDFHummus::eFailure;
 					break;
 				}
 				read = TIFFReadEncodedTile(
-					mT2p->input, 
-					inTileIndex, 
-					(tdata_t) &buffer[bufferoffset], 
+					mT2p->input,
+					inTileIndex,
+					(tdata_t) &buffer[bufferoffset],
 					mT2p->tiff_datasize);
 				if(read==-1)
 				{
 					TRACE_LOG2(
 						"TIFFImageHandler::WriteImageTileData, Error on decoding tile %u of %s",
-						inTileIndex, 
+						inTileIndex,
 						mT2p->inputFilePath.c_str());
 					_TIFFfree(buffer);
 					status = PDFHummus::eFailure;
@@ -2507,7 +2507,7 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 			if(mT2p->pdf_sample & T2P_SAMPLE_RGBA_TO_RGB)
 			{
 				mT2p->tiff_datasize=SampleRGBAToRGB(
-					(tdata_t)buffer, 
+					(tdata_t)buffer,
 					mT2p->tiff_tiles[mT2p->pdf_page].tiles_tilewidth
 					*mT2p->tiff_tiles[mT2p->pdf_page].tiles_tilelength);
 			}
@@ -2515,7 +2515,7 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 			if(mT2p->pdf_sample & T2P_SAMPLE_RGBAA_TO_RGB)
 			{
 				mT2p->tiff_datasize=SampleRGBAAToRGB(
-					(tdata_t)buffer, 
+					(tdata_t)buffer,
 					mT2p->tiff_tiles[mT2p->pdf_page].tiles_tilewidth
 					*mT2p->tiff_tiles[mT2p->pdf_page].tiles_tilelength);
 			}
@@ -2530,7 +2530,7 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 			if(mT2p->pdf_sample & T2P_SAMPLE_LAB_SIGNED_TO_UNSIGNED)
 			{
 				mT2p->tiff_datasize=SampleLABSignedToUnsigned(
-					(tdata_t)buffer, 
+					(tdata_t)buffer,
 					mT2p->tiff_tiles[mT2p->pdf_page].tiles_tilewidth
 					*mT2p->tiff_tiles[mT2p->pdf_page].tiles_tilelength);
 			}
@@ -2539,15 +2539,15 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 		if(TileIsRightEdge(inTileIndex) != 0)
 		{
 			TileCollapseLeft(
-				buffer, 
+				buffer,
 				TIFFTileRowSize(mT2p->input),
 				mT2p->tiff_tiles[mT2p->pdf_page].tiles_tilewidth,
-				mT2p->tiff_tiles[mT2p->pdf_page].tiles_edgetilewidth, 
+				mT2p->tiff_tiles[mT2p->pdf_page].tiles_edgetilewidth,
 				mT2p->tiff_tiles[mT2p->pdf_page].tiles_tilelength);
 		}
 
 		status = WriteImageBufferToStream(inImageStream,
-										TileIsRightEdge(inTileIndex) ? 
+										TileIsRightEdge(inTileIndex) ?
 											mT2p->tiff_tiles[mT2p->pdf_page].tiles_edgetilewidth :
 											mT2p->tiff_tiles[mT2p->pdf_page].tiles_tilewidth,
 										TileIsBottomEdge(inTileIndex) ?
@@ -2555,8 +2555,8 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 											mT2p->tiff_tiles[mT2p->pdf_page].tiles_edgetilelength,
 										 buffer,
 										 GetSizeFromTIFFDataSize /*GetSizeFromTIFFOutputStripSize*/);
-											
-		if (buffer != NULL) 
+
+		if (buffer != NULL)
 		{
 			_TIFFfree(buffer);
 			buffer = NULL;
@@ -2565,14 +2565,14 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 	return status;
 }
 
-void TIFFImageHandler::SamplePlanarSeparateToContig(unsigned char* inBuffer, 
-													unsigned char* inSamplebuffer, 
+void TIFFImageHandler::SamplePlanarSeparateToContig(unsigned char* inBuffer,
+													unsigned char* inSamplebuffer,
 													tsize_t inSamplebuffersize)
 {
 	tsize_t stride=0;
 	tsize_t i=0;
 	tsize_t j=0;
-	
+
 	stride=inSamplebuffersize/mT2p->tiff_samplesperpixel;
 	for(i=0;i<stride;i++){
 		for(j=0;j<mT2p->tiff_samplesperpixel;j++){
@@ -2586,15 +2586,15 @@ tsize_t TIFFImageHandler::SampleRGBAToRGB(tdata_t inData, uint32 inSampleCount)
 	uint32 i = 0;
 	uint32 sample = 0;
 	uint8 alpha = 0;
-	
-	for (i = 0; i < inSampleCount; i++) 
+
+	for (i = 0; i < inSampleCount; i++)
 	{
 		sample=((uint32*)inData)[i];
 		alpha=(uint8)((255 - (sample & 0xff)));
 		((uint8 *)inData)[i * 3] = (uint8) ((sample >> 24) & 0xff) + alpha;
 		((uint8 *)inData)[i * 3 + 1] = (uint8) ((sample >> 16) & 0xff) + alpha;
 		((uint8 *)inData)[i * 3 + 2] = (uint8) ((sample >> 8) & 0xff) + alpha;
-		
+
 	}
 
 	return (i * 3);
@@ -2603,11 +2603,11 @@ tsize_t TIFFImageHandler::SampleRGBAToRGB(tdata_t inData, uint32 inSampleCount)
 tsize_t TIFFImageHandler::SampleRGBAAToRGB(tdata_t inData, uint32 inSampleCount)
 {
 	uint32 i;
-	
+
 	for(i = 0; i < inSampleCount; i++)
 		memcpy((uint8*)inData + i * 3, (uint8*)inData + i * 4, 3);
 
-	return(i * 3);	
+	return(i * 3);
 }
 
 tsize_t	TIFFImageHandler::SampleLABSignedToUnsigned(tdata_t inBuffer, uint32 inSampleCount)
@@ -2620,8 +2620,8 @@ tsize_t	TIFFImageHandler::SampleLABSignedToUnsigned(tdata_t inBuffer, uint32 inS
 		{
 			((unsigned char*)inBuffer)[(i*3)+1] =
 				(unsigned char)(0x80 + ((char*)inBuffer)[(i*3)+1]);
-		} 
-		else 
+		}
+		else
 		{
 			((unsigned char*)inBuffer)[(i*3)+1] |= 0x80;
 		}
@@ -2629,30 +2629,30 @@ tsize_t	TIFFImageHandler::SampleLABSignedToUnsigned(tdata_t inBuffer, uint32 inS
 		{
 			((unsigned char*)inBuffer)[(i*3)+2] =
 				(unsigned char)(0x80 + ((char*)inBuffer)[(i*3)+2]);
-		} 
-		else 
+		}
+		else
 		{
 			((unsigned char*)inBuffer)[(i*3)+2] |= 0x80;
 		}
 	}
-	return(inSampleCount*3);	
+	return(inSampleCount*3);
 }
 
-void TIFFImageHandler::TileCollapseLeft(tdata_t inBuffer, tsize_t inScanWidth, 
-										uint32 inTileWidth, uint32 inEdgeTileWidth, 
+void TIFFImageHandler::TileCollapseLeft(tdata_t inBuffer, tsize_t inScanWidth,
+										uint32 inTileWidth, uint32 inEdgeTileWidth,
 										uint32 inTileLength)
 {
 	uint32 i=0;
 	tsize_t edgescanwidth=0;
-	
+
 	edgescanwidth = (inScanWidth * inEdgeTileWidth + (inTileWidth - 1))/ inTileWidth;
 	for(i=i;i<inTileLength;i++)
 	{
-		_TIFFmemcpy( 
-			&(((char*)inBuffer)[edgescanwidth*i]), 
-			&(((char*)inBuffer)[inScanWidth*i]), 
+		_TIFFmemcpy(
+			&(((char*)inBuffer)[edgescanwidth*i]),
+			&(((char*)inBuffer)[inScanWidth*i]),
 			edgescanwidth);
-	}	
+	}
 }
 
 PDFImageXObject* TIFFImageHandler::WriteUntiledImageXObject()
@@ -2664,7 +2664,7 @@ PDFImageXObject* TIFFImageHandler::WriteUntiledImageXObject()
 	{
 		ObjectIDType imageXObjectID = mObjectsContext->StartNewIndirectObject();
 		DictionaryContext* imageContext = mObjectsContext->StartDictionary();
-	
+
 		WriteCommonImageDictionaryProperties(imageContext);
 
 		// width
@@ -2686,7 +2686,7 @@ PDFImageXObject* TIFFImageHandler::WriteUntiledImageXObject()
 				TRACE_LOG("TIFFImageHandler::WriteTileImageXObject, unexpected failure. extender declared failure when writing image xobject.");
 				break;
 			}
-		}	
+		}
 
 		imageStream = mObjectsContext->StartUnfilteredPDFStream(imageContext);
 
@@ -2697,7 +2697,7 @@ PDFImageXObject* TIFFImageHandler::WriteUntiledImageXObject()
 
 		mObjectsContext->EndPDFStream(imageStream);
 
-		// Creating Image XObject procset value is dummy, because resources  on the 
+		// Creating Image XObject procset value is dummy, because resources  on the
 		// container will be set externally.
 		imageXObject = new PDFImageXObject(imageXObjectID);
 		AddImagesProcsets(imageXObject);
@@ -2706,7 +2706,7 @@ PDFImageXObject* TIFFImageHandler::WriteUntiledImageXObject()
 
 	delete imageStream;
 	return imageXObject;
-	
+
 }
 
 static const string scImageMask = "ImageMask";
@@ -2748,7 +2748,7 @@ void TIFFImageHandler::WriteCommonImageDictionaryProperties(DictionaryContext* i
 
 	// decode
 	if( (mT2p->pdf_switchdecode != 0)
-		&& ! (mT2p->pdf_colorspace == T2P_CS_BILEVEL 
+		&& ! (mT2p->pdf_colorspace == T2P_CS_BILEVEL
 		&& mT2p->pdf_compression == T2P_COMPRESS_G4)
 		)
 	{
@@ -2760,7 +2760,7 @@ void TIFFImageHandler::CalculateTiffSizeNoTiles()
 {
 	uint32* sbc=NULL;
 
-	if(mT2p->pdf_transcode == T2P_TRANSCODE_RAW && 
+	if(mT2p->pdf_transcode == T2P_TRANSCODE_RAW &&
 		(mT2p->pdf_compression == T2P_COMPRESS_G4 || mT2p->pdf_compression == T2P_COMPRESS_ZIP))
 	{
 		TIFFGetField(mT2p->input, TIFFTAG_STRIPBYTECOUNTS, &sbc);
@@ -2801,11 +2801,11 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 				mT2p->pdf_compression == T2P_COMPRESS_ZIP)
 			{
 				buffer = (unsigned char*)_TIFFmalloc(mT2p->tiff_datasize);
-				if (!buffer) 
+				if (!buffer)
 				{
-					TRACE_LOG2( 
-						"Can't allocate %u bytes of memory for t2p_readwrite_pdf_image, %s", 
-						mT2p->tiff_datasize, 
+					TRACE_LOG2(
+						"Can't allocate %u bytes of memory for t2p_readwrite_pdf_image, %s",
+						mT2p->tiff_datasize,
 						mT2p->inputFilePath.c_str());
 					status = PDFHummus::eFailure;
 					break;
@@ -2825,9 +2825,9 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 			buffer = (unsigned char*) _TIFFmalloc(mT2p->tiff_datasize);
 			if(buffer==NULL)
 			{
-				TRACE_LOG2( 
-					"Can't allocate %u bytes of memory for t2p_readwrite_pdf_image, %s", 
-					mT2p->tiff_datasize, 
+				TRACE_LOG2(
+					"Can't allocate %u bytes of memory for t2p_readwrite_pdf_image, %s",
+					mT2p->tiff_datasize,
 					mT2p->inputFilePath.c_str());
 				status = PDFHummus::eFailure;
 				break;
@@ -2837,16 +2837,16 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 			stripcount=TIFFNumberOfStrips(mT2p->input);
 			for(i=0;i<stripcount;i++)
 			{
-				read = 
-					TIFFReadEncodedStrip(mT2p->input, 
-					i, 
-					(tdata_t) &buffer[bufferoffset], 
+				read =
+					TIFFReadEncodedStrip(mT2p->input,
+					i,
+					(tdata_t) &buffer[bufferoffset],
 					stripsize);
 				if(read==-1)
 				{
-					TRACE_LOG2( 
-						"Error on decoding strip %u of %s", 
-						i, 
+					TRACE_LOG2(
+						"Error on decoding strip %u of %s",
+						i,
 						mT2p->inputFilePath.c_str());
 					_TIFFfree(buffer);
 					status = PDFHummus::eFailure;
@@ -2856,24 +2856,24 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 			}
 			if(status != PDFHummus::eSuccess)
 				break;
-		} 
-		else 
+		}
+		else
 		{
 			if(mT2p->pdf_sample & T2P_SAMPLE_PLANAR_SEPARATE_TO_CONTIG)
 			{
-			
+
 				sepstripsize=TIFFStripSize(mT2p->input);
 				sepstripcount=TIFFNumberOfStrips(mT2p->input);
-			
+
 				stripsize=sepstripsize*mT2p->tiff_samplesperpixel;
 				stripcount=sepstripcount/mT2p->tiff_samplesperpixel;
-				
+
 				buffer = (unsigned char*) _TIFFmalloc(mT2p->tiff_datasize);
 				if(buffer==NULL)
 				{
-					TRACE_LOG2( 
-						"Can't allocate %u bytes of memory for t2p_readwrite_pdf_image, %s", 
-						mT2p->tiff_datasize, 
+					TRACE_LOG2(
+						"Can't allocate %u bytes of memory for t2p_readwrite_pdf_image, %s",
+						mT2p->tiff_datasize,
 						mT2p->inputFilePath.c_str());
 					status = PDFHummus::eFailure;
 					break;
@@ -2882,9 +2882,9 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 				samplebuffer = (unsigned char*) _TIFFmalloc(stripsize);
 				if(samplebuffer==NULL)
 				{
-					TRACE_LOG2( 
-						"Can't allocate %u bytes of memory for t2p_readwrite_pdf_image, %s", 
-						mT2p->tiff_datasize, 
+					TRACE_LOG2(
+						"Can't allocate %u bytes of memory for t2p_readwrite_pdf_image, %s",
+						mT2p->tiff_datasize,
 						mT2p->inputFilePath.c_str());
 					status = PDFHummus::eFailure;
 					break;
@@ -2894,16 +2894,16 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 					samplebufferoffset=0;
 					for(j=0;j<mT2p->tiff_samplesperpixel;j++)
 					{
-						read = 
-							TIFFReadEncodedStrip(mT2p->input, 
-								i + j*stripcount, 
-								(tdata_t) &(samplebuffer[samplebufferoffset]), 
+						read =
+							TIFFReadEncodedStrip(mT2p->input,
+								i + j*stripcount,
+								(tdata_t) &(samplebuffer[samplebufferoffset]),
 								sepstripsize);
 						if(read==-1)
 						{
-							TRACE_LOG2( 
-								"Error on decoding strip %u of %s", 
-								i + j*stripcount, 
+							TRACE_LOG2(
+								"Error on decoding strip %u of %s",
+								i + j*stripcount,
 								mT2p->inputFilePath.c_str());
 								_TIFFfree(buffer);
 							status = PDFHummus::eFailure;
@@ -2915,8 +2915,8 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 						break;
 					SamplePlanarSeparateToContig(
 						&(buffer[bufferoffset]),
-						samplebuffer, 
-						samplebufferoffset); 
+						samplebuffer,
+						samplebufferoffset);
 					bufferoffset+=samplebufferoffset;
 				}
 				_TIFFfree(samplebuffer);
@@ -2927,7 +2927,7 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 										 mT2p->tiff_length,
 										 buffer,
 										 GetSizeFromTIFFDataSize);
-				if (buffer != NULL) 
+				if (buffer != NULL)
 				{
 					_TIFFfree(buffer);
 					buffer=NULL;
@@ -2938,9 +2938,9 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 			buffer = (unsigned char*) _TIFFmalloc(mT2p->tiff_datasize);
 			if(buffer==NULL)
 			{
-				TRACE_LOG2( 
-					"Can't allocate %u bytes of memory for t2p_readwrite_pdf_image, %s", 
-					mT2p->tiff_datasize, 
+				TRACE_LOG2(
+					"Can't allocate %u bytes of memory for t2p_readwrite_pdf_image, %s",
+					mT2p->tiff_datasize,
 					mT2p->inputFilePath.c_str());
 				status = PDFHummus::eFailure;
 				break;
@@ -2950,16 +2950,16 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 			stripcount=TIFFNumberOfStrips(mT2p->input);
 			for(i=0;i<stripcount;i++)
 			{
-				read = 
-					TIFFReadEncodedStrip(mT2p->input, 
-					i, 
-					(tdata_t) &buffer[bufferoffset], 
+				read =
+					TIFFReadEncodedStrip(mT2p->input,
+					i,
+					(tdata_t) &buffer[bufferoffset],
 					stripsize);
 				if(read==-1)
 				{
-					TRACE_LOG2( 
-						"Error on decoding strip %u of %s", 
-						i, 
+					TRACE_LOG2(
+						"Error on decoding strip %u of %s",
+						i,
 						mT2p->inputFilePath.c_str());
 					_TIFFfree(samplebuffer);
 					_TIFFfree(buffer);
@@ -2973,19 +2973,19 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 
 			if(mT2p->pdf_sample & T2P_SAMPLE_REALIZE_PALETTE)
 			{
-				samplebuffer=(unsigned char*)_TIFFrealloc( 
-					(tdata_t) buffer, 
+				samplebuffer=(unsigned char*)_TIFFrealloc(
+					(tdata_t) buffer,
 					mT2p->tiff_datasize * mT2p->tiff_samplesperpixel);
 				if(samplebuffer==NULL)
 				{
-					TRACE_LOG2( 
-						"Can't allocate %u bytes of memory for t2p_readwrite_pdf_image, %s", 
-						mT2p->tiff_datasize, 
+					TRACE_LOG2(
+						"Can't allocate %u bytes of memory for t2p_readwrite_pdf_image, %s",
+						mT2p->tiff_datasize,
 						mT2p->inputFilePath.c_str());
 					status = PDFHummus::eFailure;
 				  _TIFFfree(buffer);
-				} 
-				else 
+				}
+				else
 				{
 					buffer=samplebuffer;
 					mT2p->tiff_datasize *= mT2p->tiff_samplesperpixel;
@@ -2996,52 +2996,52 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 			if(mT2p->pdf_sample & T2P_SAMPLE_RGBA_TO_RGB)
 			{
 				mT2p->tiff_datasize=SampleRGBAToRGB(
-					(tdata_t)buffer, 
+					(tdata_t)buffer,
 					mT2p->tiff_width*mT2p->tiff_length);
 			}
 
 			if(mT2p->pdf_sample & T2P_SAMPLE_RGBAA_TO_RGB)
 			{
 				mT2p->tiff_datasize=SampleRGBAAToRGB(
-					(tdata_t)buffer, 
+					(tdata_t)buffer,
 					mT2p->tiff_width*mT2p->tiff_length);
 			}
 
 			if(mT2p->pdf_sample & T2P_SAMPLE_YCBCR_TO_RGB)
 			{
 				samplebuffer=(unsigned char*)_TIFFrealloc(
-					(tdata_t)buffer, 
+					(tdata_t)buffer,
 					mT2p->tiff_width*mT2p->tiff_length*4);
 				if(samplebuffer==NULL)
 				{
-					TRACE_LOG2( 
-						"Can't allocate %u bytes of memory for t2p_readwrite_pdf_image, %s", 
-						mT2p->tiff_datasize, 
+					TRACE_LOG2(
+						"Can't allocate %u bytes of memory for t2p_readwrite_pdf_image, %s",
+						mT2p->tiff_datasize,
 						mT2p->inputFilePath.c_str());
 					status = PDFHummus::eFailure;
 					_TIFFfree(buffer);
 					break;
-				} 
-				else 
+				}
+				else
 				{
 					buffer=samplebuffer;
 				}
 				if(!TIFFReadRGBAImageOriented(
-					mT2p->input, 
-					mT2p->tiff_width, 
-					mT2p->tiff_length, 
-					(uint32*)buffer, 
+					mT2p->input,
+					mT2p->tiff_width,
+					mT2p->tiff_length,
+					(uint32*)buffer,
 					ORIENTATION_TOPLEFT,
 					0))
 				{
-					TRACE_LOG1( 
-						"Can't use TIFFReadRGBAImageOriented to extract RGB image from %s", 
+					TRACE_LOG1(
+						"Can't use TIFFReadRGBAImageOriented to extract RGB image from %s",
 						mT2p->inputFilePath.c_str());
 					status = PDFHummus::eFailure;
 					break;
 				}
 				mT2p->tiff_datasize=SampleABGRToRGB(
-					(tdata_t) buffer, 
+					(tdata_t) buffer,
 					mT2p->tiff_width*mT2p->tiff_length);
 
 			}
@@ -3049,7 +3049,7 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 			if(mT2p->pdf_sample & T2P_SAMPLE_LAB_SIGNED_TO_UNSIGNED)
 			{
 				mT2p->tiff_datasize=SampleLABSignedToUnsigned(
-					(tdata_t)buffer, 
+					(tdata_t)buffer,
 					mT2p->tiff_width*mT2p->tiff_length);
 			}
 		}
@@ -3059,7 +3059,7 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 								 mT2p->tiff_length,
 								 buffer,
 								 GetSizeFromTIFFDataSize);
-		if (buffer != NULL) 
+		if (buffer != NULL)
 		{
 			_TIFFfree(buffer);
 			buffer=NULL;
@@ -3078,7 +3078,7 @@ void TIFFImageHandler::SampleRealizePalette(unsigned char* inBuffer)
 	uint32 j=0;
 	sample_count=mT2p->tiff_width*mT2p->tiff_length;
 	component_count=mT2p->tiff_samplesperpixel;
-	
+
 	for(i=sample_count;i>0;i--)
 	{
 		palette_offset=inBuffer[i-1] * component_count;
@@ -3092,7 +3092,7 @@ tsize_t TIFFImageHandler::SampleABGRToRGB(tdata_t inData, uint32 inSampleCount)
 {
 	uint32 i=0;
 	uint32 sample=0;
-	
+
 	for(i=0;i<inSampleCount;i++)
 	{
 		sample=((uint32*)inData)[i];
@@ -3101,7 +3101,7 @@ tsize_t TIFFImageHandler::SampleABGRToRGB(tdata_t inData, uint32 inSampleCount)
 		((char*)inData)[i*3+2]= (char) ((sample>>16) & 0xff);
 	}
 
-	return(i*3);	
+	return(i*3);
 }
 
 EStatusCode TIFFImageHandler::WriteImageBufferToStream(PDFStream* inPDFStream,
@@ -3115,11 +3115,11 @@ EStatusCode TIFFImageHandler::WriteImageBufferToStream(PDFStream* inPDFStream,
 	{
 		mT2p->pdfStream = NULL;
 
-		/* hopefully here is good enough, and that dummy is good. 
+		/* hopefully here is good enough, and that dummy is good.
 			basically the only allowed action is to write */
 		TIFF* output = TIFFClientOpen("dummy.txt", "w", (thandle_t)mT2p,
-					t2p_readproc, t2p_writeproc, t2p_seekproc, 
-					t2p_closeproc, t2p_sizeproc, 
+					t2p_readproc, t2p_writeproc, t2p_seekproc,
+					t2p_closeproc, t2p_sizeproc,
 					t2p_mapproc, t2p_unmapproc );
 
 		TIFFSetField(output, TIFFTAG_PHOTOMETRIC, mT2p->tiff_photometric);
@@ -3143,14 +3143,14 @@ EStatusCode TIFFImageHandler::WriteImageBufferToStream(PDFStream* inPDFStream,
 			TIFFSetField(output, TIFFTAG_COMPRESSION, COMPRESSION_DEFLATE);
 			if(mT2p->pdf_defaultcompressionquality%100 != 0)
 			{
-				TIFFSetField(output, 
-					TIFFTAG_PREDICTOR, 
+				TIFFSetField(output,
+					TIFFTAG_PREDICTOR,
 					mT2p->pdf_defaultcompressionquality % 100);
 			}
 			if(mT2p->pdf_defaultcompressionquality/100 != 0)
 			{
-				TIFFSetField(output, 
-					TIFFTAG_ZIPQUALITY, 
+				TIFFSetField(output,
+					TIFFTAG_ZIPQUALITY,
 					(mT2p->pdf_defaultcompressionquality / 100));
 			}
 			break;
@@ -3159,19 +3159,19 @@ EStatusCode TIFFImageHandler::WriteImageBufferToStream(PDFStream* inPDFStream,
 		mT2p->pdfStream = inPDFStream;
 		mT2p->output = output; // dirty trick so i can use the inBufferSizeFunction function by getting info from output (sometimes)
 
-		tsize_t bufferoffset = TIFFWriteEncodedStrip(output, (tstrip_t)0,inBuffer,inBufferSizeFunction(mT2p)); 
+		tsize_t bufferoffset = TIFFWriteEncodedStrip(output, (tstrip_t)0,inBuffer,inBufferSizeFunction(mT2p));
 
 		mT2p->output = NULL;
 		mT2p->pdfStream = NULL;
 		if (output != NULL)
 			TIFFClose(output);
 
-		if (bufferoffset == (tsize_t)-1) 
+		if (bufferoffset == (tsize_t)-1)
 		{
 			TRACE_LOG1("Error writing encoded strip to output PDF %s",mT2p->inputFilePath.c_str());
 			status = PDFHummus::eFailure;
 			break;
-		}		
+		}
 	}while(false);
 
 	return status;
@@ -3202,7 +3202,7 @@ PDFFormXObject* TIFFImageHandler::WriteImagesFormXObject(const PDFImageXObjectLi
 																	mT2p->pdf_transfer_functions_gstate));
 		}
 
-		// BiLevel tiff image handling, set the color to the "1" color 
+		// BiLevel tiff image handling, set the color to the "1" color
 		if(mT2p->pdf_colorspace & T2P_CS_BILEVEL && mUserParameters.BWTreatment.AsImageMask)
 		{
 			xobjectContentContext->q();
@@ -3230,7 +3230,7 @@ PDFFormXObject* TIFFImageHandler::WriteImagesFormXObject(const PDFImageXObjectLi
 											box.mat[6],
 											box.mat[7]);
 				xobjectContentContext->Do(
-					xobjectForm->GetResourcesDictionary().AddImageXObjectMapping(*it));			
+					xobjectForm->GetResourcesDictionary().AddImageXObjectMapping(*it));
 				xobjectContentContext->Q();
 			}
 		}
@@ -3245,10 +3245,10 @@ PDFFormXObject* TIFFImageHandler::WriteImagesFormXObject(const PDFImageXObjectLi
 										box.mat[6],
 										box.mat[7]);
 			xobjectContentContext->Do(
-				xobjectForm->GetResourcesDictionary().AddImageXObjectMapping(*it));			
+				xobjectForm->GetResourcesDictionary().AddImageXObjectMapping(*it));
 			xobjectContentContext->Q();
 		}
-		if(mT2p->tiff_transferfunctioncount != 0 || 
+		if(mT2p->tiff_transferfunctioncount != 0 ||
 			(mT2p->pdf_colorspace & T2P_CS_BILEVEL && mUserParameters.BWTreatment.AsImageMask))
 			xobjectContentContext->Q();
 
@@ -3259,7 +3259,7 @@ PDFFormXObject* TIFFImageHandler::WriteImagesFormXObject(const PDFImageXObjectLi
 				"TIFFImageHandler::WriteImagesFormXObject, Error in writing form XObject for image %s",
 				mT2p->inputFilePath.c_str());
 			break;
-		}	
+		}
 
 	}while(false);
 
@@ -3274,18 +3274,18 @@ PDFFormXObject* TIFFImageHandler::WriteImagesFormXObject(const PDFImageXObjectLi
 
 void TIFFImageHandler::AddImagesProcsets(PDFImageXObject* inImageXObject)
 {
-	if(mT2p->pdf_colorspace == T2P_CS_BILEVEL 
+	if(mT2p->pdf_colorspace == T2P_CS_BILEVEL
 		|| mT2p->pdf_colorspace == T2P_CS_GRAY
 		)
 	{
 		inImageXObject->AddRequiredProcset(KProcsetImageB);
-	} 
-	else 
+	}
+	else
 	{
 		inImageXObject->AddRequiredProcset(KProcsetImageC);
 		if(mT2p->pdf_colorspace & T2P_CS_PALETTE)
 			inImageXObject->AddRequiredProcset(KProcsetImageI);
-	}	
+	}
 }
 
 static const char scSingleColorCMYKFormat[] = "%02X%02X%02X%02X ";
@@ -3333,7 +3333,7 @@ void TIFFImageHandler::WriteIndexedCSForBiLevelColorMap()
 	mObjectsContext->WriteInteger(colorSpaceHighValue);
 
 	// now write the pallete
-	
+
 	for(unsigned long j = 0;j < colorValuesPerComponent; ++j)
 	{
 		if(4 == colorComponents)
@@ -3356,7 +3356,7 @@ void TIFFImageHandler::WriteIndexedCSForBiLevelColorMap()
 		{
 			max[i] -= maxStep[i];
 			min[i] += minStep[i];
-			
+
 		}
 		mPalleteStream<<colorsBuffer;
 	}
@@ -3413,7 +3413,7 @@ static toff_t STATIC_streamSeek(thandle_t inData, toff_t inOffset, int inDirecti
     case 2: // from end
       ((StreamWithPos*)inData)->mStream->SetPositionFromEnd(inOffset);
       break;
-    }	
+    }
 
 	return (toff_t)((((StreamWithPos*)inData)->mStream)->GetCurrentPosition() - ((StreamWithPos*)inData)->mOriginalPosition);
 }
@@ -3423,8 +3423,8 @@ static int STATIC_streamClose(thandle_t inData)
 	return 0;
 }
 
-toff_t STATIC_tiffSize(thandle_t inData) 
-{ 
+toff_t STATIC_tiffSize(thandle_t inData)
+{
 	LongFilePositionType currentPosition = ((StreamWithPos*)inData)->mStream->GetCurrentPosition();
 
 	((StreamWithPos*)inData)->mStream->SetPositionFromEnd(0);
@@ -3433,18 +3433,18 @@ toff_t STATIC_tiffSize(thandle_t inData)
 
 	((StreamWithPos*)inData)->mStream->SetPosition(currentPosition);
 
-    return  (toff_t)size; 
-}; 
+    return  (toff_t)size;
+};
 
-int STATIC_tiffMap(thandle_t, tdata_t*, toff_t*) 
-{ 
- return 0; 
-}; 
+int STATIC_tiffMap(thandle_t, tdata_t*, toff_t*)
+{
+ return 0;
+};
 
-void STATIC_tiffUnmap(thandle_t, tdata_t, toff_t) 
-{ 
- return; 
-}; 
+void STATIC_tiffUnmap(thandle_t, tdata_t, toff_t)
+{
+ return;
+};
 
 PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFStream(	IByteReaderWithPosition* inTIFFStream,
 																	ObjectIDType inFormXObjectID,
@@ -3468,7 +3468,7 @@ PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFStream(	IByteReaderWi
 		StreamWithPos streamInfo;
 		streamInfo.mStream = inTIFFStream;
 		streamInfo.mOriginalPosition = inTIFFStream->GetCurrentPosition();
-		
+
 		input = TIFFClientOpen("Stream","r",(thandle_t)&streamInfo,STATIC_streamRead,
 																	STATIC_streamWrite,
 																	STATIC_streamSeek,

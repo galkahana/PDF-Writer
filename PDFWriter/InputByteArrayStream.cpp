@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "InputByteArrayStream.h"
 #include <memory.h>
@@ -49,9 +49,9 @@ LongBufferSizeType InputByteArrayStream::Read(IOBasicTypes::Byte* inBuffer,IOBas
 	if(!mByteArray)
 		return 0;
 
-	LongBufferSizeType amountToRead = 
-		inBufferSize < (LongBufferSizeType)(mArrayLength-mCurrentPosition) ? 
-		inBufferSize : 
+	LongBufferSizeType amountToRead =
+		inBufferSize < (LongBufferSizeType)(mArrayLength-mCurrentPosition) ?
+		inBufferSize :
 		(LongBufferSizeType)(mArrayLength-mCurrentPosition);
 
 	if(amountToRead>0)

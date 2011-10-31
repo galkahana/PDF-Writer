@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "IndirectObjectsReferenceRegistry.h"
 #include "Trace.h"
@@ -37,7 +37,7 @@ using namespace PDFHummus;
 IndirectObjectsReferenceRegistry::IndirectObjectsReferenceRegistry(void)
 {
 	ObjectWriteInformation singleFreeObjectInformation;
-	
+
 	singleFreeObjectInformation.mObjectReferenceType = ObjectWriteInformation::Free;
 	singleFreeObjectInformation.mObjectWritten = false;
 	mObjectsWritesRegistry.push_back(singleFreeObjectInformation);
@@ -55,7 +55,7 @@ ObjectIDType IndirectObjectsReferenceRegistry::AllocateNewObjectID()
 
 	newObjectInformation.mObjectWritten = false;
 	newObjectInformation.mObjectReferenceType = ObjectWriteInformation::Used;
-	
+
 	mObjectsWritesRegistry.push_back(newObjectInformation);
 	return newObjectID;
 }
@@ -66,7 +66,7 @@ EStatusCode IndirectObjectsReferenceRegistry::MarkObjectAsWritten(ObjectIDType i
 	if(mObjectsWritesRegistry.size() <= inObjectID)
 	{
 		TRACE_LOG1("IndirectObjectsReferenceRegistry::MarkObjectAsWritten, Out of range failure. An Object ID is marked as written, which was not allocated before. ID = %ld",inObjectID);
-		return PDFHummus::eFailure; 
+		return PDFHummus::eFailure;
 	}
 
 	if(mObjectsWritesRegistry[inObjectID].mObjectWritten)
@@ -120,14 +120,14 @@ EStatusCode IndirectObjectsReferenceRegistry::WriteState(ObjectsContext* inState
 	ObjectIDTypeList objects;
 
 	inStateWriter->StartNewIndirectObject(inObjectID);
-	
+
 	DictionaryContext* myDictionary = inStateWriter->StartDictionary();
-	
+
 	myDictionary->WriteKey("Type");
 	myDictionary->WriteNameValue("IndirectObjectsReferenceRegistry");
 
 	myDictionary->WriteKey("mObjectsWritesRegistry");
-	
+
 	ObjectWriteInformationVector::iterator it = mObjectsWritesRegistry.begin();
 
 	inStateWriter->StartArray();
@@ -151,7 +151,7 @@ EStatusCode IndirectObjectsReferenceRegistry::WriteState(ObjectsContext* inState
 		inStateWriter->StartNewIndirectObject(*itIDs);
 
 		DictionaryContext* registryDictionary = inStateWriter->StartDictionary();
-		
+
 		registryDictionary->WriteKey("Type");
 		registryDictionary->WriteNameValue("ObjectWriteInformation");
 
@@ -188,7 +188,7 @@ EStatusCode IndirectObjectsReferenceRegistry::ReadState(PDFParser* inStateReader
 		ObjectWriteInformation newObjectInformation;
 		PDFObjectCastPtr<PDFDictionary> objectWriteInformationDictionary(inStateReader->ParseNewObject(
 																				((PDFIndirectObjectReference*)it.GetItem())->mObjectID));
-		
+
 		PDFObjectCastPtr<PDFBoolean> objectWritten(objectWriteInformationDictionary->QueryDirectObject("mObjectWritten"));
 
 		newObjectInformation.mObjectWritten = objectWritten->GetValue();

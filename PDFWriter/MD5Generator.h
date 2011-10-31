@@ -16,22 +16,22 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
  Additional Copyright Information:
 
  Gal Kahana 8/5/2010. my code is completely copied/adapted from this:
 
- MD5.CC - source code for the C++/object oriented translation and 
+ MD5.CC - source code for the C++/object oriented translation and
           modification of MD5.
 
- Translation and modification (c) 1995 by Mordechai T. Abzug 
+ Translation and modification (c) 1995 by Mordechai T. Abzug
 
- This translation/ modification is provided "as is," without express or 
+ This translation/ modification is provided "as is," without express or
  implied warranty of any kind.
 
- The translator/ modifier does not claim (1) that MD5 will do what you think 
- it does; (2) that this translation/ modification is accurate; or (3) that 
- this software is "merchantible."  (Language for this disclaimer partially 
+ The translator/ modifier does not claim (1) that MD5 will do what you think
+ it does; (2) that this translation/ modification is accurate; or (3) that
+ this software is "merchantible."  (Language for this disclaimer partially
  copied from the disclaimer below).
 
  the code is based on:
@@ -82,9 +82,9 @@ public:
 
 private:
 
-	typedef unsigned       int uint4; 
-	typedef unsigned short int uint2; 
-	typedef unsigned      char uint1; 
+	typedef unsigned       int uint4;
+	typedef unsigned short int uint2;
+	typedef unsigned      char uint1;
 	string MD5FinalString;
 
 	uint4 mState[4];
@@ -95,7 +95,7 @@ private:
 
 	void Accumulate(const uint1* inBlock,unsigned long inBlockSize);
 
-	void Transform(const uint1 *inBuffer);  // does the real update work.  Note 
+	void Transform(const uint1 *inBuffer);  // does the real update work.  Note
                                    // that length is implied to be 64.
 
 	void Decode (const uint1 *inInput, uint4 inInputLen,uint4 *outOutput);

@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "DictionaryContext.h"
 #include "ObjectsContext.h"
@@ -104,7 +104,7 @@ void DictionaryContext::WriteNullValue()
 
 void DictionaryContext::WriteNameValue(const string& inValue)
 {
-	mObjectsContext->WriteName(inValue,eTokenSeparatorEndLine);	
+	mObjectsContext->WriteName(inValue,eTokenSeparatorEndLine);
 }
 
 void DictionaryContext::WriteRectangleValue(const PDFRectangle& inRectangle)
@@ -120,7 +120,7 @@ void DictionaryContext::WriteRectangleValue(const PDFRectangle& inRectangle)
 
 void DictionaryContext::WriteDoubleValue(double inValue)
 {
-	mObjectsContext->WriteDouble(inValue,eTokenSeparatorEndLine);	
+	mObjectsContext->WriteDouble(inValue,eTokenSeparatorEndLine);
 }
 
 void DictionaryContext::WriteBooleanValue(bool inValue)

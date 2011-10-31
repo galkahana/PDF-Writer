@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "MergePDFPages.h"
 #include "TestsRunner.h"
@@ -139,7 +139,7 @@ EStatusCode MergePDFPages::TestOnlyMerge()
 			break;
 	}while(false);
 
-	
+
 	return status;
 }
 
@@ -198,7 +198,7 @@ EStatusCode MergePDFPages::TestPrefixGraphicsMerge()
 			break;
 	}while(false);
 
-	
+
 	return status;
 }
 
@@ -255,7 +255,7 @@ EStatusCode MergePDFPages::TestSuffixGraphicsMerge()
 			break;
 	}while(false);
 
-	
+
 	return status;
 }
 
@@ -384,7 +384,7 @@ EStatusCode MergePDFPages::MergeTwoPageInSeparatePhases()
 			break;
 	}while(false);
 
-	
+
 	return status;
 }
 
@@ -445,7 +445,7 @@ EStatusCode MergePDFPages::MergeTwoPageWithEvents()
 
 		MyPDFMergingHandler mergingHandler(pageContent);
 
-		// i'm using events to write the interim code, as oppose to using two merges as TestBothGraphicsMerge shows. this is more efficient, considering the embedded PDF. 
+		// i'm using events to write the interim code, as oppose to using two merges as TestBothGraphicsMerge shows. this is more efficient, considering the embedded PDF.
 		// but still, the easiest would be to use the copying context
 		pdfWriter.GetDocumentContext().AddDocumentContextExtender(&mergingHandler);
 		status = pdfWriter.MergePDFPagesToPage(page,scMergeFilePath,twoPageRange);
@@ -478,7 +478,7 @@ EStatusCode MergePDFPages::MergePagesUsingCopyingContext()
 	EStatusCode status;
 
 	// in this sample we'll create two pages, from 3 pages content of the merged page.
-	// the first page will be used as a reusable object in both result pages. the second and third page will 
+	// the first page will be used as a reusable object in both result pages. the second and third page will
 	// be reusables.
 
 	do
@@ -493,7 +493,7 @@ EStatusCode MergePDFPages::MergePagesUsingCopyingContext()
 			status = PDFHummus::eFailure;
 			break;
 		}
-		
+
 		// create a reusable form xobject from the first page
 		EStatusCodeAndObjectIDType result = copyingContext->CreateFormXObjectFromPDFPage(0,ePDFPageBoxMediaBox);
 		if(result.first != PDFHummus::eSuccess)

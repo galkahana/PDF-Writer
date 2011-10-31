@@ -246,7 +246,7 @@ FT_BEGIN_HEADER
   {NULL, NULL}                                                               \
   };
 
-#else /* FT_CONFIG_OPTION_PIC */ 
+#else /* FT_CONFIG_OPTION_PIC */
 
 #define FT_DEFINE_SERVICEDESCREC1(class_, serv_id_1, serv_data_1)            \
   void                                                                       \
@@ -274,7 +274,7 @@ FT_BEGIN_HEADER
     clazz[1].serv_data = NULL;                                               \
     *output_class = clazz;                                                   \
     return FT_Err_Ok;                                                        \
-  } 
+  }
 
 #define FT_DEFINE_SERVICEDESCREC2(class_, serv_id_1, serv_data_1,            \
         serv_id_2, serv_data_2)                                              \
@@ -305,7 +305,7 @@ FT_BEGIN_HEADER
     clazz[2].serv_data = NULL;                                               \
     *output_class = clazz;                                                   \
     return FT_Err_Ok;                                                        \
-  } 
+  }
 
 #define FT_DEFINE_SERVICEDESCREC3(class_, serv_id_1, serv_data_1,            \
         serv_id_2, serv_data_2, serv_id_3, serv_data_3)                      \
@@ -338,7 +338,7 @@ FT_BEGIN_HEADER
     clazz[3].serv_data = NULL;                                               \
     *output_class = clazz;                                                   \
     return FT_Err_Ok;                                                        \
-  } 
+  }
 
 #define FT_DEFINE_SERVICEDESCREC4(class_, serv_id_1, serv_data_1,            \
         serv_id_2, serv_data_2, serv_id_3, serv_data_3,                      \
@@ -374,7 +374,7 @@ FT_BEGIN_HEADER
     clazz[4].serv_data = NULL;                                               \
     *output_class = clazz;                                                   \
     return FT_Err_Ok;                                                        \
-  } 
+  }
 
 #define FT_DEFINE_SERVICEDESCREC5(class_, serv_id_1, serv_data_1,            \
         serv_id_2, serv_data_2, serv_id_3, serv_data_3, serv_id_4,           \
@@ -412,7 +412,7 @@ FT_BEGIN_HEADER
     clazz[5].serv_data = NULL;                                               \
     *output_class = clazz;                                                   \
     return FT_Err_Ok;                                                        \
-  } 
+  }
 
 #define FT_DEFINE_SERVICEDESCREC6(class_, serv_id_1, serv_data_1,            \
         serv_id_2, serv_data_2, serv_id_3, serv_data_3,                      \
@@ -453,8 +453,8 @@ FT_BEGIN_HEADER
     clazz[6].serv_data = NULL;                                               \
     *output_class = clazz;                                                   \
     return FT_Err_Ok;                                                        \
-  } 
-#endif /* FT_CONFIG_OPTION_PIC */ 
+  }
+#endif /* FT_CONFIG_OPTION_PIC */
 
   /*
    *  Parse a list of FT_ServiceDescRec descriptors and look for

@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "PageContentContext.h"
 #include "PDFPage.h"
@@ -84,7 +84,7 @@ EStatusCode PageContentContext::FinalizeStreamWriteAndRelease()
 PDFStream* PageContentContext::GetCurrentPageContentStream()
 {
 	StartAStreamIfRequired();
-	return mCurrentStream;	
+	return mCurrentStream;
 }
 
 void PageContentContext::RenewStreamConnection()

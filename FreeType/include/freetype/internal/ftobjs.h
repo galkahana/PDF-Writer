@@ -243,7 +243,7 @@ FT_BEGIN_HEADER
     clazz->variant_list = variant_list_;                                     \
     clazz->charvariant_list = charvariant_list_;                             \
     clazz->variantchar_list = variantchar_list_;                             \
-  } 
+  }
 #endif /* FT_CONFIG_OPTION_PIC */
 
   /* create a new charmap and add it to charmap->face */
@@ -976,7 +976,7 @@ FT_BEGIN_HEADER
     move_to_, line_to_, conic_to_, cubic_to_, shift_, delta_                 \
   };
 
-#else /* FT_CONFIG_OPTION_PIC */ 
+#else /* FT_CONFIG_OPTION_PIC */
 
 #define FT_DEFINE_OUTLINE_FUNCS(class_, move_to_, line_to_, conic_to_,       \
                                 cubic_to_, shift_, delta_)                   \
@@ -990,9 +990,9 @@ FT_BEGIN_HEADER
     clazz->shift = shift_;                                                   \
     clazz->delta = delta_;                                                   \
     return FT_Err_Ok;                                                        \
-  } 
+  }
 
-#endif /* FT_CONFIG_OPTION_PIC */ 
+#endif /* FT_CONFIG_OPTION_PIC */
 
   /*************************************************************************/
   /*                                                                       */
@@ -1018,7 +1018,7 @@ FT_BEGIN_HEADER
     raster_set_mode_, raster_render_, raster_done_                           \
   };
 
-#else /* FT_CONFIG_OPTION_PIC */ 
+#else /* FT_CONFIG_OPTION_PIC */
 
 #define FT_DEFINE_RASTER_FUNCS(class_, glyph_format_, raster_new_,           \
     raster_reset_, raster_set_mode_, raster_render_, raster_done_)           \
@@ -1031,9 +1031,9 @@ FT_BEGIN_HEADER
     clazz->raster_set_mode = raster_set_mode_;                               \
     clazz->raster_render = raster_render_;                                   \
     clazz->raster_done = raster_done_;                                       \
-  } 
+  }
 
-#endif /* FT_CONFIG_OPTION_PIC */ 
+#endif /* FT_CONFIG_OPTION_PIC */
 
   /*************************************************************************/
   /*************************************************************************/
@@ -1072,7 +1072,7 @@ FT_BEGIN_HEADER
     size_, format_, init_, done_, copy_, transform_, bbox_, prepare_         \
   };
 
-#else /* FT_CONFIG_OPTION_PIC */ 
+#else /* FT_CONFIG_OPTION_PIC */
 
 #define FT_DEFINE_GLYPH(class_, size_, format_, init_, done_, copy_,         \
                         transform_, bbox_, prepare_)                         \
@@ -1087,9 +1087,9 @@ FT_BEGIN_HEADER
     clazz->glyph_transform = transform_;                                     \
     clazz->glyph_bbox = bbox_;                                               \
     clazz->glyph_prepare = prepare_;                                         \
-  } 
+  }
 
-#endif /* FT_CONFIG_OPTION_PIC */ 
+#endif /* FT_CONFIG_OPTION_PIC */
 
   /*************************************************************************/
   /*                                                                       */
@@ -1150,7 +1150,7 @@ FT_BEGIN_HEADER
     raster_class_                                                            \
   };
 
-#else /* FT_CONFIG_OPTION_PIC */ 
+#else /* FT_CONFIG_OPTION_PIC */
 
 #define FT_DECLARE_RENDERER(class_)  FT_DECLARE_MODULE(class_)
 
@@ -1205,11 +1205,11 @@ FT_BEGIN_HEADER
                                                                              \
     *output_class = (FT_Module_Class*)clazz;                                 \
     return FT_Err_Ok;                                                        \
-  } 
+  }
 
 
 
-#endif /* FT_CONFIG_OPTION_PIC */ 
+#endif /* FT_CONFIG_OPTION_PIC */
 
   /*************************************************************************/
   /*************************************************************************/
@@ -1367,7 +1367,7 @@ FT_BEGIN_HEADER
                                                                              \
     clazz->root.module_init        = init_;                                  \
     clazz->root.module_done        = done_;                                  \
-    clazz->root.get_interface      = get_interface_;               
+    clazz->root.get_interface      = get_interface_;
 
 #define FT_DEFINE_MODULE(class_, flags_, size_, name_, version_, requires_,  \
                          interface_, init_, done_, get_interface_)           \
@@ -1415,7 +1415,7 @@ FT_BEGIN_HEADER
                                                                              \
     *output_class = clazz;                                                   \
     return FT_Err_Ok;                                                        \
-  } 
+  }
 
 #endif /* FT_CONFIG_OPTION_PIC */
 

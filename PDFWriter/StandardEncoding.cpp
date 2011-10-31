@@ -16,12 +16,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "StandardEncoding.h"
 #include "BetweenIncluding.h"
 
-static const char* scGlyphNames[256] = 
+static const char* scGlyphNames[256] =
 {
 		".notdef", ".notdef", ".notdef", ".notdef", ".notdef", ".notdef", ".notdef", ".notdef",
 		".notdef", ".notdef", ".notdef", ".notdef",	".notdef", ".notdef", ".notdef", ".notdef",
@@ -33,7 +33,7 @@ static const char* scGlyphNames[256] =
 		"eight", "nine", "colon", "semicolon","less", "equal", "greater", "question",
 		"at", "A", "B", "C", "D", "E", "F", "G",
 		"H", "I", "J", "K", "L", "M", "N", "O",
-		"P", "Q", "R", "S", "T", "U", "V", "W",	
+		"P", "Q", "R", "S", "T", "U", "V", "W",
 		"X", "Y", "Z", "bracketleft", "backslash", "bracketright", "asciicircum", "underscore",
 		"quoteleft", "a", "b", "c", "d", "e", "f", "g",
 		"h", "i", "j", "k", "l", "m", "n", "o",

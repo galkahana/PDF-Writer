@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "ANSIFontWriter.h"
 #include "ObjectsContext.h"
@@ -65,7 +65,7 @@ EStatusCode ANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 	FontDescriptorWriter fontDescriptorWriter;
 
 	inObjectsContext->StartNewIndirectObject(inFontOccurrence->mWrittenObjectID);
-	
+
 	mFontInfo = &inFontInfo;
 	mFontOccurrence = inFontOccurrence;
 	mObjectsContext = inObjectsContext;
@@ -90,7 +90,7 @@ EStatusCode ANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 		/*
 			as for widths.
 			i have to create a list/array of the characters ordered from lowest encoded value to highest, and fill it up with the charachters mapped
-			to glyphs. this will allow me to later write the highest and lowest char codes, as well as loop the list and 
+			to glyphs. this will allow me to later write the highest and lowest char codes, as well as loop the list and
 			write the widths.
 		*/
 		CalculateCharacterEncodingArray();
@@ -118,7 +118,7 @@ EStatusCode ANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 			break;
 		}
 
-		inObjectsContext->EndIndirectObject();	
+		inObjectsContext->EndIndirectObject();
 
 		// if necessary, write a dictionary encoding
 		if(mDifferences.size() > 0)
@@ -170,7 +170,7 @@ void ANSIFontWriter::WriteWidths(DictionaryContext* inFontContext)
 	inFontContext->WriteKey(scWidths);
 
 	mObjectsContext->StartArray();
-	
+
 	UIntAndGlyphEncodingInfoVector::iterator itCharacters = mCharactersVector.begin() + 1; // ignore the 0 glyph when writing widths
 	for(unsigned short i = itCharacters->second.mEncodedCharacter; i <= mCharactersVector.back().second.mEncodedCharacter; ++i)
 	{
@@ -250,7 +250,7 @@ void ANSIFontWriter::WriteEncodingDictionary()
 
 	UShortAndStringList::iterator it = mDifferences.begin();
 	unsigned short previousEncoding;
-	
+
 	encodingDictionary->WriteIntegerValue(it->first);
 	encodingDictionary->WriteNameValue(it->second);
 	previousEncoding = it->first;
@@ -350,7 +350,7 @@ void ANSIFontWriter::WriteGlyphEntry(IByteWriter* inWriter,unsigned short inEnco
 
 	SAFE_SPRINTF_1(formattingBuffer,17,"<%02x> <",inEncodedCharacter);
 	inWriter->Write((const Byte*)formattingBuffer,6);
-	
+
 	if(inUnicodeValues.size() == 0)
 	{
 		inWriter->Write(scAllZeros,4);

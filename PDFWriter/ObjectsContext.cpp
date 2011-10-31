@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "ObjectsContext.h"
 #include "IOBasicTypes.h"
@@ -104,7 +104,7 @@ EStatusCode ObjectsContext::WriteXrefTable(LongFilePositionType& outWritePositio
 {
 	EStatusCode status = PDFHummus::eSuccess;
 	outWritePosition = mOutputStream->GetCurrentPosition();
-	
+
 	// write xref keyword
 	mOutputStream->Write(scXref,4);
 	mPrimitiveWriter.EndLine();
@@ -268,7 +268,7 @@ PDFStream* ObjectsContext::StartPDFStream(DictionaryContext* inStreamDictionary)
 	streamDictionaryContext->WriteKey(scLength);
 	ObjectIDType lengthObjectID = mReferencesRegistry.AllocateNewObjectID();
 	streamDictionaryContext->WriteObjectReferenceValue(lengthObjectID);
-		
+
 	// Compression (if necessary)
 	if(mCompressStreams)
 	{
@@ -298,7 +298,7 @@ PDFStream* ObjectsContext::StartUnfilteredPDFStream(DictionaryContext* inStreamD
 	streamDictionaryContext->WriteKey(scLength);
 	ObjectIDType lengthObjectID = mReferencesRegistry.AllocateNewObjectID();
 	streamDictionaryContext->WriteObjectReferenceValue(lengthObjectID);
-		
+
 	EndDictionary(streamDictionaryContext);
 
 	// Write Stream Content
@@ -316,7 +316,7 @@ void ObjectsContext::EndPDFStream(PDFStream* inStream)
 	EndIndirectObject();
 	WritePDFStreamExtent(inStream);
 }
-	
+
 void ObjectsContext::WritePDFStreamEndWithoutExtent()
 {
 		EndLine(); // this one just to make sure
@@ -343,7 +343,7 @@ string ObjectsContext::GenerateSubsetFontPrefix()
 EStatusCode ObjectsContext::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
 {
 	EStatusCode status;
-		
+
 	do
 	{
 		inStateWriter->StartNewIndirectObject(inObjectID);
@@ -387,7 +387,7 @@ EStatusCode ObjectsContext::WriteState(ObjectsContext* inStateWriter,ObjectIDTyp
 
 		inStateWriter->EndDictionary(sequanceDict);
 
-		inStateWriter->EndIndirectObject();		
+		inStateWriter->EndIndirectObject();
 	}while(false);
 
 	return status;

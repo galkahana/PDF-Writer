@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -27,7 +27,7 @@ class ObjectsContextExtenderAdapter : public IObjectsContextExtender
 public:
 
 	virtual bool OverridesStreamCompression(){return false;}
-	
+
 	virtual IByteWriter* GetCompressionWriteStream(IByteWriterWithPosition* inOutputStream){return inOutputStream;}
 
 	virtual void FinalizeCompressedStreamWrite(IByteWriter* inCompressedStream){}

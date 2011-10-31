@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "CharStringType1Interpreter.h"
 #include "InputByteArrayStream.h"
@@ -64,7 +64,7 @@ EStatusCode CharStringType1Interpreter::ProcessCharString(InputCharStringDecodeS
 	Byte buffer;
 
 	while(inCharStringToIntepret->NotEnded() &&
-			PDFHummus::eSuccess == status && 
+			PDFHummus::eSuccess == status &&
 			!gotEndExecutionOperator &&
 			!mGotEndChar)
 	{
@@ -83,7 +83,7 @@ EStatusCode CharStringType1Interpreter::ProcessCharString(InputCharStringDecodeS
 bool CharStringType1Interpreter::IsOperator(Byte inBuffer)
 {
 	return  (inBuffer <= 31);
-			
+
 }
 
 EStatusCode CharStringType1Interpreter::InterpretOperator(Byte inBuffer,InputCharStringDecodeStream* inCharStringToIntepret,bool& outGotEndExecutionCommand)
@@ -92,7 +92,7 @@ EStatusCode CharStringType1Interpreter::InterpretOperator(Byte inBuffer,InputCha
 	unsigned short operatorValue;
 	outGotEndExecutionCommand = false;
 	Byte buffer;
-	
+
 	if(12 == inBuffer)
 	{
 		if(inCharStringToIntepret->Read(&buffer,1) != 1)
@@ -156,7 +156,7 @@ EStatusCode CharStringType1Interpreter::InterpretOperator(Byte inBuffer,InputCha
 		case 31: // hvcurveto
 			status = InterpretHVCurveto();
 			break;
-		
+
 		case 0x0c00: // dotsection
 			status = InterpretDotSection();
 			break;
@@ -185,7 +185,7 @@ EStatusCode CharStringType1Interpreter::InterpretOperator(Byte inBuffer,InputCha
 			status = InterpretSetCurrentPoint();
 			break;
 	}
-	return status;	
+	return status;
 }
 
 EStatusCode CharStringType1Interpreter::InterpretNumber(Byte inBuffer,InputCharStringDecodeStream* inCharStringToIntepret)
@@ -215,7 +215,7 @@ EStatusCode CharStringType1Interpreter::InterpretNumber(Byte inBuffer,InputCharS
 	else if(255 == inBuffer)
 	{
 		Byte byte1,byte2,byte3,byte4;
-		
+
 		if(inCharStringToIntepret->Read(&byte1,1) != 1)
 			return PDFHummus::eFailure;
 		if(inCharStringToIntepret->Read(&byte2,1) != 1)
@@ -227,9 +227,9 @@ EStatusCode CharStringType1Interpreter::InterpretNumber(Byte inBuffer,InputCharS
 
 
 		operand = (long)(
-						((unsigned long)(byte1) << 24) + 
-						((unsigned long)(byte2) << 16) + 
-						((unsigned long)(byte3) << 8) + 
+						((unsigned long)(byte1) << 24) +
+						((unsigned long)(byte2) << 16) +
+						((unsigned long)(byte3) << 8) +
 						(byte4));
 	}
 	else
@@ -509,8 +509,8 @@ EStatusCode CharStringType1Interpreter::DefaultCallOtherSubr()
 {
 	/*
 		K. at first i thought of actually implementing first 4 othersubrs- flex mechanism (hint replacement just does basically nothing).
-		but then i figured that for the purpose of running this interpreter - meaning getting the stack right, judging by how these 4 are used - 
-		i don't reallly need to do anything to get the stack right, other than do the default behavior for unknown subrs. the only damage is that 
+		but then i figured that for the purpose of running this interpreter - meaning getting the stack right, judging by how these 4 are used -
+		i don't reallly need to do anything to get the stack right, other than do the default behavior for unknown subrs. the only damage is that
 		setcurrentpoint won't necesserily get the right points after calling 0 othersubr. well...as long as it's getting the 2 parameter i'm happy,
 		and it does. actual flex implementation is only necessery if drawing the thing. so i'll leave it to implementation, and by default
 		just behave like it's unknown.

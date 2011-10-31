@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "CFFANSIFontWriter.h"
 #include "ANSIFontWriter.h"
@@ -59,10 +59,10 @@ EStatusCode CFFANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 		return PDFHummus::eFailure;
 	}
 	std::string subsetFontName = inObjectsContext->GenerateSubsetFontPrefix() + scPlus + postscriptFontName;
-	
+
 	const char* fontType = inFontInfo.GetTypeString();
 
-	// reset embedded font object ID (and flag...to whether it was actually embedded or not, which may 
+	// reset embedded font object ID (and flag...to whether it was actually embedded or not, which may
 	// happen due to font embedding restrictions)
 	mEmbeddedFontFileObjectID = 0;
 
@@ -74,7 +74,7 @@ EStatusCode CFFANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 		status = embeddedFontWriter.WriteEmbeddedFont(inFontInfo,
 													inFontOccurrence->GetGlyphIDsAsOrderedVector(),
 													scType1C,
-													subsetFontName, 
+													subsetFontName,
 													inObjectsContext,
 													mEmbeddedFontFileObjectID);
 	}
@@ -85,7 +85,7 @@ EStatusCode CFFANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 		status = embeddedFontWriter.WriteEmbeddedFont(inFontInfo,
 													inFontOccurrence->GetGlyphIDsAsOrderedVector(),
 													scType1C,
-													subsetFontName, 
+													subsetFontName,
 													inObjectsContext,
 													mEmbeddedFontFileObjectID);
 	}
@@ -136,7 +136,7 @@ void CFFANSIFontWriter::WriteCharSet(	DictionaryContext* inDescriptorContext,
 
 	UIntAndGlyphEncodingInfoVector::const_iterator it = inEncodedGlyphs.begin()+1; // skip 0 character
 	char buffer[100];
-	
+
 	for(; it != inEncodedGlyphs.end(); ++it)
 	{
 		FT_Get_Glyph_Name(*inFontInfo,it->first,buffer,100);
@@ -148,7 +148,7 @@ void CFFANSIFontWriter::WriteCharSet(	DictionaryContext* inDescriptorContext,
 }
 
 static const string scFontFile3 = "FontFile3";
-void CFFANSIFontWriter::WriteFontFileReference(	
+void CFFANSIFontWriter::WriteFontFileReference(
 										DictionaryContext* inDescriptorContext,
 										ObjectsContext* inObjectsContext)
 {

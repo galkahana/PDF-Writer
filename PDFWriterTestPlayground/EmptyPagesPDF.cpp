@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "EmptyPagesPDF.h"
 #include "PDFWriter.h"
@@ -41,7 +41,7 @@ EStatusCode EmptyPagesPDF::Run()
 {
 	PDFWriter pdfWriter;
 	LogConfiguration logConfiguration(true,true,"C:\\PDFLibTests\\EmptyPagesLog.txt");
-	EStatusCode status; 
+	EStatusCode status;
 
 	do
 	{
@@ -50,7 +50,7 @@ EStatusCode EmptyPagesPDF::Run()
 		{
 			cout<<"failed to start PDF\n";
 			break;
-		}	
+		}
 
 
 		PDFPage* page = new PDFPage();
@@ -62,7 +62,7 @@ EStatusCode EmptyPagesPDF::Run()
 			if(status != PDFHummus::eSuccess)
 				cout<<"failed to write page "<<i<<"\n";
 		}
-		delete page;		
+		delete page;
 
 		status = pdfWriter.EndPDF();
 		if(status != PDFHummus::eSuccess)

@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "CFFPrimitiveReader.h"
 #include <math.h>
@@ -53,7 +53,7 @@ void CFFPrimitiveReader::SetOffset(LongFilePositionType inNewOffset)
 {
 	if(mInternalState != PDFHummus::eFailure)
 		mCFFFile->SetPosition(mInitialPosition + inNewOffset);
-}	
+}
 
 void CFFPrimitiveReader::Skip(LongBufferSizeType inToSkip)
 {
@@ -69,7 +69,7 @@ EStatusCode CFFPrimitiveReader::GetInternalState()
 LongFilePositionType CFFPrimitiveReader::GetCurrentPosition()
 {
 	if(mInternalState != PDFHummus::eFailure)
-		return mCFFFile->GetCurrentPosition() - mInitialPosition;	
+		return mCFFFile->GetCurrentPosition() - mInitialPosition;
 	else
 		return 0;
 }
@@ -85,7 +85,7 @@ EStatusCode CFFPrimitiveReader::ReadByte(Byte& outValue)
 	if(PDFHummus::eFailure == status)
 		mInternalState = PDFHummus::eFailure;
 	outValue = buffer;
-	return status;	
+	return status;
 }
 
 EStatusCode CFFPrimitiveReader::Read(Byte* ioBuffer,LongBufferSizeType inBufferSize)
@@ -97,7 +97,7 @@ EStatusCode CFFPrimitiveReader::Read(Byte* ioBuffer,LongBufferSizeType inBufferS
 
 	if(PDFHummus::eFailure == status)
 		mInternalState = PDFHummus::eFailure;
-	return status;	
+	return status;
 }
 
 EStatusCode CFFPrimitiveReader::ReadCard8(Byte& outValue)
@@ -185,7 +185,7 @@ EStatusCode CFFPrimitiveReader::Read3ByteUnsigned(unsigned long& outValue)
 
 	outValue = ((unsigned long)byte1 << 16) + ((unsigned long)byte2 << 8) + byte3;
 
-	return PDFHummus::eSuccess;	
+	return PDFHummus::eSuccess;
 }
 
 EStatusCode CFFPrimitiveReader::Read4ByteUnsigned(unsigned long& outValue)
@@ -204,12 +204,12 @@ EStatusCode CFFPrimitiveReader::Read4ByteUnsigned(unsigned long& outValue)
 	if(ReadByte(byte4) != PDFHummus::eSuccess)
 		return PDFHummus::eFailure;
 
-	outValue = ((unsigned long)byte1 << 24) + 
-				((unsigned long)byte2 << 16) + 
-					((unsigned long)byte3 << 8) + 
+	outValue = ((unsigned long)byte1 << 24) +
+				((unsigned long)byte2 << 16) +
+					((unsigned long)byte3 << 8) +
 											byte4;
 
-	return PDFHummus::eSuccess;	
+	return PDFHummus::eSuccess;
 }
 
 EStatusCode CFFPrimitiveReader::Read4ByteSigned(long& outValue)
@@ -245,7 +245,7 @@ EStatusCode CFFPrimitiveReader::ReadIntegerOperand(Byte inFirstByte,long& outVal
 
 	if(byte0 >= 32 && byte0 <= 246)
 	{
-		outValue = (long)byte0 - 139;		
+		outValue = (long)byte0 - 139;
 	}
 	else if(byte0 >= 247 && byte0 <= 250)
 	{
@@ -253,7 +253,7 @@ EStatusCode CFFPrimitiveReader::ReadIntegerOperand(Byte inFirstByte,long& outVal
 			return PDFHummus::eFailure;
 
 		outValue = (byte0-247) * 256 + byte1 + 108;
-	} 
+	}
 	else if (byte0 >= 251 && byte0 <= 254)
 	{
 		if(ReadByte(byte1) != PDFHummus::eSuccess)
@@ -266,7 +266,7 @@ EStatusCode CFFPrimitiveReader::ReadIntegerOperand(Byte inFirstByte,long& outVal
 		short buffer = 0;
 		status = Read2ByteSigned(buffer);
 		outValue = buffer;
-	} 
+	}
 	else if(29 == byte0)
 	{
 		status = Read4ByteSigned(outValue);
@@ -358,7 +358,7 @@ EStatusCode CFFPrimitiveReader::ReadRealOperand(double& outValue,long& outRealVa
 bool CFFPrimitiveReader::IsDictOperator(Byte inCandidate)
 {
 	return (inCandidate <= 27 || 31 == inCandidate);
-}	
+}
 
 EStatusCode CFFPrimitiveReader::ReadDictOperator(Byte inFirstByte,unsigned short& outOperator)
 {
@@ -366,7 +366,7 @@ EStatusCode CFFPrimitiveReader::ReadDictOperator(Byte inFirstByte,unsigned short
 	{
 		Byte buffer;
 		if(ReadByte(buffer) == PDFHummus::eSuccess)
-		{	
+		{
 			outOperator = ((unsigned short)inFirstByte << 8) | buffer;
 			return PDFHummus::eSuccess;
 		}

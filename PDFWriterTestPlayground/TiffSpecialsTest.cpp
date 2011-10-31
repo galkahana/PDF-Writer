@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "TiffSpecialsTest.h"
 #include "TestsRunner.h"
@@ -42,7 +42,7 @@ TiffSpecialsTest::~TiffSpecialsTest(void)
 EStatusCode TiffSpecialsTest::Run()
 {
 	PDFWriter pdfWriter;
-	EStatusCode status; 
+	EStatusCode status;
 	TIFFUsageParameters TIFFParameters;
 
 	do
@@ -52,7 +52,7 @@ EStatusCode TiffSpecialsTest::Run()
 		{
 			cout<<"failed to start PDF\n";
 			break;
-		}	
+		}
 
 
 		// multipage Tiff

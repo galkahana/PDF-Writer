@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "ImagesAndFormsForwardReferenceTest.h"
 #include "TestsRunner.h"
@@ -46,7 +46,7 @@ ImagesAndFormsForwardReferenceTest::~ImagesAndFormsForwardReferenceTest(void)
 EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 {
 	PDFWriter pdfWriter;
-	EStatusCode status; 
+	EStatusCode status;
 
 	do
 	{
@@ -56,7 +56,7 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 		{
 			cout<<"failed to start PDF\n";
 			break;
-		}	
+		}
 
 		PDFPage* page = new PDFPage();
 		page->SetMediaBox(PDFRectangle(0,0,595,842));
@@ -73,7 +73,7 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 		// continue page drawing size the image to 500,400
 		pageContentContext->q();
 		pageContentContext->cm(500,0,0,400,0,0);
-		
+
 		ObjectIDType imageXObjectID = pdfWriter.GetObjectsContext().GetInDirectObjectsRegistry().AllocateNewObjectID();
 		pageContentContext->Do(page->GetResourcesDictionary().AddImageXObjectMapping(imageXObjectID));
 
@@ -117,7 +117,7 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 		}
 
 
-		// Create image xobject  
+		// Create image xobject
 		PDFImageXObject* imageXObject  = pdfWriter.CreateImageXObjectFromJPGFile("C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG",imageXObjectID);
 		if(!imageXObject)
 		{
@@ -174,7 +174,7 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 			break;
 		}
 	}while(false);
-	return status;		
+	return status;
 }
 
 ADD_CATEGORIZED_TEST(ImagesAndFormsForwardReferenceTest,"PDF Images")

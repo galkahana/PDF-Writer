@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "InputFlateDecodeStream.h"
 
@@ -132,7 +132,7 @@ IOBasicTypes::LongBufferSizeType InputFlateDecodeStream::DecodeBufferAndRead(con
 				break;
 			}
 
-			mZLibState->avail_in = 1; 
+			mZLibState->avail_in = 1;
 			mZLibState->next_in = (Bytef*)&mBuffer;
 
 			while(mZLibState->avail_in != 0 && mZLibState->avail_out != 0 && inflateResult != Z_STREAM_END)

@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "FreeTypeInitializationTest.h"
 
@@ -26,11 +26,11 @@
 #include "Trace.h"
 #include "Singleton.h"
 
-#include FT_XFREE86_H 
-#include FT_CID_H 
-#include FT_TYPE1_TABLES_H 
+#include FT_XFREE86_H
+#include FT_CID_H
+#include FT_TYPE1_TABLES_H
 #include FT_TRUETYPE_TAGS_H
-#include FT_TRUETYPE_TABLES_H 
+#include FT_TRUETYPE_TABLES_H
 
 #include <iostream>
 
@@ -119,9 +119,9 @@ EStatusCode FreeTypeInitializationTest::ShowGlobalFontProperties(FreeTypeWrapper
 		if(FT_Load_Sfnt_Table(face,TTAG_CFF,0,NULL,&length) == 0)
 			cout<<"CCF table found, length is "<<length<<"\n";
 	}
-	
+
 	FT_Bool isCID;
-	
+
 	if(FT_Get_CID_Is_Internally_CID_Keyed(face,&isCID) != 0)
 	{
 		cout<<"No CID information to read\n";
@@ -129,7 +129,7 @@ EStatusCode FreeTypeInitializationTest::ShowGlobalFontProperties(FreeTypeWrapper
 	}
 	else
 		cout<<"Font Internally CID (checks also sfnts) = "<<(isCID ? "yes":"no")<<"\n";
-	
+
 	if(isCID)
 	{
 		const char* registry;

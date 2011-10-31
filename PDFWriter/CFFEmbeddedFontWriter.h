@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -88,7 +88,7 @@ private:
 	LongFilePositionType mPrivatePlaceHolderPosition;
 	LongFilePositionType mFDArrayPlaceHolderPosition;
 	LongFilePositionType mFDSelectPlaceHolderPosition;
-	
+
 	LongFilePositionType mEncodingPosition;
 	LongFilePositionType mCharsetPosition;
 	LongFilePositionType mCharStringPosition;
@@ -97,7 +97,7 @@ private:
 	LongFilePositionType mFDArrayPosition;
 	LongFilePositionType mFDSelectPosition;
 
-	PDFHummus::EStatusCode CreateCFFSubset(	
+	PDFHummus::EStatusCode CreateCFFSubset(
 					FreeTypeFaceWrapper& inFontInfo,
 					const UIntVector& inSubsetGlyphIDs,
 					UShortVector* inCIDMapping,
@@ -126,5 +126,5 @@ private:
 	PDFHummus::EStatusCode UpdateIndexesAtTopDict();
 
 	void DetermineFDArrayIndexes(const UIntVector& inSubsetGlyphIDs,FontDictInfoToByteMap& outNewFontDictsIndexes);
-	
+
 };

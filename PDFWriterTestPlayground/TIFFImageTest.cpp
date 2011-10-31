@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "TIFFImageTest.h"
 #include "TestsRunner.h"
@@ -42,7 +42,7 @@ TIFFImageTest::~TIFFImageTest(void)
 EStatusCode TIFFImageTest::Run()
 {
 	PDFWriter pdfWriter;
-	EStatusCode status; 
+	EStatusCode status;
 
 	do
 	{
@@ -51,7 +51,7 @@ EStatusCode TIFFImageTest::Run()
 		{
 			cout<<"failed to start PDF\n";
 			break;
-		}	
+		}
 
 		for(int i=1;i<9 && status != PDFHummus::eFailure;++i)
 			status = AddPageForTIFF(pdfWriter,(string("C:\\PDFLibTests\\TestMaterials\\images\\tiff\\CCITT_") + Int(i).ToString() + ".TIF").c_str());
@@ -184,7 +184,7 @@ EStatusCode TIFFImageTest::Run()
 		}
 	}while(false);
 
-	return status;	
+	return status;
 }
 
 EStatusCode TIFFImageTest::AddPageForTIFF(PDFWriter& inpdfWriter, const char* inTiffFilePath)

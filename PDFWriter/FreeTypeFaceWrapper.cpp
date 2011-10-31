@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "FreeTypeFaceWrapper.h"
 #include "IFreeTypeFaceExtender.h"
@@ -27,8 +27,8 @@
 #include "WrittenFontCFF.h"
 #include "WrittenFontTrueType.h"
 
-#include FT_XFREE86_H 
-#include FT_CID_H 
+#include FT_XFREE86_H
+#include FT_CID_H
 
 using namespace PDFHummus;
 
@@ -36,7 +36,7 @@ FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const string& inFontFile
 {
 	mFace = inFace;
 	mFontFilePath = inFontFilePath;
-	SetupFormatSpecificExtender("");	
+	SetupFormatSpecificExtender("");
 	mDoesOwn = inDoOwn;
 }
 
@@ -91,7 +91,7 @@ void FreeTypeFaceWrapper::SetupFormatSpecificExtender(const string& inPFMFilePat
 	}
 	else
 		mFormatParticularWrapper = NULL;
-		
+
 }
 
 static const char* scEmpty="";
@@ -313,7 +313,7 @@ FT_UShort FreeTypeFaceWrapper::WeightFromName()
 				return 500;
 
 			if(strstr(mFace->style_name,"Semi Bold") != NULL || strstr(mFace->style_name,"Demi Bold") != NULL)
-				return 600;		
+				return 600;
 
 
 			if(strstr(mFace->style_name,"Extra Bold") != NULL || strstr(mFace->style_name,"Ultra Bold") != NULL)
@@ -336,9 +336,9 @@ unsigned int FreeTypeFaceWrapper::GetFontFlags()
 {
 	unsigned int flags = 0;
 
-	/* 
+	/*
 		flags are a combination of:
-		
+
 		1 - Fixed Pitch
 		2 - Serif
 		3 - Symbolic
@@ -397,7 +397,7 @@ bool FreeTypeFaceWrapper::IsDefiningCharsNotInAdobeStandardLatin()
 		bool hasOnlyAdobeStandard = true;
 		FT_ULong characterCode;
 		FT_UInt glyphIndex;
-		
+
 		characterCode = FT_Get_First_Char(mFace,&glyphIndex);
 		hasOnlyAdobeStandard = IsCharachterCodeAdobeStandard(characterCode);
 		while(hasOnlyAdobeStandard && glyphIndex != 0)
@@ -476,7 +476,7 @@ bool FreeTypeFaceWrapper::IsCharachterCodeAdobeStandard(FT_ULong inCharacterCode
 
 bool FreeTypeFaceWrapper::IsScript()
 {
-	return mFormatParticularWrapper ? mFormatParticularWrapper->IsScript() : false; 
+	return mFormatParticularWrapper ? mFormatParticularWrapper->IsScript() : false;
 }
 
 bool FreeTypeFaceWrapper::IsItalic()
@@ -525,11 +525,11 @@ EStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const ULongListList& in
 	for(; it != inUnicodeCharacters.end(); ++it)
 	{
 		if(PDFHummus::eFailure == GetGlyphsForUnicodeText(*it,glyphs))
-			status = PDFHummus::eFailure;	
+			status = PDFHummus::eFailure;
 		outGlyphs.push_back(glyphs);
 	}
 
-	return status;	
+	return status;
 }
 
 IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObjectsContext)
@@ -542,10 +542,10 @@ IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObj
 		if(strcmp(fontFormat,scType1) == 0 || strcmp(fontFormat,scCFF) == 0)
 		{
 			FT_Bool isCID = false;
-			
+
 			// CFF written fonts needs to know if the font is originally CID in order to disallow ANSI form in this case
 			if(FT_Get_CID_Is_Internally_CID_Keyed(mFace,&isCID) != 0)
-				isCID = false;	
+				isCID = false;
 
 			result = new WrittenFontCFF(inObjectsContext,isCID != 0);
 		}
@@ -562,7 +562,7 @@ IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObj
 		return result;
 	}
 	else
-		return NULL;	
+		return NULL;
 }
 
 const string& FreeTypeFaceWrapper::GetFontFilePath()

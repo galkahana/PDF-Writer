@@ -16,14 +16,14 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 #include "IFreeTypeFaceExtender.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#include FT_TRUETYPE_TABLES_H 
+#include FT_TRUETYPE_TABLES_H
 
 typedef std::pair<bool,FT_UShort> BoolAndFTUShort;
 

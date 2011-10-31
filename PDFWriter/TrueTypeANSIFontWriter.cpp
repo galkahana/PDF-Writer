@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "TrueTypeANSIFontWriter.h"
 #include "ANSIFontWriter.h"
@@ -53,7 +53,7 @@ EStatusCode TrueTypeANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 	}
 	std::string subsetFontName = inObjectsContext->GenerateSubsetFontPrefix() + scPlus + postscriptFontName;
 
-	// reset embedded font object ID (and flag...to whether it was actually embedded or not, which may 
+	// reset embedded font object ID (and flag...to whether it was actually embedded or not, which may
 	// happen due to font embedding restrictions)
 	mEmbeddedFontFileObjectID = 0;
 
@@ -94,7 +94,7 @@ void TrueTypeANSIFontWriter::WriteCharSet(	DictionaryContext* inDescriptorContex
 
 static const string scFontFile2 = "FontFile2";
 
-void TrueTypeANSIFontWriter::WriteFontFileReference(	
+void TrueTypeANSIFontWriter::WriteFontFileReference(
 										DictionaryContext* inDescriptorContext,
 										ObjectsContext* inObjectsContext)
 {

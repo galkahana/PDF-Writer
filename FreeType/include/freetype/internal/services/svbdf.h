@@ -53,7 +53,7 @@ FT_BEGIN_HEADER
     get_charset_id_, get_property_                                       \
   };
 
-#else /* FT_CONFIG_OPTION_PIC */ 
+#else /* FT_CONFIG_OPTION_PIC */
 
 #define FT_DEFINE_SERVICE_BDFRec(class_, get_charset_id_, get_property_) \
   void                                                                   \
@@ -61,9 +61,9 @@ FT_BEGIN_HEADER
   {                                                                      \
     clazz->get_charset_id = get_charset_id_;                             \
     clazz->get_property = get_property_;                                 \
-  } 
+  }
 
-#endif /* FT_CONFIG_OPTION_PIC */ 
+#endif /* FT_CONFIG_OPTION_PIC */
 
   /* */
 

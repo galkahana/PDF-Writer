@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "Type1Test.h"
 #include "TestsRunner.h"
@@ -177,7 +177,7 @@ void Type1Test::ShowIntVector(const vector<int>& inVector)
 	cout<<"[ ";
 	for(;it != inVector.end();++it)
 		cout<<*it<<" ";
-	cout<<"]";	
+	cout<<"]";
 }
 
 void Type1Test::ShowDoubleVector(const vector<double>& inVector)
@@ -187,7 +187,7 @@ void Type1Test::ShowDoubleVector(const vector<double>& inVector)
 	cout<<"[ ";
 	for(;it != inVector.end();++it)
 		cout<<Double(*it).ToString().c_str()<<" ";
-	cout<<"]";	
+	cout<<"]";
 }
 
 EStatusCode Type1Test::ShowDependencies(const string& inCharStringName,Type1Input* inType1Input)
@@ -231,7 +231,7 @@ EStatusCode Type1Test::SaveCharstringCode(const string& inCharStringName,Type1In
 	{
 		if(status != PDFHummus::eSuccess)
 			break;
-		
+
 		CharStringType1Tracer tracer;
 
 		status = tracer.TraceGlyphProgram(inCharStringName,inType1Input,glyphFile.GetOutputStream());

@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "CFFDescendentFontWriter.h"
 #include "DescendentFontWriter.h"
@@ -43,13 +43,13 @@ static bool sEncodedGlypsSort(const UIntAndGlyphEncodingInfo& inLeft, const UInt
 
 static const string scCIDFontType0C = "CIDFontType0C";
 static const char* scType1 = "Type 1";
-EStatusCode CFFDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID, 
+EStatusCode CFFDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID,
 														const string& inFontName,
 														FreeTypeFaceWrapper& inFontInfo,
 														const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
 														ObjectsContext* inObjectsContext)
 {
-	// reset embedded font object ID (and flag...to whether it was actually embedded or not, which may 
+	// reset embedded font object ID (and flag...to whether it was actually embedded or not, which may
 	// happen due to font embedding restrictions)
 	mEmbeddedFontFileObjectID = 0;
 
@@ -68,11 +68,11 @@ EStatusCode CFFDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID
 	UIntAndGlyphEncodingInfoVector encodedGlyphs = inEncodedGlyphs;
 	UIntVector orderedGlyphs;
 	UShortVector cidMapping;
-	
-	sort(encodedGlyphs.begin(),encodedGlyphs.end(),sEncodedGlypsSort);	
 
-	for(UIntAndGlyphEncodingInfoVector::const_iterator it = encodedGlyphs.begin(); 
-		it != encodedGlyphs.end(); 
+	sort(encodedGlyphs.begin(),encodedGlyphs.end(),sEncodedGlypsSort);
+
+	for(UIntAndGlyphEncodingInfoVector::const_iterator it = encodedGlyphs.begin();
+		it != encodedGlyphs.end();
 		++it)
 	{
 		orderedGlyphs.push_back(it->first);
@@ -114,6 +114,6 @@ void CFFDescendentFontWriter::WriteFontFileReference(DictionaryContext* inDescri
 	{
 		// FontFile3
 		inDescriptorContext->WriteKey(scFontFile3);
-		inDescriptorContext->WriteObjectReferenceValue(mEmbeddedFontFileObjectID);	
+		inDescriptorContext->WriteObjectReferenceValue(mEmbeddedFontFileObjectID);
 	}
 }

@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 #include "PDFObject.h"
@@ -30,7 +30,7 @@ using namespace std;
 class PDFNameLess : public binary_function<const PDFName*,const PDFName*,bool>
 {
 public:
-	bool operator( ) (const PDFName* left, 
+	bool operator( ) (const PDFName* left,
 						const PDFName* right ) const
 	{
 		return left->GetValue() < right->GetValue();

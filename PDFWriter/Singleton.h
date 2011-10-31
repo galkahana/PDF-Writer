@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -24,7 +24,7 @@
 #define NULL 0
 #endif
 
-template <class T> 
+template <class T>
 class Singleton
 {
 public:
@@ -42,7 +42,7 @@ template <class T>
 T* Singleton<T>::GetInstance()
 {
 	if(!mInstance)
-		mInstance = new T();	
+		mInstance = new T();
 	return mInstance;
 }
 

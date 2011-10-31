@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "FreeTypeOpenTypeWrapper.h"
 #include "Trace.h"
@@ -148,10 +148,10 @@ BoolAndFTUShort FreeTypeOpenTypeWrapper::StemVFromLowerLWidth()
 
 EFontStretch FreeTypeOpenTypeWrapper::GetFontStretch()
 {
-	return 
-		mOS2Table ? 
-			(EFontStretch)mOS2Table->usWidthClass : 
-			mPCLTTable ? 
+	return
+		mOS2Table ?
+			(EFontStretch)mOS2Table->usWidthClass :
+			mPCLTTable ?
 				GetFontStretchForPCLTValue(mPCLTTable->WidthType) :
 				eFontStretchUknown;
 }
@@ -159,9 +159,9 @@ EFontStretch FreeTypeOpenTypeWrapper::GetFontStretch()
 
 EFontStretch FreeTypeOpenTypeWrapper::GetFontStretchForPCLTValue(FT_Char inWidthValue)
 {
-	return 
-		(5 == inWidthValue) ? 
-			eFontStretchUltraExpanded : 
+	return
+		(5 == inWidthValue) ?
+			eFontStretchUltraExpanded :
 			(-5 == inWidthValue) ?
 			eFontStretchUltraCondensed :
 			EFontStretch(eFontStretchNormal + inWidthValue);
@@ -171,7 +171,7 @@ EFontStretch FreeTypeOpenTypeWrapper::GetFontStretchForPCLTValue(FT_Char inWidth
 
 FT_UShort FreeTypeOpenTypeWrapper::GetFontWeight()
 {
-	return 
+	return
 		mOS2Table ?
 			mOS2Table->usWeightClass :
 			mPCLTTable ?
@@ -226,7 +226,7 @@ FT_UShort FreeTypeOpenTypeWrapper::GetFontWeightFromPCLTValue(FT_Char inWeightVa
 bool FreeTypeOpenTypeWrapper::HasSerifs()
 {
 	// assume that it does, unless PCLT table says otherwise
-	return 
+	return
 		mPCLTTable ?
 		((mPCLTTable->SerifStyle>>6) & 3) != 1 :
 		true;

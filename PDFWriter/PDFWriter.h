@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 /*
@@ -116,10 +116,10 @@ public:
 	PDFFormXObject* StartFormXObject(const PDFRectangle& inBoundingBox,ObjectIDType inFormXObjectID,const double* inMatrix = NULL);
 	PDFHummus::EStatusCode EndFormXObjectAndRelease(PDFFormXObject* inFormXObject);
 
-	// Image XObject creating [for TIFF nad JPG files]. 
+	// Image XObject creating [for TIFF nad JPG files].
 	// note that as oppose to other methods, create the image xobject also writes it, so there's no "WriteXXXXAndRelease" for image.
 	// So...release the object yourself [just delete it]
-	
+
 	// jpeg - two variants
 	// will return image xobject sized at 1X1
 	PDFImageXObject* CreateImageXObjectFromJPGFile(const string& inJPGFilePath);
@@ -137,7 +137,7 @@ public:
 	PDFFormXObject* CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream);
 	PDFFormXObject* CreateFormXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inFormXObjectID);
 	PDFFormXObject* CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inFormXObjectID);
-	
+
 	// tiff
 	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const string& inTIFFFilePath,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
@@ -150,9 +150,9 @@ public:
 													ObjectIDType inFormXObjectID,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 
-	// PDF 
+	// PDF
 
-	// CreateFormXObjectsFromPDF is for using input PDF pages as objects in one page or more. you can used the returned IDs to place the 
+	// CreateFormXObjectsFromPDF is for using input PDF pages as objects in one page or more. you can used the returned IDs to place the
 	// created form xobjects
 	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const string& inPDFFilePath,
 															 const PDFPageRange& inPageRange,
@@ -165,7 +165,7 @@ public:
 															 EPDFPageBox inPageBoxToUseAsFormBox,
 															 const double* inTransformationMatrix = NULL,
 															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
-	
+
 	// CreateFormXObjectsFromPDF is an override to allow you to determine a custom crop for the page embed
 	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const string& inPDFFilePath,
 															 const PDFPageRange& inPageRange,
@@ -183,7 +183,7 @@ public:
 	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const string& inPDFFilePath,
 														const PDFPageRange& inPageRange,
 														const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
-	
+
 	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(IByteReaderWithPosition* inPDFStream,
 														const PDFPageRange& inPageRange,
 														const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());

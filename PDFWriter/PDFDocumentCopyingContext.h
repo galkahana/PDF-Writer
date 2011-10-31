@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -62,11 +62,11 @@ public:
 															 const double* inTransformationMatrix = NULL);
 	EStatusCodeAndObjectIDType AppendPDFPageFromPDF(unsigned long inPageIndex);
 	PDFHummus::EStatusCode MergePDFPageToPage(PDFPage* inTargetPage,unsigned long inSourcePageIndex);
-	
+
 	EStatusCodeAndObjectIDType CopyObject(ObjectIDType inSourceObjectID);
 
 	/* This one is a bit tricky:
-		It copies a direct object, and returns the objects that it references, and still require copying. 
+		It copies a direct object, and returns the objects that it references, and still require copying.
 		YOU ARE REQUIRED TO COPY THEM IMMEDIATELY LATER using CopyNewObjectsForDirectObject...otherwise the PDF will be fault.
 		The reason for not writing them at point of writing the direct object is simple - 100% of your usages of this
 		method it will be in the context of writing something encapsulating this code...you don't want to be disturbed.

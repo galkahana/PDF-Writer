@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "TiffUsageParameters.h"
 
@@ -25,5 +25,5 @@ const TIFFBiLevelBWColorTreatment TIFFBiLevelBWColorTreatment::DefaultTIFFBiLeve
 const TIFFBiLevelGrayscaleColorTreatment TIFFBiLevelGrayscaleColorTreatment::DefaultTIFFBiLevelGrayscaleColorTreatment(false,CMYKRGBColor::CMYKBlack,CMYKRGBColor::CMYKWhite);
 
 const TIFFUsageParameters TIFFUsageParameters::DefaultTIFFUsageParameters(	0,
-																			TIFFBiLevelBWColorTreatment::DefaultTIFFBiLevelBWColorTreatment,				
+																			TIFFBiLevelBWColorTreatment::DefaultTIFFBiLevelBWColorTreatment,
 																			TIFFBiLevelGrayscaleColorTreatment::DefaultTIFFBiLevelGrayscaleColorTreatment);

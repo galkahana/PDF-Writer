@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "InfoDictionary.h"
 
@@ -31,7 +31,7 @@ InfoDictionary::~InfoDictionary(void)
 
 bool InfoDictionary::IsEmpty()
 {
-	return 
+	return
 		Title.IsEmpty() &&
 		Author.IsEmpty() &&
 		Subject.IsEmpty() &&

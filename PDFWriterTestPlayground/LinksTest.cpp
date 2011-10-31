@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "LinksTest.h"
 #include "PDFWriter.h"
@@ -49,7 +49,7 @@ EStatusCode LinksTest::Run()
 		{
 			cout<<"failed to start PDF\n";
 			break;
-		}	
+		}
 
 		PDFPage* page = new PDFPage();
 		page->SetMediaBox(PDFRectangle(0,0,595,842));
@@ -89,7 +89,7 @@ EStatusCode LinksTest::Run()
 		contentContext->cm(0.5,0,0,0.5,90.024,200);
 		contentContext->Do(page->GetResourcesDictionary().AddFormXObjectMapping(soundCloudLogo->GetObjectID()));
 		contentContext->Q();
-		
+
 		status = pdfWriter.EndPageContentContext(contentContext);
 		if(status != PDFHummus::eSuccess)
 		{
@@ -120,7 +120,7 @@ EStatusCode LinksTest::Run()
 		{
 			cout<<"failed in end PDF\n";
 			break;
-		}	
+		}
 	}while(false);
 
 	return status;

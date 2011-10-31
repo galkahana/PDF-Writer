@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "InputPredictorPNGOptimumStream.h"
 
@@ -43,7 +43,7 @@ InputPredictorPNGOptimumStream::~InputPredictorPNGOptimumStream(void)
 }
 
 InputPredictorPNGOptimumStream::InputPredictorPNGOptimumStream(IByteReader* inSourceStream,IOBasicTypes::LongBufferSizeType inColumns)
-{	
+{
 	mSourceStream = NULL;
 	mBuffer = NULL;
 	mIndex = NULL;
@@ -57,7 +57,7 @@ InputPredictorPNGOptimumStream::InputPredictorPNGOptimumStream(IByteReader* inSo
 LongBufferSizeType InputPredictorPNGOptimumStream::Read(Byte* inBuffer,LongBufferSizeType inBufferSize)
 {
 	LongBufferSizeType readBytes = 0;
-	
+
 
 	// exhaust what's in the buffer currently
 	while(mBufferSize > (LongBufferSizeType)(mIndex - mBuffer) && readBytes < inBufferSize)
@@ -146,8 +146,8 @@ char InputPredictorPNGOptimumStream::PaethPredictor(char inLeft,char inUp,char i
 
 	if(pLeft <= pUp && pLeft <= pUpLeft)
 	  return pLeft;
-	else if(pUp <= pUpLeft) 
+	else if(pUp <= pUpLeft)
 	  return inUp;
-	else 
+	else
 	  return inUpLeft;
 }

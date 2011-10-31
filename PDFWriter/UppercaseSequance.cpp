@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "UppercaseSequance.h"
 #include "Trace.h"
@@ -34,13 +34,13 @@ UppercaseSequance::UppercaseSequance(string inSequanceString)
 
 UppercaseSequance::~UppercaseSequance(void)
 {
-	
+
 }
 
 const string& UppercaseSequance::GetNextValue()
 {
 	int i = 5;
-	
+
 	while(true)
 	{
 		if(mSequanceString.at(i) < 'Z')
@@ -58,7 +58,7 @@ const string& UppercaseSequance::GetNextValue()
 			mSequanceString.at(i) = 'A';
 			--i;
 		}
-		
+
 	}
 	return mSequanceString;
 }

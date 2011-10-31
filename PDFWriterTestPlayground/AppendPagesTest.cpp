@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "AppendPagesTest.h"
 #include "TestsRunner.h"
@@ -48,10 +48,10 @@ EStatusCode AppendPagesTest::Run()
 		{
 			cout<<"failed to start PDF\n";
 			break;
-		}	
+		}
 
 		EStatusCodeAndObjectIDTypeList result;
-		
+
 		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\Original.pdf",PDFPageRange());
 		if(result.first != PDFHummus::eSuccess)
 		{

@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "Type1ToType2Converter.h"
 #include "IByteWriter.h"
@@ -98,7 +98,7 @@ EStatusCode Type1ToType2Converter::WriteConvertedFontProgram(const string& inGly
 
 Type1CharString* Type1ToType2Converter::GetSubr(long inSubrIndex)
 {
-	return mHelper->GetSubr(inSubrIndex);	
+	return mHelper->GetSubr(inSubrIndex);
 }
 
 bool Type1ToType2Converter::IsOtherSubrSupported(long inOtherSubrsIndex)
@@ -108,7 +108,7 @@ bool Type1ToType2Converter::IsOtherSubrSupported(long inOtherSubrsIndex)
 	{
 		mHintReplacementEncountered = true;
 		RecordOperatorMarker(0x0c10);
-	} 
+	}
 	else if(1 == inOtherSubrsIndex)
 	{
 		mInFlexCollectionMode = true;
@@ -395,19 +395,19 @@ EStatusCode Type1ToType2Converter::Type1HVCurveto(const LongList& inOperandList)
 EStatusCode Type1ToType2Converter::Type1ClosePath(const LongList& inOperandList)
 {
 	// IMPORTANT - apparently closepath was removed for type 2. didn't notice it till now
-	return PDFHummus::eSuccess;	
+	return PDFHummus::eSuccess;
 }
 
 EStatusCode Type1ToType2Converter::Type1Endchar(const LongList& inOperandList)
 {
 	RecordOperatorMarker(14);
-	return PDFHummus::eSuccess;	
+	return PDFHummus::eSuccess;
 }
 
 EStatusCode Type1ToType2Converter::Type1Seac(const LongList& inOperandList)
 {
 	// le'ts convert it already to the final EndChar...and stop any later recording
-	
+
 	// note that type2 endchar implementation avoids sidebearing
 	LongList params;
 	LongList::const_iterator it = inOperandList.begin();
@@ -474,7 +474,7 @@ void Type1ToType2Converter::ConvertStems()
 			++itProgramPosition;
 		}
 
-		// now loop the nodes, converting each stem set to a call. 
+		// now loop the nodes, converting each stem set to a call.
 		while(itProgramPosition != mConversionProgram.end())
 		{
 			if(IsStemHint(itProgramPosition->mMarkerType))
@@ -489,8 +489,8 @@ void Type1ToType2Converter::ConvertStems()
 				itProgramPosition->mOperands.push_back(GenerateHintMaskFromCollectedHints());
 				++itProgramPosition;
 
-			} 
-			else if(0x0c10 == itProgramPosition->mMarkerType) 
+			}
+			else if(0x0c10 == itProgramPosition->mMarkerType)
 			{
 				// other, hints replacement here just clears the current hint collection
 				mCurrentHints.clear();
@@ -534,7 +534,7 @@ ConversionNodeList::iterator Type1ToType2Converter::InsertOperatorMarker(unsigne
 {
 	ConversionNode node;
 	ConversionNodeList::iterator result = mConversionProgram.insert(inInsertPosition,node);
-	result->mMarkerType = inMarkerType;	
+	result->mMarkerType = inMarkerType;
 	return result;
 }
 
@@ -542,7 +542,7 @@ void Type1ToType2Converter::SetupStemHintsInNode(const StemVector& inStems,long 
 {
 	StemVector::const_iterator it = inStems.begin();
 	long lastCoordinate;
-	
+
 	refNode.mOperands.push_back(it->mOrigin + inOffsetCoordinate);
 	refNode.mOperands.push_back(it->mExtent);
 	lastCoordinate = it->mOrigin + it->mExtent;
@@ -575,7 +575,7 @@ ConversionNodeList::iterator Type1ToType2Converter::CollectHintIndexesFromHere(C
 			++itOperands;
 			long origin = *itOperands;
 			mCurrentHints.insert(mHStems[Stem(origin,extent)]);
-			
+
 		} // vstem
 		else if(3 == it->mMarkerType)
 		{
@@ -652,7 +652,7 @@ void Type1ToType2Converter::ConvertPathConsturction()
 
 	for(; it != mConversionProgram.end(); ++it)
 	{
-		// either vmoveto, rmoveto or hmoveto	
+		// either vmoveto, rmoveto or hmoveto
 		if(21 == it->mMarkerType || 22 == it->mMarkerType ||  4 == it->mMarkerType)
 		{
 			long x;
@@ -706,7 +706,7 @@ void Type1ToType2Converter::ConvertPathConsturction()
 		{
 			// look for either horizontal curves, or vertical curves
 			LongList::iterator itOperands = it->mOperands.begin();
-			
+
 			long operands[6];
 			for(int i=0;i<6;++i,++itOperands)
 				operands[i] = *itOperands;
@@ -762,9 +762,9 @@ void Type1ToType2Converter::ConvertPathConsturction()
 			case(30): // vhcurveto
 				{
 					ConversionNodeList::iterator itStarter = it;
-					
+
 					it = MergeAltenratingOperators(it,31);
-					
+
 					// optionally also merge the next rrcurveto, if it's starting
 					// point conforms to the operators list
 					if(it != mConversionProgram.end() && 8 == it->mMarkerType)
@@ -899,7 +899,7 @@ void Type1ToType2Converter::AddInitialWidthParameter()
 
 	for(; it != mConversionProgram.end();++it)
 	{
-		if(	1 == it->mMarkerType || // hstem 
+		if(	1 == it->mMarkerType || // hstem
 			3 == it->mMarkerType || // vstem
 			18 == it->mMarkerType || // hstemhm
 			23 == it->mMarkerType || // vstemhm
@@ -924,7 +924,7 @@ EStatusCode Type1ToType2Converter::WriteProgramToStream(IByteWriter* inByteWrite
 	for(; it != mConversionProgram.end() && PDFHummus::eSuccess == status; ++it)
 	{
 		LongList::iterator itOperands = it->mOperands.begin();
-		
+
 		if(19 == it->mMarkerType) // hintmask
 		{
 			status = commandWriter.WriteHintMask((unsigned long)(*itOperands),(unsigned long)(mHStems.size() + mVStems.size()));
@@ -933,7 +933,7 @@ EStatusCode Type1ToType2Converter::WriteProgramToStream(IByteWriter* inByteWrite
 		{
 			for(; itOperands != it->mOperands.end() && PDFHummus::eSuccess == status;++itOperands)
 				status = commandWriter.WriteIntegerOperand(*itOperands);
-			
+
 			if(PDFHummus::eSuccess == status)
 			{
 				// if marker type is vstemhm, and next one is hintmask, no need to write vstemhm
@@ -950,5 +950,5 @@ EStatusCode Type1ToType2Converter::WriteProgramToStream(IByteWriter* inByteWrite
 			}
 		}
 	}
-	return status;	
+	return status;
 }

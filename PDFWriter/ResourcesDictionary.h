@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -55,7 +55,7 @@ public:
 	// that if One overload is used, it is used any time the particular resource dictionary is handled - this will avoid
 	// collisions in naming between the internal and external mechanism.
 	void AddFormXObjectMapping(ObjectIDType inFormXObjectID,const string& inFormXObjectName);
-	
+
 	int GetFormXObjectsCount();
 	MapIterator<ObjectIDTypeToStringMap> GetFormXObjectsIterator();
 
@@ -75,7 +75,7 @@ public:
 	int GetImageXObjectsCount();
 	MapIterator<ObjectIDTypeToStringMap> GetImageXObjectsIterator();
 
-	// ExtGStates. 
+	// ExtGStates.
 	string AddExtGStateMapping(ObjectIDType inExtGStateID);
 	void AddExtGStateMapping(ObjectIDType inExtGStateID, const string& inExtGStateName);
 	int GetExtGStatesCount();
@@ -101,7 +101,7 @@ public:
 	string AddPropertyMapping(ObjectIDType inPropertyID);
 	int GetPropertiesCount();
 	MapIterator<ObjectIDTypeToStringMap> GetPropertiesIterator();
-	
+
 
 	// Generic XObjects
 	string AddGenericXObjectMapping(ObjectIDType inXObjectID);
@@ -120,7 +120,7 @@ private:
 	ObjectIDTypeToStringMap mImageXObjects;
 	ObjectIDTypeToStringMap mExtGStates;
 	ObjectIDTypeToStringMap mFonts;
-	
+
 	ObjectIDTypeToStringMap mColorSpaces;
 	ObjectIDTypeToStringMap mPatterns;
 	ObjectIDTypeToStringMap mProperties;

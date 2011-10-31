@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -168,7 +168,7 @@ struct NameTable
 typedef unsigned long* LocaTable;
 typedef list<unsigned long> ULongList;
 
-/* this time it's gonna be just what's intersting for my subsetting purposes - which is the 
+/* this time it's gonna be just what's intersting for my subsetting purposes - which is the
    dependencies ('n some other stuff) */
 struct GlyphEntry
 {
@@ -224,13 +224,13 @@ public:
 	TableEntry* GetTableEntry(const char* inTagName);
 
 	CFFFileInput mCFF;
-	
+
 private:
 	OpenTypePrimitiveReader mPrimitivesReader;
 	EOpenTypeInputType mFontType;
 	unsigned short mTablesCount;
 	ULongToTableEntryMap mTables;
-	UShortToGlyphEntryMap mActualGlyphs; // using actual glyphs to map the glyphs that are not empty 
+	UShortToGlyphEntryMap mActualGlyphs; // using actual glyphs to map the glyphs that are not empty
 										 // (yeah, when parsing subset fonts...some glyphs might just
 										 // be empty, to avoid having to change the glyphs indices. some
 										 // technique some producers use

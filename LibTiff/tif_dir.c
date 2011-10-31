@@ -4,23 +4,23 @@
  * Copyright (c) 1988-1997 Sam Leffler
  * Copyright (c) 1991-1997 Silicon Graphics, Inc.
  *
- * Permission to use, copy, modify, distribute, and sell this software and 
+ * Permission to use, copy, modify, distribute, and sell this software and
  * its documentation for any purpose is hereby granted without fee, provided
  * that (i) the above copyright notices and this permission notice appear in
  * all copies of the software and related documentation, and (ii) the names of
  * Sam Leffler and Silicon Graphics may not be used in any advertising or
  * publicity relating to the software without the specific, prior written
  * permission of Sam Leffler and Silicon Graphics.
- * 
- * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND, 
- * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY 
- * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  
- * 
+ *
+ * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
+ * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+ *
  * IN NO EVENT SHALL SAM LEFFLER OR SILICON GRAPHICS BE LIABLE FOR
  * ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND,
  * OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
- * WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF 
- * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE 
+ * WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF
+ * LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
  * OF THIS SOFTWARE.
  */
 
@@ -75,7 +75,7 @@ static int
 setExtraSamples(TIFFDirectory* td, va_list ap, uint32* v)
 {
 /* XXX: Unassociated alpha data == 999 is a known Corel Draw bug, see below */
-#define EXTRASAMPLE_COREL_UNASSALPHA 999 
+#define EXTRASAMPLE_COREL_UNASSALPHA 999
 
 	uint16* va;
 	uint32 i;
@@ -92,7 +92,7 @@ setExtraSamples(TIFFDirectory* td, va_list ap, uint32* v)
 			 * XXX: Corel Draw is known to produce incorrect
 			 * ExtraSamples tags which must be patched here if we
 			 * want to be able to open some of the damaged TIFF
-			 * files: 
+			 * files:
 			 */
 			if (va[i] == EXTRASAMPLE_COREL_UNASSALPHA)
 				va[i] = EXTRASAMPLE_UNASSALPHA;
@@ -339,11 +339,11 @@ _TIFFVSetField(TIFF* tif, ttag_t tag, va_list ap)
 		td->td_sampleformat = (uint16) v;
 
                 /*  Try to fix up the SWAB function for complex data. */
-                if( td->td_sampleformat == SAMPLEFORMAT_COMPLEXINT 
+                if( td->td_sampleformat == SAMPLEFORMAT_COMPLEXINT
                     && td->td_bitspersample == 32
                     && tif->tif_postdecode == _TIFFSwab32BitData )
                     tif->tif_postdecode = _TIFFSwab16BitData;
-                else if( (td->td_sampleformat == SAMPLEFORMAT_COMPLEXINT 
+                else if( (td->td_sampleformat == SAMPLEFORMAT_COMPLEXINT
                           || td->td_sampleformat == SAMPLEFORMAT_COMPLEXIEEEFP)
                          && td->td_bitspersample == 64
                          && tif->tif_postdecode == _TIFFSwab64BitData )
@@ -434,7 +434,7 @@ _TIFFVSetField(TIFF* tif, ttag_t tag, va_list ap)
              */
             if(tv == NULL) {
 		TIFFTagValue	*new_customValues;
-		
+
 		td->td_customValueCount++;
 		new_customValues = (TIFFTagValue *)
 			_TIFFrealloc(td->td_customValues,
@@ -467,7 +467,7 @@ _TIFFVSetField(TIFF* tif, ttag_t tag, va_list ap)
 				 fip->field_name);
 		    goto end;
 	    }
-           
+
             if(fip->field_passcount) {
 		    if (fip->field_writecount == TIFF_VARIABLE2)
 			tv->count = (uint32) va_arg(ap, uint32);
@@ -480,8 +480,8 @@ _TIFFVSetField(TIFF* tif, ttag_t tag, va_list ap)
 		tv->count = td->td_samplesperpixel;
 	    else
                 tv->count = fip->field_writecount;
-            
-    
+
+
 	    if (fip->field_type == TIFF_ASCII)
 		    _TIFFsetString((char **)&tv->value, va_arg(ap, char *));
 	    else {
@@ -829,7 +829,7 @@ _TIFFVGetField(TIFF* tif, ttag_t tag, va_list ap)
         {
             const TIFFFieldInfo* fip = _TIFFFindFieldInfo(tif, tag, TIFF_ANY);
             int           i;
-            
+
             /*
 	     * This can happen if multiple images are open with different
 	     * codecs which have private tags.  The global tag information
@@ -858,9 +858,9 @@ _TIFFVGetField(TIFF* tif, ttag_t tag, va_list ap)
 
 		if (tv->info->field_tag != tag)
 			continue;
-                
+
 		if (fip->field_passcount) {
-			if (fip->field_readcount == TIFF_VARIABLE2) 
+			if (fip->field_readcount == TIFF_VARIABLE2)
 				*va_arg(ap, uint32*) = (uint32)tv->count;
 			else	/* Assume TIFF_VARIABLE */
 				*va_arg(ap, uint16*) = (uint16)tv->count;
@@ -1182,7 +1182,7 @@ TIFFNumberOfDirectories(TIFF* tif)
 {
     toff_t nextdir = tif->tif_header.tiff_diroff;
     tdir_t n = 0;
-    
+
     while (nextdir != 0 && TIFFAdvanceDirectory(tif, &nextdir, NULL))
         n++;
     return (n);
@@ -1359,7 +1359,7 @@ TIFFReassignTagToIgnore (enum TIFFIgnoreSense task, int TIFFtagID)
             return (TRUE) ;
         }
         break ;
-        
+
       case TIS_EXTRACT:
         for ( i = 0 ; i < tagcount ; ++i )
         {
@@ -1367,15 +1367,15 @@ TIFFReassignTagToIgnore (enum TIFFIgnoreSense task, int TIFFtagID)
                 return (TRUE) ;
         }
         break;
-        
+
       case TIS_EMPTY:
         tagcount = 0 ;			/* Clear the list */
         return (TRUE) ;
-        
+
       default:
         break;
     }
-    
+
     return (FALSE);
 }
 

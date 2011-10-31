@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "Type1Input.h"
 #include "IByteReaderWithPosition.h"
@@ -120,9 +120,9 @@ EStatusCode Type1Input::ReadType1File(IByteReaderWithPosition* inType1)
 		{
 			token = mPFBDecoder.GetNextToken();
 			status = mPFBDecoder.GetInternalState();
-			// token not having been read, is not necessarily bad. could be a result of segment ending. 
+			// token not having been read, is not necessarily bad. could be a result of segment ending.
 			// so to get whether there's an actual failure, i'm using the internal state.
-			if(!token.first) 
+			if(!token.first)
 				continue;
 
 			// skip comments
@@ -147,7 +147,7 @@ EStatusCode Type1Input::ReadType1File(IByteReaderWithPosition* inType1)
 				if(status != PDFHummus::eSuccess)
 					break;
 			}
-			
+
 		}
 
 		/*
@@ -174,7 +174,7 @@ EStatusCode Type1Input::ReadFontDictionary()
 	{
 		token = mPFBDecoder.GetNextToken();
 		status = mPFBDecoder.GetInternalState();
-		if(!token.first) 
+		if(!token.first)
 			continue;
 
 		// skip comments
@@ -255,7 +255,7 @@ EStatusCode Type1Input::ReadFontInfoDictionary()
 	{
 		token = mPFBDecoder.GetNextToken();
 		status = mPFBDecoder.GetInternalState();
-		if(!token.first) 
+		if(!token.first)
 			continue;
 
 		// skip comments
@@ -263,7 +263,7 @@ EStatusCode Type1Input::ReadFontInfoDictionary()
 			continue;
 
 		// "end" encountered, dictionary finished, return.
-		if(token.second.compare("end") == 0) 
+		if(token.second.compare("end") == 0)
 			break;
 
 		if(token.second.compare("/version") == 0)
@@ -298,25 +298,25 @@ EStatusCode Type1Input::ReadFontInfoDictionary()
 		}
 		if(token.second.compare("/ItalicAngle") == 0)
 		{
-			mFontInfoDictionary.ItalicAngle = 
+			mFontInfoDictionary.ItalicAngle =
 				Double(mPFBDecoder.GetNextToken().second);
 			continue;
 		}
 		if(token.second.compare("/isFixedPitch") == 0)
 		{
-			mFontInfoDictionary.isFixedPitch = 
+			mFontInfoDictionary.isFixedPitch =
 				PSBool(mPFBDecoder.GetNextToken().second);
 			continue;
 		}
 		if(token.second.compare("/UnderlinePosition") == 0)
 		{
-			mFontInfoDictionary.UnderlinePosition = 
+			mFontInfoDictionary.UnderlinePosition =
 				Double(mPFBDecoder.GetNextToken().second);
 			continue;
 		}
 		if(token.second.compare("/UnderlineThickness") == 0)
 		{
-			mFontInfoDictionary.UnderlineThickness = 
+			mFontInfoDictionary.UnderlineThickness =
 				Double(mPFBDecoder.GetNextToken().second);
 			continue;
 		}
@@ -327,7 +327,7 @@ EStatusCode Type1Input::ReadFontInfoDictionary()
 			mFontInfoDictionary.FSTypeValid = true;
 		}
 	}
-	return status;	
+	return status;
 }
 
 string Type1Input::FromPSName(const string& inPostScriptName)
@@ -411,7 +411,7 @@ EStatusCode Type1Input::ParseEncoding()
 			status = PDFHummus::eFailure;
 			break;
 		}
-		
+
 		// get the glyph name
 		token = mPFBDecoder.GetNextToken();
 		if(!token.first)
@@ -445,7 +445,7 @@ void Type1Input::CalculateReverseEncoding()
 			it = mReverseEncoding.find(mEncoding.mCustomEncoding[i]);
 			if(it == mReverseEncoding.end())
 				mReverseEncoding.insert(StringToByteMap::value_type(mEncoding.mCustomEncoding[i],i));
-			
+
 		}
 	}
 	else
@@ -457,7 +457,7 @@ void Type1Input::CalculateReverseEncoding()
 			it = mReverseEncoding.find(standardEncoding.GetEncodedGlyphName(i));
 			if(it == mReverseEncoding.end())
 				mReverseEncoding.insert(StringToByteMap::value_type(standardEncoding.GetEncodedGlyphName(i),i));
-			
+
 		}
 	}
 }
@@ -472,7 +472,7 @@ EStatusCode Type1Input::ReadPrivateDictionary()
 	{
 		token = mPFBDecoder.GetNextToken();
 		status = mPFBDecoder.GetInternalState();
-		if(!token.first) 
+		if(!token.first)
 			continue;
 
 		// skip comments
@@ -480,7 +480,7 @@ EStatusCode Type1Input::ReadPrivateDictionary()
 			continue;
 
 		// "end" encountered, dictionary finished, return.
-		if(token.second.compare("end") == 0) 
+		if(token.second.compare("end") == 0)
 			break;
 
 		if(token.second.compare("/UniqueID") == 0)
@@ -581,7 +581,7 @@ EStatusCode Type1Input::ReadPrivateDictionary()
 
 		}
 	}
-	return status;	
+	return status;
 }
 
 EStatusCode Type1Input::ParseIntVector(vector<int>& inVector)
@@ -634,7 +634,7 @@ EStatusCode Type1Input::ParseSubrs()
 	mSubrsCount = (Byte)Int(token.second);
 	mSubrs = new Type1CharString[mSubrsCount];
 
-	// parse the subrs. they look like this: 	
+	// parse the subrs. they look like this:
 	// dup index nbytes RD ~n~binary~bytes~ NP
 
 	// skip till the first dup
@@ -652,7 +652,7 @@ EStatusCode Type1Input::ParseSubrs()
 		token = mPFBDecoder.GetNextToken();
 		if(!token.first)
 			break;
-				
+
 		subrIndex = Int(token.second);
 		token = mPFBDecoder.GetNextToken();
 		if(!token.first)
@@ -734,15 +734,15 @@ Type1CharString* Type1Input::GetGlyphCharString(Byte inCharStringIndex)
 			characterName = ".notdef";
 		else
 			characterName = mEncoding.mCustomEncoding[inCharStringIndex];
-			
+
 	}
 	else
 	{
 		StandardEncoding standardEncoding;
-		
+
 		characterName = standardEncoding.GetEncodedGlyphName(inCharStringIndex);
 	}
-	
+
 	StringToType1CharStringMap::iterator it = mCharStrings.find(characterName);
 	if(it == mCharStrings.end())
 		return NULL;
@@ -842,15 +842,15 @@ bool Type1Input::IsValidGlyphIndex(Byte inCharStringIndex)
 			characterName = ".notdef";
 		else
 			characterName = mEncoding.mCustomEncoding[inCharStringIndex];
-			
+
 	}
 	else
 	{
 		StandardEncoding standardEncoding;
-		
+
 		characterName = standardEncoding.GetEncodedGlyphName(inCharStringIndex);
 	}
-	
+
 	return mCharStrings.find(characterName) != mCharStrings.end();
 }
 
@@ -878,7 +878,7 @@ string Type1Input::FromPSString(const string& inPSString)
 	string::const_iterator it = inPSString.begin();
 	size_t i=1;
 	++it; // skip first paranthesis
-	
+
 	for(; i < inPSString.size()-1;++it,++i)
 	{
 		if(*it == '\\')
@@ -937,7 +937,7 @@ string Type1Input::FromPSString(const string& inPSString)
 }
 
 Byte Type1Input::GetEncoding(const string& inCharStringName)
-{	
+{
 	StringToByteMap::iterator it = mReverseEncoding.find(inCharStringName);
 	if(it == mReverseEncoding.end())
 		return 0;

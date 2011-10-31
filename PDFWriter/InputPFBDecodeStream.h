@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -38,7 +38,7 @@ class InputPFBDecodeStream;
 
 typedef PDFHummus::EStatusCode (*DecodeMethod)(
 	InputPFBDecodeStream* inThis,
-	Byte& outByte 
+	Byte& outByte
  );
 
 typedef pair<bool,string> BoolAndString;
@@ -52,7 +52,7 @@ public:
 	// Assign will set the stream to decode. it also takes ownership of the stream. if you
 	// don't want the ownership make sure to Assign(NULL) when done using the decoder.
 	PDFHummus::EStatusCode Assign(IByteReader* inStreamToDecode);
-	
+
 	// IByteReader implementation
 	virtual LongBufferSizeType Read(Byte* inBuffer,LongBufferSizeType inBufferSize);
 	virtual bool NotEnded();
@@ -64,7 +64,7 @@ public:
 	// note that segment end automatically cuts of a token
 	BoolAndString GetNextToken();
 
-	// skip white spaces till token or EOF. note that end of segment 
+	// skip white spaces till token or EOF. note that end of segment
 	// will stop tokenizer as well
 	void SkipTillToken();
 
@@ -84,9 +84,9 @@ private:
 	Byte mTokenBuffer;
 	unsigned short mRandomizer;
 	bool mFoundEOF;
-	
+
 	// error flag. if set, will not allow further reading
-	PDFHummus::EStatusCode mInternalState; 
+	PDFHummus::EStatusCode mInternalState;
 
 	// Starts reading a stream segment, to receive the type and length of the segment
 	PDFHummus::EStatusCode InitializeStreamSegment();

@@ -16,14 +16,14 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 /*
 	BoxingBase is a class for boxing primitives.
 
 	it's BoxingBase, cause it's meant to be derived...but you can use as is
-*/ 
+*/
 
 #include <string>
 #include <sstream>
@@ -149,7 +149,7 @@ BoxingBaseWithRW<U,Reader,Writer>::BoxingBaseWithRW():BoxingBase<U>()
 template <typename U, class Reader, class Writer>
 BoxingBaseWithRW<U,Reader,Writer>::BoxingBaseWithRW(const U& inValue):BoxingBase<U>(inValue)
 {
-	
+
 }
 
 template <typename U, class Reader, class Writer>

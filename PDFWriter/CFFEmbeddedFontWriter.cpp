@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "CFFEmbeddedFontWriter.h"
 #include "ObjectsContext.h"
@@ -46,7 +46,7 @@ CFFEmbeddedFontWriter::~CFFEmbeddedFontWriter(void)
 
 static const string scSubtype = "Subtype";
 
-EStatusCode CFFEmbeddedFontWriter::WriteEmbeddedFont(	
+EStatusCode CFFEmbeddedFontWriter::WriteEmbeddedFont(
 								FreeTypeFaceWrapper& inFontInfo,
 								const UIntVector& inSubsetGlyphIDs,
 								const string& inFontFile3SubType,
@@ -66,7 +66,7 @@ EStatusCode CFFEmbeddedFontWriter::WriteEmbeddedFont(
 	UShortVector* inCIDMapping,
 	ObjectIDType& outEmbeddedFontObjectID)
 {
-	MyStringBuf rawFontProgram; 
+	MyStringBuf rawFontProgram;
 	bool notEmbedded;
 		// as oppose to true type, the reason for using a memory stream here is mainly peformance - i don't want to start
 		// setting file pointers and move in a file stream
@@ -79,7 +79,7 @@ EStatusCode CFFEmbeddedFontWriter::WriteEmbeddedFont(
 		{
 			TRACE_LOG("CFFEmbeddedFontWriter::WriteEmbeddedFont, failed to write embedded font program");
 			break;
-		}	
+		}
 
 		if(notEmbedded)
 		{
@@ -90,7 +90,7 @@ EStatusCode CFFEmbeddedFontWriter::WriteEmbeddedFont(
 		}
 
 		outEmbeddedFontObjectID = inObjectsContext->StartNewIndirectObject();
-		
+
 		DictionaryContext* fontProgramDictionaryContext = inObjectsContext->StartDictionary();
 
 		rawFontProgram.pubseekoff(0,ios_base::beg);
@@ -115,11 +115,11 @@ EStatusCode CFFEmbeddedFontWriter::WriteEmbeddedFont(
 		delete pdfStream;
 	}while(false);
 
-	return status;	
+	return status;
 }
 
 static const unsigned short scROS = 0xC1E;
-EStatusCode CFFEmbeddedFontWriter::CreateCFFSubset(	
+EStatusCode CFFEmbeddedFontWriter::CreateCFFSubset(
 									FreeTypeFaceWrapper& inFontInfo,
 									const UIntVector& inSubsetGlyphIDs,
 									UShortVector* inCIDMapping,
@@ -172,7 +172,7 @@ EStatusCode CFFEmbeddedFontWriter::CreateCFFSubset(
 			break;
 		}
 
-		mIsCID = mOpenTypeInput.mCFF.mTopDictIndex[0].mTopDict.find(scROS) != 
+		mIsCID = mOpenTypeInput.mCFF.mTopDictIndex[0].mTopDict.find(scROS) !=
 					mOpenTypeInput.mCFF.mTopDictIndex[0].mTopDict.end();
 
 		mFontFileStream.Assign(&outFontProgram);
@@ -263,7 +263,7 @@ EStatusCode CFFEmbeddedFontWriter::CreateCFFSubset(
 		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFEmbeddedFontWriter::CreateCFFSubset, failed to update indexes");
-			break;			
+			break;
 		}
 	}while(false);
 
@@ -295,9 +295,9 @@ EStatusCode CFFEmbeddedFontWriter::AddDependentGlyphs(UIntVector& ioSubsetGlyphI
 		ioSubsetGlyphIDs.clear();
 		for(itNewGlyphs = glyphsSet.begin(); itNewGlyphs != glyphsSet.end(); ++itNewGlyphs)
 			ioSubsetGlyphIDs.push_back(*itNewGlyphs);
-		
+
 		sort(ioSubsetGlyphIDs.begin(),ioSubsetGlyphIDs.end());
-	}	
+	}
 	return status;
 }
 
@@ -325,7 +325,7 @@ EStatusCode CFFEmbeddedFontWriter::AddComponentGlyphs(unsigned int inGlyphID,UIn
 EStatusCode CFFEmbeddedFontWriter::WriteCFFHeader()
 {
 	 // i'm just gonna copy the header of the original CFF
-	 // content. 
+	 // content.
 	 // One thing i never got - OffSize does not seem to be important.
 	 // all offeet references to (0) are dictionary items (like in Top Dict),
 	 // and reading them follows the Integer operand rules. so why signify their size.
@@ -333,7 +333,7 @@ EStatusCode CFFEmbeddedFontWriter::WriteCFFHeader()
 	 // compressed method, so if the number is small they'll use less bytes, and if large more.
 	 // so i don't get it. hope it won't screw up my implementation. in any case, for the sake of a single pass.
 	 // i'll probably just set it to something.
-	
+
 	OutputStreamTraits streamCopier(&mFontFileStream);
 	mOpenTypeFile.GetInputStream()->SetPosition(mOpenTypeInput.mCFF.mCFFOffset);
 	return streamCopier.CopyToOutputStream(mOpenTypeFile.GetInputStream(),mOpenTypeInput.mCFF.mHeader.hdrSize);
@@ -361,7 +361,7 @@ Byte CFFEmbeddedFontWriter::GetMostCompressedOffsetSize(unsigned long inOffset)
 {
 	if(inOffset < 256)
 		return 1;
-	
+
 	if(inOffset < 65536)
 		return 2;
 
@@ -388,7 +388,7 @@ EStatusCode CFFEmbeddedFontWriter::WriteTopIndex()
 
 	*/
 	EStatusCode status;
-	MyStringBuf topDictSegment; 
+	MyStringBuf topDictSegment;
 
 	do
 	{
@@ -423,7 +423,7 @@ EStatusCode CFFEmbeddedFontWriter::WriteTopIndex()
 		mCharstringsPlaceHolderPosition+=topDictDataOffset;
 		mPrivatePlaceHolderPosition+=topDictDataOffset;
 		mFDArrayPlaceHolderPosition+=topDictDataOffset;
-		mFDSelectPlaceHolderPosition+=topDictDataOffset;		
+		mFDSelectPlaceHolderPosition+=topDictDataOffset;
 
 	}while(false);
 
@@ -476,7 +476,7 @@ EStatusCode CFFEmbeddedFontWriter::WriteTopDictSegment(MyStringBuf& ioTopDictSeg
 	if(originalTopDictRef.find(scEmbeddedPostscript) == originalTopDictRef.end())
 	{
 		// no need for sophistication here...you can consider this as the only string to be added.
-		// so can be sure that its index would be the current count 
+		// so can be sure that its index would be the current count
 		stringstream formatter;
 		formatter<<"/FSType "<<mOpenTypeInput.mOS2.fsType<<" def";
 		mOptionalEmbeddedPostscript = formatter.str();
@@ -543,17 +543,17 @@ EStatusCode CFFEmbeddedFontWriter::WriteStringIndex()
 	{
 		// need to write the bloody strings...[remember that i'm adding one more string at the end]
 		mPrimitivesWriter.WriteCard16(mOpenTypeInput.mCFF.mStringsCount + 1);
-		
+
 		// calculate the total data size to determine the required offset size
 		unsigned long totalSize=0;
 		for(int i=0; i < mOpenTypeInput.mCFF.mStringsCount; ++i)
 			totalSize += (unsigned long)strlen(mOpenTypeInput.mCFF.mStrings[i]);
 		totalSize+=(unsigned long)mOptionalEmbeddedPostscript.size();
-		
+
 		Byte sizeOfOffset = GetMostCompressedOffsetSize(totalSize + 1);
 		mPrimitivesWriter.WriteOffSize(sizeOfOffset);
 		mPrimitivesWriter.SetOffSize(sizeOfOffset);
-	
+
 		unsigned long currentOffset = 1;
 
 		// write the offsets
@@ -604,8 +604,8 @@ EStatusCode CFFEmbeddedFontWriter::WriteEncodings(const UIntVector& inSubsetGlyp
 		return PDFHummus::eSuccess;
 	}
 	else
-	{	
-		// original font had custom encoding, let's subset it according to just the glyphs we 
+	{
+		// original font had custom encoding, let's subset it according to just the glyphs we
 		// actually have. but cause i'm lazy i'll just do the first format.
 
 		// figure out if we got supplements
@@ -635,7 +635,7 @@ EStatusCode CFFEmbeddedFontWriter::WriteEncodings(const UIntVector& inSubsetGlyp
 
 		// assuming that 0 is in the subset glyphs IDs, which does not require encoding
 		// get the encodings count
-		Byte encodingGlyphsCount = std::min((Byte)(inSubsetGlyphIDs.size()-1),encodingInfo->mEncodingsCount); 
+		Byte encodingGlyphsCount = std::min((Byte)(inSubsetGlyphIDs.size()-1),encodingInfo->mEncodingsCount);
 
 		mPrimitivesWriter.WriteCard8(encodingGlyphsCount);
 		for(Byte i=0; i < encodingGlyphsCount;++i)
@@ -851,7 +851,7 @@ EStatusCode CFFEmbeddedFontWriter::WriteFDArray(const UIntVector& inSubsetGlyphI
 			for(; itDict != itFontInfos->first->mFontDict.end() && PDFHummus::eSuccess == status; ++itDict)
 				if(itDict->first != scPrivate) // should get me a nice little pattern for this some time..a filter thing
 					status = fontDictPrimitiveWriter.WriteDictItems(itDict->first,itDict->second);
-			
+
 			// now add the private key
 			if(PDFHummus::eSuccess == status && privateDictionaries[itFontInfos->first].first != 0)
 			{
@@ -909,9 +909,9 @@ EStatusCode CFFEmbeddedFontWriter::WriteFDSelect(const UIntVector& inSubsetGlyph
 	unsigned short rangesCount = 1;
 	Byte currentFD,newFD;
 	unsigned short glyphIndex = 1;
-	FontDictInfoToByteMap::const_iterator itNewIndex = 
+	FontDictInfoToByteMap::const_iterator itNewIndex =
 		inNewFontDictsIndexes.find(mOpenTypeInput.mCFF.mTopDictIndex[0].mFDSelect[*itGlyphs]);
-	
+
 	// k. seems like i probably just imagine exceptions here. i guess there must
 	// be a proper FDSelect with FDs for all...so i'm defaulting to some 0
 	currentFD = (itNewIndex == inNewFontDictsIndexes.end() ? 0:itNewIndex->second);
@@ -921,7 +921,7 @@ EStatusCode CFFEmbeddedFontWriter::WriteFDSelect(const UIntVector& inSubsetGlyph
 
 	for(; itGlyphs != inSubsetGlyphIDs.end(); ++itGlyphs,++glyphIndex)
 	{
-		itNewIndex = 
+		itNewIndex =
 				inNewFontDictsIndexes.find(mOpenTypeInput.mCFF.mTopDictIndex[0].mFDSelect[*itGlyphs]);
 		newFD = (itNewIndex == inNewFontDictsIndexes.end() ? 0:itNewIndex->second);
 		if(newFD != currentFD)
@@ -959,9 +959,9 @@ EStatusCode CFFEmbeddedFontWriter::UpdateIndexesAtTopDict()
 		mFontFileStream.SetPosition(mPrivatePlaceHolderPosition);
 		mPrimitivesWriter.Write5ByteDictInteger((long)mPrivateSize);
 		mPrimitivesWriter.Write5ByteDictInteger((long)mPrivatePosition);
-		
+
 	}
-	
+
 	if(mIsCID)
 	{
 		mFontFileStream.SetPosition(mFDArrayPlaceHolderPosition);

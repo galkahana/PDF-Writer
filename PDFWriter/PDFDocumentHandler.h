@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -105,7 +105,7 @@ public:
 															 const PDFRectangle& inCropBox,
 															 const double* inTransformationMatrix,
 															 const ObjectIDTypeList& inCopyAdditionalObjects);
-	
+
 	// appends pages from source PDF to the written PDF. returns object ID for the created pages
 	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const string& inPDFFilePath,
 														const PDFPageRange& inPageRange,
@@ -129,7 +129,7 @@ public:
 
 	// Event listeners for CreateFormXObjectsFromPDF and AppendPDFPagesFromPDF
 	void AddDocumentContextExtender(IDocumentContextExtender* inExtender);
-	void RemoveDocumentContextExtender(IDocumentContextExtender* inExtender);	
+	void RemoveDocumentContextExtender(IDocumentContextExtender* inExtender);
 
 	// IDocumentContextExtender implementation
 	virtual PDFHummus::EStatusCode OnResourcesWrite(

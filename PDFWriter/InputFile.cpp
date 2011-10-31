@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "InputFile.h"
 #include "InputBufferedStream.h"
@@ -47,7 +47,7 @@ EStatusCode InputFile::OpenFile(const string& inFilePath)
 			TRACE_LOG1("InputFile::OpenFile, Unexpected Failure. Couldn't close previously open file - %s",mFilePath.c_str());
 			break;
 		}
-	
+
 		InputFileStream* inputFileStream = new InputFileStream();
 		status = inputFileStream->Open(inFilePath); // explicitly open, so status may be retrieved
 		if(status != PDFHummus::eSuccess)

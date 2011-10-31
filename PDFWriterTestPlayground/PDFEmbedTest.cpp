@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "PDFEmbedTest.h"
 #include "TestsRunner.h"
@@ -50,7 +50,7 @@ EStatusCode PDFEmbedTest::Run()
 		{
 			cout<<"failed to start PDF\n";
 			break;
-		}	
+		}
 
 		// Create XObjects from PDF to embed
 		EStatusCodeAndObjectIDTypeList result = pdfWriter.CreateFormXObjectsFromPDF("C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF",PDFPageRange(),ePDFPageBoxMediaBox);
@@ -71,7 +71,7 @@ EStatusCode PDFEmbedTest::Run()
 		contentContext->cm(0.5,0,0,0.5,0,421);
 		contentContext->Do(page->GetResourcesDictionary().AddFormXObjectMapping(result.second.front()));
 		contentContext->Q();
-		
+
 		contentContext->G(0);
 		contentContext->w(1);
 		contentContext->re(0,421,297.5,421);

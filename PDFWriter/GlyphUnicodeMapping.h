@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -36,7 +36,7 @@ struct GlyphUnicodeMapping
 		mGlyphCode = inGlyphCode;
 		mUnicodeValues.push_back(inUnicodeValue);
 	}
-	
+
 	GlyphUnicodeMapping(unsigned short inGlyphCode,ULongVector inUnicodeValues)
 	{
 		mGlyphCode = inGlyphCode;
@@ -47,7 +47,7 @@ struct GlyphUnicodeMapping
 	ULongVector mUnicodeValues;
 
 	// glyph code
-	unsigned short mGlyphCode;	
+	unsigned short mGlyphCode;
 };
 
 typedef list<GlyphUnicodeMapping> GlyphUnicodeMappingList;

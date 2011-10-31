@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "PDFObjectParser.h"
 #include "PDFObject.h"
@@ -86,7 +86,7 @@ PDFObject* PDFObjectParser::ParseNewObject()
 		{
 			pdfObject = ParseBoolean(token);
 			break;
-		} 
+		}
 		// Literal String
 		else if(IsLiteralString(token))
 		{
@@ -113,13 +113,13 @@ PDFObject* PDFObjectParser::ParseNewObject()
 		}
 		// Number (and possibly an indirect reference)
 		else if(IsNumber(token))
-		{	
+		{
 			pdfObject = ParseNumber(token);
-			
+
 			// this could be an indirect reference in case this is a positive integer
 			// and the next one is also, and then there's an "R" keyword
-			if(pdfObject && 
-				(pdfObject->GetType() == ePDFObjectInteger) && 
+			if(pdfObject &&
+				(pdfObject->GetType() == ePDFObjectInteger) &&
 				((PDFInteger*)pdfObject)->GetValue() > 0)
 			{
 				// try parse version
@@ -133,11 +133,11 @@ PDFObject* PDFObjectParser::ParseNewObject()
 					break;
 				}
 
-				PDFObject* versionObject = ParseNumber(numberToken); 
+				PDFObject* versionObject = ParseNumber(numberToken);
 				bool isReference = false;
 				do
 				{
-					if(!versionObject || 
+					if(!versionObject ||
 						(versionObject->GetType() != ePDFObjectInteger) ||
 						((PDFInteger*)versionObject)->GetValue() < 0) // k. failure to parse number, or no non-negative, cant be reference
 					{
@@ -190,9 +190,9 @@ PDFObject* PDFObjectParser::ParseNewObject()
 				if(!GetNextToken(token))
 					break;
 
-				if(scStream == token) 
+				if(scStream == token)
 				{
-					// yes, found a stream. record current position as the position where the stream starts. 
+					// yes, found a stream. record current position as the position where the stream starts.
 					// [tokenizer took care that the posiiton should be that way with a special case]
 					pdfObject = new PDFStreamInput((PDFDictionary*)pdfObject,mCurrentPositionProvider->GetCurrentPosition());
 				}
@@ -244,7 +244,7 @@ static const string scTrue = "true";
 static const string scFalse = "false";
 bool PDFObjectParser::IsBoolean(const string& inToken)
 {
-	return (scTrue == inToken || scFalse == inToken);	
+	return (scTrue == inToken || scFalse == inToken);
 }
 
 PDFObject* PDFObjectParser::ParseBoolean(const string& inToken)
@@ -266,7 +266,7 @@ PDFObject* PDFObjectParser::ParseLiteralString(const string& inToken)
 	string::const_iterator it = inToken.begin();
 	size_t i=1;
 	++it; // skip first paranthesis
-	
+
 	// verify that last character is ')'
 	if(inToken.at(inToken.size()-1) != scRightParanthesis)
 	{
@@ -344,7 +344,7 @@ static const char scRightAngle = '>';
 PDFObject* PDFObjectParser::ParseHexadecimalString(const string& inToken)
 {
 	EStatusCode status = PDFHummus::eSuccess;
-	
+
 	// verify that last character is '>'
 	if(inToken.at(inToken.size()-1) != scRightAngle)
 	{
@@ -419,7 +419,7 @@ PDFObject* PDFObjectParser::ParseName(const string& inToken)
 		}
 		stringBuffer.sputn((const char*)&buffer,1);
 	}
-	
+
 	if(PDFHummus::eSuccess == status)
 		return new PDFName(stringBuffer.str());
 	else
@@ -433,7 +433,7 @@ static const char scZero = '0';
 static const char scDot = '.';
 bool PDFObjectParser::IsNumber(const string& inToken)
 {
-	// it's a number if the first char is either a sign or digit, and the rest is 
+	// it's a number if the first char is either a sign or digit, and the rest is
 	// digits, with the exception of a dot which can appear just once.
 
 	if(inToken.at(0) != scPlus && inToken.at(0) != scMinus && (inToken.at(0) > scNine || inToken.at(0) < scZero))
@@ -580,7 +580,7 @@ PDFObject* PDFObjectParser::ParseDictionary()
 			TRACE_LOG1("PDFObjectParser::ParseDictionary, failure to parse value for a dictionary. token = %s",token.c_str());
 			break;
 		}
-	
+
 		// all well, add the two items to the dictionary
 		aDictionary->Insert(aKey.GetPtr(),aValue.GetPtr());
 	}

@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "OpenTypeFileInput.h"
 #include "Trace.h"
@@ -91,14 +91,14 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeFile(IByteReaderWithPosition* inTrueT
 			TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read true type header");
 			break;
 		}
-		
+
 		status = ReadHead();
 		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read head table");
 			break;
 		}
-		
+
 		status = ReadMaxP();
 		if(status != PDFHummus::eSuccess)
 		{
@@ -242,7 +242,7 @@ unsigned long OpenTypeFileInput::GetTag(const char* inTagName)
 	for(;i<4;++i)
 		buffer[i] = 0x20;
 
-	return	((unsigned long)buffer[0]<<24) + ((unsigned long)buffer[1]<<16) + 
+	return	((unsigned long)buffer[0]<<24) + ((unsigned long)buffer[1]<<16) +
 			((unsigned long)buffer[2]<<8) + buffer[3];
 }
 
@@ -274,7 +274,7 @@ EStatusCode OpenTypeFileInput::ReadHead()
 	mPrimitivesReader.ReadSHORT(mHead.IndexToLocFormat);
 	mPrimitivesReader.ReadSHORT(mHead.GlyphDataFormat);
 
-	return mPrimitivesReader.GetInternalState();	
+	return mPrimitivesReader.GetInternalState();
 }
 
 EStatusCode OpenTypeFileInput::ReadMaxP()
@@ -308,7 +308,7 @@ EStatusCode OpenTypeFileInput::ReadMaxP()
 		mPrimitivesReader.ReadUSHORT(mMaxp.MaxComponentElements);
 		mPrimitivesReader.ReadUSHORT(mMaxp.MaxCompontentDepth);
 	}
-	return mPrimitivesReader.GetInternalState();	
+	return mPrimitivesReader.GetInternalState();
 
 }
 
@@ -338,7 +338,7 @@ EStatusCode OpenTypeFileInput::ReadHHea()
 	mPrimitivesReader.ReadSHORT(mHHea.MetricDataFormat);
 	mPrimitivesReader.ReadUSHORT(mHHea.NumberOfHMetrics);
 
-	return mPrimitivesReader.GetInternalState();	
+	return mPrimitivesReader.GetInternalState();
 }
 
 EStatusCode OpenTypeFileInput::ReadHMtx()
@@ -368,7 +368,7 @@ EStatusCode OpenTypeFileInput::ReadHMtx()
 		mPrimitivesReader.ReadSHORT(mHMtx[i].LeftSideBearing);
 	}
 
-	return mPrimitivesReader.GetInternalState();	
+	return mPrimitivesReader.GetInternalState();
 }
 
 EStatusCode OpenTypeFileInput::ReadOS2()
@@ -429,7 +429,7 @@ EStatusCode OpenTypeFileInput::ReadOS2()
 		mPrimitivesReader.ReadUSHORT(mOS2.BreakChar);
 		mPrimitivesReader.ReadUSHORT(mOS2.MaxContext);
 	}
-	return mPrimitivesReader.GetInternalState();	
+	return mPrimitivesReader.GetInternalState();
 }
 
 EStatusCode OpenTypeFileInput::ReadName()
@@ -441,13 +441,13 @@ EStatusCode OpenTypeFileInput::ReadName()
 		return PDFHummus::eFailure;
 	}
 
-	mPrimitivesReader.SetOffset(it->second.Offset);	
+	mPrimitivesReader.SetOffset(it->second.Offset);
 	mPrimitivesReader.Skip(2);
 	mPrimitivesReader.ReadUSHORT(mName.mNameEntriesCount);
 	mName.mNameEntries = new NameTableEntry[mName.mNameEntriesCount];
-	
+
 	unsigned short stringOffset;
-	
+
 	mPrimitivesReader.ReadUSHORT(stringOffset);
 
 	for(unsigned short i=0;i<mName.mNameEntriesCount;++i)
@@ -467,7 +467,7 @@ EStatusCode OpenTypeFileInput::ReadName()
 		mPrimitivesReader.Read((Byte*)(mName.mNameEntries[i].String),mName.mNameEntries[i].Length);
 	}
 
-	return mPrimitivesReader.GetInternalState();	
+	return mPrimitivesReader.GetInternalState();
 }
 
 EStatusCode OpenTypeFileInput::ReadLoca()
@@ -478,7 +478,7 @@ EStatusCode OpenTypeFileInput::ReadLoca()
 		TRACE_LOG("OpenTypeFileInput::ReadLoca, could not find loca table");
 		return PDFHummus::eFailure;
 	}
-	mPrimitivesReader.SetOffset(it->second.Offset);	
+	mPrimitivesReader.SetOffset(it->second.Offset);
 
 	mLoca = new unsigned long[mMaxp.NumGlyphs+1];
 
@@ -496,7 +496,7 @@ EStatusCode OpenTypeFileInput::ReadLoca()
 		for(unsigned short i=0; i < mMaxp.NumGlyphs+1; ++i)
 			mPrimitivesReader.ReadULONG(mLoca[i]);
 	}
-	return mPrimitivesReader.GetInternalState();	
+	return mPrimitivesReader.GetInternalState();
 }
 
 EStatusCode OpenTypeFileInput::ReadGlyfForDependencies()
@@ -540,7 +540,7 @@ EStatusCode OpenTypeFileInput::ReadGlyfForDependencies()
 					mPrimitivesReader.ReadUSHORT(flags);
 					mPrimitivesReader.ReadUSHORT(glyphIndex);
 					mGlyf[i]->mComponentGlyphs.push_back(glyphIndex);
-					if((flags & 1) != 0) // 
+					if((flags & 1) != 0) //
 						mPrimitivesReader.Skip(4); // skip 2 shorts, ARG_1_AND_2_ARE_WORDS
 					else
 						mPrimitivesReader.Skip(2); // skip 1 short, nah - they are bytes
@@ -559,10 +559,10 @@ EStatusCode OpenTypeFileInput::ReadGlyfForDependencies()
 
 			mActualGlyphs.insert(UShortToGlyphEntryMap::value_type(i,mGlyf[i]));
 		}
-	}	
+	}
 
 
-	return mPrimitivesReader.GetInternalState();	
+	return mPrimitivesReader.GetInternalState();
 }
 
 unsigned short OpenTypeFileInput::GetGlyphsCount()
@@ -573,8 +573,8 @@ unsigned short OpenTypeFileInput::GetGlyphsCount()
 TableEntry* OpenTypeFileInput::GetTableEntry(const char* inTagName)
 {
 	ULongToTableEntryMap::iterator it = mTables.find(GetTag(inTagName));
-	
-	if(it == mTables.end())	
+
+	if(it == mTables.end())
 		return NULL;
 	else
 		return &(it->second);

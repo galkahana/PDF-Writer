@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "InputPredictorTIFFSubStream.h"
 #include "Trace.h"
@@ -53,7 +53,7 @@ InputPredictorTIFFSubStream::~InputPredictorTIFFSubStream(void)
 LongBufferSizeType InputPredictorTIFFSubStream::Read(Byte* inBuffer,LongBufferSizeType inBufferSize)
 {
 	LongBufferSizeType readBytes = 0;
-	
+
 
 	// exhaust what's in the buffer currently
 	while(mReadColorsCount > (LongBufferSizeType)(mReadColorsIndex - mColors) && readBytes < inBufferSize)
@@ -79,7 +79,7 @@ LongBufferSizeType InputPredictorTIFFSubStream::Read(Byte* inBuffer,LongBufferSi
 			++readBytes;
 		}
 	}
-	return readBytes;	
+	return readBytes;
 }
 
 bool InputPredictorTIFFSubStream::NotEnded()
@@ -96,7 +96,7 @@ void InputPredictorTIFFSubStream::Assign(IByteReader* inSourceStream,
 	mColors = inColors;
 	mBitsPerComponent = inBitsPerComponent;
 	mColumns = inColumns;
-	
+
 	delete mRowBuffer;
 	mRowBuffer = new Byte[(inColumns*inColors*inBitsPerComponent)/8];
 
@@ -139,10 +139,10 @@ void InputPredictorTIFFSubStream::ReadByteFromColorsArray(Byte& outBuffer)
 }
 
 void InputPredictorTIFFSubStream::DecodeBufferToColors()
-{	
+{
 	//1. Split to colors. Use array of colors (should be columns * colors). Each time take BitsPerComponent of the buffer
 	//2. Once you got the "colors", loop the array, setting values after diffs (use modulo of bit mask for "sign" computing)
-	//3. Now you have the colors array. 
+	//3. Now you have the colors array.
 	LongBufferSizeType i = 0;
 
 	// read the colors differences according to bits per component

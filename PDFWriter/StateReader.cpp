@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "StateReader.h"
 #include "PDFObjectCast.h"
@@ -41,7 +41,7 @@ EStatusCode StateReader::Start(const string& inStateFilePath)
 		TRACE_LOG1("StateReader::Start, can't open file for state reading in %s",inStateFilePath.c_str());
 		return PDFHummus::eFailure;
 	}
-	
+
 	if(mParser.StartStateFileParsing(mInputFile.GetInputStream()) != PDFHummus::eSuccess)
 	{
 		TRACE_LOG("StateReader::Start, unable to start parsing for the state reader file");

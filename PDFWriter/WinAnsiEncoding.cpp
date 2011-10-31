@@ -16,12 +16,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "WinAnsiEncoding.h"
 #include "BetweenIncluding.h"
 
-static const char* scGlyphNames[256] = 
+static const char* scGlyphNames[256] =
 {
 		".notdef", ".notdef", ".notdef", ".notdef",".notdef", ".notdef", ".notdef", ".notdef",
 		".notdef", ".notdef", ".notdef", ".notdef",".notdef", ".notdef", ".notdef", ".notdef",
@@ -66,7 +66,7 @@ WinAnsiEncoding::~WinAnsiEncoding(void)
 }
 
 BoolAndByte WinAnsiEncoding::Encode(unsigned long inUnicodeCharacter)
-{ 
+{
 	BoolAndByte result(true,0);
 
 	if(	betweenIncluding<unsigned long>(inUnicodeCharacter,0x00,0x17) ||
@@ -76,7 +76,7 @@ BoolAndByte WinAnsiEncoding::Encode(unsigned long inUnicodeCharacter)
 	{
 		result.second = (char)inUnicodeCharacter;
 	}
-	else 
+	else
 	{
 		switch(inUnicodeCharacter)
 		{
@@ -165,7 +165,7 @@ BoolAndByte WinAnsiEncoding::Encode(unsigned long inUnicodeCharacter)
 				result.first = false;
 		}
 	}
-	return result;	
+	return result;
 }
 
 const char* WinAnsiEncoding::GetEncodedGlyphName(IOBasicTypes::Byte inEncodedCharacter)

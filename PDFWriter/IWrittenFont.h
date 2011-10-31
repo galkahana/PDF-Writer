@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -40,12 +40,12 @@ class PDFParser;
 class IWrittenFont
 {
 public:
-	virtual ~IWrittenFont(){}	
+	virtual ~IWrittenFont(){}
 
 	/*
 		recieve a list of glyphs (and reference text, which can be ignored),
 		and return an encoded list of charactrs to represent them. Also return if each charachter is single byte or multi (dbl) byte.
-		this chap simply states whether this is non CID or CID. last but not least - return the object ID for the font, so that 
+		this chap simply states whether this is non CID or CID. last but not least - return the object ID for the font, so that
 		the using content can refer to it
 	*/
 	virtual void AppendGlyphs(const GlyphUnicodeMappingList& inGlyphsList,

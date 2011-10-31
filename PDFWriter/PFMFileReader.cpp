@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "PFMFileReader.h"
 #include "Trace.h"
@@ -61,7 +61,7 @@ EStatusCode PFMFileReader::Read(const string& inPFMFilePath)
 		status = ReadExtendedFontMetrics();
 		if(status != PDFHummus::eSuccess)
 			break;
-		
+
 	}while(false);
 
 	pfmFile.CloseFile();

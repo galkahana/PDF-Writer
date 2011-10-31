@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -49,7 +49,7 @@ private:
 	IOBasicTypes::LongBufferSizeType mColors;
 	IOBasicTypes::Byte mBitsPerComponent;
 	IOBasicTypes::LongBufferSizeType mColumns;
-	
+
 	IOBasicTypes::Byte* mRowBuffer;
 	IOBasicTypes::LongBufferSizeType mReadColorsCount;
 	unsigned short* mReadColors;

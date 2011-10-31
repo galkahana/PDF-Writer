@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 #include "EStatusCode.h"
@@ -47,7 +47,7 @@ public:
 	~DescendentFontWriter(void);
 
 	// the IDescendentFontWriter input pointer will implement the font specific differences
-	virtual PDFHummus::EStatusCode WriteFont(	ObjectIDType inDecendentObjectID, 
+	virtual PDFHummus::EStatusCode WriteFont(	ObjectIDType inDecendentObjectID,
 									const string& inFontName,
 									FreeTypeFaceWrapper& inFontInfo,
 									const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,

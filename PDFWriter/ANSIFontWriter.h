@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -43,7 +43,7 @@ typedef list<UShortAndString> UShortAndStringList;
 typedef pair<unsigned int, GlyphEncodingInfo> UIntAndGlyphEncodingInfo;
 typedef vector<UIntAndGlyphEncodingInfo> UIntAndGlyphEncodingInfoVector;
 
-class ANSIFontWriter 
+class ANSIFontWriter
 {
 public:
 	ANSIFontWriter(void);

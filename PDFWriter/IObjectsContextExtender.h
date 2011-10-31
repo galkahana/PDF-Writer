@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -34,8 +34,8 @@ public:
 	// flag to determine if the extender takes over compression or not
 	// if true than other compression methods will be called in case compression is required
 	virtual bool OverridesStreamCompression() = 0;
-	
-	// GetCompressionWriteStream is called when PDFStream Object is created 
+
+	// GetCompressionWriteStream is called when PDFStream Object is created
 	// if compression was required and OverridesStreamCompression returned true.
 	// input is the stream to write to, output is the new stream to write to - the compressed stream
 	virtual IByteWriter* GetCompressionWriteStream(IByteWriterWithPosition* inOutputStream) = 0;

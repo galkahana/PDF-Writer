@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "OpenTypePrimitiveReader.h"
 
@@ -115,7 +115,7 @@ EStatusCode OpenTypePrimitiveReader::ReadULONG(unsigned long& outValue)
 	if(ReadBYTE(byte4) != PDFHummus::eSuccess)
 		return PDFHummus::eFailure;
 
-	outValue = ((unsigned long)byte1 << 24) + ((unsigned long)byte2 << 16) + 
+	outValue = ((unsigned long)byte1 << 24) + ((unsigned long)byte2 << 16) +
 									((unsigned long)byte3 << 8) + byte4;
 
 	return PDFHummus::eSuccess;
@@ -160,18 +160,18 @@ EStatusCode OpenTypePrimitiveReader::ReadLongDateTime(long long& outValue)
 	if(ReadBYTE(byte8) != PDFHummus::eSuccess)
 		return PDFHummus::eFailure;
 
-	outValue =(long long)(	((unsigned long long)byte1 << 56) + ((unsigned long long)byte2 << 48) + 
-							((unsigned long long)byte3 << 40) + ((unsigned long long)byte4 << 32) + 
-							((unsigned long long)byte5 << 24) + ((unsigned long long)byte6 << 16) + 
+	outValue =(long long)(	((unsigned long long)byte1 << 56) + ((unsigned long long)byte2 << 48) +
+							((unsigned long long)byte3 << 40) + ((unsigned long long)byte4 << 32) +
+							((unsigned long long)byte5 << 24) + ((unsigned long long)byte6 << 16) +
 							((unsigned long long)byte7 << 8) + byte8);
-	return PDFHummus::eSuccess;	
+	return PDFHummus::eSuccess;
 }
 
 void OpenTypePrimitiveReader::SetOffset(LongFilePositionType inNewOffset)
 {
 	if(mInternalState != PDFHummus::eFailure)
 		mOpenTypeFile->SetPosition(mInitialPosition + inNewOffset);
-}	
+}
 
 void OpenTypePrimitiveReader::Skip(LongBufferSizeType inToSkip)
 {
@@ -202,7 +202,7 @@ EStatusCode OpenTypePrimitiveReader::ReadFixed(double& outValue)
 LongFilePositionType OpenTypePrimitiveReader::GetCurrentPosition()
 {
 	if(mInternalState != PDFHummus::eFailure)
-		return mOpenTypeFile->GetCurrentPosition() - mInitialPosition;	
+		return mOpenTypeFile->GetCurrentPosition() - mInitialPosition;
 	else
 		return 0;
 }
@@ -216,7 +216,7 @@ EStatusCode OpenTypePrimitiveReader::Read(Byte* inBuffer,LongBufferSizeType inBu
 
 	if(PDFHummus::eFailure == status)
 		mInternalState = PDFHummus::eFailure;
-	return status;	
+	return status;
 }
 
 IByteReaderWithPosition* OpenTypePrimitiveReader::GetReadStream()

@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "UnicodeString.h"
 #include "Trace.h"
@@ -177,7 +177,7 @@ EStatusCodeAndString UnicodeString::ToUTF8() const
 			status = PDFHummus::eFailure;
 		}
 	}
-	
+
 	return EStatusCodeAndString(status,result.str());
 }
 
@@ -220,7 +220,7 @@ EStatusCode UnicodeString::FromUTF16BE(const unsigned char* inString, unsigned l
 	{
 		unsigned short buffer = (((unsigned short)inString[i])<<8) + inString[i+1];
 
-		if(0xD800 <= buffer && buffer <= 0xDBFF) 
+		if(0xD800 <= buffer && buffer <= 0xDBFF)
 		{
 			// Aha! high surrogate! this means that this character requires 2 w_chars
 			unsigned short highSurrogate = buffer;
@@ -245,7 +245,7 @@ EStatusCode UnicodeString::FromUTF16BE(const unsigned char* inString, unsigned l
 			mUnicodeCharacters.push_back(0x10000 + ((highSurrogate - 0xD800) << 5) + (lowSurrogate - 0xDC00));
 		}
 		else
-			mUnicodeCharacters.push_back(buffer);		
+			mUnicodeCharacters.push_back(buffer);
 	}
 
 	return status;
@@ -272,7 +272,7 @@ EStatusCode UnicodeString::FromUTF16LE(const unsigned char* inString, unsigned l
 	{
 		unsigned short buffer = (((unsigned short)inString[i+1])<<8) + inString[i];
 
-		if(0xD800 <= buffer && buffer <= 0xDBFF) 
+		if(0xD800 <= buffer && buffer <= 0xDBFF)
 		{
 			// Aha! high surrogate! this means that this character requires 2 w_chars
 			unsigned short highSurrogate = buffer;
@@ -297,7 +297,7 @@ EStatusCode UnicodeString::FromUTF16LE(const unsigned char* inString, unsigned l
 			mUnicodeCharacters.push_back(0x10000 + ((highSurrogate - 0xD800) << 5) + (lowSurrogate - 0xDC00));
 		}
 		else
-			mUnicodeCharacters.push_back(buffer);		
+			mUnicodeCharacters.push_back(buffer);
 	}
 
 	return status;
@@ -310,7 +310,7 @@ EStatusCode UnicodeString::FromUTF16UShort(const unsigned short* inShorts, unsig
 
 	for(unsigned long i = 0; i < inLength && PDFHummus::eSuccess == status; ++i)
 	{
-		if(0xD800 <= inShorts[i] && inShorts[i] <= 0xDBFF) 
+		if(0xD800 <= inShorts[i] && inShorts[i] <= 0xDBFF)
 		{
 			// Aha! high surrogate! this means that this character requires 2 w_chars
 			++i;
@@ -331,10 +331,10 @@ EStatusCode UnicodeString::FromUTF16UShort(const unsigned short* inShorts, unsig
 			mUnicodeCharacters.push_back(0x10000 + ((inShorts[i-1] - 0xD800) << 5) + (inShorts[i] - 0xDC00));
 		}
 		else
-			mUnicodeCharacters.push_back(inShorts[i]);		
+			mUnicodeCharacters.push_back(inShorts[i]);
 	}
 
-	return status;		
+	return status;
 }
 
 
@@ -361,7 +361,7 @@ EStatusCodeAndString UnicodeString::ToUTF16BE(bool inPrependWithBom) const
 		{
 			unsigned short highSurrogate = (unsigned short)(((*it - 0x10000) >> 10) + 0xD800);
 			unsigned short lowSurrogate = (unsigned short)(((*it - 0x10000) & 0x3FF) + 0xDC00);
-			
+
 			result.put((unsigned char)(highSurrogate>>8));
 			result.put((unsigned char)(highSurrogate & 0xFF));
 			result.put((unsigned char)(lowSurrogate>>8));
@@ -371,9 +371,9 @@ EStatusCodeAndString UnicodeString::ToUTF16BE(bool inPrependWithBom) const
 		{
 			status = PDFHummus::eFailure;
 			break;
-		}	
+		}
 	}
-	
+
 	return EStatusCodeAndString(status,result.str());
 }
 
@@ -400,7 +400,7 @@ EStatusCodeAndString UnicodeString::ToUTF16LE(bool inPrependWithBom) const
 		{
 			unsigned short highSurrogate = (unsigned short)(((*it - 0x10000) >> 10) + 0xD800);
 			unsigned short lowSurrogate = (unsigned short)(((*it - 0x10000) & 0x3FF) + 0xDC00);
-			
+
 			result.put((unsigned char)(highSurrogate & 0xFF));
 			result.put((unsigned char)(highSurrogate>>8));
 			result.put((unsigned char)(lowSurrogate & 0xFF));
@@ -410,9 +410,9 @@ EStatusCodeAndString UnicodeString::ToUTF16LE(bool inPrependWithBom) const
 		{
 			status = PDFHummus::eFailure;
 			break;
-		}	
+		}
 	}
-	
+
 	return EStatusCodeAndString(status,result.str());
 }
 
@@ -440,9 +440,9 @@ EStatusCodeAndUShortList UnicodeString::ToUTF16UShort() const
 		{
 			status = PDFHummus::eFailure;
 			break;
-		}	
+		}
 	}
-	
+
 	return EStatusCodeAndUShortList(status,result);
 }
 

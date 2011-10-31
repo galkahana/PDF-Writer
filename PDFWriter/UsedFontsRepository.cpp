@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "UsedFontsRepository.h"
 #include "FreeTypeWrapper.h"
@@ -51,7 +51,7 @@ UsedFontsRepository::~UsedFontsRepository(void)
 	StringToPDFUsedFontMap::iterator it = mUsedFonts.begin();
 	for(; it != mUsedFonts.end();++it)
 		delete (it->second);
-	mUsedFonts.clear(); 
+	mUsedFonts.clear();
 	delete mInputFontsInformation;
 }
 
@@ -114,7 +114,7 @@ EStatusCode UsedFontsRepository::WriteUsedFontsDefinitions()
 	for(; it != mUsedFonts.end() && PDFHummus::eSuccess == status; ++it)
 		status = it->second->WriteFontDefinition();
 
-	return status;	
+	return status;
 }
 
 PDFUsedFont* UsedFontsRepository::GetFontForFile(const string& inFontFilePath)
@@ -144,7 +144,7 @@ EStatusCode UsedFontsRepository::WriteState(ObjectsContext* inStateWriter,Object
 	{
 		PDFTextString aTextString(it->first);
 		inStateWriter->WriteLiteralString(aTextString.ToString());
-		
+
 		ObjectIDType usedFontID = inStateWriter->GetInDirectObjectsRegistry().AllocateNewObjectID();
 		inStateWriter->WriteIndirectObjectReference(usedFontID);
 		usedFontsObjects.push_back(usedFontID);
@@ -190,7 +190,7 @@ EStatusCode UsedFontsRepository::ReadState(PDFParser* inStateReader,ObjectIDType
 	StringToPDFUsedFontMap::iterator itUsedFonts = mUsedFonts.begin();
 	for(; itUsedFonts != mUsedFonts.end();++itUsedFonts)
 		delete (itUsedFonts->second);
-	mUsedFonts.clear(); 
+	mUsedFonts.clear();
 
 
 	PDFObjectCastPtr<PDFDictionary> usedFontsRepositoryState(inStateReader->ParseNewObject(inObjectID));
@@ -236,7 +236,7 @@ EStatusCode UsedFontsRepository::ReadState(PDFParser* inStateReader,ObjectIDType
 
 		FT_Face face;
 		face = mInputFontsInformation->NewFace(filePath);
-		
+
 		if(!face)
 		{
 			TRACE_LOG1("UsedFontsRepository::ReadState, Failed to load font from %s",filePath.c_str());
@@ -246,7 +246,7 @@ EStatusCode UsedFontsRepository::ReadState(PDFParser* inStateReader,ObjectIDType
 
 
 		PDFUsedFont* usedFont;
-		
+
 		StringToStringMap::iterator itOptionlMetricsFile = mOptionaMetricsFiles.find(filePath);
 		if(itOptionlMetricsFile != mOptionaMetricsFiles.end())
 			usedFont = new PDFUsedFont(face,filePath,itOptionlMetricsFile->second,mObjectsContext);
@@ -266,5 +266,5 @@ EStatusCode UsedFontsRepository::ReadState(PDFParser* inStateReader,ObjectIDType
 
 	}
 	return status;
-	
+
 }

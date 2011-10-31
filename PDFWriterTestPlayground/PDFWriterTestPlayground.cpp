@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 // PDFWriterTestPlayground.cpp : Defines the entry point for the console application.
 //
@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
 			bool hasExclusions = false;
 			StringList categories;
 			int i=2;
-			
+
 			for(;i<argc;++i)
 			{
 				if(strcmp(argv[i],"-xt") == 0)

@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -28,7 +28,7 @@ public:
 	InputLimitedStream();
 	virtual ~InputLimitedStream(void);
 
-	// K. with this one (just cause i'm tired of this ownership thing) i'm trying something new - to flag ownership. 
+	// K. with this one (just cause i'm tired of this ownership thing) i'm trying something new - to flag ownership.
 	// So make good use of this last flag
 	InputLimitedStream(IByteReader* inSourceStream,IOBasicTypes::LongFilePositionType inReadLimit,bool inOwnsStream);
 

@@ -16,12 +16,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "PDFDictionary.h"
 
 PDFDictionary::PDFDictionary(void) : PDFObject(eType)
-{ 
+{
 }
 
 PDFDictionary::~PDFDictionary(void)

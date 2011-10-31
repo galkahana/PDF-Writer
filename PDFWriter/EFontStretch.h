@@ -16,20 +16,20 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
 //aligning index to be like the Open Type width class numbers, for direct mapping
 
 enum EFontStretch {
-	eFontStretchUltraCondensed = 1, 
-	eFontStretchExtraCondensed, 
-	eFontStretchCondensed, 
-	eFontStretchSemiCondensed, 
-	eFontStretchNormal, 
-	eFontStretchSemiExpanded, 
-	eFontStretchExpanded, 
+	eFontStretchUltraCondensed = 1,
+	eFontStretchExtraCondensed,
+	eFontStretchCondensed,
+	eFontStretchSemiCondensed,
+	eFontStretchNormal,
+	eFontStretchSemiExpanded,
+	eFontStretchExpanded,
 	eFontStretchExtraExpanded,
 	eFontStretchUltraExpanded,
 	eFontStretchMax,
@@ -39,13 +39,13 @@ enum EFontStretch {
 static const char* scFontStretchLabels[eFontStretchMax] =
 {
 	"",
-	"UltraCondensed", 
-	"ExtraCondensed", 
-	"Condensed", 
-	"SemiCondensed", 
-	"Normal", 
-	"SemiExpanded", 
-	"Expanded", 
+	"UltraCondensed",
+	"ExtraCondensed",
+	"Condensed",
+	"SemiCondensed",
+	"Normal",
+	"SemiExpanded",
+	"Expanded",
 	"ExtraExpanded",
 	"UltraExpanded"
 };

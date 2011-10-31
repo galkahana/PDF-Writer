@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "CharStringType2Flattener.h"
 #include "CFFFileInput.h"
@@ -36,9 +36,9 @@ CharStringType2Flattener::~CharStringType2Flattener(void)
 {
 }
 
-EStatusCode CharStringType2Flattener::WriteFlattenedGlyphProgram(unsigned short inFontIndex, 
-																 unsigned short inGlyphIndex, 
-																 CFFFileInput* inCFFFileInput, 
+EStatusCode CharStringType2Flattener::WriteFlattenedGlyphProgram(unsigned short inFontIndex,
+																 unsigned short inGlyphIndex,
+																 CFFFileInput* inCFFFileInput,
 																 IByteWriter* inWriter)
 {
 	CharStringType2Interpreter interpreter;
@@ -56,7 +56,7 @@ EStatusCode CharStringType2Flattener::WriteFlattenedGlyphProgram(unsigned short 
 			TRACE_LOG("CharStringType2Flattener::Trace, Exception, cannot prepare for glyph interpretation");
 			break;
 		}
-		
+
 		CharString* charString = inCFFFileInput->GetGlyphCharString(inFontIndex,inGlyphIndex);
 		if(!charString)
 		{
@@ -70,7 +70,7 @@ EStatusCode CharStringType2Flattener::WriteFlattenedGlyphProgram(unsigned short 
 			The alrogithm for writing a flattened charstring is as follows:
 			1. enumerator, through interpretation, the charstring
 			2. hit an operand? accumulate.
-			3. hit an operator? if it's not callgsubr or callsubr just write the operand stack, and continue. 
+			3. hit an operator? if it's not callgsubr or callsubr just write the operand stack, and continue.
 								if it is callgsubr/callsubr pop the last element on the operand stack and write it, then continue.
 			4. an exception would be when callgsubr/callsubr follow an operator, in which case their index operand is already written. just call drop.
 

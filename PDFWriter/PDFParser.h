@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -53,7 +53,7 @@ struct XrefEntryInput
 	// are true only for "n" type of entries
 	LongFilePositionType mObjectPosition;
 	unsigned long mRivision;
-	EXrefEntryType mType;	
+	EXrefEntryType mType;
 };
 
 struct ObjectStreamHeaderEntry
@@ -76,7 +76,7 @@ public:
 	}
 private:
 	IByteReaderWithPosition* mStream;
-	
+
 };
 
 typedef map<ObjectIDType,ObjectStreamHeaderEntry*> ObjectIDTypeToObjectStreamHeaderEntryMap;
@@ -102,7 +102,7 @@ public:
 
 	// IMPORTANT! All non "Get" prefix methods below return an object after calling AddRef (or at least make sure reference is added)
 	// to handle refcount use the RefCountPtr object, or just make sure to call Release when you are done.
-	
+
 	// Creates a new object, use smart pointers to control ownership
 	PDFObject* ParseNewObject(ObjectIDType inObjectId);
 	ObjectIDType GetObjectsCount();
@@ -110,7 +110,7 @@ public:
 	// Query a dictinary object, if indirect, go and fetch the indirect object and return it instead
 	// [if you want the direct dictionary value, use PDFDictionary::QueryDirectObject [will AddRef automatically]
 	PDFObject* QueryDictionaryObject(PDFDictionary* inDictionary,const string& inName);
-	
+
 	// Query an array object, if indirect, go and fetch the indirect object and return it instead
 	// [if you want the direct array value, use the PDFArray direct access to the vector [and use AddRef, cause it won't]
 	PDFObject* QueryArrayObject(PDFArray* inArray,unsigned long inIndex);
@@ -135,7 +135,7 @@ private:
 	PDFObjectParser mObjectParser;
 	IByteReaderWithPosition* mStream;
 	AdapterIByteReaderWithPositionToIReadPositionProvider mCurrentPositionProvider;
-	
+
 	// we'll use this items for bacwkards reading. might turns this into a proper stream object
 	IOBasicTypes::Byte mLinesBuffer[LINE_BUFFER_SIZE];
 	IOBasicTypes::Byte* mCurrentBufferIndex;

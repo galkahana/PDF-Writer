@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
@@ -72,7 +72,7 @@ public:
 	virtual ~AbstractContentContext(void);
 
 	// PDF Operators. For explanations on the meanings of each operator read Appendix A "Operator Summary" of the PDF Reference Manual (1.7)
-	
+
 	// path stroke/fill
 	void b();
 	void B();
@@ -88,12 +88,12 @@ public:
 	// path construction
 	void m(double inX,double inY);
 	void l(double inX,double inY);
-	void c(	double inX1,double inY1, 
-			double inX2, double inY2, 
+	void c(	double inX1,double inY1,
+			double inX2, double inY2,
 			double inX3, double inY3);
-	void v(	double inX2,double inY2, 
+	void v(	double inX2,double inY2,
 			double inX3, double inY3);
-	void y(	double inX1,double inY1, 
+	void y(	double inX1,double inY1,
 			double inX3, double inY3);
 	void h();
 	void re(double inLeft,double inBottom, double inWidth,double inHeight);
@@ -171,20 +171,20 @@ public:
 	// The rest of the text operators, handled by the library handing of font. text is in UTF8
 	PDFHummus::EStatusCode Quote(const string& inText);
 	PDFHummus::EStatusCode DoubleQuote(double inWordSpacing, double inCharacterSpacing, const string& inText);
-	PDFHummus::EStatusCode TJ(const StringOrDoubleList& inStringsAndSpacing); 
+	PDFHummus::EStatusCode TJ(const StringOrDoubleList& inStringsAndSpacing);
 
 	//
 	// Text showing operators using the library handling of fonts with direct glyph selection
 	//
-	
+
 	// For Direct glyph selections (if you don't like my UTF16 encoding), use the following commands.
-	// each command accepts a list of glyphs. each glyph is mapped to its matching unicode values. 
+	// each command accepts a list of glyphs. each glyph is mapped to its matching unicode values.
 	// a glyph may have more than one unicode value in case it reperesents a series of Characters.
 
 	PDFHummus::EStatusCode Tj(const GlyphUnicodeMappingList& inText);
 	PDFHummus::EStatusCode Quote(const GlyphUnicodeMappingList& inText);
 	PDFHummus::EStatusCode DoubleQuote(double inWordSpacing, double inCharacterSpacing, const GlyphUnicodeMappingList& inText);
-	PDFHummus::EStatusCode TJ(const GlyphUnicodeMappingListOrDoubleList& inStringsAndSpacing); 
+	PDFHummus::EStatusCode TJ(const GlyphUnicodeMappingListOrDoubleList& inStringsAndSpacing);
 
 	//
 	// Text showing operators overriding library behavior
@@ -194,18 +194,18 @@ public:
 	// font and text usage
 
 	// Low level setting of font. for the high level version, see below
-	void TfLow(const string& inFontName,double inFontSize); 
+	void TfLow(const string& inFontName,double inFontSize);
 
-	// first version of Tj writes the string in literal string paranthesis, 
+	// first version of Tj writes the string in literal string paranthesis,
 	// second version of Tj writes the string in hex string angle brackets
 	void TjLow(const string& inText);
-	void TjHexLow(const string& inText); 
+	void TjHexLow(const string& inText);
 
 	void QuoteLow(const string& inText); // matches the operator '
 	void QuoteHexLow(const string& inText);
 
 	void DoubleQuoteLow(double inWordSpacing, double inCharacterSpacing, const string& inText); // matches the operator "
-	void DoubleQuoteHexLow(double inWordSpacing, double inCharacterSpacing, const string& inText); 
+	void DoubleQuoteHexLow(double inWordSpacing, double inCharacterSpacing, const string& inText);
 
 	// similar to the TJ PDF command, TJ() recieves an input an array of items which
 	// can be either a string or a double

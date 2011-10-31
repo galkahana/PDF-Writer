@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 #include "IDescendentFontWriter.h"
@@ -28,7 +28,7 @@ public:
 	~CFFDescendentFontWriter(void);
 
 	// IDescendentFontWriter implementation [used also as helper for the DescendentFontWriter]
-	virtual PDFHummus::EStatusCode WriteFont(	ObjectIDType inDecendentObjectID, 
+	virtual PDFHummus::EStatusCode WriteFont(	ObjectIDType inDecendentObjectID,
 									const string& inFontName,
 									FreeTypeFaceWrapper& inFontInfo,
 									const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,

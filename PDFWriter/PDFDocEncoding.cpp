@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "PDFDocEncoding.h"
 #include "BetweenIncluding.h"
@@ -76,7 +76,7 @@ BoolAndByte PDFDocEncoding::Encode(unsigned long inUnicodeCharacter)
 	{
 		result.second = (char)inUnicodeCharacter;
 	}
-	else 
+	else
 	{
 		switch(inUnicodeCharacter)
 		{
@@ -222,7 +222,7 @@ unsigned long PDFDocEncoding::Decode(IOBasicTypes::Byte inEncodedCharacter)
 	{
 		result = (unsigned long)inEncodedCharacter;
 	}
-	else 
+	else
 	{
 		switch(inEncodedCharacter)
 		{

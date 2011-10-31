@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "Timer.h"
 
@@ -50,4 +50,4 @@ void Timer::StopMeasureAndAccumulate()
 double Timer::GetTotalMiliSeconds()
 {
 	return mTotal;
-}	
+}

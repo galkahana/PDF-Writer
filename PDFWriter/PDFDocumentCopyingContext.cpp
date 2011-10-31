@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "PDFDocumentCopyingContext.h"
 
@@ -59,7 +59,7 @@ EStatusCodeAndObjectIDType PDFDocumentCopyingContext::CreateFormXObjectFromPDFPa
 																					 const PDFRectangle& inCropBox,
 																					 const double* inTransformationMatrix)
 {
-	return mDocumentHandler.CreateFormXObjectFromPDFPage(inPageIndex,inCropBox,inTransformationMatrix);	
+	return mDocumentHandler.CreateFormXObjectFromPDFPage(inPageIndex,inCropBox,inTransformationMatrix);
 }
 
 

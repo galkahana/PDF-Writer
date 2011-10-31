@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 /*
@@ -48,7 +48,7 @@ public:
 	PageTree* GetPageTreeRoot(IndirectObjectsReferenceRegistry& inObjectsRegistry);
 
 	PageTree* GetCurrentPageTreeNode();
-	
+
 	void SetCurrentPageTreeNode(PageTree* inCurrentPageTreeNode);
 private:
 

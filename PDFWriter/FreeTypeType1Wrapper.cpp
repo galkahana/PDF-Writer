@@ -16,7 +16,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #include "FreeTypeType1Wrapper.h"
 #include "Trace.h"
@@ -29,7 +29,7 @@ FreeTypeType1Wrapper::FreeTypeType1Wrapper(FT_Face inFace,const string& inPFMFil
 		mPSavailable = false; // this is obviousy an exception
 	}
 	else
-		mPSavailable = true; 
+		mPSavailable = true;
 
 
 	if(FT_Get_PS_Font_Private(inFace,&mPrivateInfo) != 0)
@@ -38,9 +38,9 @@ FreeTypeType1Wrapper::FreeTypeType1Wrapper(FT_Face inFace,const string& inPFMFil
 		mPSPrivateAvailable = false; // this is obviousy an exception
 	}
 	else
-		mPSPrivateAvailable = true; 
+		mPSPrivateAvailable = true;
 
-	mPFMFileInfoRelevant = 
+	mPFMFileInfoRelevant =
 		(inPFMFilePath.size() != 0 && mPFMReader.Read(inPFMFilePath) != PDFHummus::eFailure);
 }
 
@@ -100,7 +100,7 @@ bool FreeTypeType1Wrapper::IsScript()
 	if(mPFMFileInfoRelevant)
 		return (mPFMReader.Header.PitchAndFamily & 64) != 0;
 	else
-		return false;	
+		return false;
 }
 
 bool FreeTypeType1Wrapper::IsForceBold()
