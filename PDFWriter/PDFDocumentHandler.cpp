@@ -1041,8 +1041,8 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::CreatePDFPageForPage(unsigned lon
 	IDocumentContextExtenderSet::iterator it = mExtenders.begin();
 	for(; it != mExtenders.end() && PDFHummus::eSuccess == status; ++it)
 	{
-		result.first = (*it)->OnBeforeCreatePageFromPage(pageObject.GetPtr(),mObjectsContext,mDocumentContext,this);
-		if(result.first != PDFHummus::eSuccess)
+		status = (*it)->OnBeforeCreatePageFromPage(pageObject.GetPtr(),mObjectsContext,mDocumentContext,this);
+		if(status != PDFHummus::eSuccess)
 			TRACE_LOG("DocumentContext::CreatePDFPageForPage, unexpected failure. extender declared failure before writing page.");
 	}
 	if(status != PDFHummus::eSuccess)

@@ -166,7 +166,7 @@ EStatusCode PDFParser::ParseEOFLine()
 		aTokenizer.SetReadStream(mStream);
 		BoolAndString token = aTokenizer.GetNextToken();
 
-		if(token.first && (scEOF == token.second))
+		if(token.first && (token.second.substr(0,scEOF.length()) == scEOF))
 		{
 			return PDFHummus::eSuccess;
 		}
@@ -1619,8 +1619,21 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 			break;
 		} 
 
+		// if array, get what should be the one and only item
+		if(filterObject->GetType() == ePDFObjectArray)
+		{
+			if(((PDFArray*)(filterObject.GetPtr()))->GetLength() != 1)
+			{
+				TRACE_LOG("PDFParser::CreateInputStreamReader, supporting decode arrays of length 1");
+				status = PDFHummus::eFailure;
+				break;
+			}
+			filterObject = ((PDFArray*)(filterObject.GetPtr()))->QueryObject(0);
+
+		}
+
 		// check for flate
-		if(filterObject->GetType() != ePDFObjectName || ((PDFName*)(filterObject.GetPtr()))->GetValue() != "FlateDecode")
+		if (filterObject->GetType() != ePDFObjectName || ((PDFName*)(filterObject.GetPtr()))->GetValue() != "FlateDecode")
 		{
 			TRACE_LOG("PDFParser::CreateInputStreamReader, supporting only flate decode, failing");
 			status = PDFHummus::eFailure;
