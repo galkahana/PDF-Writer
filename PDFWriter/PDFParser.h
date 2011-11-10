@@ -30,10 +30,13 @@
 #include "AdapterIByteReaderWithPositionToIReadPositionProvider.h"
 
 #include <map>
+#include <utility>
 
 
 class PDFArray;
 class PDFStreamInput;
+class PDFDictionary;
+class PDFName;
 
 #define LINE_BUFFER_SIZE 1024
 
@@ -80,6 +83,7 @@ private:
 };
 
 typedef map<ObjectIDType,ObjectStreamHeaderEntry*> ObjectIDTypeToObjectStreamHeaderEntryMap;
+typedef pair<PDFHummus::EStatusCode,IByteReader*> EStatusCodeAndIByteReader;
 
 class PDFParser
 {
@@ -184,6 +188,7 @@ private:
 	PDFObject* ParseExistingInDirectStreamObject(ObjectIDType inObjectId);
 	PDFHummus::EStatusCode ParseObjectStreamHeader(ObjectStreamHeaderEntry* inHeaderInfo,ObjectIDType inObjectsCount);
 	void MovePositionInStream(LongFilePositionType inPosition);
+	EStatusCodeAndIByteReader CreateFilterForStream(IByteReader* inStream,PDFName* inFilterName,PDFDictionary* inDecodeParams);
 
 	// Backward reading
 	bool ReadNextBufferFromEnd();
