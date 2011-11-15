@@ -556,6 +556,9 @@
       <Filter>PDF Embedding</Filter>
     </ClInclude>
     <ClInclude Include="PDFWriter.h" />
+    <ClInclude Include="InputAscii85DecodeStream.h">
+      <Filter>Infrastracture\IO</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="InputBufferedStream.cpp">
@@ -919,5 +922,8 @@
       <Filter>PDF Embedding</Filter>
     </ClCompile>
     <ClCompile Include="PDFWriter.cpp" />
+    <ClCompile Include="InputAscii85DecodeStream.cpp">
+      <Filter>Infrastracture\IO</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

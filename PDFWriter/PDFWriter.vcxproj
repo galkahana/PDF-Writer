@@ -156,6 +156,7 @@
     <ClInclude Include="IByteWriter.h" />
     <ClInclude Include="IByteWriterWithPosition.h" />
     <ClInclude Include="IDocumentContextExtender.h" />
+    <ClInclude Include="InputAscii85DecodeStream.h" />
     <ClInclude Include="InputBufferedStream.h" />
     <ClInclude Include="InputByteArrayStream.h" />
     <ClInclude Include="InputFile.h" />
@@ -311,6 +312,7 @@
   <ItemGroup>
     <ClCompile Include="Ascii7Encoding.cpp" />
     <ClCompile Include="DocumentContext.cpp" />
+    <ClCompile Include="InputAscii85DecodeStream.cpp" />
     <ClCompile Include="InputBufferedStream.cpp" />
     <ClCompile Include="InputByteArrayStream.cpp" />
     <ClCompile Include="InputFile.cpp" />
