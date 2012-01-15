@@ -193,6 +193,8 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 				{
 					// Hex string 
 
+					tokenBuffer.Write(&buffer,1);
+
 					while(mStream->NotEnded())
 					{
 						if(GetNextByteForToken(buffer) != PDFHummus::eSuccess)

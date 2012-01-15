@@ -73,7 +73,7 @@ it is recommended but not required for characters whose codes are outside the ra
 
 		if(aValue < 33 || aValue > 126)
 		{
-			SAFE_SPRINTF_1((char*)buffer,5,"#%d",aValue); 
+			SAFE_SPRINTF_1((char*)buffer,5,"#%02x",aValue); 
 			mStreamForWriting->Write(buffer,strlen((char*)buffer));		
 		}
 		else

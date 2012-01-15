@@ -44,6 +44,7 @@
 #include "InputPredictorPNGPaethStream.h"
 #include "InputPredictorPNGOptimumStream.h"
 #include "InputPredictorTIFFSubStream.h"
+#include "InputAscii85DecodeStream.h"
 
 #include  <algorithm>
 using namespace PDFHummus;
@@ -166,7 +167,7 @@ EStatusCode PDFParser::ParseEOFLine()
 		aTokenizer.SetReadStream(mStream);
 		BoolAndString token = aTokenizer.GetNextToken();
 
-		if(token.first && (scEOF == token.second))
+		if(token.first && (token.second.substr(0,scEOF.length()) == scEOF))
 		{
 			return PDFHummus::eSuccess;
 		}
@@ -1619,92 +1620,60 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 			break;
 		} 
 
-		// check for flate
-		if(filterObject->GetType() != ePDFObjectName || ((PDFName*)(filterObject.GetPtr()))->GetValue() != "FlateDecode")
+		if(filterObject->GetType() == ePDFObjectArray)
 		{
-			TRACE_LOG("PDFParser::CreateInputStreamReader, supporting only flate decode, failing");
-			status = PDFHummus::eFailure;
-			break;
+			PDFArray* filterObjectArray = (PDFArray*)filterObject.GetPtr();
+			PDFObjectCastPtr<PDFArray> decodeParams(QueryDictionaryObject(streamDictionary.GetPtr(),"DecodeParms"));
+			for(unsigned long i=0; i < filterObjectArray->GetLength() && eSuccess == status;++i)
+			{
+				PDFObjectCastPtr<PDFName> filterObjectItem(filterObjectArray->QueryObject(i));
+				if(!filterObjectItem)
+				{
+					TRACE_LOG("PDFParser::CreateInputStreamReader, filter item in an array is not a name. should be a name");
+					status = PDFHummus::eFailure;
+					break;
+				}
+
+				EStatusCodeAndIByteReader createStatus;
+				if(!decodeParams)
+				{
+					 createStatus = CreateFilterForStream(result,filterObjectItem.GetPtr(), NULL);
+				}
+				else
+				{
+					PDFObjectCastPtr<PDFDictionary> decodeParamsItem(QueryArrayObject(decodeParams.GetPtr(),i));
+
+					createStatus = CreateFilterForStream(result,(PDFName*)filterObject.GetPtr(), !decodeParamsItem ? NULL: decodeParamsItem.GetPtr());
+				}
+
+				if(createStatus.first != eSuccess)
+				{
+					status = PDFHummus::eFailure;
+					break;
+				}
+				else
+					result = createStatus.second;
+			}
 		}
-
-		result = new InputFlateDecodeStream(result);
-
-		// check for predictor n' such
-		PDFObjectCastPtr<PDFDictionary> decodeParams(QueryDictionaryObject(streamDictionary.GetPtr(),"DecodeParms"));
-		if(!decodeParams)
+		else if(filterObject->GetType() == ePDFObjectName)
 		{
-			// no predictor, stop here
-			break;
-		}
+			PDFObjectCastPtr<PDFDictionary> decodeParams(QueryDictionaryObject(streamDictionary.GetPtr(),"DecodeParms"));
 
-		// read predictor, and apply the relevant predictor function
-		PDFObjectCastPtr<PDFInteger> predictor(QueryDictionaryObject(decodeParams.GetPtr(),"Predictor"));
-		
-		if(!predictor || predictor->GetValue() == 1)
-		{
-			// no predictor or default, stop here
-			break;
-		}
-
-		PDFObjectCastPtr<PDFInteger> columns(QueryDictionaryObject(decodeParams.GetPtr(),"Columns"));
-		LongBufferSizeType columnsValue = columns.GetPtr() ? 
-															(IOBasicTypes::LongBufferSizeType)columns->GetValue() :
-															1;
-
-		switch(predictor->GetValue())
-		{
-			case 2:
+			EStatusCodeAndIByteReader createStatus = CreateFilterForStream(result,(PDFName*)filterObject.GetPtr(), !decodeParams ? NULL: decodeParams.GetPtr());
+			if(createStatus.first != eSuccess)
 			{
-				PDFObjectCastPtr<PDFInteger> colors(QueryDictionaryObject(decodeParams.GetPtr(),"Colors"));
-				PDFObjectCastPtr<PDFInteger> bitsPerComponent(QueryDictionaryObject(decodeParams.GetPtr(),"BitsPerComponent"));
-				result = new InputPredictorTIFFSubStream(result,
-														 colors.GetPtr() ? 
-															(IOBasicTypes::LongBufferSizeType)colors->GetValue() :
-															1,
-														 bitsPerComponent.GetPtr() ?
-															(IOBasicTypes::Byte)colors->GetValue() :
-															8,
-															columnsValue);
-				break;
-			}
-			case 10:
-			{
-				result = new InputPredictorPNGNoneStream(result,columnsValue);
-				break;
-			}
-			case 11:
-			{
-				result = new InputPredictorPNGSubStream(result,columnsValue);
-				break;
-			}
-			case 12:
-			{
-
-				result =  new InputPredictorPNGUpStream(result,columnsValue);
-				break;
-			}
-			case 13:
-			{
-
-				result =  new InputPredictorPNGAverageStream(result,columnsValue);
-				break;
-			}
-			case 14:
-			{
-				result =  new InputPredictorPNGPaethStream(result,columnsValue);
-				break;
-			}
-			case 15:
-			{
-				result =  new InputPredictorPNGOptimumStream(result,columnsValue);
-				break;
-			}
-			default:
-			{
-				TRACE_LOG("PDFParser::CreateInputStreamReader, supporting only predictor of types 1,2,10,11,12,13,14,15, failing");
 				status = PDFHummus::eFailure;
 				break;
 			}
+			else
+				result = createStatus.second;
+
+		}
+		else
+		{
+			TRACE_LOG("PDFParser::CreateInputStreamReader, filter parameter is of unkown type. only array and name are supported.");
+			status = PDFHummus::eFailure;
+			break;			
 		}
 		
 	}while(false);
@@ -1716,6 +1685,121 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 		result = NULL;
 	}
 	return result;
+}
+
+EStatusCodeAndIByteReader PDFParser::CreateFilterForStream(IByteReader* inStream,PDFName* inFilterName,PDFDictionary* inDecodeParams)
+{
+	EStatusCode status = eSuccess;
+	IByteReader* result = NULL;
+
+	do
+	{
+
+		if(inFilterName->GetValue() == "FlateDecode")
+		{
+			InputFlateDecodeStream* flateStream;
+			flateStream = new InputFlateDecodeStream(NULL); // assigning null, so later delete, if failure occurs won't delete the input stream
+			result = flateStream;
+
+			// check for predictor n' such
+			if(!inDecodeParams)
+			{
+				// no predictor, stop here
+				flateStream->Assign(inStream);
+				break;
+			}
+
+			// read predictor, and apply the relevant predictor function
+			PDFObjectCastPtr<PDFInteger> predictor(QueryDictionaryObject(inDecodeParams,"Predictor"));
+			
+			if(!predictor || predictor->GetValue() == 1)
+			{
+				// no predictor or default, stop here
+				flateStream->Assign(inStream);
+				break;
+			}
+
+			PDFObjectCastPtr<PDFInteger> columns(QueryDictionaryObject(inDecodeParams,"Columns"));
+			LongBufferSizeType columnsValue = columns.GetPtr() ? 
+																(IOBasicTypes::LongBufferSizeType)columns->GetValue() :
+																1;
+
+			switch(predictor->GetValue())
+			{
+				case 2:
+				{
+					PDFObjectCastPtr<PDFInteger> colors(QueryDictionaryObject(inDecodeParams,"Colors"));
+					PDFObjectCastPtr<PDFInteger> bitsPerComponent(QueryDictionaryObject(inDecodeParams,"BitsPerComponent"));
+					result = new InputPredictorTIFFSubStream(result,
+															 colors.GetPtr() ? 
+																(IOBasicTypes::LongBufferSizeType)colors->GetValue() :
+																1,
+															 bitsPerComponent.GetPtr() ?
+																(IOBasicTypes::Byte)colors->GetValue() :
+																8,
+																columnsValue);
+					break;
+				}
+				case 10:
+				{
+					result = new InputPredictorPNGNoneStream(result,columnsValue);
+					break;
+				}
+				case 11:
+				{
+					result = new InputPredictorPNGSubStream(result,columnsValue);
+					break;
+				}
+				case 12:
+				{
+
+					result =  new InputPredictorPNGUpStream(result,columnsValue);
+					break;
+				}
+				case 13:
+				{
+
+					result =  new InputPredictorPNGAverageStream(result,columnsValue);
+					break;
+				}
+				case 14:
+				{
+					result =  new InputPredictorPNGPaethStream(result,columnsValue);
+					break;
+				}
+				case 15:
+				{
+					result =  new InputPredictorPNGOptimumStream(result,columnsValue);
+					break;
+				}
+				default:
+				{
+					TRACE_LOG("PDFParser::CreateFilterForStream, supporting only predictor of types 1,2,10,11,12,13,14,15, failing");
+					status = PDFHummus::eFailure;
+					break;
+				}
+			}
+			flateStream->Assign(inStream);
+		}
+		else if(inFilterName->GetValue() == "ASCII85Decode")
+		{
+			result = new InputAscii85DecodeStream(inStream);
+		}
+		else
+		{
+			TRACE_LOG("PDFParser::CreateFilterForStream, supporting only flate decode and ascii 85 decode, failing");
+			status = PDFHummus::eFailure;
+			break;
+		}
+	}while(false);
+
+	if(status != PDFHummus::eSuccess)
+	{
+		delete result;
+		result = NULL;
+	}
+	return EStatusCodeAndIByteReader(status,result);
+
 }
 
 EStatusCode PDFParser::StartStateFileParsing(IByteReaderWithPosition* inSourceStream)

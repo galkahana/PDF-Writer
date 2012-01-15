@@ -284,8 +284,10 @@ PDFObject* PDFObjectParser::ParseLiteralString(const string& inToken)
 			{
 				buffer = (*it - '0') * 64;
 				++it;
+				++i;
 				buffer += (*it - '0') * 8;
 				++it;
+				++i;
 				buffer += (*it - '0');
 			}
 			else

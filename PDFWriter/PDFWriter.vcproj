@@ -302,6 +302,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\InputAscii85DecodeStream.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\InputAscii85DecodeStream.h"
+					>
+				</File>
+				<File
 					RelativePath=".\InputBufferedStream.cpp"
 					>
 				</File>
