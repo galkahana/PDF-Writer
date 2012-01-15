@@ -23,9 +23,9 @@
 #include "EStatusCode.h"
 #include "IType1InterpreterImplementation.h"
 
+#include <vector>
 #include <map>
 #include <set>
-#include <vector>
 #include <string>
 
 using namespace std;
@@ -43,6 +43,8 @@ typedef list<ConversionNode> ConversionNodeList;
 
 struct Stem
 {
+	Stem() {mOrigin = 0; mExtent = 0;}
+	Stem(const Stem& inStem){mOrigin = inStem.mOrigin;mExtent = inStem.mExtent;}
 	Stem(long inOrigin,long inExtent){mOrigin = inOrigin; mExtent = inExtent;}
 
 	long mOrigin;
@@ -62,8 +64,8 @@ public:
 	}
 };
 
+typedef vector<const Stem*> StemVector;
 typedef set<Stem,StemLess> StemSet;
-typedef vector<Stem> StemVector;
 typedef set<size_t> SizeTSet;
 typedef map<Stem,size_t,StemLess> StemToSizeTMap;
 
@@ -118,8 +120,6 @@ private:
 	long mWidth[2];
 
 	// hints handling
-	StemVector mOrderedHStems;
-	StemVector mOrderedVStems;
 	StemToSizeTMap mHStems;
 	StemToSizeTMap mVStems;
 	SizeTSet mCurrentHints;

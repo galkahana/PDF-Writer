@@ -88,8 +88,6 @@ EStatusCode Type1ToType2Converter::WriteConvertedFontProgram(const string& inGly
 		}
 	}while(false);
 
-	mOrderedHStems.clear();
-	mOrderedVStems.clear();
 	mVStems.clear();
 	mHStems.clear();
 	mConversionProgram.clear();
@@ -223,10 +221,7 @@ EStatusCode Type1ToType2Converter::AddHStem(long inOrigin,long inExtent)
 	StemToSizeTMap::iterator it = mHStems.find(aStem);
 
 	if(it == mHStems.end())
-	{
-		it = mHStems.insert(StemToSizeTMap::value_type(aStem,0)).first;
-		mOrderedHStems.push_back(it->first);
-	}
+		mHStems.insert(StemToSizeTMap::value_type(aStem,0));
 	return PDFHummus::eSuccess;
 }
 
@@ -236,10 +231,7 @@ EStatusCode Type1ToType2Converter::AddVStem(long inOrigin,long inExtent)
 	StemToSizeTMap::iterator it = mVStems.find(aStem);
 
 	if(it == mVStems.end())
-	{
-		it = mVStems.insert(StemToSizeTMap::value_type(aStem,0)).first;
-		mOrderedVStems.push_back(it->first);
-	}
+		mVStems.insert(StemToSizeTMap::value_type(aStem,0));
 	return PDFHummus::eSuccess;
 }
 
@@ -417,20 +409,32 @@ EStatusCode Type1ToType2Converter::Type1Seac(const LongList& inOperandList)
 	return RecordOperatorWithParameters(14,params);
 }
 
-static bool sStemSort(const Stem& inLeft, const Stem& inRight)
+static bool sStemSort(const Stem* inLeft, const Stem* inRight)
 {
-	return inLeft.mOrigin < inRight.mOrigin;
+	return inLeft->mOrigin < inRight->mOrigin;
 }
 
 
 void Type1ToType2Converter::ConvertStems()
 {
-	if(mOrderedHStems.size() == 0 && mOrderedVStems.size() == 0)
+
+
+	if(mHStems.size() == 0 && mVStems.size() == 0)
 		return;
 
+	StemVector orderedHStems;
+	StemVector orderedVStems;
+
+	StemToSizeTMap::iterator it = mHStems.begin();
+	for(; it != mHStems.end(); ++it)
+		orderedHStems.push_back(&(it->first));
+	it = mVStems.begin();
+	for(; it != mVStems.end(); ++it)
+		orderedVStems.push_back(&(it->first));
+
 	// sort stems
-	sort(mOrderedHStems.begin(),mOrderedHStems.end(),sStemSort);
-	sort(mOrderedVStems.begin(),mOrderedVStems.end(),sStemSort);
+	sort(orderedHStems.begin(),orderedHStems.end(),sStemSort);
+	sort(orderedVStems.begin(),orderedVStems.end(),sStemSort);
 
 	ConversionNodeList::iterator itProgramPosition = mConversionProgram.begin();
 
@@ -445,24 +449,24 @@ void Type1ToType2Converter::ConvertStems()
 	{
 		// setup stem to index maps
 		size_t i=0;
-		for(; i < mOrderedHStems.size();++i)
-			mHStems[mOrderedHStems[i]] = i;
-		for(i=0; i < mOrderedVStems.size();++i)
-			mVStems[mOrderedVStems[i]] = i+mOrderedHStems.size();
+		for(; i < orderedHStems.size();++i)
+			mHStems[*orderedHStems[i]] = i;
+		for(i=0; i < orderedVStems.size();++i)
+			mVStems[*orderedVStems[i]] = i+orderedHStems.size();
 
 		// write initial hstemhm command
-		if(mOrderedHStems.size() > 0)
+		if(orderedHStems.size() > 0)
 		{
 			itProgramPosition = InsertOperatorMarker(18,itProgramPosition);
-			SetupStemHintsInNode(mOrderedHStems,mSideBearing[1],*itProgramPosition);
+			SetupStemHintsInNode(orderedHStems,mSideBearing[1],*itProgramPosition);
 			++itProgramPosition;
 		}
 
 		// write vstemhm command
-		if(mOrderedVStems.size() > 0)
+		if(orderedVStems.size() > 0)
 		{
 			itProgramPosition = InsertOperatorMarker(23,itProgramPosition);
-			SetupStemHintsInNode(mOrderedVStems,mSideBearing[0],*itProgramPosition);
+			SetupStemHintsInNode(orderedVStems,mSideBearing[0],*itProgramPosition);
 			++itProgramPosition;
 		}
 
@@ -504,18 +508,18 @@ void Type1ToType2Converter::ConvertStems()
 	{
 		// if not hint mask, just write the hint definitions and go.
 		// write initial hstem command
-		if(mOrderedHStems.size() > 0)
+		if(orderedHStems.size() > 0)
 		{
 			itProgramPosition = InsertOperatorMarker(1,itProgramPosition);
-			SetupStemHintsInNode(mOrderedHStems,mSideBearing[1],*itProgramPosition);
+			SetupStemHintsInNode(orderedHStems,mSideBearing[1],*itProgramPosition);
 			++itProgramPosition;
 		}
 
 		// write vstem command
-		if(mOrderedVStems.size() > 0)
+		if(orderedVStems.size() > 0)
 		{
 			itProgramPosition = InsertOperatorMarker(3,itProgramPosition);
-			SetupStemHintsInNode(mOrderedVStems,mSideBearing[0],*itProgramPosition);
+			SetupStemHintsInNode(orderedVStems,mSideBearing[0],*itProgramPosition);
 			++itProgramPosition;
 		}
 
@@ -543,16 +547,16 @@ void Type1ToType2Converter::SetupStemHintsInNode(const StemVector& inStems,long 
 	StemVector::const_iterator it = inStems.begin();
 	long lastCoordinate;
 	
-	refNode.mOperands.push_back(it->mOrigin + inOffsetCoordinate);
-	refNode.mOperands.push_back(it->mExtent);
-	lastCoordinate = it->mOrigin + it->mExtent;
+	refNode.mOperands.push_back((*it)->mOrigin + inOffsetCoordinate);
+	refNode.mOperands.push_back((*it)->mExtent);
+	lastCoordinate = (*it)->mOrigin + (*it)->mExtent;
 	++it;
 
 	for(; it != inStems.end();++it)
 	{
-		refNode.mOperands.push_back(it->mOrigin - lastCoordinate);
-		refNode.mOperands.push_back(it->mExtent);
-		lastCoordinate = it->mOrigin + it->mExtent;
+		refNode.mOperands.push_back((*it)->mOrigin - lastCoordinate);
+		refNode.mOperands.push_back((*it)->mExtent);
+		lastCoordinate = (*it)->mOrigin + (*it)->mExtent;
 	}
 }
 
@@ -644,6 +648,8 @@ long Type1ToType2Converter::GenerateHintMaskFromCollectedHints()
 
 	return (long)hintMask;
 }
+
+static const unsigned long scMergeLimit = 40; // PDF implementation details show 48. i take a safety distance. just for kicks.
 
 void Type1ToType2Converter::ConvertPathConsturction()
 {
@@ -767,7 +773,7 @@ void Type1ToType2Converter::ConvertPathConsturction()
 					
 					// optionally also merge the next rrcurveto, if it's starting
 					// point conforms to the operators list
-					if(it != mConversionProgram.end() && 8 == it->mMarkerType)
+					if(it != mConversionProgram.end() && 8 == it->mMarkerType && (itStarter->mOperands.size() + it->mOperands.size() - 1 < scMergeLimit))
 					{
 						if(itStarter->mOperands.size() % 8 == 0)
 						{
@@ -811,7 +817,7 @@ void Type1ToType2Converter::ConvertPathConsturction()
 
 					// optionally also merge the next rrcurveto, if it's starting
 					// point conforms to the operators list
-					if(it != mConversionProgram.end() && 8 == it->mMarkerType)
+					if(it != mConversionProgram.end() && 8 == it->mMarkerType && (itStarter->mOperands.size() + it->mOperands.size() - 1 < scMergeLimit))
 					{
 						if(itStarter->mOperands.size() % 8 == 0)
 						{
@@ -864,7 +870,7 @@ ConversionNodeList::iterator Type1ToType2Converter::MergeSameOperators(Conversio
 	ConversionNodeList::iterator itNext = inStartingNode;
 	++itNext;
 
-	while(inOpCode == itNext->mMarkerType)
+	while(inOpCode == itNext->mMarkerType && (inStartingNode->mOperands.size()  + itNext->mOperands.size() < scMergeLimit))
 	{
 		inStartingNode->mOperands.insert(inStartingNode->mOperands.end(),itNext->mOperands.begin(),itNext->mOperands.end());
 		itNext = mConversionProgram.erase(itNext);
@@ -879,7 +885,7 @@ ConversionNodeList::iterator Type1ToType2Converter::MergeAltenratingOperators(Co
 	++itNext;
 	unsigned short currentMarker = inAlternatingOpcode;
 
-	while(currentMarker == itNext->mMarkerType)
+	while(currentMarker == itNext->mMarkerType && (inStartingNode->mOperands.size()  + itNext->mOperands.size() < scMergeLimit))
 	{
 		inStartingNode->mOperands.insert(inStartingNode->mOperands.end(),itNext->mOperands.begin(),itNext->mOperands.end());
 		itNext = mConversionProgram.erase(itNext);
