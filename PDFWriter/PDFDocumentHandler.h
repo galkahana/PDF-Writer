@@ -77,7 +77,7 @@ public:
 	PDFDocumentHandler(void);
 	virtual ~PDFDocumentHandler(void);
 
-	void SetOperationsContexts(DocumentContext* inDocumentContext,ObjectsContext* inObjectsContext);
+	void SetOperationsContexts(PDFHummus::DocumentContext* inDocumentContext,ObjectsContext* inObjectsContext);
 
 	// Create a list of XObjects from a PDF file.
 	// the list of objects can then be used to place the "pages" in various locations on the written
@@ -136,7 +136,7 @@ public:
 							ResourcesDictionary* inResources,
 							DictionaryContext* inPageResourcesDictionaryContext,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext);
+							PDFHummus::DocumentContext* inPDFWriterDocumentContext);
 
 
 	// copying context handling
@@ -169,7 +169,7 @@ public:
 private:
 
 	ObjectsContext* mObjectsContext;
-	DocumentContext* mDocumentContext;
+	PDFHummus::DocumentContext* mDocumentContext;
 	IDocumentContextExtenderSet mExtenders;
 
 

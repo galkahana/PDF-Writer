@@ -34,21 +34,21 @@ public:
 							PDFPage* inPage,
 							DictionaryContext* inPageDictionaryContext,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext){return PDFHummus::eSuccess;}
+							PDFHummus::DocumentContext* inDocumentContext){return PDFHummus::eSuccess;}
 
 	// add items to the resources dictionary while it's written (can be either page or xobject resources dictionary)
 	virtual PDFHummus::EStatusCode OnResourcesWrite(
 							ResourcesDictionary* inResources,
 							DictionaryContext* inPageResourcesDictionaryContext,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext){return PDFHummus::eSuccess;}
+							PDFHummus::DocumentContext* inDocumentContext){return PDFHummus::eSuccess;}
 
 	// add items to a particular resource dictionary (will be called from all but procset array and xobjects dict)
 	virtual PDFHummus::EStatusCode OnResourceDictionaryWrite(
 							DictionaryContext* inResourceDictionary,
 							const string& inResourceDictionaryName,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext){return PDFHummus::eSuccess;}
+							PDFHummus::DocumentContext* inDocumentContext){return PDFHummus::eSuccess;}
 
 	// add items to the form dictionary while it's written
 	virtual PDFHummus::EStatusCode OnFormXObjectWrite(
@@ -56,14 +56,14 @@ public:
 							ObjectIDType inFormXObjectResourcesDictionaryID,
 							DictionaryContext* inFormDictionaryContext,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext){return PDFHummus::eSuccess;}
+							PDFHummus::DocumentContext* inDocumentContext){return PDFHummus::eSuccess;}
 
 	// add items to the image dictionary while it's written
 	virtual PDFHummus::EStatusCode OnJPEGImageXObjectWrite(
 							ObjectIDType inImageXObjectID,
 							DictionaryContext* inImageDictionaryContext,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext,
+							PDFHummus::DocumentContext* inDocumentContext,
 							JPEGImageHandler* inJPGImageHandler){return PDFHummus::eSuccess;}
 
 	// add items to the image dictionary while it's writtern for a TIFF image (for tile images there are multiple such images)
@@ -71,7 +71,7 @@ public:
 							ObjectIDType inImageXObjectID,
 							DictionaryContext* inImageDictionaryContext,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext,
+							PDFHummus::DocumentContext* inDocumentContext,
 							TIFFImageHandler* inTIFFImageHandler){return PDFHummus::eSuccess;}
 
 
@@ -80,21 +80,21 @@ public:
 							CatalogInformation* inCatalogInformation,
 							DictionaryContext* inCatalogDictionaryContext,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext){return PDFHummus::eSuccess;}
+							PDFHummus::DocumentContext* inDocumentContext){return PDFHummus::eSuccess;}
 
 	// pdf copying events
 
 	// When using any embedding method - Parsing of PDF to merge is not complete, before starting any merging
 	virtual PDFHummus::EStatusCode OnPDFParsingComplete(
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext,
+							PDFHummus::DocumentContext* inDocumentContext,
 							PDFDocumentHandler* inPDFDocumentHandler){return PDFHummus::eSuccess;}
 
 	// When creating XObjects from pages - before creating a particular page xobject
 	virtual PDFHummus::EStatusCode OnBeforeCreateXObjectFromPage(
 							PDFDictionary* inPageObjectDictionary,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext,
+							PDFHummus::DocumentContext* inDocumentContext,
 							PDFDocumentHandler* inPDFDocumentHandler){return PDFHummus::eSuccess;}
 
 	// When creating XObjects from pages - after creating a particular page xobject
@@ -102,14 +102,14 @@ public:
 							PDFFormXObject* iPageObjectResultXObject,
 							PDFDictionary* inPageObjectDictionary,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext,
+							PDFHummus::DocumentContext* inDocumentContext,
 							PDFDocumentHandler* inPDFDocumentHandler){return PDFHummus::eSuccess;}
 
 	// When appending pages from PDF - before appending a particular page
 	virtual PDFHummus::EStatusCode OnBeforeCreatePageFromPage(
 							PDFDictionary* inPageObjectDictionary,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext,
+							PDFHummus::DocumentContext* inDocumentContext,
 							PDFDocumentHandler* inPDFDocumentHandler){return PDFHummus::eSuccess;}
 
 
@@ -118,7 +118,7 @@ public:
 							PDFPage* iPageObjectResultPage,
 							PDFDictionary* inPageObjectDictionary,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext,
+							PDFHummus::DocumentContext* inDocumentContext,
 							PDFDocumentHandler* inPDFDocumentHandler){return PDFHummus::eSuccess;}
 
 	// When merging pages from PDF - before merging a particular page
@@ -126,7 +126,7 @@ public:
 							PDFPage* inTargetPage,
 							PDFDictionary* inPageObjectDictionary,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext,
+							PDFHummus::DocumentContext* inDocumentContext,
 							PDFDocumentHandler* inPDFDocumentHandler){return PDFHummus::eSuccess;}
 
 	// When merging pages from PDF - after merging a particular page
@@ -134,13 +134,13 @@ public:
 							PDFPage* inTargetPage,
 							PDFDictionary* inPageObjectDictionary,
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext,
+							PDFHummus::DocumentContext* inDocumentContext,
 							PDFDocumentHandler* inPDFDocumentHandler){return PDFHummus::eSuccess;}
 
 	// When using any embedding method - right after embedding of the PDF is complete
 	virtual PDFHummus::EStatusCode OnPDFCopyingComplete(
 							ObjectsContext* inPDFWriterObjectContext,
-							DocumentContext* inPDFWriterDocumentContext,
+							PDFHummus::DocumentContext* inDocumentContext,
 							PDFDocumentHandler* inPDFDocumentHandler){return PDFHummus::eSuccess;}
 
 protected:
