@@ -185,6 +185,8 @@ EStatusCode CharStringType2Flattener::WriteCharStringOperand(const CharStringOpe
 		if(sign)
 			integerPart = -integerPart;
 
+		if(WriteByte(Byte(0xff)) != PDFHummus::eSuccess)
+			return PDFHummus::eFailure;
 		if(WriteByte(Byte((integerPart>>8) & 0xff)) != PDFHummus::eSuccess)
 			return PDFHummus::eFailure;
 		if(WriteByte(Byte(integerPart & 0xff)) != PDFHummus::eSuccess)
