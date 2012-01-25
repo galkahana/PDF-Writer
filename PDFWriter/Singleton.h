@@ -30,6 +30,8 @@ class Singleton
 public:
 	static T* GetInstance();
 	static void Reset();
+	// same as reset (trying to work with different versions usage here)
+	static void Release();
 private:
 	Singleton();
 	static T* mInstance;
@@ -51,4 +53,10 @@ void Singleton<T>::Reset()
 {
 	delete mInstance;
 	mInstance = NULL;
+}
+
+template <class T>
+void Singleton<T>::Release()
+{
+	Reset();
 }
