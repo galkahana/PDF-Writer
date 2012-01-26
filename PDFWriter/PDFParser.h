@@ -135,6 +135,9 @@ public:
 
 	// using PDFParser also for state information reading. this is a specialized version of the StartParsing for reading state
 	PDFHummus::EStatusCode StartStateFileParsing(IByteReaderWithPosition* inSourceStream);
+
+	// check if this file is encrypted. considering that the library can't really handle these files, this shoud be handy.
+	bool IsEncrypted();
 private:
 	PDFObjectParser mObjectParser;
 	IByteReaderWithPosition* mStream;

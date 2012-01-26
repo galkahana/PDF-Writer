@@ -1216,9 +1216,7 @@ EStatusCode PDFDocumentHandler::StartCopyingContext(IByteReaderWithPosition* inP
 			break;
 		}
 
-		// do not allow encrypted/protected documents
-		PDFObjectCastPtr<PDFDictionary> encryptionDictionary(mParser.QueryDictionaryObject(mParser.GetTrailer(),"Encrypt"));
-		if(encryptionDictionary.GetPtr())
+		if(mParser.IsEncrypted())
 		{
 			TRACE_LOG("PDFDocumentHandler::StartCopyingContext, Document contains an encryption dictionary. Library does not support embedding of encrypted PDF");
 			status = PDFHummus::eFailure;
