@@ -304,6 +304,12 @@ bool TrueTypeEmbeddedFontWriter::AddComponentGlyphs(unsigned int inGlyphID,UIntS
 	ULongList::iterator itComponentGlyphs;
 	bool isComposite = false;
 
+	if(inGlyphID >= mTrueTypeInput.mMaxp.NumGlyphs)
+	{
+		TRACE_LOG2("TrueTypeEmbeddedFontWriter::AddComponentGlyphs, error, requested glyph index %ld is larger than the maximum glyph index for this font which is %ld. ",inGlyphID,mTrueTypeInput.mMaxp.NumGlyphs-1);
+		return false;
+	}
+
 	glyfTableEntry = mTrueTypeInput.mGlyf[inGlyphID];
 	if(glyfTableEntry != NULL && glyfTableEntry->mComponentGlyphs.size() > 0)
 	{
@@ -597,10 +603,18 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteGlyf(const UIntVector& inSubsetGlyp
 	OutputStreamTraits streamCopier(&mFontFileStream);
 	unsigned short glyphIndex,previousGlyphIndexEnd = 0;
 	inLocaTable[0] = 0;
+	EStatusCode status = eSuccess;
 
-	for(;it != inSubsetGlyphIDs.end(); ++it)
+	for(;it != inSubsetGlyphIDs.end() && eSuccess == status; ++it)
 	{
 		glyphIndex = *it;
+		if(glyphIndex >= mTrueTypeInput.mMaxp.NumGlyphs)
+		{
+			TRACE_LOG2("TrueTypeEmbeddedFontWriter::WriteGlyf, error, requested glyph index %ld is larger than the maximum glyph index for this font which is %ld. ",glyphIndex,mTrueTypeInput.mMaxp.NumGlyphs-1);
+			status = eFailure;
+			break;
+		}
+
 		for(unsigned short i= previousGlyphIndexEnd + 1; i<=glyphIndex;++i)
 			inLocaTable[i] = inLocaTable[previousGlyphIndexEnd];
 		if(mTrueTypeInput.mGlyf[glyphIndex] != NULL)
