@@ -132,11 +132,11 @@ public:
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 
 
-	void SetOperationsContexts(DocumentContext* inContainerDocumentContext,ObjectsContext* inObjectsContext);
+	void SetOperationsContexts(PDFHummus::DocumentContext* inContainerDocumentContext,ObjectsContext* inObjectsContext);
 	void SetDocumentContextExtender(IDocumentContextExtender* inExtender);
 
 private:
-	DocumentContext* mContainerDocumentContext;
+	PDFHummus::DocumentContext* mContainerDocumentContext;
 	ObjectsContext* mObjectsContext;
 	T2P* mT2p; // state for tiff->pdf
 	TIFFUsageParameters mUserParameters;

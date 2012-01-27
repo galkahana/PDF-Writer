@@ -109,5 +109,9 @@ LongFilePositionType InputFileStream::GetFileSize()
 void InputFileStream::SetPositionFromEnd(LongFilePositionType inOffsetFromEnd)
 {
 	if(mStream)
-		SAFE_FSEEK64(mStream,-inOffsetFromEnd,SEEK_END);
+	{
+		// if failed, probaby means that seeks too much, so place at file begin.
+		if(SAFE_FSEEK64(mStream,-inOffsetFromEnd,SEEK_END) != 0)
+			SAFE_FSEEK64(mStream,0,SEEK_SET);
+	}
 }

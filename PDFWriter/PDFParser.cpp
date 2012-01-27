@@ -112,10 +112,21 @@ EStatusCode PDFParser::StartPDFParsing(IByteReaderWithPosition* inSourceStream)
 		if(status != PDFHummus::eSuccess)
 			break;
 
-		status = ParsePagesObjectIDs();
-		if(status != PDFHummus::eSuccess)
-			break;
-
+		if(IsEncrypted())
+		{
+			// not parsing pages for encrypted docs. 
+			// not commiting..and there's a practical reason. 
+			// lower level objects will be in object streams (for those PDFs that have them)
+			// and the may not be accessed
+			mPagesCount = 0;
+			mPagesObjectIDs = NULL;
+		}
+		else
+		{
+			status = ParsePagesObjectIDs();
+			if(status != PDFHummus::eSuccess)
+				break;
+		}
 	}while(false);
 
 	return status;
@@ -1834,4 +1845,10 @@ EStatusCode PDFParser::StartStateFileParsing(IByteReaderWithPosition* inSourceSt
 	}while(false);
 
 	return status;	
+}
+
+bool PDFParser::IsEncrypted()
+{
+	PDFObjectCastPtr<PDFDictionary> encryptionDictionary(QueryDictionaryObject(mTrailer.GetPtr(),"Encrypt"));
+	return encryptionDictionary.GetPtr() != NULL ;
 }

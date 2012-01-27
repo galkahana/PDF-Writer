@@ -217,13 +217,13 @@ public:
 	PDFHummus::EStatusCode AttachURLLinktoCurrentPage(const string& inURL,const PDFRectangle& inLinkClickArea);
 
 	// Extensibility, reaching to lower levels
-	DocumentContext& GetDocumentContext();
+	PDFHummus::DocumentContext& GetDocumentContext();
 	ObjectsContext& GetObjectsContext();
 	OutputFile& GetOutputFile();
 private:
 
 	ObjectsContext mObjectsContext;
-	DocumentContext mDocumentContext;
+	PDFHummus::DocumentContext mDocumentContext;
 
 	// for output file workflow, this will be the valid output [stream workflow does not have a file]
 	OutputFile mOutputFile;

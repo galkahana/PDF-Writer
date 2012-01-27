@@ -71,7 +71,7 @@ public:
 	PDFFormXObject* CreateFormXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inFormXObjectID);
 	PDFFormXObject* CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inFormXObjectID);
 
-	void SetOperationsContexts(DocumentContext* inDocumentContext,ObjectsContext* inObjectsContext);
+	void SetOperationsContexts(PDFHummus::DocumentContext* inDocumentContext,ObjectsContext* inObjectsContext);
 	void AddDocumentContextExtender(IDocumentContextExtender* inExtender);
 	void RemoveDocumentContextExtender(IDocumentContextExtender* inExtender);
 
@@ -79,7 +79,7 @@ private:
 	JPEGImageInformation mNullInformation;
 	StringToJPEGImageInformationMap mImagesInformationMap;
 	ObjectsContext* mObjectsContext;
-	DocumentContext* mDocumentContext;
+	PDFHummus::DocumentContext* mDocumentContext;
 	IDocumentContextExtenderSet mExtenders;
 
 	PDFImageXObject* CreateAndWriteImageXObjectFromJPGInformation(const string& inJPGFilePath,ObjectIDType inImageXObjectID, const JPEGImageInformation& inJPGImageInformation);

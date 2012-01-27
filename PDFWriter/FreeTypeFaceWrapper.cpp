@@ -499,7 +499,7 @@ EStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const ULongList& inUnic
 		outGlyphs.clear();
 
 		ULongList::const_iterator it = inUnicodeCharacters.begin();
-		for(; it != inUnicodeCharacters.end() && PDFHummus::eSuccess == status; ++it)
+		for(; it != inUnicodeCharacters.end(); ++it)
 		{
 			glyphIndex = FT_Get_Char_Index(mFace,*it);
 			outGlyphs.push_back(glyphIndex);
