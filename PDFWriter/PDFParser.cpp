@@ -1136,6 +1136,7 @@ EStatusCode PDFParser::ParseFileDirectory()
 		else
 		{
 			TRACE_LOG("PDFParser::ParseFileDirectory,Unexpected object at xref start");
+			status = eFailure;
 		}
 
 
