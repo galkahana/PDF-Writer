@@ -75,6 +75,8 @@ public:
 	void AddDocumentContextExtender(IDocumentContextExtender* inExtender);
 	void RemoveDocumentContextExtender(IDocumentContextExtender* inExtender);
 
+	void Reset();
+
 private:
 	JPEGImageInformation mNullInformation;
 	StringToJPEGImageInformationMap mImagesInformationMap;

@@ -45,6 +45,9 @@ public:
 	ObjectsContext(void);
 	~ObjectsContext(void);
 
+	// Cleanup method. called in order to reset the object context for another production
+	void Cleanup();
+
 	void SetOutputStream(IByteWriterWithPosition* inOutputStream);
 	
 

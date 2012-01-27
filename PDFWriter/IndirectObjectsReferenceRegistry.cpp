@@ -207,3 +207,14 @@ EStatusCode IndirectObjectsReferenceRegistry::ReadState(PDFParser* inStateReader
 
 	return PDFHummus::eSuccess;
 }
+
+void IndirectObjectsReferenceRegistry::Reset()
+{
+	mObjectsWritesRegistry.clear();
+
+	ObjectWriteInformation singleFreeObjectInformation;
+	
+	singleFreeObjectInformation.mObjectReferenceType = ObjectWriteInformation::Free;
+	singleFreeObjectInformation.mObjectWritten = false;
+	mObjectsWritesRegistry.push_back(singleFreeObjectInformation);
+}

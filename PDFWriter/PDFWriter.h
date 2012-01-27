@@ -85,6 +85,8 @@ public:
 								  const PDFCreationSettings& inPDFCreationSettings = PDFCreationSettings::DefaultPDFCreationSettings);
 	PDFHummus::EStatusCode EndPDFForStream();
 
+	// in case of internal or external error, call this function to cleanup, in order to allow reuse of the PDFWriter class
+	void Reset();
 
 	// Ending and Restarting writing session
 	PDFHummus::EStatusCode Shutdown(const string& inStateFilePath);
@@ -232,6 +234,7 @@ private:
 	void SetupObjectsContext(const PDFCreationSettings& inPDFCreationSettings);
 	void ReleaseLog();
 	PDFHummus::EStatusCode SetupState(const string& inStateFilePath);
+	void Cleanup();
 
 
 };

@@ -32,6 +32,11 @@ UppercaseSequance::UppercaseSequance(string inSequanceString)
 }
 
 
+void UppercaseSequance::Reset()
+{
+	mSequanceString = "AAAAAA";
+}
+
 UppercaseSequance::~UppercaseSequance(void)
 {
 	

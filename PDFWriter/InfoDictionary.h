@@ -63,6 +63,8 @@ public:
 
 
 	bool IsEmpty();
+
+	void Reset();
 private:
 
 	StringToPDFTextString mAdditionalInfoEntries;

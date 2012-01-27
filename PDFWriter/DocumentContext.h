@@ -215,6 +215,8 @@ namespace PDFHummus
 
 		PDFHummus::EStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
 		PDFHummus::EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);
+
+		void Cleanup();
 		
 	private:
 		ObjectsContext* mObjectsContext;

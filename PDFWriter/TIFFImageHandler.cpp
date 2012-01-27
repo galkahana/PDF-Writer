@@ -385,6 +385,13 @@ TIFFImageHandler::~TIFFImageHandler(void)
 	DestroyConversionState();
 }
 
+void TIFFImageHandler::Reset()
+{
+	DestroyConversionState();
+	mT2p = NULL;
+	mExtender = NULL;
+}
+
 void TIFFImageHandler::SetOperationsContexts(DocumentContext* inContainerDocumentContext,ObjectsContext* inObjectsContext)
 {
 	mObjectsContext = inObjectsContext;

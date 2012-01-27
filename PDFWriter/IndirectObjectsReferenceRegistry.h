@@ -72,6 +72,8 @@ public:
 	PDFHummus::EStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
 	PDFHummus::EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);
 
+	void Reset();
+
 private:
 	ObjectWriteInformationVector mObjectsWritesRegistry;
 };

@@ -76,3 +76,12 @@ BoolAndObjectIDType TrailerInformation::GetInfoDictionaryReference()
 {
 	return BoolAndObjectIDType(mInfoDictionaryReference != 0, mInfoDictionaryReference);
 }
+
+void TrailerInformation::Reset()
+{
+	mPrev = 0;
+	mRootReference = 0;
+	mEncryptReference = 0;
+	mInfoDictionaryReference = 0;
+	mInfoDictionary.Reset();
+}

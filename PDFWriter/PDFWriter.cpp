@@ -82,8 +82,21 @@ EStatusCode PDFWriter::EndPDF()
 		status = mOutputFile.CloseFile();
 	}
 	while(false);
-	ReleaseLog();
+	Cleanup();
 	return status;
+}
+
+void PDFWriter::Cleanup()
+{
+	mObjectsContext.Cleanup();
+	mDocumentContext.Cleanup();
+	ReleaseLog();
+}
+
+void PDFWriter::Reset()
+{
+	mOutputFile.CloseFile();
+	Cleanup();
 }
 
 EStatusCodeAndObjectIDType PDFWriter::WritePageAndReturnPageID(PDFPage* inPage)
@@ -412,7 +425,7 @@ EStatusCode PDFWriter::StartPDFForStream(IByteWriterWithPosition* inOutputStream
 EStatusCode PDFWriter::EndPDFForStream()
 {
 	EStatusCode status = mDocumentContext.FinalizePDF();
-	ReleaseLog();
+	Cleanup();
 	return status;
 }
 

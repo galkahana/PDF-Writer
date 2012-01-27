@@ -48,11 +48,7 @@ UsedFontsRepository::UsedFontsRepository(void)
 
 UsedFontsRepository::~UsedFontsRepository(void)
 {
-	StringToPDFUsedFontMap::iterator it = mUsedFonts.begin();
-	for(; it != mUsedFonts.end();++it)
-		delete (it->second);
-	mUsedFonts.clear(); 
-	delete mInputFontsInformation;
+	Reset();
 }
 
 void UsedFontsRepository::SetObjectsContext(ObjectsContext* inObjectsContext)
@@ -267,4 +263,15 @@ EStatusCode UsedFontsRepository::ReadState(PDFParser* inStateReader,ObjectIDType
 	}
 	return status;
 	
+}
+
+void UsedFontsRepository::Reset()
+{
+	StringToPDFUsedFontMap::iterator it = mUsedFonts.begin();
+	for(; it != mUsedFonts.end();++it)
+		delete (it->second);
+	mUsedFonts.clear(); 
+	delete mInputFontsInformation;
+	mInputFontsInformation = NULL;
+	mOptionaMetricsFiles.clear();
 }

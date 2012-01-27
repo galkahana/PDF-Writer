@@ -45,6 +45,20 @@ bool InfoDictionary::IsEmpty()
 
 }
 
+void InfoDictionary::Reset()
+{
+	mAdditionalInfoEntries.clear();
+	Trapped = EInfoTrappedUnknown;
+	Title = PDFTextString::Empty;
+	Author = PDFTextString::Empty;
+	Subject = PDFTextString::Empty;
+	Keywords = PDFTextString::Empty;
+	Creator = PDFTextString::Empty;
+	Producer = PDFTextString::Empty;
+	CreationDate.SetTime(-1);
+	ModDate.SetTime(-1);
+}
+
 void InfoDictionary::AddAdditionalInfoEntry(const string& inKey,
 											const PDFTextString& inValue)
 {

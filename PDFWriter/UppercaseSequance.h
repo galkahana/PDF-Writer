@@ -37,6 +37,9 @@ public:
 	// get the current value
 	const string& ToString();
 	void SetSequanceString(const string& inSequanceString);
+
+	// reset to beginning value
+	void Reset();
 private:
 	string mSequanceString;
 

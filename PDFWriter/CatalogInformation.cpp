@@ -29,6 +29,11 @@ CatalogInformation::CatalogInformation(void)
 
 CatalogInformation::~CatalogInformation(void)
 {
+	Reset();
+}
+
+void CatalogInformation::Reset()
+{
 	if(mCurrentPageTreeNode)
 	{
 		// delete root
@@ -37,6 +42,7 @@ CatalogInformation::~CatalogInformation(void)
 			resultPageTree = resultPageTree->GetParent();
 		delete resultPageTree;
 	}
+	mCurrentPageTreeNode = NULL;
 }
 
 ObjectIDType CatalogInformation::AddPageToPageTree(ObjectIDType inPageID,IndirectObjectsReferenceRegistry& inObjectsRegistry)

@@ -409,3 +409,13 @@ EStatusCode ObjectsContext::ReadState(PDFParser* inStateReader,ObjectIDType inOb
 	return mReferencesRegistry.ReadState(inStateReader,referencesObject->mObjectID);
 
 }
+
+void ObjectsContext::Cleanup()
+{
+	mOutputStream = NULL;
+	mCompressStreams = true;
+	mExtender = NULL;
+
+	mSubsetFontsNamesSequance.Reset();
+	mReferencesRegistry.Reset();
+}

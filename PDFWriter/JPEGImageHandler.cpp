@@ -48,6 +48,11 @@ JPEGImageHandler::~JPEGImageHandler(void)
 {
 }
 
+void JPEGImageHandler::Reset()
+{
+	mImagesInformationMap.clear();
+	mExtenders.clear();
+}
 
 void JPEGImageHandler::SetOperationsContexts(DocumentContext* inDocumentContext,ObjectsContext* inObjectsContext)
 {

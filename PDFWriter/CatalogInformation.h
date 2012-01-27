@@ -50,6 +50,8 @@ public:
 	PageTree* GetCurrentPageTreeNode();
 	
 	void SetCurrentPageTreeNode(PageTree* inCurrentPageTreeNode);
+
+	void Reset();
 private:
 
 	PageTree* mCurrentPageTreeNode;

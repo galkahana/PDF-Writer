@@ -135,6 +135,7 @@ public:
 	void SetOperationsContexts(PDFHummus::DocumentContext* inContainerDocumentContext,ObjectsContext* inObjectsContext);
 	void SetDocumentContextExtender(IDocumentContextExtender* inExtender);
 
+	void Reset();
 private:
 	PDFHummus::DocumentContext* mContainerDocumentContext;
 	ObjectsContext* mObjectsContext;

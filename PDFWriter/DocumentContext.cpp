@@ -1606,3 +1606,17 @@ PDFDocumentCopyingContext* DocumentContext::CreatePDFCopyingContext(IByteReaderW
 	else
 		return context;
 }
+
+void DocumentContext::Cleanup()
+{
+	// DO NOT NULL MOBJECTSCONTEXT. EVER
+
+	mTrailerInformation.Reset();
+	mCatalogInformation.Reset();
+	mJPEGImageHandler.Reset();
+	mTIFFImageHandler.Reset();
+	mUsedFontsRepository.Reset();
+	mOutputFilePath.clear();
+	mExtenders.clear();
+	mAnnotations.clear();
+}

@@ -51,6 +51,8 @@ public:
 
 	InfoDictionary& GetInfo();
 
+	void Reset();
+
 private:
 	LongFilePositionType mPrev;
 
