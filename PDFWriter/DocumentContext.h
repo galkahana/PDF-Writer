@@ -63,6 +63,7 @@ typedef set<IDocumentContextExtender*> IDocumentContextExtenderSet;
 typedef pair<PDFHummus::EStatusCode,ObjectIDType> EStatusCodeAndObjectIDType;
 typedef list<ObjectIDType> ObjectIDTypeList;
 typedef map<ObjectIDType,string> ObjectIDTypeToStringMap;
+typedef set<PDFDocumentCopyingContext*> PDFDocumentCopyingContextSet;
 
 namespace PDFHummus
 {
@@ -218,6 +219,9 @@ namespace PDFHummus
 
 		void Cleanup();
 		
+		// internal methods for copying context listeners handling
+		void RegisterCopyingContext(PDFDocumentCopyingContext* inCopyingContext);
+		void UnRegisterCopyingContext(PDFDocumentCopyingContext* inCopyingContext);
 	private:
 		ObjectsContext* mObjectsContext;
 		TrailerInformation mTrailerInformation;
@@ -229,6 +233,7 @@ namespace PDFHummus
 		PDFDocumentHandler mPDFDocumentHandler;
 		UsedFontsRepository mUsedFontsRepository;
 		ObjectIDTypeList mAnnotations;
+		PDFDocumentCopyingContextSet mCopyingContexts;
 		
 		void WriteHeaderComment(EPDFVersion inPDFVersion);
 		void Write4BinaryBytes();

@@ -157,6 +157,7 @@ public:
 	EStatusCodeAndObjectIDTypeList CopyDirectObject(PDFObject* inObject);
 	PDFHummus::EStatusCode CopyNewObjectsForDirectObject(const ObjectIDTypeList& inReferencedObjects);
 	void StopCopyingContext();
+	void ReplaceSourceObjects(const ObjectIDTypeToObjectIDTypeMap& inSourceObjectsToNewTargetObjects);
 
 
 	// Internal implementation. do not use directly

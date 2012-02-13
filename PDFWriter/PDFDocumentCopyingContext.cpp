@@ -19,6 +19,7 @@
    
 */
 #include "PDFDocumentCopyingContext.h"
+#include "DocumentContext.h"
 
 using namespace PDFHummus;
 
@@ -35,6 +36,8 @@ EStatusCode PDFDocumentCopyingContext::Start(const string& inPDFFilePath,
 											  DocumentContext* inDocumentContext,
 											  ObjectsContext* inObjectsContext)
 {
+	mDocumentContext = inDocumentContext;
+	inDocumentContext->RegisterCopyingContext(this);
 	mDocumentHandler.SetOperationsContexts(inDocumentContext,inObjectsContext);
 	return mDocumentHandler.StartFileCopyingContext(inPDFFilePath);
 }
@@ -43,6 +46,8 @@ EStatusCode PDFDocumentCopyingContext::Start(IByteReaderWithPosition* inPDFStrea
 											 DocumentContext* inDocumentContext,
 											 ObjectsContext* inObjectsContext)
 {
+	mDocumentContext = inDocumentContext;
+	inDocumentContext->RegisterCopyingContext(this);
 	mDocumentHandler.SetOperationsContexts(inDocumentContext,inObjectsContext);
 	return mDocumentHandler.StartStreamCopyingContext(inPDFStream);
 }
@@ -96,7 +101,8 @@ EStatusCode PDFDocumentCopyingContext::MergePDFPageToPage(PDFPage* inTargetPage,
 
 void PDFDocumentCopyingContext::End()
 {
-	return mDocumentHandler.StopCopyingContext();
+	mDocumentHandler.StopCopyingContext();
+	mDocumentContext->UnRegisterCopyingContext(this);
 }
 
 EStatusCodeAndObjectIDTypeList PDFDocumentCopyingContext::CopyDirectObject(PDFObject* inObject)
@@ -107,4 +113,19 @@ EStatusCodeAndObjectIDTypeList PDFDocumentCopyingContext::CopyDirectObject(PDFOb
 EStatusCode PDFDocumentCopyingContext::CopyNewObjectsForDirectObject(const ObjectIDTypeList& inReferencedObjects)
 {
 	return mDocumentHandler.CopyNewObjectsForDirectObject(inReferencedObjects);
+}
+
+void PDFDocumentCopyingContext::ReplaceSourceObjects(const ObjectIDTypeToObjectIDTypeMap& inSourceObjectsToNewTargetObjects)
+{
+	return mDocumentHandler.ReplaceSourceObjects(inSourceObjectsToNewTargetObjects);
+}
+
+void PDFDocumentCopyingContext::AddDocumentContextExtender(IDocumentContextExtender* inExtender)
+{
+	mDocumentHandler.AddDocumentContextExtender(inExtender);
+}
+
+void PDFDocumentCopyingContext::RemoveDocumentContextExtender(IDocumentContextExtender* inExtender)
+{
+	mDocumentHandler.RemoveDocumentContextExtender(inExtender);
 }
