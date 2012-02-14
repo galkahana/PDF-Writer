@@ -2028,3 +2028,9 @@ void PDFDocumentHandler::ReplaceSourceObjects(const ObjectIDTypeToObjectIDTypeMa
 			mSourceToTarget.insert(ObjectIDTypeToObjectIDTypeMap::value_type(itReplaced->first,itReplaced->second));
 	}
 }
+
+IByteReaderWithPosition* PDFDocumentHandler::GetSourceDocumentStream()
+{
+	return mPDFStream;
+}
+

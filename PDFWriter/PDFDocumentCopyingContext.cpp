@@ -129,3 +129,8 @@ void PDFDocumentCopyingContext::RemoveDocumentContextExtender(IDocumentContextEx
 {
 	mDocumentHandler.RemoveDocumentContextExtender(inExtender);
 }
+
+IByteReaderWithPosition* PDFDocumentCopyingContext::GetSourceDocumentStream()
+{
+	return mDocumentHandler.GetSourceDocumentStream();
+}

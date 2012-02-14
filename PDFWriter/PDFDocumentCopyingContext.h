@@ -81,6 +81,7 @@ public:
 	PDFHummus::EStatusCode CopyNewObjectsForDirectObject(const ObjectIDTypeList& inReferencedObjects);
 
 	PDFParser* GetSourceDocumentParser();
+	IByteReaderWithPosition* GetSourceDocumentStream();
 	EStatusCodeAndObjectIDType GetCopiedObjectID(ObjectIDType inSourceObjectID);
 	MapIterator<ObjectIDTypeToObjectIDTypeMap> GetCopiedObjectsMappingIterator();
 
