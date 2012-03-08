@@ -37,6 +37,9 @@ class PDFArray;
 class PDFStreamInput;
 class PDFDictionary;
 class PDFName;
+class IPDFParserExtender;
+
+typedef pair<PDFHummus::EStatusCode,IByteReader*> EStatusCodeAndIByteReader;
 
 #define LINE_BUFFER_SIZE 1024
 
@@ -83,7 +86,6 @@ private:
 };
 
 typedef map<ObjectIDType,ObjectStreamHeaderEntry*> ObjectIDTypeToObjectStreamHeaderEntryMap;
-typedef pair<PDFHummus::EStatusCode,IByteReader*> EStatusCodeAndIByteReader;
 
 class PDFParser
 {
@@ -138,6 +140,10 @@ public:
 
 	// check if this file is encrypted. considering that the library can't really handle these files, this shoud be handy.
 	bool IsEncrypted();
+
+	// set extender for parser, to enhance parsing capabilities
+	void SetParserExtender(IPDFParserExtender* inParserExtender);
+
 private:
 	PDFObjectParser mObjectParser;
 	IByteReaderWithPosition* mStream;
@@ -158,6 +164,7 @@ private:
 	XrefEntryInput* mXrefTable;
 	unsigned long mPagesCount;
 	ObjectIDType* mPagesObjectIDs;
+	IPDFParserExtender* mParserExtender;
 
 	PDFHummus::EStatusCode ParseHeaderLine();
 	PDFHummus::EStatusCode ParseEOFLine();

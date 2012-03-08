@@ -48,6 +48,7 @@ using namespace PDFHummus;
 DocumentContext::DocumentContext()
 {
 	mObjectsContext = NULL;
+	mParserExtender = NULL;
 }
 
 DocumentContext::~DocumentContext(void)
@@ -1413,7 +1414,7 @@ PDFDocumentCopyingContext* DocumentContext::CreatePDFCopyingContext(const string
 {
 	PDFDocumentCopyingContext* context = new PDFDocumentCopyingContext();
 
-	if(context->Start(inFilePath,this,mObjectsContext) != PDFHummus::eSuccess)
+	if(context->Start(inFilePath,this,mObjectsContext,mParserExtender) != PDFHummus::eSuccess)
 	{
 		delete context;
 		return NULL;
@@ -1598,7 +1599,7 @@ PDFDocumentCopyingContext* DocumentContext::CreatePDFCopyingContext(IByteReaderW
 {
 	PDFDocumentCopyingContext* context = new PDFDocumentCopyingContext();
 
-	if(context->Start(inPDFStream,this,mObjectsContext) != PDFHummus::eSuccess)
+	if(context->Start(inPDFStream,this,mObjectsContext,mParserExtender) != PDFHummus::eSuccess)
 	{
 		delete context;
 		return NULL;
@@ -1619,4 +1620,10 @@ void DocumentContext::Cleanup()
 	mOutputFilePath.clear();
 	mExtenders.clear();
 	mAnnotations.clear();
+}
+
+void DocumentContext::SetParserExtender(IPDFParserExtender* inParserExtender)
+{
+	mParserExtender = inParserExtender;
+	mPDFDocumentHandler.SetParserExtender(inParserExtender);
 }

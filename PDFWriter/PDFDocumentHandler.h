@@ -43,6 +43,7 @@ class PageContentContext;
 class PDFPage;
 class IDocumentContextExtender;
 class IPageEmbedInFormCommand;
+class IPDFParserExtender;
 
 using namespace std;
 
@@ -77,7 +78,8 @@ public:
 	PDFDocumentHandler(void);
 	virtual ~PDFDocumentHandler(void);
 
-	void SetOperationsContexts(PDFHummus::DocumentContext* inDocumentContext,ObjectsContext* inObjectsContext);
+	void SetOperationsContexts(PDFHummus::DocumentContext* inDocumentContext,
+							   ObjectsContext* inObjectsContext);
 
 	// Create a list of XObjects from a PDF file.
 	// the list of objects can then be used to place the "pages" in various locations on the written
@@ -166,6 +168,9 @@ public:
 	PDFFormXObject* CreatePDFFormXObjectForPage(unsigned long inPageIndex,
 												const PDFRectangle& inCropBox,
 												const double* inTransformationMatrix);
+
+	// Extendibility
+	void SetParserExtender(IPDFParserExtender* inParserExtender);
 private:
 
 	ObjectsContext* mObjectsContext;

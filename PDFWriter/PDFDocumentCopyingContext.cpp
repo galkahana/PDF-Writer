@@ -33,17 +33,21 @@ PDFDocumentCopyingContext::~PDFDocumentCopyingContext(void)
 
 EStatusCode PDFDocumentCopyingContext::Start(const string& inPDFFilePath,
 											  DocumentContext* inDocumentContext,
-											  ObjectsContext* inObjectsContext)
+											  ObjectsContext* inObjectsContext,
+											  IPDFParserExtender* inParserExtender)
 {
 	mDocumentHandler.SetOperationsContexts(inDocumentContext,inObjectsContext);
+	mDocumentHandler.SetParserExtender(inParserExtender);
 	return mDocumentHandler.StartFileCopyingContext(inPDFFilePath);
 }
 
 EStatusCode PDFDocumentCopyingContext::Start(IByteReaderWithPosition* inPDFStream,
 											 DocumentContext* inDocumentContext,
-											 ObjectsContext* inObjectsContext)
+											 ObjectsContext* inObjectsContext,
+											 IPDFParserExtender* inParserExtender)
 {
 	mDocumentHandler.SetOperationsContexts(inDocumentContext,inObjectsContext);
+	mDocumentHandler.SetParserExtender(inParserExtender);
 	return mDocumentHandler.StartStreamCopyingContext(inPDFStream);
 }
 

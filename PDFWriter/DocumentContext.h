@@ -208,6 +208,7 @@ namespace PDFHummus
 		// Extensibility
 		void AddDocumentContextExtender(IDocumentContextExtender* inExtender);
 		void RemoveDocumentContextExtender(IDocumentContextExtender* inExtender);
+		void SetParserExtender(IPDFParserExtender* inParserExtender);
 
 		// JPG images handler for retrieving JPG images information
 		JPEGImageHandler& GetJPEGImageHandler();
@@ -229,6 +230,7 @@ namespace PDFHummus
 		PDFDocumentHandler mPDFDocumentHandler;
 		UsedFontsRepository mUsedFontsRepository;
 		ObjectIDTypeList mAnnotations;
+		IPDFParserExtender* mParserExtender;
 		
 		void WriteHeaderComment(EPDFVersion inPDFVersion);
 		void Write4BinaryBytes();

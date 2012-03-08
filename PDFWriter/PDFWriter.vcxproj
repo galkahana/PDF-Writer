@@ -166,6 +166,7 @@
     <ClInclude Include="InputStreamSkipperStream.h" />
     <ClInclude Include="InputStringBufferStream.h" />
     <ClInclude Include="IOBasicTypes.h" />
+    <ClInclude Include="IPDFParserExtender.h" />
     <ClInclude Include="IReadPositionProvider.h" />
     <ClInclude Include="OutputBufferedStream.h" />
     <ClInclude Include="OutputFile.h" />

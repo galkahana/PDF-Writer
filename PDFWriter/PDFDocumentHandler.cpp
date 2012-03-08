@@ -58,7 +58,8 @@ PDFDocumentHandler::~PDFDocumentHandler(void)
 {
 }
 
-void PDFDocumentHandler::SetOperationsContexts(DocumentContext* inDocumentContext,ObjectsContext* inObjectsContext)
+void PDFDocumentHandler::SetOperationsContexts(DocumentContext* inDocumentContext,
+											   ObjectsContext* inObjectsContext)
 {
 	mObjectsContext = inObjectsContext;
 	mDocumentContext = inDocumentContext;
@@ -2020,3 +2021,7 @@ EStatusCode PDFDocumentHandler::CopyNewObjectsForDirectObject(const ObjectIDType
 	return WriteNewObjects(inReferencedObjects);
 }
 
+void PDFDocumentHandler::SetParserExtender(IPDFParserExtender* inParserExtender)
+{
+	mParser.SetParserExtender(inParserExtender);
+}

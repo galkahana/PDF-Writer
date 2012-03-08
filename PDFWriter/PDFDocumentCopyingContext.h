@@ -31,6 +31,7 @@ using namespace std;
 
 class ObjectsContext;
 class PDFParser;
+class IPDFParserExtender;
 
 namespace PDFHummus
 {
@@ -48,11 +49,13 @@ public:
 
 	PDFHummus::EStatusCode Start(const string& inPDFFilePath,
 					  DocumentContext* inDocumentContext,
-					  ObjectsContext* inObjectsContext);
+					  ObjectsContext* inObjectsContext,
+					  IPDFParserExtender* inParserExtender);
 
 	PDFHummus::EStatusCode Start(IByteReaderWithPosition* inPDFStream,
 					  DocumentContext* inDocumentContext,
-					  ObjectsContext* inObjectsContext);
+					  ObjectsContext* inObjectsContext,
+					  IPDFParserExtender* inParserExtender);
 
 	EStatusCodeAndObjectIDType CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
 															 EPDFPageBox inPageBoxToUseAsFormBox,

@@ -45,6 +45,7 @@
 #include "InputPredictorPNGOptimumStream.h"
 #include "InputPredictorTIFFSubStream.h"
 #include "InputAscii85DecodeStream.h"
+#include "IPDFParserExtender.h"
 
 #include  <algorithm>
 using namespace PDFHummus;
@@ -55,6 +56,7 @@ PDFParser::PDFParser(void)
 	mTrailer = NULL;
 	mXrefTable = NULL;
 	mPagesObjectIDs = NULL;
+	mParserExtender = NULL;
 }
 
 PDFParser::~PDFParser(void)
@@ -1796,6 +1798,10 @@ EStatusCodeAndIByteReader PDFParser::CreateFilterForStream(IByteReader* inStream
 		{
 			result = new InputAscii85DecodeStream(inStream);
 		}
+		else if(mParserExtender)
+		{
+			result = mParserExtender->CreateFilterForStream(inStream,inFilterName,inDecodeParams);
+		}
 		else
 		{
 			TRACE_LOG("PDFParser::CreateFilterForStream, supporting only flate decode and ascii 85 decode, failing");
@@ -1851,4 +1857,9 @@ bool PDFParser::IsEncrypted()
 {
 	PDFObjectCastPtr<PDFDictionary> encryptionDictionary(QueryDictionaryObject(mTrailer.GetPtr(),"Encrypt"));
 	return encryptionDictionary.GetPtr() != NULL ;
+}
+
+void PDFParser::SetParserExtender(IPDFParserExtender* inParserExtender)
+{
+	mParserExtender = inParserExtender;
 }

@@ -559,6 +559,9 @@
     <ClInclude Include="InputAscii85DecodeStream.h">
       <Filter>Infrastracture\IO</Filter>
     </ClInclude>
+    <ClInclude Include="IPDFParserExtender.h">
+      <Filter>PDF Embedding</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="InputBufferedStream.cpp">
