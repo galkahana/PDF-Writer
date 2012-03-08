@@ -75,6 +75,10 @@ void DocumentContext::AddDocumentContextExtender(IDocumentContextExtender* inExt
 	mExtenders.insert(inExtender);
 	mJPEGImageHandler.AddDocumentContextExtender(inExtender);
 	mPDFDocumentHandler.AddDocumentContextExtender(inExtender);
+
+	PDFDocumentCopyingContextSet::iterator it = mCopyingContexts.begin();
+	for(; it != mCopyingContexts.end(); ++it)
+		(*it)->AddDocumentContextExtender(inExtender);
 }
 
 void DocumentContext::RemoveDocumentContextExtender(IDocumentContextExtender* inExtender)
@@ -82,6 +86,9 @@ void DocumentContext::RemoveDocumentContextExtender(IDocumentContextExtender* in
 	mExtenders.erase(inExtender);
 	mJPEGImageHandler.RemoveDocumentContextExtender(inExtender);
 	mPDFDocumentHandler.RemoveDocumentContextExtender(inExtender);
+	PDFDocumentCopyingContextSet::iterator it = mCopyingContexts.begin();
+	for(; it != mCopyingContexts.end(); ++it)
+		(*it)->RemoveDocumentContextExtender(inExtender);
 }
 
 TrailerInformation& DocumentContext::GetTrailerInformation()
@@ -1620,10 +1627,21 @@ void DocumentContext::Cleanup()
 	mOutputFilePath.clear();
 	mExtenders.clear();
 	mAnnotations.clear();
+	mCopyingContexts.clear();
 }
 
 void DocumentContext::SetParserExtender(IPDFParserExtender* inParserExtender)
 {
 	mParserExtender = inParserExtender;
 	mPDFDocumentHandler.SetParserExtender(inParserExtender);
+}
+
+void DocumentContext::RegisterCopyingContext(PDFDocumentCopyingContext* inCopyingContext)
+{
+	mCopyingContexts.insert(inCopyingContext);
+}
+
+void DocumentContext::UnRegisterCopyingContext(PDFDocumentCopyingContext* inCopyingContext)
+{
+	mCopyingContexts.erase(inCopyingContext);
 }

@@ -540,10 +540,8 @@ EStatusCode PDFDocumentHandler::CopyResourcesIndirectObjects(PDFDictionary* inPa
 
 EStatusCode PDFDocumentHandler::WriteNewObjects(const ObjectIDTypeList& inSourceObjectIDs)
 {
-	// notice that using this method directly is slightly unsafe - the input objects are ASSUMED to have not been
-	// copied yet. unexpected results if the objects of these ids were already copied.
-
 	ObjectIDTypeSet writtenObjects;
+	// note that any objects in inSourceObjectIDs are trusted for not having been copied yet!
 	return WriteNewObjects(inSourceObjectIDs,writtenObjects);
 }
 
@@ -2024,4 +2022,20 @@ EStatusCode PDFDocumentHandler::CopyNewObjectsForDirectObject(const ObjectIDType
 void PDFDocumentHandler::SetParserExtender(IPDFParserExtender* inParserExtender)
 {
 	mParser.SetParserExtender(inParserExtender);
+}
+
+void PDFDocumentHandler::ReplaceSourceObjects(const ObjectIDTypeToObjectIDTypeMap& inSourceObjectsToNewTargetObjects)
+{
+	ObjectIDTypeToObjectIDTypeMap::const_iterator itReplaced = inSourceObjectsToNewTargetObjects.begin();
+
+	for(; itReplaced != inSourceObjectsToNewTargetObjects.end(); ++itReplaced)
+	{
+		if(mSourceToTarget.find(itReplaced->first) == mSourceToTarget.end())
+			mSourceToTarget.insert(ObjectIDTypeToObjectIDTypeMap::value_type(itReplaced->first,itReplaced->second));
+	}
+}
+
+IByteReaderWithPosition* PDFDocumentHandler::GetSourceDocumentStream()
+{
+	return mPDFStream;
 }

@@ -159,7 +159,8 @@ public:
 	EStatusCodeAndObjectIDTypeList CopyDirectObject(PDFObject* inObject);
 	PDFHummus::EStatusCode CopyNewObjectsForDirectObject(const ObjectIDTypeList& inReferencedObjects);
 	void StopCopyingContext();
-
+	void ReplaceSourceObjects(const ObjectIDTypeToObjectIDTypeMap& inSourceObjectsToNewTargetObjects);
+	IByteReaderWithPosition* GetSourceDocumentStream();
 
 	// Internal implementation. do not use directly
 	PDFFormXObject* CreatePDFFormXObjectForPage(unsigned long inPageIndex,

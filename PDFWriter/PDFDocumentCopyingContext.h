@@ -84,12 +84,28 @@ public:
 	PDFHummus::EStatusCode CopyNewObjectsForDirectObject(const ObjectIDTypeList& inReferencedObjects);
 
 	PDFParser* GetSourceDocumentParser();
+	IByteReaderWithPosition* GetSourceDocumentStream();
 	EStatusCodeAndObjectIDType GetCopiedObjectID(ObjectIDType inSourceObjectID);
 	MapIterator<ObjectIDTypeToObjectIDTypeMap> GetCopiedObjectsMappingIterator();
 
 	void End();
+
+	/* Use this method to signal the copying context to avoid copying some objects, but rather use replacements.
+		The input map has as keys source object IDs (you can scan for these objects earlier using the parser or some other methods.
+		The values in this map are object IDs to use instead. these should be valid IDs in the target PDF, though they do not have to
+		be defined yet (can be forward declaration. Note that any keys that are mapped to objects already copied, will be ignored, rather than replaced.
+	*/
+	void ReplaceSourceObjects(const ObjectIDTypeToObjectIDTypeMap& inSourceObjectsToNewTargetObjects);
+
+
+	// Used directly, the extendedrs used here will only get CreateFormXObjectsFromPDF and AppendPDFPagesFromPDF events for this
+	// copying context. to get full extension of the documetn context, make sure to add the listeners through the document context
+	void AddDocumentContextExtender(IDocumentContextExtender* inExtender);
+	void RemoveDocumentContextExtender(IDocumentContextExtender* inExtender);	
+
 private:
 
+	PDFHummus::DocumentContext* mDocumentContext;
 	PDFDocumentHandler mDocumentHandler;
 
 
