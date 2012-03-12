@@ -31,6 +31,7 @@
 
 class PDFObject;
 class IByteReader;
+class IPDFParserExtender;
 
 using namespace std;
 
@@ -47,7 +48,7 @@ public:
 	// Assign the stream to read from (does not take ownership of the stream)
 	void SetReadStream(IByteReader* inSourceStream,IReadPositionProvider* inCurrentPositionProvider);
 
-	PDFObject* ParseNewObject();
+	PDFObject* ParseNewObject(IPDFParserExtender* inParserExtender);
 
 	// calls this when changing underlying stream position
 	void ResetReadState();
@@ -66,10 +67,10 @@ private:
 	PDFObject* ParseBoolean(const string& inToken);
 
 	bool IsLiteralString(const string& inToken);
-	PDFObject* ParseLiteralString(const string& inToken);
+	PDFObject* ParseLiteralString(const string& inToken,IPDFParserExtender* inParserExtender);
 
 	bool IsHexadecimalString(const string& inToken);
-	PDFObject* ParseHexadecimalString(const string& inToken);
+	PDFObject* ParseHexadecimalString(const string& inToken,IPDFParserExtender* inParserExtender);
 
 	bool IsNull(const string& inToken);
 
@@ -80,10 +81,10 @@ private:
 	PDFObject* ParseNumber(const string& inToken);
 
 	bool IsArray(const string& inToken);
-	PDFObject* ParseArray();
+	PDFObject* ParseArray(IPDFParserExtender* inParserExtender);
 
 	bool IsDictionary(const string& inToken);
-	PDFObject* ParseDictionary();
+	PDFObject* ParseDictionary(IPDFParserExtender* inParserExtender);
 
 	bool IsComment(const string& inToken);
 

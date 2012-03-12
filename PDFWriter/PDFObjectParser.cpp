@@ -38,6 +38,7 @@
 #include "IByteReader.h"
 #include "RefCountPtr.h"
 #include "PDFObjectCast.h"
+#include "IPDFParserExtender.h"
 
 #include <sstream>
 
@@ -68,7 +69,7 @@ void PDFObjectParser::ResetReadState()
 
 static const string scR = "R";
 static const string scStream = "stream";
-PDFObject* PDFObjectParser::ParseNewObject()
+PDFObject* PDFObjectParser::ParseNewObject(IPDFParserExtender* inParserExtender)
 {
 	PDFObject* pdfObject = NULL;
 	string token;
@@ -90,13 +91,13 @@ PDFObject* PDFObjectParser::ParseNewObject()
 		// Literal String
 		else if(IsLiteralString(token))
 		{
-			pdfObject = ParseLiteralString(token);
+			pdfObject = ParseLiteralString(token,inParserExtender);
 			break;
 		}
 		// Hexadecimal String
 		else if(IsHexadecimalString(token))
 		{
-			pdfObject = ParseHexadecimalString(token);
+			pdfObject = ParseHexadecimalString(token,inParserExtender);
 			break;
 		}
 		// NULL
@@ -176,13 +177,13 @@ PDFObject* PDFObjectParser::ParseNewObject()
 		// Array
 		else if(IsArray(token))
 		{
-			pdfObject = ParseArray();
+			pdfObject = ParseArray(inParserExtender);
 			break;
 		}
 		// Dictionary
 		else if (IsDictionary(token))
 		{
-			pdfObject = ParseDictionary();
+			pdfObject = ParseDictionary(inParserExtender);
 
 			if(pdfObject)
 			{
@@ -259,7 +260,7 @@ bool PDFObjectParser::IsLiteralString(const string& inToken)
 }
 
 static const char scRightParanthesis = ')';
-PDFObject* PDFObjectParser::ParseLiteralString(const string& inToken)
+PDFObject* PDFObjectParser::ParseLiteralString(const string& inToken,IPDFParserExtender* inParserExtender)
 {
 	stringbuf stringBuffer;
 	Byte buffer;
@@ -331,7 +332,7 @@ PDFObject* PDFObjectParser::ParseLiteralString(const string& inToken)
 		}
 		stringBuffer.sputn((const char*)&buffer,1);
 	}
-	return new PDFLiteralString(stringBuffer.str());
+	return new PDFLiteralString(inParserExtender->DecryptString(stringBuffer.str()));
 }
 
 static const char scLeftAngle = '<';
@@ -343,7 +344,7 @@ bool PDFObjectParser::IsHexadecimalString(const string& inToken)
 
 
 static const char scRightAngle = '>';
-PDFObject* PDFObjectParser::ParseHexadecimalString(const string& inToken)
+PDFObject* PDFObjectParser::ParseHexadecimalString(const string& inToken,IPDFParserExtender* inParserExtender)
 {
 	EStatusCode status = PDFHummus::eSuccess;
 	
@@ -354,7 +355,7 @@ PDFObject* PDFObjectParser::ParseHexadecimalString(const string& inToken)
 		return NULL;
 	}
 
-	return new PDFHexString(inToken.substr(1,inToken.size()-2));
+	return new PDFHexString(inParserExtender->DecryptString(inToken.substr(1,inToken.size()-2)));
 }
 
 static const string scNull = "null";
@@ -484,7 +485,7 @@ bool PDFObjectParser::IsArray(const string& inToken)
 }
 
 static const string scRightSquare = "]";
-PDFObject* PDFObjectParser::ParseArray()
+PDFObject* PDFObjectParser::ParseArray(IPDFParserExtender* inParserExtender)
 {
 	PDFArray* anArray = new PDFArray();
 	bool arrayEndEncountered = false;
@@ -499,7 +500,7 @@ PDFObject* PDFObjectParser::ParseArray()
 			break;
 
 		ReturnTokenToBuffer(token);
-		RefCountPtr<PDFObject> anObject(ParseNewObject());
+		RefCountPtr<PDFObject> anObject(ParseNewObject(inParserExtender));
 		if(!anObject)
 		{
 			status = PDFHummus::eFailure;
@@ -540,7 +541,7 @@ bool PDFObjectParser::IsDictionary(const string& inToken)
 }
 
 static const string scDoubleRightAngle = ">>";
-PDFObject* PDFObjectParser::ParseDictionary()
+PDFObject* PDFObjectParser::ParseDictionary(IPDFParserExtender* inParserExtender)
 {
 	PDFDictionary* aDictionary = new PDFDictionary();
 	PDFObject* aKey = NULL;
@@ -558,7 +559,7 @@ PDFObject* PDFObjectParser::ParseDictionary()
 		ReturnTokenToBuffer(token);
 
 		// Parse Key
-		PDFObjectCastPtr<PDFName> aKey(ParseNewObject());
+		PDFObjectCastPtr<PDFName> aKey(ParseNewObject(inParserExtender));
 		if(!aKey)
 		{
 			status = PDFHummus::eFailure;
@@ -575,7 +576,7 @@ PDFObject* PDFObjectParser::ParseDictionary()
 		}
 
 		// Parse Value
-		RefCountPtr<PDFObject> aValue = ParseNewObject();
+		RefCountPtr<PDFObject> aValue = ParseNewObject(inParserExtender);
 		if(!aValue)
 		{
 			status = PDFHummus::eFailure;

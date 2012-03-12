@@ -331,7 +331,7 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 		mStream->SetPositionFromEnd(GetCurrentPositionFromEnd());
 		
 		mObjectParser.ResetReadState();
-		RefCountPtr<PDFObject> anObject(mObjectParser.ParseNewObject());
+		RefCountPtr<PDFObject> anObject(mObjectParser.ParseNewObject(mParserExtender));
 
 		if(anObject->GetType() == ePDFObjectInteger)
 		{
@@ -349,7 +349,7 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 			mStream->SetPositionFromEnd(GetCurrentPositionFromEnd());
 			
 			mObjectParser.ResetReadState();
-			PDFObjectCastPtr<PDFSymbol> startxRef(mObjectParser.ParseNewObject());
+			PDFObjectCastPtr<PDFSymbol> startxRef(mObjectParser.ParseNewObject(mParserExtender));
 
 			if(!startxRef || startxRef->GetValue() != scStartxref)
 			{
@@ -364,7 +364,7 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 
 			while(!foundStartXref && mStream->NotEnded())
 			{
-				PDFObjectCastPtr<PDFSymbol> startxRef(mObjectParser.ParseNewObject());
+				PDFObjectCastPtr<PDFSymbol> startxRef(mObjectParser.ParseNewObject(mParserExtender));
 				foundStartXref = startxRef.GetPtr() && (startxRef->GetValue() == scStartxref);
 			}
 			
@@ -375,7 +375,7 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 				break;
 			}
 
-			PDFObjectCastPtr<PDFInteger> xrefPosition(mObjectParser.ParseNewObject());
+			PDFObjectCastPtr<PDFInteger> xrefPosition(mObjectParser.ParseNewObject(mParserExtender));
 			if(!xrefPosition)
 			{
 				status = PDFHummus::eFailure;
@@ -422,7 +422,7 @@ EStatusCode PDFParser::ParseTrailerDictionary()
 
 		// k. now that all is well, just parse the damn dictionary, which is actually...the easiest part.
 		mObjectParser.ResetReadState();
-		PDFObjectCastPtr<PDFDictionary> dictionaryObject(mObjectParser.ParseNewObject());
+		PDFObjectCastPtr<PDFDictionary> dictionaryObject(mObjectParser.ParseNewObject(mParserExtender));
 		if(!dictionaryObject)
 		{
 			status = PDFHummus::eFailure;
@@ -662,7 +662,7 @@ PDFObject* PDFParser::ParseExistingInDirectObject(ObjectIDType inObjectID)
 		// verify that it's good and if so continue to parse the object itself
 
 		// verify object ID
-		PDFObjectCastPtr<PDFInteger> idObject(mObjectParser.ParseNewObject());
+		PDFObjectCastPtr<PDFInteger> idObject(mObjectParser.ParseNewObject(mParserExtender));
 
 		if(!idObject)
 		{
@@ -678,13 +678,16 @@ PDFObject* PDFParser::ParseExistingInDirectObject(ObjectIDType inObjectID)
 		}
 
 		// verify object Version
-		PDFObjectCastPtr<PDFInteger> versionObject(mObjectParser.ParseNewObject());
+		PDFObjectCastPtr<PDFInteger> versionObject(mObjectParser.ParseNewObject(mParserExtender));
 
 		if(!versionObject)
 		{
 			TRACE_LOG("PDFParser::ParseExistingInDirectObject, failed to read object declaration, Version");
 			break;
 		}
+
+		if(mParserExtender)
+			mParserExtender->OnObjectStart(inObjectID,versionObject->GetValue());
 
 		if(versionObject->GetValue() != mXrefTable[inObjectID].mRivision)
 		{
@@ -694,7 +697,7 @@ PDFObject* PDFParser::ParseExistingInDirectObject(ObjectIDType inObjectID)
 		}
 
 		// now the obj keyword
-		PDFObjectCastPtr<PDFSymbol> objKeyword(mObjectParser.ParseNewObject());
+		PDFObjectCastPtr<PDFSymbol> objKeyword(mObjectParser.ParseNewObject(mParserExtender));
 
 		if(!objKeyword)
 		{
@@ -709,8 +712,10 @@ PDFObject* PDFParser::ParseExistingInDirectObject(ObjectIDType inObjectID)
 			break;
 		}
 
-		readObject = mObjectParser.ParseNewObject();
+		readObject = mObjectParser.ParseNewObject(mParserExtender);
 
+		if(mParserExtender)
+			mParserExtender->OnObjectEnd(readObject);
 	}while(false);
 
 	return readObject;
@@ -990,7 +995,7 @@ EStatusCode PDFParser::ParseDirectory(LongFilePositionType inXrefPosition,
 	do
 	{
 		// take the object, so that we can check whether this is an Xref or an Xref stream
-		RefCountPtr<PDFObject> anObject(mObjectParser.ParseNewObject());
+		RefCountPtr<PDFObject> anObject(mObjectParser.ParseNewObject(mParserExtender));
 		if(!anObject)
 		{
 			status = PDFHummus::eFailure;
@@ -1011,7 +1016,7 @@ EStatusCode PDFParser::ParseDirectory(LongFilePositionType inXrefPosition,
 			}
 
 			// at this point we should be after the token of the "trailer"
-			PDFObjectCastPtr<PDFDictionary> trailerDictionary(mObjectParser.ParseNewObject());
+			PDFObjectCastPtr<PDFDictionary> trailerDictionary(mObjectParser.ParseNewObject(mParserExtender));
 			if(!trailerDictionary)
 			{
 				status = PDFHummus::eFailure;
@@ -1039,7 +1044,7 @@ EStatusCode PDFParser::ParseDirectory(LongFilePositionType inXrefPosition,
 		{
 			// Xref stream case. make some validations, grab the xref stream object details, and parse it
 
-			PDFObjectCastPtr<PDFInteger> versionObject(mObjectParser.ParseNewObject());
+			PDFObjectCastPtr<PDFInteger> versionObject(mObjectParser.ParseNewObject(mParserExtender));
 
 			if(!versionObject)
 			{
@@ -1048,7 +1053,11 @@ EStatusCode PDFParser::ParseDirectory(LongFilePositionType inXrefPosition,
 				break;
 			}
 
-			PDFObjectCastPtr<PDFSymbol> objKeyword(mObjectParser.ParseNewObject());
+			if(mParserExtender)
+				mParserExtender->OnObjectStart(((PDFInteger*)anObject.GetPtr())->GetValue(),versionObject->GetValue());
+
+
+			PDFObjectCastPtr<PDFSymbol> objKeyword(mObjectParser.ParseNewObject(mParserExtender));
 
 			if(!objKeyword)
 			{
@@ -1065,13 +1074,16 @@ EStatusCode PDFParser::ParseDirectory(LongFilePositionType inXrefPosition,
 				break;
 			}
 
-			PDFObjectCastPtr<PDFStreamInput> xrefStream(mObjectParser.ParseNewObject());
+			PDFObjectCastPtr<PDFStreamInput> xrefStream(mObjectParser.ParseNewObject(mParserExtender));
 			if(!xrefStream)
 			{
 				TRACE_LOG("PDFParser::BuildXrefTableAndTrailerFromXrefStream, failure to parse xref stream");
 				status = PDFHummus::eFailure;
 				break;
 			}
+
+			if(mParserExtender)
+				mParserExtender->OnObjectEnd(xrefStream.GetPtr());
 
 			*outTrailer = xrefStream->QueryStreamDictionary();
 
@@ -1108,7 +1120,7 @@ EStatusCode PDFParser::ParseFileDirectory()
 	do
 	{
 		// take the object, so that we can check whether this is an Xref or an Xref stream
-		RefCountPtr<PDFObject> anObject(mObjectParser.ParseNewObject());
+		RefCountPtr<PDFObject> anObject(mObjectParser.ParseNewObject(mParserExtender));
 		if(!anObject)
 		{
 			status = PDFHummus::eFailure;
@@ -1130,7 +1142,7 @@ EStatusCode PDFParser::ParseFileDirectory()
 		else if(anObject->GetType() == ePDFObjectInteger && ((PDFInteger*)anObject.GetPtr())->GetValue() > 0)
 		{
 			// Xref stream case
-			status = BuildXrefTableAndTrailerFromXrefStream();
+			status = BuildXrefTableAndTrailerFromXrefStream(((PDFInteger*)anObject.GetPtr())->GetValue());
 			if(status != PDFHummus::eSuccess)
 				break;
 
@@ -1149,14 +1161,14 @@ EStatusCode PDFParser::ParseFileDirectory()
 	return status;
 }
 
-EStatusCode PDFParser::BuildXrefTableAndTrailerFromXrefStream()
+EStatusCode PDFParser::BuildXrefTableAndTrailerFromXrefStream(long long inXrefStreamObjectID)
 {
 	// xref stream is trailer and stream togather. need to parse them both.
 	// the object parser is now after the object ID. so verify that next we goot a version and the obj keyword
 	// then parse the xref stream
 	EStatusCode status = PDFHummus::eSuccess;
 	
-	PDFObjectCastPtr<PDFInteger> versionObject(mObjectParser.ParseNewObject());
+	PDFObjectCastPtr<PDFInteger> versionObject(mObjectParser.ParseNewObject(mParserExtender));
 
 	do
 	{
@@ -1167,7 +1179,11 @@ EStatusCode PDFParser::BuildXrefTableAndTrailerFromXrefStream()
 			break;
 		}
 
-		PDFObjectCastPtr<PDFSymbol> objKeyword(mObjectParser.ParseNewObject());
+
+		if(mParserExtender)
+			mParserExtender->OnObjectStart(inXrefStreamObjectID,versionObject->GetValue());
+
+		PDFObjectCastPtr<PDFSymbol> objKeyword(mObjectParser.ParseNewObject(mParserExtender));
 
 		if(!objKeyword)
 		{
@@ -1185,13 +1201,16 @@ EStatusCode PDFParser::BuildXrefTableAndTrailerFromXrefStream()
 		}
 
 		// k. now just parse the object which should be a stream
-		PDFObjectCastPtr<PDFStreamInput> xrefStream(mObjectParser.ParseNewObject());
+		PDFObjectCastPtr<PDFStreamInput> xrefStream(mObjectParser.ParseNewObject(mParserExtender));
 		if(!xrefStream)
 		{
 			TRACE_LOG("PDFParser::BuildXrefTableAndTrailerFromXrefStream, failure to parse xref stream");
 			status = PDFHummus::eFailure;
 			break;
 		}
+
+		if(mParserExtender)
+			mParserExtender->OnObjectEnd(xrefStream.GetPtr());
 
 		RefCountPtr<PDFDictionary> xrefDictionary(xrefStream->QueryStreamDictionary());
 		mTrailer = xrefDictionary;
@@ -1229,7 +1248,7 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,Objec
 	do
 	{
 		// take the object, so that we can check whether this is an Xref or an Xref stream
-		PDFObjectCastPtr<PDFInteger> anObject(mObjectParser.ParseNewObject());
+		PDFObjectCastPtr<PDFInteger> anObject(mObjectParser.ParseNewObject(mParserExtender));
 		if(!anObject || anObject->GetValue() <= 0)
 		{
 			TRACE_LOG1("PDFParser::ParseXrefFromXrefStream, expecting object number for xref stream at %ld",inXrefPosition);
@@ -1237,7 +1256,7 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,Objec
 			break;
 		}
 
-		PDFObjectCastPtr<PDFInteger> versionObject(mObjectParser.ParseNewObject());
+		PDFObjectCastPtr<PDFInteger> versionObject(mObjectParser.ParseNewObject(mParserExtender));
 
 		if(!versionObject)
 		{
@@ -1246,7 +1265,10 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,Objec
 			break;
 		}
 
-		PDFObjectCastPtr<PDFSymbol> objKeyword(mObjectParser.ParseNewObject());
+		if(mParserExtender)
+			mParserExtender->OnObjectStart(anObject->GetValue(),versionObject->GetValue());
+
+		PDFObjectCastPtr<PDFSymbol> objKeyword(mObjectParser.ParseNewObject(mParserExtender));
 
 		if(!objKeyword)
 		{
@@ -1263,13 +1285,16 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,Objec
 			break;
 		}
 
-		PDFObjectCastPtr<PDFStreamInput> xrefStream(mObjectParser.ParseNewObject());
+		PDFObjectCastPtr<PDFStreamInput> xrefStream(mObjectParser.ParseNewObject(mParserExtender));
 		if(!xrefStream)
 		{
 			TRACE_LOG("PDFParser::ParseXrefFromXrefStream, failure to parse xref stream");
 			status = PDFHummus::eFailure;
 			break;
 		}
+
+		if(mParserExtender)
+			mParserExtender->OnObjectEnd(xrefStream.GetPtr());
 
 		status = ParseXrefFromXrefStream(inXrefTable,inXrefSize,xrefStream.GetPtr());
 	}while(false);
@@ -1560,7 +1585,7 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 			mObjectParser.ResetReadState();
 		}
 		
-		anObject = mObjectParser.ParseNewObject();
+		anObject = mObjectParser.ParseNewObject(mParserExtender);
 
 	}while(false);
 
@@ -1585,7 +1610,7 @@ EStatusCode PDFParser::ParseObjectStreamHeader(ObjectStreamHeaderEntry* inHeader
 
 	while(currentObject < inObjectsCount && (PDFHummus::eSuccess == status))
 	{
-		PDFObjectCastPtr<PDFInteger> objectNumber(mObjectParser.ParseNewObject());
+		PDFObjectCastPtr<PDFInteger> objectNumber(mObjectParser.ParseNewObject(mParserExtender));
 		if(!objectNumber)
 		{
 			TRACE_LOG("PDFParser::ParseObjectStreamHeader, parsing failed when reading object number. either not enough objects, or of the wrong type");
@@ -1593,7 +1618,7 @@ EStatusCode PDFParser::ParseObjectStreamHeader(ObjectStreamHeaderEntry* inHeader
 			break;
 		}
 
-		PDFObjectCastPtr<PDFInteger> objectPosition(mObjectParser.ParseNewObject());
+		PDFObjectCastPtr<PDFInteger> objectPosition(mObjectParser.ParseNewObject(mParserExtender));
 		if(!objectPosition)
 		{
 			TRACE_LOG("PDFParser::ParseObjectStreamHeader, parsing failed when reading object position. either not enough objects, or of the wrong type");
@@ -1626,6 +1651,10 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 		}	
 
 		result = new InputLimitedStream(mStream,lengthObject->GetValue(),false);
+
+		// call for parser extender for encryption implementation
+		if(mParserExtender)
+			result = mParserExtender->CreateDecryptionFilterForStream(result);
 
 		RefCountPtr<PDFObject> filterObject(QueryDictionaryObject(streamDictionary.GetPtr(),"Filter"));
 		if(!filterObject)

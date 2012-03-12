@@ -181,7 +181,7 @@ private:
 	PDFHummus::EStatusCode ParsePreviousXrefs(PDFDictionary* inTrailer);
 	void MergeXrefWithMainXref(XrefEntryInput* inTableToMerge);
 	PDFHummus::EStatusCode ParseFileDirectory();
-	PDFHummus::EStatusCode BuildXrefTableAndTrailerFromXrefStream();
+	PDFHummus::EStatusCode BuildXrefTableAndTrailerFromXrefStream(long long inXrefStreamObjectID);
 	// an overload for cases where the xref stream object is already parsed
 	PDFHummus::EStatusCode ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,PDFStreamInput* inXrefStream);
 	// an overload for cases where the position should hold a stream object, and it should be parsed
