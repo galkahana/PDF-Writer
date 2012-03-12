@@ -332,7 +332,11 @@ PDFObject* PDFObjectParser::ParseLiteralString(const string& inToken,IPDFParserE
 		}
 		stringBuffer.sputn((const char*)&buffer,1);
 	}
-	return new PDFLiteralString(inParserExtender->DecryptString(stringBuffer.str()));
+
+	if(inParserExtender)
+		return new PDFLiteralString(inParserExtender->DecryptString(stringBuffer.str()));
+	else
+		return new PDFLiteralString(stringBuffer.str());
 }
 
 static const char scLeftAngle = '<';
@@ -354,8 +358,10 @@ PDFObject* PDFObjectParser::ParseHexadecimalString(const string& inToken,IPDFPar
 		TRACE_LOG1("PDFObjectParser::ParseHexadecimalString, exception in parsing hexadecimal string, no closing angle, Expression: %s",inToken.c_str());
 		return NULL;
 	}
-
-	return new PDFHexString(inParserExtender->DecryptString(inToken.substr(1,inToken.size()-2)));
+	if(inParserExtender)
+		return new PDFHexString(inParserExtender->DecryptString(inToken.substr(1,inToken.size()-2)));
+	else
+		return new PDFHexString(inToken.substr(1,inToken.size()-2));
 }
 
 static const string scNull = "null";
