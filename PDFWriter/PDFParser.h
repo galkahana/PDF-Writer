@@ -140,6 +140,8 @@ public:
 
 	// check if this file is encrypted. considering that the library can't really handle these files, this shoud be handy.
 	bool IsEncrypted();
+	// encryption is supported if there's an extender that supports it in the parser
+	bool IsEncryptionSupported();
 
 	// set extender for parser, to enhance parsing capabilities
 	void SetParserExtender(IPDFParserExtender* inParserExtender);

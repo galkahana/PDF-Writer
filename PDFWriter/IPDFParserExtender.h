@@ -19,6 +19,8 @@ public:
 
 	// for decryption extension
 
+	// DoesSupportEncryption should return true if encryption is supported
+	virtual bool DoesSupportEncryption() = 0;
 	// return input stream if did nothing, or a filter stream owning the input stream if encryption is required
 	virtual IByteReader* CreateDecryptionFilterForStream(IByteReader* inStream) = 0;
 	// decrypt input string. this serves both literal and hexadecimal strings

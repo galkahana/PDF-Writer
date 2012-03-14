@@ -1831,6 +1831,12 @@ EStatusCodeAndIByteReader PDFParser::CreateFilterForStream(IByteReader* inStream
 		else if(mParserExtender)
 		{
 			result = mParserExtender->CreateFilterForStream(inStream,inFilterName,inDecodeParams);
+			if(result == inStream)
+			{
+				TRACE_LOG1("PDFParser::CreateFilterForStream, filter is not supported by extender - %s",inFilterName->GetValue().c_str());
+				status = PDFHummus::eFailure;
+				break;
+			}
 		}
 		else
 		{
@@ -1892,4 +1898,9 @@ bool PDFParser::IsEncrypted()
 void PDFParser::SetParserExtender(IPDFParserExtender* inParserExtender)
 {
 	mParserExtender = inParserExtender;
+}
+
+bool PDFParser::IsEncryptionSupported()
+{
+	return mParserExtender && mParserExtender->DoesSupportEncryption();
 }
