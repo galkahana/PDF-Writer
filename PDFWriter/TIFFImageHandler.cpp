@@ -1758,7 +1758,9 @@ ObjectIDType TIFFImageHandler::WriteICCCS()
 	ICCDictionary->WriteKey(scAlternate);
 	
 	// NOW Write the CS
+	mT2p->pdf_colorspace = (t2p_cs_t)(mT2p->pdf_colorspace ^ T2P_CS_ICCBASED);
 	WriteXObjectCS(ICCDictionary);
+	mT2p->pdf_colorspace = (t2p_cs_t)(mT2p->pdf_colorspace | T2P_CS_ICCBASED);
 
 	// the stream
 	PDFStream* ICCStream =  mObjectsContext->StartPDFStream(ICCDictionary);
