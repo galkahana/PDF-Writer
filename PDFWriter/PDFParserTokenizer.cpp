@@ -275,18 +275,21 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 				if(result.first && mStream->NotEnded() && scStream == result.second)
 				{
 					// k. a bit of a special case here for streams. the reading changes after the keyword "stream", 
-					// essentially forcing the next content to start after either CR-LF or LF. so there might be a little
+					// essentially forcing the next content to start after either CR, CR-LF or LF. so there might be a little
 					// skip to do here.
 					// if indeed there's a "stream", so the last buffer read should have been either CR or LF, which means (respectively)
 					// that we should either skip one more "LF" or do nothing (based on what was parsed)
 					
 					// verify that buffer is either CR or LF, and behave accordingly
-					if(scCR == buffer) // CR. should be CR-LF
+					if(scCR == buffer) // CR. should be CR-LF or CR alone
 					{
 						if(GetNextByteForToken(buffer) == PDFHummus::eSuccess)
-							result.first = (scLF == buffer); // verify that buffer is LF (so that we see CR-LF)
-						else
-							result.first = false; // cant have CR alone!
+						{
+							// if CR-LF treat as a single line, otherwise put back token nicely cause CR is alone
+							if(buffer != scLF)
+								SaveTokenBuffer(buffer);
+						}
+						result.first = true; 
 					}
 					else
 						result.first = (scLF == buffer); // otherwise must be LF
