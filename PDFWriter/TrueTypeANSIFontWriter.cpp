@@ -84,6 +84,12 @@ IFontDescriptorHelper* TrueTypeANSIFontWriter::GetCharsetWriter()
 	return this;
 }
 
+bool TrueTypeANSIFontWriter::CanWriteDifferencesFromWinAnsi()
+{
+	return false;
+}
+
+
 void TrueTypeANSIFontWriter::WriteCharSet(	DictionaryContext* inDescriptorContext,
 										ObjectsContext* inObjectsContext,
 										FreeTypeFaceWrapper* inFontInfo,

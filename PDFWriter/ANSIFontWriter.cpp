@@ -97,7 +97,8 @@ EStatusCode ANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 
 		WriteWidths(fontContext);
 
-		CalculateDifferences();
+		if(inANSIFontWriterHelper->CanWriteDifferencesFromWinAnsi())
+			CalculateDifferences();
 		WriteEncoding(fontContext);
 
 		// ToUnicode
