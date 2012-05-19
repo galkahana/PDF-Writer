@@ -43,7 +43,7 @@ ImagesAndFormsForwardReferenceTest::~ImagesAndFormsForwardReferenceTest(void)
 {
 }
 
-EStatusCode ImagesAndFormsForwardReferenceTest::Run()
+EStatusCode ImagesAndFormsForwardReferenceTest::Run(const TestConfiguration& inTestConfiguration)
 {
 	PDFWriter pdfWriter;
 	EStatusCode status; 
@@ -51,7 +51,7 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 	do
 	{
 
-		status = pdfWriter.StartPDF("C:\\PDFLibTests\\ImagesAndFormsForwardReferenceTest.PDF",ePDFVersion13);
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"ImagesAndFormsForwardReferenceTest.PDF"),ePDFVersion13);
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
@@ -118,7 +118,7 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 
 
 		// Create image xobject  
-		PDFImageXObject* imageXObject  = pdfWriter.CreateImageXObjectFromJPGFile("C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG",imageXObjectID);
+		PDFImageXObject* imageXObject  = pdfWriter.CreateImageXObjectFromJPGFile(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/images/otherStage.JPG"),imageXObjectID);
 		if(!imageXObject)
 		{
 			cout<<"failed to create image XObject from file\n";
@@ -127,7 +127,8 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 		}
 
 		// now create form xobject
-		PDFFormXObject*  formXObject = pdfWriter.CreateFormXObjectFromJPGFile("C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG",formXObjectID);
+		PDFFormXObject*  formXObject = pdfWriter.CreateFormXObjectFromJPGFile(
+            RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/images/otherStage.JPG"),formXObjectID);
 		if(!formXObject)
 		{
 			cout<<"failed to create form XObject from file\n";
@@ -135,7 +136,8 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run()
 			break;
 		}
 
-		PDFFormXObject* tiffFormXObject = pdfWriter.CreateFormXObjectFromTIFFFile("C:\\PDFLibTests\\TestMaterials\\images\\tiff\\jim___ah.tif",tiffFormXObjectID);
+		PDFFormXObject* tiffFormXObject = pdfWriter.CreateFormXObjectFromTIFFFile(
+            RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/images/tiff/jim___ah.tif"),tiffFormXObjectID);
 		if(!tiffFormXObject)
 		{
 			cout<<"failed to create image form XObject from file, for file\n";

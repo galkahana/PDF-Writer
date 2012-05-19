@@ -28,5 +28,5 @@ public:
 	FlateEncryptionTest(void);
 	virtual ~FlateEncryptionTest(void);
 
-	virtual PDFHummus::EStatusCode Run();
+	virtual PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration);
 };

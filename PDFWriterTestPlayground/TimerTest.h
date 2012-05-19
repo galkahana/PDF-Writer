@@ -28,7 +28,7 @@ public:
 	TimerTest(void);
 	~TimerTest(void);
 
-	virtual PDFHummus::EStatusCode Run();
+	virtual PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration);
 
 private:
 	void Sleep(double inSeconds);

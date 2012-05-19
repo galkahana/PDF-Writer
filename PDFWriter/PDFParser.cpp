@@ -333,7 +333,7 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 		mObjectParser.ResetReadState();
 		RefCountPtr<PDFObject> anObject(mObjectParser.ParseNewObject(mParserExtender));
 
-		if(anObject->GetType() == ePDFObjectInteger)
+		if(anObject->GetType() == PDFObject::ePDFObjectInteger)
 		{
 			mLastXrefPosition = (LongFilePositionType)((PDFInteger*)anObject.GetPtr())->GetValue();
 
@@ -360,7 +360,7 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 		}
 		else // this means that the line is not only integer, a bit more complicated path, look for startxref and then the next would be the number
 		{
-			bool foundStartXref = (anObject->GetType() == ePDFObjectSymbol) && (((PDFSymbol*)anObject.GetPtr())->GetValue() == scStartxref);
+			bool foundStartXref = (anObject->GetType() == PDFObject::ePDFObjectSymbol) && (((PDFSymbol*)anObject.GetPtr())->GetValue() == scStartxref);
 
 			while(!foundStartXref && mStream->NotEnded())
 			{
@@ -838,9 +838,9 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 			
 			while(it.MoveNext() && PDFHummus::eSuccess == status)
 			{
-				if(it.GetItem()->GetType() != ePDFObjectIndirectObjectReference)
+				if(it.GetItem()->GetType() != PDFObject::ePDFObjectIndirectObjectReference)
 				{
-					TRACE_LOG1("PDFParser::ParsePagesIDs, unexpected type for a Kids array object, type = %s",scPDFObjectTypeLabel[it.GetItem()->GetType()]);
+					TRACE_LOG1("PDFParser::ParsePagesIDs, unexpected type for a Kids array object, type = %s",PDFObject::scPDFObjectTypeLabel[it.GetItem()->GetType()]);
 					status = PDFHummus::eFailure;
 					break;
 				}
@@ -915,7 +915,7 @@ PDFObject* PDFParser::QueryDictionaryObject(PDFDictionary* inDictionary,const st
 	if(anObject.GetPtr() == NULL)
 		return NULL;
 
-	if(anObject->GetType() == ePDFObjectIndirectObjectReference)
+	if(anObject->GetType() == PDFObject::ePDFObjectIndirectObjectReference)
 	{
 		PDFObject* theActualObject = ParseNewObject(((PDFIndirectObjectReference*)anObject.GetPtr())->mObjectID);
 		return theActualObject;
@@ -934,7 +934,7 @@ PDFObject* PDFParser::QueryArrayObject(PDFArray* inArray,unsigned long inIndex)
 	if(anObject.GetPtr() == NULL)
 		return NULL;
 	
-	if(anObject->GetType() == ePDFObjectIndirectObjectReference)
+	if(anObject->GetType() == PDFObject::ePDFObjectIndirectObjectReference)
 	{
 		PDFObject* theActualObject = ParseNewObject(((PDFIndirectObjectReference*)anObject.GetPtr())->mObjectID);
 		return theActualObject;
@@ -1002,7 +1002,7 @@ EStatusCode PDFParser::ParseDirectory(LongFilePositionType inXrefPosition,
 			break;
 		}
 
-		if(anObject->GetType() == ePDFObjectSymbol && ((PDFSymbol*)anObject.GetPtr())->GetValue() == scXref)
+		if(anObject->GetType() == PDFObject::ePDFObjectSymbol && ((PDFSymbol*)anObject.GetPtr())->GetValue() == scXref)
 		{
 			// This is the case of a regular xref table. note that as oppose to the main trailer case
 			// i already have a limit of Xrefsize (which is determined by the main trailer Size entry)
@@ -1040,7 +1040,7 @@ EStatusCode PDFParser::ParseDirectory(LongFilePositionType inXrefPosition,
 			trailerDictionary->AddRef();
 			*outTrailer = trailerDictionary.GetPtr();
 		}
-		else if(anObject->GetType() == ePDFObjectInteger && ((PDFInteger*)anObject.GetPtr())->GetValue() > 0)
+		else if(anObject->GetType() == PDFObject::ePDFObjectInteger && ((PDFInteger*)anObject.GetPtr())->GetValue() > 0)
 		{
 			// Xref stream case. make some validations, grab the xref stream object details, and parse it
 
@@ -1127,7 +1127,7 @@ EStatusCode PDFParser::ParseFileDirectory()
 			break;
 		}
 
-		if(anObject->GetType() == ePDFObjectSymbol && ((PDFSymbol*)anObject.GetPtr())->GetValue() == scXref)
+		if(anObject->GetType() == PDFObject::ePDFObjectSymbol && ((PDFSymbol*)anObject.GetPtr())->GetValue() == scXref)
 		{
 			// this would be a normal xref case
 			// jump lines till you get to a line where the token is "trailer". then parse.
@@ -1139,7 +1139,7 @@ EStatusCode PDFParser::ParseFileDirectory()
 			if(status != PDFHummus::eSuccess)
 				break;
 		}
-		else if(anObject->GetType() == ePDFObjectInteger && ((PDFInteger*)anObject.GetPtr())->GetValue() > 0)
+		else if(anObject->GetType() == PDFObject::ePDFObjectInteger && ((PDFInteger*)anObject.GetPtr())->GetValue() > 0)
 		{
 			// Xref stream case
 			status = BuildXrefTableAndTrailerFromXrefStream(((PDFInteger*)anObject.GetPtr())->GetValue());
@@ -1663,7 +1663,7 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 			break;
 		} 
 
-		if(filterObject->GetType() == ePDFObjectArray)
+		if(filterObject->GetType() == PDFObject::ePDFObjectArray)
 		{
 			PDFArray* filterObjectArray = (PDFArray*)filterObject.GetPtr();
 			PDFObjectCastPtr<PDFArray> decodeParams(QueryDictionaryObject(streamDictionary.GetPtr(),"DecodeParms"));
@@ -1698,7 +1698,7 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 					result = createStatus.second;
 			}
 		}
-		else if(filterObject->GetType() == ePDFObjectName)
+		else if(filterObject->GetType() == PDFObject::ePDFObjectName)
 		{
 			PDFObjectCastPtr<PDFDictionary> decodeParams(QueryDictionaryObject(streamDictionary.GetPtr(),"DecodeParms"));
 

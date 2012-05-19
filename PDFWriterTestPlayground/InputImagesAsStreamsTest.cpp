@@ -21,7 +21,7 @@ InputImagesAsStreamsTest::~InputImagesAsStreamsTest(void)
 }
 
 
-EStatusCode InputImagesAsStreamsTest::Run()
+EStatusCode InputImagesAsStreamsTest::Run(const TestConfiguration& inTestConfiguration)
 {
 	// A minimal test to see if images as streams work. i'm using regular file streams, just to show the point
 	// obviously this is quite a trivial case.
@@ -31,7 +31,7 @@ EStatusCode InputImagesAsStreamsTest::Run()
 
 	do
 	{
-		status = pdfWriter.StartPDF("C:\\PDFLibTests\\ImagesInStreams.PDF",ePDFVersion13);
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"ImagesInStreams.PDF"),ePDFVersion13);
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
@@ -45,10 +45,10 @@ EStatusCode InputImagesAsStreamsTest::Run()
 
 		InputFile jpgImage;
 
-		status = jpgImage.OpenFile("C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG");
+		status = jpgImage.OpenFile(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/images/otherStage.JPG"));
 		if(status != PDFHummus::eSuccess)
 		{
-			cout<<"failed to open JPG image in"<<"C:\\PDFLibTests\\TestMaterials\\images\\otherStage.JPG"<<"\n";
+			cout<<"failed to open JPG image in"<<"TestMaterials/images/otherStage.JPG"<<"\n";
 			break;
 		}
 
@@ -96,10 +96,10 @@ EStatusCode InputImagesAsStreamsTest::Run()
 		page->SetMediaBox(PDFRectangle(0,0,595,842));
 
 		InputFile tiffFile;
-		status = tiffFile.OpenFile("C:\\PDFLibTests\\TestMaterials\\images\\tiff\\FLAG_T24.TIF");
+		status = tiffFile.OpenFile(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/images/tiff/FLAG_T24.TIF"));
 		if(status != PDFHummus::eSuccess)
 		{
-			cout<<"failed to open TIFF image in"<<"C:\\PDFLibTests\\TestMaterials\\images\\tiff\\FLAG_T24.TIF"<<"\n";
+			cout<<"failed to open TIFF image in"<<"TestMaterials/images/tiff/FLAG_T24.TIF"<<"\n";
 			break;
 		}
 
@@ -146,10 +146,10 @@ EStatusCode InputImagesAsStreamsTest::Run()
 		
 		InputFile pdfFile;
 
-		status = pdfFile.OpenFile("C:\\PDFLibTests\\TestMaterials\\Original.pdf");
+		status = pdfFile.OpenFile(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/Original.pdf"));
 		if(status != PDFHummus::eSuccess)
 		{
-			cout<<"failed to open PDF file in"<<"C:\\PDFLibTests\\TestMaterials\\Original.pdf"<<"\n";
+			cout<<"failed to open PDF file in"<<"TestMaterials/Original.pdf"<<"\n";
 			break;
 		}
 

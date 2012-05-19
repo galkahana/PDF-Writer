@@ -34,7 +34,7 @@ PDFDateTest::~PDFDateTest(void)
 {
 }
 
-EStatusCode PDFDateTest::Run()
+EStatusCode PDFDateTest::Run(const TestConfiguration& inTestConfiguration)
 {
 	EStatusCode status = PDFHummus::eSuccess;
 

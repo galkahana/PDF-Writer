@@ -28,5 +28,5 @@ public:
 	RefCountTest(void);
 	virtual ~RefCountTest(void);
 
-	virtual PDFHummus::EStatusCode Run();
+	virtual PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration);
 };

@@ -27,5 +27,5 @@ public:
 	SimpleContentPageTest(void);
 	~SimpleContentPageTest(void);
 
-	virtual PDFHummus::EStatusCode Run();
+	virtual PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration);
 };

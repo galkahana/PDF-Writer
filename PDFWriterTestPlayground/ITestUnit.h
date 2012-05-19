@@ -21,6 +21,13 @@
 #pragma once
 
 #include "EStatusCode.h"
+#include "FileURL.h"
+
+class TestConfiguration
+{
+public:
+    FileURL mSampleFileBase;  
+};
 
 class ITestUnit
 {
@@ -29,6 +36,6 @@ public:
 	
 	virtual ~ITestUnit(){}
 
-	virtual PDFHummus::EStatusCode Run() = 0;
+	virtual PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration) = 0;
 
 };

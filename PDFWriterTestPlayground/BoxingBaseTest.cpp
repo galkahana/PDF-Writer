@@ -35,7 +35,7 @@ BoxingBaseTest::~BoxingBaseTest(void)
 {
 }
 
-EStatusCode BoxingBaseTest::Run()
+EStatusCode BoxingBaseTest::Run(const TestConfiguration& inTestConfiguration)
 {
 	EStatusCode status = RunIntTest();
 

@@ -946,8 +946,6 @@ EStatusCode CFFEmbeddedFontWriter::WriteFDSelect(const UIntVector& inSubsetGlyph
 
 EStatusCode CFFEmbeddedFontWriter::UpdateIndexesAtTopDict()
 {
-	LongFilePositionType currentPosition = mFontFileStream.GetCurrentPosition();
-
 	mFontFileStream.SetPosition(mCharsetPlaceHolderPosition);
 	mPrimitivesWriter.Write5ByteDictInteger((long)mCharsetPosition);
 

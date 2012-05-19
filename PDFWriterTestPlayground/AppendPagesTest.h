@@ -27,5 +27,5 @@ public:
 	AppendPagesTest(void);
 	virtual ~AppendPagesTest(void);
 
-	virtual PDFHummus::EStatusCode Run();
+	virtual PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration);
 };

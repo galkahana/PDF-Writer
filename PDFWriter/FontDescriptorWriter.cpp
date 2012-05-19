@@ -47,6 +47,21 @@ static const string scXHeight = "XHeight";
 static const string scStemV = "StemV";
 static const string scCharSet = "CharSet";
 
+
+static const char* scFontStretchLabels[eFontStretchMax] =
+{
+	"",
+	"UltraCondensed", 
+	"ExtraCondensed", 
+	"Condensed", 
+	"SemiCondensed", 
+	"Normal", 
+	"SemiExpanded", 
+	"Expanded", 
+	"ExtraExpanded",
+	"UltraExpanded"
+};
+
 void FontDescriptorWriter::WriteFontDescriptor(	ObjectIDType inFontDescriptorObjectID,
 												const string& inFontPostscriptName,
 												FreeTypeFaceWrapper* inFontInfo,

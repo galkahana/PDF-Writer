@@ -23,6 +23,7 @@
 #include "EStatusCode.h"
 #include "ITestUnit.h"
 #include "Singleton.h"
+#include "FileURL.h"
 
 #include <string>
 #include <list>
@@ -48,15 +49,14 @@ public:
 	TestsRunner(void);
 	~TestsRunner(void);
 
-
-	PDFHummus::EStatusCode RunAll();
-	PDFHummus::EStatusCode RunTest(const string& inTestLabel);
-	PDFHummus::EStatusCode RunTests(const StringList& inTestsLabels);
-	PDFHummus::EStatusCode RunCategory(const string& inCategory);
-	PDFHummus::EStatusCode RunCategories(const StringList& inCategories);
-	PDFHummus::EStatusCode RunCategories(const StringList& inCategories, const StringSet& inTestsToExclude);
-	PDFHummus::EStatusCode RunExcludeCategories(const StringSet& inCategories);
-	PDFHummus::EStatusCode RunExcludeTests(const StringSet& inTests);
+	PDFHummus::EStatusCode RunAll(const TestConfiguration& inTestConfiguration);
+	PDFHummus::EStatusCode RunTest(const TestConfiguration& inTestConfiguration,const string& inTestLabel);
+	PDFHummus::EStatusCode RunTests(const TestConfiguration& inTestConfiguration,const StringList& inTestsLabels);
+	PDFHummus::EStatusCode RunCategory(const TestConfiguration& inTestConfiguration,const string& inCategory);
+	PDFHummus::EStatusCode RunCategories(const TestConfiguration& inTestConfiguration,const StringList& inCategories);
+	PDFHummus::EStatusCode RunCategories(const TestConfiguration& inTestConfiguration,const StringList& inCategories, const StringSet& inTestsToExclude);
+	PDFHummus::EStatusCode RunExcludeCategories(const TestConfiguration& inTestConfiguration,const StringSet& inCategories);
+	PDFHummus::EStatusCode RunExcludeTests(const TestConfiguration& inTestConfiguration,const StringSet& inTests);
 
 	void AddTest(const string& inTestLabel,ITestUnit* inTest);
 	void AddTest(const std::string& inTestLabel,const std::string& inCategory,ITestUnit* inTest);
@@ -65,8 +65,8 @@ private:
 	StringToStringAndTestUnitListMap mTests;
 	StringToTestUnitMap mTestsByName;
 
-	PDFHummus::EStatusCode RunTestsInList(const StringAndTestUnitList& inTests);
-	PDFHummus::EStatusCode RunSingleTest(const string& inTestName,ITestUnit* inTest);
+	PDFHummus::EStatusCode RunTestsInList(const TestConfiguration& inTestConfiguration,const StringAndTestUnitList& inTests);
+	PDFHummus::EStatusCode RunSingleTest(const TestConfiguration& inTestConfiguration,const string& inTestName,ITestUnit* inTest);
 	void DeleteTests();
 };
 
@@ -87,7 +87,46 @@ template <class T> \
 class TestRegistrar { \
 	public:  \
 		TestRegistrar(){ \
-		Singleton<TestsRunner>::GetInstance()->AddTest(#X,##CATEGORY,new T); \
+		Singleton<TestsRunner>::GetInstance()->AddTest(#X,CATEGORY,new T); \
 		} \
 };  \
-static TestRegistrar<X> TestRegistrar;
+static TestRegistrar<X> TestRegistrarInstance;
+
+
+// Helper macro to get a path string from file URL, according to the current OS
+#ifdef WIN32
+
+    #include "WindowsPath.h"
+    static string FileURLToLocalPath(const FileURL& inFileURL)
+    {
+        WindowsPath windowsPath;
+        windowsPath.FromFileURL(inFileURL);
+        return windowsPath.ToString();
+    }
+
+    static FileURL LocalPathToFileURL(const string& inLocalPath)
+    {
+        WindowsPath windowsPath(inLocalPath);
+        return windowsPath.ToFileURL();
+    }
+#else
+
+    #include "PosixPath.h"
+    static string FileURLToLocalPath(const FileURL& inFileURL)
+    {
+        PosixPath posixPath;
+        posixPath.FromFileURL(inFileURL);
+        return posixPath.ToString();
+    }
+
+    static FileURL LocalPathToFileURL(const string& inLocalPath)
+    {
+        PosixPath posixPath(inLocalPath);
+        return posixPath.ToFileURL();
+    }
+#endif
+
+static string RelativeURLToLocalPath(const FileURL& inFileURL,const string& inRelativeURL)
+{
+    return FileURLToLocalPath(FileURL(inRelativeURL).InterpretFrom(inFileURL));
+}

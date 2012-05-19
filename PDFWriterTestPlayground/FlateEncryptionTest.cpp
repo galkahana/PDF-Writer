@@ -42,28 +42,31 @@ FlateEncryptionTest::~FlateEncryptionTest(void)
 {
 }
 
-EStatusCode FlateEncryptionTest::Run()
+EStatusCode FlateEncryptionTest::Run(const TestConfiguration& inTestConfiguration)
 {
 	EStatusCode status;
 
 	do
 	{
 		// Create encrypted copy of the message
-		char* aString = "encryptedMessage";
+		string aString = "encryptedMessage";
 
-		IByteWriter* encoderStream = new OutputFlateEncodeStream(new OutputBufferedStream(new OutputFileStream("c:\\PDFLibTests\\encrypted.txt")));
+		IByteWriter* encoderStream = new OutputFlateEncodeStream(new OutputBufferedStream(new OutputFileStream(
+                                        RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"encrypted.txt"))));
 
-		LongBufferSizeType writtenSize = encoderStream->Write((const IOBasicTypes::Byte*)aString,strlen(aString));
+		LongBufferSizeType writtenSize = encoderStream->Write((const IOBasicTypes::Byte*)aString.c_str(),aString.length());
 		delete encoderStream;
-		if(writtenSize != strlen(aString))
+		if(writtenSize != aString.length())
 		{
 			cout<<"Failed to write all message to output\n";
 			status = PDFHummus::eFailure;
 			break;
 		}
 
-		IByteReader* encoderReaderStream = new InputBufferedStream(new InputFileStream("c:\\PDFLibTests\\encrypted.txt"));
-		IByteWriter* decoderWriterStream = new OutputFlateDecodeStream(new OutputBufferedStream(new OutputFileStream("c:\\PDFLibTests\\decrypted.txt"))); 
+		IByteReader* encoderReaderStream = new InputBufferedStream(new InputFileStream(
+                                          RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"encrypted.txt")));
+		IByteWriter* decoderWriterStream = new OutputFlateDecodeStream(new OutputBufferedStream(new OutputFileStream(
+                                          RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"decrypted.txt")))); 
 
 		OutputStreamTraits outputTraits(decoderWriterStream);
 		status = outputTraits.CopyToOutputStream(encoderReaderStream);
@@ -78,7 +81,8 @@ EStatusCode FlateEncryptionTest::Run()
 		delete decoderWriterStream;
 
 		// now read again decrypted and compare to original message
-		IByteReader* decoderReaderStream = new InputBufferedStream(new InputFileStream("c:\\PDFLibTests\\decrypted.txt"));
+		IByteReader* decoderReaderStream = new InputBufferedStream(new InputFileStream(
+                                          RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"decrypted.txt")));
 		char buffer[256];
 
 		LongBufferSizeType readSize = decoderReaderStream->Read((IOBasicTypes::Byte*)buffer,255);
@@ -86,7 +90,7 @@ EStatusCode FlateEncryptionTest::Run()
 
 		delete decoderReaderStream;
 
-		if(strcmp(aString,buffer) != 0)
+		if(strcmp(aString.c_str(),buffer) != 0)
 		{
 			cout<<"decrypted content is different from encrypted content\n";
 			status = PDFHummus::eFailure;

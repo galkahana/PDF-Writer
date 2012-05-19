@@ -129,7 +129,6 @@ EStatusCode Type1ToType2Converter::CallOtherSubr(const LongList& inOperandList,L
 	// should get here onther for 0 othersubr, to mark flex segment end. implement it...and also insert a node
 	// for flex
 	LongList::const_reverse_iterator it = inOperandList.rbegin();
-	long otherSubrIndex = *it; // this should be 0
 	++it;
 	long argumentsCount = *it;
 	++it;

@@ -35,7 +35,7 @@ AppendPagesTest::~AppendPagesTest(void)
 {
 }
 
-EStatusCode AppendPagesTest::Run()
+EStatusCode AppendPagesTest::Run(const TestConfiguration& inTestConfiguration)
 {
 	EStatusCode status;
 
@@ -43,7 +43,7 @@ EStatusCode AppendPagesTest::Run()
 	{
 	 	PDFWriter pdfWriter;
 
-		status = pdfWriter.StartPDF("C:\\PDFLibTests\\AppendPagesTest.PDF",ePDFVersion13,LogConfiguration(true,true,"c:\\pdflibtests\\AppendPagesTestLog.txt"));
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"AppendPagesTest.PDF"),ePDFVersion13,LogConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"AppendPagesTestLog.txt")));
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
@@ -52,14 +52,14 @@ EStatusCode AppendPagesTest::Run()
 
 		EStatusCodeAndObjectIDTypeList result;
 		
-		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\Original.pdf",PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/Original.pdf"),PDFPageRange());
 		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from Original.PDF\n";
 			status = result.first;
 			break;
 		}
-		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF",PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/XObjectContent.PDF"),PDFPageRange());
 		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from XObjectContent.pdf\n";
@@ -67,7 +67,7 @@ EStatusCode AppendPagesTest::Run()
 			break;
 		}
 
-		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\BasicTIFFImagesTest.PDF",PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/BasicTIFFImagesTest.PDF"),PDFPageRange());
 		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from BasicTIFFImagesTest.PDF\n";

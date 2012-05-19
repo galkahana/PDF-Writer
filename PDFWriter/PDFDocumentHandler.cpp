@@ -425,12 +425,12 @@ void PDFDocumentHandler::SetPDFRectangleFromPDFArray(PDFArray* inPDFArray,PDFRec
 
 double PDFDocumentHandler::GetAsDoubleValue(PDFObject* inNumberObject)
 {
-	if(inNumberObject->GetType() == ePDFObjectInteger)
+	if(inNumberObject->GetType() == PDFObject::ePDFObjectInteger)
 	{
 		PDFInteger* anInteger = (PDFInteger*)inNumberObject;
 		return (double)anInteger->GetValue();
 	}
-	else if(inNumberObject->GetType() == ePDFObjectReal)
+	else if(inNumberObject->GetType() == PDFObject::ePDFObjectReal)
 	{
 		PDFReal* aReal = (PDFReal*)inNumberObject;
 		return aReal->GetValue();
@@ -459,11 +459,11 @@ EStatusCode PDFDocumentHandler::WritePageContentToSingleStream(IByteWriter* inTa
 	EStatusCode status = PDFHummus::eSuccess;
 
 	RefCountPtr<PDFObject> pageContent(mParser.QueryDictionaryObject(inPageObject,"Contents"));
-	if(pageContent->GetType() == ePDFObjectStream)
+	if(pageContent->GetType() == PDFObject::ePDFObjectStream)
 	{
 		status = WritePDFStreamInputToStream(inTargetStream,(PDFStreamInput*)pageContent.GetPtr());
 	}
-	else if(pageContent->GetType() == ePDFObjectArray)
+	else if(pageContent->GetType() == PDFObject::ePDFObjectArray)
 	{
 		SingleValueContainerIterator<PDFObjectVector> it = ((PDFArray*)pageContent.GetPtr())->GetIterator();
 		PDFObjectCastPtr<PDFIndirectObjectReference> refItem;
@@ -495,7 +495,7 @@ EStatusCode PDFDocumentHandler::WritePageContentToSingleStream(IByteWriter* inTa
 	}
 	else
 	{
-		TRACE_LOG1("PDFDocumentHandler::WritePageContentToSingleStream, error copying page content, expected either array or stream, getting %s",scPDFObjectTypeLabel[pageContent->GetType()]);
+		TRACE_LOG1("PDFDocumentHandler::WritePageContentToSingleStream, error copying page content, expected either array or stream, getting %s",PDFObject::scPDFObjectTypeLabel[pageContent->GetType()]);
 		status = PDFHummus::eFailure;
 	}
 	
@@ -578,17 +578,17 @@ void PDFDocumentHandler::RegisterInDirectObjects(PDFDictionary* inDictionary,Obj
 	// i'm assuming keys are directs. i can move into indirects if that's important
 	while(it.MoveNext())
 	{
-		if(it.GetValue()->GetType() == ePDFObjectIndirectObjectReference)
+		if(it.GetValue()->GetType() == PDFObject::ePDFObjectIndirectObjectReference)
 		{
 			ObjectIDTypeToObjectIDTypeMap::iterator	itObjects = mSourceToTarget.find(((PDFIndirectObjectReference*)it.GetValue())->mObjectID);
 			if(itObjects == mSourceToTarget.end())
 				outNewObjects.push_back(((PDFIndirectObjectReference*)it.GetValue())->mObjectID);
 		} 
-		else if(it.GetValue()->GetType() == ePDFObjectArray)
+		else if(it.GetValue()->GetType() == PDFObject::ePDFObjectArray)
 		{
 			RegisterInDirectObjects((PDFArray*)it.GetValue(),outNewObjects);
 		}
-		else if(it.GetValue()->GetType() == ePDFObjectDictionary)
+		else if(it.GetValue()->GetType() == PDFObject::ePDFObjectDictionary)
 		{
 			RegisterInDirectObjects((PDFDictionary*)it.GetValue(),outNewObjects);
 		}
@@ -601,17 +601,17 @@ void PDFDocumentHandler::RegisterInDirectObjects(PDFArray* inArray,ObjectIDTypeL
 
 	while(it.MoveNext())
 	{
-		if(it.GetItem()->GetType() == ePDFObjectIndirectObjectReference)
+		if(it.GetItem()->GetType() == PDFObject::ePDFObjectIndirectObjectReference)
 		{
 			ObjectIDTypeToObjectIDTypeMap::iterator	itObjects = mSourceToTarget.find(((PDFIndirectObjectReference*)it.GetItem())->mObjectID);
 			if(itObjects == mSourceToTarget.end())
 				outNewObjects.push_back(((PDFIndirectObjectReference*)it.GetItem())->mObjectID);
 		} 
-		else if(it.GetItem()->GetType() == ePDFObjectArray)
+		else if(it.GetItem()->GetType() == PDFObject::ePDFObjectArray)
 		{
 			RegisterInDirectObjects((PDFArray*)it.GetItem(),outNewObjects);
 		}
-		else if(it.GetItem()->GetType() == ePDFObjectDictionary)
+		else if(it.GetItem()->GetType() == PDFObject::ePDFObjectDictionary)
 		{
 			RegisterInDirectObjects((PDFDictionary*)it.GetItem(),outNewObjects);
 		}
@@ -659,47 +659,47 @@ EStatusCode PDFDocumentHandler::WriteObjectByType(PDFObject* inObject,ETokenSepa
 
 	switch(inObject->GetType())
 	{
-		case ePDFObjectBoolean:
+		case PDFObject::ePDFObjectBoolean:
 		{
 			mObjectsContext->WriteBoolean(((PDFBoolean*)inObject)->GetValue(),inSeparator);
 			break;
 		}
-		case ePDFObjectLiteralString:
+		case PDFObject::ePDFObjectLiteralString:
 		{
 			mObjectsContext->WriteLiteralString(((PDFLiteralString*)inObject)->GetValue(),inSeparator);
 			break;
 		}
-		case ePDFObjectHexString:
+		case PDFObject::ePDFObjectHexString:
 		{
 			mObjectsContext->WriteHexString(((PDFHexString*)inObject)->GetValue(),inSeparator);
 			break;
 		}
-		case ePDFObjectNull:
+		case PDFObject::ePDFObjectNull:
 		{
 			mObjectsContext->WriteNull(eTokenSeparatorEndLine);
 			break;
 		}
-		case ePDFObjectName:
+		case PDFObject::ePDFObjectName:
 		{
 			mObjectsContext->WriteName(((PDFName*)inObject)->GetValue(),inSeparator);
 			break;
 		}
-		case ePDFObjectInteger:
+		case PDFObject::ePDFObjectInteger:
 		{
 			mObjectsContext->WriteInteger(((PDFInteger*)inObject)->GetValue(),inSeparator);
 			break;
 		}
-		case ePDFObjectReal:
+		case PDFObject::ePDFObjectReal:
 		{
 			mObjectsContext->WriteDouble(((PDFReal*)inObject)->GetValue(),inSeparator);
 			break;
 		}
-		case ePDFObjectSymbol:
+		case PDFObject::ePDFObjectSymbol:
 		{
 			mObjectsContext->WriteKeyword(((PDFSymbol*)inObject)->GetValue());
 			break;
 		}
-		case ePDFObjectIndirectObjectReference:
+		case PDFObject::ePDFObjectIndirectObjectReference:
 		{
 			ObjectIDType sourceObjectID = ((PDFIndirectObjectReference*)inObject)->mObjectID;
 			ObjectIDTypeToObjectIDTypeMap::iterator	itObjects = mSourceToTarget.find(sourceObjectID);
@@ -712,17 +712,17 @@ EStatusCode PDFDocumentHandler::WriteObjectByType(PDFObject* inObject,ETokenSepa
 			mObjectsContext->WriteIndirectObjectReference(itObjects->second,inSeparator);
 			break;
 		}
-		case ePDFObjectArray:
+		case PDFObject::ePDFObjectArray:
 		{
 			status = WriteArrayObject((PDFArray*)inObject,inSeparator,outSourceObjectsToAdd);
 			break;
 		}
-		case ePDFObjectDictionary:
+		case PDFObject::ePDFObjectDictionary:
 		{
 			status = WriteDictionaryObject((PDFDictionary*)inObject,outSourceObjectsToAdd);
 			break;
 		}
-		case ePDFObjectStream:
+		case PDFObject::ePDFObjectStream:
 		{
 			status = WriteStreamObject((PDFStreamInput*)inObject,outSourceObjectsToAdd);
 			break;
@@ -778,48 +778,48 @@ EStatusCode PDFDocumentHandler::WriteObjectByType(PDFObject* inObject,Dictionary
 
 	switch(inObject->GetType())
 	{
-		case ePDFObjectBoolean:
+		case PDFObject::ePDFObjectBoolean:
 		{
 			inDictionaryContext->WriteBooleanValue(((PDFBoolean*)inObject)->GetValue());
 			break;
 		}
-		case ePDFObjectLiteralString:
+		case PDFObject::ePDFObjectLiteralString:
 		{
 			inDictionaryContext->WriteLiteralStringValue(((PDFLiteralString*)inObject)->GetValue());
 			break;
 		}
-		case ePDFObjectHexString:
+		case PDFObject::ePDFObjectHexString:
 		{
 			inDictionaryContext->WriteHexStringValue(((PDFHexString*)inObject)->GetValue());
 			break;
 		}
-		case ePDFObjectNull:
+		case PDFObject::ePDFObjectNull:
 		{
 			inDictionaryContext->WriteNullValue();
 			break;
 		}
-		case ePDFObjectName:
+		case PDFObject::ePDFObjectName:
 		{
 			inDictionaryContext->WriteNameValue(((PDFName*)inObject)->GetValue());
 			break;
 		}
-		case ePDFObjectInteger:
+		case PDFObject::ePDFObjectInteger:
 		{
 			inDictionaryContext->WriteIntegerValue(((PDFInteger*)inObject)->GetValue());
 			break;
 		}
-		case ePDFObjectReal:
+		case PDFObject::ePDFObjectReal:
 		{
 			inDictionaryContext->WriteDoubleValue(((PDFReal*)inObject)->GetValue());
 			break;
 		}
-		case ePDFObjectSymbol:
+		case PDFObject::ePDFObjectSymbol:
 		{
 			// not sure this is supposed to happen...but then...it is probably not supposed to happen at any times...
 			inDictionaryContext->WriteKeywordValue(((PDFSymbol*)inObject)->GetValue());
 			break;
 		}
-		case ePDFObjectIndirectObjectReference:
+		case PDFObject::ePDFObjectIndirectObjectReference:
 		{
 			ObjectIDType sourceObjectID = ((PDFIndirectObjectReference*)inObject)->mObjectID;
 			ObjectIDTypeToObjectIDTypeMap::iterator	itObjects = mSourceToTarget.find(sourceObjectID);
@@ -832,17 +832,17 @@ EStatusCode PDFDocumentHandler::WriteObjectByType(PDFObject* inObject,Dictionary
 			inDictionaryContext->WriteObjectReferenceValue(itObjects->second);
 			break;
 		}
-		case ePDFObjectArray:
+		case PDFObject::ePDFObjectArray:
 		{
 			status = WriteArrayObject((PDFArray*)inObject,eTokenSeparatorEndLine,outSourceObjectsToAdd);
 			break;
 		}
-		case ePDFObjectDictionary:
+		case PDFObject::ePDFObjectDictionary:
 		{
 			status = WriteDictionaryObject((PDFDictionary*)inObject,outSourceObjectsToAdd);
 			break;
 		}
-		case ePDFObjectStream:
+		case PDFObject::ePDFObjectStream:
 		{
 			// k. that's not supposed to happen
 			TRACE_LOG("PDFDocumentHandler::WriteObjectByType, got that wrong sir. ain't gonna write a stream in a dictionary. must be a ref. we got exception here");
@@ -1082,7 +1082,7 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::CreatePDFPageForPage(unsigned lon
 	mWrittenPage = NULL;
 	mDocumentContext->RemoveDocumentContextExtender(this);
 
-	if(result.first = PDFHummus::eSuccess)
+	if(result.first == PDFHummus::eSuccess)
 	{
 		it = mExtenders.begin();
 		for(; it != mExtenders.end() && PDFHummus::eSuccess == result.first; ++it)
@@ -1105,11 +1105,11 @@ EStatusCode PDFDocumentHandler::CopyPageContentToTargetPage(PDFPage* inPage,PDFD
 	PageContentContext* pageContentContext = mDocumentContext->StartPageContentContext(inPage);
 
 	RefCountPtr<PDFObject> pageContent(mParser.QueryDictionaryObject(inPageObject,"Contents"));
-	if(pageContent->GetType() == ePDFObjectStream)
+	if(pageContent->GetType() == PDFObject::ePDFObjectStream)
 	{
 		status = WritePDFStreamInputToContentContext(pageContentContext,(PDFStreamInput*)pageContent.GetPtr());
 	}
-	else if(pageContent->GetType() == ePDFObjectArray)
+	else if(pageContent->GetType() == PDFObject::ePDFObjectArray)
 	{
 		SingleValueContainerIterator<PDFObjectVector> it = ((PDFArray*)pageContent.GetPtr())->GetIterator();
 		PDFObjectCastPtr<PDFIndirectObjectReference> refItem;
@@ -1134,7 +1134,7 @@ EStatusCode PDFDocumentHandler::CopyPageContentToTargetPage(PDFPage* inPage,PDFD
 	}
 	else
 	{
-		TRACE_LOG1("PDFDocumentHandler::CopyPageContentToTargetPage, error copying page content, expected either array or stream, getting %s",scPDFObjectTypeLabel[pageContent->GetType()]);
+		TRACE_LOG1("PDFDocumentHandler::CopyPageContentToTargetPage, error copying page content, expected either array or stream, getting %s",PDFObject::scPDFObjectTypeLabel[pageContent->GetType()]);
 		status = PDFHummus::eFailure;
 	}
 	
@@ -1717,7 +1717,7 @@ string PDFDocumentHandler::AsEncodedName(const string& inName)
 EStatusCodeAndObjectIDType PDFDocumentHandler::CopyObjectToIndirectObject(PDFObject* inObject)
 {
 	EStatusCodeAndObjectIDType result;
-	if(inObject->GetType() != ePDFObjectIndirectObjectReference)
+	if(inObject->GetType() != PDFObject::ePDFObjectIndirectObjectReference)
 	{
 		result.second = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
 		result.first = CopyDirectObjectToIndirectObject(inObject,result.second);
@@ -1765,11 +1765,11 @@ EStatusCode PDFDocumentHandler::MergePageContentToTargetPage(PDFPage* inTargetPa
 	PageContentContext* pageContentContext = mDocumentContext->StartPageContentContext(inTargetPage);
 
 	RefCountPtr<PDFObject> pageContent(mParser.QueryDictionaryObject(inSourcePage,"Contents"));
-	if(pageContent->GetType() == ePDFObjectStream)
+	if(pageContent->GetType() == PDFObject::ePDFObjectStream)
 	{
 		status = WritePDFStreamInputToContentContext(pageContentContext,(PDFStreamInput*)pageContent.GetPtr(),inMappedResourcesNames);
 	}
-	else if(pageContent->GetType() == ePDFObjectArray)
+	else if(pageContent->GetType() == PDFObject::ePDFObjectArray)
 	{
 		SingleValueContainerIterator<PDFObjectVector> it = ((PDFArray*)pageContent.GetPtr())->GetIterator();
 		PDFObjectCastPtr<PDFIndirectObjectReference> refItem;
@@ -1794,7 +1794,7 @@ EStatusCode PDFDocumentHandler::MergePageContentToTargetPage(PDFPage* inTargetPa
 	}
 	else
 	{
-		TRACE_LOG1("PDFDocumentHandler::MergePageContentToTargetPage, error copying page content, expected either array or stream, getting %s",scPDFObjectTypeLabel[pageContent->GetType()]);
+		TRACE_LOG1("PDFDocumentHandler::MergePageContentToTargetPage, error copying page content, expected either array or stream, getting %s",PDFObject::scPDFObjectTypeLabel[pageContent->GetType()]);
 		status = PDFHummus::eFailure;
 	}
 

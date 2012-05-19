@@ -28,5 +28,5 @@ public:
 	PDFCopyingContextTest(void);
 	virtual ~PDFCopyingContextTest(void);
 
-	PDFHummus::EStatusCode Run();
+	PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration);
 };

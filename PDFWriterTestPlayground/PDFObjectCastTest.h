@@ -28,5 +28,5 @@ public:
 	PDFObjectCastTest(void);
 	virtual ~PDFObjectCastTest(void);
 
-	virtual PDFHummus::EStatusCode Run();
+	virtual PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration);
 };

@@ -38,10 +38,10 @@ public:
 	Type1Test(void);
 	~Type1Test(void);
 
-	virtual PDFHummus::EStatusCode Run();
+	virtual PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration);
 
 private:
-	PDFHummus::EStatusCode SaveCharstringCode(const string& inCharStringName,Type1Input* inType1Input);
+	PDFHummus::EStatusCode SaveCharstringCode(const TestConfiguration& inTestConfiguration,const string& inCharStringName,Type1Input* inType1Input);
 	PDFHummus::EStatusCode ShowDependencies(const string& inCharStringName,Type1Input* inType1Input);
 
 	void ShowFontDictionary(const Type1FontDictionary& inFontDictionary);

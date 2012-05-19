@@ -41,7 +41,7 @@ ShutDownRestartTest::~ShutDownRestartTest(void)
 }
 
 
-EStatusCode ShutDownRestartTest::Run()
+EStatusCode ShutDownRestartTest::Run(const TestConfiguration& inTestConfiguration)
 {
 	EStatusCode status; 
 
@@ -49,7 +49,7 @@ EStatusCode ShutDownRestartTest::Run()
 	{
 		{
 			PDFWriter pdfWriterA;
-			status = pdfWriterA.StartPDF("C:\\PDFLibTests\\SimpleContentShutdownRestart.PDF",ePDFVersion13);
+			status = pdfWriterA.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleContentShutdownRestart.PDF"),ePDFVersion13);
 			if(status != PDFHummus::eSuccess)
 			{
 				cout<<"failed to start PDF\n";
@@ -59,7 +59,7 @@ EStatusCode ShutDownRestartTest::Run()
 			PDFPage* page = new PDFPage();
 			page->SetMediaBox(PDFRectangle(0,0,595,842));
 
-			PDFUsedFont* font = pdfWriterA.GetFontForFile("C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
+			PDFUsedFont* font = pdfWriterA.GetFontForFile(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/fonts/arial.ttf"));
 			if(!font)
 			{
 				status = PDFHummus::eFailure;
@@ -134,7 +134,7 @@ EStatusCode ShutDownRestartTest::Run()
 			}
 
 
-			status = pdfWriterA.Shutdown("C:\\PDFLibTests\\ShutDownRestartState.txt");
+			status = pdfWriterA.Shutdown(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"ShutDownRestartState.txt"));
 			if(status != PDFHummus::eSuccess)
 			{
 				cout<<"failed to shutdown library\n";
@@ -144,7 +144,10 @@ EStatusCode ShutDownRestartTest::Run()
 		}
 		{
 			PDFWriter pdfWriterB;
-			status = pdfWriterB.ContinuePDF("C:\\PDFLibTests\\SimpleContentShutdownRestart.PDF","C:\\PDFLibTests\\ShutDownRestartState.txt");
+			status = pdfWriterB.ContinuePDF(
+                            RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleContentShutdownRestart.PDF"),
+                            RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"ShutDownRestartState.txt")
+                    );
 			if(status != PDFHummus::eSuccess)
 			{
 				cout<<"failed to restart library\n";

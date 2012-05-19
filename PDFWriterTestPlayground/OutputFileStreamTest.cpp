@@ -38,9 +38,9 @@ OutputFileStreamTest::~OutputFileStreamTest(void)
 {
 }
 
-EStatusCode OutputFileStreamTest::Run()
+EStatusCode OutputFileStreamTest::Run(const TestConfiguration& inTestConfiguration)
 {
-	OutputFileStream stream("C:\\PDFLibTests\\OutputFileStreamTest.txt");
+	OutputFileStream stream(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"OutputFileStreamTest.txt"));
 	Byte buffer[5] = {'a','b','c','d','e'};
 
 	stream.Write(buffer,5);

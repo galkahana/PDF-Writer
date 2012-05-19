@@ -40,14 +40,14 @@ FormXObjectTest::~FormXObjectTest(void)
 {
 }
 
-EStatusCode FormXObjectTest::Run()
+EStatusCode FormXObjectTest::Run(const TestConfiguration& inTestConfiguration)
 {
 	PDFWriter pdfWriter;
 	EStatusCode status; 
 
 	do
 	{
-		status = pdfWriter.StartPDF("C:\\PDFLibTests\\XObjectContent.PDF",ePDFVersion13);
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"XObjectContent.PDF"),ePDFVersion13);
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";

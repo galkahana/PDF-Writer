@@ -29,8 +29,8 @@ public:
 	TIFFImageTest(void);
 	virtual ~TIFFImageTest(void);
 
-	virtual PDFHummus::EStatusCode Run();
+	virtual PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration);
 
 private:
-	PDFHummus::EStatusCode AddPageForTIFF(PDFWriter& inPDFWriter, const char* inTiffFilePath);
+	PDFHummus::EStatusCode AddPageForTIFF(PDFWriter& inPDFWriter, const string& inTiffFilePath);
 };

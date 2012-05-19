@@ -37,14 +37,14 @@ LinksTest::~LinksTest(void)
 {
 }
 
-EStatusCode LinksTest::Run()
+EStatusCode LinksTest::Run(const TestConfiguration& inTestConfiguration)
 {
 	EStatusCode status;
 	PDFWriter pdfWriter;
 
 	do
 	{
-		status = pdfWriter.StartPDF("C:\\PDFLibTests\\LinksTest.PDF",ePDFVersion13,LogConfiguration(true,true,"C:\\PDFLibTests\\LinksTest.log"));
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"LinksTest.PDF"),ePDFVersion13,LogConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"LinksTest.log")));
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
@@ -54,7 +54,8 @@ EStatusCode LinksTest::Run()
 		PDFPage* page = new PDFPage();
 		page->SetMediaBox(PDFRectangle(0,0,595,842));
 
-		PDFFormXObject* soundCloudLogo = pdfWriter.CreateFormXObjectFromJPGFile("c:\\PDFLibTests\\TestMaterials\\Images\\soundcloud_logo.jpg");
+		PDFFormXObject* soundCloudLogo = pdfWriter.CreateFormXObjectFromJPGFile(
+                                                RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/Images/soundcloud_logo.jpg"));
 
 
 		PageContentContext* contentContext = pdfWriter.StartPageContentContext(page);
@@ -65,7 +66,7 @@ EStatusCode LinksTest::Run()
 			break;
 		}
 
-		PDFUsedFont* font = pdfWriter.GetFontForFile("C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
+		PDFUsedFont* font = pdfWriter.GetFontForFile(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/fonts/arial.ttf"));
 		if(!font)
 		{
 			status = PDFHummus::eFailure;

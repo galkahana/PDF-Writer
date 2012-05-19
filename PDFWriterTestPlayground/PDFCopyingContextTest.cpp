@@ -36,7 +36,7 @@ PDFCopyingContextTest::~PDFCopyingContextTest(void)
 {
 }
 
-EStatusCode PDFCopyingContextTest::Run()
+EStatusCode PDFCopyingContextTest::Run(const TestConfiguration& inTestConfiguration)
 {
 	EStatusCode status;
 	PDFWriter pdfWriter;
@@ -44,7 +44,10 @@ EStatusCode PDFCopyingContextTest::Run()
 
 	do
 	{
-		status = pdfWriter.StartPDF("C:\\PDFLibTests\\PDFCopyingContextTest.PDF",ePDFVersion13,LogConfiguration(true,true,"c:\\pdflibtests\\PDFCopyingContextTest.txt"));
+		status = pdfWriter.StartPDF(
+                        RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"PDFCopyingContextTest.PDF"),ePDFVersion13,
+                        LogConfiguration(true,true,
+                        RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"PDFCopyingContextTest.txt")));
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
@@ -52,7 +55,8 @@ EStatusCode PDFCopyingContextTest::Run()
 		}	
 
 
-		copyingContext = pdfWriter.CreatePDFCopyingContext("C:\\PDFLibTests\\TestMaterials\\BasicTIFFImagesTest.PDF");
+		copyingContext = pdfWriter.CreatePDFCopyingContext(
+                        RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/BasicTIFFImagesTest.PDF"));
 		if(!copyingContext)
 		{
 			cout<<"failed to initialize copying context from BasicTIFFImagesTest\n";

@@ -42,14 +42,14 @@ SimpleContentPageTest::~SimpleContentPageTest(void)
 	Creates a single page PDF with some drawings
 */
 
-EStatusCode SimpleContentPageTest::Run()
+EStatusCode SimpleContentPageTest::Run(const TestConfiguration& inTestConfiguration)
 {
 	PDFWriter pdfWriter;
 	EStatusCode status; 
 
 	do
 	{
-		status = pdfWriter.StartPDF("C:\\PDFLibTests\\SimpleContent.PDF",ePDFVersion13);
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleContent.PDF"),ePDFVersion13);
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";

@@ -27,16 +27,16 @@ public:
 	MergePDFPages(void);
 	~MergePDFPages(void);
 
-	virtual PDFHummus::EStatusCode Run();
+	virtual PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration);
 
 private:
 
-	PDFHummus::EStatusCode TestOnlyMerge();
-	PDFHummus::EStatusCode TestPrefixGraphicsMerge();
-	PDFHummus::EStatusCode TestSuffixGraphicsMerge();
-	PDFHummus::EStatusCode TestBothGraphicsMerge();
-	PDFHummus::EStatusCode MergeTwoPageInSeparatePhases();
-	PDFHummus::EStatusCode MergeTwoPageWithEvents();
-	PDFHummus::EStatusCode MergePagesUsingCopyingContext();
+	PDFHummus::EStatusCode TestOnlyMerge(const TestConfiguration& inTestConfiguration);
+	PDFHummus::EStatusCode TestPrefixGraphicsMerge(const TestConfiguration& inTestConfiguration);
+	PDFHummus::EStatusCode TestSuffixGraphicsMerge(const TestConfiguration& inTestConfiguration);
+	PDFHummus::EStatusCode TestBothGraphicsMerge(const TestConfiguration& inTestConfiguration);
+	PDFHummus::EStatusCode MergeTwoPageInSeparatePhases(const TestConfiguration& inTestConfiguration);
+	PDFHummus::EStatusCode MergeTwoPageWithEvents(const TestConfiguration& inTestConfiguration);
+	PDFHummus::EStatusCode MergePagesUsingCopyingContext(const TestConfiguration& inTestConfiguration);
 
 };

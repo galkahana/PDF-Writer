@@ -45,7 +45,7 @@ PDFParserTest::~PDFParserTest(void)
 {
 }
 
-EStatusCode PDFParserTest::Run()
+EStatusCode PDFParserTest::Run(const TestConfiguration& inTestConfiguration)
 {
 	EStatusCode status = PDFHummus::eSuccess;
 	InputFile pdfFile;
@@ -54,10 +54,10 @@ EStatusCode PDFParserTest::Run()
 
 	do
 	{
-		status = pdfFile.OpenFile("C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF");
+		status = pdfFile.OpenFile(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/XObjectContent.PDF"));
 		if(status != PDFHummus::eSuccess)
 		{
-			cout<<"unable to open file for reading. should be in C:\\PDFLibTests\\TestMaterials\\XObjectContent.PDF\n";
+			cout<<"unable to open file for reading. should be in TestMaterials/XObjectContent.PDF\n";
 			break;
 		}
 
@@ -94,7 +94,7 @@ EStatusCode PDFParserTest::Run()
 		}
 
 		mTabLevel = 0;
-		status = outputFile.OpenFile("C:\\PDFLibTests\\PDFParserTestOutput.txt");
+		status = outputFile.OpenFile(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"PDFParserTestOutput.txt"));
 
 		status = IterateObjectTypes(catalog.GetPtr(),parser,outputFile.GetOutputStream());
 		if(status != PDFHummus::eSuccess)
@@ -121,7 +121,7 @@ EStatusCode PDFParserTest::IterateObjectTypes(PDFObject* inObject,PDFParser& inP
 	for(int i=0;i<mTabLevel;++i)
 		inOutput->Write((const Byte*)"  ",2);
 
-	if(inObject->GetType() == ePDFObjectIndirectObjectReference)
+	if(inObject->GetType() == PDFObject::ePDFObjectIndirectObjectReference)
 	{
 		inOutput->Write((const Byte*)scIndirectStart,strlen(scIndirectStart));
 		if(mIteratedObjectIDs.find(((PDFIndirectObjectReference*)inObject)->mObjectID) == mIteratedObjectIDs.end())
@@ -144,9 +144,9 @@ EStatusCode PDFParserTest::IterateObjectTypes(PDFObject* inObject,PDFParser& inP
 		}
 		
 	}
-	else if(inObject->GetType() == ePDFObjectArray)
+	else if(inObject->GetType() == PDFObject::ePDFObjectArray)
 	{
-		primitivesWriter.WriteKeyword(scPDFObjectTypeLabel[inObject->GetType()]);
+		primitivesWriter.WriteKeyword(PDFObject::scPDFObjectTypeLabel[inObject->GetType()]);
 		++mTabLevel;
 		PDFObjectCastPtr<PDFArray> anArray;
 		anArray = inObject;  // do assignment here, otherwise it's considered constructor...which won't addref
@@ -157,9 +157,9 @@ EStatusCode PDFParserTest::IterateObjectTypes(PDFObject* inObject,PDFParser& inP
 		--mTabLevel;
 		return status;
 	}
-	else if(inObject->GetType() == ePDFObjectDictionary)
+	else if(inObject->GetType() == PDFObject::ePDFObjectDictionary)
 	{
-		primitivesWriter.WriteKeyword(scPDFObjectTypeLabel[inObject->GetType()]);
+		primitivesWriter.WriteKeyword(PDFObject::scPDFObjectTypeLabel[inObject->GetType()]);
 		++mTabLevel;
 		PDFObjectCastPtr<PDFDictionary> aDictionary;
 		aDictionary = inObject; // do assignment here, otherwise it's considered constructor...which won't addref
@@ -176,7 +176,7 @@ EStatusCode PDFParserTest::IterateObjectTypes(PDFObject* inObject,PDFParser& inP
 		return status;
 
 	}
-	else if(inObject->GetType() == ePDFObjectStream)
+	else if(inObject->GetType() == PDFObject::ePDFObjectStream)
 	{
 		inOutput->Write((const Byte*)scIteratingStreamDict,strlen(scIteratingStreamDict));
 		PDFObjectCastPtr<PDFDictionary> aDictionary(((PDFStreamInput*)inObject)->QueryStreamDictionary());
@@ -184,7 +184,7 @@ EStatusCode PDFParserTest::IterateObjectTypes(PDFObject* inObject,PDFParser& inP
 	}
 	else 
 	{
-		primitivesWriter.WriteKeyword(scPDFObjectTypeLabel[inObject->GetType()]);
+		primitivesWriter.WriteKeyword(PDFObject::scPDFObjectTypeLabel[inObject->GetType()]);
 		return PDFHummus::eSuccess;
 	}
 	

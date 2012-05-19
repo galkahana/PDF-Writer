@@ -40,13 +40,13 @@ SimpleTextUsage::~SimpleTextUsage(void)
 
 
 #include "Trace.h"
-EStatusCode SimpleTextUsage::Run()
+EStatusCode SimpleTextUsage::Run(const TestConfiguration& inTestConfiguration)
 {
 	EStatusCode status;
 
 	do
 	{
-		status = RunCFFTest();
+		status = RunCFFTest(inTestConfiguration);
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"Failed CFF Test\n";
@@ -54,7 +54,7 @@ EStatusCode SimpleTextUsage::Run()
 			break;
 		}
 
-		status = RunTrueTypeTest();
+		status = RunTrueTypeTest(inTestConfiguration);
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"Failed True Type Test\n";
@@ -62,7 +62,7 @@ EStatusCode SimpleTextUsage::Run()
 			break;
 		}
 
-		status = RunType1Test();
+		status = RunType1Test(inTestConfiguration);
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"Failed Type 1 Test\n";
@@ -75,14 +75,17 @@ EStatusCode SimpleTextUsage::Run()
 	return status;
 }
 
-EStatusCode SimpleTextUsage::RunCFFTest()
+EStatusCode SimpleTextUsage::RunCFFTest(const TestConfiguration& inTestConfiguration)
 {
 	PDFWriter pdfWriter;
 	EStatusCode status; 
 
 	do
 	{
-		status = pdfWriter.StartPDF("C:\\PDFLibTests\\SimpleTextUsageCFF.PDF",ePDFVersion13,LogConfiguration(true,true,"C:\\PDFLibTests\\SimpleTextUsage.log"));
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleTextUsageCFF.PDF"),
+                                    ePDFVersion13,
+                                    LogConfiguration(true,true,
+                                                     RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleTextUsage.log")));
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
@@ -100,7 +103,10 @@ EStatusCode SimpleTextUsage::RunCFFTest()
 			break;
 		}
 
-		PDFUsedFont* font = pdfWriter.GetFontForFile("C:\\PDFLibTests\\TestMaterials\\fonts\\BrushScriptStd.otf");
+		PDFUsedFont* font = pdfWriter.GetFontForFile(
+                                                     RelativeURLToLocalPath(
+                                                                            inTestConfiguration.mSampleFileBase,
+                                                                            "TestMaterials/fonts/BrushScriptStd.otf"));
 		if(!font)
 		{
 			status = PDFHummus::eFailure;
@@ -127,7 +133,10 @@ EStatusCode SimpleTextUsage::RunCFFTest()
 		contentContext->BT();
 		contentContext->k(0,0,0,1);
 
-		PDFUsedFont* fontK = pdfWriter.GetFontForFile("C:\\PDFLibTests\\TestMaterials\\fonts\\KozGoPro-Regular.otf");
+		PDFUsedFont* fontK = pdfWriter.GetFontForFile(
+                                                      RelativeURLToLocalPath(
+                                                                             inTestConfiguration.mSampleFileBase,
+                                                                             "TestMaterials/fonts/KozGoPro-Regular.otf"));
 		if(!fontK)
 		{
 			status = PDFHummus::eFailure;
@@ -171,14 +180,17 @@ EStatusCode SimpleTextUsage::RunCFFTest()
 
 }
 
-EStatusCode SimpleTextUsage::RunTrueTypeTest()
+EStatusCode SimpleTextUsage::RunTrueTypeTest(const TestConfiguration& inTestConfiguration)
 {
 	PDFWriter pdfWriter;
 	EStatusCode status; 
 
 	do
 	{
-		status = pdfWriter.StartPDF("C:\\PDFLibTests\\SimpleTextUsageTrueType.PDF",ePDFVersion13,LogConfiguration(true,true,"C:\\PDFLibTests\\SimpleTextUsage.log"));
+		status = pdfWriter.StartPDF(
+                                    RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleTextUsageTrueType.PDF"),
+                                    ePDFVersion13,
+                                    LogConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleTextUsage.log")));
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
@@ -196,7 +208,8 @@ EStatusCode SimpleTextUsage::RunTrueTypeTest()
 			break;
 		}
 
-		PDFUsedFont* font = pdfWriter.GetFontForFile("C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
+		PDFUsedFont* font = pdfWriter.GetFontForFile(
+                                RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/fonts/arial.ttf"));
 		if(!font)
 		{
 			status = PDFHummus::eFailure;
@@ -244,14 +257,17 @@ EStatusCode SimpleTextUsage::RunTrueTypeTest()
 	return status;	
 }
 
-EStatusCode SimpleTextUsage::RunType1Test()
+EStatusCode SimpleTextUsage::RunType1Test(const TestConfiguration& inTestConfiguration)
 {
 	PDFWriter pdfWriter;
 	EStatusCode status; 
 
 	do
 	{
-		status = pdfWriter.StartPDF("C:\\PDFLibTests\\SimpleTextUsageType1.PDF",ePDFVersion13,LogConfiguration(true,true,"C:\\PDFLibTests\\SimpleTextUsage.log"));
+		status = pdfWriter.StartPDF(
+                         RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleTextUsageType1.PDF"),
+                         ePDFVersion13,
+                         LogConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleTextUsage.log")));
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
@@ -269,8 +285,9 @@ EStatusCode SimpleTextUsage::RunType1Test()
 			break;
 		}
 
-		PDFUsedFont* font = pdfWriter.GetFontForFile("C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFB",
-													 "C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFM");
+		PDFUsedFont* font = pdfWriter.GetFontForFile(
+                                RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/fonts/HLB_____.PFB"),
+                                RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/fonts/HLB_____.PFM"));
 		if(!font)
 		{
 			status = PDFHummus::eFailure;

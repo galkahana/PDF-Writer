@@ -719,7 +719,6 @@ EStatusCode TIFFImageHandler::ReadTopLevelTiffInformation()
 EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 {
 	EStatusCode status = PDFHummus::eSuccess;
-	int i=0;
 	uint16 xuint16;
 	uint16* xuint16p;
 	float* xfloatp;
@@ -2256,6 +2255,9 @@ void TIFFImageHandler::WriteImageXObjectFilter(DictionaryContext* inImageDiction
 				mObjectsContext->EndDictionary(decodeParmsDictionary);
 			}
 			break;
+        default:
+            // do nothing
+            break;
 	}
 }
 
@@ -2359,7 +2361,6 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 	uint16 edge=0;
 	unsigned char* buffer=NULL;
 
-	tsize_t written=0;
 	tsize_t bufferoffset=0;
 	unsigned char* samplebuffer=NULL;
 	tsize_t samplebufferoffset=0;
@@ -3414,10 +3415,7 @@ static toff_t STATIC_streamSeek(thandle_t inData, toff_t inOffset, int inDirecti
       (((StreamWithPos*)inData)->mStream)->SetPosition(inOffset);
       break;
     case 1: // current
-		if(inOffset >=0)
 	      (((StreamWithPos*)inData)->mStream)->Skip(inOffset);
-		else
-	      (((StreamWithPos*)inData)->mStream)->SetPosition(((StreamWithPos*)inData)->mStream->GetCurrentPosition() + inOffset);
       break;
     case 2: // from end
       ((StreamWithPos*)inData)->mStream->SetPositionFromEnd(inOffset);

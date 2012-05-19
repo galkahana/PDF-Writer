@@ -35,7 +35,7 @@ AppendSpecialPagesTest::~AppendSpecialPagesTest(void)
 {
 }
 
-EStatusCode AppendSpecialPagesTest::Run()
+EStatusCode AppendSpecialPagesTest::Run(const TestConfiguration& inTestConfiguration)
 {
 	EStatusCode status;
 	PDFWriter pdfWriter;
@@ -43,7 +43,8 @@ EStatusCode AppendSpecialPagesTest::Run()
 	do
 	{
 
-		status = pdfWriter.StartPDF("C:\\PDFLibTests\\AppendSpecialPagesTest.PDF",ePDFVersion13,LogConfiguration(true,true,"c:\\pdflibtests\\AppendSpecialPagesTestLog.txt"));
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"AppendSpecialPagesTest.PDF"),ePDFVersion13,LogConfiguration(true,true,
+            RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"AppendSpecialPagesTestLog.txt")));
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
@@ -52,7 +53,7 @@ EStatusCode AppendSpecialPagesTest::Run()
 
 		EStatusCodeAndObjectIDTypeList result;
 
-		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\Protected.pdf",PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/Protected.pdf"),PDFPageRange());
 		if(result.first == PDFHummus::eSuccess)
 		{
 			cout<<"failted to NOT ALLOW embedding of protected documents\n";
@@ -60,7 +61,7 @@ EStatusCode AppendSpecialPagesTest::Run()
 			break;
 		}
 
-		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\ObjectStreamsModified.pdf",PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/ObjectStreamsModified.pdf"),PDFPageRange());
 		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from ObjectStreamsModified.pdf\n";
@@ -68,7 +69,7 @@ EStatusCode AppendSpecialPagesTest::Run()
 			break;
 		}
 
-		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\ObjectStreams.pdf",PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/ObjectStreams.pdf"),PDFPageRange());
 		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from ObjectStreams.pdf\n";
@@ -77,7 +78,7 @@ EStatusCode AppendSpecialPagesTest::Run()
 		}
 
 		
-		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\AddedItem.pdf",PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/AddedItem.pdf"),PDFPageRange());
 		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from AddedItem.pdf\n";
@@ -85,7 +86,7 @@ EStatusCode AppendSpecialPagesTest::Run()
 			break;
 		}
 
-		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\AddedPage.pdf",PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/AddedPage.pdf"),PDFPageRange());
 		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from AddedPage.pdf\n";
@@ -94,7 +95,7 @@ EStatusCode AppendSpecialPagesTest::Run()
 		}
 
 
-		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\MultipleChange.pdf",PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/MultipleChange.pdf"),PDFPageRange());
 		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from MultipleChange.pdf\n";
@@ -102,7 +103,7 @@ EStatusCode AppendSpecialPagesTest::Run()
 			break;
 		}
 
-		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\RemovedItem.pdf",PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/RemovedItem.pdf"),PDFPageRange());
 		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from RemovedItem.pdf\n";
@@ -111,7 +112,7 @@ EStatusCode AppendSpecialPagesTest::Run()
 		}
 
 
-		result = pdfWriter.AppendPDFPagesFromPDF("C:\\PDFLibTests\\TestMaterials\\Linearized.pdf",PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/Linearized.pdf"),PDFPageRange());
 		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from RemovedItem.pdf\n";

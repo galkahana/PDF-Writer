@@ -35,7 +35,7 @@ PDFTextStringTest::~PDFTextStringTest(void)
 {
 }
 
-EStatusCode PDFTextStringTest::Run()
+EStatusCode PDFTextStringTest::Run(const TestConfiguration& inTestConfiguration)
 {
 	EStatusCode status = PDFHummus::eSuccess;
 

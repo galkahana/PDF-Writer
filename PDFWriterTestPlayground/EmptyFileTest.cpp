@@ -36,15 +36,15 @@ EmptyFileTest::~EmptyFileTest(void)
 {
 }
 
-EStatusCode EmptyFileTest::Run()
+EStatusCode EmptyFileTest::Run(const TestConfiguration& inTestConfiguration)
 {
 	PDFWriter pdfWriter;
-	LogConfiguration logConfiguration(true,true,"C:\\PDFLibTests\\EmptyFileLog.txt");
+	LogConfiguration logConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"EmptyFileLog.txt"));
 	EStatusCode status; 
 
 	do
 	{
-		status = pdfWriter.StartPDF("C:\\PDFLibTests\\test.txt",ePDFVersion13,logConfiguration);
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"test.txt"),ePDFVersion13,logConfiguration);
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";

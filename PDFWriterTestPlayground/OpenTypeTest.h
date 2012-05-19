@@ -28,10 +28,10 @@ public:
 	OpenTypeTest(void);
 	~OpenTypeTest(void);
 
-	virtual PDFHummus::EStatusCode Run();
+	virtual PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration);
 
 private:
-	PDFHummus::EStatusCode SaveCharstringCode(unsigned short inFontIndex,unsigned short inGlyphIndex,CFFFileInput* inCFFFileInput);
-	PDFHummus::EStatusCode TestFont();
+	PDFHummus::EStatusCode SaveCharstringCode(const TestConfiguration& inTestConfiguration,unsigned short inFontIndex,unsigned short inGlyphIndex,CFFFileInput* inCFFFileInput);
+	PDFHummus::EStatusCode TestFont(const TestConfiguration& inTestConfiguration);
 
 };

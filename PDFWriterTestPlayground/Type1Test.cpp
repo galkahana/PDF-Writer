@@ -39,7 +39,7 @@ Type1Test::~Type1Test(void)
 {
 }
 
-EStatusCode Type1Test::Run()
+EStatusCode Type1Test::Run(const TestConfiguration& inTestConfiguration)
 {
 	EStatusCode status = PDFHummus::eSuccess;
 	InputFile type1File;
@@ -47,7 +47,7 @@ EStatusCode Type1Test::Run()
 
 	do
 	{
-		status = type1File.OpenFile("C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFB");
+		status = type1File.OpenFile(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/fonts/HLB_____.PFB"));
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"Failed to open Helvetica input file\n";
@@ -82,19 +82,19 @@ EStatusCode Type1Test::Run()
 			break;
 		// show just abcd and notdef
 
-		status = SaveCharstringCode(".notdef",&type1Input);
+		status = SaveCharstringCode(inTestConfiguration,".notdef",&type1Input);
 		if(status != PDFHummus::eSuccess)
 			break;
-		status = SaveCharstringCode("a",&type1Input);
+		status = SaveCharstringCode(inTestConfiguration,"a",&type1Input);
 		if(status != PDFHummus::eSuccess)
 			break;
-		status = SaveCharstringCode("b",&type1Input);
+		status = SaveCharstringCode(inTestConfiguration,"b",&type1Input);
 		if(status != PDFHummus::eSuccess)
 			break;
-		status = SaveCharstringCode("c",&type1Input);
+		status = SaveCharstringCode(inTestConfiguration,"c",&type1Input);
 		if(status != PDFHummus::eSuccess)
 			break;
-		status = SaveCharstringCode("d",&type1Input);
+		status = SaveCharstringCode(inTestConfiguration,"d",&type1Input);
 		if(status != PDFHummus::eSuccess)
 			break;
 
@@ -221,11 +221,13 @@ EStatusCode Type1Test::ShowDependencies(const string& inCharStringName,Type1Inpu
 	return PDFHummus::eSuccess;
 }
 
-EStatusCode Type1Test::SaveCharstringCode(const string& inCharStringName,Type1Input* inType1Input)
+EStatusCode Type1Test::SaveCharstringCode(const TestConfiguration& inTestConfiguration,const string& inCharStringName,Type1Input* inType1Input)
 {
 	OutputFile glyphFile;
 
-	EStatusCode status = glyphFile.OpenFile(string("C:\\PDFLibTests\\glyphType1_") + inCharStringName + "_.txt");
+    
+	EStatusCode status = glyphFile.OpenFile(
+                                            RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,string("glyphType1_") + inCharStringName + "_.txt"));
 
 	do
 	{

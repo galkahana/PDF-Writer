@@ -32,20 +32,20 @@ LogTest::~LogTest(void)
 {
 }
 
-EStatusCode LogTest::Run()
+EStatusCode LogTest::Run(const TestConfiguration& inTestConfiguration)
 {
-	Log log("C:\\PDFLibTests\\logTest.txt",true);
+	Log log(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"logTest.txt"),true);
 
 	log.LogEntry("testing wide string input");
 
-	char* aString = "testing Byte input";
+	const char* aString = "testing Byte input";
 
 	log.LogEntry((const Byte*)aString,strlen(aString));
 
 
 	Trace trace;
 
-	trace.SetLogSettings("C:\\PDFLibTests\\traceTest.txt",true,true);
+	trace.SetLogSettings(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"traceTest.txt"),true,true);
 	trace.TraceToLog("Tracing number %d %d",10,20);
 	trace.TraceToLog("Tracing some other items %s 0x%x","hello",20);
 

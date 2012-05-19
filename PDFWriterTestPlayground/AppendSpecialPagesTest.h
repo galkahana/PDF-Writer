@@ -27,5 +27,5 @@ public:
 	AppendSpecialPagesTest(void);
 	virtual ~AppendSpecialPagesTest(void);
 
-	virtual PDFHummus::EStatusCode Run();
+	virtual PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration);
 };

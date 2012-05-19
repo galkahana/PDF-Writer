@@ -27,5 +27,5 @@ public:
 	LinksTest(void);
 	virtual ~LinksTest(void);
 
-	virtual PDFHummus::EStatusCode Run();
+	virtual PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration);
 };

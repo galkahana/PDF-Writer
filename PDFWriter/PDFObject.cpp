@@ -20,6 +20,22 @@
 */
 #include "PDFObject.h"
 
+const char* PDFObject::scPDFObjectTypeLabel[] = 
+{
+	"Boolean",
+	"LiteralString",
+	"HexString",
+	"Null",
+	"Name",
+	"Integer",
+	"Real",
+	"Array",
+	"Dictionary",
+	"IndirectObjectReference",
+	"Stream",
+	"Symbol"
+};
+
 PDFObject::PDFObject(EPDFObjectType inType)
 {
 	mType = inType;
@@ -35,7 +51,7 @@ PDFObject::~PDFObject(void)
 {
 }
 
-EPDFObjectType PDFObject::GetType()
+PDFObject::EPDFObjectType PDFObject::GetType()
 {
 	return mType;
 }

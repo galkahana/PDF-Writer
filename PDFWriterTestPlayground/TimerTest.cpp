@@ -34,9 +34,9 @@ TimerTest::~TimerTest(void)
 {
 }
 
-EStatusCode TimerTest::Run()
+EStatusCode TimerTest::Run(const TestConfiguration& inTestConfiguration)
 {
-	Singleton<Trace>::GetInstance()->SetLogSettings("c:\\PDFLibTests\\timersTrace.txt",true,true);
+	Singleton<Trace>::GetInstance()->SetLogSettings(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"timersTrace.txt"),true,true);
 
 	TimersRegistry timersRegistry;
 

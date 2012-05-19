@@ -27,5 +27,5 @@ public:
 	EmptyFileTest(void);
 	~EmptyFileTest(void);
 
-	virtual PDFHummus::EStatusCode Run();
+	virtual PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration);
 };

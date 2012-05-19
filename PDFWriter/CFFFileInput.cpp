@@ -1323,7 +1323,6 @@ EStatusCode CFFFileInput::ReadFDSelect(unsigned short inFontIndex)
 		status = mPrimitivesReader.ReadCard16(rangesCount);
 		if(status != PDFHummus::eFailure)
 		{
-			unsigned short glyphIndex = 0;
 			status = mPrimitivesReader.ReadCard16(firstGlyphIndex);
 			for(unsigned short i=0; i < rangesCount && PDFHummus::eSuccess == status;++i)
 			{

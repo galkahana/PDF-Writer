@@ -36,16 +36,3 @@ enum EFontStretch {
 	eFontStretchUknown
 };
 
-static const char* scFontStretchLabels[eFontStretchMax] =
-{
-	"",
-	"UltraCondensed", 
-	"ExtraCondensed", 
-	"Condensed", 
-	"SemiCondensed", 
-	"Normal", 
-	"SemiExpanded", 
-	"Expanded", 
-	"ExtraExpanded",
-	"UltraExpanded"
-};

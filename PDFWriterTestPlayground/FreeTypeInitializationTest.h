@@ -31,10 +31,10 @@ public:
 	FreeTypeInitializationTest(void);
 	~FreeTypeInitializationTest(void);
 
-	virtual PDFHummus::EStatusCode Run();
+	virtual PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration);
 
 
 private:
-	PDFHummus::EStatusCode ShowFaceProperties(FreeTypeWrapper& inFreeType,const char* inFontFilePath,const char* inSecondaryFontFilePath = NULL);
+	PDFHummus::EStatusCode ShowFaceProperties(FreeTypeWrapper& inFreeType,const string& inFontFilePath,const string& inSecondaryFontFilePath = "");
 	PDFHummus::EStatusCode ShowGlobalFontProperties(FreeTypeWrapper& inFreeType,FT_Face inFace);
 };

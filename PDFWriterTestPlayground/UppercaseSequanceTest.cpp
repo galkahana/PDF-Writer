@@ -33,7 +33,7 @@ UppercaseSequanceTest::~UppercaseSequanceTest(void)
 {
 }
 
-EStatusCode UppercaseSequanceTest::Run()
+EStatusCode UppercaseSequanceTest::Run(const TestConfiguration& inTestConfiguration)
 {
 	EStatusCode status = PDFHummus::eSuccess;
 	UppercaseSequance sequance;

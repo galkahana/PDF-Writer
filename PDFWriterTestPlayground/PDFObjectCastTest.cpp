@@ -37,7 +37,7 @@ PDFObjectCastTest::~PDFObjectCastTest(void)
 {
 }
 
-EStatusCode PDFObjectCastTest::Run()
+EStatusCode PDFObjectCastTest::Run(const TestConfiguration& inTestConfiguration)
 {
 	EStatusCode status = PDFHummus::eSuccess;
 

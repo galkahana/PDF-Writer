@@ -34,7 +34,7 @@ T* PDFObjectCast(PDFObject* inOriginal)
 	if(!inOriginal)
 		return NULL;
 
-	if(inOriginal->GetType() == (EPDFObjectType)T::eType)
+	if(inOriginal->GetType() == (PDFObject::EPDFObjectType)T::eType)
 	{
 		return (T*)inOriginal;
 	}

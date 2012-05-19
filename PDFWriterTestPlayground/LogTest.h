@@ -28,5 +28,5 @@ public:
 	LogTest(void);
 	~LogTest(void);
 
-	virtual PDFHummus::EStatusCode Run();
+	virtual PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration);
 };

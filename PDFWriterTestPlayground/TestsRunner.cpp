@@ -46,16 +46,16 @@ void TestsRunner::DeleteTests()
 	mTests.clear();
 }
 
-EStatusCode TestsRunner::RunAll()
+EStatusCode TestsRunner::RunAll(const TestConfiguration& inTestConfiguration)
 {
 	StringAndTestUnitList testsList;
 	StringToTestUnitMap::iterator it = mTestsByName.begin();
 	for(;it != mTestsByName.end();++it)
 		testsList.push_back(StringAndTestUnit(it->first,it->second));
-	return RunTestsInList(testsList);
+	return RunTestsInList(inTestConfiguration,testsList);
 }
 
-EStatusCode TestsRunner::RunTestsInList(const StringAndTestUnitList& inTests)
+EStatusCode TestsRunner::RunTestsInList(const TestConfiguration& inTestConfiguration,const StringAndTestUnitList& inTests)
 {
 	EStatusCode testsStatus;
 
@@ -66,7 +66,7 @@ EStatusCode TestsRunner::RunTestsInList(const StringAndTestUnitList& inTests)
 	}
 	else if(inTests.size() == 1)
 	{
-		testsStatus = RunSingleTest(inTests.front().first,inTests.front().second);
+		testsStatus = RunSingleTest(inTestConfiguration,inTests.front().first,inTests.front().second);
 	}
 	else
 	{
@@ -78,7 +78,7 @@ EStatusCode TestsRunner::RunTestsInList(const StringAndTestUnitList& inTests)
 		cout<<"Start tests run\n";
 		for(;it!= inTests.end();++it)
 		{
-			testStatus = RunSingleTest(it->first,it->second);
+			testStatus = RunSingleTest(inTestConfiguration,it->first,it->second);
 			if(PDFHummus::eFailure == testStatus)
 			{
 				++failedCount;
@@ -95,12 +95,12 @@ EStatusCode TestsRunner::RunTestsInList(const StringAndTestUnitList& inTests)
 	return testsStatus;
 }
 
-EStatusCode TestsRunner::RunSingleTest(const string& inTestName,ITestUnit* inTest)
+EStatusCode TestsRunner::RunSingleTest(const TestConfiguration& inTestConfiguration,const string& inTestName,ITestUnit* inTest)
 {
 	EStatusCode testStatus;
 	
 	cout<<"Running Test "<<inTestName<<"\n";
-	testStatus = inTest->Run();
+	testStatus = inTest->Run(inTestConfiguration);
 	if(PDFHummus::eFailure == testStatus)
 		cout<<"Test "<<inTestName<<" Failed\n\n";
 	else
@@ -124,7 +124,7 @@ void TestsRunner::AddTest(const string& inTestLabel,ITestUnit* inTest)
 	AddTest(inTestLabel,scGeneral,inTest);
 }
 
-EStatusCode TestsRunner::RunTest(const string& inTestLabel)
+EStatusCode TestsRunner::RunTest(const TestConfiguration& inTestConfiguration,const string& inTestLabel)
 {
 	StringToTestUnitMap::iterator it = mTestsByName.find(inTestLabel);
 
@@ -134,10 +134,10 @@ EStatusCode TestsRunner::RunTest(const string& inTestLabel)
 		return PDFHummus::eSuccess;
 	}
 	else
-		return RunSingleTest(it->first,it->second);
+		return RunSingleTest(inTestConfiguration,it->first,it->second);
 }
 
-EStatusCode TestsRunner::RunTests(const StringList& inTestsLabels)
+EStatusCode TestsRunner::RunTests(const TestConfiguration& inTestConfiguration,const StringList& inTestsLabels)
 {
 	StringAndTestUnitList testsList;
 	StringList::const_iterator it = inTestsLabels.begin();
@@ -149,10 +149,10 @@ EStatusCode TestsRunner::RunTests(const StringList& inTestsLabels)
 		else
 			cout<<"Test "<<*it<<" not found\n";
 	}
-	return RunTestsInList(testsList);
+	return RunTestsInList(inTestConfiguration,testsList);
 }
 
-EStatusCode TestsRunner::RunCategory(const string& inCategory)
+EStatusCode TestsRunner::RunCategory(const TestConfiguration& inTestConfiguration,const string& inCategory)
 {
 	StringToStringAndTestUnitListMap::iterator it = mTests.find(inCategory);
 
@@ -162,10 +162,10 @@ EStatusCode TestsRunner::RunCategory(const string& inCategory)
 		return PDFHummus::eSuccess;
 	}
 	else
-		return RunTestsInList(it->second);
+		return RunTestsInList(inTestConfiguration,it->second);
 }
 
-EStatusCode TestsRunner::RunCategories(const StringList& inCategories)
+EStatusCode TestsRunner::RunCategories(const TestConfiguration& inTestConfiguration,const StringList& inCategories)
 {
 	StringAndTestUnitList testsList;
 	StringList::const_iterator it = inCategories.begin();
@@ -179,10 +179,10 @@ EStatusCode TestsRunner::RunCategories(const StringList& inCategories)
 			cout<<"Category "<<*it<<" not found\n";
 	}
 
-	return RunTestsInList(testsList);
+	return RunTestsInList(inTestConfiguration,testsList);
 }
 
-EStatusCode TestsRunner::RunCategories(const StringList& inCategories, const StringSet& inTestsToExclude)
+EStatusCode TestsRunner::RunCategories(const TestConfiguration& inTestConfiguration,const StringList& inCategories, const StringSet& inTestsToExclude)
 {
 	StringAndTestUnitList testsList;
 	StringList::const_iterator it = inCategories.begin();
@@ -201,11 +201,11 @@ EStatusCode TestsRunner::RunCategories(const StringList& inCategories, const Str
 			cout<<"Category "<<*it<<" not found\n";
 	}
 
-	return RunTestsInList(testsList);
+	return RunTestsInList(inTestConfiguration,testsList);
 }
 
 
-EStatusCode TestsRunner::RunExcludeCategories(const StringSet& inCategories)
+EStatusCode TestsRunner::RunExcludeCategories(const TestConfiguration& inTestConfiguration,const StringSet& inCategories)
 {
 	StringAndTestUnitList testsList;
 	StringToStringAndTestUnitListMap::iterator it = mTests.begin();
@@ -213,10 +213,10 @@ EStatusCode TestsRunner::RunExcludeCategories(const StringSet& inCategories)
 	for(; it != mTests.end(); ++it)
 		if(inCategories.find(it->first) == inCategories.end())
 			testsList.insert(testsList.end(),it->second.begin(),it->second.end());
-	return RunTestsInList(testsList);
+	return RunTestsInList(inTestConfiguration,testsList);
 }
 
-EStatusCode TestsRunner::RunExcludeTests(const StringSet& inTests)
+EStatusCode TestsRunner::RunExcludeTests(const TestConfiguration& inTestConfiguration,const StringSet& inTests)
 {
 	StringAndTestUnitList testsList;
 	StringToTestUnitMap::iterator it = mTestsByName.begin();
@@ -225,5 +225,5 @@ EStatusCode TestsRunner::RunExcludeTests(const StringSet& inTests)
 		if(inTests.find(it->first) == inTests.end())
 			testsList.push_back(StringAndTestUnit(it->first,it->second));
 
-	return RunTestsInList(testsList);
+	return RunTestsInList(inTestConfiguration,testsList);
 }

@@ -27,5 +27,5 @@ public:
 	ShutDownRestartTest(void);
 	virtual ~ShutDownRestartTest(void);
 
-	virtual PDFHummus::EStatusCode Run();
+	virtual PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration);
 };

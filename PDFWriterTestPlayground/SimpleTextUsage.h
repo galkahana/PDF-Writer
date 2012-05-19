@@ -29,11 +29,11 @@ public:
 	SimpleTextUsage(void);
 	virtual ~SimpleTextUsage(void);
 
-	virtual PDFHummus::EStatusCode Run();
+	virtual PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration);
 
 private:
 
-	PDFHummus::EStatusCode RunCFFTest();
-	PDFHummus::EStatusCode RunTrueTypeTest();
-	PDFHummus::EStatusCode RunType1Test();
+	PDFHummus::EStatusCode RunCFFTest(const TestConfiguration& inTestConfiguration);
+	PDFHummus::EStatusCode RunTrueTypeTest(const TestConfiguration& inTestConfiguration);
+	PDFHummus::EStatusCode RunType1Test(const TestConfiguration& inTestConfiguration);
 };

@@ -52,7 +52,7 @@ private:
 
 int MyClass::TotalObjectsCount = 0;
 
-EStatusCode RefCountTest::Run()
+EStatusCode RefCountTest::Run(const TestConfiguration& inTestConfiguration)
 {
 	EStatusCode status = PDFHummus::eSuccess;
 

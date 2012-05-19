@@ -38,7 +38,7 @@ InputFlateDecodeTester::~InputFlateDecodeTester(void)
 {
 }
 
-EStatusCode InputFlateDecodeTester::Run()
+EStatusCode InputFlateDecodeTester::Run(const TestConfiguration& inTestConfiguration)
 {
 	OutputFile outputFile;
 	string aString("hello world");
@@ -46,14 +46,14 @@ EStatusCode InputFlateDecodeTester::Run()
 	InputFlateDecodeStream inputDecoder;
 	OutputFlateEncodeStream outputEncoder;
 
-	outputFile.OpenFile("C:\\pdflibtests\\source.txt");
+	outputFile.OpenFile(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"source.txt"));
 	outputEncoder.Assign(outputFile.GetOutputStream());
 	outputEncoder.Write((IOBasicTypes::Byte*)aString.c_str(),aString.size());
 	outputEncoder.Assign(NULL);
 	outputFile.CloseFile();
 
 	InputFile inputFile;
-	inputFile.OpenFile("C:\\pdflibtests\\source.txt");
+	inputFile.OpenFile(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"source.txt"));
 	inputDecoder.Assign(inputFile.GetInputStream());
 
 	bool isSame = true;

@@ -38,9 +38,10 @@ BufferedOutputStreamTest::~BufferedOutputStreamTest(void)
 {
 }
 
-EStatusCode BufferedOutputStreamTest::Run()
+EStatusCode BufferedOutputStreamTest::Run(const TestConfiguration& inTestConfiguration)
 {
-	IByteWriter* stream = new OutputBufferedStream(new OutputFileStream("C:\\PDFLibTests\\BufferedOutputStreamTest.txt"),2);
+	IByteWriter* stream = new OutputBufferedStream(new OutputFileStream(
+                            RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"BufferedOutputStreamTest.txt")),2);
 	Byte buffer[5] = {'a','b','c','d','e'};
 
 	stream->Write(buffer,5);

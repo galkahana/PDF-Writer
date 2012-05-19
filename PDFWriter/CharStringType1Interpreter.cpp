@@ -518,7 +518,6 @@ EStatusCode CharStringType1Interpreter::DefaultCallOtherSubr()
 	*/
 
 	LongList::reverse_iterator it = mOperandStack.rbegin();
-	long otherSubrIndex = *it;
 	++it;
 	long argumentsCount = *it;
 	++it;

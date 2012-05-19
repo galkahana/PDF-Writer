@@ -156,6 +156,9 @@ EStatusCode CFFPrimitiveWriter::Write4ByteUnsigned(unsigned long inValue)
 	if(WriteByte(byte3) != PDFHummus::eSuccess)
 		return PDFHummus::eFailure;
 
+	if(WriteByte(byte4) != PDFHummus::eSuccess)
+		return PDFHummus::eFailure;
+    
 	return PDFHummus::eSuccess;
 }
 

@@ -28,7 +28,7 @@ public:
 	BufferedOutputStreamTest(void);
 	virtual ~BufferedOutputStreamTest(void);
 
-	virtual PDFHummus::EStatusCode Run();
+	virtual PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration);
 };
 
 

@@ -120,7 +120,7 @@ PDFObject* PDFObjectParser::ParseNewObject(IPDFParserExtender* inParserExtender)
 			// this could be an indirect reference in case this is a positive integer
 			// and the next one is also, and then there's an "R" keyword
 			if(pdfObject && 
-				(pdfObject->GetType() == ePDFObjectInteger) && 
+				(pdfObject->GetType() == PDFObject::ePDFObjectInteger) && 
 				((PDFInteger*)pdfObject)->GetValue() > 0)
 			{
 				// try parse version
@@ -139,7 +139,7 @@ PDFObject* PDFObjectParser::ParseNewObject(IPDFParserExtender* inParserExtender)
 				do
 				{
 					if(!versionObject || 
-						(versionObject->GetType() != ePDFObjectInteger) ||
+                       (versionObject->GetType() != PDFObject::ePDFObjectInteger) ||
 						((PDFInteger*)versionObject)->GetValue() < 0) // k. failure to parse number, or no non-negative, cant be reference
 					{
 						SaveTokenToBuffer(numberToken);
@@ -350,8 +350,6 @@ bool PDFObjectParser::IsHexadecimalString(const string& inToken)
 static const char scRightAngle = '>';
 PDFObject* PDFObjectParser::ParseHexadecimalString(const string& inToken,IPDFParserExtender* inParserExtender)
 {
-	EStatusCode status = PDFHummus::eSuccess;
-	
 	// verify that last character is '>'
 	if(inToken.at(inToken.size()-1) != scRightAngle)
 	{
@@ -550,8 +548,6 @@ static const string scDoubleRightAngle = ">>";
 PDFObject* PDFObjectParser::ParseDictionary(IPDFParserExtender* inParserExtender)
 {
 	PDFDictionary* aDictionary = new PDFDictionary();
-	PDFObject* aKey = NULL;
-	PDFObject* aValue = NULL;
 	bool dictionaryEndEncountered = false;
 	string token;
 	EStatusCode status = PDFHummus::eSuccess;

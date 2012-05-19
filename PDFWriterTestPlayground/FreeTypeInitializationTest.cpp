@@ -45,9 +45,9 @@ FreeTypeInitializationTest::~FreeTypeInitializationTest(void)
 {
 }
 
-EStatusCode FreeTypeInitializationTest::Run()
+EStatusCode FreeTypeInitializationTest::Run(const TestConfiguration& inTestConfiguration)
 {
-	Singleton<Trace>::GetInstance()->SetLogSettings("c:\\PDFLibTests\\FreeTypeTest.txt",true,true);
+	Singleton<Trace>::GetInstance()->SetLogSettings(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"FreeTypeTest.txt"),true,true);
 
 	EStatusCode status = PDFHummus::eSuccess;
 	FreeTypeWrapper ftWrapper;
@@ -55,15 +55,19 @@ EStatusCode FreeTypeInitializationTest::Run()
 
 	do
 	{
-		status = ShowFaceProperties(ftWrapper,"C:\\PDFLibTests\\TestMaterials\\fonts\\arial.ttf");
+		status = ShowFaceProperties(ftWrapper,
+                            RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/fonts/arial.ttf"));
 		if(status != PDFHummus::eSuccess)
 			break;
 
-		status = ShowFaceProperties(ftWrapper,"C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFB","C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFM");
+		status = ShowFaceProperties(ftWrapper,
+                            RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/fonts/HLB_____.PFB"),
+                            RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/fonts/HLB_____.PFM"));
 		if(status != PDFHummus::eSuccess)
 			break;
 
-		status = ShowFaceProperties(ftWrapper,"C:\\PDFLibTests\\TestMaterials\\fonts\\BrushScriptStd.otf");
+		status = ShowFaceProperties(ftWrapper,
+                            RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/fonts/BrushScriptStd.otf"));
 		if(status != PDFHummus::eSuccess)
 			break;
 
@@ -75,7 +79,7 @@ EStatusCode FreeTypeInitializationTest::Run()
 	return status;
 }
 
-EStatusCode FreeTypeInitializationTest::ShowFaceProperties(FreeTypeWrapper& inFreeType,const char* inFontFilePath,const char* inSecondaryFontFilePath)
+EStatusCode FreeTypeInitializationTest::ShowFaceProperties(FreeTypeWrapper& inFreeType,const string& inFontFilePath,const string& inSecondaryFontFilePath)
 {
 	FT_Face face;
 	EStatusCode status = PDFHummus::eSuccess;
@@ -83,14 +87,14 @@ EStatusCode FreeTypeInitializationTest::ShowFaceProperties(FreeTypeWrapper& inFr
 	do
 	{
 		cout<<"Start Font\n";
-		if(inSecondaryFontFilePath)
+		if(inSecondaryFontFilePath.length() > 0)
 			face = inFreeType.NewFace(inFontFilePath,inSecondaryFontFilePath);
 		else
 			face = inFreeType.NewFace(inFontFilePath);
 		if(!face)
 		{
 			status = PDFHummus::eFailure;
-			cout<<"Failed to load font from "<<inFontFilePath<<"\n";
+			cout<<"Failed to load font from "<<inFontFilePath.c_str()<<"\n";
 			break;
 		}
 		status = ShowGlobalFontProperties(inFreeType,face);
@@ -164,7 +168,7 @@ EStatusCode FreeTypeInitializationTest::ShowGlobalFontProperties(FreeTypeWrapper
 	if(eFontStretchUknown == fontStretch)
 		cout<<"Unkown Stretch";
 	else
-		cout<<"Stretch = "<<scFontStretchLabels[fontStretch]<<"\n";
+		cout<<"Stretch = "<<fontStretch<<"\n";
 
 	FT_UShort fontWeight = face.GetFontWeight();
 	if(1000 == fontWeight)

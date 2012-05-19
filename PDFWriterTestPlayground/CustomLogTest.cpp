@@ -23,7 +23,7 @@ CustomLogTest::~CustomLogTest(void)
 {
 }
 
-EStatusCode CustomLogTest::Run()
+EStatusCode CustomLogTest::Run(const TestConfiguration& inTestConfiguration)
 {
 	// Place log in a compressed stream, for a non-file PDF
 	EStatusCode status;
@@ -37,7 +37,7 @@ EStatusCode CustomLogTest::Run()
 		OutputStringBufferStream pdfStream;
 	
 		// setup log file with compression
-		status = compressedLogFile.OpenFile("c:\\PDFLibTests\\CustomLogEncrypted.txt");
+		status = compressedLogFile.OpenFile(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"CustomLogEncrypted.txt"));
 		if(status != PDFHummus::eSuccess)
 			break;
 		flateEncodeStream.Assign(compressedLogFile.GetOutputStream());
@@ -68,7 +68,7 @@ EStatusCode CustomLogTest::Run()
 
 		// dump PDF to a file, so we can review it
 		OutputFile pdfFile;
-		status = pdfFile.OpenFile("c:\\PDFLibTests\\DumpPDFFile.pdf");
+		status = pdfFile.OpenFile(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"DumpPDFFile.pdf"));
 		if(status != PDFHummus::eSuccess)
 			break;
 
@@ -89,7 +89,7 @@ EStatusCode CustomLogTest::Run()
 		// now open a new file and decompress the log into it.
 		OutputFile decryptedLogFile;
 
-		status = decryptedLogFile.OpenFile("c:\\PDFLibTests\\CustomLogDecrypted.txt");
+		status = decryptedLogFile.OpenFile(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"CustomLogDecrypted.txt"));
 		if(status != PDFHummus::eSuccess)
 			break;
 
@@ -102,7 +102,7 @@ EStatusCode CustomLogTest::Run()
 		OutputStreamTraits traits(&flateDecodeStream);
 
 		InputFile compressedLogFileInput;
-		status = compressedLogFileInput.OpenFile("c:\\PDFLibTests\\CustomLogEncrypted.txt");
+		status = compressedLogFileInput.OpenFile(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"CustomLogEncrypted.txt"));
 		if(status != PDFHummus::eSuccess)
 			break;
 

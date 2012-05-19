@@ -40,11 +40,13 @@ OpenTypeTest::~OpenTypeTest(void)
 {
 }
 
-EStatusCode OpenTypeTest::SaveCharstringCode(unsigned short inFontIndex,unsigned short inGlyphIndex,CFFFileInput* inCFFFileInput)
+EStatusCode OpenTypeTest::SaveCharstringCode(const TestConfiguration& inTestConfiguration,unsigned short inFontIndex,unsigned short inGlyphIndex,CFFFileInput* inCFFFileInput)
 {
 	OutputFile glyphFile;
 
-	EStatusCode status = glyphFile.OpenFile(string("C:\\PDFLibTests\\glyphCFF")  + Long(inFontIndex).ToString() + "_" + inCFFFileInput->GetGlyphName(0,inGlyphIndex) + ".txt");
+	EStatusCode status = glyphFile.OpenFile(
+        RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,
+            string("glyphCFF")  + Long(inFontIndex).ToString() + "_" + inCFFFileInput->GetGlyphName(0,inGlyphIndex) + ".txt"));
 
 	do
 	{
@@ -62,19 +64,19 @@ EStatusCode OpenTypeTest::SaveCharstringCode(unsigned short inFontIndex,unsigned
 	return status;
 }
 
-EStatusCode OpenTypeTest::Run()
+EStatusCode OpenTypeTest::Run(const TestConfiguration& inTestConfiguration)
 {
-	return TestFont();
+	return TestFont(inTestConfiguration);
 }
 
-EStatusCode OpenTypeTest::TestFont()
+EStatusCode OpenTypeTest::TestFont(const TestConfiguration& inTestConfiguration)
 {
 	EStatusCode status;
 	InputFile otfFile;
 
 	do
 	{
-		status = otfFile.OpenFile("C:\\PDFLibTests\\TestMaterials\\fonts\\BrushScriptStd.otf");
+		status = otfFile.OpenFile(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/fonts/BrushScriptStd.otf"));
 
 		if(status != PDFHummus::eSuccess)
 		{
@@ -94,9 +96,9 @@ EStatusCode OpenTypeTest::TestFont()
 
 		// show just abcd and notdef
 
-		status = SaveCharstringCode(0,0,&openTypeReader.mCFF);
+		status = SaveCharstringCode(inTestConfiguration,0,0,&openTypeReader.mCFF);
 		for(unsigned short i=66; i < 70 && PDFHummus::eSuccess == status; ++i)
-			status = SaveCharstringCode(0,i,&openTypeReader.mCFF);
+			status = SaveCharstringCode(inTestConfiguration,0,i,&openTypeReader.mCFF);
 	}while(false);
 	return status;
 }

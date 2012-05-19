@@ -859,8 +859,6 @@ void Type1ToCFFEmbeddedFontWriter::AddDeltaVectorIfNotEmpty(CFFPrimitiveWriter& 
 
 EStatusCode Type1ToCFFEmbeddedFontWriter::UpdateIndexesAtTopDict()
 {
-	LongFilePositionType currentPosition = mFontFileStream.GetCurrentPosition();
-
 	mFontFileStream.SetPosition(mCharsetPlaceHolderPosition);
 	mPrimitivesWriter.Write5ByteDictInteger((long)mCharsetPosition);
 

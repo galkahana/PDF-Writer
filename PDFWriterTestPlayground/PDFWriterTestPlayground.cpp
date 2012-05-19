@@ -28,9 +28,10 @@
 static void PrintUsage()
 {
 	cout<<"Usage:\n"<<
-		"PDFWriterTestPlayground [-c category1 category2... [-xt test1 test2...]] [-t test1 test2...] [-xc category1 category2...] [-xt test1 test2...]\n\n"<<
+		"PDFWriterTestPlayground -b BasePath [-c category1 category2... [-xt test1 test2...]] [-t test1 test2...] [-xc category1 category2...] [-xt test1 test2...]\n\n"<<
 		"PDFWriterTestPlayground runs tests.\n"<<
-		"The non parameterized version runs all tests.\n\n"<<
+        "Use -b to designate the base testing folder. it should be in the lingua of the OS. for example, to use C:\\PDFLibTests on windows go \"-b c:\\PDFLibTests\"\n."<<
+		"If no options are selected, the application will run all tests.\n\n"<<
 		"Use -c to run only a group of tests assigned to specific categories. after -c name the cateogries. for example:\n"<<
 		"	PDFWriterTestPlayGround -c PDF ObjectContext\n"<<
 		"will run only tests in the PDF or ObjectContext categories.\n\n"<<
@@ -47,9 +48,14 @@ static void PrintUsage()
 
 int main(int argc, char* argv[])
 {
-	if(3 <= argc)
+	if(5 <= argc)
 	{
-		if(strcmp(argv[1],"-c") == 0) // categories testing
+        // argv[1] should always be -b
+        // then argv[2] will have the target path
+        TestConfiguration config;
+        config.mSampleFileBase = LocalPathToFileURL(argv[2]);
+        
+		if(strcmp(argv[3],"-c") == 0) // categories testing
 		{
 			bool hasExclusions = false;
 			StringList categories;
@@ -71,42 +77,47 @@ int main(int argc, char* argv[])
 				StringSet excludedTests;
 				for(;i<argc;++i)
 					excludedTests.insert(argv[i]);
-				Singleton<TestsRunner>::GetInstance()->RunCategories(categories,excludedTests);
+				Singleton<TestsRunner>::GetInstance()->RunCategories(config,categories,excludedTests);
 			}
 			else
-				Singleton<TestsRunner>::GetInstance()->RunCategories(categories);
+				Singleton<TestsRunner>::GetInstance()->RunCategories(config,categories);
 			Singleton<TestsRunner>::Reset();
 		}
-		else if(strcmp(argv[1],"-t") == 0) // per test label testing
+		else if(strcmp(argv[3],"-t") == 0) // per test label testing
 		{
 			StringList tests;
 			for(int i=2;i<argc;++i)
 				tests.push_back(argv[i]);
-			Singleton<TestsRunner>::GetInstance()->RunTests(tests);
+			Singleton<TestsRunner>::GetInstance()->RunTests(config,tests);
 			Singleton<TestsRunner>::Reset();
 		}
-		else if(strcmp(argv[1],"-xc") == 0) // all tests with categories exclusion
+		else if(strcmp(argv[3],"-xc") == 0) // all tests with categories exclusion
 		{
 			StringSet categories;
 			for(int i=2;i<argc;++i)
 				categories.insert(argv[i]);
-			Singleton<TestsRunner>::GetInstance()->RunExcludeCategories(categories);
+			Singleton<TestsRunner>::GetInstance()->RunExcludeCategories(config,categories);
 			Singleton<TestsRunner>::Reset();
 		}
-		else if(strcmp(argv[1],"-xt") == 0) // all tests with categories exclusion
+		else if(strcmp(argv[3],"-xt") == 0) // all tests with categories exclusion
 		{
 			StringSet tests;
 			for(int i=2;i<argc;++i)
 				tests.insert(argv[i]);
-			Singleton<TestsRunner>::GetInstance()->RunExcludeTests(tests);
+			Singleton<TestsRunner>::GetInstance()->RunExcludeTests(config,tests);
 			Singleton<TestsRunner>::Reset();
 		}
 		else
 			PrintUsage();
 	}
-	else if(1 == argc)
+	else if(3 == argc)
 	{
-		Singleton<TestsRunner>::GetInstance()->RunAll();
+        // argv[1] should always be -b
+        // then argv[2] will have the target path
+        TestConfiguration config;
+        config.mSampleFileBase = LocalPathToFileURL(argv[2]);
+		
+        Singleton<TestsRunner>::GetInstance()->RunAll(config);
 		Singleton<TestsRunner>::Reset();
 	}
 	else

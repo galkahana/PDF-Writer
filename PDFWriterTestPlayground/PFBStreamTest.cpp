@@ -39,7 +39,7 @@ PFBStreamTest::~PFBStreamTest(void)
 {
 }
 
-EStatusCode PFBStreamTest::Run()
+EStatusCode PFBStreamTest::Run(const TestConfiguration& inTestConfiguration)
 {
 	EStatusCode status;
 	InputFile pfbFile;
@@ -48,9 +48,9 @@ EStatusCode PFBStreamTest::Run()
 
 	do
 	{
-		pfbFile.OpenFile("C:\\PDFLibTests\\TestMaterials\\fonts\\HLB_____.PFB");
+		pfbFile.OpenFile(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/fonts/HLB_____.PFB"));
 
-		decodedPFBFile.OpenFile("C:\\PDFLibTests\\decodedPFBFile.txt");
+		decodedPFBFile.OpenFile(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"decodedPFBFile.txt"));
 
 
 		status = decodeStream.Assign(pfbFile.GetInputStream());

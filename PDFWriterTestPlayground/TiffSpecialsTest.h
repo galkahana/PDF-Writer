@@ -30,10 +30,10 @@ public:
 	TiffSpecialsTest(void);
 	virtual ~TiffSpecialsTest(void);
 
-	virtual PDFHummus::EStatusCode Run();
+	virtual PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration);
 
 private:
 	PDFHummus::EStatusCode CreatePageForImageAndRelease(PDFWriter& inPDFWriter,PDFFormXObject* inImageObject);
-	PDFHummus::EStatusCode CreateBlackAndWhiteMaskImage(PDFWriter& inPDFWriter);
-	PDFHummus::EStatusCode CreateBiLevelGrayScales(PDFWriter& inPDFWriter);
+	PDFHummus::EStatusCode CreateBlackAndWhiteMaskImage(const TestConfiguration& inTestConfiguration,PDFWriter& inPDFWriter);
+	PDFHummus::EStatusCode CreateBiLevelGrayScales(const TestConfiguration& inTestConfiguration,PDFWriter& inPDFWriter);
 };
