@@ -114,6 +114,12 @@ IFontDescriptorHelper* CFFANSIFontWriter::GetCharsetWriter()
 	return this;
 }
 
+bool CFFANSIFontWriter::CanWriteDifferencesFromWinAnsi()
+{
+	return true;
+}
+
+
 
 static const string scCharSet = "CharSet";
 static const Byte scLeftParanthesis[] = {'('};

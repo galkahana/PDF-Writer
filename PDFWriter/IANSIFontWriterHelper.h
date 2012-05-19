@@ -34,4 +34,9 @@ public:
 	// Get the relevant CharSet entry writer for the descriptor writing. 
 	// always return something - even if doing nothing
 	virtual IFontDescriptorHelper* GetCharsetWriter() = 0;
+
+	// Flag for possibility of having differences from win ansi.
+	// basically true type can't, and others - type 1 and CFF can. true type has the pacularty
+	// of not having dependable glyph names, but using index always...so can't have ansi if there are differences anyways
+	virtual bool CanWriteDifferencesFromWinAnsi() = 0;
 };

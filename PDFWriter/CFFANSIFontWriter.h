@@ -43,6 +43,7 @@ public:
 	// IANSIFontWriterHelper implementation
 	virtual void WriteSubTypeValue(DictionaryContext* inDictionary);
 	virtual IFontDescriptorHelper* GetCharsetWriter();
+	virtual bool CanWriteDifferencesFromWinAnsi();
 
 	// IFontDescriptorHelper implementation
 	virtual void WriteCharSet(	DictionaryContext* inDescriptorContext,
