@@ -347,6 +347,34 @@
 				RelativePath=".\TestsRunner.h"
 				>
 			</File>
+			<Filter
+				Name="Hummus paths"
+				>
+				<File
+					RelativePath=".\FileURL.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileURL.h"
+					>
+				</File>
+				<File
+					RelativePath=".\PosixPath.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\PosixPath.h"
+					>
+				</File>
+				<File
+					RelativePath=".\WindowsPath.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\WindowsPath.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Tests"

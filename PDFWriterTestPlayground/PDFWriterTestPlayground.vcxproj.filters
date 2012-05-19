@@ -49,6 +49,9 @@
     <Filter Include="Tests\PDFEmbedding">
       <UniqueIdentifier>{0af2b333-1f07-4faf-9093-20dc09c661b0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="TestingSystem\Hummus Paths">
+      <UniqueIdentifier>{6ac9ed7e-7102-4e0f-9a8d-1f7ff3678b51}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PDFWriterTestPlayground.cpp">
@@ -159,6 +162,15 @@
     <ClCompile Include="MergePDFPages.cpp">
       <Filter>Tests\PDFEmbedding</Filter>
     </ClCompile>
+    <ClCompile Include="WindowsPath.cpp">
+      <Filter>TestingSystem\Hummus Paths</Filter>
+    </ClCompile>
+    <ClCompile Include="FileURL.cpp">
+      <Filter>TestingSystem\Hummus Paths</Filter>
+    </ClCompile>
+    <ClCompile Include="PosixPath.cpp">
+      <Filter>TestingSystem\Hummus Paths</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ITestUnit.h">
@@ -268,6 +280,15 @@
     </ClInclude>
     <ClInclude Include="MergePDFPages.h">
       <Filter>Tests\PDFEmbedding</Filter>
+    </ClInclude>
+    <ClInclude Include="PosixPath.h">
+      <Filter>TestingSystem\Hummus Paths</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowsPath.h">
+      <Filter>TestingSystem\Hummus Paths</Filter>
+    </ClInclude>
+    <ClInclude Include="FileURL.h">
+      <Filter>TestingSystem\Hummus Paths</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

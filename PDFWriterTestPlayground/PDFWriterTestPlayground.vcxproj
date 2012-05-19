@@ -176,8 +176,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="FileURL.cpp" />
     <ClCompile Include="MergePDFPages.cpp" />
     <ClCompile Include="PDFWriterTestPlayground.cpp" />
+    <ClCompile Include="PosixPath.cpp" />
     <ClCompile Include="TestsRunner.cpp" />
     <ClCompile Include="BufferedOutputStreamTest.cpp" />
     <ClCompile Include="FlateEncryptionTest.cpp" />
@@ -221,10 +223,13 @@
     <ClCompile Include="PDFObjectCastTest.cpp" />
     <ClCompile Include="PDFParserTest.cpp" />
     <ClCompile Include="RefCountTest.cpp" />
+    <ClCompile Include="WindowsPath.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FileURL.h" />
     <ClInclude Include="ITestUnit.h" />
     <ClInclude Include="MergePDFPages.h" />
+    <ClInclude Include="PosixPath.h" />
     <ClInclude Include="TestsRunner.h" />
     <ClInclude Include="BufferedOutputStreamTest.h" />
     <ClInclude Include="FlateEncryptionTest.h" />
@@ -259,6 +264,7 @@
     <ClInclude Include="PDFObjectCastTest.h" />
     <ClInclude Include="PDFParserTest.h" />
     <ClInclude Include="RefCountTest.h" />
+    <ClInclude Include="WindowsPath.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ImportantReadme.txt" />

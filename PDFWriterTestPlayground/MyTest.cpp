@@ -91,7 +91,7 @@ static bool sStringSort(const StringAndInt& inLeft, const StringAndInt& inRight)
 	return strcmp(inLeft.first,inRight.first) < 0;
 }
 
-EStatusCode MyTest::Run()
+EStatusCode MyTest::Run(const TestConfiguration& inTestConfiguration)
 {
 	StringAndIntVector stringsVector;
 	int i=0;
