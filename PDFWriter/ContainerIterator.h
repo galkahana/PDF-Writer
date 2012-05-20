@@ -34,6 +34,26 @@
 	}
 */
 
+// some minor template specialization to differ const lists from non const lists
+template <class T>
+class ContainerTraits
+{
+public:
+    
+    typedef typename T::iterator iteratorType;
+
+};
+
+template <class T>
+class ContainerTraits<const T>
+{
+public:
+    
+    typedef typename T::const_iterator iteratorType;
+
+};
+
+// the real deal
 template <class T>
 class ContainerIterator
 {
@@ -46,12 +66,11 @@ public:
 	bool IsFinished();
     
 private:
-	
-	typename T::iterator mEndPosition;
+	typename ContainerTraits<T>::iteratorType mEndPosition;
 	bool mFirstMove;
     
 protected:
-	typename T::iterator mCurrentPosition;
+	typename ContainerTraits<T>::iteratorType mCurrentPosition;
 };
 
 template <class T>
@@ -92,65 +111,5 @@ bool ContainerIterator<T>::IsFinished()
 {
 	return mCurrentPosition == mEndPosition;
 }
-
-template <class T>
-class ContainerIterator<const T>
-{
-public:
-    
-	ContainerIterator(const T& inContainer);
-	ContainerIterator(const ContainerIterator<const T>& inOtherIterator);
-    
-	bool MoveNext();
-	bool IsFinished();
-    
-private:
-	
-	typename T::const_iterator mEndPosition;
-	bool mFirstMove;
-    
-protected:
-	typename T::const_iterator mCurrentPosition;
-};
-
-template <class T>
-ContainerIterator<const T>::ContainerIterator(const T& inList)
-{
-	mCurrentPosition = inList.begin();
-	mEndPosition = inList.end();
-	mFirstMove = true;
-}
-
-template <class T>
-ContainerIterator<const T>::ContainerIterator(const ContainerIterator<const T>& inOtherIterator)
-{
-	mCurrentPosition = inOtherIterator.mCurrentPosition;
-	mEndPosition = inOtherIterator.mEndPosition;
-	mFirstMove = inOtherIterator.mFirstMove;
-}
-
-template <class T>
-bool ContainerIterator<const T>::MoveNext()
-{
-	if(mCurrentPosition == mEndPosition)
-		return false;
-	if(mFirstMove)
-	{
-		mFirstMove = false;
-	}
-	else
-	{
-		if(++mCurrentPosition == mEndPosition)
-			return false;
-	}
-	return true;
-}
-
-template <class T>
-bool ContainerIterator<const T>::IsFinished()
-{
-	return mCurrentPosition == mEndPosition;
-}
-
 
 

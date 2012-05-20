@@ -36,7 +36,6 @@
 	}
 */
 
-
 template <class T>
 class SingleValueContainerIterator : public ContainerIterator<T>
 {
@@ -63,33 +62,3 @@ typename T::value_type SingleValueContainerIterator<T>::GetItem()
 {
 	return *this->mCurrentPosition;
 }
-
-template <class T>
-class SingleValueContainerIterator<const T> : public ContainerIterator<const T>
-{
-public:
-    
-	SingleValueContainerIterator(const T& inContainer);
-	SingleValueContainerIterator(const SingleValueContainerIterator<const T>& inOtherIterator);
-    
-	typename T::value_type GetItem() const;
-};
-
-template <class T>
-SingleValueContainerIterator<const T>::SingleValueContainerIterator(const T& inContainer) : ContainerIterator<const T>(inContainer)
-{
-}
-
-template <class T>
-SingleValueContainerIterator<const T>::SingleValueContainerIterator(const SingleValueContainerIterator<const T>& inOtherIterator) : ContainerIterator<const T>(inOtherIterator)
-{
-}
-
-template <class T>
-typename T::value_type SingleValueContainerIterator<const T>::GetItem() const
-{
-	return *this->mCurrentPosition;
-}
-
-
-
