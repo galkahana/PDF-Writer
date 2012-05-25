@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
 		else if(strcmp(argv[3],"-t") == 0) // per test label testing
 		{
 			StringList tests;
-			for(int i=2;i<argc;++i)
+			for(int i=4;i<argc;++i)
 				tests.push_back(argv[i]);
 			Singleton<TestsRunner>::GetInstance()->RunTests(config,tests);
 			Singleton<TestsRunner>::Reset();
@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
 		else if(strcmp(argv[3],"-xc") == 0) // all tests with categories exclusion
 		{
 			StringSet categories;
-			for(int i=2;i<argc;++i)
+			for(int i=4;i<argc;++i)
 				categories.insert(argv[i]);
 			Singleton<TestsRunner>::GetInstance()->RunExcludeCategories(config,categories);
 			Singleton<TestsRunner>::Reset();
@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
 		else if(strcmp(argv[3],"-xt") == 0) // all tests with categories exclusion
 		{
 			StringSet tests;
-			for(int i=2;i<argc;++i)
+			for(int i=4;i<argc;++i)
 				tests.insert(argv[i]);
 			Singleton<TestsRunner>::GetInstance()->RunExcludeTests(config,tests);
 			Singleton<TestsRunner>::Reset();
