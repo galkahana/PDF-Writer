@@ -25,8 +25,9 @@ class FSType
 public:
 	FSType(unsigned short inFSTypeValue) {mFSTypeValue = inFSTypeValue;}
 
-	// using Adobe applications policy as published in FontPolicies.pdf
-	bool CanEmbed(){return (mFSTypeValue & 0x2) == 0 && (mFSTypeValue & 0x0200) == 0;}
+	// using Adobe applications policy as published in FontPolicies.pdf [note that if multiple bits are set the least restrictive takes over]
+	// so there are just 3 options for not embedding
+	bool CanEmbed(){return (mFSTypeValue != 0x2) && (mFSTypeValue != 0x0200) && (mFSTypeValue != 0x0202);}
 private:
 
 	unsigned short mFSTypeValue;
