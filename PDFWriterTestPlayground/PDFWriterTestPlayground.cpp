@@ -50,62 +50,67 @@ int main(int argc, char* argv[])
 {
 	if(5 <= argc)
 	{
-        // argv[1] should always be -b
-        // then argv[2] will have the target path
-        TestConfiguration config;
-        config.mSampleFileBase = LocalPathToFileURL(argv[2]);
-        
-		if(strcmp(argv[3],"-c") == 0) // categories testing
+		if(strcmp(argv[1],"-b") == 0)
 		{
-			bool hasExclusions = false;
-			StringList categories;
-			int i=2;
-			
-			for(;i<argc;++i)
+			// argv[1] should always be -b
+			// then argv[2] will have the target path
+			TestConfiguration config;
+			config.mSampleFileBase = LocalPathToFileURL(argv[2]);
+        
+			if(strcmp(argv[3],"-c") == 0) // categories testing
 			{
-				if(strcmp(argv[i],"-xt") == 0)
+				bool hasExclusions = false;
+				StringList categories;
+				int i=2;
+			
+				for(;i<argc;++i)
 				{
-					hasExclusions = true;
-					break;
+					if(strcmp(argv[i],"-xt") == 0)
+					{
+						hasExclusions = true;
+						break;
+					}
+					else
+						categories.push_back(argv[i]);
+				}
+
+				if(hasExclusions)
+				{
+					StringSet excludedTests;
+					for(;i<argc;++i)
+						excludedTests.insert(argv[i]);
+					Singleton<TestsRunner>::GetInstance()->RunCategories(config,categories,excludedTests);
 				}
 				else
-					categories.push_back(argv[i]);
+					Singleton<TestsRunner>::GetInstance()->RunCategories(config,categories);
+				Singleton<TestsRunner>::Reset();
 			}
-
-			if(hasExclusions)
+			else if(strcmp(argv[3],"-t") == 0) // per test label testing
 			{
-				StringSet excludedTests;
-				for(;i<argc;++i)
-					excludedTests.insert(argv[i]);
-				Singleton<TestsRunner>::GetInstance()->RunCategories(config,categories,excludedTests);
+				StringList tests;
+				for(int i=4;i<argc;++i)
+					tests.push_back(argv[i]);
+				Singleton<TestsRunner>::GetInstance()->RunTests(config,tests);
+				Singleton<TestsRunner>::Reset();
+			}
+			else if(strcmp(argv[3],"-xc") == 0) // all tests with categories exclusion
+			{
+				StringSet categories;
+				for(int i=4;i<argc;++i)
+					categories.insert(argv[i]);
+				Singleton<TestsRunner>::GetInstance()->RunExcludeCategories(config,categories);
+				Singleton<TestsRunner>::Reset();
+			}
+			else if(strcmp(argv[3],"-xt") == 0) // all tests with categories exclusion
+			{
+				StringSet tests;
+				for(int i=4;i<argc;++i)
+					tests.insert(argv[i]);
+				Singleton<TestsRunner>::GetInstance()->RunExcludeTests(config,tests);
+				Singleton<TestsRunner>::Reset();
 			}
 			else
-				Singleton<TestsRunner>::GetInstance()->RunCategories(config,categories);
-			Singleton<TestsRunner>::Reset();
-		}
-		else if(strcmp(argv[3],"-t") == 0) // per test label testing
-		{
-			StringList tests;
-			for(int i=4;i<argc;++i)
-				tests.push_back(argv[i]);
-			Singleton<TestsRunner>::GetInstance()->RunTests(config,tests);
-			Singleton<TestsRunner>::Reset();
-		}
-		else if(strcmp(argv[3],"-xc") == 0) // all tests with categories exclusion
-		{
-			StringSet categories;
-			for(int i=4;i<argc;++i)
-				categories.insert(argv[i]);
-			Singleton<TestsRunner>::GetInstance()->RunExcludeCategories(config,categories);
-			Singleton<TestsRunner>::Reset();
-		}
-		else if(strcmp(argv[3],"-xt") == 0) // all tests with categories exclusion
-		{
-			StringSet tests;
-			for(int i=4;i<argc;++i)
-				tests.insert(argv[i]);
-			Singleton<TestsRunner>::GetInstance()->RunExcludeTests(config,tests);
-			Singleton<TestsRunner>::Reset();
+				PrintUsage();
 		}
 		else
 			PrintUsage();
@@ -114,11 +119,16 @@ int main(int argc, char* argv[])
 	{
         // argv[1] should always be -b
         // then argv[2] will have the target path
-        TestConfiguration config;
-        config.mSampleFileBase = LocalPathToFileURL(argv[2]);
+		if(strcmp(argv[1],"-b") == 0)
+		{
+	        TestConfiguration config;
+			config.mSampleFileBase = LocalPathToFileURL(argv[2]);
 		
-        Singleton<TestsRunner>::GetInstance()->RunAll(config);
-		Singleton<TestsRunner>::Reset();
+			Singleton<TestsRunner>::GetInstance()->RunAll(config);
+			Singleton<TestsRunner>::Reset();
+		}
+		else
+			PrintUsage();
 	}
 	else
 		PrintUsage();

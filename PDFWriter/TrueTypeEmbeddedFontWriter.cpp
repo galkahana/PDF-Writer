@@ -348,7 +348,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteTrueTypeHeader()
 	// cmap, cvt, fpgm, glyf, head, hhea, hmtx, loca, maxp, name, os/2, prep
 
 	unsigned short tableCount = 
-		8	// needs - head, hhea,hmtx, maxp, loca, glyf, name, os/2
+		9	// needs - cmap, glyf, head, hhea, hmtx, loca, maxp, name, OS/2
 		+
 		(mTrueTypeInput.mCVTExists ? 1:0) + // cvt
 		(mTrueTypeInput.mPREPExists ? 1:0) + // prep
