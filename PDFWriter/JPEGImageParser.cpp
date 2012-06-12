@@ -55,6 +55,7 @@ const unsigned int scTagID = 0xff;
 const unsigned char scJPEGID[2] = {0xff,0xd8};
 const unsigned char scAPP1ID[6] = {0x45,0x78,0x69,0x66,0x00,0x00};
 const unsigned char scEOS = '\0';
+const unsigned char sc8Bim[4] = {'8','B','I','M'};
 const unsigned char scResolutionBIMID[2] = {0x03,0xed};
 const unsigned int scAPP1BigEndian = 0x4d4d;
 const unsigned int scAPP1LittleEndian = 0x4949;
@@ -106,8 +107,14 @@ EStatusCode JPEGImageParser::Parse(IByteReaderWithPosition* inImageStream,JPEGIm
 						SkipTag();
 					break;
 				case scAPP13TagID:
-					PhotoshopMarkerNotFound = false;
-					status = ReadPhotoshopData(outImageInformation);
+                    if(PhotoshopMarkerNotFound)
+                    {
+                        // photoshop tags may be corrupt, so internal method will return if the 
+                        // photoshop tag is OK. otherwise skip it, and wait for the next one...parhaps will be better
+                        status = ReadPhotoshopData(outImageInformation,PhotoshopMarkerNotFound);
+                    }
+                    else
+                        status = SkipTag();
 					break;				
 				case scAPP1TagID:
 					if(ExifMarkerNotFound)
@@ -234,7 +241,7 @@ EStatusCode JPEGImageParser::ReadJFIFData(JPEGImageInformation& outImageInformat
 	return status;
 }
 
-EStatusCode JPEGImageParser::ReadPhotoshopData(JPEGImageInformation& outImageInformation)
+EStatusCode JPEGImageParser::ReadPhotoshopData(JPEGImageInformation& outImageInformation,bool outPhotoshopDataOK)
 {
 	EStatusCode status;
 	unsigned int intSkip;
@@ -253,8 +260,12 @@ EStatusCode JPEGImageParser::ReadPhotoshopData(JPEGImageInformation& outImageInf
 			break;
 		while(toSkip > 0 && resolutionBimNotFound)
 		{
-			SkipStream(4);
-			toSkip-=4;
+			status = ReadStreamToBuffer(4);
+			if(status !=PDFHummus::eSuccess)
+				break;
+            toSkip-=4;
+            if(0 != memcmp(mReadBuffer,sc8Bim,4))
+                break; // k. corrupt header. stop here and just skip the next
 			status = ReadStreamToBuffer(3);
 			if(status !=PDFHummus::eSuccess)
 				break;
@@ -290,6 +301,7 @@ EStatusCode JPEGImageParser::ReadPhotoshopData(JPEGImageInformation& outImageInf
 		if(PDFHummus::eSuccess == status)
 			SkipStream(toSkip);
 	}while(false);
+    outPhotoshopDataOK = !resolutionBimNotFound;
 	return status;
 }
 

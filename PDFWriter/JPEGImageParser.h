@@ -47,7 +47,7 @@ private:
 							 bool inUseLittleEndian = false);
 	void SkipStream(unsigned long inSkip);
 	PDFHummus::EStatusCode ReadJFIFData(JPEGImageInformation& outImageInformation);
-	PDFHummus::EStatusCode ReadPhotoshopData(JPEGImageInformation& outImageInformation);
+	PDFHummus::EStatusCode ReadPhotoshopData(JPEGImageInformation& outImageInformation,bool outPhotoshopDataOK);
 	PDFHummus::EStatusCode ReadExifData(JPEGImageInformation& outImageInformation);
 	PDFHummus::EStatusCode GetResolutionFromExif(	JPEGImageInformation& outImageInformation,
 									   unsigned long inXResolutionOffset,
