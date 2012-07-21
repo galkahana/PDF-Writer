@@ -116,7 +116,7 @@ EStatusCode PDFUsedFont::WriteState(ObjectsContext* inStateWriter,ObjectIDType i
 		writtenFontObject = inStateWriter->GetInDirectObjectsRegistry().AllocateNewObjectID();
 
 		pdfUsedFontObject->WriteKey("mWrittenFont");
-		pdfUsedFontObject->WriteObjectReferenceValue(writtenFontObject);
+		pdfUsedFontObject->WriteNewObjectReferenceValue(writtenFontObject);
 	}
 
 	inStateWriter->EndDictionary(pdfUsedFontObject);

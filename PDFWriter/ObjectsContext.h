@@ -51,9 +51,11 @@ public:
 	void SetOutputStream(IByteWriterWithPosition* inOutputStream);
 	
 
-	// Currently doing pre 1.5 xref writing
+	// pre 1.5 xref writing
 	PDFHummus::EStatusCode WriteXrefTable(LongFilePositionType& outWritePosition);
-
+    // post 1.5 xref writing (only used now for modified files)
+    PDFHummus::EStatusCode WriteXrefStream(DictionaryContext* inDictionaryContext);
+    
 	// Free Context, for direct stream writing
 	IByteWriterWithPosition* StartFreeContext();
 	void EndFreeContext();
@@ -77,7 +79,9 @@ public:
 	void WriteInteger(long long inIntegerToken,ETokenSeparator inSeparate = eTokenSeparatorSpace);
 	void WriteLiteralString(const string& inString,ETokenSeparator inSeparate = eTokenSeparatorSpace);
 	void WriteHexString(const string& inString,ETokenSeparator inSeparate = eTokenSeparatorSpace);
-	void WriteIndirectObjectReference(ObjectIDType inIndirectObjectID,ETokenSeparator inSeparate = eTokenSeparatorSpace);
+	void WriteIndirectObjectReference(ObjectIDType inIndirectObjectID,unsigned long inGenerationNumber,ETokenSeparator inSeparate = eTokenSeparatorSpace);
+	void WriteIndirectObjectReference(const ObjectReference& inObjectReference,ETokenSeparator inSeparate = eTokenSeparatorSpace);
+    void WriteNewIndirectObjectReference(ObjectIDType indirectObjectID,ETokenSeparator inSeparate = eTokenSeparatorSpace);
 	void WriteDouble(double inDoubleToken,ETokenSeparator inSeparate = eTokenSeparatorSpace);
 	void WriteBoolean(bool inBooleanToken,ETokenSeparator inSeparate = eTokenSeparatorSpace);
 	void WriteNull(ETokenSeparator inSeparate = eTokenSeparatorSpace);
@@ -99,6 +103,8 @@ public:
 	void StartNewIndirectObject(ObjectIDType inObjectID);
 	void EndIndirectObject();
 
+    // for modified files scenarios, modify an existing object
+    void StartModifiedIndirectObject(ObjectIDType inObjectID);
 
 	// Sets whether streams created by the objects context will be compressed (with flate) or not
 	void SetCompressStreams(bool inCompressStreams);
@@ -106,7 +112,7 @@ public:
 	// Create PDF stream and write it's header. note that stream are written with indirect object for Length, to allow one pass writing.
 	// inStreamDictionary can be passed in order to include stream generic information in an already written stream dictionary
 	// that is type specific. [the method will take care of closing the dictionary.
-	PDFStream* StartPDFStream(DictionaryContext* inStreamDictionary=NULL);
+	PDFStream* StartPDFStream(DictionaryContext* inStreamDictionary=NULL,bool inForceDirectExtentObject = false);
 	// same as StartPDFStream but forces the stream to create an unfiltered stream
 	PDFStream* StartUnfilteredPDFStream(DictionaryContext* inStreamDictionary=NULL);
 	void EndPDFStream(PDFStream* inStream);
@@ -119,6 +125,8 @@ public:
 	// subset fonts prefixes. might want to consider a more relevant object...
 	string GenerateSubsetFontPrefix();
 
+    // setup for modified file workflow
+    void SetupModifiedFile(PDFParser* inModifiedFileParser);
 
 	PDFHummus::EStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
 	PDFHummus::EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);
@@ -135,5 +143,6 @@ private:
 
 	void WritePDFStreamEndWithoutExtent();
 	void WritePDFStreamExtent(PDFStream* inStream);
+    void WriteXrefNumber(IByteWriter* inStream,LongFilePositionType inElement, size_t inElementSize);
 
 };

@@ -142,6 +142,10 @@ public:
 							ObjectsContext* inPDFWriterObjectContext,
 							PDFHummus::DocumentContext* inDocumentContext,
 							PDFDocumentHandler* inPDFDocumentHandler){return PDFHummus::eSuccess;}
+    
+    // When modifying a PDF, asking extender whether catalog update is desirable
+    virtual bool IsCatalogUpdateRequiredForModifiedFile(PDFParser* inModifiderFileParser){return false;}
+
 
 protected:
 	DocumentContextExtenderAdapter(){}

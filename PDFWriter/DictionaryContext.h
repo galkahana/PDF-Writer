@@ -46,7 +46,9 @@ public:
 	void WriteNullValue();
 	void WriteNameValue(const string& inValue);
 	void WriteKeywordValue(const string& inValue);
-	void WriteObjectReferenceValue(ObjectIDType inObjectReference);
+	void WriteObjectReferenceValue(const ObjectReference& inObjectReference);
+	void WriteObjectReferenceValue(ObjectIDType inObjectID,unsigned long inGenerationNumber);
+    void WriteNewObjectReferenceValue(ObjectIDType inObjectID);
 	void WriteRectangleValue(const PDFRectangle& inRectangle);
 	void WriteDoubleValue(double inValue);
 	void WriteBooleanValue(bool inValue);

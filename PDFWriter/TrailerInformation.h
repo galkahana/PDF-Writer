@@ -28,7 +28,7 @@
 using namespace IOBasicTypes;
 
 typedef std::pair<bool,LongFilePositionType> BoolAndLongFilePositionType;
-typedef std::pair<bool,ObjectIDType> BoolAndObjectIDType;
+typedef std::pair<bool,ObjectReference> BoolAndObjectReference;
 
 class TrailerInformation
 {
@@ -37,17 +37,17 @@ public:
 	~TrailerInformation(void);
 
 	void SetPrev(LongFilePositionType inPrev);
-	void SetRoot(ObjectIDType inRootReference);
-	void SetEncrypt(ObjectIDType inEncryptReference);
-	void SetInfoDictionaryReference(ObjectIDType inInfoDictionaryReference);
+	void SetRoot(const ObjectReference& inRootReference);
+	void SetEncrypt(const ObjectReference& inEncryptReference);
+	void SetInfoDictionaryReference(const ObjectReference& inInfoDictionaryReference);
 
 
 	// return with existance validation. for example, if Root is undefined, will return false
 	// as the first parameter, otherwise true and the value
 	BoolAndLongFilePositionType GetPrev();
-	BoolAndObjectIDType GetRoot();
-	BoolAndObjectIDType GetEncrypt();
-	BoolAndObjectIDType GetInfoDictionaryReference();
+	BoolAndObjectReference GetRoot();
+	BoolAndObjectReference GetEncrypt();
+	BoolAndObjectReference GetInfoDictionaryReference();
 
 	InfoDictionary& GetInfo();
 
@@ -56,9 +56,10 @@ public:
 private:
 	LongFilePositionType mPrev;
 
-	ObjectIDType mRootReference;
-	ObjectIDType mEncryptReference;
+	ObjectReference mRootReference;
+	ObjectReference mEncryptReference;
 
 	InfoDictionary mInfoDictionary;
-	ObjectIDType mInfoDictionaryReference;
+	ObjectReference mInfoDictionaryReference;
+    
 };

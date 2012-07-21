@@ -32,6 +32,7 @@ class JPEGImageHandler;
 class TIFFImageHandler;
 class PDFDocumentHandler;
 class PDFDictionary;
+class PDFParser;
 
 namespace PDFHummus
 {
@@ -157,5 +158,8 @@ public:
 							ObjectsContext* inPDFWriterObjectContext,
 							PDFHummus::DocumentContext* inPDFWriterDocumentContext,
 							PDFDocumentHandler* inPDFDocumentHandler) = 0;
+    
+    // When modifying a PDF, asking extender whether catalog update is desirable
+    virtual bool IsCatalogUpdateRequiredForModifiedFile(PDFParser* inModifiderFileParser) = 0;
 
 };

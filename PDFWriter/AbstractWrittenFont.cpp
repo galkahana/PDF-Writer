@@ -304,7 +304,7 @@ EStatusCode AbstractWrittenFont::WriteStateInDictionary(ObjectsContext* inStateW
 		mCidRepresentationObjectStateID = inStateWriter->GetInDirectObjectsRegistry().AllocateNewObjectID();
 
 		inDerivedObjectDictionary->WriteKey("mCIDRepresentation");
-		inDerivedObjectDictionary->WriteObjectReferenceValue(mCidRepresentationObjectStateID);
+		inDerivedObjectDictionary->WriteNewObjectReferenceValue(mCidRepresentationObjectStateID);
 	}
 
 	if(mANSIRepresentation)
@@ -312,7 +312,7 @@ EStatusCode AbstractWrittenFont::WriteStateInDictionary(ObjectsContext* inStateW
 		mAnsiRepresentationObjectStateID = inStateWriter->GetInDirectObjectsRegistry().AllocateNewObjectID();
 
 		inDerivedObjectDictionary->WriteKey("mANSIRepresentation");
-		inDerivedObjectDictionary->WriteObjectReferenceValue(mAnsiRepresentationObjectStateID);
+		inDerivedObjectDictionary->WriteNewObjectReferenceValue(mAnsiRepresentationObjectStateID);
 	}
 	return PDFHummus::eSuccess;
 }
@@ -365,7 +365,7 @@ EStatusCode AbstractWrittenFont::WriteWrittenFontState(WrittenFontRepresentation
 		ObjectIDType objectID = inStateWriter->GetInDirectObjectsRegistry().AllocateNewObjectID();
 		
 		inStateWriter->WriteInteger(it->first);
-		inStateWriter->WriteIndirectObjectReference(objectID);
+		inStateWriter->WriteNewIndirectObjectReference(objectID);
 		objectIDs.push_back(objectID);
 	}
 	inStateWriter->EndArray(eTokenSeparatorEndLine);

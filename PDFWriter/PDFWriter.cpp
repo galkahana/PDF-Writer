@@ -30,6 +30,9 @@
 #include "PDFObjectCast.h"
 #include "PDFIndirectObjectReference.h"
 #include "IByteWriterWithPosition.h"
+#include "OutputStreamTraits.h"
+#include "PDFBoolean.h"
+#include "PDFInteger.h"
 
 using namespace PDFHummus;
 
@@ -43,6 +46,7 @@ PDFWriter::PDFWriter(void)
 	// this allows the creation of copying context before starting to write the PDF, so that already
 	// the first decision (level) about the PDF can be the result of parsing
 	mDocumentContext.SetObjectsContext(&mObjectsContext);
+    mIsModified = false;
 }
 
 PDFWriter::~PDFWriter(void)
@@ -58,30 +62,50 @@ EStatusCode PDFWriter::StartPDF(
 	SetupLog(inLogConfiguration);
 	SetupObjectsContext(inPDFCreationSettings);
 	EStatusCode status = mOutputFile.OpenFile(inOutputFilePath);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return status;
 
 	mObjectsContext.SetOutputStream(mOutputFile.GetOutputStream());
 	mDocumentContext.SetOutputFileInformation(&mOutputFile);
+    
+    mIsModified = false;
 	
 	return mDocumentContext.WriteHeader(inPDFVersion);
 }
 
 EStatusCode PDFWriter::EndPDF()
 {
+    
 	EStatusCode status;
 	do
 	{
-		status = mDocumentContext.FinalizePDF();
-		if(status != PDFHummus::eSuccess)
+        if(mIsModified)
+            status = mDocumentContext.FinalizeModifiedPDF(&mModifiedFileParser,mModifiedFileVersion);
+        else    
+            status = mDocumentContext.FinalizeNewPDF();
+		if(status != eSuccess)
 		{
-			mOutputFile.CloseFile();
 			TRACE_LOG("PDFWriter::EndPDF, Could not end PDF");
 			break;
 		}
 		status = mOutputFile.CloseFile();
+        if(status != eSuccess)
+        {
+            TRACE_LOG("PDFWriter::EndPDF, Could not close output file");
+            break;
+    
+        }
+        mModifiedFileParser.ResetParser();
+        status = mModifiedFile.CloseFile();
 	}
 	while(false);
+    
+    if(status != eSuccess)
+    {
+        mOutputFile.CloseFile();
+        mModifiedFileParser.ResetParser();
+        mModifiedFile.CloseFile();
+    }
 	Cleanup();
 	return status;
 }
@@ -96,6 +120,8 @@ void PDFWriter::Cleanup()
 void PDFWriter::Reset()
 {
 	mOutputFile.CloseFile();
+    mModifiedFileParser.ResetParser();
+    mModifiedFile.CloseFile();
 	Cleanup();
 }
 
@@ -268,7 +294,7 @@ EStatusCode PDFWriter::Shutdown(const string& inStateFilePath)
 		StateWriter writer;
 
 		status = writer.Start(inStateFilePath);
-		if(status != PDFHummus::eSuccess)
+		if(status != eSuccess)
 		{
 			TRACE_LOG("PDFWriter::Shutdown, cant start state writing");
 			break;
@@ -284,33 +310,42 @@ EStatusCode PDFWriter::Shutdown(const string& inStateFilePath)
 		ObjectIDType DocumentContextID = writer.GetObjectsWriter()->GetInDirectObjectsRegistry().AllocateNewObjectID();
 
 		pdfWriterDictionary->WriteKey("mObjectsContext");
-		pdfWriterDictionary->WriteObjectReferenceValue(objectsContextID);
+		pdfWriterDictionary->WriteNewObjectReferenceValue(objectsContextID);
 
 		pdfWriterDictionary->WriteKey("mDocumentContext");
-		pdfWriterDictionary->WriteObjectReferenceValue(DocumentContextID);
+		pdfWriterDictionary->WriteNewObjectReferenceValue(DocumentContextID);
 
+        pdfWriterDictionary->WriteKey("mIsModified");
+        pdfWriterDictionary->WriteBooleanValue(mIsModified);
+        
+        if(mIsModified)
+        {
+            pdfWriterDictionary->WriteKey("mModifiedFileVersion");
+            pdfWriterDictionary->WriteIntegerValue(mModifiedFileVersion);
+        }
+        
 		writer.GetObjectsWriter()->EndDictionary(pdfWriterDictionary);
 		writer.GetObjectsWriter()->EndIndirectObject();
 
 		writer.SetRootObject(rootObjectID);
 
 		status = mObjectsContext.WriteState(writer.GetObjectsWriter(),objectsContextID);
-		if(status != PDFHummus::eSuccess)
+		if(status != eSuccess)
 			break;
 
 		status = mDocumentContext.WriteState(writer.GetObjectsWriter(),DocumentContextID);
-		if(status != PDFHummus::eSuccess)
+		if(status != eSuccess)
 			break;
 
 		status = writer.Finish();
-		if(status != PDFHummus::eSuccess)
+		if(status != eSuccess)
 		{
 			TRACE_LOG("PDFWriter::Shutdown, cant finish state writing");
 		}
 
 	}while(false);
 
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 	{
 		mOutputFile.CloseFile();
 		TRACE_LOG("PDFWriter::Shutdown, Could not end PDF");
@@ -323,15 +358,28 @@ EStatusCode PDFWriter::Shutdown(const string& inStateFilePath)
 
 EStatusCode PDFWriter::ContinuePDF(const string& inOutputFilePath,
 								   const string& inStateFilePath,
+                                   const string& inOptionalModifiedFile,
 								   const LogConfiguration& inLogConfiguration)
 {
 	
 
 	SetupLog(inLogConfiguration);
 	EStatusCode status = mOutputFile.OpenFile(inOutputFilePath,true);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return status;
 
+    if(inOptionalModifiedFile.size() != 0)
+    {
+        // setup parser for reading modified file
+        status = mModifiedFile.OpenFile(inOptionalModifiedFile);
+        if(status != eSuccess)
+            return status;
+        
+        status = mModifiedFileParser.StartPDFParsing(mModifiedFile.GetInputStream());
+        if(status != eSuccess)
+            return status;
+    }
+    
 	mObjectsContext.SetOutputStream(mOutputFile.GetOutputStream());
 	mDocumentContext.SetOutputFileInformation(&mOutputFile);
 
@@ -349,7 +397,7 @@ EStatusCode PDFWriter::SetupState(const string& inStateFilePath)
 		StateReader reader;
 
 		status = reader.Start(inStateFilePath);
-		if(status != PDFHummus::eSuccess)
+		if(status != eSuccess)
 		{
 			TRACE_LOG("PDFWriter::SetupState, cant start state readering");
 			break;
@@ -357,14 +405,23 @@ EStatusCode PDFWriter::SetupState(const string& inStateFilePath)
 
 		PDFObjectCastPtr<PDFDictionary> pdfWriterDictionary(reader.GetObjectsReader()->ParseNewObject(reader.GetRootObjectID()));
 
+        PDFObjectCastPtr<PDFBoolean> isModifiedObject(pdfWriterDictionary->QueryDirectObject("mIsModified"));
+        mIsModified = isModifiedObject->GetValue();
+        
+        if(mIsModified)
+        {
+            PDFObjectCastPtr<PDFInteger> isModifiedFileVersionObject(pdfWriterDictionary->QueryDirectObject("mModifiedFileVersion"));
+            mModifiedFileVersion = (EPDFVersion)(isModifiedFileVersionObject->GetValue());
+        }
+        
 		PDFObjectCastPtr<PDFIndirectObjectReference> objectsContextObject(pdfWriterDictionary->QueryDirectObject("mObjectsContext"));
 		status = mObjectsContext.ReadState(reader.GetObjectsReader(),objectsContextObject->mObjectID);
-		if(status!= PDFHummus::eSuccess)
+		if(status!= eSuccess)
 			break;
 
-		PDFObjectCastPtr<PDFIndirectObjectReference> DocumentContextObject(pdfWriterDictionary->QueryDirectObject("mDocumentContext"));
-		status = mDocumentContext.ReadState(reader.GetObjectsReader(),DocumentContextObject->mObjectID);
-		if(status!= PDFHummus::eSuccess)
+		PDFObjectCastPtr<PDFIndirectObjectReference> documentContextObject(pdfWriterDictionary->QueryDirectObject("mDocumentContext"));
+		status = mDocumentContext.ReadState(reader.GetObjectsReader(),documentContextObject->mObjectID);
+		if(status!= eSuccess)
 			break;
 
 		reader.Finish();
@@ -377,10 +434,15 @@ EStatusCode PDFWriter::SetupState(const string& inStateFilePath)
 
 EStatusCode PDFWriter::ContinuePDFForStream(IByteWriterWithPosition* inOutputStream,
 											const string& inStateFilePath,
+                                            IByteReaderWithPosition* inModifiedSourceStream,
 			 								const LogConfiguration& inLogConfiguration)
 {
 	SetupLog(inLogConfiguration);
-
+    
+    if(inModifiedSourceStream)
+        if(mModifiedFileParser.StartPDFParsing(inModifiedSourceStream) != eSuccess)
+            return eFailure;
+ 
 	mObjectsContext.SetOutputStream(inOutputStream);
 
 	return SetupState(inStateFilePath);
@@ -419,12 +481,19 @@ EStatusCode PDFWriter::StartPDFForStream(IByteWriterWithPosition* inOutputStream
 	SetupObjectsContext(inPDFCreationSettings);
 
 	mObjectsContext.SetOutputStream(inOutputStream);
+    mIsModified = false;
 	
 	return mDocumentContext.WriteHeader(inPDFVersion);
 }
 EStatusCode PDFWriter::EndPDFForStream()
 {
-	EStatusCode status = mDocumentContext.FinalizePDF();
+    EStatusCode status;
+    
+    if(mIsModified)
+        status = mDocumentContext.FinalizeModifiedPDF(&mModifiedFileParser,mModifiedFileVersion);
+    else    
+        status = mDocumentContext.FinalizeNewPDF();
+    mModifiedFileParser.ResetParser();
 	Cleanup();
 	return status;
 }
@@ -503,3 +572,126 @@ PDFDocumentCopyingContext* PDFWriter::CreatePDFCopyingContext(IByteReaderWithPos
 	return mDocumentContext.CreatePDFCopyingContext(inPDFStream);	
 }
 
+EStatusCode PDFWriter::ModifyPDF(const string& inModifiedFile,
+                                            EPDFVersion inPDFVersion,
+                                            const string& inOptionalAlternativeOutputFile,
+                                            const LogConfiguration& inLogConfiguration,
+                                            const PDFCreationSettings& inPDFCreationSettings)
+{
+    EStatusCode status = eSuccess;
+    
+    SetupLog(inLogConfiguration);
+	SetupObjectsContext(inPDFCreationSettings);
+	
+    do 
+    {
+        // either append to original file, or create a new copy and "modify" it. depending on users choice
+        if(inOptionalAlternativeOutputFile.size() == 0 || (inOptionalAlternativeOutputFile == inModifiedFile))
+        {
+            status = mOutputFile.OpenFile(inModifiedFile,true);
+            if(status != eSuccess)
+                break;
+        }
+        else
+        {
+            status = mOutputFile.OpenFile(inOptionalAlternativeOutputFile);
+            if(status != eSuccess)
+               break;
+            
+            // copy original to new output file
+            InputFile modifiedFileInput;
+            status = modifiedFileInput.OpenFile(inModifiedFile);
+            if(status != eSuccess)
+                break;
+            
+            OutputStreamTraits traits(mOutputFile.GetOutputStream());
+            status = traits.CopyToOutputStream(modifiedFileInput.GetInputStream());
+            if(status != eSuccess)
+                break;
+        }
+        
+        mObjectsContext.SetOutputStream(mOutputFile.GetOutputStream());
+        mDocumentContext.SetOutputFileInformation(&mOutputFile);
+        
+        // do setup for modification 
+        mIsModified = true;
+        status = SetupStateFromModifiedFile(inModifiedFile,inPDFVersion);
+    } 
+    while (false);
+           
+    return status;
+}
+
+EStatusCode PDFWriter::ModifyPDFForStream(
+                                      IByteReaderWithPosition* inModifiedSourceStream,
+                                      IByteWriterWithPosition* inModifiedDestinationStream,
+                                      EPDFVersion inPDFVersion,
+                                      const LogConfiguration& inLogConfiguration,
+                                      const PDFCreationSettings& inPDFCreationSettings)
+{    
+    SetupLog(inLogConfiguration);
+	SetupObjectsContext(inPDFCreationSettings);
+	
+    mObjectsContext.SetOutputStream(inModifiedDestinationStream);
+        
+    mIsModified = true;
+        
+    return SetupStateFromModifiedStream(inModifiedSourceStream,inPDFVersion);  
+}
+
+EStatusCode PDFWriter::SetupStateFromModifiedStream(IByteReaderWithPosition* inModifiedSourceStream,
+                                                    EPDFVersion inPDFVersion)
+{
+    EStatusCode status;
+    
+    do 
+    {
+        status = mModifiedFileParser.StartPDFParsing(inModifiedSourceStream);
+        if(status != eSuccess)
+            break;    
+        
+        mObjectsContext.SetupModifiedFile(&mModifiedFileParser);
+        
+        status = mDocumentContext.SetupModifiedFile(&mModifiedFileParser);
+        if(status != eSuccess)
+            break;
+        
+        mModifiedFileVersion = inPDFVersion;
+        
+    } 
+    while (false);
+    
+    return status;
+}
+
+EStatusCode PDFWriter::SetupStateFromModifiedFile(const string& inModifiedFile,EPDFVersion inPDFVersion)
+{
+    EStatusCode status;
+    
+    do
+    {
+        status = mModifiedFile.OpenFile(inModifiedFile);
+        if(status != eSuccess)
+            break;
+        
+        status = SetupStateFromModifiedStream(mModifiedFile.GetInputStream(),inPDFVersion);
+    }
+    while(false);
+    
+    return status;
+}
+
+PDFParser& PDFWriter::GetModifiedFileParser()
+{
+    return mModifiedFileParser;
+}
+
+InputFile& PDFWriter::GetModifiedInputFile()
+{
+    return mModifiedFile;
+}
+
+PDFDocumentCopyingContext* PDFWriter::CreatePDFCopyingContextForModifiedFile()
+{
+	return mDocumentContext.CreatePDFCopyingContext(&mModifiedFileParser);    
+}

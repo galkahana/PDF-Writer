@@ -57,6 +57,12 @@ public:
 					  ObjectsContext* inObjectsContext,
 					  IPDFParserExtender* inParserExtender);
 
+    
+	PDFHummus::EStatusCode Start(PDFParser* inPDFParser,
+                                 DocumentContext* inDocumentContext,
+                                 ObjectsContext* inObjectsContext,
+                                 IPDFParserExtender* inParserExtender);
+
 	EStatusCodeAndObjectIDType CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
 															 EPDFPageBox inPageBoxToUseAsFormBox,
 															 const double* inTransformationMatrix = NULL);
@@ -76,9 +82,9 @@ public:
 		still...there might be referenced objects from this object to copy, hence you must later copy them. The internal
 		state of the copying context will hold object references for them till you do, so that the reference IDs remain good.
 	*/
-	EStatusCodeAndObjectIDTypeList CopyDirectObject(PDFObject* inObject);
+	EStatusCodeAndObjectIDTypeList CopyDirectObjectWithDeepCopy(PDFObject* inObject);
 	/*
-		Call this ONLY with the result of CopyDirectObject, to copy new objects that are reuqired for direct object. It is OK to merge a couple of results from multiple
+		Call this ONLY with the result of CopyDirectObjectWithDeepCopy, to copy new objects that are reuqired for direct object. It is OK to merge a couple of results from multiple
 		CopyDirectObject to a single list. MAKE SURE THERE ARE NO DUPLICATES in that case.
 	*/
 	PDFHummus::EStatusCode CopyNewObjectsForDirectObject(const ObjectIDTypeList& inReferencedObjects);
@@ -103,6 +109,16 @@ public:
 	void AddDocumentContextExtender(IDocumentContextExtender* inExtender);
 	void RemoveDocumentContextExtender(IDocumentContextExtender* inExtender);	
 
+    // for document modification workflows
+ 
+    // This method copies a direct object as is, with any references
+    // retained to old IDs. this is different from CopyDirectObjectDeepCopy which copies
+    // the referenced object and uses new references.
+    // This method is fitting file modification scenarios. CopyDirectObjectDeepCopy fits
+    // importing scenarios.
+    PDFHummus::EStatusCode CopyDirectObjectAsIs(PDFObject* inObject);
+    
+    
 private:
 
 	PDFHummus::DocumentContext* mDocumentContext;

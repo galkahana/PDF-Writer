@@ -98,7 +98,7 @@ EStatusCode CIDFontWriter::WriteFont(FreeTypeFaceWrapper& inFontInfo,
 
 		fontContext->WriteKey(scDescendantFonts);
 		mObjectsContext->StartArray();
-		mObjectsContext->WriteIndirectObjectReference(descendantFontID);
+		mObjectsContext->WriteNewIndirectObjectReference(descendantFontID);
 		mObjectsContext->EndArray(eTokenSeparatorEndLine);
 
 		CalculateCharacterEncodingArray(); // put the charachter in the order of encoding, for the ToUnicode map
@@ -106,7 +106,7 @@ EStatusCode CIDFontWriter::WriteFont(FreeTypeFaceWrapper& inFontInfo,
 		// ToUnicode
 		fontContext->WriteKey(scToUnicode);
 		ObjectIDType toUnicodeMapObjectID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
-		fontContext->WriteObjectReferenceValue(toUnicodeMapObjectID);
+		fontContext->WriteNewObjectReferenceValue(toUnicodeMapObjectID);
 		
 		status = inObjectsContext->EndDictionary(fontContext);
 		if(status != PDFHummus::eSuccess)

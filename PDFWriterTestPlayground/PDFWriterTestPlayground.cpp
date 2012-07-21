@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
 			{
 				bool hasExclusions = false;
 				StringList categories;
-				int i=2;
+				int i=4;
 			
 				for(;i<argc;++i)
 				{

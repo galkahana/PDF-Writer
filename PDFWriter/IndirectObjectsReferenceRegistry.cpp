@@ -36,10 +36,18 @@ using namespace PDFHummus;
 
 IndirectObjectsReferenceRegistry::IndirectObjectsReferenceRegistry(void)
 {
+    SetupInitialFreeObject();
+}
+
+void IndirectObjectsReferenceRegistry::SetupInitialFreeObject()
+{
 	ObjectWriteInformation singleFreeObjectInformation;
 	
 	singleFreeObjectInformation.mObjectReferenceType = ObjectWriteInformation::Free;
 	singleFreeObjectInformation.mObjectWritten = false;
+    singleFreeObjectInformation.mIsDirty = true;
+    singleFreeObjectInformation.mGenerationNumber = 65535;
+    singleFreeObjectInformation.mWritePosition = 0;
 	mObjectsWritesRegistry.push_back(singleFreeObjectInformation);
 }
 
@@ -55,6 +63,8 @@ ObjectIDType IndirectObjectsReferenceRegistry::AllocateNewObjectID()
 
 	newObjectInformation.mObjectWritten = false;
 	newObjectInformation.mObjectReferenceType = ObjectWriteInformation::Used;
+    newObjectInformation.mGenerationNumber = 0;
+    newObjectInformation.mIsDirty = true;
 	
 	mObjectsWritesRegistry.push_back(newObjectInformation);
 	return newObjectID;
@@ -82,6 +92,7 @@ EStatusCode IndirectObjectsReferenceRegistry::MarkObjectAsWritten(ObjectIDType i
 		return PDFHummus::eFailure;
 	}
 
+    mObjectsWritesRegistry[inObjectID].mIsDirty = true;
 	mObjectsWritesRegistry[inObjectID].mWritePosition = inWritePosition;
 	mObjectsWritesRegistry[inObjectID].mObjectWritten = true;
 	return PDFHummus::eSuccess;
@@ -112,6 +123,52 @@ ObjectIDType IndirectObjectsReferenceRegistry::GetObjectsCount() const
 {
 	return static_cast<ObjectIDType>(mObjectsWritesRegistry.size());
 }
+
+PDFHummus::EStatusCode IndirectObjectsReferenceRegistry::DeleteObject(ObjectIDType inObjectID)
+{
+	if(mObjectsWritesRegistry.size() <= inObjectID)
+	{
+		TRACE_LOG1("IndirectObjectsReferenceRegistry::DeleteObject, Out of range failure. An Object ID is marked for delete,but there's no such object. ID = %ld",inObjectID);
+		return PDFHummus::eFailure; 
+	}
+
+    if(mObjectsWritesRegistry[inObjectID].mGenerationNumber == 65535)
+    {
+		TRACE_LOG1("IndirectObjectsReferenceRegistry::DeleteObject, object ID generation number reached maximum value and cannot be increased. ID = %ld",inObjectID);
+		return PDFHummus::eFailure; 
+        
+    }
+    
+    mObjectsWritesRegistry[inObjectID].mIsDirty = true;
+    ++(mObjectsWritesRegistry[inObjectID].mGenerationNumber);
+    mObjectsWritesRegistry[inObjectID].mWritePosition = 0;
+    mObjectsWritesRegistry[inObjectID].mObjectReferenceType = ObjectWriteInformation::Free;
+    
+    return PDFHummus::eSuccess;
+}
+
+PDFHummus::EStatusCode IndirectObjectsReferenceRegistry::MarkObjectAsUpdated(ObjectIDType inObjectID,LongFilePositionType inNewWritePosition)
+{
+ 	if(mObjectsWritesRegistry.size() <= inObjectID)
+	{
+		TRACE_LOG1("IndirectObjectsReferenceRegistry::MarkObjectAsUpdated, Out of range failure. An Object ID is marked for update,but there's no such object. ID = %ld",inObjectID);
+		return PDFHummus::eFailure; 
+	}
+
+	if(inNewWritePosition > 9999999999LL) // if write position is larger than what can be represented by 10 digits, xref write will fail
+	{
+		TRACE_LOG1("IndirectObjectsReferenceRegistry::MarkObjectAsUpdated, Write position out of bounds. Trying to write an object at position that cannot be represented in Xref = %lld. probably means file got too long",inNewWritePosition);
+		return PDFHummus::eFailure;
+	}
+
+    
+    mObjectsWritesRegistry[inObjectID].mIsDirty = true;
+    mObjectsWritesRegistry[inObjectID].mWritePosition = inNewWritePosition;
+    mObjectsWritesRegistry[inObjectID].mObjectReferenceType = ObjectWriteInformation::Used;
+
+    return PDFHummus::eSuccess;
+}
+
 
 typedef list<ObjectIDType> ObjectIDTypeList;
 
@@ -167,6 +224,13 @@ EStatusCode IndirectObjectsReferenceRegistry::WriteState(ObjectsContext* inState
 		registryDictionary->WriteKey("mObjectReferenceType");
 		registryDictionary->WriteIntegerValue(it->mObjectReferenceType);
 
+        registryDictionary->WriteKey("mIsDirty");
+		registryDictionary->WriteBooleanValue(it->mIsDirty);
+        
+		registryDictionary->WriteKey("mGenerationNumber");
+		registryDictionary->WriteIntegerValue(it->mGenerationNumber);
+        
+        
 		inStateWriter->EndDictionary(registryDictionary);
 		inStateWriter->EndIndirectObject();
 	}
@@ -202,6 +266,12 @@ EStatusCode IndirectObjectsReferenceRegistry::ReadState(PDFParser* inStateReader
 		PDFObjectCastPtr<PDFInteger> objectReferenceType(objectWriteInformationDictionary->QueryDirectObject("mObjectReferenceType"));
 		newObjectInformation.mObjectReferenceType = (ObjectWriteInformation::EObjectReferenceType)objectReferenceType->GetValue();
 
+		PDFObjectCastPtr<PDFBoolean> objectDirty(objectWriteInformationDictionary->QueryDirectObject("mIsDirty"));
+        newObjectInformation.mIsDirty = objectDirty->GetValue();
+        
+        PDFObjectCastPtr<PDFInteger> generationNumber(objectWriteInformationDictionary->QueryDirectObject("mGenerationNumber"));
+        newObjectInformation.mGenerationNumber = (unsigned long)generationNumber->GetValue();
+
 		mObjectsWritesRegistry.push_back(newObjectInformation);
 	}
 
@@ -212,9 +282,38 @@ void IndirectObjectsReferenceRegistry::Reset()
 {
 	mObjectsWritesRegistry.clear();
 
-	ObjectWriteInformation singleFreeObjectInformation;
+	SetupInitialFreeObject();
+}
+
+void IndirectObjectsReferenceRegistry::AppendExistingItem(
+    ObjectWriteInformation::EObjectReferenceType inObjectReferenceType,
+    unsigned long inGenerationNumber,
+    LongFilePositionType inWritePosition)
+{
+  
+	ObjectWriteInformation newObjectInformation;
+    
+	newObjectInformation.mObjectWritten = (inObjectReferenceType == ObjectWriteInformation::Used);
+	newObjectInformation.mObjectReferenceType = inObjectReferenceType;
+    newObjectInformation.mGenerationNumber = inGenerationNumber;
+    newObjectInformation.mIsDirty = false;
+    newObjectInformation.mWritePosition = (inObjectReferenceType == ObjectWriteInformation::Used) ? inWritePosition:0;
 	
-	singleFreeObjectInformation.mObjectReferenceType = ObjectWriteInformation::Free;
-	singleFreeObjectInformation.mObjectWritten = false;
-	mObjectsWritesRegistry.push_back(singleFreeObjectInformation);
+	mObjectsWritesRegistry.push_back(newObjectInformation);
+    
+}
+
+void IndirectObjectsReferenceRegistry::SetupXrefFromModifiedFile(PDFParser* inModifiedFileParser)
+{
+    
+    // kind of easy, just read the xref from the parer into the existing parser [skip first element, which is the free element]
+    for(ObjectIDType i = 1; i < inModifiedFileParser->GetXrefSize(); ++i)
+    {
+        XrefEntryInput* anEntry = inModifiedFileParser->GetXrefEntry(i);
+        AppendExistingItem(
+            anEntry->mType != eXrefEntryDelete ? ObjectWriteInformation::Used : ObjectWriteInformation::Free,
+                           anEntry->mType != eXrefEntryStreamObject ? anEntry->mRivision:0,
+            anEntry->mObjectPosition);       
+    }
+    
 }

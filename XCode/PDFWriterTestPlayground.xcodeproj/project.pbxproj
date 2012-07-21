@@ -10,6 +10,12 @@
 		490BBEA915657BE900C28250 /* WindowsPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 490BBEA815657BE900C28250 /* WindowsPath.cpp */; };
 		490BBEAB15657C5900C28250 /* FileURL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 490BBEAA15657C5900C28250 /* FileURL.cpp */; };
 		490BBEAF1566B80D00C28250 /* PosixPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 490BBEAE1566B80D00C28250 /* PosixPath.cpp */; };
+		497CD3C215A87136000B3C7C /* BasicModification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 497CD3C115A87136000B3C7C /* BasicModification.cpp */; };
+		497CD3C415A8ABBE000B3C7C /* AppendingAndReading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 497CD3C315A8ABBE000B3C7C /* AppendingAndReading.cpp */; };
+		4983E2161587D73900F3F62A /* JPGImageBugTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4983E2151587D73900F3F62A /* JPGImageBugTest.cpp */; };
+		4989F37C15BA977800F91EAF /* ModifyingExistingFileContent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4989F37B15BA977800F91EAF /* ModifyingExistingFileContent.cpp */; };
+		4989F38215BAB98000F91EAF /* PDFComment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4989F37E15BAB97F00F91EAF /* PDFComment.cpp */; };
+		4989F38315BAB98000F91EAF /* PDFCommentWriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4989F38015BAB97F00F91EAF /* PDFCommentWriter.cpp */; };
 		49B70DFD155C5F3500C0FD9F /* AppendPagesTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49B70DA8155C5F3500C0FD9F /* AppendPagesTest.cpp */; };
 		49B70DFE155C5F3500C0FD9F /* AppendSpecialPagesTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49B70DAA155C5F3500C0FD9F /* AppendSpecialPagesTest.cpp */; };
 		49B70DFF155C5F3500C0FD9F /* BoxingBaseTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49B70DAC155C5F3500C0FD9F /* BoxingBaseTest.cpp */; };
@@ -49,6 +55,7 @@
 		49B70E23155C5F3500C0FD9F /* Type1Test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49B70DF9155C5F3500C0FD9F /* Type1Test.cpp */; };
 		49B70E24155C5F3500C0FD9F /* UppercaseSequanceTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49B70DFB155C5F3500C0FD9F /* UppercaseSequanceTest.cpp */; };
 		49BADF7A155C629C00BE7C32 /* libLibTiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 49BADF79155C629C00BE7C32 /* libLibTiff.a */; };
+		49CD30EA157106AB00413969 /* AmitsTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49CD30E8157106AB00413969 /* AmitsTest.cpp */; };
 		49E5A56C155C601B00ED8A29 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49E5A56B155C601B00ED8A29 /* CoreFoundation.framework */; };
 		49E5A56F155C602500ED8A29 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 49E5A56E155C602500ED8A29 /* libz.dylib */; };
 		49E5A571155C603300ED8A29 /* libPDFWriter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 49E5A570155C603300ED8A29 /* libPDFWriter.a */; };
@@ -74,7 +81,19 @@
 		490BBEAC15657C6A00C28250 /* FileURL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileURL.h; sourceTree = "<group>"; };
 		490BBEAD1566B7FD00C28250 /* PosixPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PosixPath.h; sourceTree = "<group>"; };
 		490BBEAE1566B80D00C28250 /* PosixPath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PosixPath.cpp; sourceTree = "<group>"; };
+		497CD3C015A87124000B3C7C /* BasicModification.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BasicModification.h; sourceTree = "<group>"; };
+		497CD3C115A87136000B3C7C /* BasicModification.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BasicModification.cpp; sourceTree = "<group>"; };
+		497CD3C315A8ABBE000B3C7C /* AppendingAndReading.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppendingAndReading.cpp; sourceTree = "<group>"; };
+		497CD3C515A8ABCF000B3C7C /* AppendingAndReading.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppendingAndReading.h; sourceTree = "<group>"; };
+		4983E2151587D73900F3F62A /* JPGImageBugTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JPGImageBugTest.cpp; sourceTree = "<group>"; };
+		4983E2181587D77100F3F62A /* JPGImageBugTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JPGImageBugTest.h; sourceTree = "<group>"; };
 		4989C52A155C5EED00D93089 /* PDFWriterTestPlayground */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PDFWriterTestPlayground; sourceTree = BUILT_PRODUCTS_DIR; };
+		4989F37915BA976700F91EAF /* ModifyingExistingFileContent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ModifyingExistingFileContent.h; sourceTree = "<group>"; };
+		4989F37B15BA977800F91EAF /* ModifyingExistingFileContent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ModifyingExistingFileContent.cpp; sourceTree = "<group>"; };
+		4989F37E15BAB97F00F91EAF /* PDFComment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PDFComment.cpp; sourceTree = "<group>"; };
+		4989F37F15BAB97F00F91EAF /* PDFComment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDFComment.h; sourceTree = "<group>"; };
+		4989F38015BAB97F00F91EAF /* PDFCommentWriter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PDFCommentWriter.cpp; sourceTree = "<group>"; };
+		4989F38115BAB97F00F91EAF /* PDFCommentWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDFCommentWriter.h; sourceTree = "<group>"; };
 		49B70DA8155C5F3500C0FD9F /* AppendPagesTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AppendPagesTest.cpp; path = ../PDFWriterTestPlayground/AppendPagesTest.cpp; sourceTree = SOURCE_ROOT; };
 		49B70DA9155C5F3500C0FD9F /* AppendPagesTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppendPagesTest.h; path = ../PDFWriterTestPlayground/AppendPagesTest.h; sourceTree = SOURCE_ROOT; };
 		49B70DAA155C5F3500C0FD9F /* AppendSpecialPagesTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AppendSpecialPagesTest.cpp; path = ../PDFWriterTestPlayground/AppendSpecialPagesTest.cpp; sourceTree = SOURCE_ROOT; };
@@ -152,6 +171,8 @@
 		49B70DFB155C5F3500C0FD9F /* UppercaseSequanceTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UppercaseSequanceTest.cpp; path = ../PDFWriterTestPlayground/UppercaseSequanceTest.cpp; sourceTree = SOURCE_ROOT; };
 		49B70DFC155C5F3500C0FD9F /* UppercaseSequanceTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UppercaseSequanceTest.h; path = ../PDFWriterTestPlayground/UppercaseSequanceTest.h; sourceTree = SOURCE_ROOT; };
 		49BADF79155C629C00BE7C32 /* libLibTiff.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libLibTiff.a; path = Build/Products/Debug/libLibTiff.a; sourceTree = "<group>"; };
+		49CD30E8157106AB00413969 /* AmitsTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AmitsTest.cpp; sourceTree = "<group>"; };
+		49CD30E9157106AB00413969 /* AmitsTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AmitsTest.h; sourceTree = "<group>"; };
 		49E5A56B155C601B00ED8A29 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		49E5A56E155C602500ED8A29 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		49E5A570155C603300ED8A29 /* libPDFWriter.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libPDFWriter.a; path = Build/Products/Debug/libPDFWriter.a; sourceTree = "<group>"; };
@@ -187,6 +208,20 @@
 			name = "Hummus Paths";
 			sourceTree = "<group>";
 		};
+		497CD3BE15A8710D000B3C7C /* Modification */ = {
+			isa = PBXGroup;
+			children = (
+				4989F37D15BAB95400F91EAF /* Comments Infrastracture */,
+				497CD3C015A87124000B3C7C /* BasicModification.h */,
+				497CD3C115A87136000B3C7C /* BasicModification.cpp */,
+				497CD3C515A8ABCF000B3C7C /* AppendingAndReading.h */,
+				497CD3C315A8ABBE000B3C7C /* AppendingAndReading.cpp */,
+				4989F37915BA976700F91EAF /* ModifyingExistingFileContent.h */,
+				4989F37B15BA977800F91EAF /* ModifyingExistingFileContent.cpp */,
+			);
+			name = Modification;
+			sourceTree = "<group>";
+		};
 		4989C51F155C5EED00D93089 = {
 			isa = PBXGroup;
 			children = (
@@ -219,9 +254,22 @@
 			path = ../PDFWriterTestPlayground;
 			sourceTree = SOURCE_ROOT;
 		};
+		4989F37D15BAB95400F91EAF /* Comments Infrastracture */ = {
+			isa = PBXGroup;
+			children = (
+				4989F37E15BAB97F00F91EAF /* PDFComment.cpp */,
+				4989F37F15BAB97F00F91EAF /* PDFComment.h */,
+				4989F38015BAB97F00F91EAF /* PDFCommentWriter.cpp */,
+				4989F38115BAB97F00F91EAF /* PDFCommentWriter.h */,
+			);
+			name = "Comments Infrastracture";
+			sourceTree = "<group>";
+		};
 		49B70E25155C5F5000C0FD9F /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				497CD3BE15A8710D000B3C7C /* Modification */,
+				49CD30E61571069C00413969 /* bugs */,
 				49DB92AD155D149C00C949D7 /* Type1 */,
 				49DB92AC155D149300C949D7 /* TrueType */,
 				49DB92A8155D145E00C949D7 /* PDFs */,
@@ -236,6 +284,17 @@
 			name = Tests;
 			path = ../PDFWriterTestPlayground;
 			sourceTree = SOURCE_ROOT;
+		};
+		49CD30E61571069C00413969 /* bugs */ = {
+			isa = PBXGroup;
+			children = (
+				49CD30E8157106AB00413969 /* AmitsTest.cpp */,
+				49CD30E9157106AB00413969 /* AmitsTest.h */,
+				4983E2151587D73900F3F62A /* JPGImageBugTest.cpp */,
+				4983E2181587D77100F3F62A /* JPGImageBugTest.h */,
+			);
+			name = bugs;
+			sourceTree = "<group>";
 		};
 		49DB929F155D12B300C949D7 /* Main */ = {
 			isa = PBXGroup;
@@ -528,6 +587,13 @@
 				490BBEA915657BE900C28250 /* WindowsPath.cpp in Sources */,
 				490BBEAB15657C5900C28250 /* FileURL.cpp in Sources */,
 				490BBEAF1566B80D00C28250 /* PosixPath.cpp in Sources */,
+				49CD30EA157106AB00413969 /* AmitsTest.cpp in Sources */,
+				4983E2161587D73900F3F62A /* JPGImageBugTest.cpp in Sources */,
+				497CD3C215A87136000B3C7C /* BasicModification.cpp in Sources */,
+				497CD3C415A8ABBE000B3C7C /* AppendingAndReading.cpp in Sources */,
+				4989F37C15BA977800F91EAF /* ModifyingExistingFileContent.cpp in Sources */,
+				4989F38215BAB98000F91EAF /* PDFComment.cpp in Sources */,
+				4989F38315BAB98000F91EAF /* PDFCommentWriter.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

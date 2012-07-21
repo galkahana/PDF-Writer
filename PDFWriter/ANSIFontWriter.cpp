@@ -104,13 +104,13 @@ EStatusCode ANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 		// ToUnicode
 		fontContext->WriteKey(scToUnicode);
 		ObjectIDType toUnicodeMapObjectID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
-		fontContext->WriteObjectReferenceValue(toUnicodeMapObjectID);
+		fontContext->WriteNewObjectReferenceValue(toUnicodeMapObjectID);
 
 
 		// FontDescriptor
 		fontContext->WriteKey(scFontDescriptor);
 		ObjectIDType fontDescriptorObjectID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
-		fontContext->WriteObjectReferenceValue(fontDescriptorObjectID);
+		fontContext->WriteNewObjectReferenceValue(fontDescriptorObjectID);
 
 		status = inObjectsContext->EndDictionary(fontContext);
 		if(status != PDFHummus::eSuccess)
@@ -224,7 +224,7 @@ void ANSIFontWriter::WriteEncoding(DictionaryContext* inFontContext)
 	else
 	{
 		mEncodingDictionaryID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
-		inFontContext->WriteObjectReferenceValue(mEncodingDictionaryID);
+		inFontContext->WriteNewObjectReferenceValue(mEncodingDictionaryID);
 	}
 }
 

@@ -46,9 +46,16 @@ struct ObjectWriteInformation
 		Used
 	};	
 
+    // is object already written to file (when in incremental changes, it includes previous document versions as well)
 	bool mObjectWritten;
-	LongFilePositionType mWritePosition; // value is undefined if mObjectWritten is false
+    // has anything changed (true for initial file writing. when in incremental changes, dependent on whether something was done to this object)
+    bool mIsDirty;
+    // value is undefined if mObjectWritten is false or if free
+	LongFilePositionType mWritePosition;
+    // free or used object
 	EObjectReferenceType mObjectReferenceType;
+    // object generation number
+    unsigned long mGenerationNumber;
 };
 
 typedef std::pair<bool,ObjectWriteInformation> GetObjectWriteInformationResult;
@@ -69,11 +76,25 @@ public:
 	// should be used with safe object IDs. use GetObjectsCount to verify the maximum ID
 	const ObjectWriteInformation& GetNthObjectReference(ObjectIDType inObjectID) const; 
 
+
+    // modified PDF methods
+    PDFHummus::EStatusCode DeleteObject(ObjectIDType inObjectID);
+	PDFHummus::EStatusCode MarkObjectAsUpdated(ObjectIDType inObjectID,LongFilePositionType inNewWritePosition);
+    
+    
+    
 	PDFHummus::EStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
 	PDFHummus::EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);
 
 	void Reset();
-
+ 
+    void SetupXrefFromModifiedFile(PDFParser* inModifiedFileParser);
+    
 private:
 	ObjectWriteInformationVector mObjectsWritesRegistry;
+    
+    void SetupInitialFreeObject();
+    void AppendExistingItem(ObjectWriteInformation::EObjectReferenceType inObjectReferenceType,
+                            unsigned long inGenerationNumber,
+                            LongFilePositionType inWritePosition);
 };

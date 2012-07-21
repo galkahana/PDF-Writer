@@ -76,9 +76,20 @@ void DictionaryContext::WriteIntegerValue(long long inValue)
 	mObjectsContext->WriteInteger(inValue,eTokenSeparatorEndLine);
 }
 
-void DictionaryContext::WriteObjectReferenceValue(ObjectIDType inObjectReference)
+void DictionaryContext::WriteObjectReferenceValue(const ObjectReference& inObjectReference)
 {
-	mObjectsContext->WriteIndirectObjectReference(inObjectReference,eTokenSeparatorEndLine);
+    WriteObjectReferenceValue(inObjectReference.ObjectID,inObjectReference.GenerationNumber);
+}
+
+void DictionaryContext::WriteObjectReferenceValue(ObjectIDType inObjectReference,unsigned long inGenerationNumber)
+{
+    mObjectsContext->WriteIndirectObjectReference(inObjectReference,inGenerationNumber,eTokenSeparatorEndLine);
+}
+
+
+void DictionaryContext::WriteNewObjectReferenceValue(ObjectIDType inObjectReference)
+{
+    WriteObjectReferenceValue(inObjectReference,0);
 }
 
 void DictionaryContext::WriteLiteralStringValue(const string& inValue)

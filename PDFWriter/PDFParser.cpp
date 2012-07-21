@@ -462,7 +462,7 @@ EStatusCode PDFParser::BuildXrefTableFromTable()
 			break;
 
 		// For hybrids, check also XRefStm entry
-		PDFObjectCastPtr<PDFInteger> xrefStmReference(mTrailer->QueryDirectObject("XRefStem"));
+		PDFObjectCastPtr<PDFInteger> xrefStmReference(mTrailer->QueryDirectObject("XRefStm"));
 		if(!xrefStmReference)
 			break;
 		// if exists, merge update xref
@@ -1025,7 +1025,7 @@ EStatusCode PDFParser::ParseDirectory(LongFilePositionType inXrefPosition,
 			}	
 
 			// For hybrids, check also XRefStm entry
-			PDFObjectCastPtr<PDFInteger> xrefStmReference(trailerDictionary->QueryDirectObject("XRefStem"));
+			PDFObjectCastPtr<PDFInteger> xrefStmReference(trailerDictionary->QueryDirectObject("XRefStm"));
 			if(xrefStmReference.GetPtr())
 			{
 				// if exists, merge update xref
@@ -1903,4 +1903,24 @@ void PDFParser::SetParserExtender(IPDFParserExtender* inParserExtender)
 bool PDFParser::IsEncryptionSupported()
 {
 	return mParserExtender && mParserExtender->DoesSupportEncryption();
+}
+
+ObjectIDType PDFParser::GetXrefSize()
+{
+    return mXrefSize;
+}
+
+XrefEntryInput* PDFParser::GetXrefEntry(ObjectIDType inObjectID)
+{
+    return (inObjectID < mXrefSize) ? mXrefTable+inObjectID : NULL;
+}
+
+LongFilePositionType PDFParser::GetXrefPosition()
+{
+    return mLastXrefPosition;
+}
+
+IByteReaderWithPosition* PDFParser::GetParserStream()
+{
+    return mStream;
 }

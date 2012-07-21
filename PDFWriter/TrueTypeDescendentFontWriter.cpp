@@ -92,6 +92,6 @@ void TrueTypeDescendentFontWriter::WriteFontFileReference(
 	{
 		// FontFile2
 		inDescriptorContext->WriteKey(scFontFile2);
-		inDescriptorContext->WriteObjectReferenceValue(mEmbeddedFontFileObjectID);
+		inDescriptorContext->WriteNewObjectReferenceValue(mEmbeddedFontFileObjectID);
 	}
 }

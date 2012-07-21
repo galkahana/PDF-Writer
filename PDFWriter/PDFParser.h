@@ -146,6 +146,13 @@ public:
 	// set extender for parser, to enhance parsing capabilities
 	void SetParserExtender(IPDFParserExtender* inParserExtender);
 
+    // advanced, direct xref access
+    ObjectIDType GetXrefSize();
+    XrefEntryInput* GetXrefEntry(ObjectIDType inObjectID);   
+    LongFilePositionType GetXrefPosition();
+    
+    IByteReaderWithPosition* GetParserStream();
+    
 private:
 	PDFObjectParser mObjectParser;
 	IByteReaderWithPosition* mStream;

@@ -62,6 +62,7 @@ class PDFDocumentCopyingContext;
 typedef set<IDocumentContextExtender*> IDocumentContextExtenderSet;
 typedef pair<PDFHummus::EStatusCode,ObjectIDType> EStatusCodeAndObjectIDType;
 typedef list<ObjectIDType> ObjectIDTypeList;
+typedef set<ObjectIDType> ObjectIDTypeSet;
 typedef map<ObjectIDType,string> ObjectIDTypeToStringMap;
 typedef set<PDFDocumentCopyingContext*> PDFDocumentCopyingContextSet;
 
@@ -76,7 +77,8 @@ namespace PDFHummus
 		void SetObjectsContext(ObjectsContext* inObjectsContext);
 		void SetOutputFileInformation(OutputFile* inOutputFile);
 		PDFHummus::EStatusCode	WriteHeader(EPDFVersion inPDFVersion);
-		PDFHummus::EStatusCode	FinalizePDF();
+		PDFHummus::EStatusCode	FinalizeNewPDF();
+        PDFHummus::EStatusCode	FinalizeModifiedPDF(PDFParser* inModifiedFileParser,EPDFVersion inModifiedPDFVersion);
 
 		TrailerInformation& GetTrailerInformation();
 		CatalogInformation& GetCatalogInformation();
@@ -195,8 +197,8 @@ namespace PDFHummus
 										const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
 		PDFDocumentCopyingContext* CreatePDFCopyingContext(const string& inPDFFilePath);
-
 		PDFDocumentCopyingContext* CreatePDFCopyingContext(IByteReaderWithPosition* inPDFStream);
+        PDFDocumentCopyingContext* CreatePDFCopyingContext(PDFParser* inPDFParser);
 
 		// Font [Text]
 		PDFUsedFont* GetFontForFile(const string& inFontFilePath);
@@ -219,6 +221,9 @@ namespace PDFHummus
 		PDFHummus::EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);
 
 		void Cleanup();
+        
+        // modification scenario
+        PDFHummus::EStatusCode SetupModifiedFile(PDFParser* inModifiedFileParser);
 		
 		// internal methods for copying context listeners handling
 		void RegisterCopyingContext(PDFDocumentCopyingContext* inCopyingContext);
@@ -233,14 +238,23 @@ namespace PDFHummus
 		TIFFImageHandler mTIFFImageHandler;
 		PDFDocumentHandler mPDFDocumentHandler;
 		UsedFontsRepository mUsedFontsRepository;
-		ObjectIDTypeList mAnnotations;
+		ObjectIDTypeSet mAnnotations;
 		IPDFParserExtender* mParserExtender;
 		PDFDocumentCopyingContextSet mCopyingContexts;
+        bool mModifiedDocumentIDExists;
+        string mModifiedDocumentID;
+		ObjectIDType mCurrentPageTreeIDInState;
 		
 		void WriteHeaderComment(EPDFVersion inPDFVersion);
 		void Write4BinaryBytes();
-		PDFHummus::EStatusCode WriteCatalogObject();
+		PDFHummus::EStatusCode WriteCatalogObjectOfNewPDF();
+        PDFHummus::EStatusCode WriteCatalogObject(const ObjectReference& inPageTreeRootObjectReference);
 		PDFHummus::EStatusCode WriteTrailerDictionary();
+        PDFHummus::EStatusCode WriteTrailerDictionaryValues(DictionaryContext* inDictionaryContext);
+        void WriteReferenceState(ObjectsContext* inStateWriter,
+                                 DictionaryContext* inDictionaryContext, 
+                                 const ObjectReference& inReference);
+
 		void WriteXrefReference(LongFilePositionType inXrefTablePosition);
 		void WriteFinalEOF();
 		void WriteInfoDictionary();
@@ -256,18 +270,28 @@ namespace PDFHummus
 		EStatusCodeAndObjectIDType WriteAnnotationAndLinkForURL(const string& inURL,const PDFRectangle& inLinkClickArea);
 
 		void WriteTrailerState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
+        void WriteReferenceState(ObjectsContext* inStateWriter,
+                                 const ObjectReference& inReference);
 		void WriteTrailerInfoState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
 		void WriteDateState(ObjectsContext* inStateWriter,const PDFDate& inDate);
 		void WriteCatalogInformationState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
 		void ReadTrailerState(PDFParser* inStateReader,PDFDictionary* inTrailerState);
+        ObjectReference GetReferenceFromState(PDFDictionary* inDictionary);
 		void ReadTrailerInfoState(PDFParser* inStateReader,PDFDictionary* inTrailerInfoState);
 		void ReadDateState(PDFDictionary* inDateState,PDFDate& inDate);
 		void ReadCatalogInformationState(PDFParser* inStateReader,PDFDictionary* inCatalogInformationState);
 
-		ObjectIDType mCurrentPageTreeIDInState;
 
 		void WritePageTreeState(ObjectsContext* inStateWriter,ObjectIDType inObjectID,PageTree* inPageTree);
 		void ReadPageTreeState(PDFParser* inStateReader,PDFDictionary* inPageTreeState,PageTree* inPageTree);
-
+        
+        PDFHummus::EStatusCode SetupTrailerFromModifiedFile(PDFParser* inModifiedFileParser);
+        ObjectReference GetOriginalDocumentPageTreeRoot(PDFParser* inModifiedFileParser);
+        bool DocumentHasNewPages();
+        ObjectIDType WriteCombinedPageTree(PDFParser* inModifiedFileParser);
+        bool IsRequiredVersionHigherThanPDFVersion(PDFParser* inModifiedFileParser,EPDFVersion inModifiedPDFVersion);
+        bool DoExtendersRequireCatalogUpdate(PDFParser* inModifiedFileParser);
+        bool RequiresXrefStream(PDFParser* inModifiedFileParser);
+        PDFHummus::EStatusCode WriteXrefStream(LongFilePositionType& outXrefPosition);
 	};
 }

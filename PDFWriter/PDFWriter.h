@@ -88,14 +88,31 @@ public:
 	// in case of internal or external error, call this function to cleanup, in order to allow reuse of the PDFWriter class
 	void Reset();
 
-	// Ending and Restarting writing session
+    
+    // modify PDF (use EndPDF to finish)
+    PDFHummus::EStatusCode ModifyPDF(const string& inModifiedFile,
+                                     EPDFVersion inPDFVersion,
+                                     const string& inOptionalAlternativeOutputFile,
+                                     const LogConfiguration& inLogConfiguration = LogConfiguration::DefaultLogConfiguration,
+                                     const PDFCreationSettings& inPDFCreationSettings = PDFCreationSettings::DefaultPDFCreationSettings);                                 
+    PDFHummus::EStatusCode ModifyPDFForStream(
+                                    IByteReaderWithPosition* inModifiedSourceStream,
+                                    IByteWriterWithPosition* inModifiedDestinationStream,
+                                    EPDFVersion inPDFVersion,
+                                    const LogConfiguration& inLogConfiguration = LogConfiguration::DefaultLogConfiguration,
+                                    const PDFCreationSettings& inPDFCreationSettings = PDFCreationSettings::DefaultPDFCreationSettings                                 
+                                    );
+    
+	// Ending and Restarting writing session (optional input file is for modification scenarios)
 	PDFHummus::EStatusCode Shutdown(const string& inStateFilePath);
 	PDFHummus::EStatusCode ContinuePDF(const string& inOutputFilePath,
 							const string& inStateFilePath,
+                            const string& inOptionalModifiedFile = "",
 							const LogConfiguration& inLogConfiguration = LogConfiguration::DefaultLogConfiguration);
-	// Continue PDF in output stream workflow
+	// Continue PDF in output stream workflow (optional input stream is for modification scenarios)
 	PDFHummus::EStatusCode ContinuePDFForStream(IByteWriterWithPosition* inOutputStream,
 									 const string& inStateFilePath,
+                                     IByteReaderWithPosition* inModifiedSourceStream = NULL,
 				 					 const LogConfiguration& inLogConfiguration = LogConfiguration::DefaultLogConfiguration);
 
 	// Page context, for drwaing page content
@@ -205,8 +222,10 @@ public:
 
 	// Copying context, allowing for a continous flow of copying from multiple sources PDFs (create one per source) to target PDF
 	PDFDocumentCopyingContext* CreatePDFCopyingContext(const string& inPDFFilePath);
-
 	PDFDocumentCopyingContext* CreatePDFCopyingContext(IByteReaderWithPosition* inPDFStream);
+    
+    // for modified file path, create a copying context for the modified file
+    PDFDocumentCopyingContext* CreatePDFCopyingContextForModifiedFile();
 
 
 	// fonts [text]
@@ -218,10 +237,15 @@ public:
 	// URL should be encoded to be a valid URL, ain't gonna be checking that!
 	PDFHummus::EStatusCode AttachURLLinktoCurrentPage(const string& inURL,const PDFRectangle& inLinkClickArea);
 
+    
 	// Extensibility, reaching to lower levels
 	PDFHummus::DocumentContext& GetDocumentContext();
 	ObjectsContext& GetObjectsContext();
 	OutputFile& GetOutputFile();
+    
+    // Extensibiility, for modified files workflow
+    PDFParser& GetModifiedFileParser();
+    InputFile& GetModifiedInputFile();
 private:
 
 	ObjectsContext mObjectsContext;
@@ -229,12 +253,21 @@ private:
 
 	// for output file workflow, this will be the valid output [stream workflow does not have a file]
 	OutputFile mOutputFile;
+    
+    // for modified workflow, the next two will hold the input file data
+    InputFile mModifiedFile;
+    PDFParser mModifiedFileParser;
+    EPDFVersion mModifiedFileVersion;
+    bool mIsModified;
 
 	void SetupLog(const LogConfiguration& inLogConfiguration);
 	void SetupObjectsContext(const PDFCreationSettings& inPDFCreationSettings);
 	void ReleaseLog();
 	PDFHummus::EStatusCode SetupState(const string& inStateFilePath);
 	void Cleanup();
+    PDFHummus::EStatusCode SetupStateFromModifiedFile(const string& inModifiedFile,EPDFVersion inPDFVersion);
+    PDFHummus::EStatusCode SetupStateFromModifiedStream(IByteReaderWithPosition* inModifiedSourceStream,EPDFVersion inPDFVersion);
+
 
 
 };

@@ -144,6 +144,7 @@ public:
 	// copying context handling
 	PDFHummus::EStatusCode StartFileCopyingContext(const string& inPDFFilePath);
 	PDFHummus::EStatusCode StartStreamCopyingContext(IByteReaderWithPosition* inPDFStream);
+	PDFHummus::EStatusCode StartParserCopyingContext(PDFParser* inPDFParser);
 	EStatusCodeAndObjectIDType CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
 														 EPDFPageBox inPageBoxToUseAsFormBox,
 														 const double* inTransformationMatrix);
@@ -156,7 +157,8 @@ public:
 	PDFParser* GetSourceDocumentParser();
 	EStatusCodeAndObjectIDType GetCopiedObjectID(ObjectIDType inSourceObjectID);
 	MapIterator<ObjectIDTypeToObjectIDTypeMap> GetCopiedObjectsMappingIterator();
-	EStatusCodeAndObjectIDTypeList CopyDirectObject(PDFObject* inObject);
+	EStatusCodeAndObjectIDTypeList CopyDirectObjectWithDeepCopy(PDFObject* inObject);
+    PDFHummus::EStatusCode CopyDirectObjectAsIs(PDFObject* inObject);
 	PDFHummus::EStatusCode CopyNewObjectsForDirectObject(const ObjectIDTypeList& inReferencedObjects);
 	void StopCopyingContext();
 	void ReplaceSourceObjects(const ObjectIDTypeToObjectIDTypeMap& inSourceObjectsToNewTargetObjects);
@@ -181,7 +183,8 @@ private:
 
 	InputFile mPDFFile;
 	IByteReaderWithPosition* mPDFStream;
-	PDFParser mParser;
+	PDFParser* mParser;
+    bool mParserOwned;
 	ObjectIDTypeToObjectIDTypeMap mSourceToTarget;
 	PDFDictionary* mWrittenPage;
 
@@ -199,6 +202,7 @@ private:
 	PDFHummus::EStatusCode CopyInDirectObject(ObjectIDType inSourceObjectID,ObjectIDType inTargetObjectID,ObjectIDTypeSet& ioCopiedObjects);
 	PDFHummus::EStatusCode WriteObjectByType(PDFObject* inObject,ETokenSeparator inSeparator,ObjectIDTypeList& outSourceObjectsToAdd);
 	PDFHummus::EStatusCode WriteArrayObject(PDFArray* inArray,ETokenSeparator inSeparator,ObjectIDTypeList& outSourceObjectsToAdd);
+	PDFHummus::EStatusCode WriteArrayObject(PDFArray* inArray,ETokenSeparator inSeparator);
 	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const string& inPDFFilePath,
 															const PDFPageRange& inPageRange,
 															IPageEmbedInFormCommand* inPageEmbedCommand,
@@ -211,10 +215,13 @@ private:
 
 
 	PDFHummus::EStatusCode WriteDictionaryObject(PDFDictionary* inDictionary,ObjectIDTypeList& outSourceObjectsToAdd);
+	PDFHummus::EStatusCode WriteDictionaryObject(PDFDictionary* inDictionary);
 	PDFHummus::EStatusCode WriteObjectByType(PDFObject* inObject,DictionaryContext* inDictionaryContext,ObjectIDTypeList& outSourceObjectsToAdd);
+    PDFHummus::EStatusCode WriteObjectByType(PDFObject* inObject,ETokenSeparator inSeparator);
 
 
 	PDFHummus::EStatusCode WriteStreamObject(PDFStreamInput* inStream,ObjectIDTypeList& outSourceObjectsToAdd);
+	PDFHummus::EStatusCode WriteStreamObject(PDFStreamInput* inStream);
 	EStatusCodeAndObjectIDType CreatePDFPageForPage(unsigned long inPageIndex);
 	PDFHummus::EStatusCode CopyPageContentToTargetPage(PDFPage* inPage,PDFDictionary* inPageObject);
 	PDFHummus::EStatusCode WritePDFStreamInputToContentContext(PageContentContext* inContentContext,PDFStreamInput* inContentSource);
@@ -248,6 +255,7 @@ private:
 											const PDFPageRange& inPageRange,
 											const ObjectIDTypeList& inCopyAdditionalObjects);
 	PDFHummus::EStatusCode StartCopyingContext(IByteReaderWithPosition* inPDFStream);
+	PDFHummus::EStatusCode StartCopyingContext(PDFParser* inPDFParser);
 
 
 	string AsEncodedName(const string& inName);

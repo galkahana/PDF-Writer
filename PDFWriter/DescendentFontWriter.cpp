@@ -82,12 +82,12 @@ EStatusCode DescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID,
 		// CIDSystemInfo
 		fontContext->WriteKey(scCIDSystemInfo);
 		ObjectIDType cidSystemInfoObjectID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
-		fontContext->WriteObjectReferenceValue(cidSystemInfoObjectID);
+		fontContext->WriteNewObjectReferenceValue(cidSystemInfoObjectID);
 
 		// FontDescriptor
 		fontContext->WriteKey(scFontDescriptor);
 		ObjectIDType fontDescriptorObjectID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
-		fontContext->WriteObjectReferenceValue(fontDescriptorObjectID);
+		fontContext->WriteNewObjectReferenceValue(fontDescriptorObjectID);
 
 		// free dictionary end writing
 		inDescendentFontWriterHelper->WriteAdditionalKeys(fontContext);
@@ -263,7 +263,7 @@ void DescendentFontWriter::WriteCharSet(	DictionaryContext* inDescriptorContext,
 	// CIDSet
 	inDescriptorContext->WriteKey(scCIDSet);
 	mCIDSetObjectID = inObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
-	inDescriptorContext->WriteObjectReferenceValue(mCIDSetObjectID);
+	inDescriptorContext->WriteNewObjectReferenceValue(mCIDSetObjectID);
 }
 
 void DescendentFontWriter::WriteCIDSet(const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs)

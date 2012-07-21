@@ -1713,14 +1713,14 @@ ObjectIDType TIFFImageHandler::WriteTransferFunctionsExtGState(const ObjectIDTyp
 	gstateDictionary->WriteKey(scTR);
 	if(inTransferFunctions.size() == 1)
 	{
-		gstateDictionary->WriteObjectReferenceValue(inTransferFunctions.back());
+		gstateDictionary->WriteNewObjectReferenceValue(inTransferFunctions.back());
 	}
 	else
 	{
 		mObjectsContext->StartArray();
 		ObjectIDTypeList::const_iterator it = inTransferFunctions.begin();
 		for(;it != inTransferFunctions.end();++it)
-			mObjectsContext->WriteIndirectObjectReference(*it);				
+			mObjectsContext->WriteNewIndirectObjectReference(*it);				
 		mObjectsContext->WriteName(scIdentity);		
 		mObjectsContext->EndArray(eTokenSeparatorEndLine);
 	}
@@ -1789,7 +1789,7 @@ void TIFFImageHandler::WriteXObjectCS(DictionaryContext* inContainerDictionary)
 	{
 		mObjectsContext->StartArray();
 		mObjectsContext->WriteName(scICCBased);
-		mObjectsContext->WriteIndirectObjectReference(mT2p->pdf_icccs);
+		mObjectsContext->WriteNewIndirectObjectReference(mT2p->pdf_icccs);
 		mObjectsContext->EndArray(eTokenSeparatorEndLine);
 		return;
 	}
@@ -1802,7 +1802,7 @@ void TIFFImageHandler::WriteXObjectCS(DictionaryContext* inContainerDictionary)
 		WriteXObjectCS(NULL);
 		mT2p->pdf_colorspace = (t2p_cs_t)(mT2p->pdf_colorspace | T2P_CS_PALETTE);
 		mObjectsContext->WriteInteger((0x0001 << mT2p->tiff_bitspersample)-1);
-		mObjectsContext->WriteIndirectObjectReference(mT2p->pdf_palettecs);
+		mObjectsContext->WriteNewIndirectObjectReference(mT2p->pdf_palettecs);
 		mObjectsContext->EndArray(eTokenSeparatorEndLine);
 		return;
 	}

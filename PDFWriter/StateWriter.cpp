@@ -107,7 +107,7 @@ void StateWriter::WriteTrailerDictionary()
 	if(mRootObject !=0)
 	{
 		dictionaryContext->WriteKey(scRoot);
-		dictionaryContext->WriteObjectReferenceValue(mRootObject);
+		dictionaryContext->WriteNewObjectReferenceValue(mRootObject);
 	}
 	mObjectsContext->EndDictionary(dictionaryContext);
 }

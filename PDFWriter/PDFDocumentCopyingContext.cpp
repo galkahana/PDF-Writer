@@ -40,8 +40,9 @@ EStatusCode PDFDocumentCopyingContext::Start(const string& inPDFFilePath,
 	mDocumentContext = inDocumentContext;
 	inDocumentContext->RegisterCopyingContext(this);
 	mDocumentHandler.SetOperationsContexts(inDocumentContext,inObjectsContext);
-	mDocumentHandler.SetParserExtender(inParserExtender);
-	return mDocumentHandler.StartFileCopyingContext(inPDFFilePath);
+	EStatusCode status = mDocumentHandler.StartFileCopyingContext(inPDFFilePath);
+    mDocumentHandler.SetParserExtender(inParserExtender);
+    return status;
 }
 
 EStatusCode PDFDocumentCopyingContext::Start(IByteReaderWithPosition* inPDFStream,
@@ -52,10 +53,23 @@ EStatusCode PDFDocumentCopyingContext::Start(IByteReaderWithPosition* inPDFStrea
 	mDocumentContext = inDocumentContext;
 	inDocumentContext->RegisterCopyingContext(this);
 	mDocumentHandler.SetOperationsContexts(inDocumentContext,inObjectsContext);
-	mDocumentHandler.SetParserExtender(inParserExtender);
-	return mDocumentHandler.StartStreamCopyingContext(inPDFStream);
+	EStatusCode status = mDocumentHandler.StartStreamCopyingContext(inPDFStream);
+    mDocumentHandler.SetParserExtender(inParserExtender);
+    return status;
 }
 
+PDFHummus::EStatusCode PDFDocumentCopyingContext::Start(PDFParser* inPDFParser,
+                             DocumentContext* inDocumentContext,
+                             ObjectsContext* inObjectsContext,
+                             IPDFParserExtender* inParserExtender)
+{
+	mDocumentContext = inDocumentContext;
+	inDocumentContext->RegisterCopyingContext(this);
+	mDocumentHandler.SetOperationsContexts(inDocumentContext,inObjectsContext);
+	EStatusCode status = mDocumentHandler.StartParserCopyingContext(inPDFParser); 
+    mDocumentHandler.SetParserExtender(inParserExtender);
+    return status;
+}
 
 EStatusCodeAndObjectIDType PDFDocumentCopyingContext::CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
 																					EPDFPageBox inPageBoxToUseAsFormBox,
@@ -109,9 +123,14 @@ void PDFDocumentCopyingContext::End()
 	mDocumentContext->UnRegisterCopyingContext(this);
 }
 
-EStatusCodeAndObjectIDTypeList PDFDocumentCopyingContext::CopyDirectObject(PDFObject* inObject)
+EStatusCodeAndObjectIDTypeList PDFDocumentCopyingContext::CopyDirectObjectWithDeepCopy(PDFObject* inObject)
 {
-	return mDocumentHandler.CopyDirectObject(inObject);
+	return mDocumentHandler.CopyDirectObjectWithDeepCopy(inObject);
+}
+
+EStatusCode PDFDocumentCopyingContext::CopyDirectObjectAsIs(PDFObject* inObject)
+{
+	return mDocumentHandler.CopyDirectObjectAsIs(inObject);    
 }
 
 EStatusCode PDFDocumentCopyingContext::CopyNewObjectsForDirectObject(const ObjectIDTypeList& inReferencedObjects)

@@ -163,6 +163,6 @@ void CFFANSIFontWriter::WriteFontFileReference(
 	{
 		// FontFile3
 		inDescriptorContext->WriteKey(scFontFile3);
-		inDescriptorContext->WriteObjectReferenceValue(mEmbeddedFontFileObjectID);
+		inDescriptorContext->WriteNewObjectReferenceValue(mEmbeddedFontFileObjectID);
 	}
 }

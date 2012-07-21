@@ -42,6 +42,8 @@
 #include "PDFArray.h"
 #include "PDFDocumentCopyingContext.h"
 #include "Ascii7Encoding.h"
+#include "PDFHexString.h"
+#include "PDFName.h"
 
 using namespace PDFHummus;
 
@@ -49,6 +51,7 @@ DocumentContext::DocumentContext()
 {
 	mObjectsContext = NULL;
 	mParserExtender = NULL;
+    mModifiedDocumentIDExists = false;
 }
 
 DocumentContext::~DocumentContext(void)
@@ -68,6 +71,7 @@ void DocumentContext::SetOutputFileInformation(OutputFile* inOutputFile)
 {
 	// just save the output file path for the ID generation in the end
 	mOutputFilePath = inOutputFile->GetFilePath();
+    mModifiedDocumentIDExists = false;
 }
 
 void DocumentContext::AddDocumentContextExtender(IDocumentContextExtender* inExtender)
@@ -158,7 +162,7 @@ void DocumentContext::Write4BinaryBytes()
 	mObjectsContext->EndFreeContext();
 }
 
-EStatusCode	DocumentContext::FinalizePDF()
+EStatusCode	DocumentContext::FinalizeNewPDF()
 {
 	EStatusCode status;
 	LongFilePositionType xrefTablePosition;
@@ -173,7 +177,7 @@ EStatusCode	DocumentContext::FinalizePDF()
 
 		WritePagesTree();
 
-		status = WriteCatalogObject();
+		status = WriteCatalogObjectOfNewPDF();
 		if(status != 0)
 			break;
 
@@ -223,37 +227,47 @@ static const string scInfo = "Info";
 static const string scID = "ID";
 EStatusCode DocumentContext::WriteTrailerDictionary()
 {
-	EStatusCode status = PDFHummus::eSuccess;
 	DictionaryContext* dictionaryContext;
-
+    
 	mObjectsContext->WriteKeyword(scTrailer);
 	dictionaryContext = mObjectsContext->StartDictionary();
+
+    EStatusCode status = WriteTrailerDictionaryValues(dictionaryContext);
+    
+    mObjectsContext->EndDictionary(dictionaryContext);
+
+    return status;
+}
+
+EStatusCode DocumentContext::WriteTrailerDictionaryValues(DictionaryContext* inDictionaryContext)
+{
+    EStatusCode status = eSuccess;
 
 	do
 	{
 	
 		// size
-		dictionaryContext->WriteKey(scSize);
-		dictionaryContext->WriteIntegerValue(mObjectsContext->GetInDirectObjectsRegistry().GetObjectsCount());
+		inDictionaryContext->WriteKey(scSize);
+		inDictionaryContext->WriteIntegerValue(mObjectsContext->GetInDirectObjectsRegistry().GetObjectsCount());
 
 		// prev reference
 		BoolAndLongFilePositionType filePositionResult = mTrailerInformation.GetPrev(); 
 		if(filePositionResult.first)
 		{
-			dictionaryContext->WriteKey(scPrev);
-			dictionaryContext->WriteIntegerValue(filePositionResult.second);
+			inDictionaryContext->WriteKey(scPrev);
+			inDictionaryContext->WriteIntegerValue(filePositionResult.second);
 		}
 
 		// catalog reference
-		BoolAndObjectIDType objectIDResult = mTrailerInformation.GetRoot();
+		BoolAndObjectReference objectIDResult = mTrailerInformation.GetRoot();
 		if(objectIDResult.first)
 		{
-			dictionaryContext->WriteKey(scRoot);
-			dictionaryContext->WriteObjectReferenceValue(objectIDResult.second);
+			inDictionaryContext->WriteKey(scRoot);
+			inDictionaryContext->WriteObjectReferenceValue(objectIDResult.second);
 		}
 		else
 		{
-			TRACE_LOG("DocumentContext::WriteTrailerDictionary, Unexpected Failure. Didn't find catalog object while writing trailer");
+			TRACE_LOG("DocumentContext::WriteTrailerDictionaryValues, Unexpected Failure. Didn't find catalog object while writing trailer");
 			status = PDFHummus::eFailure;
 			break;
 		}
@@ -262,32 +276,35 @@ EStatusCode DocumentContext::WriteTrailerDictionary()
 		objectIDResult = mTrailerInformation.GetEncrypt();
 		if(objectIDResult.first)
 		{
-			dictionaryContext->WriteKey(scEncrypt);
-			dictionaryContext->WriteObjectReferenceValue(objectIDResult.second);
+			inDictionaryContext->WriteKey(scEncrypt);
+			inDictionaryContext->WriteObjectReferenceValue(objectIDResult.second);
 		}
 
 		// info reference
 		objectIDResult = mTrailerInformation.GetInfoDictionaryReference();
 		if(objectIDResult.first)
 		{
-			dictionaryContext->WriteKey(scInfo);
-			dictionaryContext->WriteObjectReferenceValue(objectIDResult.second);
+			inDictionaryContext->WriteKey(scInfo);
+			inDictionaryContext->WriteObjectReferenceValue(objectIDResult.second);
 		}
 
 		// write ID
 
 		string id = GenerateMD5IDForFile();
-		dictionaryContext->WriteKey(scID);
+		inDictionaryContext->WriteKey(scID);
 		mObjectsContext->StartArray();
-		mObjectsContext->WriteHexString(id);
+        
+        // if modified file scenario use original ID, otherwise create a new one for the document created ID
+        if(mModifiedDocumentIDExists)
+            mObjectsContext->WriteHexString(mModifiedDocumentID);
+        else
+            mObjectsContext->WriteHexString(id);
 		mObjectsContext->WriteHexString(id);
 		mObjectsContext->EndArray();
 		mObjectsContext->EndLine();
 
 	}while(false);
 	
-	mObjectsContext->EndDictionary(dictionaryContext);
-
 	return status;
 }
 
@@ -389,7 +406,13 @@ CatalogInformation& DocumentContext::GetCatalogInformation()
 static const string scType = "Type";
 static const string scCatalog = "Catalog";
 static const string scPages = "Pages";
-EStatusCode DocumentContext::WriteCatalogObject()
+EStatusCode DocumentContext::WriteCatalogObjectOfNewPDF()
+{
+    return WriteCatalogObject(mCatalogInformation.GetPageTreeRoot(mObjectsContext->GetInDirectObjectsRegistry())->GetID());
+    
+}
+
+EStatusCode DocumentContext::WriteCatalogObject(const ObjectReference& inPageTreeRootObjectReference)
 {
 	EStatusCode status = PDFHummus::eSuccess;
 	ObjectIDType catalogID = mObjectsContext->StartNewIndirectObject();
@@ -401,7 +424,7 @@ EStatusCode DocumentContext::WriteCatalogObject()
 	catalogContext->WriteNameValue(scCatalog);
 
 	catalogContext->WriteKey(scPages);
-	catalogContext->WriteObjectReferenceValue(mCatalogInformation.GetPageTreeRoot(mObjectsContext->GetInDirectObjectsRegistry())->GetID());
+	catalogContext->WriteObjectReferenceValue(inPageTreeRootObjectReference);
 
 	IDocumentContextExtenderSet::iterator it = mExtenders.begin();
 	for(; it != mExtenders.end() && PDFHummus::eSuccess == status; ++it)
@@ -452,7 +475,7 @@ int DocumentContext::WritePageTree(PageTree* inPageTreeToWrite)
 		pagesTreeContext->WriteKey(scKids);
 		mObjectsContext->StartArray();
 		for(int i=0;i<inPageTreeToWrite->GetNodesCount();++i)
-			mObjectsContext->WriteIndirectObjectReference(inPageTreeToWrite->GetPageIDChild(i));
+			mObjectsContext->WriteNewIndirectObjectReference(inPageTreeToWrite->GetPageIDChild(i));
 		mObjectsContext->EndArray();
 		mObjectsContext->EndLine();
 
@@ -460,7 +483,7 @@ int DocumentContext::WritePageTree(PageTree* inPageTreeToWrite)
 		if(inPageTreeToWrite->GetParent())
 		{
 			pagesTreeContext->WriteKey(scParent);
-			pagesTreeContext->WriteObjectReferenceValue(inPageTreeToWrite->GetParent()->GetID());
+			pagesTreeContext->WriteNewObjectReferenceValue(inPageTreeToWrite->GetParent()->GetID());
 		}
 
 		mObjectsContext->EndDictionary(pagesTreeContext);
@@ -492,7 +515,7 @@ int DocumentContext::WritePageTree(PageTree* inPageTreeToWrite)
 		pagesTreeContext->WriteKey(scKids);
 		mObjectsContext->StartArray();
 		for(int j=0;j<inPageTreeToWrite->GetNodesCount();++j)
-			mObjectsContext->WriteIndirectObjectReference(inPageTreeToWrite->GetPageTreeChild(j)->GetID());
+			mObjectsContext->WriteNewIndirectObjectReference(inPageTreeToWrite->GetPageTreeChild(j)->GetID());
 		mObjectsContext->EndArray();
 		mObjectsContext->EndLine();
 
@@ -500,7 +523,7 @@ int DocumentContext::WritePageTree(PageTree* inPageTreeToWrite)
 		if(inPageTreeToWrite->GetParent())
 		{
 			pagesTreeContext->WriteKey(scParent);
-			pagesTreeContext->WriteObjectReferenceValue(inPageTreeToWrite->GetParent()->GetID());
+			pagesTreeContext->WriteNewObjectReferenceValue(inPageTreeToWrite->GetParent()->GetID());
 		}
 
 		mObjectsContext->EndDictionary(pagesTreeContext);
@@ -530,7 +553,7 @@ EStatusCodeAndObjectIDType DocumentContext::WritePage(PDFPage* inPage)
 
 	// parent
 	pageContext->WriteKey(scParent);
-	pageContext->WriteObjectReferenceValue(mCatalogInformation.AddPageToPageTree(result.second,mObjectsContext->GetInDirectObjectsRegistry()));
+	pageContext->WriteNewObjectReferenceValue(mCatalogInformation.AddPageToPageTree(result.second,mObjectsContext->GetInDirectObjectsRegistry()));
 	
 	// Media Box
 	pageContext->WriteKey(scMediaBox);
@@ -552,11 +575,11 @@ EStatusCodeAndObjectIDType DocumentContext::WritePage(PDFPage* inPage)
 		{
 			pageContext->WriteKey("Annots");
 
-			ObjectIDTypeList::iterator it = mAnnotations.begin();
+			ObjectIDTypeSet::iterator it = mAnnotations.begin();
 
 			mObjectsContext->StartArray();
 			for(; it != mAnnotations.end(); ++it)
-				mObjectsContext->WriteIndirectObjectReference(*it);
+				mObjectsContext->WriteNewIndirectObjectReference(*it);
 			mObjectsContext->EndArray(eTokenSeparatorEndLine);			
 		}
 		mAnnotations.clear();
@@ -571,14 +594,14 @@ EStatusCodeAndObjectIDType DocumentContext::WritePage(PDFPage* inPage)
 			{
 				mObjectsContext->StartArray();
 				while(iterator.MoveNext())
-					mObjectsContext->WriteIndirectObjectReference(iterator.GetItem());
+					mObjectsContext->WriteNewIndirectObjectReference(iterator.GetItem());
 				mObjectsContext->EndArray();	
 				mObjectsContext->EndLine();
 			}
 			else
 			{
 				iterator.MoveNext();
-				pageContext->WriteObjectReferenceValue(iterator.GetItem());
+				pageContext->WriteNewObjectReferenceValue(iterator.GetItem());
 			}
 		}
 
@@ -723,7 +746,7 @@ PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBounding
 		xobjectContext->WriteKey(scResources);	
 		// put a resources dictionary place holder
 		ObjectIDType formXObjectResourcesDictionaryID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
-		xobjectContext->WriteObjectReferenceValue(formXObjectResourcesDictionaryID);
+		xobjectContext->WriteNewObjectReferenceValue(formXObjectResourcesDictionaryID);
 
 		IDocumentContextExtenderSet::iterator it = mExtenders.begin();
 		EStatusCode status = PDFHummus::eSuccess;
@@ -813,21 +836,21 @@ EStatusCode DocumentContext::WriteResourcesDictionary(ResourcesDictionary& inRes
 			while(itFormXObjects.MoveNext())
 			{
 				xobjectsContext->WriteKey(itFormXObjects.GetValue());
-				xobjectsContext->WriteObjectReferenceValue(itFormXObjects.GetKey());
+				xobjectsContext->WriteNewObjectReferenceValue(itFormXObjects.GetKey());
 			}
 			// image xobjects
 			MapIterator<ObjectIDTypeToStringMap> itImageXObjects = inResourcesDictionary.GetImageXObjectsIterator();
 			while(itImageXObjects.MoveNext())
 			{
 				xobjectsContext->WriteKey(itImageXObjects.GetValue());
-				xobjectsContext->WriteObjectReferenceValue(itImageXObjects.GetKey());
+				xobjectsContext->WriteNewObjectReferenceValue(itImageXObjects.GetKey());
 			}
 			// generic xobjects
 			MapIterator<ObjectIDTypeToStringMap> itGenericXObjects = inResourcesDictionary.GetGenericXObjectsIterator();
 			while(itGenericXObjects.MoveNext())
 			{
 				xobjectsContext->WriteKey(itGenericXObjects.GetValue());
-				xobjectsContext->WriteObjectReferenceValue(itGenericXObjects.GetKey());
+				xobjectsContext->WriteNewObjectReferenceValue(itGenericXObjects.GetKey());
 			}
 			mObjectsContext->EndDictionary(xobjectsContext);
 
@@ -884,7 +907,7 @@ void DocumentContext::WriteResourceDictionary(DictionaryContext* inResourcesDict
 	while(inMapping.MoveNext())
 	{
 		resourceContext->WriteKey(inMapping.GetValue());
-		resourceContext->WriteObjectReferenceValue(inMapping.GetKey());
+		resourceContext->WriteNewObjectReferenceValue(inMapping.GetKey());
 	}
 
 
@@ -1017,13 +1040,22 @@ EStatusCode DocumentContext::WriteState(ObjectsContext* inStateWriter,ObjectIDTy
 		documentDictionary->WriteNameValue("DocumentContext");
 
 		documentDictionary->WriteKey("mTrailerInformation");
-		documentDictionary->WriteObjectReferenceValue(trailerInformationID);
+		documentDictionary->WriteNewObjectReferenceValue(trailerInformationID);
 
 		documentDictionary->WriteKey("mCatalogInformation");
-		documentDictionary->WriteObjectReferenceValue(catalogInformationID);
+		documentDictionary->WriteNewObjectReferenceValue(catalogInformationID);
 
 		documentDictionary->WriteKey("mUsedFontsRepository");
-		documentDictionary->WriteObjectReferenceValue(usedFontsRepositoryID);
+		documentDictionary->WriteNewObjectReferenceValue(usedFontsRepositoryID);
+        
+        documentDictionary->WriteKey("mModifiedDocumentIDExists");
+        documentDictionary->WriteBooleanValue(mModifiedDocumentIDExists);
+        
+        if(mModifiedDocumentIDExists)
+        {
+            documentDictionary->WriteKey("mModifiedDocumentID");
+            documentDictionary->WriteHexStringValue(mModifiedDocumentID);
+        }
 
 		inStateWriter->EndDictionary(documentDictionary);
 		inStateWriter->EndIndirectObject();
@@ -1039,6 +1071,20 @@ EStatusCode DocumentContext::WriteState(ObjectsContext* inStateWriter,ObjectIDTy
 	return status;
 }
 
+void DocumentContext::WriteReferenceState(ObjectsContext* inStateWriter,
+                                          const ObjectReference& inReference)
+{
+    DictionaryContext* referenceContext = inStateWriter->StartDictionary();
+    
+    referenceContext->WriteKey("ObjectID");
+    referenceContext->WriteIntegerValue(inReference.ObjectID);
+    
+    referenceContext->WriteKey("GenerationNumber");
+    referenceContext->WriteIntegerValue(inReference.GenerationNumber);
+    
+    inStateWriter->EndDictionary(referenceContext);
+}
+
 void DocumentContext::WriteTrailerState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
 {
 	inStateWriter->StartNewIndirectObject(inObjectID);
@@ -1052,17 +1098,17 @@ void DocumentContext::WriteTrailerState(ObjectsContext* inStateWriter,ObjectIDTy
 	trailerDictionary->WriteIntegerValue(mTrailerInformation.GetPrev().second);
 
 	trailerDictionary->WriteKey("mRootReference");
-	trailerDictionary->WriteIntegerValue(mTrailerInformation.GetRoot().second);
+	WriteReferenceState(inStateWriter,mTrailerInformation.GetRoot().second);
 
 	trailerDictionary->WriteKey("mEncryptReference");
-	trailerDictionary->WriteIntegerValue(mTrailerInformation.GetEncrypt().second);
+	WriteReferenceState(inStateWriter,mTrailerInformation.GetEncrypt().second);
 
 	trailerDictionary->WriteKey("mInfoDictionary");
 	ObjectIDType infoDictionaryID = inStateWriter->GetInDirectObjectsRegistry().AllocateNewObjectID();
-	trailerDictionary->WriteObjectReferenceValue(infoDictionaryID);
+	trailerDictionary->WriteNewObjectReferenceValue(infoDictionaryID);
 
 	trailerDictionary->WriteKey("mInfoDictionaryReference");
-	trailerDictionary->WriteIntegerValue(mTrailerInformation.GetInfoDictionaryReference().second);
+	WriteReferenceState(inStateWriter,mTrailerInformation.GetInfoDictionaryReference().second);
 
 	inStateWriter->EndDictionary(trailerDictionary);
 	inStateWriter->EndIndirectObject();
@@ -1177,10 +1223,10 @@ void DocumentContext::WriteCatalogInformationState(ObjectsContext* inStateWriter
 	if(mCatalogInformation.GetCurrentPageTreeNode())
 	{
 		catalogInformation->WriteKey("PageTreeRoot");
-		catalogInformation->WriteObjectReferenceValue(rootNodeID);
+		catalogInformation->WriteNewObjectReferenceValue(rootNodeID);
 
 		catalogInformation->WriteKey("mCurrentPageTreeNode");
-		catalogInformation->WriteObjectReferenceValue(mCurrentPageTreeIDInState);
+		catalogInformation->WriteNewObjectReferenceValue(mCurrentPageTreeIDInState);
 	}
 
 	inStateWriter->EndDictionary(catalogInformation);
@@ -1219,7 +1265,7 @@ void DocumentContext::WritePageTreeState(ObjectsContext* inStateWriter,ObjectIDT
 		for(int i=0;i<inPageTree->GetNodesCount();++i)
 		{
 			ObjectIDType pageNodeObjectID = inStateWriter->GetInDirectObjectsRegistry().AllocateNewObjectID();
-			inStateWriter->WriteIndirectObjectReference(pageNodeObjectID);
+			inStateWriter->WriteNewIndirectObjectReference(pageNodeObjectID);
 			kidsObjectIDs.push_back(pageNodeObjectID);
 		}
 		inStateWriter->EndArray(eTokenSeparatorEndLine);		
@@ -1246,6 +1292,15 @@ EStatusCode DocumentContext::ReadState(PDFParser* inStateReader,ObjectIDType inO
 {
 	PDFObjectCastPtr<PDFDictionary> documentState(inStateReader->ParseNewObject(inObjectID));
 
+    PDFObjectCastPtr<PDFBoolean> modifiedDocumentExists(documentState->QueryDirectObject("mModifiedDocumentIDExists"));
+    mModifiedDocumentIDExists = modifiedDocumentExists->GetValue();                        
+    
+    if(mModifiedDocumentIDExists)
+    {
+        PDFObjectCastPtr<PDFHexString> modifiedDocumentExists(documentState->QueryDirectObject("mModifiedDocumentID"));
+        mModifiedDocumentID = modifiedDocumentExists->GetValue();
+    }    
+    
 	PDFObjectCastPtr<PDFDictionary> trailerInformationState(inStateReader->QueryDictionaryObject(documentState.GetPtr(),"mTrailerInformation"));
 	ReadTrailerState(inStateReader,trailerInformationState.GetPtr());
 
@@ -1262,18 +1317,26 @@ void DocumentContext::ReadTrailerState(PDFParser* inStateReader,PDFDictionary* i
 	PDFObjectCastPtr<PDFInteger> prevState(inTrailerState->QueryDirectObject("mPrev"));
 	mTrailerInformation.SetPrev(prevState->GetValue());
 
-	PDFObjectCastPtr<PDFInteger> rootReferenceState(inTrailerState->QueryDirectObject("mRootReference"));
-	mTrailerInformation.SetRoot((ObjectIDType)rootReferenceState->GetValue());
+	PDFObjectCastPtr<PDFDictionary> rootReferenceState(inTrailerState->QueryDirectObject("mRootReference"));
+	mTrailerInformation.SetRoot(GetReferenceFromState(rootReferenceState.GetPtr()));
 
-	PDFObjectCastPtr<PDFInteger> encryptReferenceState(inTrailerState->QueryDirectObject("mEncryptReference"));
-	mTrailerInformation.SetEncrypt((ObjectIDType)encryptReferenceState->GetValue());
+	PDFObjectCastPtr<PDFDictionary> encryptReferenceState(inTrailerState->QueryDirectObject("mEncryptReference"));
+	mTrailerInformation.SetEncrypt(GetReferenceFromState(encryptReferenceState.GetPtr()));
 
 	PDFObjectCastPtr<PDFDictionary> infoDictionaryState(inStateReader->QueryDictionaryObject(inTrailerState,"mInfoDictionary"));
 	ReadTrailerInfoState(inStateReader,infoDictionaryState.GetPtr());
 
-	PDFObjectCastPtr<PDFInteger> infoDictionaryReferenceState(inTrailerState->QueryDirectObject("mInfoDictionaryReference"));
-	mTrailerInformation.SetInfoDictionaryReference((ObjectIDType)infoDictionaryReferenceState->GetValue());
+	PDFObjectCastPtr<PDFDictionary> infoDictionaryReferenceState(inTrailerState->QueryDirectObject("mInfoDictionaryReference"));
+	mTrailerInformation.SetInfoDictionaryReference(GetReferenceFromState(infoDictionaryReferenceState.GetPtr()));
 
+}
+
+ObjectReference DocumentContext::GetReferenceFromState(PDFDictionary* inDictionary)
+{
+    PDFObjectCastPtr<PDFInteger> objectID(inDictionary->QueryDirectObject("ObjectID"));
+    PDFObjectCastPtr<PDFInteger> generationNumber(inDictionary->QueryDirectObject("GenerationNumber"));
+    
+    return ObjectReference((ObjectIDType)(objectID->GetValue()),(unsigned long)generationNumber->GetValue());
 }
 
 void DocumentContext::ReadTrailerInfoState(PDFParser* inStateReader,PDFDictionary* inTrailerInfoState)
@@ -1522,7 +1585,7 @@ EStatusCodeAndObjectIDType DocumentContext::WriteAnnotationAndLinkForURL(const s
 
 void DocumentContext::RegisterAnnotationReferenceForNextPageWrite(ObjectIDType inAnnotationReference)
 {
-	mAnnotations.push_back(inAnnotationReference);
+	mAnnotations.insert(inAnnotationReference);
 }
 
 EStatusCode DocumentContext::MergePDFPagesToPage(PDFPage* inPage,
@@ -1629,6 +1692,7 @@ void DocumentContext::Cleanup()
 	mExtenders.clear();
 	mAnnotations.clear();
 	mCopyingContexts.clear();
+    mModifiedDocumentIDExists = false;
 }
 
 void DocumentContext::SetParserExtender(IPDFParserExtender* inParserExtender)
@@ -1646,3 +1710,408 @@ void DocumentContext::UnRegisterCopyingContext(PDFDocumentCopyingContext* inCopy
 {
 	mCopyingContexts.erase(inCopyingContext);
 }
+
+EStatusCode DocumentContext::SetupModifiedFile(PDFParser* inModifiedFileParser)
+{
+    // setup trailer and save original document ID
+    
+    if(!inModifiedFileParser->GetTrailer())
+        return eFailure;
+    
+    PDFObjectCastPtr<PDFIndirectObjectReference> rootReference = inModifiedFileParser->GetTrailer()->QueryDirectObject("Root");
+    if(!rootReference)
+        return eFailure;
+    
+    // set catalog reference and previous reference table position
+    mTrailerInformation.SetRoot(rootReference->mObjectID);
+    mTrailerInformation.SetPrev(inModifiedFileParser->GetXrefPosition());
+    
+    // setup modified date to current time
+    mTrailerInformation.GetInfo().ModDate.SetToCurrentTime();
+    
+    // try to get document ID. in any case use whatever was the original
+    mModifiedDocumentIDExists = true;
+    mModifiedDocumentID = "";
+    PDFObjectCastPtr<PDFArray> idArray = inModifiedFileParser->GetTrailer()->QueryDirectObject("ID");
+    if(idArray.GetPtr() && idArray->GetLength() == 2)
+    {
+        PDFObjectCastPtr<PDFHexString> firstID = idArray->QueryObject(0);
+        if(firstID.GetPtr())
+            mModifiedDocumentID = firstID->GetValue();
+    }
+    
+    return eSuccess;
+}
+
+class VersionUpdate : public DocumentContextExtenderAdapter
+{
+public:
+    VersionUpdate(EPDFVersion inPDFVersion){mPDFVersion = inPDFVersion;}
+    virtual ~VersionUpdate(){}
+    
+    // IDocumentContextExtender implementation
+	virtual PDFHummus::EStatusCode OnCatalogWrite(
+            CatalogInformation* inCatalogInformation,
+            DictionaryContext* inCatalogDictionaryContext,
+            ObjectsContext* inPDFWriterObjectContext,
+            PDFHummus::DocumentContext* inDocumentContext)
+    {
+        inCatalogDictionaryContext->WriteKey("Version");
+        
+        // need to write as /1.4 (name, of float value)
+        inCatalogDictionaryContext->WriteNameValue(Double(((double)mPDFVersion)/10).ToString());
+        
+        return eSuccess;
+    }    
+    
+private:
+    
+    EPDFVersion mPDFVersion;
+};
+
+EStatusCode	DocumentContext::FinalizeModifiedPDF(PDFParser* inModifiedFileParser,EPDFVersion inModifiedPDFVersion)
+{
+	EStatusCode status;
+	LongFilePositionType xrefTablePosition;
+    
+	do
+	{
+		status = WriteUsedFontsDefinitions();
+		if(status != eSuccess)
+			break;
+        
+        // Page tree writing
+        // k. page tree needs to be a combination of what pages are coming from the original document
+        // and those from the new one. The decision whether a new page tree need to be written is simple -
+        // if no pages were added...no new page tree...if yes...then we need a new page tree which will combine
+        // the new pages and the old pages
+        
+        ObjectReference originalDocumentPageTreeRoot = GetOriginalDocumentPageTreeRoot(inModifiedFileParser);
+        bool hasNewPageTreeRoot;
+        ObjectReference finalPageRoot;
+        
+        if(DocumentHasNewPages())
+        {
+            if(originalDocumentPageTreeRoot.ObjectID != 0)
+            {
+                finalPageRoot.ObjectID = WriteCombinedPageTree(inModifiedFileParser);
+                finalPageRoot.GenerationNumber = 0;
+                
+                // check for error - may fail to write combined page tree if document is protected!
+                if(finalPageRoot.ObjectID == 0)
+                {
+                    status = eFailure;
+                    break;
+                }
+            }
+            else
+            {
+                WritePagesTree();
+                PageTree* pageTreeRoot = mCatalogInformation.GetPageTreeRoot(mObjectsContext->GetInDirectObjectsRegistry());
+                finalPageRoot.ObjectID = pageTreeRoot->GetID();
+                finalPageRoot.GenerationNumber = 0;
+
+            }
+            hasNewPageTreeRoot = true;
+        }
+        else
+        {
+            hasNewPageTreeRoot = false;
+            finalPageRoot = originalDocumentPageTreeRoot;
+        }
+        // marking if has new page root, cause this effects the decision to have a new catalog
+        
+        bool requiresVersionUpdate = IsRequiredVersionHigherThanPDFVersion(inModifiedFileParser,inModifiedPDFVersion);
+        
+        if(hasNewPageTreeRoot || requiresVersionUpdate || DoExtendersRequireCatalogUpdate(inModifiedFileParser))
+        {
+            VersionUpdate* versionUpdate = NULL;
+            if(requiresVersionUpdate)
+            {
+                versionUpdate = new VersionUpdate(inModifiedPDFVersion);
+                AddDocumentContextExtender(versionUpdate);
+            }
+            status = WriteCatalogObject(finalPageRoot);
+            if(requiresVersionUpdate)
+            {
+                RemoveDocumentContextExtender(versionUpdate);
+                delete versionUpdate;
+            }
+            if(status != 0)
+                break;
+        }
+                
+ 		// write the info dictionary of the trailer, if has any valid entries
+		WriteInfoDictionary();
+        
+        if(RequiresXrefStream(inModifiedFileParser))
+        {
+            status = WriteXrefStream(xrefTablePosition);
+        }
+        else
+        {
+            status = mObjectsContext->WriteXrefTable(xrefTablePosition);
+            if(status != eSuccess)
+                break;
+            
+            status = WriteTrailerDictionary();
+            if(status != eSuccess)
+                break;
+            
+        }
+        
+		WriteXrefReference(xrefTablePosition);
+		WriteFinalEOF();
+	} while(false);
+    
+	return status;
+}
+
+ObjectReference DocumentContext::GetOriginalDocumentPageTreeRoot(PDFParser* inModifiedFileParser)
+{
+	ObjectReference rootObject;
+    
+	
+	do
+	{
+		// get catalogue, verify indirect reference
+		PDFObjectCastPtr<PDFIndirectObjectReference> catalogReference(inModifiedFileParser->GetTrailer()->QueryDirectObject("Root"));
+		if(!catalogReference)
+		{
+			TRACE_LOG("DocumentContext::GetOriginalDocumentPageTreeRoot, failed to read catalog reference in trailer");
+			break;
+		}
+        
+		PDFObjectCastPtr<PDFDictionary> catalog(inModifiedFileParser->ParseNewObject(catalogReference->mObjectID));
+		if(!catalog)
+		{
+			TRACE_LOG("DocumentContext::GetOriginalDocumentPageTreeRoot, failed to read catalog");
+			break;
+		}
+        
+		// get pages, verify indirect reference
+		PDFObjectCastPtr<PDFIndirectObjectReference> pagesReference(catalog->QueryDirectObject("Pages"));
+		if(!pagesReference)
+		{
+			TRACE_LOG("PDFParser::GetOriginalDocumentPageTreeRoot, failed to read pages reference in catalog");
+			break;
+		}
+        
+        rootObject.GenerationNumber = pagesReference->mVersion;
+        rootObject.ObjectID = pagesReference->mObjectID;
+                
+	}while(false);
+    
+	return rootObject;    
+    
+}
+
+bool DocumentContext::DocumentHasNewPages()
+{
+    // the best way to check if there are new pages created is to check if there's at least one leaf
+    
+    if(!mCatalogInformation.GetCurrentPageTreeNode())
+        return false;
+    
+    // note that page tree root surely exist, so no worries about creating a new one
+    PageTree* pageTreeRoot = mCatalogInformation.GetPageTreeRoot(mObjectsContext->GetInDirectObjectsRegistry());
+    
+    bool hasLeafs = false;
+    
+    while(hasLeafs == false)
+    {
+        hasLeafs = pageTreeRoot->IsLeafParent();
+        if(pageTreeRoot->GetNodesCount() == 0)
+            break;
+        else 
+            pageTreeRoot = pageTreeRoot->GetPageTreeChild(0);
+    }
+ 
+    return hasLeafs;
+}
+
+ObjectIDType DocumentContext::WriteCombinedPageTree(PDFParser* inModifiedFileParser)
+{
+    // writing a combined page tree looks like this
+    // first, we allocate a new root object that will contain both new and old pages
+    // then, write the new pages tree with reference to the new root object as parent
+    // then, write a new pages tree root to represent the old pages tree. this is a copy
+    // of the old tree, but with the parent object pointing to the new root object.
+    // now write the new root object with allocated ID and the old and new pages trees roots as direct children.
+    // happy.
+    
+    
+    // allocate new root object
+    ObjectIDType newPageRootTreeID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
+    
+    PageTree* root = new PageTree(newPageRootTreeID);
+	
+    // write new pages tree
+    PageTree* newPagesTree = mCatalogInformation.GetPageTreeRoot(mObjectsContext->GetInDirectObjectsRegistry());
+    newPagesTree->SetParent(root);
+ 	long long newPagesCount = WritePageTree(newPagesTree);
+    newPagesTree->SetParent(NULL);
+    delete root;
+    
+    // write modified old pages root
+    ObjectReference originalTreeRoot = GetOriginalDocumentPageTreeRoot(inModifiedFileParser);
+    
+    PDFObjectCastPtr<PDFDictionary> originalTreeRootObject = inModifiedFileParser->ParseNewObject(originalTreeRoot.ObjectID);
+  
+    mObjectsContext->StartModifiedIndirectObject(originalTreeRoot.ObjectID);
+    
+    DictionaryContext* pagesTreeContext = mObjectsContext->StartDictionary();
+ 
+    PDFObjectCastPtr<PDFInteger> kidsCount = originalTreeRootObject->QueryDirectObject(scCount);
+    long long originalPageTreeKidsCount = kidsCount.GetPtr() ? kidsCount->GetValue() : 0;
+    
+    // copy all but parent key. then add parent as the new root object
+    
+    MapIterator<PDFNameToPDFObjectMap>  pageTreeIt = originalTreeRootObject->GetIterator();
+    PDFDocumentCopyingContext aCopyingContext;
+    
+    EStatusCode status = aCopyingContext.Start(inModifiedFileParser,this,mObjectsContext,NULL);
+    
+    do {
+        
+        if(status != eSuccess)
+        {
+            TRACE_LOG("DocumentContext::WriteCombinedPageTree, Unable to copy original page tree. this probably means that the original file is protected - and is therefore unsupported for such activity as adding pages");
+            break;
+        }
+        
+        while(pageTreeIt.MoveNext())
+        {
+            if(pageTreeIt.GetKey()->GetValue() != "Parent")
+            {
+                pagesTreeContext->WriteKey(pageTreeIt.GetKey()->GetValue());
+                aCopyingContext.CopyDirectObjectAsIs(pageTreeIt.GetValue());
+            }
+            
+        }
+        
+        aCopyingContext.End();
+    
+        // parent
+        pagesTreeContext->WriteKey(scParent);
+        pagesTreeContext->WriteNewObjectReferenceValue(newPageRootTreeID);
+        
+        mObjectsContext->EndDictionary(pagesTreeContext);
+        mObjectsContext->EndIndirectObject();
+        
+        // now write the root page tree. 2 kids, the original pages, and new pages
+        mObjectsContext->StartNewIndirectObject(newPageRootTreeID);
+        
+        pagesTreeContext = mObjectsContext->StartDictionary();
+        
+        // type
+        pagesTreeContext->WriteKey(scType);
+        pagesTreeContext->WriteNameValue(scPages);
+        
+        // count
+        pagesTreeContext->WriteKey(scCount);    
+        pagesTreeContext->WriteIntegerValue(originalPageTreeKidsCount + newPagesCount);
+        
+        // kids
+        pagesTreeContext->WriteKey(scKids);
+        mObjectsContext->StartArray();
+        
+        mObjectsContext->WriteIndirectObjectReference(originalTreeRoot);
+        mObjectsContext->WriteNewIndirectObjectReference(newPagesTree->GetID());
+        
+        mObjectsContext->EndArray();
+        mObjectsContext->EndLine();
+
+        mObjectsContext->EndDictionary(pagesTreeContext);
+        mObjectsContext->EndIndirectObject();
+    
+    } while (false);
+   
+    
+
+    if(status == eSuccess)
+        return newPageRootTreeID;
+    else
+        return 0;
+}
+           
+bool DocumentContext::IsRequiredVersionHigherThanPDFVersion(PDFParser* inModifiedFileParser,EPDFVersion inModifiedPDFVersion)
+{
+    return (EPDFVersion)(inModifiedFileParser->GetPDFLevel() * 10) < inModifiedPDFVersion;
+}
+
+bool DocumentContext::DoExtendersRequireCatalogUpdate(PDFParser* inModifiedFileParser)
+{
+    bool isUpdateRequired = false;
+    
+ 	IDocumentContextExtenderSet::iterator it = mExtenders.begin();
+	for(; it != mExtenders.end() && !isUpdateRequired; ++it)
+		isUpdateRequired = (*it)->IsCatalogUpdateRequiredForModifiedFile(inModifiedFileParser);
+    
+    return isUpdateRequired;
+}
+
+bool DocumentContext::RequiresXrefStream(PDFParser* inModifiedFileParser)
+{
+    // modification requires xref stream if the original document uses one...so just ask trailer
+    if(!inModifiedFileParser->GetTrailer())
+        return false;
+    
+    PDFObjectCastPtr<PDFName> typeObject = inModifiedFileParser->GetTrailer()->QueryDirectObject("Type");
+    
+    if(!typeObject)
+        return false;
+    
+    return typeObject->GetValue() == "XRef";
+    
+    
+}
+
+EStatusCode DocumentContext::WriteXrefStream(LongFilePositionType& outXrefPosition)
+{
+    EStatusCode status = eSuccess;
+    
+    do 
+    {
+        // get the position by accessing the free context of the underlying objects stream
+ 
+        // an Xref stream is a beast that is both trailer and the xref
+        // start the xref with a dictionary detailing the trailer information, then move to the
+        // xref table aspects, with the lower level objects context.
+        
+        outXrefPosition = mObjectsContext->StartFreeContext()->GetCurrentPosition();
+        mObjectsContext->StartNewIndirectObject();
+ 
+        mObjectsContext->EndFreeContext();
+       
+        DictionaryContext* xrefDictionary = mObjectsContext->StartDictionary();
+        
+        xrefDictionary->WriteKey("Type");
+        xrefDictionary->WriteNameValue("XRef");
+        
+        status = WriteTrailerDictionaryValues(xrefDictionary);
+        if(status != eSuccess)
+            break;
+
+        // k. now for the xref table itself
+        status = mObjectsContext->WriteXrefStream(xrefDictionary);
+        
+    } 
+    while (false);
+    
+    return status;
+}
+
+PDFDocumentCopyingContext* DocumentContext::CreatePDFCopyingContext(PDFParser* inPDFParser)
+{
+	PDFDocumentCopyingContext* context = new PDFDocumentCopyingContext();
+    
+	if(context->Start(inPDFParser,this,mObjectsContext,mParserExtender) != PDFHummus::eSuccess)
+	{
+		delete context;
+		return NULL;
+	}
+	else
+		return context;
+}
+

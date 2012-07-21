@@ -29,6 +29,8 @@
 #include "IOBasicTypes.h"
 #include "ObjectsBasicTypes.h"
 #include "OutputFlateEncodeStream.h"
+#include "MyStringBuf.h"
+#include "OutputStringBufferStream.h"
 #include <sstream>
 
 
@@ -37,6 +39,7 @@ using namespace std;
 
 class IByteWriterWithPosition;
 class IObjectsContextExtender;
+class DictionaryContext;
 
 class PDFStream
 {
@@ -46,18 +49,31 @@ public:
 		IByteWriterWithPosition* inOutputStream,
 		ObjectIDType inExtentObjectID,
 		IObjectsContextExtender* inObjectsContextExtender);
+    
+    PDFStream(
+        bool inCompressStream,
+        IByteWriterWithPosition* inOutputStream,
+        DictionaryContext* inStreamDictionaryContextForDirectExtentStream,
+        IObjectsContextExtender* inObjectsContextExtender);
+    
+    
 	~PDFStream(void);
 
 	// Get the output stream of the PDFStream, make sure to use only before calling FinalizeStreamWrite, after which it becomes invalid
 	IByteWriter* GetWriteStream();
 
-	// when done with writing to the stream call FinalizeWriteStream to get all writing resources released and calculate the stream extent
+	// when done with writing to the stream call FinalizeWriteStream to get all writing resources released and calculate the stream extent. For streams where extent writing is direct object, there is still 
+    // a call needed later, to FlushStreamContentForDirectExtentStream() to actually write it.
 	void FinalizeStreamWrite();
 
 	bool IsStreamCompressed();
 	ObjectIDType GetExtentObjectID();
 
 	LongFilePositionType GetLength(); // get the stream extent
+    
+    // direct extent specific
+    DictionaryContext* GetStreamDictionaryForDirectExtentStream();
+    void FlushStreamContentForDirectExtentStream();
 
 private:
 	bool mCompressStream;
@@ -68,4 +84,7 @@ private:
 	LongFilePositionType mStreamStartPosition;
 	IByteWriter* mWriteStream;
 	IObjectsContextExtender* mExtender;
+    MyStringBuf mTemporaryStream;
+    OutputStringBufferStream mTemporaryOutputStream;
+    DictionaryContext* mStreamDictionaryContextForDirectExtentStream;
 };

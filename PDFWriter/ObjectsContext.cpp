@@ -78,11 +78,21 @@ void ObjectsContext::WriteHexString(const string& inString,ETokenSeparator inSep
 	mPrimitiveWriter.WriteHexString(inString,inSeparate);
 }
 
+void ObjectsContext::WriteIndirectObjectReference(const ObjectReference& inObjectReference,ETokenSeparator inSeparate)
+{
+    WriteIndirectObjectReference(inObjectReference.ObjectID,inObjectReference.GenerationNumber,inSeparate);
+}
+
+void ObjectsContext::WriteNewIndirectObjectReference(ObjectIDType indirectObjectID,ETokenSeparator inSeparate)
+{
+    WriteIndirectObjectReference(indirectObjectID,0,inSeparate);
+}
+
 static const IOBasicTypes::Byte scR[1] = {'R'};
-void ObjectsContext::WriteIndirectObjectReference(ObjectIDType inIndirectObjectID,ETokenSeparator inSeparate)
+void ObjectsContext::WriteIndirectObjectReference(ObjectIDType inIndirectObjectID,unsigned long inGenerationNumber,ETokenSeparator inSeparate)
 {
 	mPrimitiveWriter.WriteInteger(inIndirectObjectID);
-	mPrimitiveWriter.WriteInteger(0);
+	mPrimitiveWriter.WriteInteger(inGenerationNumber);
 	mOutputStream->Write(scR,1);
 	mPrimitiveWriter.WriteTokenSeparator(inSeparate);
 }
@@ -98,7 +108,6 @@ void ObjectsContext::EndFreeContext()
 }
 
 static const IOBasicTypes::Byte scXref[] = {'x','r','e','f'};
-static const IOBasicTypes::Byte scFreeObjectEntry[] = {'0','0','0','0','0','0','0','0','0','0',' ','6','5','5','3','5',' ','f','\r','\n'};
 
 EStatusCode ObjectsContext::WriteXrefTable(LongFilePositionType& outWritePosition)
 {
@@ -109,31 +118,81 @@ EStatusCode ObjectsContext::WriteXrefTable(LongFilePositionType& outWritePositio
 	mOutputStream->Write(scXref,4);
 	mPrimitiveWriter.EndLine();
 
-	// write objects amount in subsection (just one subsection required)
-	mPrimitiveWriter.WriteInteger(0);
-	mPrimitiveWriter.WriteInteger(mReferencesRegistry.GetObjectsCount(),eTokenSeparatorEndLine);
+    
+    ObjectIDType startID = 0;
+    ObjectIDType firstIDNotInRange;
+    ObjectIDType nextFreeObject = 0;
+    
+    // write subsections
+    while((startID < mReferencesRegistry.GetObjectsCount()) && (PDFHummus::eSuccess == status))
+    {
+        firstIDNotInRange = startID;
+        
+        // look for first ID that does not require update [for first version of PDF...it will be the end]
+        while(firstIDNotInRange < mReferencesRegistry.GetObjectsCount() &&
+                mReferencesRegistry.GetNthObjectReference(firstIDNotInRange).mIsDirty)
+            ++firstIDNotInRange;
+        
+    
+        // write section header
+        mPrimitiveWriter.WriteInteger(startID);
+        mPrimitiveWriter.WriteInteger(firstIDNotInRange - startID,eTokenSeparatorEndLine);
+        
+        // write used/free objects
+        char entryBuffer[21];
+        
+        for(ObjectIDType i = startID; i < firstIDNotInRange && (PDFHummus::eSuccess == status);++i)
+        {
+            const ObjectWriteInformation& objectReference = mReferencesRegistry.GetNthObjectReference(i);
+            if(objectReference.mObjectReferenceType == ObjectWriteInformation::Used)
+            {
+                // used object
+                
+                if(objectReference.mObjectWritten)
+                {
+                    SAFE_SPRINTF_2(entryBuffer,21,"%010lld %05ld n\r\n",objectReference.mWritePosition,objectReference.mGenerationNumber);
+                    mOutputStream->Write((const IOBasicTypes::Byte *)entryBuffer,20);
+                }
+                else
+                {
+                    // object not written. at this point this should not happen, and indicates a failure
+                    status = PDFHummus::eFailure;
+                    TRACE_LOG1("ObjectsContext::WriteXrefTable, Unexpected Failure. Object of ID = %ld was not registered as written. probably means it was not written",i);
+                }
+            }
+            else 
+            {
+                // free object
+                
+                ++nextFreeObject;
+                // look for next dirty & free object, to be the next item of linked list
+                while(nextFreeObject < mReferencesRegistry.GetObjectsCount() &&
+                      (!mReferencesRegistry.GetNthObjectReference(nextFreeObject).mIsDirty ||
+                      mReferencesRegistry.GetNthObjectReference(nextFreeObject).mObjectReferenceType != ObjectWriteInformation::Free))
+                    ++nextFreeObject;
+                
+                // if reached end of list, then link back to head - 0
+                if(nextFreeObject == mReferencesRegistry.GetObjectsCount())
+                    nextFreeObject = 0;
 
-	// write single free object entry
-	mOutputStream->Write(scFreeObjectEntry,20);
+                SAFE_SPRINTF_2(entryBuffer,21,"%010ld %05ld f\r\n",nextFreeObject,objectReference.mGenerationNumber);
+                mOutputStream->Write((const IOBasicTypes::Byte *)entryBuffer,20);
+                
+            }
+        }
+        
+        if(status != PDFHummus::eSuccess)
+            break;
+        
+        startID = firstIDNotInRange;
+        
+        // now promote startID to the next object to update
+        while(startID < mReferencesRegistry.GetObjectsCount() &&
+              !mReferencesRegistry.GetNthObjectReference(startID).mIsDirty)
+            ++startID;        
+    }
+    
 
-	// write used objects
-	char entryBuffer[21];
-
-	for(ObjectIDType i = 1; i < mReferencesRegistry.GetObjectsCount() && (PDFHummus::eSuccess == status);++i)
-	{
-		const ObjectWriteInformation& objectReference = mReferencesRegistry.GetNthObjectReference(i);
-		if(objectReference.mObjectWritten)
-		{
-			SAFE_SPRINTF_1(entryBuffer,21,"%010lld 00000 n\r\n",objectReference.mWritePosition);
-			mOutputStream->Write((const IOBasicTypes::Byte *)entryBuffer,20);
-		}
-		else
-		{
-			// object not written. at this point this should not happen, and indicates a failure
-			status = PDFHummus::eFailure;
-			TRACE_LOG1("ObjectsContext::WriteXrefTable, Unexpected Failure. Object of ID = %ld was not registered as written. probably means it was not written",i);
-		}
-	}
 	return status;
 }
 
@@ -228,6 +287,14 @@ void ObjectsContext::StartNewIndirectObject(ObjectIDType inObjectID)
 	mPrimitiveWriter.WriteKeyword(scObj);
 }
 
+void ObjectsContext::StartModifiedIndirectObject(ObjectIDType inObjectID)
+{
+	mReferencesRegistry.MarkObjectAsUpdated(inObjectID,mOutputStream->GetCurrentPosition());
+	mPrimitiveWriter.WriteInteger(inObjectID);
+	mPrimitiveWriter.WriteInteger(0);
+	mPrimitiveWriter.WriteKeyword(scObj);    
+}
+
 static const std::string scEndObj = "endobj";
 void ObjectsContext::EndIndirectObject()
 {
@@ -255,7 +322,7 @@ static const string scEndStream = "endstream";
 static const string scFilter = "Filter";
 static const string scFlateDecode = "FlateDecode";
 
-PDFStream* ObjectsContext::StartPDFStream(DictionaryContext* inStreamDictionary)
+PDFStream* ObjectsContext::StartPDFStream(DictionaryContext* inStreamDictionary,bool inForceDirectExtentObject)
 {
 	// write stream header and allocate PDF stream.
 	// PDF stream will take care of maintaining state for the stream till writing is finished
@@ -264,11 +331,6 @@ PDFStream* ObjectsContext::StartPDFStream(DictionaryContext* inStreamDictionary)
 	// Write Stream Dictionary (note that inStreamDictionary is optionally used)
 	DictionaryContext* streamDictionaryContext = (NULL == inStreamDictionary ? StartDictionary() : inStreamDictionary);
 
-	// Length (write as an indirect object)
-	streamDictionaryContext->WriteKey(scLength);
-	ObjectIDType lengthObjectID = mReferencesRegistry.AllocateNewObjectID();
-	streamDictionaryContext->WriteObjectReferenceValue(lengthObjectID);
-		
 	// Compression (if necessary)
 	if(mCompressStreams)
 	{
@@ -276,13 +338,25 @@ PDFStream* ObjectsContext::StartPDFStream(DictionaryContext* inStreamDictionary)
 		streamDictionaryContext->WriteNameValue(scFlateDecode);
 	}
 
-	EndDictionary(streamDictionaryContext);
+    if(!inForceDirectExtentObject)
+    {
+    
+        // Length (write as an indirect object)
+        streamDictionaryContext->WriteKey(scLength);
+        ObjectIDType lengthObjectID = mReferencesRegistry.AllocateNewObjectID();
+        streamDictionaryContext->WriteNewObjectReferenceValue(lengthObjectID);
+            
 
-	// Write Stream Content
-	WriteKeyword(scStream);
+        EndDictionary(streamDictionaryContext);
 
-	// now begin the stream itself
-	return new PDFStream(mCompressStreams,mOutputStream,lengthObjectID,mExtender);
+        // Write Stream Content
+        WriteKeyword(scStream);
+        
+        return new PDFStream(mCompressStreams,mOutputStream,lengthObjectID,mExtender);
+    }
+    else
+        return new PDFStream(mCompressStreams,mOutputStream,streamDictionaryContext,mExtender);
+	
 }
 
 PDFStream* ObjectsContext::StartUnfilteredPDFStream(DictionaryContext* inStreamDictionary)
@@ -297,7 +371,7 @@ PDFStream* ObjectsContext::StartUnfilteredPDFStream(DictionaryContext* inStreamD
 	// Length (write as an indirect object)
 	streamDictionaryContext->WriteKey(scLength);
 	ObjectIDType lengthObjectID = mReferencesRegistry.AllocateNewObjectID();
-	streamDictionaryContext->WriteObjectReferenceValue(lengthObjectID);
+	streamDictionaryContext->WriteNewObjectReferenceValue(lengthObjectID);
 		
 	EndDictionary(streamDictionaryContext);
 
@@ -312,10 +386,36 @@ void ObjectsContext::EndPDFStream(PDFStream* inStream)
 {
 	// finalize the stream write to end stream context and calculate length
 	inStream->FinalizeStreamWrite();
-	WritePDFStreamEndWithoutExtent();
-	EndIndirectObject();
-	WritePDFStreamExtent(inStream);
+
+	if(inStream->GetExtentObjectID() == 0)
+    {
+        DictionaryContext* streamDictionaryContext = inStream->GetStreamDictionaryForDirectExtentStream();
+        
+        // Length (write as a direct object)
+        streamDictionaryContext->WriteKey(scLength);
+        streamDictionaryContext->WriteIntegerValue(inStream->GetLength());
+        
+        
+        EndDictionary(streamDictionaryContext);
+        
+        // Write Stream Content
+        WriteKeyword(scStream);
+        
+        inStream->FlushStreamContentForDirectExtentStream();
+        
+        EndLine();
+		WriteKeyword(scEndStream);
+        EndIndirectObject();
+        
+    }
+    else
+    {
+        WritePDFStreamEndWithoutExtent();
+        EndIndirectObject();
+        WritePDFStreamExtent(inStream);
+    }
 }
+ 
 	
 void ObjectsContext::WritePDFStreamEndWithoutExtent()
 {
@@ -357,13 +457,13 @@ EStatusCode ObjectsContext::WriteState(ObjectsContext* inStateWriter,ObjectIDTyp
 		objectsContextDict->WriteNameValue("ObjectsContext");
 
 		objectsContextDict->WriteKey("mReferencesRegistry");
-		objectsContextDict->WriteObjectReferenceValue(referencesRegistryObjectID);
+		objectsContextDict->WriteNewObjectReferenceValue(referencesRegistryObjectID);
 
 		objectsContextDict->WriteKey("mCompressStreams");
 		objectsContextDict->WriteBooleanValue(mCompressStreams);
 
 		objectsContextDict->WriteKey("mSubsetFontsNamesSequance");
-		objectsContextDict->WriteObjectReferenceValue(subsetFontsNameSequanceID);
+		objectsContextDict->WriteNewObjectReferenceValue(subsetFontsNameSequanceID);
 
 		inStateWriter->EndDictionary(objectsContextDict);
 
@@ -418,4 +518,140 @@ void ObjectsContext::Cleanup()
 
 	mSubsetFontsNamesSequance.Reset();
 	mReferencesRegistry.Reset();
+}
+
+void ObjectsContext::SetupModifiedFile(PDFParser* inModifiedFileParser)
+{
+    mReferencesRegistry.SetupXrefFromModifiedFile(inModifiedFileParser);
+}
+
+EStatusCode ObjectsContext::WriteXrefStream(DictionaryContext* inDictionaryContext)
+{
+    // k. complement input dictionary with the relevant entries - W and Index
+    // then continue with a regular stream, forced to have "length" as direct object
+    
+    // write Index entry
+    inDictionaryContext->WriteKey("Index");
+    StartArray();
+    
+    ObjectIDType startID = 0;
+    ObjectIDType firstIDNotInRange;
+ 
+    while(startID < mReferencesRegistry.GetObjectsCount())
+    {
+        firstIDNotInRange = startID;
+        
+        // look for first ID that does not require update [for first version of PDF...it will be the end]
+        while(firstIDNotInRange < mReferencesRegistry.GetObjectsCount() &&
+              mReferencesRegistry.GetNthObjectReference(firstIDNotInRange).mIsDirty)
+            ++firstIDNotInRange;
+        
+        // write section header
+        mPrimitiveWriter.WriteInteger(startID);
+        mPrimitiveWriter.WriteInteger(firstIDNotInRange - startID);
+        
+        startID = firstIDNotInRange;
+        
+        // now promote startID to the next object to update
+        while(startID < mReferencesRegistry.GetObjectsCount() &&
+              !mReferencesRegistry.GetNthObjectReference(startID).mIsDirty)
+            ++startID;        
+    }
+    
+    EndArray();
+    EndLine();
+    
+    // write W entry, which is going to be 1 sizeof(long long) and sizeof(unsigned long), per the types i'm using
+    
+    size_t typeSize = 1;
+    size_t locationSize = sizeof(LongFilePositionType);
+    size_t generationSize = sizeof(unsigned long);
+    
+    inDictionaryContext->WriteKey("W");
+    StartArray();
+    WriteInteger(typeSize);
+    WriteInteger(locationSize);
+    WriteInteger(generationSize);
+    EndArray();
+    EndLine();
+    
+    // start the xref stream itself
+    PDFStream* aStream = StartPDFStream(inDictionaryContext,true);
+    
+    // now write the table data itself
+    EStatusCode status = eSuccess;
+    ObjectIDType nextFreeObject = 0;
+    
+    do {
+    
+        for(ObjectIDType i = 0; i < mReferencesRegistry.GetObjectsCount() && eSuccess == status;++i)
+        {
+            if(!mReferencesRegistry.GetNthObjectReference(i).mIsDirty)
+                continue;
+     
+            const ObjectWriteInformation& objectReference = mReferencesRegistry.GetNthObjectReference(i);
+
+            if(objectReference.mObjectReferenceType == ObjectWriteInformation::Used)
+            {
+                // used object
+                
+                if(objectReference.mObjectWritten)
+                {
+                    WriteXrefNumber(aStream->GetWriteStream(),1,typeSize);
+                    WriteXrefNumber(aStream->GetWriteStream(),objectReference.mWritePosition,locationSize);
+                    WriteXrefNumber(aStream->GetWriteStream(),objectReference.mGenerationNumber,generationSize);
+                }
+                else
+                {
+                    // object not written. at this point this should not happen, and indicates a failure
+                    status = PDFHummus::eFailure;
+                    TRACE_LOG1("ObjectsContext::WriteXrefStream, Unexpected Failure. Object of ID = %ld was not registered as written. probably means it was not written",i);
+                }
+            }
+            else 
+            {
+                // free object
+                
+                ++nextFreeObject;
+                // look for next dirty & free object, to be the next item of linked list
+                while(nextFreeObject < mReferencesRegistry.GetObjectsCount() &&
+                      (!mReferencesRegistry.GetNthObjectReference(nextFreeObject).mIsDirty ||
+                       mReferencesRegistry.GetNthObjectReference(nextFreeObject).mObjectReferenceType != ObjectWriteInformation::Free))
+                    ++nextFreeObject;
+                
+                // if reached end of list, then link back to head - 0
+                if(nextFreeObject == mReferencesRegistry.GetObjectsCount())
+                    nextFreeObject = 0;
+     
+                WriteXrefNumber(aStream->GetWriteStream(),0,typeSize);
+                WriteXrefNumber(aStream->GetWriteStream(),nextFreeObject,locationSize);
+                WriteXrefNumber(aStream->GetWriteStream(),objectReference.mGenerationNumber,generationSize);
+                
+            }
+
+        }
+        
+        if(status != eSuccess)
+            break;
+            
+        // end the stream and g'bye
+        EndPDFStream(aStream);
+
+    } 
+    while (false);
+
+    return status;
+}
+
+void ObjectsContext::WriteXrefNumber(IByteWriter* inStream,LongFilePositionType inElement, size_t inElementSize)
+{
+    // xref numbers are written high order byte first (big endian)
+    Byte buffer[inElementSize];
+    
+    for(size_t i = inElementSize; i>0; --i)
+    {
+        buffer[i-1] = (Byte)(inElement & 0xff);
+        inElement = inElement >> 8;
+    }
+    inStream->Write(buffer,inElementSize);
 }

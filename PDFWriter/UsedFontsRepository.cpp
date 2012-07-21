@@ -142,7 +142,7 @@ EStatusCode UsedFontsRepository::WriteState(ObjectsContext* inStateWriter,Object
 		inStateWriter->WriteLiteralString(aTextString.ToString());
 		
 		ObjectIDType usedFontID = inStateWriter->GetInDirectObjectsRegistry().AllocateNewObjectID();
-		inStateWriter->WriteIndirectObjectReference(usedFontID);
+		inStateWriter->WriteNewIndirectObjectReference(usedFontID);
 		usedFontsObjects.push_back(usedFontID);
 	}
 

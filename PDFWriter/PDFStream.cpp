@@ -20,6 +20,8 @@
 */
 #include "PDFStream.h"
 #include "IObjectsContextExtender.h"
+#include "InputStringBufferStream.h"
+#include "OutputStreamTraits.h"
 
 PDFStream::PDFStream(bool inCompressStream,
 					 IByteWriterWithPosition* inOutputStream,
@@ -32,6 +34,7 @@ PDFStream::PDFStream(bool inCompressStream,
 	mStreamStartPosition = inOutputStream->GetCurrentPosition();
 	mOutputStream = inOutputStream;
 	mStreamLength = 0;
+    mStreamDictionaryContextForDirectExtentStream = NULL;
 
 
 	if(mCompressStream)
@@ -51,8 +54,43 @@ PDFStream::PDFStream(bool inCompressStream,
 
 }
 
+PDFStream::PDFStream(
+          bool inCompressStream,
+          IByteWriterWithPosition* inOutputStream,
+          DictionaryContext* inStreamDictionaryContextForDirectExtentStream,
+          IObjectsContextExtender* inObjectsContextExtender)
+{
+	mExtender = inObjectsContextExtender;
+	mCompressStream = inCompressStream;
+	mExtendObjectID = 0;	
+	mStreamStartPosition = 0;
+	mOutputStream = inOutputStream;
+	mStreamLength = 0;
+    mStreamDictionaryContextForDirectExtentStream = inStreamDictionaryContextForDirectExtentStream;
+    
+    mTemporaryOutputStream.Assign(&mTemporaryStream);
+    
+	if(mCompressStream)
+	{
+		if(mExtender && mExtender->OverridesStreamCompression())
+		{
+			mWriteStream = mExtender->GetCompressionWriteStream(&mTemporaryOutputStream);
+		}
+		else
+		{
+			mFlateEncodingStream.Assign(&mTemporaryOutputStream);
+			mWriteStream = &mFlateEncodingStream;
+		}
+	}
+	else
+		mWriteStream = &mTemporaryOutputStream;
+    
+}
+
+
 PDFStream::~PDFStream(void)
 {
+    
 }
 
 IByteWriter* PDFStream::GetWriteStream()
@@ -67,8 +105,17 @@ void PDFStream::FinalizeStreamWrite()
 	mWriteStream = NULL;
 	if(mCompressStream)
 		mFlateEncodingStream.Assign(NULL);  // this both finished encoding any left buffers and releases ownership from mFlateEncodingStream
-	mStreamLength = mOutputStream->GetCurrentPosition()-mStreamStartPosition;
-	mOutputStream = NULL;
+    
+    // different endings, depending if direct stream writing or not
+    if(mExtendObjectID == 0)
+    {
+        mStreamLength = mTemporaryStream.GetCurrentWritePosition();
+    }
+    else 
+    {
+        mStreamLength = mOutputStream->GetCurrentPosition()-mStreamStartPosition;
+        mOutputStream = NULL;
+    }
 }
 
 LongFilePositionType PDFStream::GetLength()
@@ -85,3 +132,22 @@ ObjectIDType PDFStream::GetExtentObjectID()
 {
 	return mExtendObjectID;
 }
+
+DictionaryContext* PDFStream::GetStreamDictionaryForDirectExtentStream()
+{
+    return mStreamDictionaryContextForDirectExtentStream;
+}
+
+void PDFStream::FlushStreamContentForDirectExtentStream()
+{
+    mTemporaryStream.pubseekoff(0,ios_base::beg);
+    
+    // copy internal temporary stream to output
+    InputStringBufferStream inputStreamForWrite(&mTemporaryStream);
+    OutputStreamTraits streamCopier(mOutputStream);
+    streamCopier.CopyToOutputStream(&inputStreamForWrite);
+    
+    mTemporaryStream.str();
+    mOutputStream = NULL;
+}
+

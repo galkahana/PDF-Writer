@@ -23,16 +23,13 @@
 TrailerInformation::TrailerInformation(void)
 {
 	mPrev = 0;
-	mRootReference = 0;
-	mEncryptReference = 0;
-	mInfoDictionaryReference = 0;
 }
 
 TrailerInformation::~TrailerInformation(void)
 {
 }
 
-void TrailerInformation::SetInfoDictionaryReference(ObjectIDType inInfoDictionaryReference)
+void TrailerInformation::SetInfoDictionaryReference(const ObjectReference& inInfoDictionaryReference)
 {
 	mInfoDictionaryReference = inInfoDictionaryReference;
 }
@@ -42,12 +39,12 @@ void TrailerInformation::SetPrev(LongFilePositionType inPrev)
 	mPrev = inPrev;
 }
 
-void TrailerInformation::SetRoot(ObjectIDType inRootReference)
+void TrailerInformation::SetRoot(const ObjectReference& inRootReference)
 {
 	mRootReference = inRootReference;
 }
 
-void TrailerInformation::SetEncrypt(ObjectIDType inEncryptReference)
+void TrailerInformation::SetEncrypt(const ObjectReference& inEncryptReference)
 {
 	mEncryptReference = inEncryptReference;
 }
@@ -57,14 +54,14 @@ BoolAndLongFilePositionType TrailerInformation::GetPrev()
 	return BoolAndLongFilePositionType(mPrev != 0,mPrev);
 }
 
-BoolAndObjectIDType TrailerInformation::GetRoot()
+BoolAndObjectReference TrailerInformation::GetRoot()
 {
-	return BoolAndObjectIDType(mRootReference != 0, mRootReference);
+	return BoolAndObjectReference(mRootReference.ObjectID != 0, mRootReference);
 }
 
-BoolAndObjectIDType TrailerInformation::GetEncrypt()
+BoolAndObjectReference TrailerInformation::GetEncrypt()
 {
-	return BoolAndObjectIDType(mEncryptReference != 0, mEncryptReference);
+	return BoolAndObjectReference(mEncryptReference.ObjectID != 0, mEncryptReference);
 }
 
 InfoDictionary& TrailerInformation::GetInfo()
@@ -72,16 +69,16 @@ InfoDictionary& TrailerInformation::GetInfo()
 	return mInfoDictionary;
 }
 
-BoolAndObjectIDType TrailerInformation::GetInfoDictionaryReference()
+BoolAndObjectReference TrailerInformation::GetInfoDictionaryReference()
 {
-	return BoolAndObjectIDType(mInfoDictionaryReference != 0, mInfoDictionaryReference);
+	return BoolAndObjectReference(mInfoDictionaryReference.ObjectID != 0, mInfoDictionaryReference);
 }
 
 void TrailerInformation::Reset()
 {
 	mPrev = 0;
-	mRootReference = 0;
-	mEncryptReference = 0;
-	mInfoDictionaryReference = 0;
+	mRootReference.ObjectID = 0;
+	mEncryptReference.ObjectID = 0;
+	mInfoDictionaryReference.ObjectID = 0;
 	mInfoDictionary.Reset();
 }

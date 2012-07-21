@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "InputBufferedStream::Skip(unsigned long):InputBufferedStream.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "*(mCurrentBufferIndex+1)">
+            </PersistentString>
+            <PersistentString
+               value = "*(mCurrentBufferIndex+2)">
+            </PersistentString>
+            <PersistentString
+               value = "*(mCurrentBufferIndex+3)">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "JPEGImageParser::GetLongValue(unsigned char const*, bool):JPEGImageParser.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "inBuffer[1]">
+            </PersistentString>
+            <PersistentString
+               value = "inBuffer[3]">
+            </PersistentString>
+            <PersistentString
+               value = "inBuffer[0]">
+            </PersistentString>
+            <PersistentString
+               value = "inBuffer[2]">
+            </PersistentString>
+            <PersistentString
+               value = "(unsigned long)((unsigned int)inBuffer[3] + (unsigned int)inBuffer[2] * 0x100 + (unsigned int)inBuffer[1] * 0x10000 + (unsigned int)inBuffer[0] * 0x1000000)">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>
