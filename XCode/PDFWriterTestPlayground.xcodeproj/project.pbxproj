@@ -12,10 +12,14 @@
 		490BBEAF1566B80D00C28250 /* PosixPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 490BBEAE1566B80D00C28250 /* PosixPath.cpp */; };
 		497CD3C215A87136000B3C7C /* BasicModification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 497CD3C115A87136000B3C7C /* BasicModification.cpp */; };
 		497CD3C415A8ABBE000B3C7C /* AppendingAndReading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 497CD3C315A8ABBE000B3C7C /* AppendingAndReading.cpp */; };
+		497EF61A15C1E50E00286CAC /* MergeToPDFForm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 497EF61915C1E50E00286CAC /* MergeToPDFForm.cpp */; };
 		4983E2161587D73900F3F62A /* JPGImageBugTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4983E2151587D73900F3F62A /* JPGImageBugTest.cpp */; };
 		4989F37C15BA977800F91EAF /* ModifyingExistingFileContent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4989F37B15BA977800F91EAF /* ModifyingExistingFileContent.cpp */; };
 		4989F38215BAB98000F91EAF /* PDFComment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4989F37E15BAB97F00F91EAF /* PDFComment.cpp */; };
 		4989F38315BAB98000F91EAF /* PDFCommentWriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4989F38015BAB97F00F91EAF /* PDFCommentWriter.cpp */; };
+		498C3F0715C5B67E009EA9F8 /* JpegLibTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 498C3F0615C5B67E009EA9F8 /* JpegLibTest.cpp */; };
+		498C3F0B15C5BB6C009EA9F8 /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 498C3F0A15C5BB6C009EA9F8 /* libjpeg.a */; };
+		498C3F1615CBF64E009EA9F8 /* DCTDecodeFilterTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 498C3F1515CBF64E009EA9F8 /* DCTDecodeFilterTest.cpp */; };
 		49B70DFD155C5F3500C0FD9F /* AppendPagesTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49B70DA8155C5F3500C0FD9F /* AppendPagesTest.cpp */; };
 		49B70DFE155C5F3500C0FD9F /* AppendSpecialPagesTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49B70DAA155C5F3500C0FD9F /* AppendSpecialPagesTest.cpp */; };
 		49B70DFF155C5F3500C0FD9F /* BoxingBaseTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49B70DAC155C5F3500C0FD9F /* BoxingBaseTest.cpp */; };
@@ -85,6 +89,8 @@
 		497CD3C115A87136000B3C7C /* BasicModification.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BasicModification.cpp; sourceTree = "<group>"; };
 		497CD3C315A8ABBE000B3C7C /* AppendingAndReading.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppendingAndReading.cpp; sourceTree = "<group>"; };
 		497CD3C515A8ABCF000B3C7C /* AppendingAndReading.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppendingAndReading.h; sourceTree = "<group>"; };
+		497EF61715C1E4F600286CAC /* MergeToPDFForm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MergeToPDFForm.h; sourceTree = "<group>"; };
+		497EF61915C1E50E00286CAC /* MergeToPDFForm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MergeToPDFForm.cpp; sourceTree = "<group>"; };
 		4983E2151587D73900F3F62A /* JPGImageBugTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JPGImageBugTest.cpp; sourceTree = "<group>"; };
 		4983E2181587D77100F3F62A /* JPGImageBugTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JPGImageBugTest.h; sourceTree = "<group>"; };
 		4989C52A155C5EED00D93089 /* PDFWriterTestPlayground */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PDFWriterTestPlayground; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -94,6 +100,11 @@
 		4989F37F15BAB97F00F91EAF /* PDFComment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDFComment.h; sourceTree = "<group>"; };
 		4989F38015BAB97F00F91EAF /* PDFCommentWriter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PDFCommentWriter.cpp; sourceTree = "<group>"; };
 		4989F38115BAB97F00F91EAF /* PDFCommentWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PDFCommentWriter.h; sourceTree = "<group>"; };
+		498C3F0515C5B66D009EA9F8 /* JpegLibTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JpegLibTest.h; sourceTree = "<group>"; };
+		498C3F0615C5B67E009EA9F8 /* JpegLibTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JpegLibTest.cpp; sourceTree = "<group>"; };
+		498C3F0A15C5BB6C009EA9F8 /* libjpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libjpeg.a; sourceTree = "<group>"; };
+		498C3F1415CBF63F009EA9F8 /* DCTDecodeFilterTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DCTDecodeFilterTest.h; sourceTree = "<group>"; };
+		498C3F1515CBF64E009EA9F8 /* DCTDecodeFilterTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DCTDecodeFilterTest.cpp; sourceTree = "<group>"; };
 		49B70DA8155C5F3500C0FD9F /* AppendPagesTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AppendPagesTest.cpp; path = ../PDFWriterTestPlayground/AppendPagesTest.cpp; sourceTree = SOURCE_ROOT; };
 		49B70DA9155C5F3500C0FD9F /* AppendPagesTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppendPagesTest.h; path = ../PDFWriterTestPlayground/AppendPagesTest.h; sourceTree = SOURCE_ROOT; };
 		49B70DAA155C5F3500C0FD9F /* AppendSpecialPagesTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AppendSpecialPagesTest.cpp; path = ../PDFWriterTestPlayground/AppendSpecialPagesTest.cpp; sourceTree = SOURCE_ROOT; };
@@ -189,6 +200,7 @@
 				49E5A571155C603300ED8A29 /* libPDFWriter.a in Frameworks */,
 				49E5A56F155C602500ED8A29 /* libz.dylib in Frameworks */,
 				49E5A56C155C601B00ED8A29 /* CoreFoundation.framework in Frameworks */,
+				498C3F0B15C5BB6C009EA9F8 /* libjpeg.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -226,6 +238,7 @@
 			isa = PBXGroup;
 			children = (
 				49BADF79155C629C00BE7C32 /* libLibTiff.a */,
+				498C3F0A15C5BB6C009EA9F8 /* libjpeg.a */,
 				49E5A574155C60FF00ED8A29 /* libfreetype.6.dylib */,
 				49E5A570155C603300ED8A29 /* libPDFWriter.a */,
 				49E5A56E155C602500ED8A29 /* libz.dylib */,
@@ -265,9 +278,21 @@
 			name = "Comments Infrastracture";
 			sourceTree = "<group>";
 		};
+		498C3F0315C5B3C1009EA9F8 /* DCT decode */ = {
+			isa = PBXGroup;
+			children = (
+				498C3F0515C5B66D009EA9F8 /* JpegLibTest.h */,
+				498C3F0615C5B67E009EA9F8 /* JpegLibTest.cpp */,
+				498C3F1415CBF63F009EA9F8 /* DCTDecodeFilterTest.h */,
+				498C3F1515CBF64E009EA9F8 /* DCTDecodeFilterTest.cpp */,
+			);
+			name = "DCT decode";
+			sourceTree = "<group>";
+		};
 		49B70E25155C5F5000C0FD9F /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				498C3F0315C5B3C1009EA9F8 /* DCT decode */,
 				497CD3BE15A8710D000B3C7C /* Modification */,
 				49CD30E61571069C00413969 /* bugs */,
 				49DB92AD155D149C00C949D7 /* Type1 */,
@@ -401,6 +426,8 @@
 				49B70DA9155C5F3500C0FD9F /* AppendPagesTest.h */,
 				49B70DAA155C5F3500C0FD9F /* AppendSpecialPagesTest.cpp */,
 				49B70DAB155C5F3500C0FD9F /* AppendSpecialPagesTest.h */,
+				497EF61715C1E4F600286CAC /* MergeToPDFForm.h */,
+				497EF61915C1E50E00286CAC /* MergeToPDFForm.cpp */,
 			);
 			name = PDFEmbedding;
 			sourceTree = "<group>";
@@ -594,6 +621,9 @@
 				4989F37C15BA977800F91EAF /* ModifyingExistingFileContent.cpp in Sources */,
 				4989F38215BAB98000F91EAF /* PDFComment.cpp in Sources */,
 				4989F38315BAB98000F91EAF /* PDFCommentWriter.cpp in Sources */,
+				497EF61A15C1E50E00286CAC /* MergeToPDFForm.cpp in Sources */,
+				498C3F0715C5B67E009EA9F8 /* JpegLibTest.cpp in Sources */,
+				498C3F1615CBF64E009EA9F8 /* DCTDecodeFilterTest.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -654,11 +684,13 @@
 					/usr/X11/include,
 					/usr/X11/include/freetype2,
 					../PDFWriter,
+					../LibJpeg,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/Build/Products/Debug\"",
 					/usr/X11/lib,
+					"\"$(SRCROOT)\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -671,11 +703,13 @@
 					/usr/X11/include,
 					/usr/X11/include/freetype2,
 					../PDFWriter,
+					../LibJpeg,
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/Build/Products/Debug\"",
 					/usr/X11/lib,
+					"\"$(SRCROOT)\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

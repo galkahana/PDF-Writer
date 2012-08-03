@@ -41,7 +41,8 @@ EStatusCode PDFDocumentCopyingContext::Start(const string& inPDFFilePath,
 	inDocumentContext->RegisterCopyingContext(this);
 	mDocumentHandler.SetOperationsContexts(inDocumentContext,inObjectsContext);
 	EStatusCode status = mDocumentHandler.StartFileCopyingContext(inPDFFilePath);
-    mDocumentHandler.SetParserExtender(inParserExtender);
+    if(eSuccess == status)
+        mDocumentHandler.SetParserExtender(inParserExtender);
     return status;
 }
 
@@ -54,7 +55,8 @@ EStatusCode PDFDocumentCopyingContext::Start(IByteReaderWithPosition* inPDFStrea
 	inDocumentContext->RegisterCopyingContext(this);
 	mDocumentHandler.SetOperationsContexts(inDocumentContext,inObjectsContext);
 	EStatusCode status = mDocumentHandler.StartStreamCopyingContext(inPDFStream);
-    mDocumentHandler.SetParserExtender(inParserExtender);
+    if(eSuccess == status)
+        mDocumentHandler.SetParserExtender(inParserExtender);
     return status;
 }
 
@@ -116,6 +118,12 @@ EStatusCode PDFDocumentCopyingContext::MergePDFPageToPage(PDFPage* inTargetPage,
 	return mDocumentHandler.MergePDFPageToPage(inTargetPage,inSourcePageIndex);
 }
 
+EStatusCode PDFDocumentCopyingContext::MergePDFPageToFormXObject(
+                                            PDFFormXObject* inTargetFormXObject,
+                                            unsigned long inSourcePageIndex)
+{
+    return mDocumentHandler.MergePDFPageToFormXObject(inTargetFormXObject,inSourcePageIndex);
+}
 
 void PDFDocumentCopyingContext::End()
 {

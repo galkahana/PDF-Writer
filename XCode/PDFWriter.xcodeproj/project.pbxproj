@@ -7,6 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		49456FBF15BC954A00272BC1 /* PDFPageMergingHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49456FBD15BC954A00272BC1 /* PDFPageMergingHelper.cpp */; };
+		49456FC015BC954A00272BC1 /* PDFPageMergingHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 49456FBE15BC954A00272BC1 /* PDFPageMergingHelper.h */; };
+		497EF62015C41A9300286CAC /* PDFPageInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 497EF61F15C41A9300286CAC /* PDFPageInput.cpp */; };
+		497EF62215C41ABB00286CAC /* PDFPageInput.h in Headers */ = {isa = PBXBuildFile; fileRef = 497EF62115C41ABB00286CAC /* PDFPageInput.h */; };
+		497EF62615C4552800286CAC /* ParsedPrimitiveHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 497EF62515C4552800286CAC /* ParsedPrimitiveHelper.cpp */; };
+		497EF62815C4553D00286CAC /* ParsedPrimitiveHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 497EF62715C4553D00286CAC /* ParsedPrimitiveHelper.h */; };
+		4988223315C094CE007F9448 /* IFormEndWritingTask.h in Headers */ = {isa = PBXBuildFile; fileRef = 4988223215C094CE007F9448 /* IFormEndWritingTask.h */; };
+		4988223515C094DD007F9448 /* IResourceWritingTask.h in Headers */ = {isa = PBXBuildFile; fileRef = 4988223415C094DD007F9448 /* IResourceWritingTask.h */; };
+		498C3F1115CB0A5D009EA9F8 /* InputDCTDecodeStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 498C3F1015CB0A5D009EA9F8 /* InputDCTDecodeStream.h */; };
+		498C3F1315CB0A85009EA9F8 /* InputDCTDecodeStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 498C3F1215CB0A85009EA9F8 /* InputDCTDecodeStream.cpp */; };
 		499D52D4155C59EF006F6E28 /* AbstractContentContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 499D51B0155C59EF006F6E28 /* AbstractContentContext.cpp */; };
 		499D52D5155C59EF006F6E28 /* AbstractContentContext.h in Headers */ = {isa = PBXBuildFile; fileRef = 499D51B1155C59EF006F6E28 /* AbstractContentContext.h */; };
 		499D52D6155C59EF006F6E28 /* AbstractWrittenFont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 499D51B2155C59EF006F6E28 /* AbstractWrittenFont.cpp */; };
@@ -295,6 +305,16 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		49456FBD15BC954A00272BC1 /* PDFPageMergingHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PDFPageMergingHelper.cpp; path = ../PDFWriter/PDFPageMergingHelper.cpp; sourceTree = "<group>"; };
+		49456FBE15BC954A00272BC1 /* PDFPageMergingHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PDFPageMergingHelper.h; path = ../PDFWriter/PDFPageMergingHelper.h; sourceTree = "<group>"; };
+		497EF61F15C41A9300286CAC /* PDFPageInput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PDFPageInput.cpp; path = ../PDFWriter/PDFPageInput.cpp; sourceTree = "<group>"; };
+		497EF62115C41ABB00286CAC /* PDFPageInput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PDFPageInput.h; path = ../PDFWriter/PDFPageInput.h; sourceTree = "<group>"; };
+		497EF62515C4552800286CAC /* ParsedPrimitiveHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParsedPrimitiveHelper.cpp; path = ../PDFWriter/ParsedPrimitiveHelper.cpp; sourceTree = "<group>"; };
+		497EF62715C4553D00286CAC /* ParsedPrimitiveHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ParsedPrimitiveHelper.h; path = ../PDFWriter/ParsedPrimitiveHelper.h; sourceTree = "<group>"; };
+		4988223215C094CE007F9448 /* IFormEndWritingTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IFormEndWritingTask.h; path = ../PDFWriter/IFormEndWritingTask.h; sourceTree = "<group>"; };
+		4988223415C094DD007F9448 /* IResourceWritingTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IResourceWritingTask.h; path = ../PDFWriter/IResourceWritingTask.h; sourceTree = "<group>"; };
+		498C3F1015CB0A5D009EA9F8 /* InputDCTDecodeStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InputDCTDecodeStream.h; path = ../PDFWriter/InputDCTDecodeStream.h; sourceTree = "<group>"; };
+		498C3F1215CB0A85009EA9F8 /* InputDCTDecodeStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InputDCTDecodeStream.cpp; path = ../PDFWriter/InputDCTDecodeStream.cpp; sourceTree = "<group>"; };
 		499C420E15498FFA00149723 /* libPDFWriter.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPDFWriter.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		499D51B0155C59EF006F6E28 /* AbstractContentContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AbstractContentContext.cpp; path = ../PDFWriter/AbstractContentContext.cpp; sourceTree = "<group>"; };
 		499D51B1155C59EF006F6E28 /* AbstractContentContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AbstractContentContext.h; path = ../PDFWriter/AbstractContentContext.h; sourceTree = "<group>"; };
@@ -594,6 +614,34 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		497EF61B15C419ED00286CAC /* Parser */ = {
+			isa = PBXGroup;
+			children = (
+				499D5228155C59EF006F6E28 /* IPDFParserExtender.h */,
+				499D527B155C59EF006F6E28 /* PDFParserTokenizer.cpp */,
+				499D527C155C59EF006F6E28 /* PDFParserTokenizer.h */,
+				499D5279155C59EF006F6E28 /* PDFParser.cpp */,
+				499D527A155C59EF006F6E28 /* PDFParser.h */,
+				499D5275155C59EF006F6E28 /* PDFObjectParser.cpp */,
+				499D5276155C59EF006F6E28 /* PDFObjectParser.h */,
+				497EF61D15C41A4800286CAC /* Parsed Objects Heplers */,
+				49870A03155D022600C9B080 /* Parsed Objects */,
+				49870A04155D023100C9B080 /* PredictionFilters */,
+			);
+			name = Parser;
+			sourceTree = "<group>";
+		};
+		497EF61D15C41A4800286CAC /* Parsed Objects Heplers */ = {
+			isa = PBXGroup;
+			children = (
+				497EF61F15C41A9300286CAC /* PDFPageInput.cpp */,
+				497EF62115C41ABB00286CAC /* PDFPageInput.h */,
+				497EF62515C4552800286CAC /* ParsedPrimitiveHelper.cpp */,
+				497EF62715C4553D00286CAC /* ParsedPrimitiveHelper.h */,
+			);
+			name = "Parsed Objects Heplers";
+			sourceTree = "<group>";
+		};
 		498709F4155D009000C9B080 /* Document Context Level */ = {
 			isa = PBXGroup;
 			children = (
@@ -631,6 +679,8 @@
 				499D51B1155C59EF006F6E28 /* AbstractContentContext.h */,
 				499D51BB155C59EF006F6E28 /* CatalogInformation.cpp */,
 				499D51BC155C59EF006F6E28 /* CatalogInformation.h */,
+				4988223415C094DD007F9448 /* IResourceWritingTask.h */,
+				4988223215C094CE007F9448 /* IFormEndWritingTask.h */,
 			);
 			name = "Document Context Level";
 			sourceTree = "<group>";
@@ -764,6 +814,8 @@
 				499D51F9155C59EF006F6E28 /* IByteWriterWithPosition.h */,
 				499D51B4155C59EF006F6E28 /* AdapterIByteReaderWithPositionToIReadPositionProvider.h */,
 				499D5229155C59EF006F6E28 /* IReadPositionProvider.h */,
+				498C3F1015CB0A5D009EA9F8 /* InputDCTDecodeStream.h */,
+				498C3F1215CB0A85009EA9F8 /* InputDCTDecodeStream.cpp */,
 			);
 			name = IO;
 			sourceTree = "<group>";
@@ -837,20 +889,14 @@
 		49870A02155D021600C9B080 /* PDF Embedding */ = {
 			isa = PBXGroup;
 			children = (
-				499D527B155C59EF006F6E28 /* PDFParserTokenizer.cpp */,
-				499D527C155C59EF006F6E28 /* PDFParserTokenizer.h */,
-				499D5279155C59EF006F6E28 /* PDFParser.cpp */,
-				499D527A155C59EF006F6E28 /* PDFParser.h */,
-				499D5275155C59EF006F6E28 /* PDFObjectParser.cpp */,
-				499D5276155C59EF006F6E28 /* PDFObjectParser.h */,
+				497EF61B15C419ED00286CAC /* Parser */,
+				49456FBD15BC954A00272BC1 /* PDFPageMergingHelper.cpp */,
+				49456FBE15BC954A00272BC1 /* PDFPageMergingHelper.h */,
 				499D5261155C59EF006F6E28 /* PDFEmbedParameterTypes.h */,
-				499D5228155C59EF006F6E28 /* IPDFParserExtender.h */,
 				499D525D155C59EF006F6E28 /* PDFDocumentCopyingContext.cpp */,
 				499D525E155C59EF006F6E28 /* PDFDocumentCopyingContext.h */,
 				499D525F155C59EF006F6E28 /* PDFDocumentHandler.cpp */,
 				499D5260155C59EF006F6E28 /* PDFDocumentHandler.h */,
-				49870A03155D022600C9B080 /* Parsed Objects */,
-				49870A04155D023100C9B080 /* PredictionFilters */,
 			);
 			name = "PDF Embedding";
 			sourceTree = "<group>";
@@ -1264,6 +1310,12 @@
 				499D53EF155C59EF006F6E28 /* WrittenFontRepresentation.h in Headers */,
 				499D53F1155C59EF006F6E28 /* WrittenFontTrueType.h in Headers */,
 				499D53F3155C59EF006F6E28 /* XObjectContentContext.h in Headers */,
+				49456FC015BC954A00272BC1 /* PDFPageMergingHelper.h in Headers */,
+				4988223315C094CE007F9448 /* IFormEndWritingTask.h in Headers */,
+				4988223515C094DD007F9448 /* IResourceWritingTask.h in Headers */,
+				497EF62215C41ABB00286CAC /* PDFPageInput.h in Headers */,
+				497EF62815C4553D00286CAC /* ParsedPrimitiveHelper.h in Headers */,
+				498C3F1115CB0A5D009EA9F8 /* InputDCTDecodeStream.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1440,6 +1492,10 @@
 				499D53ED155C59EF006F6E28 /* WrittenFontCFF.cpp in Sources */,
 				499D53F0155C59EF006F6E28 /* WrittenFontTrueType.cpp in Sources */,
 				499D53F2155C59EF006F6E28 /* XObjectContentContext.cpp in Sources */,
+				49456FBF15BC954A00272BC1 /* PDFPageMergingHelper.cpp in Sources */,
+				497EF62015C41A9300286CAC /* PDFPageInput.cpp in Sources */,
+				497EF62615C4552800286CAC /* ParsedPrimitiveHelper.cpp in Sources */,
+				498C3F1315CB0A85009EA9F8 /* InputDCTDecodeStream.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1511,6 +1567,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				EXECUTABLE_PREFIX = lib;
+				HEADER_SEARCH_PATHS = (
+					"/usr/X11/include/**",
+					"/usr/X11/include/freetype2/**",
+					"../LibTiff/**",
+					"../LibJpeg/**",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -1519,6 +1581,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				EXECUTABLE_PREFIX = lib;
+				HEADER_SEARCH_PATHS = (
+					"/usr/X11/include/**",
+					"/usr/X11/include/freetype2/**",
+					"../LibTiff/**",
+					"../LibJpeg/**",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

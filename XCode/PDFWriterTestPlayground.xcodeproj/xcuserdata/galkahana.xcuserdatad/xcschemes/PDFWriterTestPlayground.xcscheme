@@ -58,7 +58,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-b /Users/galkahana/documents/pdflibtesting -t ModifyingExistingFileContent"
+            argument = "-b /Users/galkahana/documents/pdflibtesting"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

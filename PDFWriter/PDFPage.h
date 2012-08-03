@@ -26,6 +26,9 @@
 #include "ResourcesDictionary.h"
 
 #include <list>
+#include <utility>
+
+typedef pair<bool,PDFRectangle> BoolAndPDFRectangle;
 
 class PageContentContext;
 
@@ -39,7 +42,29 @@ public:
 
 	void SetMediaBox(const PDFRectangle& inMediaBox);
 	const PDFRectangle& GetMediaBox() const;
+    
+    
+    // crop box, defaults to MediaBox
+    // bleed box, defaults to crop box
+    // trim box, defaults to crop box
+    // art box, default to crop box
 
+	void SetCropBox(const PDFRectangle& inCropBox);
+    // returns indicator for wheather crop was set, and its value
+	const BoolAndPDFRectangle& GetCropBox() const;
+
+	void SetBleedBox(const PDFRectangle& inBleedBox);
+    // returns indicator for wheather crop was set, and its value
+	const BoolAndPDFRectangle& GetBleedBox() const;
+    
+	void SetTrimBox(const PDFRectangle& inTrimBox);
+    // returns indicator for wheather crop was set, and its value
+	const BoolAndPDFRectangle& GetTrimBox() const;
+
+	void SetArtBox(const PDFRectangle& inArtBox);
+    // returns indicator for wheather crop was set, and its value
+	const BoolAndPDFRectangle& GetArtBox() const;
+    
 	ResourcesDictionary& GetResourcesDictionary();
 
 	void AddContentStreamReference(ObjectIDType inStreamReference);
@@ -53,6 +78,10 @@ public:
 
 private:
 	PDFRectangle mMediaBox;
+    BoolAndPDFRectangle mTrimBox;
+    BoolAndPDFRectangle mArtBox;
+    BoolAndPDFRectangle mCropBox;
+    BoolAndPDFRectangle mBleedBox;
 	ObjectIDTypeList mContentStreamReferences;
 	ResourcesDictionary mResources;
 	PageContentContext* mContentContext;

@@ -44,6 +44,7 @@ class PDFPage;
 class IDocumentContextExtender;
 class IPageEmbedInFormCommand;
 class IPDFParserExtender;
+class ICategoryServicesCommand;
 
 using namespace std;
 
@@ -153,6 +154,7 @@ public:
 														 const double* inTransformationMatrix);
 	EStatusCodeAndObjectIDType AppendPDFPageFromPDF(unsigned long inPageIndex);
 	PDFHummus::EStatusCode MergePDFPageToPage(PDFPage* inTargetPage,unsigned long inSourcePageIndex);
+    PDFHummus::EStatusCode MergePDFPageToFormXObject(PDFFormXObject* inTargetFormXObject,unsigned long inSourcePageIndex);
 	EStatusCodeAndObjectIDType CopyObject(ObjectIDType inSourceObjectID);
 	PDFParser* GetSourceDocumentParser();
 	EStatusCodeAndObjectIDType GetCopiedObjectID(ObjectIDType inSourceObjectID);
@@ -171,6 +173,7 @@ public:
 	PDFFormXObject* CreatePDFFormXObjectForPage(unsigned long inPageIndex,
 												const PDFRectangle& inCropBox,
 												const double* inTransformationMatrix);
+    void RegisterFormRelatedObjects(PDFFormXObject* inFormXObject,const ObjectIDTypeList& inObjectsToWrite);
 
 	// Extendibility
 	void SetParserExtender(IPDFParserExtender* inParserExtender);
@@ -190,8 +193,6 @@ private:
 
 
 	PDFRectangle DeterminePageBox(PDFDictionary* inDictionary,EPDFPageBox inPageBoxType);
-	void SetPDFRectangleFromPDFArray(PDFArray* inPDFArray,PDFRectangle& outPDFRectangle);
-	double GetAsDoubleValue(PDFObject* inNumberObject);
 	PDFHummus::EStatusCode WritePageContentToSingleStream(IByteWriter* inTargetStream,PDFDictionary* inPageObject);
 	PDFHummus::EStatusCode WritePDFStreamInputToStream(IByteWriter* inTargetStream,PDFStreamInput* inSourceStream);
 	PDFHummus::EStatusCode CopyResourcesIndirectObjects(PDFDictionary* inPage);
@@ -225,7 +226,6 @@ private:
 	EStatusCodeAndObjectIDType CreatePDFPageForPage(unsigned long inPageIndex);
 	PDFHummus::EStatusCode CopyPageContentToTargetPage(PDFPage* inPage,PDFDictionary* inPageObject);
 	PDFHummus::EStatusCode WritePDFStreamInputToContentContext(PageContentContext* inContentContext,PDFStreamInput* inContentSource);
-	PDFObject* QueryInheritedValue(PDFDictionary* inDictionary,string inName);
 	PDFHummus::EStatusCode MergePDFPageForPage(PDFPage* inTargetPage,unsigned long inSourcePageIndex);
 	PDFHummus::EStatusCode MergeResourcesToPage(PDFPage* inTargetPage,PDFDictionary* inPage,StringToStringMap& outMappedResourcesNames);
 	EStatusCodeAndObjectIDType CopyObjectToIndirectObject(PDFObject* inObject);
@@ -256,8 +256,20 @@ private:
 											const ObjectIDTypeList& inCopyAdditionalObjects);
 	PDFHummus::EStatusCode StartCopyingContext(IByteReaderWithPosition* inPDFStream);
 	PDFHummus::EStatusCode StartCopyingContext(PDFParser* inPDFParser);
-
-
+    EStatusCode MergePDFPageForXObject(PDFFormXObject* inTargetFormXObject,unsigned long inSourcePageIndex);
+    EStatusCode RegisterResourcesForForm(PDFFormXObject* inTargetFormXObject,
+                                         PDFDictionary* inPageObject,
+                                         StringToStringMap& inMappedResourcesNames);
+    
 	string AsEncodedName(const string& inName);
+    void RegisterResourcesForResourcesCategory(PDFFormXObject* inTargetFormXObject,
+                                               ICategoryServicesCommand* inCommand,
+                                               PDFDictionary* inResourcesDictionary,
+                                               ObjectIDTypeList& ioObjectsToLaterCopy,
+                                               StringToStringMap& ioMappedResourcesNames);
+    PDFHummus::EStatusCode MergePageContentToTargetXObject(PDFFormXObject* inTargetFormXObject,
+                                                           PDFDictionary* inSourcePage,
+                                                           const StringToStringMap& inMappedResourcesNames);
+
 
 };

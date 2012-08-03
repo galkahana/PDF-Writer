@@ -210,3 +210,8 @@ void PrimitiveObjectsWriter::WriteHexString(const string& inString,ETokenSeparat
 	mStreamForWriting->Write(scRightAngle,1);
 	WriteTokenSeparator(inSeparate);
 }
+
+IByteWriter* PrimitiveObjectsWriter::GetWritingStream()
+{
+    return mStreamForWriting;
+}

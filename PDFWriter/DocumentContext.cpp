@@ -44,6 +44,8 @@
 #include "Ascii7Encoding.h"
 #include "PDFHexString.h"
 #include "PDFName.h"
+#include "IResourceWritingTask.h"
+#include "IFormEndWritingTask.h"
 
 using namespace PDFHummus;
 
@@ -56,6 +58,7 @@ DocumentContext::DocumentContext()
 
 DocumentContext::~DocumentContext(void)
 {
+    Cleanup();
 }
 
 void DocumentContext::SetObjectsContext(ObjectsContext* inObjectsContext)
@@ -536,6 +539,10 @@ int DocumentContext::WritePageTree(PageTree* inPageTreeToWrite)
 static const string scResources = "Resources";
 static const string scPage = "Page";
 static const string scMediaBox = "MediaBox";
+static const string scCropBox = "CropBox";
+static const string scBleedBox = "BleedBox";
+static const string scTrimBox = "TrimBox";
+static const string scArtBox = "ArtBox";
 static const string scContents = "Contents";
 
 EStatusCodeAndObjectIDType DocumentContext::WritePage(PDFPage* inPage)
@@ -559,6 +566,40 @@ EStatusCodeAndObjectIDType DocumentContext::WritePage(PDFPage* inPage)
 	pageContext->WriteKey(scMediaBox);
 	pageContext->WriteRectangleValue(inPage->GetMediaBox());
 
+    // Crop Box
+    PDFRectangle cropBox;
+    if(inPage->GetCropBox().first && (inPage->GetCropBox().second != inPage->GetMediaBox()))
+    {
+        pageContext->WriteKey(scCropBox);
+        pageContext->WriteRectangleValue(inPage->GetCropBox().second);
+        cropBox = inPage->GetCropBox().second;
+    }
+    else 
+        cropBox = inPage->GetMediaBox();
+    
+    
+    // Bleed Box
+    if(inPage->GetBleedBox().first && (inPage->GetBleedBox().second != cropBox))
+    {
+        pageContext->WriteKey(scBleedBox);
+        pageContext->WriteRectangleValue(inPage->GetBleedBox().second);
+    }
+    
+    // Trim Box
+    if(inPage->GetTrimBox().first && (inPage->GetTrimBox().second != cropBox))
+    {
+        pageContext->WriteKey(scTrimBox);
+        pageContext->WriteRectangleValue(inPage->GetTrimBox().second);
+    }    
+    
+    // Art Box
+    if(inPage->GetArtBox().first && (inPage->GetArtBox().second != cropBox))
+    {
+        pageContext->WriteKey(scArtBox);
+        pageContext->WriteRectangleValue(inPage->GetArtBox().second);
+    }    
+    
+    
 	do
 	{
 		// Resource dict 
@@ -785,7 +826,24 @@ EStatusCode DocumentContext::EndFormXObjectNoRelease(PDFFormXObject* inFormXObje
 	WriteResourcesDictionary(inFormXObject->GetResourcesDictionary());
 	mObjectsContext->EndIndirectObject();
 	
-	return PDFHummus::eSuccess;
+    // now write writing tasks
+    PDFFormXObjectToIFormEndWritingTaskListMap::iterator it= mFormEndTasks.find(inFormXObject);
+    
+    EStatusCode status = eSuccess;
+    if(it != mFormEndTasks.end())
+    {
+        IFormEndWritingTaskList::iterator itTasks = it->second.begin();
+        
+        for(; itTasks != it->second.end() && eSuccess == status; ++itTasks)
+            status = (*itTasks)->Write(inFormXObject,mObjectsContext,this);
+        
+        // one time, so delete
+        for(itTasks = it->second.begin(); itTasks != it->second.end(); ++itTasks)
+            delete (*itTasks);
+        mFormEndTasks.erase(it); 
+    }
+    
+	return status;
 }
 
 EStatusCode DocumentContext::EndFormXObjectAndRelease(PDFFormXObject* inFormXObject)
@@ -796,8 +854,8 @@ EStatusCode DocumentContext::EndFormXObjectAndRelease(PDFFormXObject* inFormXObj
 	return status;
 }
 
-static const string scXObjects = "XObject";
 static const string scProcesets = "ProcSet";
+static const string scXObjects = "XObject";
 static const string scExtGStates = "ExtGState";
 static const string scFonts = "Font";
 static const string scColorSpaces = "ColorSpace";
@@ -813,78 +871,59 @@ EStatusCode DocumentContext::WriteResourcesDictionary(ResourcesDictionary& inRes
 
 		DictionaryContext* resourcesContext = mObjectsContext->StartDictionary();
 
-		if(inResourcesDictionary.GetProcsetsCount() > 0)
-		{
-			//	Procsets
-			resourcesContext->WriteKey(scProcesets);
-			mObjectsContext->StartArray();
-			SingleValueContainerIterator<StringSet> it = inResourcesDictionary.GetProcesetsIterator();
-			while(it.MoveNext())
-				mObjectsContext->WriteName(it.GetItem());
 
-			mObjectsContext->EndArray();
-			mObjectsContext->EndLine();
-		}
+        //	Procsets
+        SingleValueContainerIterator<StringSet> itProcesets = inResourcesDictionary.GetProcesetsIterator();
+        if(itProcesets.MoveNext())
+        {
+            resourcesContext->WriteKey(scProcesets);
+            mObjectsContext->StartArray();
+            do 
+            {
+                mObjectsContext->WriteName(itProcesets.GetItem());
+            } 
+            while (itProcesets.MoveNext());
+            mObjectsContext->EndArray();
+            mObjectsContext->EndLine();
+        }
 
-		if(inResourcesDictionary.GetXObjectsCount() >0)
-		{
-			// XObjects
-			resourcesContext->WriteKey(scXObjects);
-			DictionaryContext* xobjectsContext = mObjectsContext->StartDictionary();
-			// form xobjects
-			MapIterator<ObjectIDTypeToStringMap> itFormXObjects = inResourcesDictionary.GetFormXObjectsIterator();
-			while(itFormXObjects.MoveNext())
-			{
-				xobjectsContext->WriteKey(itFormXObjects.GetValue());
-				xobjectsContext->WriteNewObjectReferenceValue(itFormXObjects.GetKey());
-			}
-			// image xobjects
-			MapIterator<ObjectIDTypeToStringMap> itImageXObjects = inResourcesDictionary.GetImageXObjectsIterator();
-			while(itImageXObjects.MoveNext())
-			{
-				xobjectsContext->WriteKey(itImageXObjects.GetValue());
-				xobjectsContext->WriteNewObjectReferenceValue(itImageXObjects.GetKey());
-			}
-			// generic xobjects
-			MapIterator<ObjectIDTypeToStringMap> itGenericXObjects = inResourcesDictionary.GetGenericXObjectsIterator();
-			while(itGenericXObjects.MoveNext())
-			{
-				xobjectsContext->WriteKey(itGenericXObjects.GetValue());
-				xobjectsContext->WriteNewObjectReferenceValue(itGenericXObjects.GetKey());
-			}
-			mObjectsContext->EndDictionary(xobjectsContext);
-
-			// i'm not having further extensiblity to XObjects. they will always be indirect, and user can use either of the three options to write xobject resources.
-		}
+        // XObjects
+        status = WriteResourceDictionary(&inResourcesDictionary,resourcesContext,scXObjects,inResourcesDictionary.GetXObjectsIterator());
+        if(status!=eSuccess)
+            break;
 
 		// ExtGStates
-		if(inResourcesDictionary.GetExtGStatesCount() > 0)
-			WriteResourceDictionary(resourcesContext,scExtGStates,inResourcesDictionary.GetExtGStatesIterator());
+        status = WriteResourceDictionary(&inResourcesDictionary,resourcesContext,scExtGStates,inResourcesDictionary.GetExtGStatesIterator());
+        if(status!=eSuccess)
+            break;
 
 		// Fonts
-		if(inResourcesDictionary.GetFontsCount() > 0)
-			WriteResourceDictionary(resourcesContext,scFonts,inResourcesDictionary.GetFontsIterator());
+        status = WriteResourceDictionary(&inResourcesDictionary,resourcesContext,scFonts,inResourcesDictionary.GetFontsIterator());
+        if(status!=eSuccess)
+            break;
 
 		// Color space
-		if(inResourcesDictionary.GetColorSpacesCount() > 0)
-			WriteResourceDictionary(resourcesContext,scColorSpaces,inResourcesDictionary.GetColorSpacesIterator());
+        status = WriteResourceDictionary(&inResourcesDictionary,resourcesContext,scColorSpaces,inResourcesDictionary.GetColorSpacesIterator());
 	
 		// Patterns
-		if(inResourcesDictionary.GetPatternsCount() > 0)
-			WriteResourceDictionary(resourcesContext,scPatterns,inResourcesDictionary.GetPatternsIterator());
+        status = WriteResourceDictionary(&inResourcesDictionary,resourcesContext,scPatterns,inResourcesDictionary.GetPatternsIterator());
+        if(status!=eSuccess)
+            break;
 
 		// Shading
-		if(inResourcesDictionary.GetShadingsCount() > 0)
-			WriteResourceDictionary(resourcesContext,scShadings,inResourcesDictionary.GetShadingsIterator());
+        status = WriteResourceDictionary(&inResourcesDictionary,resourcesContext,scShadings,inResourcesDictionary.GetShadingsIterator());
+        if(status!=eSuccess)
+            break;
 
 		// Properties
-		if(inResourcesDictionary.GetPropertiesCount() > 0)
-			WriteResourceDictionary(resourcesContext,scShadings,inResourcesDictionary.GetPropertiesIterator());
+        status = WriteResourceDictionary(&inResourcesDictionary,resourcesContext,scProperties,inResourcesDictionary.GetPropertiesIterator());
+        if(status!=eSuccess)
+            break;
 
-		IDocumentContextExtenderSet::iterator it = mExtenders.begin();
-		for(; it != mExtenders.end() && PDFHummus::eSuccess == status; ++it)
+		IDocumentContextExtenderSet::iterator itExtenders = mExtenders.begin();
+		for(; itExtenders != mExtenders.end() && PDFHummus::eSuccess == status; ++itExtenders)
 		{
-			status = (*it)->OnResourcesWrite(&(inResourcesDictionary),resourcesContext,mObjectsContext,this);
+			status = (*itExtenders)->OnResourcesWrite(&(inResourcesDictionary),resourcesContext,mObjectsContext,this);
 			if(status != PDFHummus::eSuccess)
 			{
 				TRACE_LOG("DocumentContext::WriteResourcesDictionary, unexpected failure. extender declared failure when writing resources.");
@@ -898,32 +937,67 @@ EStatusCode DocumentContext::WriteResourcesDictionary(ResourcesDictionary& inRes
 	return status;
 }
 
-void DocumentContext::WriteResourceDictionary(DictionaryContext* inResourcesDictionary,
+EStatusCode DocumentContext::WriteResourceDictionary(ResourcesDictionary* inResourcesDictionary,
+                                              DictionaryContext* inResourcesCategoryDictionary,
 											const string& inResourceDictionaryLabel,
 											MapIterator<ObjectIDTypeToStringMap> inMapping)
 {
-	inResourcesDictionary->WriteKey(inResourceDictionaryLabel);
-	DictionaryContext* resourceContext = mObjectsContext->StartDictionary();
-	while(inMapping.MoveNext())
-	{
-		resourceContext->WriteKey(inMapping.GetValue());
-		resourceContext->WriteNewObjectReferenceValue(inMapping.GetKey());
-	}
+    EStatusCode status = eSuccess;
+    
+    ResourcesDictionaryAndStringToIResourceWritingTaskListMap::iterator itWriterTasks = 
+        mFormResourcesTasks.find(ResourcesDictionaryAndString(inResourcesDictionary,inResourceDictionaryLabel));
+    
+    if(inMapping.MoveNext() || itWriterTasks != mFormResourcesTasks.end())
+    {
+        do {
+            inResourcesCategoryDictionary->WriteKey(inResourceDictionaryLabel);
+            DictionaryContext* resourceContext = mObjectsContext->StartDictionary();
+            
+            if(!inMapping.IsFinished())
+            {
+                do
+                {
+                    resourceContext->WriteKey(inMapping.GetValue());
+                    resourceContext->WriteNewObjectReferenceValue(inMapping.GetKey());
+                }
+                while(inMapping.MoveNext());
+            }
+            
+            if(itWriterTasks != mFormResourcesTasks.end())
+            {
+                IResourceWritingTaskList::iterator itTasks = itWriterTasks->second.begin();
+                
+                for(; itTasks != itWriterTasks->second.end() && eSuccess == status; ++itTasks)
+                    status = (*itTasks)->Write(inResourcesCategoryDictionary,mObjectsContext,this);
+                
+                // Discard the tasks for this category
+                for(itTasks = itWriterTasks->second.begin(); itTasks != itWriterTasks->second.end(); ++itTasks)
+                    delete *itTasks;
+                mFormResourcesTasks.erase(itWriterTasks);
+                if(status != eSuccess)
+                    break;
+            }
+            
+            IDocumentContextExtenderSet::iterator it = mExtenders.begin();
+            EStatusCode status = PDFHummus::eSuccess;
+            for(; it != mExtenders.end() && eSuccess == status; ++it)
+            {
+                status = (*it)->OnResourceDictionaryWrite(resourceContext,inResourceDictionaryLabel,mObjectsContext,this);
+                if(status != PDFHummus::eSuccess)
+                {
+                    TRACE_LOG("DocumentContext::WriteResourceDictionary, unexpected failure. extender declared failure when writing a resource dictionary.");
+                    break;
+                }
+            }
+            
+            mObjectsContext->EndDictionary(resourceContext);
+            
+        } 
+        while (false);
 
-
-	IDocumentContextExtenderSet::iterator it = mExtenders.begin();
-	EStatusCode status = PDFHummus::eSuccess;
-	for(; it != mExtenders.end() && PDFHummus::eSuccess == status; ++it)
-	{
-		status = (*it)->OnResourceDictionaryWrite(resourceContext,inResourceDictionaryLabel,mObjectsContext,this);
-		if(status != PDFHummus::eSuccess)
-		{
-			TRACE_LOG("DocumentContext::WriteResourceDictionary, unexpected failure. extender declared failure when writing a resource dictionary.");
-			break;
-		}
-	}
-
-	mObjectsContext->EndDictionary(resourceContext);	
+    }
+    
+    return status;
 }
 
 
@@ -1693,6 +1767,28 @@ void DocumentContext::Cleanup()
 	mAnnotations.clear();
 	mCopyingContexts.clear();
     mModifiedDocumentIDExists = false;
+    
+    ResourcesDictionaryAndStringToIResourceWritingTaskListMap::iterator itCategories = mFormResourcesTasks.begin();
+    
+    for(; itCategories != mFormResourcesTasks.end(); ++itCategories)
+    {
+        IResourceWritingTaskList::iterator itWritingTasks = itCategories->second.begin();
+        for(; itWritingTasks != itCategories->second.end(); ++itWritingTasks)
+            delete *itWritingTasks;
+    }
+    
+    mFormResourcesTasks.clear();
+    
+    PDFFormXObjectToIFormEndWritingTaskListMap::iterator itFormEnd = mFormEndTasks.begin();
+    
+    for(; itFormEnd != mFormEndTasks.end();++itFormEnd)
+    {
+        IFormEndWritingTaskList::iterator itEndWritingTasks = itFormEnd->second.begin();
+        for(; itEndWritingTasks != itFormEnd->second.end(); ++itEndWritingTasks)
+            delete *itEndWritingTasks;
+        
+    }
+    mFormEndTasks.clear();
 }
 
 void DocumentContext::SetParserExtender(IPDFParserExtender* inParserExtender)
@@ -2113,5 +2209,61 @@ PDFDocumentCopyingContext* DocumentContext::CreatePDFCopyingContext(PDFParser* i
 	}
 	else
 		return context;
+}
+
+string DocumentContext::AddExtendedResourceMapping(PDFFormXObject* inFormXObject,
+                                                   const string& inResourceCategoryName,
+                                                   IResourceWritingTask* inWritingTask)
+{
+    // do two things. first is to include this writing task as part of the tasks to write
+    // second is to allocate a name for this resource from the resource category in the relevant dictionary
+    
+    ResourcesDictionaryAndStringToIResourceWritingTaskListMap::iterator it = 
+                mFormResourcesTasks.find(ResourcesDictionaryAndString(&(inFormXObject->GetResourcesDictionary()),inResourceCategoryName));
+    
+    if(it == mFormResourcesTasks.end())
+    {
+        it =mFormResourcesTasks.insert(
+            ResourcesDictionaryAndStringToIResourceWritingTaskListMap::value_type(
+                                   ResourcesDictionaryAndString(&(inFormXObject->GetResourcesDictionary()),inResourceCategoryName),
+                                                                             IResourceWritingTaskList())).first;
+    }
+    
+    it->second.push_back(inWritingTask);
+    
+    string newResourceName;
+    
+    ResourcesDictionary& resourceDictionary = inFormXObject->GetResourcesDictionary();
+    if(inResourceCategoryName == scXObjects)
+        newResourceName = resourceDictionary.AddXObjectMapping(0);
+    else if(inResourceCategoryName == scExtGStates)
+        newResourceName = resourceDictionary.AddExtGStateMapping(0);
+    else if(inResourceCategoryName == scFonts)
+        newResourceName = resourceDictionary.AddFontMapping(0);
+    else if(inResourceCategoryName == scColorSpaces)
+        newResourceName = resourceDictionary.AddColorSpaceMapping(0);
+    else if(inResourceCategoryName == scPatterns)
+        newResourceName = resourceDictionary.AddPatternMapping(0);
+    else if(inResourceCategoryName == scShadings)
+        newResourceName = resourceDictionary.AddShadingMapping(0);
+    else if(inResourceCategoryName == scProperties)
+        newResourceName = resourceDictionary.AddPropertyMapping(0);
+    else {
+        TRACE_LOG1("DocumentContext::AddExtendedResourceMapping:, unidentified category for registering a resource writer %s",inResourceCategoryName.c_str());
+    }
+    return newResourceName;
+}
+
+void DocumentContext::RegisterFormEndWritingTask(PDFFormXObject* inFormXObject,IFormEndWritingTask* inWritingTask)
+{
+    PDFFormXObjectToIFormEndWritingTaskListMap::iterator it = 
+    mFormEndTasks.find(inFormXObject);
+    
+    if(it == mFormEndTasks.end())
+    {
+        it =mFormEndTasks.insert(PDFFormXObjectToIFormEndWritingTaskListMap::value_type(inFormXObject,IFormEndWritingTaskList())).first;
+    }
+    
+    it->second.push_back(inWritingTask);    
 }
 

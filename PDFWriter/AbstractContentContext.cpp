@@ -27,6 +27,7 @@
 #include "Trace.h"
 #include "OutputStringBufferStream.h"
 #include "SafeBufferMacrosDefs.h"
+#include "OutputStreamTraits.h"
 
 using namespace PDFHummus;
 
@@ -1028,4 +1029,17 @@ EStatusCode AbstractContentContext::TJ(const GlyphUnicodeMappingListOrDoubleList
 		TJLow(stringOrDoubleList);
 	}
 	return PDFHummus::eSuccess;	
+}
+
+void AbstractContentContext::WriteFreeCode(const string& inFreeCode)
+{
+    RenewStreamConnection();
+    mPrimitiveWriter.GetWritingStream()->Write((const Byte*)(inFreeCode.c_str()),inFreeCode.length());
+}
+void AbstractContentContext::WriteFreeCode(IByteReader* inFreeCodeSource)
+{
+	RenewStreamConnection();
+    
+    OutputStreamTraits traits(mPrimitiveWriter.GetWritingStream());
+    traits.CopyToOutputStream(inFreeCodeSource);
 }

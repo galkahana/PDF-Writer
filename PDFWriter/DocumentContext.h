@@ -57,6 +57,8 @@ class PDFUsedFont;
 class PageContentContext;
 class PDFParser;
 class PDFDictionary;
+class IResourceWritingTask;
+class IFormEndWritingTask;
 class PDFDocumentCopyingContext;
 
 typedef set<IDocumentContextExtender*> IDocumentContextExtenderSet;
@@ -65,6 +67,11 @@ typedef list<ObjectIDType> ObjectIDTypeList;
 typedef set<ObjectIDType> ObjectIDTypeSet;
 typedef map<ObjectIDType,string> ObjectIDTypeToStringMap;
 typedef set<PDFDocumentCopyingContext*> PDFDocumentCopyingContextSet;
+typedef pair<ResourcesDictionary*,string> ResourcesDictionaryAndString;
+typedef list<IResourceWritingTask*> IResourceWritingTaskList;
+typedef map<ResourcesDictionaryAndString,IResourceWritingTaskList> ResourcesDictionaryAndStringToIResourceWritingTaskListMap;
+typedef list<IFormEndWritingTask*> IFormEndWritingTaskList;
+typedef map<PDFFormXObject*,IFormEndWritingTaskList> PDFFormXObjectToIFormEndWritingTaskListMap;
 
 namespace PDFHummus
 {
@@ -116,7 +123,7 @@ namespace PDFHummus
 
 		// no release version of ending a form XObject. owner should delete it (regular delete...nothin special)
 		PDFHummus::EStatusCode EndFormXObjectNoRelease(PDFFormXObject* inFormXObject);
-
+        
 		// Image XObject creating. 
 		// note that as oppose to other methods, create the image xobject also writes it, so there's no "WriteXXXXAndRelease" for image.
 		// So...release the object yourself [just delete it]
@@ -212,6 +219,21 @@ namespace PDFHummus
 		void AddDocumentContextExtender(IDocumentContextExtender* inExtender);
 		void RemoveDocumentContextExtender(IDocumentContextExtender* inExtender);
 		void SetParserExtender(IPDFParserExtender* inParserExtender);
+        
+        // Extensibility option. a method of adding direct objects to a resource dictionary of a form.
+        // resource writing tasks are one time objects (deleted when done, owned by documentcontext) that
+        // are called when a certain resoruce category for a certain form is written. each task
+        // is supposed to write one resource. it can write a direct object.
+        // note that the task is supposed to both write the name and the content of the object.
+        // returns the name of the newley added resource
+        string AddExtendedResourceMapping(PDFFormXObject* inFormXObject,
+                                          const string& inResourceCategoryName,
+                                          IResourceWritingTask* inWritingTask);
+        
+        
+        // Extensibility option. option of writing a single time task for when a particular form ends
+        void RegisterFormEndWritingTask(PDFFormXObject* inFormXObject,IFormEndWritingTask* inWritingTask);
+
 
 		// JPG images handler for retrieving JPG images information
 		JPEGImageHandler& GetJPEGImageHandler();
@@ -244,6 +266,8 @@ namespace PDFHummus
         bool mModifiedDocumentIDExists;
         string mModifiedDocumentID;
 		ObjectIDType mCurrentPageTreeIDInState;
+        ResourcesDictionaryAndStringToIResourceWritingTaskListMap mFormResourcesTasks;
+        PDFFormXObjectToIFormEndWritingTaskListMap mFormEndTasks;
 		
 		void WriteHeaderComment(EPDFVersion inPDFVersion);
 		void Write4BinaryBytes();
@@ -262,9 +286,10 @@ namespace PDFHummus
 		int WritePageTree(PageTree* inPageTreeToWrite);
 		string GenerateMD5IDForFile();
 		PDFHummus::EStatusCode WriteResourcesDictionary(ResourcesDictionary& inResourcesDictionary);
-		void WriteResourceDictionary(DictionaryContext* inResourcesDictionary,
-									const string& inResourceDictionaryLabel,
-									MapIterator<ObjectIDTypeToStringMap> inMapping);
+        PDFHummus::EStatusCode WriteResourceDictionary(ResourcesDictionary* inResourcesDictionary,
+                                                       DictionaryContext* inResourcesCategoryDictionary,
+                                                       const string& inResourceDictionaryLabel,
+                                                       MapIterator<ObjectIDTypeToStringMap> inMapping);
 		bool IsIdentityMatrix(const double* inMatrix);
 		PDFHummus::EStatusCode WriteUsedFontsDefinitions();
 		EStatusCodeAndObjectIDType WriteAnnotationAndLinkForURL(const string& inURL,const PDFRectangle& inLinkClickArea);

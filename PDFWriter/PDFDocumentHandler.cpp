@@ -44,6 +44,9 @@
 #include "PDFPage.h"
 #include "PDFParserTokenizer.h"
 #include "InputStreamSkipperStream.h"
+#include "IResourceWritingTask.h"
+#include "IFormEndWritingTask.h"
+#include "PDFPageInput.h"
 
 using namespace PDFHummus;
 
@@ -337,111 +340,36 @@ PDFFormXObject* PDFDocumentHandler::CreatePDFFormXObjectForPage(PDFDictionary* i
 PDFRectangle PDFDocumentHandler::DeterminePageBox(PDFDictionary* inDictionary,EPDFPageBox inPageBoxType)
 {
 	PDFRectangle result;
+    inDictionary->AddRef();
+    PDFPageInput pageInput(mParser,inDictionary);
 
 	switch(inPageBoxType)
 	{
 		case ePDFPageBoxMediaBox:
-		{
-			PDFObjectCastPtr<PDFArray> mediaBox(QueryInheritedValue(inDictionary,"MediaBox"));
-			if(!mediaBox || mediaBox->GetLength() != 4)
-			{
-				TRACE_LOG("PDFDocumentHandler::DeterminePageBox, Exception, pdf page does not have correct media box. defaulting to A4");
-				result = PDFRectangle(0,0,595,842);
-			}
-			else
-			{
-				SetPDFRectangleFromPDFArray(mediaBox.GetPtr(),result);
-			}
-			break;
-		}
+			result = pageInput.GetMediaBox();
+            break;
 		case ePDFPageBoxCropBox:
 		{
-			PDFObjectCastPtr<PDFArray> cropBox(QueryInheritedValue(inDictionary,"CropBox"));
-			
-			if(!cropBox || cropBox->GetLength() != 4)
-			{
-				TRACE_LOG("PDFDocumentHandler::DeterminePageBox, PDF does not have crop box, defaulting to media box.");
-				result = DeterminePageBox(inDictionary,ePDFPageBoxMediaBox);
-			}
-			else
-			{
-				SetPDFRectangleFromPDFArray(cropBox.GetPtr(),result);
-			}
+            result = pageInput.GetCropBox();
 			break;
 		}
 		case ePDFPageBoxBleedBox:
 		{
-			PDFObjectCastPtr<PDFArray> bleedBox(mParser->QueryDictionaryObject(inDictionary,"BleedBox"));
-			if(!bleedBox || bleedBox->GetLength() != 4)
-			{
-				TRACE_LOG("PDFDocumentHandler::DeterminePageBox, PDF does not have bleed box, defaulting to crop box.");
-				result = DeterminePageBox(inDictionary,ePDFPageBoxCropBox);
-			}
-			else
-			{
-				SetPDFRectangleFromPDFArray(bleedBox.GetPtr(),result);
-			}
+            result = pageInput.GetBleedBox();
 			break;
 		}
 		case ePDFPageBoxTrimBox:
 		{
-			PDFObjectCastPtr<PDFArray> trimBox(mParser->QueryDictionaryObject(inDictionary,"TrimBox"));
-			if(!trimBox || trimBox->GetLength() != 4)
-			{
-				TRACE_LOG("PDFDocumentHandler::DeterminePageBox, PDF does not have trim box, defaulting to crop box.");
-				result = DeterminePageBox(inDictionary,ePDFPageBoxCropBox);
-			}
-			else
-			{
-				SetPDFRectangleFromPDFArray(trimBox.GetPtr(),result);
-			}
+            result = pageInput.GetTrimBox();
 			break;
 		}
 		case ePDFPageBoxArtBox:
 		{
-			PDFObjectCastPtr<PDFArray> artBox(mParser->QueryDictionaryObject(inDictionary,"ArtBox"));
-			if(!artBox || artBox->GetLength() != 4)
-			{
-				TRACE_LOG("PDFDocumentHandler::DeterminePageBox, PDF does not have art box, defaulting to crop box.");
-				result = DeterminePageBox(inDictionary,ePDFPageBoxCropBox);
-			}
-			else
-			{
-				SetPDFRectangleFromPDFArray(artBox.GetPtr(),result);
-			}
+            result = pageInput.GetArtBox();
 			break;
 		}
 	}
 	return result;
-}
-
-void PDFDocumentHandler::SetPDFRectangleFromPDFArray(PDFArray* inPDFArray,PDFRectangle& outPDFRectangle)
-{
-	RefCountPtr<PDFObject> lowerLeftX(inPDFArray->QueryObject(0));
-	RefCountPtr<PDFObject> lowerLeftY(inPDFArray->QueryObject(1));
-	RefCountPtr<PDFObject> upperRightX(inPDFArray->QueryObject(2));
-	RefCountPtr<PDFObject> upperRightY(inPDFArray->QueryObject(3));
-	
-	outPDFRectangle.LowerLeftX = GetAsDoubleValue(lowerLeftX.GetPtr());
-	outPDFRectangle.LowerLeftY = GetAsDoubleValue(lowerLeftY.GetPtr());
-	outPDFRectangle.UpperRightX = GetAsDoubleValue(upperRightX.GetPtr());
-	outPDFRectangle.UpperRightY = GetAsDoubleValue(upperRightY.GetPtr());
-}
-
-double PDFDocumentHandler::GetAsDoubleValue(PDFObject* inNumberObject)
-{
-	if(inNumberObject->GetType() == PDFObject::ePDFObjectInteger)
-	{
-		PDFInteger* anInteger = (PDFInteger*)inNumberObject;
-		return (double)anInteger->GetValue();
-	}
-	else if(inNumberObject->GetType() == PDFObject::ePDFObjectReal)
-	{
-		PDFReal* aReal = (PDFReal*)inNumberObject;
-		return aReal->GetValue();
-	}
-	else
-		return 0;
 }
 
 PDFFormXObject* PDFDocumentHandler::CreatePDFFormXObjectForPage(unsigned long inPageIndex,
@@ -1059,7 +987,8 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::CreatePDFPageForPage(unsigned lon
 
 		// Create a new form XObject
 		newPage = new PDFPage();
-		newPage->SetMediaBox(DeterminePageBox(pageObject.GetPtr(),ePDFPageBoxMediaBox));
+ 
+		newPage->SetMediaBox(PDFPageInput(mParser,pageObject).GetMediaBox());
 
 		// copy the page content to the target page content
 		if(CopyPageContentToTargetPage(newPage,pageObject.GetPtr()) != PDFHummus::eSuccess)
@@ -1175,24 +1104,6 @@ EStatusCode PDFDocumentHandler::WritePDFStreamInputToContentContext(PageContentC
 
 	return status;
 
-}
-
-static const string scParent = "Parent";
-PDFObject* PDFDocumentHandler::QueryInheritedValue(PDFDictionary* inDictionary,string inName)
-{
-	if(inDictionary->Exists(inName))
-	{
-		return mParser->QueryDictionaryObject(inDictionary,inName);
-	}
-	else if(inDictionary->Exists(scParent))
-	{
-		PDFObjectCastPtr<PDFDictionary> parent(mParser->QueryDictionaryObject(inDictionary,scParent));
-		if(!parent)
-			return NULL;
-		return QueryInheritedValue(parent.GetPtr(),inName);
-	}
-	else
-		return NULL;
 }
 
 EStatusCode PDFDocumentHandler::StartFileCopyingContext(const string& inPDFFilePath)
@@ -1690,7 +1601,7 @@ EStatusCode PDFDocumentHandler::MergeResourcesToPage(PDFPage* inTargetPage,PDFDi
 				outMappedResourcesNames.insert(
 					StringToStringMap::value_type(
 						AsEncodedName(it.GetKey()->GetValue()),
-						inTargetPage->GetResourcesDictionary().AddGenericXObjectMapping(result.second)));
+						inTargetPage->GetResourcesDictionary().AddXObjectMapping(result.second)));
 				
 			}
 			if(status != PDFHummus::eSuccess)
@@ -2237,3 +2148,388 @@ EStatusCode PDFDocumentHandler::WriteStreamObject(PDFStreamInput* inStream)
 	return status;
 }
 
+EStatusCode PDFDocumentHandler::MergePDFPageToFormXObject(PDFFormXObject* inTargetFormXObject,
+                                                          unsigned long inSourcePageIndex)
+{
+	EStatusCode result;
+    
+	if(inSourcePageIndex < mParser->GetPagesCount())
+	{
+		result = MergePDFPageForXObject(inTargetFormXObject,inSourcePageIndex);
+		if(result != eSuccess)
+			TRACE_LOG1("PDFDocumentHandler::MergePDFPageToFormXObject, failed to merge page %ld",inSourcePageIndex);
+	}
+	else
+	{
+		TRACE_LOG2(
+                   "PDFDocumentHandler::MergePDFPageToFormXObject, request object index %ld is larger than maximum page for input document = %ld", 
+                   inSourcePageIndex,
+                   mParser->GetPagesCount()-1);
+		result = eFailure;
+	}
+	return result;
+    
+}
+
+EStatusCode PDFDocumentHandler::MergePDFPageForXObject(
+                                                        PDFFormXObject* inTargetFormXObject,
+                                                        unsigned long inSourcePageIndex)
+{
+	RefCountPtr<PDFDictionary> pageObject = mParser->ParsePage(inSourcePageIndex);
+    EStatusCode result = eSuccess;
+    
+    do 
+    {
+        if(!pageObject)
+        {
+            TRACE_LOG1("PDFDocumentHandler::MergePDFPageForXObject, unhexpected exception, page index does not denote a page object. page index = %ld",inSourcePageIndex);
+            result = eFailure;
+            break;
+        }
+        
+        StringToStringMap pageResourcesNamesMapping;
+            
+        // register resources for later copying (post form xobject writing finishing)
+        result = RegisterResourcesForForm(inTargetFormXObject,pageObject.GetPtr(),pageResourcesNamesMapping);
+        if(result != PDFHummus::eSuccess)
+            break;
+            
+        // copy the page content to the target page content
+        result = MergePageContentToTargetXObject(inTargetFormXObject,pageObject.GetPtr(),pageResourcesNamesMapping);
+            
+    } 
+    while (false);
+
+	return result;	
+}
+
+class ICategoryServicesCommand
+{
+public:
+    
+    virtual ~ICategoryServicesCommand(){}
+    
+    virtual string GetResourcesCategoryName() = 0;
+    virtual string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister) = 0;
+};
+
+class ExtGStateCategoryServices : public ICategoryServicesCommand
+{
+public:
+    ExtGStateCategoryServices(ResourcesDictionary& inTargetResourcesDictionary):mTargetRersourcesDictionary(inTargetResourcesDictionary){}
+    
+    virtual string GetResourcesCategoryName(){return "ExtGState";}
+    virtual string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister){
+        return mTargetRersourcesDictionary.AddExtGStateMapping(inResourceToRegister);}
+
+private:
+    ResourcesDictionary& mTargetRersourcesDictionary;
+
+};
+
+class ColorSpaceCategoryServices : public ICategoryServicesCommand
+{
+public:
+    ColorSpaceCategoryServices(ResourcesDictionary& inTargetResourcesDictionary):mTargetRersourcesDictionary(inTargetResourcesDictionary){}
+    
+    virtual string GetResourcesCategoryName(){return "ColorSpace";}
+    virtual string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister){
+        return mTargetRersourcesDictionary.AddColorSpaceMapping(inResourceToRegister);}
+    
+private:
+    ResourcesDictionary& mTargetRersourcesDictionary;
+    
+};
+
+class PatternCategoryServices : public ICategoryServicesCommand
+{
+public:
+    PatternCategoryServices(ResourcesDictionary& inTargetResourcesDictionary):mTargetRersourcesDictionary(inTargetResourcesDictionary){}
+    
+    virtual string GetResourcesCategoryName(){return "Pattern";}
+    virtual string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister){
+        return mTargetRersourcesDictionary.AddPatternMapping(inResourceToRegister);}
+    
+private:
+    ResourcesDictionary& mTargetRersourcesDictionary;
+};
+
+class ShadingCategoryServices : public ICategoryServicesCommand
+{
+public:
+    ShadingCategoryServices(ResourcesDictionary& inTargetResourcesDictionary):mTargetRersourcesDictionary(inTargetResourcesDictionary){}
+    
+    virtual string GetResourcesCategoryName(){return "Shading";}
+    virtual string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister){
+        return mTargetRersourcesDictionary.AddShadingMapping(inResourceToRegister);}
+    
+private:
+    ResourcesDictionary& mTargetRersourcesDictionary;
+};
+
+class XObjectCategoryServices : public ICategoryServicesCommand
+{
+public:
+    XObjectCategoryServices(ResourcesDictionary& inTargetResourcesDictionary):mTargetRersourcesDictionary(inTargetResourcesDictionary){}
+    
+    virtual string GetResourcesCategoryName(){return "XObject";}
+    virtual string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister){
+        return mTargetRersourcesDictionary.AddXObjectMapping(inResourceToRegister);}
+    
+private:
+    ResourcesDictionary& mTargetRersourcesDictionary;
+};
+
+class FontCategoryServices : public ICategoryServicesCommand
+{
+public:
+    FontCategoryServices(ResourcesDictionary& inTargetResourcesDictionary):mTargetRersourcesDictionary(inTargetResourcesDictionary){}
+    
+    virtual string GetResourcesCategoryName(){return "Font";}
+    virtual string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister){
+        return mTargetRersourcesDictionary.AddFontMapping(inResourceToRegister);}
+    
+private:
+    ResourcesDictionary& mTargetRersourcesDictionary;
+};
+
+class PropertyCategoryServices : public ICategoryServicesCommand
+{
+public:
+    PropertyCategoryServices(ResourcesDictionary& inTargetResourcesDictionary):mTargetRersourcesDictionary(inTargetResourcesDictionary){}
+    
+    virtual string GetResourcesCategoryName(){return "Properties";}
+    virtual string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister){
+        return mTargetRersourcesDictionary.AddPropertyMapping(inResourceToRegister);}
+    
+private:
+    ResourcesDictionary& mTargetRersourcesDictionary;
+};
+
+EStatusCode PDFDocumentHandler::RegisterResourcesForForm(PDFFormXObject* inTargetFormXObject,
+                                                         PDFDictionary* inPageObject,
+                                                         StringToStringMap& outMappedResourcesNames)
+{
+    EStatusCode result = PDFHummus::eSuccess;
+    ObjectIDTypeList objectsForDelayedWriting;
+    
+    do 
+    {
+        PDFObjectCastPtr<PDFDictionary> resources(mParser->QueryDictionaryObject(inPageObject,"Resources"));
+        
+        // k. no resources...as wierd as that might be...or just wrong...i'll let it be
+        if(!resources)
+            break;
+        
+        // ProcSet
+        PDFObjectCastPtr<PDFArray> procsets(mParser->QueryDictionaryObject(resources.GetPtr(),"ProcSet"));
+        if(procsets.GetPtr())
+        {
+            SingleValueContainerIterator<PDFObjectVector> it(procsets->GetIterator());
+            while(it.MoveNext())
+                inTargetFormXObject->GetResourcesDictionary().AddProcsetResource(((PDFName*)it.GetItem())->GetValue());
+        }
+            
+        // ExtGState
+        ExtGStateCategoryServices extServices(inTargetFormXObject->GetResourcesDictionary());
+        RegisterResourcesForResourcesCategory(inTargetFormXObject,&extServices,resources.GetPtr(),objectsForDelayedWriting,outMappedResourcesNames);
+        
+           
+        // ColorSpace
+        ColorSpaceCategoryServices colorSpaceServices(inTargetFormXObject->GetResourcesDictionary());
+        RegisterResourcesForResourcesCategory(inTargetFormXObject,&colorSpaceServices,resources.GetPtr(),objectsForDelayedWriting,outMappedResourcesNames);
+        
+        
+        // Pattern
+        PatternCategoryServices patternServices(inTargetFormXObject->GetResourcesDictionary());
+        RegisterResourcesForResourcesCategory(inTargetFormXObject,&patternServices,resources.GetPtr(),objectsForDelayedWriting,outMappedResourcesNames);
+        
+        
+        // Shading
+        ShadingCategoryServices shadingServices(inTargetFormXObject->GetResourcesDictionary());
+        RegisterResourcesForResourcesCategory(inTargetFormXObject,&shadingServices,resources.GetPtr(),objectsForDelayedWriting,outMappedResourcesNames);
+        
+         
+        // XObject
+        XObjectCategoryServices xobjectServices(inTargetFormXObject->GetResourcesDictionary());
+        RegisterResourcesForResourcesCategory(inTargetFormXObject,&xobjectServices,resources.GetPtr(),objectsForDelayedWriting,outMappedResourcesNames);
+        
+        // Font
+        FontCategoryServices fontServices(inTargetFormXObject->GetResourcesDictionary());
+        RegisterResourcesForResourcesCategory(inTargetFormXObject,&fontServices,resources.GetPtr(),objectsForDelayedWriting,outMappedResourcesNames);
+        
+        
+        // Properties
+        PropertyCategoryServices propertyServices(inTargetFormXObject->GetResourcesDictionary());
+        RegisterResourcesForResourcesCategory(inTargetFormXObject,&propertyServices,resources.GetPtr(),objectsForDelayedWriting,outMappedResourcesNames);
+        
+        
+        RegisterFormRelatedObjects(inTargetFormXObject,objectsForDelayedWriting);
+            
+    } 
+    while (false);
+
+	return result;    
+}
+
+class ResourceCopierTask : public IResourceWritingTask
+{
+public:
+    ResourceCopierTask(PDFFormXObject* inFormXObject,PDFDocumentHandler* inCopier,PDFObject* inObjectToCopy)
+    {
+        mCopier = inCopier;
+        mObjectToCopy = inObjectToCopy;
+        mObjectToCopy->AddRef();
+        mFormXObject = inFormXObject;
+    }
+    
+    void SetResourceName(const string& inResourceName)
+    {
+        mResourceName = inResourceName;
+    }
+    
+    virtual EStatusCode Write(DictionaryContext* inResoruceCategoryContext,
+                              ObjectsContext* inObjectsContext,
+                              PDFHummus::DocumentContext* inDocumentContext)
+    {
+        // write key
+        inResoruceCategoryContext->WriteKey(mResourceName);
+        
+        // write object
+        EStatusCodeAndObjectIDTypeList result = mCopier->CopyDirectObjectWithDeepCopy(mObjectToCopy);
+        mObjectToCopy->Release();
+        
+        // register indirect objects for later writing
+        
+        if(result.first == eSuccess)
+            mCopier->RegisterFormRelatedObjects(mFormXObject,result.second);
+        
+        return result.first;
+    }
+    
+private:
+    PDFDocumentHandler* mCopier;
+    PDFObject* mObjectToCopy;
+    string mResourceName;
+    PDFFormXObject* mFormXObject;
+
+};
+
+void PDFDocumentHandler::RegisterResourcesForResourcesCategory(PDFFormXObject* inTargetFormXObject,
+                                                               ICategoryServicesCommand* inCommand,
+                                                               PDFDictionary* inResourcesDictionary,
+                                                               ObjectIDTypeList& ioObjectsToLaterCopy,
+                                                               StringToStringMap& ioMappedResourcesNames)
+{
+    PDFObjectCastPtr<PDFDictionary> resourcesCategoryDictionary(mParser->QueryDictionaryObject(
+                                                                                    inResourcesDictionary,inCommand->GetResourcesCategoryName()));
+    if(resourcesCategoryDictionary.GetPtr())
+    {	
+        MapIterator<PDFNameToPDFObjectMap> it(resourcesCategoryDictionary->GetIterator());
+        while(it.MoveNext())
+        {
+            if(it.GetValue()->GetType() == PDFObject::ePDFObjectIndirectObjectReference)
+            {
+                PDFIndirectObjectReference* indirectReference = (PDFIndirectObjectReference*)(it.GetValue());
+                ObjectIDTypeToObjectIDTypeMap::iterator	itObjects = mSourceToTarget.find(indirectReference->mObjectID);
+                ObjectIDType targetObjectID;
+                if(itObjects == mSourceToTarget.end())
+                {
+                    targetObjectID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
+                    mSourceToTarget.insert(ObjectIDTypeToObjectIDTypeMap::value_type(indirectReference->mObjectID,targetObjectID));
+                    ioObjectsToLaterCopy.push_back(indirectReference->mObjectID);
+                }
+                else
+                {
+                    targetObjectID = itObjects->second;
+                }
+                ioMappedResourcesNames.insert(StringToStringMap::value_type(AsEncodedName(it.GetKey()->GetValue()),
+                                                                            inCommand->RegisterInDirectResourceInFormResources(targetObjectID)));
+            }
+            else 
+            {
+                
+                ResourceCopierTask* task = new ResourceCopierTask(inTargetFormXObject,this,it.GetValue());
+                StringToStringMap::iterator itInsert = ioMappedResourcesNames.insert(StringToStringMap::value_type(AsEncodedName(it.GetKey()->GetValue()),
+                                                                            mDocumentContext->AddExtendedResourceMapping(inTargetFormXObject, inCommand->GetResourcesCategoryName(),
+                                                                                task))).first;
+                task->SetResourceName(itInsert->second);
+            }
+        }
+    }
+}
+
+EStatusCode PDFDocumentHandler::MergePageContentToTargetXObject(PDFFormXObject* inTargetFormXObject,
+                                                       PDFDictionary* inSourcePage,
+                                                       const StringToStringMap& inMappedResourcesNames)
+{
+ 	EStatusCode status = PDFHummus::eSuccess;
+
+    PrimitiveObjectsWriter primitivesWriter;
+    primitivesWriter.SetStreamForWriting(inTargetFormXObject->GetContentStream()->GetWriteStream());
+    
+	RefCountPtr<PDFObject> pageContent(mParser->QueryDictionaryObject(inSourcePage,"Contents"));
+	if(pageContent->GetType() == PDFObject::ePDFObjectStream)
+	{
+		status = WritePDFStreamInputToStream(inTargetFormXObject->GetContentStream()->GetWriteStream(),(PDFStreamInput*)pageContent.GetPtr(),inMappedResourcesNames);
+        primitivesWriter.EndLine();
+	}
+	else if(pageContent->GetType() == PDFObject::ePDFObjectArray)
+	{
+		SingleValueContainerIterator<PDFObjectVector> it = ((PDFArray*)pageContent.GetPtr())->GetIterator();
+		PDFObjectCastPtr<PDFIndirectObjectReference> refItem;
+		while(it.MoveNext() && status == PDFHummus::eSuccess)
+		{
+			refItem = it.GetItem();
+			if(!refItem)
+			{
+				status = PDFHummus::eFailure;
+				TRACE_LOG("PDFDocumentHandler::MergePageContentToTargetXObject, content stream array contains non-refs");
+				break;
+			}
+			PDFObjectCastPtr<PDFStreamInput> contentStream(mParser->ParseNewObject(refItem->mObjectID));
+			if(!contentStream)
+			{
+				status = PDFHummus::eFailure;
+				TRACE_LOG("PDFDocumentHandler::MergePageContentToTargetXObject, content stream array contains references to non streams");
+				break;
+			}
+			status = WritePDFStreamInputToStream(inTargetFormXObject->GetContentStream()->GetWriteStream(),contentStream.GetPtr(),inMappedResourcesNames);
+            primitivesWriter.EndLine();
+		}
+	}
+	else
+	{
+		TRACE_LOG1("PDFDocumentHandler::MergePageContentToTargetXObject, error copying page content, expected either array or stream, getting %s",PDFObject::scPDFObjectTypeLabel[pageContent->GetType()]);
+		status = PDFHummus::eFailure;
+	}
+
+	return status;	   
+}
+
+class ObjectsCopyingTask : public IFormEndWritingTask
+{
+public:
+    ObjectsCopyingTask(PDFDocumentHandler* inCopier,const ObjectIDTypeList& inObjectsToWrite)
+    {mCopier = inCopier;mObjectsToWrite = inObjectsToWrite;}
+    
+    virtual ~ObjectsCopyingTask(){}
+    
+    virtual EStatusCode Write(PDFFormXObject* inFormXObject,
+                              ObjectsContext* inObjectsContext,
+                              PDFHummus::DocumentContext* inDocumentContext)
+    {
+        return mCopier->CopyNewObjectsForDirectObject(mObjectsToWrite);
+    }
+    
+private:
+    PDFDocumentHandler* mCopier;
+    ObjectIDTypeList mObjectsToWrite;
+};
+
+
+
+void PDFDocumentHandler::RegisterFormRelatedObjects(PDFFormXObject* inFormXObject,const ObjectIDTypeList& inObjectsToWrite)
+{
+    mDocumentContext->RegisterFormEndWritingTask(inFormXObject,new ObjectsCopyingTask(this,inObjectsToWrite));
+}

@@ -46,6 +46,7 @@ class PDFStream;
 class ResourcesDictionary;
 class PDFImageXObject;
 class ITextCommand;
+class IByteReader;
 
 template <typename T>
 struct SomethingOrDouble
@@ -212,6 +213,9 @@ public:
 	void TJLow(const StringOrDoubleList& inStringsAndSpacing);
 	void TJHexLow(const StringOrDoubleList& inStringsAndSpacing);
 
+    // introduce free code
+    void WriteFreeCode(const string& inFreeCode);
+    void WriteFreeCode(IByteReader* inFreeCodeSource);
 
 protected:
 

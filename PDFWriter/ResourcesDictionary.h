@@ -42,10 +42,36 @@ public:
 	virtual ~ResourcesDictionary(void);
 
 	void AddProcsetResource(const string& inResourceName);
-	int GetProcsetsCount();
 	SingleValueContainerIterator<StringSet> GetProcesetsIterator();
 
-	int GetXObjectsCount();
+	// ExtGStates. 
+	string AddExtGStateMapping(ObjectIDType inExtGStateID);
+	void AddExtGStateMapping(ObjectIDType inExtGStateID, const string& inExtGStateName);
+	MapIterator<ObjectIDTypeToStringMap> GetExtGStatesIterator();
+
+
+	// Fonts.
+	string AddFontMapping(ObjectIDType inFontObjectID);
+	void AddFontMapping(ObjectIDType inFontObjectID,const string& inFontObjectName);
+	MapIterator<ObjectIDTypeToStringMap> GetFontsIterator();
+
+
+	// Color space
+	string AddColorSpaceMapping(ObjectIDType inColorspaceID);
+	MapIterator<ObjectIDTypeToStringMap> GetColorSpacesIterator();
+
+	// Patterns
+	string AddPatternMapping(ObjectIDType inPatternID);
+	MapIterator<ObjectIDTypeToStringMap> GetPatternsIterator();
+
+	// Properties
+	string AddPropertyMapping(ObjectIDType inPropertyID);
+	MapIterator<ObjectIDTypeToStringMap> GetPropertiesIterator();
+	
+
+	// XObjects
+	string AddXObjectMapping(ObjectIDType inXObjectID);
+	MapIterator<ObjectIDTypeToStringMap> GetXObjectsIterator();
 
 	// Use AddFormXObjectMapping to use a form XObject in a content stream [page or xobject].
 	// AddFromXObjectMapping(inFormXObjectID) returns a string name that you can use for 'Do' calls
@@ -55,77 +81,39 @@ public:
 	// that if One overload is used, it is used any time the particular resource dictionary is handled - this will avoid
 	// collisions in naming between the internal and external mechanism.
 	void AddFormXObjectMapping(ObjectIDType inFormXObjectID,const string& inFormXObjectName);
-	
-	int GetFormXObjectsCount();
-	MapIterator<ObjectIDTypeToStringMap> GetFormXObjectsIterator();
-
+    
 	// images. same idea as forms. note that image define resources that should
 	// be added to the container resources dictionary
 	string AddImageXObjectMapping(PDFImageXObject* inImageXObject);
 	void AddImageXObjectMapping(PDFImageXObject* inImageXObject, const string& inImageXObjectName);
-
+    
 	// images registration without the automatic addition of image resources to the container resources dictionary
 	string AddImageXObjectMapping(ObjectIDType inImageXObjectID);
 	void AddImageXObjectMapping(ObjectIDType inImageXObjectID, const string& inImageXObjectName);
-
-	string AddFontMapping(ObjectIDType inFontObjectID);
-	void AddFontMapping(ObjectIDType inFontObjectID,const string& inFontObjectName);
-
-
-	int GetImageXObjectsCount();
-	MapIterator<ObjectIDTypeToStringMap> GetImageXObjectsIterator();
-
-	// ExtGStates. 
-	string AddExtGStateMapping(ObjectIDType inExtGStateID);
-	void AddExtGStateMapping(ObjectIDType inExtGStateID, const string& inExtGStateName);
-	int GetExtGStatesCount();
-	MapIterator<ObjectIDTypeToStringMap> GetExtGStatesIterator();
-
-
-	// Fonts.
-	int GetFontsCount();
-	MapIterator<ObjectIDTypeToStringMap> GetFontsIterator();
-
-
-	// Color space
-	string AddColorSpaceMapping(ObjectIDType inColorspaceID);
-	int GetColorSpacesCount();
-	MapIterator<ObjectIDTypeToStringMap> GetColorSpacesIterator();
-
-	// Patterns
-	string AddPatternMapping(ObjectIDType inPatternID);
-	int GetPatternsCount();
-	MapIterator<ObjectIDTypeToStringMap> GetPatternsIterator();
-
-	// Properties
-	string AddPropertyMapping(ObjectIDType inPropertyID);
-	int GetPropertiesCount();
-	MapIterator<ObjectIDTypeToStringMap> GetPropertiesIterator();
-	
-
-	// Generic XObjects
-	string AddGenericXObjectMapping(ObjectIDType inXObjectID);
-	int GetGenericXObjectsCount();
-	MapIterator<ObjectIDTypeToStringMap> GetGenericXObjectsIterator();
-
+    
 	// Shading
 	string AddShadingMapping(ObjectIDType inShadingID);
-	int GetShadingsCount();
 	MapIterator<ObjectIDTypeToStringMap> GetShadingsIterator();
 
 private:
 
 	StringSet mProcsets;
-	ObjectIDTypeToStringMap mFormXObjects;
-	ObjectIDTypeToStringMap mImageXObjects;
+    unsigned long mFormXObjectsCount;
+    unsigned long mImageXObjectsCount;
+    unsigned long mGenericXObjectsCount;
 	ObjectIDTypeToStringMap mExtGStates;
+    unsigned long mExtGStatesCount;
 	ObjectIDTypeToStringMap mFonts;
-	
+	unsigned long mFontsCount;
 	ObjectIDTypeToStringMap mColorSpaces;
+    unsigned long mColorSpacesCount;
 	ObjectIDTypeToStringMap mPatterns;
+    unsigned long mPatternsCount;
 	ObjectIDTypeToStringMap mProperties;
-	ObjectIDTypeToStringMap mGenericXObjects;
+    unsigned long mPropertiesCount;
+	ObjectIDTypeToStringMap mXObjects;
 	ObjectIDTypeToStringMap mShading;
+    unsigned long mShadingCount;
 
 	void AddImageXObjectMappingWithName(PDFImageXObject* inImageXObject, const string& inImageXObjectName);
 

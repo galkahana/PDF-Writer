@@ -47,3 +47,19 @@ PDFRectangle::PDFRectangle(const PDFRectangle& inOther)
 	UpperRightX = inOther.UpperRightX;
 	UpperRightY = inOther.UpperRightY;
 }
+
+bool PDFRectangle::operator==(const PDFRectangle& inOther) const
+{
+    return  LowerLeftX == inOther.LowerLeftX &&
+            LowerLeftY == inOther.LowerLeftY &&
+            UpperRightX == inOther.UpperRightX &&
+            UpperRightY == inOther.UpperRightY;    
+}
+
+bool PDFRectangle::operator!=(const PDFRectangle& inOther) const
+{
+    return  LowerLeftX != inOther.LowerLeftX ||
+            LowerLeftY != inOther.LowerLeftY ||
+            UpperRightX != inOther.UpperRightX ||
+            UpperRightY != inOther.UpperRightY;   
+}

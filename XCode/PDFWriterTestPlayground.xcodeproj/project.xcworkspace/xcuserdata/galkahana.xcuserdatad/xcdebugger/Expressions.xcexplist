@@ -3,6 +3,14 @@
    version = "1.0">
    <ContextStates>
       <ContextState
+         contextName = "JpegLibTest::Run(TestConfiguration const&amp;):JpegLibTest.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "cinfo.output_scanline">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "InputBufferedStream::Skip(unsigned long):InputBufferedStream.cpp">
          <PersistentStrings>
             <PersistentString

@@ -167,6 +167,7 @@ struct NameTable
 
 typedef unsigned long* LocaTable;
 typedef list<unsigned long> ULongList;
+typedef list<unsigned int> UIntList;
 
 /* this time it's gonna be just what's intersting for my subsetting purposes - which is the 
    dependencies ('n some other stuff) */
@@ -177,7 +178,7 @@ struct GlyphEntry
 	short YMin;
 	short XMax;
 	short YMax;
-	ULongList mComponentGlyphs; // will be empty for simple glyphs, and with component glyph indexes for components
+	UIntList mComponentGlyphs; // will be empty for simple glyphs, and with component glyph indexes for components
 };
 
 typedef GlyphEntry** GlyfTable;

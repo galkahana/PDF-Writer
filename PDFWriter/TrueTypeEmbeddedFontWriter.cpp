@@ -301,7 +301,7 @@ void TrueTypeEmbeddedFontWriter::AddDependentGlyphs(UIntVector& ioSubsetGlyphIDs
 bool TrueTypeEmbeddedFontWriter::AddComponentGlyphs(unsigned int inGlyphID,UIntSet& ioComponents)
 {
 	GlyphEntry* glyfTableEntry;
-	ULongList::iterator itComponentGlyphs;
+	UIntList::iterator itComponentGlyphs;
 	bool isComposite = false;
 
 	if(inGlyphID >= mTrueTypeInput.mMaxp.NumGlyphs)

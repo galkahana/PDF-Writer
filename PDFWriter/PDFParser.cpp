@@ -46,6 +46,7 @@
 #include "InputPredictorTIFFSubStream.h"
 #include "InputAscii85DecodeStream.h"
 #include "IPDFParserExtender.h"
+#include "InputDCTDecodeStream.h"
 
 #include  <algorithm>
 using namespace PDFHummus;
@@ -1828,6 +1829,10 @@ EStatusCodeAndIByteReader PDFParser::CreateFilterForStream(IByteReader* inStream
 		{
 			result = new InputAscii85DecodeStream(inStream);
 		}
+        else if(inFilterName->GetValue() == "DCTDecode")
+        {
+            result = new InputDCTDecodeStream(inStream);
+        }
 		else if(mParserExtender)
 		{
 			result = mParserExtender->CreateFilterForStream(inStream,inFilterName,inDecodeParams);
@@ -1853,6 +1858,14 @@ EStatusCodeAndIByteReader PDFParser::CreateFilterForStream(IByteReader* inStream
 	}
 	return EStatusCodeAndIByteReader(status,result);
 
+}
+
+IByteReader* PDFParser::StartReadingFromStream(PDFStreamInput* inStream)
+{
+    IByteReader* result = CreateInputStreamReader(inStream);
+    if(result)
+        MovePositionInStream(inStream->GetStreamContentStart());
+    return result;
 }
 
 EStatusCode PDFParser::StartStateFileParsing(IByteReaderWithPosition* inSourceStream)

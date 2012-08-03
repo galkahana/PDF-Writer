@@ -127,10 +127,16 @@ public:
 	// get page object ID for an input index
 	ObjectIDType GetPageObjectID(unsigned long inPageIndex);
 
-	// This is sort of a public function, in order to provide the right filters when reading
-	// note that the final reader does not own the source stream. You can delete it safely after usage
-	// even if it's cascading filters
+	// Create a reader that will be able to read the stream. when filters are included
+    // in the stream definition it will add them. delete the returned object when done.
+    // Note that it DOES NOT setup the reading position of the file for reading the stream,
+    // so if you want to read it, you have to also move the strem position, or use StartReadingFromStream instead
 	IByteReader* CreateInputStreamReader(PDFStreamInput* inStream);
+    
+    // prepare parser so that you can read from the input stream object.
+    // create filters and move the stream to the beginning of the stream position.
+    // delete the result when done
+    IByteReader* StartReadingFromStream(PDFStreamInput* inStream);
 
 	// use this to explictly free used objects. quite obviously this means that you'll have to parse the file again
 	void ResetParser();

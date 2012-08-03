@@ -54,7 +54,7 @@ public:
 	// AddRefs on both
 	void Insert(PDFName* inKeyObject, PDFObject* inValueObject);
 
-	bool Exists(string inName);
+    bool Exists(string inName);
 	PDFObject* QueryDirectObject(string inName);
 
 	MapIterator<PDFNameToPDFObjectMap> GetIterator();

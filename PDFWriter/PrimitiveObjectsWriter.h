@@ -51,6 +51,8 @@ public:
 
 	void StartArray();
 	void EndArray(ETokenSeparator inSeparate = eTokenSepratorNone);
+    
+    IByteWriter* GetWritingStream();
 
 private:
 	IByteWriter* mStreamForWriting;

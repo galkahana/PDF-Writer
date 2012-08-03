@@ -266,7 +266,7 @@ struct T2P{
 	int pdf_image_interpolate;	/* 0 (default) : do not interpolate,
 					   1 : interpolate */
 	uint16 tiff_transferfunctioncount;
-	uint32 pdf_icccs;
+	ObjectIDType pdf_icccs;
 	uint32 tiff_iccprofilelength;
 	tdata_t tiff_iccprofile;
 

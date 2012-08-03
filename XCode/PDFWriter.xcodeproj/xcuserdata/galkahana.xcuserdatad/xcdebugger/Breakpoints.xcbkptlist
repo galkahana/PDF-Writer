@@ -13,7 +13,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "1780"
          endingLineNumber = "1780"
-         landmarkName = "DocumentContext::FinalizeModifiedPDF(PDFParser* inModifiedFileParser,EPDFVersion inModifiedPDFVersion)"
+         landmarkName = "DocumentContext::SetupModifiedFile(PDFParser* inModifiedFileParser)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -39,7 +39,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "1956"
          endingLineNumber = "1956"
-         landmarkName = "DocumentContext::WriteCombinedPageTree(PDFParser* inModifiedFileParser)"
+         landmarkName = "DocumentContext::GetOriginalDocumentPageTreeRoot(PDFParser* inModifiedFileParser)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -54,6 +54,32 @@
          endingLineNumber = "534"
          landmarkName = "ObjectsContext::WriteXrefStream(DictionaryContext* inDictionaryContext)"
          landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "../PDFWriter/PDFParser.cpp"
+         timestampString = "365700524.911447"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "1834"
+         endingLineNumber = "1834"
+         landmarkName = "PDFParser::CreateFilterForStream(IByteReader* inStream,PDFName* inFilterName,PDFDictionary* inDecodeParams)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "../PDFWriter/InputDCTDecodeStream.cpp"
+         timestampString = "365719225.735342"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "64"
+         endingLineNumber = "64"
+         landmarkName = "HummusFillInputBuffer (j_decompress_ptr cinfo)"
+         landmarkType = "7">
       </FileBreakpoint>
    </FileBreakpoints>
 </Bucket>

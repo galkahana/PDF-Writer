@@ -23,6 +23,10 @@
 PDFPage::PDFPage(void)
 {
 	mContentContext = NULL;
+    mTrimBox.first = false;
+    mArtBox.first = false;
+    mCropBox.first = false;
+    mBleedBox.first = false;
 }
 
 PDFPage::~PDFPage(void)
@@ -73,4 +77,48 @@ void PDFPage::DisassociateContentContext()
 void PDFPage::AssociateContentContext(PageContentContext* inContentContext)
 {
 	mContentContext = inContentContext;
+}
+
+void PDFPage::SetCropBox(const PDFRectangle& inCropBox)
+{
+    mCropBox.first = true;
+    mCropBox.second = inCropBox;
+}
+
+const BoolAndPDFRectangle& PDFPage::GetCropBox() const
+{
+    return mCropBox;
+}
+
+void PDFPage::SetBleedBox(const PDFRectangle& inBleedBox)
+{
+    mBleedBox.first = true;
+    mBleedBox.second = inBleedBox;
+}
+
+const BoolAndPDFRectangle& PDFPage::GetBleedBox() const
+{
+    return mBleedBox;
+}
+
+void PDFPage::SetTrimBox(const PDFRectangle& inTrimBox)
+{
+    mTrimBox.first = true;
+    mTrimBox.second = inTrimBox;
+}
+
+const BoolAndPDFRectangle& PDFPage::GetTrimBox() const
+{
+    return mTrimBox;
+}
+
+void PDFPage::SetArtBox(const PDFRectangle& inArtBox)
+{
+    mArtBox.first = true;
+    mArtBox.second = inArtBox;
+}
+
+const BoolAndPDFRectangle& PDFPage::GetArtBox() const
+{
+    return mArtBox;
 }

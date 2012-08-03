@@ -43,7 +43,7 @@ public:
 
 	// Extensibility method, get the page to which this content is associated
 	PDFPage* GetAssociatedPage();
-
+    
 private:
 	PDFPage* mPageOfContext;
 	ObjectsContext* mObjectsContext;

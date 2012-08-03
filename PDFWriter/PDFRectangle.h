@@ -28,7 +28,10 @@ public:
 
 	PDFRectangle(double inLowerLeftX, double inLowerLeftY, double inUpperRightX, double inUpperRightY);
 	PDFRectangle(const PDFRectangle& inOther);
-
+    
+    bool operator==(const PDFRectangle& inOther) const;
+    bool operator!=(const PDFRectangle& inOther) const;
+    
 	double LowerLeftX;
 	double LowerLeftY;
 	double UpperRightX;

@@ -28,6 +28,10 @@
 
 */ 
 
+#ifndef NULL
+#define NULL 0
+#endif
+
 
 template <typename T>
 class RefCountPtr
@@ -59,7 +63,7 @@ public:
 	bool operator !=(RefCountPtr<T>& inOtherPtr); 
 
 	// get pointer directly
-	T* GetPtr();
+	T* GetPtr() const;
 
 	bool operator!() const;
 
@@ -151,7 +155,7 @@ bool RefCountPtr<T>::operator !=(RefCountPtr<T>& inOtherPtr)
 }
 
 template <typename T>
-T* RefCountPtr<T>::GetPtr()
+T* RefCountPtr<T>::GetPtr() const
 {
 	return mValue;
 }
