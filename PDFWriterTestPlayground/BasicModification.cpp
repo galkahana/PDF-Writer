@@ -42,7 +42,7 @@ BasicModification::~BasicModification()
 
 EStatusCode BasicModification::Run(const TestConfiguration& inTestConfiguration)
 {
-    EStatusCode status;
+    EStatusCode status = eSuccess;
     
     do 
     {

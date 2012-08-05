@@ -52,7 +52,6 @@ EStatusCode AppendingAndReading::Run(const TestConfiguration& inTestConfiguratio
     
     do 
     {
-  
         // write initial file
         {
             OutputFile outputFile;
