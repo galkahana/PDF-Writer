@@ -52,6 +52,18 @@
     <Filter Include="TestingSystem\Hummus Paths">
       <UniqueIdentifier>{6ac9ed7e-7102-4e0f-9a8d-1f7ff3678b51}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tests\bugs">
+      <UniqueIdentifier>{1e3315cb-b64c-4f4b-be77-d7fc92c6492e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\DCT Decode">
+      <UniqueIdentifier>{36655f11-6c0c-4f7a-9c3b-5c628a626031}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\Modification">
+      <UniqueIdentifier>{6f4450ff-b7eb-4334-9aa3-7d1853263948}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\Modification\Comments infrastracture">
+      <UniqueIdentifier>{7edf588f-cd11-4acb-b335-b4894bd6c549}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PDFWriterTestPlayground.cpp">
@@ -171,6 +183,30 @@
     <ClCompile Include="PosixPath.cpp">
       <Filter>TestingSystem\Hummus Paths</Filter>
     </ClCompile>
+    <ClCompile Include="AmitsTest.cpp">
+      <Filter>Tests\bugs</Filter>
+    </ClCompile>
+    <ClCompile Include="DCTDecodeFilterTest.cpp">
+      <Filter>Tests\DCT Decode</Filter>
+    </ClCompile>
+    <ClCompile Include="JpegLibTest.cpp">
+      <Filter>Tests\DCT Decode</Filter>
+    </ClCompile>
+    <ClCompile Include="PDFComment.cpp">
+      <Filter>Tests\Modification\Comments infrastracture</Filter>
+    </ClCompile>
+    <ClCompile Include="PDFCommentWriter.cpp">
+      <Filter>Tests\Modification\Comments infrastracture</Filter>
+    </ClCompile>
+    <ClCompile Include="AppendingAndReading.cpp">
+      <Filter>Tests\Modification</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicModification.cpp">
+      <Filter>Tests\Modification</Filter>
+    </ClCompile>
+    <ClCompile Include="ModifyingExistingFileContent.cpp">
+      <Filter>Tests\Modification</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ITestUnit.h">
@@ -289,6 +325,30 @@
     </ClInclude>
     <ClInclude Include="FileURL.h">
       <Filter>TestingSystem\Hummus Paths</Filter>
+    </ClInclude>
+    <ClInclude Include="AmitsTest.h">
+      <Filter>Tests\bugs</Filter>
+    </ClInclude>
+    <ClInclude Include="DCTDecodeFilterTest.h">
+      <Filter>Tests\DCT Decode</Filter>
+    </ClInclude>
+    <ClInclude Include="JpegLibTest.h">
+      <Filter>Tests\DCT Decode</Filter>
+    </ClInclude>
+    <ClInclude Include="PDFComment.h">
+      <Filter>Tests\Modification\Comments infrastracture</Filter>
+    </ClInclude>
+    <ClInclude Include="PDFCommentWriter.h">
+      <Filter>Tests\Modification\Comments infrastracture</Filter>
+    </ClInclude>
+    <ClInclude Include="AppendingAndReading.h">
+      <Filter>Tests\Modification</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicModification.h">
+      <Filter>Tests\Modification</Filter>
+    </ClInclude>
+    <ClInclude Include="ModifyingExistingFileContent.h">
+      <Filter>Tests\Modification</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

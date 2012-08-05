@@ -84,7 +84,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\zlib;..\libtiff;..\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\zlib;..\libtiff;..\FreeType\include;..\libjpeg;</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -101,7 +101,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\zlib;..\libtiff;..\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\zlib;..\libtiff;..\FreeType\include;..\libjpeg;</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -116,7 +116,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\zlib;..\libtiff;..\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\zlib;..\libtiff;..\FreeType\include;..\libjpeg;</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -134,7 +134,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\zlib;..\libtiff;..\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\zlib;..\libtiff;..\FreeType\include;..\libjpeg;</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -156,9 +156,11 @@
     <ClInclude Include="IByteWriter.h" />
     <ClInclude Include="IByteWriterWithPosition.h" />
     <ClInclude Include="IDocumentContextExtender.h" />
+    <ClInclude Include="IFormEndWritingTask.h" />
     <ClInclude Include="InputAscii85DecodeStream.h" />
     <ClInclude Include="InputBufferedStream.h" />
     <ClInclude Include="InputByteArrayStream.h" />
+    <ClInclude Include="InputDCTDecodeStream.h" />
     <ClInclude Include="InputFile.h" />
     <ClInclude Include="InputFileStream.h" />
     <ClInclude Include="InputFlateDecodeStream.h" />
@@ -168,6 +170,7 @@
     <ClInclude Include="IOBasicTypes.h" />
     <ClInclude Include="IPDFParserExtender.h" />
     <ClInclude Include="IReadPositionProvider.h" />
+    <ClInclude Include="IResourceWritingTask.h" />
     <ClInclude Include="OutputBufferedStream.h" />
     <ClInclude Include="OutputFile.h" />
     <ClInclude Include="OutputFileStream.h" />
@@ -179,7 +182,10 @@
     <ClInclude Include="CMYKRGBColor.h" />
     <ClInclude Include="EPDFVersion.h" />
     <ClInclude Include="MyStringBuf.h" />
+    <ClInclude Include="ParsedPrimitiveHelper.h" />
     <ClInclude Include="PDFObjectParser.h" />
+    <ClInclude Include="PDFPageInput.h" />
+    <ClInclude Include="PDFPageMergingHelper.h" />
     <ClInclude Include="PDFParser.h" />
     <ClInclude Include="PDFWriter.h" />
     <ClInclude Include="SafeBufferMacrosDefs.h" />
@@ -316,6 +322,7 @@
     <ClCompile Include="InputAscii85DecodeStream.cpp" />
     <ClCompile Include="InputBufferedStream.cpp" />
     <ClCompile Include="InputByteArrayStream.cpp" />
+    <ClCompile Include="InputDCTDecodeStream.cpp" />
     <ClCompile Include="InputFile.cpp" />
     <ClCompile Include="InputFileStream.cpp" />
     <ClCompile Include="InputFlateDecodeStream.cpp" />
@@ -339,7 +346,10 @@
     <ClCompile Include="OutputStreamTraits.cpp" />
     <ClCompile Include="OutputStringBufferStream.cpp" />
     <ClCompile Include="CMYKRGBColor.cpp" />
+    <ClCompile Include="ParsedPrimitiveHelper.cpp" />
     <ClCompile Include="PDFObjectParser.cpp" />
+    <ClCompile Include="PDFPageInput.cpp" />
+    <ClCompile Include="PDFPageMergingHelper.cpp" />
     <ClCompile Include="PDFParser.cpp" />
     <ClCompile Include="PDFWriter.cpp" />
     <ClCompile Include="RefCountObject.cpp" />

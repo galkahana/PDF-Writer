@@ -646,7 +646,7 @@ EStatusCode ObjectsContext::WriteXrefStream(DictionaryContext* inDictionaryConte
 void ObjectsContext::WriteXrefNumber(IByteWriter* inStream,LongFilePositionType inElement, size_t inElementSize)
 {
     // xref numbers are written high order byte first (big endian)
-    Byte buffer[inElementSize];
+    Byte* buffer = new Byte[inElementSize];
     
     for(size_t i = inElementSize; i>0; --i)
     {
@@ -654,4 +654,5 @@ void ObjectsContext::WriteXrefNumber(IByteWriter* inStream,LongFilePositionType 
         inElement = inElement >> 8;
     }
     inStream->Write(buffer,inElementSize);
+	delete[] buffer;
 }

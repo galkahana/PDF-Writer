@@ -173,18 +173,16 @@ void InputDCTDecodeStream::Assign(IByteReader* inSourceReader)
 
 void InputDCTDecodeStream::InitializeDecodingState()
 {
-    jpeg_error_mgr jerr;
-    
-    mJPGState.err = jpeg_std_error(&jerr);
-    jerr.error_exit = HummusJPGErrorExit;
-    jerr.output_message = HummusJPGOutputMessage;
+    mJPGState.err = jpeg_std_error(&mJPGError);
+    mJPGError.error_exit = HummusJPGErrorExit;
+    mJPGError.output_message = HummusJPGOutputMessage;
     
     try {
         jpeg_create_decompress(&mJPGState);
         HummusJPGSourceInitialization(&mJPGState,mStream);
         mIsDecoding = true;
     }
-    catch(HummusJPGException ex)
+    catch(HummusJPGException)
     {
         TRACE_LOG("InputDCTDecodeStream::InitializeDecodingState, caught exception in jpg decoding");
         
@@ -209,7 +207,7 @@ EStatusCode InputDCTDecodeStream::StartRead()
         mIndexInRow = 0;
         mIsHeaderRead = true;
     }
-    catch(HummusJPGException ex)
+    catch(HummusJPGException)
     {
         TRACE_LOG("InputDCTDecodeStream::StartRead, caught exception in jpg decoding");
         status = eFailure;
@@ -238,13 +236,13 @@ LongBufferSizeType InputDCTDecodeStream::Read(
  
     // if not satisfied, loop by reading more samples, and filling the buffer.
     // if while reading for samples encountered end of filter, stop
-    while((indexInBuffer - inBuffer < inBufferSize) && (mJPGState.output_scanline < mJPGState.output_height))
+    while(((LongBufferSizeType)(indexInBuffer - inBuffer) < inBufferSize) && (mJPGState.output_scanline < mJPGState.output_height))
     {
         try
         {
             mTotalSampleRows = jpeg_read_scanlines(&mJPGState, mSamplesBuffer, mJPGState.rec_outbuf_height);
         }
-        catch(HummusJPGException ex)
+        catch(HummusJPGException)
         {
             TRACE_LOG("InputDCTDecodeStream::Read, caught exception in jpg decoding");
             mTotalSampleRows = 0;
@@ -261,7 +259,7 @@ Byte* InputDCTDecodeStream::CopySamplesArrayToBuffer(Byte* inBuffer, LongBufferS
     Byte* indexInBuffer = inBuffer;
     LongBufferSizeType row_stride = mJPGState.output_width * mJPGState.output_components;
 
-    while(mCurrentSampleRow < mTotalSampleRows && (indexInBuffer - inBuffer) < inBufferSize)
+    while(mCurrentSampleRow < mTotalSampleRows && ((LongBufferSizeType)(indexInBuffer - inBuffer)) < inBufferSize)
     {
         if((inBufferSize - (indexInBuffer - inBuffer)) < (row_stride - mIndexInRow))
         {

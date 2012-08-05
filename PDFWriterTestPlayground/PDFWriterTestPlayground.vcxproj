@@ -88,7 +88,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\PDFWriter;..\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\PDFWriter;..\FreeType\include;..\libjpeg</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -99,7 +99,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(OutDir)\PDFWriter.lib;$(OutDir)\ZLib.lib;$(OutDir)\LibTiff.lib;..\FreeType\bin\$(Platform)\$(Configuration)\FreeType.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)\PDFWriter.lib;$(OutDir)\ZLib.lib;$(OutDir)\LibTiff.lib;$(OutDir)\LibJpeg.lib;..\FreeType\bin\$(Platform)\$(Configuration)\FreeType.lib</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -111,7 +111,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\PDFWriter;..\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\PDFWriter;..\FreeType\include;..\libjpeg</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -122,7 +122,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(OutDir)\PDFWriter.lib;$(OutDir)\ZLib.lib;$(OutDir)\LibTiff.lib;..\FreeType\bin\$(Platform)\$(Configuration)\FreeType.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)\PDFWriter.lib;$(OutDir)\ZLib.lib;$(OutDir)\LibTiff.lib;$(OutDir)\LibJpeg.lib;..\FreeType\bin\$(Platform)\$(Configuration)\FreeType.lib</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX64</TargetMachine>
@@ -132,7 +132,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\PDFWriter;..\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\PDFWriter;..\FreeType\include;..\libjpeg</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -142,7 +142,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(OutDir)\PDFWriter.lib;$(OutDir)\ZLib.lib;$(OutDir)\LibTiff.lib;..\FreeType\bin\$(Platform)\$(Configuration)\FreeType.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)\PDFWriter.lib;$(OutDir)\ZLib.lib;$(OutDir)\LibTiff.lib;$(OutDir)\LibJpeg.lib;..\FreeType\bin\$(Platform)\$(Configuration)\FreeType.lib</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -157,7 +157,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>..\PDFWriter;..\FreeType\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\PDFWriter;..\FreeType\include;..\libjpeg</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -167,7 +167,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(OutDir)\PDFWriter.lib;$(OutDir)\ZLib.lib;$(OutDir)\LibTiff.lib;..\FreeType\bin\$(Platform)\$(Configuration)\FreeType.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(OutDir)\PDFWriter.lib;$(OutDir)\ZLib.lib;$(OutDir)\LibTiff.lib;$(OutDir)\LibJpeg.lib;..\FreeType\bin\$(Platform)\$(Configuration)\FreeType.lib</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -176,8 +176,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AmitsTest.cpp" />
+    <ClCompile Include="AppendingAndReading.cpp" />
+    <ClCompile Include="BasicModification.cpp" />
+    <ClCompile Include="DCTDecodeFilterTest.cpp" />
     <ClCompile Include="FileURL.cpp" />
+    <ClCompile Include="JpegLibTest.cpp" />
     <ClCompile Include="MergePDFPages.cpp" />
+    <ClCompile Include="ModifyingExistingFileContent.cpp" />
+    <ClCompile Include="PDFComment.cpp" />
+    <ClCompile Include="PDFCommentWriter.cpp" />
     <ClCompile Include="PDFWriterTestPlayground.cpp" />
     <ClCompile Include="PosixPath.cpp" />
     <ClCompile Include="TestsRunner.cpp" />
@@ -226,9 +234,17 @@
     <ClCompile Include="WindowsPath.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AmitsTest.h" />
+    <ClInclude Include="AppendingAndReading.h" />
+    <ClInclude Include="BasicModification.h" />
+    <ClInclude Include="DCTDecodeFilterTest.h" />
     <ClInclude Include="FileURL.h" />
     <ClInclude Include="ITestUnit.h" />
+    <ClInclude Include="JpegLibTest.h" />
     <ClInclude Include="MergePDFPages.h" />
+    <ClInclude Include="ModifyingExistingFileContent.h" />
+    <ClInclude Include="PDFComment.h" />
+    <ClInclude Include="PDFCommentWriter.h" />
     <ClInclude Include="PosixPath.h" />
     <ClInclude Include="TestsRunner.h" />
     <ClInclude Include="BufferedOutputStreamTest.h" />

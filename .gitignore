@@ -30,6 +30,8 @@ _.swp
 *.lastbuildstate
 *.ipch
 *.rc
+*.opensdf
+*.cache
 
 #XCode unwanted#
 ################
@@ -41,6 +43,7 @@ xcode/DerivedData
 zlib-1.2.3
 tiff-3.9.4
 freetype-2.4.2
+jpegsr8d
 *.gz
 TestMaterials
 Downloads

@@ -73,6 +73,9 @@
     <Filter Include="State Serialization">
       <UniqueIdentifier>{47b2c031-b767-4fb0-ae81-0d77fffba39b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="PDF Embedding\Parsed objects Helpers">
+      <UniqueIdentifier>{4aea4c89-f15f-4e43-b4f9-d111a0a2db96}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AdapterIByteReaderWithPositionToIReadPositionProvider.h">
@@ -562,6 +565,24 @@
     <ClInclude Include="IPDFParserExtender.h">
       <Filter>PDF Embedding</Filter>
     </ClInclude>
+    <ClInclude Include="IFormEndWritingTask.h">
+      <Filter>Document Context Level</Filter>
+    </ClInclude>
+    <ClInclude Include="IResourceWritingTask.h">
+      <Filter>Document Context Level</Filter>
+    </ClInclude>
+    <ClInclude Include="InputDCTDecodeStream.h">
+      <Filter>Infrastracture\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="PDFPageInput.h">
+      <Filter>PDF Embedding\Parsed objects Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="PDFPageMergingHelper.h">
+      <Filter>PDF Embedding</Filter>
+    </ClInclude>
+    <ClInclude Include="ParsedPrimitiveHelper.h">
+      <Filter>PDF Embedding\Parsed objects Helpers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="InputBufferedStream.cpp">
@@ -927,6 +948,18 @@
     <ClCompile Include="PDFWriter.cpp" />
     <ClCompile Include="InputAscii85DecodeStream.cpp">
       <Filter>Infrastracture\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="InputDCTDecodeStream.cpp">
+      <Filter>Infrastracture\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="PDFPageInput.cpp">
+      <Filter>PDF Embedding\Parsed objects Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="PDFPageMergingHelper.cpp">
+      <Filter>PDF Embedding</Filter>
+    </ClCompile>
+    <ClCompile Include="ParsedPrimitiveHelper.cpp">
+      <Filter>PDF Embedding\Parsed objects Helpers</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

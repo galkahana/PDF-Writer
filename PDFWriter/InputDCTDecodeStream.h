@@ -46,6 +46,8 @@ public:
     
 private:
     jpeg_decompress_struct mJPGState;
+    jpeg_error_mgr mJPGError;
+
     IByteReader* mStream;
     JSAMPARRAY mSamplesBuffer;
     bool mIsDecoding;

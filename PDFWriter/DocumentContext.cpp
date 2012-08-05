@@ -2133,7 +2133,7 @@ ObjectIDType DocumentContext::WriteCombinedPageTree(PDFParser* inModifiedFilePar
            
 bool DocumentContext::IsRequiredVersionHigherThanPDFVersion(PDFParser* inModifiedFileParser,EPDFVersion inModifiedPDFVersion)
 {
-    return (EPDFVersion)(inModifiedFileParser->GetPDFLevel() * 10) < inModifiedPDFVersion;
+    return (EPDFVersion)((size_t)(inModifiedFileParser->GetPDFLevel() * 10)) < inModifiedPDFVersion;
 }
 
 bool DocumentContext::DoExtendersRequireCatalogUpdate(PDFParser* inModifiedFileParser)
