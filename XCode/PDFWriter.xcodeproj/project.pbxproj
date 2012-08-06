@@ -1345,7 +1345,7 @@
 		499C420515498FFA00149723 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0430;
+				LastUpgradeCheck = 0440;
 				ORGANIZATIONNAME = "gal.kahana@hotmail.com";
 			};
 			buildConfigurationList = 499C420815498FFA00149723 /* Build configuration list for PBXProject "PDFWriter" */;
@@ -1529,7 +1529,7 @@
 					"../LibTiff/**",
 				);
 				LIBRARY_SEARCH_PATHS = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "";
@@ -1557,7 +1557,7 @@
 					"../LibTiff/**",
 				);
 				LIBRARY_SEARCH_PATHS = "";
-				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
@@ -1566,12 +1566,12 @@
 		499C421315498FFA00149723 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_PREFIX = lib;
 				HEADER_SEARCH_PATHS = (
-					"/usr/X11/include/**",
-					"/usr/X11/include/freetype2/**",
 					"../LibTiff/**",
 					"../LibJpeg/**",
+					"../FreeType/Include/**",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1580,12 +1580,12 @@
 		499C421415498FFA00149723 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_PREFIX = lib;
 				HEADER_SEARCH_PATHS = (
-					"/usr/X11/include/**",
-					"/usr/X11/include/freetype2/**",
 					"../LibTiff/**",
 					"../LibJpeg/**",
+					"../FreeType/Include/**",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

@@ -43,6 +43,7 @@ xcode/DerivedData
 zlib-1.2.3
 tiff-3.9.4
 freetype-2.4.2
+freetype-2.4.10
 jpegsr8d
 *.gz
 TestMaterials

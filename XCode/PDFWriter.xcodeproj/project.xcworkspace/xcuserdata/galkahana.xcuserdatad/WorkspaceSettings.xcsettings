@@ -14,6 +14,8 @@
 	<string>DerivedData</string>
 	<key>DerivedDataLocationStyle</key>
 	<string>WorkspaceRelativePath</string>
+	<key>HasAskedToTakeAutomaticSnapshotBeforeSignificantChanges</key>
+	<true/>
 	<key>IssueFilterStyle</key>
 	<string>ShowActiveSchemeOnly</string>
 	<key>LiveSourceIssuesEnabled</key>
