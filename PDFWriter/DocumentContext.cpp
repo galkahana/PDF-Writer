@@ -945,9 +945,9 @@ EStatusCode DocumentContext::WriteResourceDictionary(ResourcesDictionary* inReso
     EStatusCode status = eSuccess;
     
     ResourcesDictionaryAndStringToIResourceWritingTaskListMap::iterator itWriterTasks = 
-        mFormResourcesTasks.find(ResourcesDictionaryAndString(inResourcesDictionary,inResourceDictionaryLabel));
+        mResourcesTasks.find(ResourcesDictionaryAndString(inResourcesDictionary,inResourceDictionaryLabel));
     
-    if(inMapping.MoveNext() || itWriterTasks != mFormResourcesTasks.end())
+    if(inMapping.MoveNext() || itWriterTasks != mResourcesTasks.end())
     {
         do {
             inResourcesCategoryDictionary->WriteKey(inResourceDictionaryLabel);
@@ -963,7 +963,7 @@ EStatusCode DocumentContext::WriteResourceDictionary(ResourcesDictionary* inReso
                 while(inMapping.MoveNext());
             }
             
-            if(itWriterTasks != mFormResourcesTasks.end())
+            if(itWriterTasks != mResourcesTasks.end())
             {
                 IResourceWritingTaskList::iterator itTasks = itWriterTasks->second.begin();
                 
@@ -973,7 +973,7 @@ EStatusCode DocumentContext::WriteResourceDictionary(ResourcesDictionary* inReso
                 // Discard the tasks for this category
                 for(itTasks = itWriterTasks->second.begin(); itTasks != itWriterTasks->second.end(); ++itTasks)
                     delete *itTasks;
-                mFormResourcesTasks.erase(itWriterTasks);
+                mResourcesTasks.erase(itWriterTasks);
                 if(status != eSuccess)
                     break;
             }
@@ -1768,16 +1768,16 @@ void DocumentContext::Cleanup()
 	mCopyingContexts.clear();
     mModifiedDocumentIDExists = false;
     
-    ResourcesDictionaryAndStringToIResourceWritingTaskListMap::iterator itCategories = mFormResourcesTasks.begin();
+    ResourcesDictionaryAndStringToIResourceWritingTaskListMap::iterator itCategories = mResourcesTasks.begin();
     
-    for(; itCategories != mFormResourcesTasks.end(); ++itCategories)
+    for(; itCategories != mResourcesTasks.end(); ++itCategories)
     {
         IResourceWritingTaskList::iterator itWritingTasks = itCategories->second.begin();
         for(; itWritingTasks != itCategories->second.end(); ++itWritingTasks)
             delete *itWritingTasks;
     }
     
-    mFormResourcesTasks.clear();
+    mResourcesTasks.clear();
     
     PDFFormXObjectToIFormEndWritingTaskListMap::iterator itFormEnd = mFormEndTasks.begin();
     
@@ -2211,47 +2211,61 @@ PDFDocumentCopyingContext* DocumentContext::CreatePDFCopyingContext(PDFParser* i
 		return context;
 }
 
-string DocumentContext::AddExtendedResourceMapping(PDFFormXObject* inFormXObject,
-                                                   const string& inResourceCategoryName,
-                                                   IResourceWritingTask* inWritingTask)
+
+string DocumentContext::AddExtendedResourceMapping(PDFPage* inPage,
+                                  const string& inResourceCategoryName,
+                                  IResourceWritingTask* inWritingTask)
+{
+    return AddExtendedResourceMapping(&inPage->GetResourcesDictionary(),inResourceCategoryName,inWritingTask);
+}
+
+string DocumentContext::AddExtendedResourceMapping(ResourcesDictionary* inResourceDictionary,
+                                  const string& inResourceCategoryName,
+                                  IResourceWritingTask* inWritingTask)
 {
     // do two things. first is to include this writing task as part of the tasks to write
     // second is to allocate a name for this resource from the resource category in the relevant dictionary
     
-    ResourcesDictionaryAndStringToIResourceWritingTaskListMap::iterator it = 
-                mFormResourcesTasks.find(ResourcesDictionaryAndString(&(inFormXObject->GetResourcesDictionary()),inResourceCategoryName));
+    ResourcesDictionaryAndStringToIResourceWritingTaskListMap::iterator it =
+    mResourcesTasks.find(ResourcesDictionaryAndString(inResourceDictionary,inResourceCategoryName));
     
-    if(it == mFormResourcesTasks.end())
+    if(it == mResourcesTasks.end())
     {
-        it =mFormResourcesTasks.insert(
-            ResourcesDictionaryAndStringToIResourceWritingTaskListMap::value_type(
-                                   ResourcesDictionaryAndString(&(inFormXObject->GetResourcesDictionary()),inResourceCategoryName),
-                                                                             IResourceWritingTaskList())).first;
+        it =mResourcesTasks.insert(
+                                       ResourcesDictionaryAndStringToIResourceWritingTaskListMap::value_type(
+                                                                                                             ResourcesDictionaryAndString(inResourceDictionary,inResourceCategoryName),
+                                                                                                             IResourceWritingTaskList())).first;
     }
     
     it->second.push_back(inWritingTask);
     
     string newResourceName;
     
-    ResourcesDictionary& resourceDictionary = inFormXObject->GetResourcesDictionary();
     if(inResourceCategoryName == scXObjects)
-        newResourceName = resourceDictionary.AddXObjectMapping(0);
+        newResourceName = inResourceDictionary->AddXObjectMapping(0);
     else if(inResourceCategoryName == scExtGStates)
-        newResourceName = resourceDictionary.AddExtGStateMapping(0);
+        newResourceName = inResourceDictionary->AddExtGStateMapping(0);
     else if(inResourceCategoryName == scFonts)
-        newResourceName = resourceDictionary.AddFontMapping(0);
+        newResourceName = inResourceDictionary->AddFontMapping(0);
     else if(inResourceCategoryName == scColorSpaces)
-        newResourceName = resourceDictionary.AddColorSpaceMapping(0);
+        newResourceName = inResourceDictionary->AddColorSpaceMapping(0);
     else if(inResourceCategoryName == scPatterns)
-        newResourceName = resourceDictionary.AddPatternMapping(0);
+        newResourceName = inResourceDictionary->AddPatternMapping(0);
     else if(inResourceCategoryName == scShadings)
-        newResourceName = resourceDictionary.AddShadingMapping(0);
+        newResourceName = inResourceDictionary->AddShadingMapping(0);
     else if(inResourceCategoryName == scProperties)
-        newResourceName = resourceDictionary.AddPropertyMapping(0);
+        newResourceName = inResourceDictionary->AddPropertyMapping(0);
     else {
         TRACE_LOG1("DocumentContext::AddExtendedResourceMapping:, unidentified category for registering a resource writer %s",inResourceCategoryName.c_str());
     }
     return newResourceName;
+}
+
+string DocumentContext::AddExtendedResourceMapping(PDFFormXObject* inFormXObject,
+                                                   const string& inResourceCategoryName,
+                                                   IResourceWritingTask* inWritingTask)
+{
+    return AddExtendedResourceMapping(&inFormXObject->GetResourcesDictionary(),inResourceCategoryName,inWritingTask);
 }
 
 void DocumentContext::RegisterFormEndWritingTask(PDFFormXObject* inFormXObject,IFormEndWritingTask* inWritingTask)

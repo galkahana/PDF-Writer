@@ -220,7 +220,7 @@ namespace PDFHummus
 		void RemoveDocumentContextExtender(IDocumentContextExtender* inExtender);
 		void SetParserExtender(IPDFParserExtender* inParserExtender);
         
-        // Extensibility option. a method of adding direct objects to a resource dictionary of a form.
+        // Extensibility option. a method of adding direct objects to a resource dictionary of a form or page.
         // resource writing tasks are one time objects (deleted when done, owned by documentcontext) that
         // are called when a certain resoruce category for a certain form is written. each task
         // is supposed to write one resource. it can write a direct object.
@@ -229,7 +229,12 @@ namespace PDFHummus
         string AddExtendedResourceMapping(PDFFormXObject* inFormXObject,
                                           const string& inResourceCategoryName,
                                           IResourceWritingTask* inWritingTask);
-        
+        string AddExtendedResourceMapping(PDFPage* inPage,
+                                          const string& inResourceCategoryName,
+                                          IResourceWritingTask* inWritingTask);
+        string AddExtendedResourceMapping(ResourcesDictionary* inResourceDictionary,
+                                          const string& inResourceCategoryName,
+                                          IResourceWritingTask* inWritingTask);
         
         // Extensibility option. option of writing a single time task for when a particular form ends
         void RegisterFormEndWritingTask(PDFFormXObject* inFormXObject,IFormEndWritingTask* inWritingTask);
@@ -266,7 +271,7 @@ namespace PDFHummus
         bool mModifiedDocumentIDExists;
         string mModifiedDocumentID;
 		ObjectIDType mCurrentPageTreeIDInState;
-        ResourcesDictionaryAndStringToIResourceWritingTaskListMap mFormResourcesTasks;
+        ResourcesDictionaryAndStringToIResourceWritingTaskListMap mResourcesTasks;
         PDFFormXObjectToIFormEndWritingTaskListMap mFormEndTasks;
 		
 		void WriteHeaderComment(EPDFVersion inPDFVersion);

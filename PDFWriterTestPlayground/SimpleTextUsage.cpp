@@ -70,6 +70,14 @@ EStatusCode SimpleTextUsage::Run(const TestConfiguration& inTestConfiguration)
 			break;
 		}
 
+		status = RunNoTextTest(inTestConfiguration);
+		if(status != PDFHummus::eSuccess)
+		{
+			cout<<"Failed No Text Test\n";
+			status = PDFHummus::eFailure;
+			break;
+		}
+        
 	}while(false);
 
 	return status;
@@ -334,5 +342,83 @@ EStatusCode SimpleTextUsage::RunType1Test(const TestConfiguration& inTestConfigu
 	}while(false);
 	return status;		
 }
+
+EStatusCode SimpleTextUsage::RunNoTextTest(const TestConfiguration& inTestConfiguration)
+{
+    // this one checks an edge case where a font object is created but no text written. should not fail.
+	PDFWriter pdfWriter;
+	EStatusCode status;
+    
+	do
+	{
+		status = pdfWriter.StartPDF(
+                                    RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleNoTextUsage.PDF"),
+                                    ePDFVersion13,
+                                    LogConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleTextUsage.log")));
+		if(status != PDFHummus::eSuccess)
+		{
+			cout<<"failed to start PDF\n";
+			break;
+		}
+        
+		PDFPage* page = new PDFPage();
+		page->SetMediaBox(PDFRectangle(0,0,595,842));
+        
+		PageContentContext* contentContext = pdfWriter.StartPageContentContext(page);
+		if(NULL == contentContext)
+		{
+			status = PDFHummus::eFailure;
+			cout<<"failed to create content context for page\n";
+			break;
+		}
+        
+		PDFUsedFont* font = pdfWriter.GetFontForFile(
+                                                     RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/fonts/HLB_____.PFB"),
+                                                     RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/fonts/HLB_____.PFM"));
+		if(!font)
+		{
+			status = PDFHummus::eFailure;
+			cout<<"Failed to create font object for Helvetica Neue font\n";
+			break;
+		}
+        
+        
+		// Draw some text
+		contentContext->BT();
+		contentContext->k(0,0,0,1);
+        
+		contentContext->Tf(font,1);
+        
+		contentContext->Tm(30,0,0,30,78.4252,662.8997);
+
+        // no text is written!!!
+        
+		// continue even if failed...want to see how it looks like
+		contentContext->ET();
+        
+		status = pdfWriter.EndPageContentContext(contentContext);
+		if(status != PDFHummus::eSuccess)
+		{
+			cout<<"failed to end page content context\n";
+			break;
+		}
+        
+		status = pdfWriter.WritePageAndRelease(page);
+		if(status != PDFHummus::eSuccess)
+		{
+			cout<<"failed to write page\n";
+			break;
+		}
+        
+		status = pdfWriter.EndPDF();
+		if(status != PDFHummus::eSuccess)
+		{
+			cout<<"failed in end PDF\n";
+			break;
+		}
+	}while(false);
+	return status;
+}
+
 
 ADD_CATEGORIZED_TEST(SimpleTextUsage,"PDF")

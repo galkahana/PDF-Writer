@@ -53,7 +53,8 @@ const unsigned int scAPP1TagID = 0xe1;	//Exif marker
 const unsigned int scAPP13TagID = 0xed;//Photoshop marker
 const unsigned int scTagID = 0xff;
 const unsigned char scJPEGID[2] = {0xff,0xd8};
-const unsigned char scAPP1ID[6] = {0x45,0x78,0x69,0x66,0x00,0x00};
+const unsigned char scAPP1ID_1[6] = {0x45,0x78,0x69,0x66,0x00,0x00};
+const unsigned char scAPP1ID_2[6] = {0x45,0x78,0x69,0x66,0x00,0xFF};
 const unsigned char scEOS = '\0';
 const unsigned char sc8Bim[4] = {'8','B','I','M'};
 const unsigned char scResolutionBIMID[2] = {0x03,0xed};
@@ -121,6 +122,12 @@ EStatusCode JPEGImageParser::Parse(IByteReaderWithPosition* inImageStream,JPEGIm
 					{
 						ExifMarkerNotFound = false;
 						status = ReadExifData(outImageInformation);
+                        if(status != eSuccess)
+                        {
+                            // if unable to read marker it's either XMP or unsupported version of Exif. simply ignore
+                            ExifMarkerNotFound = true;
+                            status = eSuccess;
+                        }
 					}
 					else
 						status = SkipTag();
@@ -326,10 +333,13 @@ EStatusCode JPEGImageParser::ReadExifData(JPEGImageInformation& outImageInformat
 
 		//read Exif ID
 		status = ReadExifID();
-		if (status != PDFHummus::eSuccess)
-			break;
-		
 		toSkip -= 6;
+		if (status != PDFHummus::eSuccess)
+        {
+            // might be wrong ID
+            SkipStream(toSkip);
+			break;
+		}
 
 		//read encoding
 		status = IsBigEndianExif(isBigEndian);
@@ -510,7 +520,7 @@ EStatusCode JPEGImageParser::ReadExifID()
 	if (status != PDFHummus::eSuccess)
 		return status;
 
-	if (memcmp(mReadBuffer, scAPP1ID, 6) != 0)
+	if (memcmp(mReadBuffer, scAPP1ID_1, 6) != 0 && memcmp(mReadBuffer, scAPP1ID_2,6) != 0)
 		return PDFHummus::eFailure;
 
 	return PDFHummus::eSuccess;

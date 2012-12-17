@@ -36,4 +36,6 @@ private:
 	PDFHummus::EStatusCode RunCFFTest(const TestConfiguration& inTestConfiguration);
 	PDFHummus::EStatusCode RunTrueTypeTest(const TestConfiguration& inTestConfiguration);
 	PDFHummus::EStatusCode RunType1Test(const TestConfiguration& inTestConfiguration);
+    PDFHummus::EStatusCode RunNoTextTest(const TestConfiguration& inTestConfiguration);
+
 };
