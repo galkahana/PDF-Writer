@@ -4,22 +4,22 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>PDFWriter-iphoneos.xcscheme</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>2</integer>
-		</dict>
-		<key>PDFWriter-iphonesimulator.xcscheme</key>
+		<key>Freetype-iphoneos.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>1</integer>
 		</dict>
-		<key>PDFWriter.xcscheme</key>
+		<key>Freetype-iphonesimulator.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
+		<key>Freetype.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
-		<key>PDFWriterIOSUniversal.xcscheme</key>
+		<key>FreetypeIOSUniversal.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>3</integer>
@@ -27,22 +27,22 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>4947D51116986BA5008971EF</key>
+		<key>492079FC169E1A2E00E2D9FC</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>4947D52416986C02008971EF</key>
+		<key>49207A80169E26AC00E2D9FC</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>4947D87C16986DE2008971EF</key>
+		<key>49207ACD169E288A00E2D9FC</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>499C420D15498FFA00149723</key>
+		<key>49207B0F169E296400E2D9FC</key>
 		<dict>
 			<key>primary</key>
 			<true/>

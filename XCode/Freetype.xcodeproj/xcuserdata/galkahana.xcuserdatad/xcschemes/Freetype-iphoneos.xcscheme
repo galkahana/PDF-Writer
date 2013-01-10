@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "497D1EA015484C5900530DBB"
-               BuildableName = "libLibTiff.a"
-               BlueprintName = "LibTiff"
-               ReferencedContainer = "container:LibTiff.xcodeproj">
+               BlueprintIdentifier = "49207A80169E26AC00E2D9FC"
+               BuildableName = "libFreetype-iphoneos.a"
+               BlueprintName = "Freetype-iphoneos"
+               ReferencedContainer = "container:Freetype.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -35,7 +35,7 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"
       useCustomWorkingDirectory = "NO"
-      buildConfiguration = "Debug"
+      buildConfiguration = "Release"
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       allowLocationSimulation = "YES">

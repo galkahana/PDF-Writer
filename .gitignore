@@ -44,8 +44,18 @@ zlib-1.2.3
 tiff-3.9.4
 freetype-2.4.2
 freetype-2.4.10
+freetype-2.4.11
 jpegsr8d
+jpeg-8d
 *.gz
 TestMaterials
 Downloads
 
+PDFWriterTestPlayground/AmitsTest.cpp
+PDFWriterTestPlayground/AmitsTest.h
+PDFWriterTestPlayground/File.cpp
+PDFWriterTestPlayground/File.h
+PDFWriterTestPlayground/JPGImageBugTest.cpp
+PDFWriterTestPlayground/JPGImageBugTest.h
+PDFWriterTestPlayground/SudokuPDFCreation.cpp
+PDFWriterTestPlayground/SudokuPDFCreation.h
