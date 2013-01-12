@@ -28,7 +28,7 @@
 #include <string>
 #include <sstream>
 
-using namespace std;
+
 
 template <typename T>
 class BoxingBase
@@ -80,21 +80,21 @@ template <typename T>
 class STDStreamsReader
 {
 public:
-	void Read(const string& inReadFrom,T& outValue);
-	void Read(const wstring& inReadFrom,T& outValue);
+	void Read(const std::string& inReadFrom,T& outValue);
+	void Read(const std::wstring& inReadFrom,T& outValue);
 };
 
 template <typename T>
-void STDStreamsReader<T>::Read(const string& inReadFrom,T& outValue)
+void STDStreamsReader<T>::Read(const std::string& inReadFrom,T& outValue)
 {
-	stringstream stream(inReadFrom);
+	std::stringstream stream(inReadFrom);
 	stream>>outValue;
 }
 
 template <typename T>
-void STDStreamsReader<T>::Read(const wstring& inReadFrom,T& outValue)
+void STDStreamsReader<T>::Read(const std::wstring& inReadFrom,T& outValue)
 {
-	wstringstream stream(inReadFrom);
+	std::wstringstream stream(inReadFrom);
 	stream>>outValue;
 }
 
@@ -102,22 +102,22 @@ template <typename T>
 class STDStreamsWriter
 {
 public:
-	void Write(const T& inValue,string& outWriteTo);
-	void Write(const T& inValue,wstring& outWriteTo);
+	void Write(const T& inValue,std::string& outWriteTo);
+	void Write(const T& inValue,std::wstring& outWriteTo);
 };
 
 template <typename T>
-void STDStreamsWriter<T>::Write(const T& inValue,string& outWriteTo)
+void STDStreamsWriter<T>::Write(const T& inValue,std::string& outWriteTo)
 {
-	stringstream stream;
+	std::stringstream stream;
 	stream<<inValue;
 	outWriteTo = stream.str();
 }
 
 template <typename T>
-void STDStreamsWriter<T>::Write(const T& inValue,wstring& outWriteTo)
+void STDStreamsWriter<T>::Write(const T& inValue,std::wstring& outWriteTo)
 {
-	wstringstream stream;
+	std::wstringstream stream;
 	stream<<inValue;
 	outWriteTo = stream.str();
 }
@@ -131,13 +131,13 @@ public:
 	BoxingBaseWithRW(const U& inValue);
 	BoxingBaseWithRW(const BoxingBase<U>& inOther);
 	BoxingBaseWithRW(const BoxingBaseWithRW<U,Reader,Writer>& inOther);
-	BoxingBaseWithRW(const wstring& inReadFrom);
-	BoxingBaseWithRW(const string& inReadFrom);
+	BoxingBaseWithRW(const std::wstring& inReadFrom);
+	BoxingBaseWithRW(const std::string& inReadFrom);
 
 	BoxingBaseWithRW<U,Reader,Writer>&  operator =(const U& inValue);
 
-	string ToString() const;
-	wstring ToWString() const;
+	std::string ToString() const;
+	std::wstring ToWString() const;
 };
 
 template <typename U, class Reader, class Writer>
@@ -165,14 +165,14 @@ BoxingBaseWithRW<U,Reader,Writer>::BoxingBaseWithRW(const BoxingBaseWithRW<U,Rea
 }
 
 template <typename U, class Reader, class Writer>
-BoxingBaseWithRW<U,Reader,Writer>::BoxingBaseWithRW(const wstring& inReadFrom)
+BoxingBaseWithRW<U,Reader,Writer>::BoxingBaseWithRW(const std::wstring& inReadFrom)
 {
 	Reader reader;
 	reader.Read(inReadFrom,this->boxedValue);
 }
 
 template <typename U, class Reader, class Writer>
-BoxingBaseWithRW<U,Reader,Writer>::BoxingBaseWithRW(const string& inReadFrom)
+BoxingBaseWithRW<U,Reader,Writer>::BoxingBaseWithRW(const std::string& inReadFrom)
 {
 	Reader reader;
 	reader.Read(inReadFrom,this->boxedValue);
@@ -187,10 +187,10 @@ BoxingBaseWithRW<U,Reader,Writer>&  BoxingBaseWithRW<U,Reader,Writer>::operator 
 
 
 template <typename U, class Reader, class Writer>
-string BoxingBaseWithRW<U,Reader,Writer>::ToString() const
+std::string BoxingBaseWithRW<U,Reader,Writer>::ToString() const
 {
 	Writer writer;
-	string aString;
+	std::string aString;
 
 	writer.Write(this->boxedValue,aString);
 
@@ -198,10 +198,10 @@ string BoxingBaseWithRW<U,Reader,Writer>::ToString() const
 }
 
 template <typename U, class Reader, class Writer>
-wstring BoxingBaseWithRW<U,Reader,Writer>::ToWString() const
+std::wstring BoxingBaseWithRW<U,Reader,Writer>::ToWString() const
 {
 	Writer writer;
-	wstring aString;
+	std::wstring aString;
 
 	writer.Write(this->boxedValue,aString);
 

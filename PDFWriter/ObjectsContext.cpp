@@ -56,24 +56,24 @@ void ObjectsContext::SetOutputStream(IByteWriterWithPosition* inOutputStream)
 }
 
 static const IOBasicTypes::Byte scComment[1] = {'%'};
-void ObjectsContext::WriteComment(const string& inCommentText)
+void ObjectsContext::WriteComment(const std::string& inCommentText)
 {
 	mOutputStream->Write(scComment,1);
 	mOutputStream->Write((const IOBasicTypes::Byte *)inCommentText.c_str(),inCommentText.size());
 	EndLine();
 }
 
-void ObjectsContext::WriteName(const string& inName,ETokenSeparator inSeparate)
+void ObjectsContext::WriteName(const std::string& inName,ETokenSeparator inSeparate)
 {
 	mPrimitiveWriter.WriteName(inName,inSeparate);
 }
 
-void ObjectsContext::WriteLiteralString(const string& inString,ETokenSeparator inSeparate)
+void ObjectsContext::WriteLiteralString(const std::string& inString,ETokenSeparator inSeparate)
 {
 	mPrimitiveWriter.WriteLiteralString(inString,inSeparate);
 }
 
-void ObjectsContext::WriteHexString(const string& inString,ETokenSeparator inSeparate)
+void ObjectsContext::WriteHexString(const std::string& inString,ETokenSeparator inSeparate)
 {
 	mPrimitiveWriter.WriteHexString(inString,inSeparate);
 }
@@ -243,7 +243,7 @@ void ObjectsContext::WriteTokenSeparator(ETokenSeparator inSeparate)
 	mPrimitiveWriter.WriteTokenSeparator(inSeparate);
 }
 
-void ObjectsContext::WriteKeyword(const string& inKeyword)
+void ObjectsContext::WriteKeyword(const std::string& inKeyword)
 {
 	mPrimitiveWriter.WriteKeyword(inKeyword);
 }
@@ -316,11 +316,11 @@ void ObjectsContext::SetCompressStreams(bool inCompressStreams)
 	mCompressStreams = inCompressStreams;
 }
 
-static const string scLength = "Length";
-static const string scStream = "stream";
-static const string scEndStream = "endstream";
-static const string scFilter = "Filter";
-static const string scFlateDecode = "FlateDecode";
+static const std::string scLength = "Length";
+static const std::string scStream = "stream";
+static const std::string scEndStream = "endstream";
+static const std::string scFilter = "Filter";
+static const std::string scFlateDecode = "FlateDecode";
 
 PDFStream* ObjectsContext::StartPDFStream(DictionaryContext* inStreamDictionary,bool inForceDirectExtentObject)
 {
@@ -435,7 +435,7 @@ void ObjectsContext::SetObjectsContextExtender(IObjectsContextExtender* inExtend
 	mExtender = inExtender;
 }
 
-string ObjectsContext::GenerateSubsetFontPrefix()
+std::string ObjectsContext::GenerateSubsetFontPrefix()
 {
 	return mSubsetFontsNamesSequance.GetNextValue();
 }

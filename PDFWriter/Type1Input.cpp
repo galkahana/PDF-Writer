@@ -160,7 +160,7 @@ EStatusCode Type1Input::ReadType1File(IByteReaderWithPosition* inType1)
 	return status;
 }
 
-bool Type1Input::IsComment(const string& inToken)
+bool Type1Input::IsComment(const std::string& inToken)
 {
 	return inToken.at(0) == '%';
 }
@@ -330,7 +330,7 @@ EStatusCode Type1Input::ReadFontInfoDictionary()
 	return status;	
 }
 
-string Type1Input::FromPSName(const string& inPostScriptName)
+std::string Type1Input::FromPSName(const std::string& inPostScriptName)
 {
 	return inPostScriptName.substr(1);
 }
@@ -584,7 +584,7 @@ EStatusCode Type1Input::ReadPrivateDictionary()
 	return status;	
 }
 
-EStatusCode Type1Input::ParseIntVector(vector<int>& inVector)
+EStatusCode Type1Input::ParseIntVector(std::vector<int>& inVector)
 {
 	// skip the [ or {
 	BoolAndString token = mPFBDecoder.GetNextToken();
@@ -603,7 +603,7 @@ EStatusCode Type1Input::ParseIntVector(vector<int>& inVector)
 	return token.first ? PDFHummus::eSuccess:PDFHummus::eFailure;
 }
 
-EStatusCode Type1Input::ParseDoubleVector(vector<double>& inVector)
+EStatusCode Type1Input::ParseDoubleVector(std::vector<double>& inVector)
 {
 	// skip the [ or {
 	BoolAndString token = mPFBDecoder.GetNextToken();
@@ -681,7 +681,7 @@ EStatusCode Type1Input::ParseSubrs()
 EStatusCode Type1Input::ParseCharstrings()
 {
 	BoolAndString token;
-	string characterName;
+	std::string characterName;
 	Type1CharString charString;
 
 	// skip till "begin"
@@ -726,7 +726,7 @@ EStatusCode Type1Input::ParseCharstrings()
 
 Type1CharString* Type1Input::GetGlyphCharString(Byte inCharStringIndex)
 {
-	string characterName;
+	std::string characterName;
 
 	if(eType1EncodingTypeCustom == mEncoding.EncodingType)
 	{
@@ -750,7 +750,7 @@ Type1CharString* Type1Input::GetGlyphCharString(Byte inCharStringIndex)
 		return &(it->second);
 }
 
-Type1CharString* Type1Input::GetGlyphCharString(const string& inCharStringName)
+Type1CharString* Type1Input::GetGlyphCharString(const std::string& inCharStringName)
 {
 	StringToType1CharStringMap::iterator it = mCharStrings.find(inCharStringName);
 	if(it == mCharStrings.end())
@@ -778,7 +778,7 @@ EStatusCode Type1Input::CalculateDependenciesForCharIndex(	Byte inCharStringInde
 	return status;
 }
 
-EStatusCode Type1Input::CalculateDependenciesForCharIndex(const string& inCharStringName,
+EStatusCode Type1Input::CalculateDependenciesForCharIndex(const std::string& inCharStringName,
 											  CharString1Dependencies& ioDependenciesInfo)
 {
 	CharStringType1Interpreter interpreter;
@@ -834,7 +834,7 @@ unsigned long Type1Input::GetLenIV()
 
 bool Type1Input::IsValidGlyphIndex(Byte inCharStringIndex)
 {
-	string characterName;
+	std::string characterName;
 
 	if(eType1EncodingTypeCustom == mEncoding.EncodingType)
 	{
@@ -854,7 +854,7 @@ bool Type1Input::IsValidGlyphIndex(Byte inCharStringIndex)
 	return mCharStrings.find(characterName) != mCharStrings.end();
 }
 
-string Type1Input::GetGlyphCharStringName(Byte inCharStringIndex)
+std::string Type1Input::GetGlyphCharStringName(Byte inCharStringIndex)
 {
 	if(eType1EncodingTypeCustom == mEncoding.EncodingType)
 	{
@@ -871,11 +871,11 @@ string Type1Input::GetGlyphCharStringName(Byte inCharStringIndex)
 	}
 }
 
-string Type1Input::FromPSString(const string& inPSString)
+std::string Type1Input::FromPSString(const std::string& inPSString)
 {
-	stringbuf stringBuffer;
+	std::stringbuf stringBuffer;
 	Byte buffer;
-	string::const_iterator it = inPSString.begin();
+	std::string::const_iterator it = inPSString.begin();
 	size_t i=1;
 	++it; // skip first paranthesis
 	
@@ -936,7 +936,7 @@ string Type1Input::FromPSString(const string& inPSString)
 	return stringBuffer.str();
 }
 
-Byte Type1Input::GetEncoding(const string& inCharStringName)
+Byte Type1Input::GetEncoding(const std::string& inCharStringName)
 {	
 	StringToByteMap::iterator it = mReverseEncoding.find(inCharStringName);
 	if(it == mReverseEncoding.end())

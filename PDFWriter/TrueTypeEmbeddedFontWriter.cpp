@@ -32,7 +32,7 @@
 #include <sstream>
 #include <algorithm>
 
-using namespace std;
+
 using namespace PDFHummus;
 
 TrueTypeEmbeddedFontWriter::TrueTypeEmbeddedFontWriter(void):mFontFileReaderStream(NULL)
@@ -43,7 +43,7 @@ TrueTypeEmbeddedFontWriter::~TrueTypeEmbeddedFontWriter(void)
 {
 }
 
-static const string scLength1 = "Length1";
+static const std::string scLength1 = "Length1";
 EStatusCode TrueTypeEmbeddedFontWriter::WriteEmbeddedFont(	
 								FreeTypeFaceWrapper& inFontInfo,
 								const UIntVector& inSubsetGlyphIDs,
@@ -79,7 +79,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteEmbeddedFont(
 
 		fontProgramDictionaryContext->WriteKey(scLength1);
 		fontProgramDictionaryContext->WriteIntegerValue(rawFontProgram.GetCurrentWritePosition());
-		rawFontProgram.pubseekoff(0,ios_base::beg);
+		rawFontProgram.pubseekoff(0,std::ios_base::beg);
 		PDFStream* pdfStream = inObjectsContext->StartPDFStream(fontProgramDictionaryContext);
 
 

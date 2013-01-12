@@ -68,7 +68,7 @@
 #include "EStatusCode.h"
 #include <string>
 
-using namespace std;
+
 
 class MD5Generator
 {
@@ -76,16 +76,16 @@ public:
 	MD5Generator(void);
 	~MD5Generator(void);
 
-	PDFHummus::EStatusCode Accumulate(const string& inString);
+	PDFHummus::EStatusCode Accumulate(const std::string& inString);
 
-	string ToString();
+	std::string ToString();
 
 private:
 
 	typedef unsigned       int uint4; 
 	typedef unsigned short int uint2; 
 	typedef unsigned      char uint1; 
-	string MD5FinalString;
+	std::string MD5FinalString;
 
 	uint4 mState[4];
 	uint4 mCount[2];     // number of *bits*, mod 2^64

@@ -30,9 +30,10 @@
 #include FT_XFREE86_H 
 #include FT_CID_H 
 
+
 using namespace PDFHummus;
 
-FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const string& inFontFilePath,bool inDoOwn)
+FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const std::string& inFontFilePath,bool inDoOwn)
 {
 	mFace = inFace;
 	mFontFilePath = inFontFilePath;
@@ -40,11 +41,11 @@ FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const string& inFontFile
 	mDoesOwn = inDoOwn;
 }
 
-FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const string& inFontFilePath,const string& inPFMFilePath, bool inDoOwn)
+FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const std::string& inFontFilePath,const std::string& inPFMFilePath, bool inDoOwn)
 {
 	mFace = inFace;
 	mFontFilePath = inFontFilePath;
-	string fileExtension = GetExtension(inPFMFilePath);
+	std::string fileExtension = GetExtension(inPFMFilePath);
 	if(fileExtension == "PFM" || fileExtension ==  "pfm") // just don't bother if it's not PFM
 		SetupFormatSpecificExtender(inPFMFilePath);
 	else
@@ -52,9 +53,9 @@ FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const string& inFontFile
 	mDoesOwn = inDoOwn;
 }
 
-string FreeTypeFaceWrapper::GetExtension(const string& inFilePath)
+std::string FreeTypeFaceWrapper::GetExtension(const std::string& inFilePath)
 {
-	string::size_type dotPosition = inFilePath.rfind(".");
+	std::string::size_type dotPosition = inFilePath.rfind(".");
 
 	if(inFilePath.npos == dotPosition || (inFilePath.size() - 1) == dotPosition)
 		return "";
@@ -73,7 +74,7 @@ static const char* scType1 = "Type 1";
 static const char* scTrueType = "TrueType";
 static const char* scCFF = "CFF";
 
-void FreeTypeFaceWrapper::SetupFormatSpecificExtender(const string& inPFMFilePath /*pass empty if non existant or irrelevant*/)
+void FreeTypeFaceWrapper::SetupFormatSpecificExtender(const std::string& inPFMFilePath /*pass empty if non existant or irrelevant*/)
 {
 	if(mFace)
 	{
@@ -565,7 +566,7 @@ IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObj
 		return NULL;	
 }
 
-const string& FreeTypeFaceWrapper::GetFontFilePath()
+const std::string& FreeTypeFaceWrapper::GetFontFilePath()
 {
 	return mFontFilePath;
 }

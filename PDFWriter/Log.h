@@ -25,7 +25,7 @@
 
 #include <string>
 
-using namespace std;
+
 using namespace IOBasicTypes;
 
 class Log;
@@ -39,11 +39,11 @@ class Log
 public:
 
 	// log writes are in UTF8. so i'm asking here if you want a bom
-	Log(const string& inLogFilePath,bool inPlaceUTF8Bom);
+	Log(const std::string& inLogFilePath,bool inPlaceUTF8Bom);
 	Log(IByteWriter* inLogStream);
 	~Log(void);
 
-	void LogEntry(const string& inMessage);
+	void LogEntry(const std::string& inMessage);
 	void LogEntry(const Byte* inMessage, LongBufferSizeType inMessageSize);
 
 
@@ -53,11 +53,11 @@ public:
 
 private:
 
-	string mFilePath;
+	std::string mFilePath;
 	OutputFile mLogFile;
 	IByteWriter* mLogStream;
 	LogFileMethod mLogMethod;
 
-	string GetFormattedTimeString();
+	std::string GetFormattedTimeString();
 	void WriteLogEntryToStream(const Byte* inMessage, LongBufferSizeType inMessageSize,IByteWriter* inStream);
 };

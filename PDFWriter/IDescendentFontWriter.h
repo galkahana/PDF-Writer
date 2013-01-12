@@ -31,10 +31,10 @@ class FreeTypeFaceWrapper;
 class ObjectsContext;
 class DictionaryContext;
 
-using namespace std;
 
-typedef pair<unsigned int, GlyphEncodingInfo> UIntAndGlyphEncodingInfo;
-typedef vector<UIntAndGlyphEncodingInfo> UIntAndGlyphEncodingInfoVector;
+
+typedef std::pair<unsigned int, GlyphEncodingInfo> UIntAndGlyphEncodingInfo;
+typedef std::vector<UIntAndGlyphEncodingInfo> UIntAndGlyphEncodingInfoVector;
 
 class IDescendentFontWriter
 {
@@ -42,7 +42,7 @@ public:
 	virtual ~IDescendentFontWriter(){};
 
 	virtual PDFHummus::EStatusCode WriteFont(	ObjectIDType inDecendentObjectID, 
-									const string& inFontName,
+									const std::string& inFontName,
 									FreeTypeFaceWrapper& inFontInfo,
 									const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
 									ObjectsContext* inObjectsContext) = 0;

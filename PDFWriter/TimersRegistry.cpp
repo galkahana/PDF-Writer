@@ -29,7 +29,7 @@ TimersRegistry::~TimersRegistry(void)
 {
 }
 
-void TimersRegistry::StartMeasure(const string& inTimerName)
+void TimersRegistry::StartMeasure(const std::string& inTimerName)
 {
 	StringToTimerMap::iterator it = mTimers.find(inTimerName);
 	if(it == mTimers.end())
@@ -38,7 +38,7 @@ void TimersRegistry::StartMeasure(const string& inTimerName)
 	it->second.StartMeasure();
 }
 
-void TimersRegistry::StopMeasureAndAccumulate(const string& inTimerName)
+void TimersRegistry::StopMeasureAndAccumulate(const std::string& inTimerName)
 {
 	StringToTimerMap::iterator it = mTimers.find(inTimerName);
 	if(it == mTimers.end())
@@ -47,7 +47,7 @@ void TimersRegistry::StopMeasureAndAccumulate(const string& inTimerName)
 	it->second.StopMeasureAndAccumulate();
 }
 
-double TimersRegistry::GetTotalMiliSeconds(const string& inTimerName)
+double TimersRegistry::GetTotalMiliSeconds(const std::string& inTimerName)
 {
 	StringToTimerMap::iterator it = mTimers.find(inTimerName);
 	if(it == mTimers.end())
@@ -56,7 +56,7 @@ double TimersRegistry::GetTotalMiliSeconds(const string& inTimerName)
 	return it->second.GetTotalMiliSeconds();
 }
 
-Timer& TimersRegistry::GetTimer(const string& inTimerName)
+Timer& TimersRegistry::GetTimer(const std::string& inTimerName)
 {
 	StringToTimerMap::iterator it = mTimers.find(inTimerName);
 	if(it == mTimers.end())

@@ -35,7 +35,7 @@
 
 
 using namespace IOBasicTypes;
-using namespace std;
+
 
 class IByteWriterWithPosition;
 class IObjectsContextExtender;

@@ -33,7 +33,7 @@ PFMFileReader::~PFMFileReader(void)
 {
 }
 
-EStatusCode PFMFileReader::Read(const string& inPFMFilePath)
+EStatusCode PFMFileReader::Read(const std::string& inPFMFilePath)
 {
 	EStatusCode status = PDFHummus::eSuccess;
 	mInternalReadStatus = PDFHummus::eSuccess;

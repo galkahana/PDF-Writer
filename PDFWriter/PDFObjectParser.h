@@ -33,10 +33,10 @@ class PDFObject;
 class IByteReader;
 class IPDFParserExtender;
 
-using namespace std;
 
-typedef pair<bool,IOBasicTypes::Byte> BoolAndByte;
-typedef list<string> StringList;
+
+typedef std::pair<bool,IOBasicTypes::Byte> BoolAndByte;
+typedef std::list<std::string> StringList;
 
 class PDFObjectParser
 {
@@ -59,34 +59,34 @@ private:
 	IByteReader* mStream;
 	IReadPositionProvider* mCurrentPositionProvider;
 
-	bool GetNextToken(string& outToken);
-	void SaveTokenToBuffer(string& inToken);
-	void ReturnTokenToBuffer(string& inToken);
+	bool GetNextToken(std::string& outToken);
+	void SaveTokenToBuffer(std::string& inToken);
+	void ReturnTokenToBuffer(std::string& inToken);
 
-	bool IsBoolean(const string& inToken);
-	PDFObject* ParseBoolean(const string& inToken);
+	bool IsBoolean(const std::string& inToken);
+	PDFObject* ParseBoolean(const std::string& inToken);
 
-	bool IsLiteralString(const string& inToken);
-	PDFObject* ParseLiteralString(const string& inToken,IPDFParserExtender* inParserExtender);
+	bool IsLiteralString(const std::string& inToken);
+	PDFObject* ParseLiteralString(const std::string& inToken,IPDFParserExtender* inParserExtender);
 
-	bool IsHexadecimalString(const string& inToken);
-	PDFObject* ParseHexadecimalString(const string& inToken,IPDFParserExtender* inParserExtender);
+	bool IsHexadecimalString(const std::string& inToken);
+	PDFObject* ParseHexadecimalString(const std::string& inToken,IPDFParserExtender* inParserExtender);
 
-	bool IsNull(const string& inToken);
+	bool IsNull(const std::string& inToken);
 
-	bool IsName(const string& inToken);
-	PDFObject* ParseName(const string& inToken);
+	bool IsName(const std::string& inToken);
+	PDFObject* ParseName(const std::string& inToken);
 
-	bool IsNumber(const string& inToken);
-	PDFObject* ParseNumber(const string& inToken);
+	bool IsNumber(const std::string& inToken);
+	PDFObject* ParseNumber(const std::string& inToken);
 
-	bool IsArray(const string& inToken);
+	bool IsArray(const std::string& inToken);
 	PDFObject* ParseArray(IPDFParserExtender* inParserExtender);
 
-	bool IsDictionary(const string& inToken);
+	bool IsDictionary(const std::string& inToken);
 	PDFObject* ParseDictionary(IPDFParserExtender* inParserExtender);
 
-	bool IsComment(const string& inToken);
+	bool IsComment(const std::string& inToken);
 
 	BoolAndByte GetHexValue(IOBasicTypes::Byte inValue);
 

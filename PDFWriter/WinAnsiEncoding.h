@@ -23,9 +23,9 @@
 #include "IOBasicTypes.h"
 #include <utility>
 
-using namespace std;
 
-typedef pair<bool,IOBasicTypes::Byte> BoolAndByte;
+
+typedef std::pair<bool,IOBasicTypes::Byte> BoolAndByte;
 
 
 class WinAnsiEncoding

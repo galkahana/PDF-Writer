@@ -47,17 +47,17 @@ bool InputStringBufferStream::NotEnded()
 
 void InputStringBufferStream::Skip(LongBufferSizeType inSkipSize)
 {
-	mBufferToReadFrom->pubseekoff(inSkipSize,ios_base::cur);
+	mBufferToReadFrom->pubseekoff(inSkipSize,std::ios_base::cur);
 }
 
 void InputStringBufferStream::SetPosition(LongFilePositionType inOffsetFromStart)
 {
-	mBufferToReadFrom->pubseekoff((long)inOffsetFromStart,ios_base::beg);
+	mBufferToReadFrom->pubseekoff((long)inOffsetFromStart,std::ios_base::beg);
 }
 
 void InputStringBufferStream::SetPositionFromEnd(LongFilePositionType inOffsetFromEnd)
 {
-	mBufferToReadFrom->pubseekoff((long)inOffsetFromEnd,ios_base::end);
+	mBufferToReadFrom->pubseekoff((long)inOffsetFromEnd,std::ios_base::end);
 }
 
 

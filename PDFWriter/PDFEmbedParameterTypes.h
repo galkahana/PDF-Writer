@@ -28,16 +28,16 @@
 class PDFFormXObject;
 class PDFPage;
 
-using namespace std;
 
-typedef pair<unsigned long,unsigned long> ULongAndULong;
-typedef list<ULongAndULong> ULongAndULongList;
-typedef list<PDFFormXObject*> PDFFormXObjectList;
-typedef pair<PDFHummus::EStatusCode,PDFFormXObjectList> EStatusCodeAndPDFFormXObjectList;
 
-typedef list<ObjectIDType> ObjectIDTypeList;
-typedef pair<PDFHummus::EStatusCode,ObjectIDTypeList> EStatusCodeAndObjectIDTypeList;
-typedef pair<PDFHummus::EStatusCode,ObjectIDType> EStatusCodeAndObjectIDType;
+typedef std::pair<unsigned long,unsigned long> ULongAndULong;
+typedef std::list<ULongAndULong> ULongAndULongList;
+typedef std::list<PDFFormXObject*> PDFFormXObjectList;
+typedef std::pair<PDFHummus::EStatusCode,PDFFormXObjectList> EStatusCodeAndPDFFormXObjectList;
+
+typedef std::list<ObjectIDType> ObjectIDTypeList;
+typedef std::pair<PDFHummus::EStatusCode,ObjectIDTypeList> EStatusCodeAndObjectIDTypeList;
+typedef std::pair<PDFHummus::EStatusCode,ObjectIDType> EStatusCodeAndObjectIDType;
 
 /*
 	PDFPageRange is to be used as a method to select pages ranges. quite simply it's either "All" or "Specific".

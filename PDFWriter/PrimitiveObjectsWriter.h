@@ -23,7 +23,7 @@
 #include "ETokenSeparator.h"
 #include <string>
 
-using namespace std;
+
 
 class IByteWriter;
 
@@ -39,12 +39,12 @@ public:
 	void WriteTokenSeparator(ETokenSeparator inSeparate);
 	void EndLine();
 
-	void WriteKeyword(const string& inKeyword);
-	void WriteName(const string& inName,ETokenSeparator inSeparate = eTokenSeparatorSpace);
+	void WriteKeyword(const std::string& inKeyword);
+	void WriteName(const std::string& inName,ETokenSeparator inSeparate = eTokenSeparatorSpace);
 	void WriteInteger(long long inIntegerToken,ETokenSeparator inSeparate = eTokenSeparatorSpace);
-	void WriteUnsafeLiteralString(const string& inString,ETokenSeparator inSeparate = eTokenSeparatorSpace);
-	void WriteLiteralString(const string& inString,ETokenSeparator inSeparate = eTokenSeparatorSpace);
-	void WriteHexString(const string& inString,ETokenSeparator inSeparate = eTokenSeparatorSpace);
+	void WriteUnsafeLiteralString(const std::string& inString,ETokenSeparator inSeparate = eTokenSeparatorSpace);
+	void WriteLiteralString(const std::string& inString,ETokenSeparator inSeparate = eTokenSeparatorSpace);
+	void WriteHexString(const std::string& inString,ETokenSeparator inSeparate = eTokenSeparatorSpace);
 	void WriteDouble(double inDoubleToken,ETokenSeparator inSeparate = eTokenSeparatorSpace);
 	void WriteBoolean(bool inBoolean,ETokenSeparator inSeparate = eTokenSeparatorSpace);
 	void WriteNull(ETokenSeparator inSeparate = eTokenSeparatorSpace);

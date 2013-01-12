@@ -27,7 +27,7 @@
 
 #include <string>
 
-using namespace std;
+
 
 class ObjectsContext;
 
@@ -37,7 +37,7 @@ public:
 	StateWriter(void);
 	virtual ~StateWriter(void);
 
-	PDFHummus::EStatusCode Start(const string& inStateFilePath);
+	PDFHummus::EStatusCode Start(const std::string& inStateFilePath);
 	ObjectsContext* GetObjectsWriter();
 	void SetRootObject(ObjectIDType inRootObjectID);
 	PDFHummus::EStatusCode Finish();

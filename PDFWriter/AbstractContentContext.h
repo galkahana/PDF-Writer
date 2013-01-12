@@ -39,7 +39,7 @@
 #include <string>
 #include <list>
 
-using namespace std;
+
 
 class ObjectsContext;
 class PDFStream;
@@ -60,11 +60,11 @@ struct SomethingOrDouble
 	SomethingOrDouble(double inDouble){DoubleValue = inDouble;IsDouble = true;}
 };
 
-typedef SomethingOrDouble<string> StringOrDouble;
+typedef SomethingOrDouble<std::string> StringOrDouble;
 typedef SomethingOrDouble<GlyphUnicodeMappingList> GlyphUnicodeMappingListOrDouble;
 
-typedef list<StringOrDouble> StringOrDoubleList;
-typedef list<GlyphUnicodeMappingListOrDouble> GlyphUnicodeMappingListOrDoubleList;
+typedef std::list<StringOrDouble> StringOrDoubleList;
+typedef std::list<GlyphUnicodeMappingListOrDouble> GlyphUnicodeMappingListOrDoubleList;
 
 class AbstractContentContext
 {
@@ -108,19 +108,19 @@ public:
 	void j(int inLineJoinStyle);
 	void M(double inMiterLimit);
 	void d(int* inDashArray, int inDashArrayLength,int inDashPhase);
-	void ri(const string& inRenderingIntentName);
+	void ri(const std::string& inRenderingIntentName);
 	void i(int inFlatness);
-	void gs(const string& inGraphicStateName);
+	void gs(const std::string& inGraphicStateName);
 
 	// color operators
-	void CS(const string& inColorSpaceName);
-	void cs(const string& inColorSpaceName);
+	void CS(const std::string& inColorSpaceName);
+	void cs(const std::string& inColorSpaceName);
 	void SC(double* inColorComponents, int inColorComponentsLength);
 	void SCN(double* inColorComponents, int inColorComponentsLength);
-	void SCN(double* inColorComponents, int inColorComponentsLength,const string& inPatternName);
+	void SCN(double* inColorComponents, int inColorComponentsLength,const std::string& inPatternName);
 	void sc(double* inColorComponents, int inColorComponentsLength);
 	void scn(double* inColorComponents, int inColorComponentsLength);
-	void scn(double* inColorComponents, int inColorComponentsLength,const string& inPatternName);
+	void scn(double* inColorComponents, int inColorComponentsLength,const std::string& inPatternName);
 	void G(double inGray);
 	void g(double inGray);
 	void RG(double inR,double inG,double inB);
@@ -133,7 +133,7 @@ public:
 	void WStar();
 
 	// XObject usage
-	void Do(const string& inXObjectName);
+	void Do(const std::string& inXObjectName);
 
 	// Text state operators
 	void Tc(double inCharacterSpace);
@@ -167,11 +167,11 @@ public:
 	// will return error if no font was set, or that one of the glyphs
 	// didn't succeed in encoding.
 	// input parameter is UTF-8 encoded
-	PDFHummus::EStatusCode Tj(const string& inText);
+	PDFHummus::EStatusCode Tj(const std::string& inText);
 
 	// The rest of the text operators, handled by the library handing of font. text is in UTF8
-	PDFHummus::EStatusCode Quote(const string& inText);
-	PDFHummus::EStatusCode DoubleQuote(double inWordSpacing, double inCharacterSpacing, const string& inText);
+	PDFHummus::EStatusCode Quote(const std::string& inText);
+	PDFHummus::EStatusCode DoubleQuote(double inWordSpacing, double inCharacterSpacing, const std::string& inText);
 	PDFHummus::EStatusCode TJ(const StringOrDoubleList& inStringsAndSpacing); 
 
 	//
@@ -195,18 +195,18 @@ public:
 	// font and text usage
 
 	// Low level setting of font. for the high level version, see below
-	void TfLow(const string& inFontName,double inFontSize); 
+	void TfLow(const std::string& inFontName,double inFontSize); 
 
 	// first version of Tj writes the string in literal string paranthesis, 
 	// second version of Tj writes the string in hex string angle brackets
-	void TjLow(const string& inText);
-	void TjHexLow(const string& inText); 
+	void TjLow(const std::string& inText);
+	void TjHexLow(const std::string& inText); 
 
-	void QuoteLow(const string& inText); // matches the operator '
-	void QuoteHexLow(const string& inText);
+	void QuoteLow(const std::string& inText); // matches the operator '
+	void QuoteHexLow(const std::string& inText);
 
-	void DoubleQuoteLow(double inWordSpacing, double inCharacterSpacing, const string& inText); // matches the operator "
-	void DoubleQuoteHexLow(double inWordSpacing, double inCharacterSpacing, const string& inText); 
+	void DoubleQuoteLow(double inWordSpacing, double inCharacterSpacing, const std::string& inText); // matches the operator "
+	void DoubleQuoteHexLow(double inWordSpacing, double inCharacterSpacing, const std::string& inText); 
 
 	// similar to the TJ PDF command, TJ() recieves an input an array of items which
 	// can be either a string or a double
@@ -214,7 +214,7 @@ public:
 	void TJHexLow(const StringOrDoubleList& inStringsAndSpacing);
 
     // introduce free code
-    void WriteFreeCode(const string& inFreeCode);
+    void WriteFreeCode(const std::string& inFreeCode);
     void WriteFreeCode(IByteReader* inFreeCodeSource);
 
 protected:
@@ -233,8 +233,8 @@ private:
 	// graphic stack to monitor high-level graphic usage (now - fonts)
 	GraphicStateStack mGraphicStack;
 
-	void AssertProcsetAvailable(const string& inProcsetName);
+	void AssertProcsetAvailable(const std::string& inProcsetName);
 
-	PDFHummus::EStatusCode WriteTextCommandWithEncoding(const string& inUnicodeText,ITextCommand* inTextCommand);
+	PDFHummus::EStatusCode WriteTextCommandWithEncoding(const std::string& inUnicodeText,ITextCommand* inTextCommand);
 	PDFHummus::EStatusCode WriteTextCommandWithDirectGlyphSelection(const GlyphUnicodeMappingList& inText,ITextCommand* inTextCommand);
 };

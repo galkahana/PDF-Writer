@@ -32,7 +32,8 @@
 
 #include <list>
 
-using namespace std;
+
+
 using namespace PDFHummus;
 
 AbstractWrittenFont::AbstractWrittenFont(ObjectsContext* inObjectsContext)
@@ -341,7 +342,7 @@ EStatusCode AbstractWrittenFont::WriteStateAfterDictionary(ObjectsContext* inSta
 	return status;
 }
 
-typedef list<ObjectIDType> ObjectIDTypeList;
+typedef std::list<ObjectIDType> ObjectIDTypeList;
 
 EStatusCode AbstractWrittenFont::WriteWrittenFontState(WrittenFontRepresentation* inRepresentation,
 													   ObjectsContext* inStateWriter,

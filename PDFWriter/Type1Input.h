@@ -28,7 +28,7 @@
 #include <vector>
 #include <set>
 
-using namespace std;
+
 
 enum EType1EncodingType
 {
@@ -39,12 +39,12 @@ enum EType1EncodingType
 struct Type1Encoding
 {
 	EType1EncodingType EncodingType;
-	string mCustomEncoding[256];
+	std::string mCustomEncoding[256];
 };
 
 struct Type1FontDictionary
 {
-	string FontName;
+	std::string FontName;
 	int PaintType;
 	int FontType;
 	double FontMatrix[6];
@@ -58,12 +58,12 @@ struct Type1FontDictionary
 
 struct Type1FontInfoDictionary
 {
-	string version;
-	string Notice;
-	string Copyright;
-	string FullName;
-	string FamilyName;
-	string Weight;
+	std::string version;
+	std::string Notice;
+	std::string Copyright;
+	std::string FullName;
+	std::string FamilyName;
+	std::string Weight;
 	double ItalicAngle;
 	bool isFixedPitch;
 	double UnderlinePosition;
@@ -75,17 +75,17 @@ struct Type1FontInfoDictionary
 struct Type1PrivateDictionary
 {
 	int UniqueID;
-	vector<int> BlueValues;
-	vector<int> OtherBlues;
-	vector<int> FamilyBlues;
-	vector<int> FamilyOtherBlues;
+	std::vector<int> BlueValues;
+	std::vector<int> OtherBlues;
+	std::vector<int> FamilyBlues;
+	std::vector<int> FamilyOtherBlues;
 	double BlueScale;
 	int BlueShift;
 	int BlueFuzz;
 	double StdHW;
 	double StdVW;
-	vector<double> StemSnapH;
-	vector<double> StemSnapV;
+	std::vector<double> StemSnapH;
+	std::vector<double> StemSnapV;
 	bool ForceBold;
 	int LanguageGroup;
 	int lenIV;
@@ -93,8 +93,8 @@ struct Type1PrivateDictionary
 };
 
 
-typedef set<Byte> ByteSet;
-typedef set<unsigned short> UShortSet;
+typedef std::set<Byte> ByteSet;
+typedef std::set<unsigned short> UShortSet;
 
 struct CharString1Dependencies
 {
@@ -104,9 +104,9 @@ struct CharString1Dependencies
 };
 
 
-typedef vector<Type1CharString> Type1CharStringVector;
-typedef map<string,Type1CharString> StringToType1CharStringMap;
-typedef map<string,Byte> StringToByteMap;
+typedef std::vector<Type1CharString> Type1CharStringVector;
+typedef std::map<std::string,Type1CharString> StringToType1CharStringMap;
+typedef std::map<std::string,Byte> StringToByteMap;
 
 class IByteReaderWithPosition;
 
@@ -119,14 +119,14 @@ public:
 	PDFHummus::EStatusCode ReadType1File(IByteReaderWithPosition* inType1File);
 	PDFHummus::EStatusCode CalculateDependenciesForCharIndex(Byte inCharStringIndex,
 												  CharString1Dependencies& ioDependenciesInfo);
-	PDFHummus::EStatusCode CalculateDependenciesForCharIndex(const string& inCharStringName,
+	PDFHummus::EStatusCode CalculateDependenciesForCharIndex(const std::string& inCharStringName,
 												  CharString1Dependencies& ioDependenciesInfo);
 	void Reset();
-	Type1CharString* GetGlyphCharString(const string& inCharStringName);
+	Type1CharString* GetGlyphCharString(const std::string& inCharStringName);
 	Type1CharString* GetGlyphCharString(Byte inCharStringIndex);
-	string GetGlyphCharStringName(Byte inCharStringIndex);
+	std::string GetGlyphCharStringName(Byte inCharStringIndex);
 	bool IsValidGlyphIndex(Byte inCharStringIndex);
-	Byte GetEncoding(const string& inCharStringName);
+	Byte GetEncoding(const std::string& inCharStringName);
 	
 	// some structs for you all laddies and lasses
 	Type1FontDictionary mFontDictionary;
@@ -152,17 +152,17 @@ private:
 
 
 	void FreeTables();
-	bool IsComment(const string& inToken);
+	bool IsComment(const std::string& inToken);
 	PDFHummus::EStatusCode ReadFontDictionary();
 	PDFHummus::EStatusCode ReadFontInfoDictionary();
-	string FromPSName(const string& inPostScriptName);
+	std::string FromPSName(const std::string& inPostScriptName);
 	PDFHummus::EStatusCode ParseEncoding();
 	PDFHummus::EStatusCode ReadPrivateDictionary();
-	PDFHummus::EStatusCode ParseIntVector(vector<int>& inVector);
-	PDFHummus::EStatusCode ParseDoubleVector(vector<double>& inVector);
+	PDFHummus::EStatusCode ParseIntVector(std::vector<int>& inVector);
+	PDFHummus::EStatusCode ParseDoubleVector(std::vector<double>& inVector);
 	PDFHummus::EStatusCode ParseSubrs();
 	PDFHummus::EStatusCode ParseCharstrings();
 	PDFHummus::EStatusCode ParseDoubleArray(double* inArray,int inArraySize);
-	string FromPSString(const string& inPSString);
+	std::string FromPSString(const std::string& inPSString);
 	void CalculateReverseEncoding();
 };

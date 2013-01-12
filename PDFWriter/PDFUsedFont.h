@@ -30,12 +30,12 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-using namespace std;
 
-typedef list<unsigned short> UShortList;
-typedef list<UShortList> UShortListList;
-typedef list<string> StringList;
-typedef list<GlyphUnicodeMappingList> GlyphUnicodeMappingListList;
+
+typedef std::list<unsigned short> UShortList;
+typedef std::list<UShortList> UShortListList;
+typedef std::list<std::string> StringList;
+typedef std::list<GlyphUnicodeMappingList> GlyphUnicodeMappingListList;
 
 class IWrittenFont;
 class ObjectsContext;
@@ -45,8 +45,8 @@ class PDFUsedFont
 {
 public:
 	PDFUsedFont(FT_Face inInputFace,
-				const string& inFontFilePath,
-				const string& inAdditionalMetricsFontFilePath,
+				const std::string& inFontFilePath,
+				const std::string& inAdditionalMetricsFontFilePath,
 				ObjectsContext* inObjectsContext);
 	virtual ~PDFUsedFont(void);
 
@@ -74,7 +74,7 @@ public:
 	PDFHummus::EStatusCode WriteFontDefinition();
 
 	// use this method to translate text to glyphs and unicode mapping, to be later used for EncodeStringForShowing
-	PDFHummus::EStatusCode TranslateStringToGlyphs(const string& inText,GlyphUnicodeMappingList& outGlyphsUnicodeMapping);
+	PDFHummus::EStatusCode TranslateStringToGlyphs(const std::string& inText,GlyphUnicodeMappingList& outGlyphsUnicodeMapping);
 
 	PDFHummus::EStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
 	PDFHummus::EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);

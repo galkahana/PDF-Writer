@@ -25,6 +25,9 @@
 #include "IFontDescriptorHelper.h"
 #include "DictionaryContext.h"
 
+
+
+
 FontDescriptorWriter::FontDescriptorWriter(void)
 {
 }
@@ -33,19 +36,19 @@ FontDescriptorWriter::~FontDescriptorWriter(void)
 {
 }
 
-static const string scFontName = "FontName";
-static const string scFontFamily = "FontFamily";
-static const string scFontStretch = "FontStretch";
-static const string scFontWeight = "FontWeight";
-static const string scFlags = "Flags";
-static const string scFontBBox = "FontBBox";
-static const string scItalicAngle = "ItalicAngle";
-static const string scAscent = "Ascent";
-static const string scDescent = "Descent";
-static const string scCapHeight = "CapHeight";
-static const string scXHeight = "XHeight";
-static const string scStemV = "StemV";
-static const string scCharSet = "CharSet";
+static const std::string scFontName = "FontName";
+static const std::string scFontFamily = "FontFamily";
+static const std::string scFontStretch = "FontStretch";
+static const std::string scFontWeight = "FontWeight";
+static const std::string scFlags = "Flags";
+static const std::string scFontBBox = "FontBBox";
+static const std::string scItalicAngle = "ItalicAngle";
+static const std::string scAscent = "Ascent";
+static const std::string scDescent = "Descent";
+static const std::string scCapHeight = "CapHeight";
+static const std::string scXHeight = "XHeight";
+static const std::string scStemV = "StemV";
+static const std::string scCharSet = "CharSet";
 
 
 static const char* scFontStretchLabels[eFontStretchMax] =
@@ -63,7 +66,7 @@ static const char* scFontStretchLabels[eFontStretchMax] =
 };
 
 void FontDescriptorWriter::WriteFontDescriptor(	ObjectIDType inFontDescriptorObjectID,
-												const string& inFontPostscriptName,
+												const std::string& inFontPostscriptName,
 												FreeTypeFaceWrapper* inFontInfo,
 												const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
 												ObjectsContext* inObjectsContext,

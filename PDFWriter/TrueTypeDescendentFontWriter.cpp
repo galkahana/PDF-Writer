@@ -46,7 +46,7 @@ static UIntVector GetOrderedKeys(const UIntAndGlyphEncodingInfoVector& inMap)
 
 
 EStatusCode TrueTypeDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID, 
-														const string& inFontName,
+														const std::string& inFontName,
 														FreeTypeFaceWrapper& inFontInfo,
 														const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
 														ObjectsContext* inObjectsContext)
@@ -65,15 +65,15 @@ EStatusCode TrueTypeDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObj
 	return descendentFontWriter.WriteFont(inDecendentObjectID,inFontName,inFontInfo,inEncodedGlyphs,inObjectsContext,this);
 }
 
-static const string scCIDFontType2 = "CIDFontType2";
+static const std::string scCIDFontType2 = "CIDFontType2";
 
 void TrueTypeDescendentFontWriter::WriteSubTypeValue(DictionaryContext* inDescendentFontContext)
 {
 	inDescendentFontContext->WriteNameValue(scCIDFontType2);
 }
 
-static const string scCIDToGIDMap = "CIDToGIDMap";
-static const string scIdentity = "Identity";
+static const std::string scCIDToGIDMap = "CIDToGIDMap";
+static const std::string scIdentity = "Identity";
 
 void TrueTypeDescendentFontWriter::WriteAdditionalKeys(DictionaryContext* inDescendentFontContext)
 {
@@ -82,7 +82,7 @@ void TrueTypeDescendentFontWriter::WriteAdditionalKeys(DictionaryContext* inDesc
 	inDescendentFontContext->WriteNameValue(scIdentity);
 }
 
-static const string scFontFile2 = "FontFile2";
+static const std::string scFontFile2 = "FontFile2";
 void TrueTypeDescendentFontWriter::WriteFontFileReference(	
 										DictionaryContext* inDescriptorContext,
 										ObjectsContext* inObjectsContext)

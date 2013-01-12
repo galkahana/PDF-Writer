@@ -36,7 +36,7 @@ OutputFile::~OutputFile(void)
 	CloseFile();
 }
 
-EStatusCode OutputFile::OpenFile(const string& inFilePath,bool inAppend)
+EStatusCode OutputFile::OpenFile(const std::string& inFilePath,bool inAppend)
 {
 	EStatusCode status;
 	do
@@ -87,7 +87,7 @@ IByteWriterWithPosition* OutputFile::GetOutputStream()
 	return mOutputStream;
 }
 
-const string& OutputFile::GetFilePath()
+const std::string& OutputFile::GetFilePath()
 {
 	return mFilePath;
 }

@@ -35,13 +35,13 @@ InputFileStream::~InputFileStream(void)
 }
 
 
-InputFileStream::InputFileStream(const string& inFilePath)
+InputFileStream::InputFileStream(const std::string& inFilePath)
 {
 	mStream = NULL;
 	Open(inFilePath);
 }
 
-EStatusCode InputFileStream::Open(const string& inFilePath)
+EStatusCode InputFileStream::Open(const std::string& inFilePath)
 {
 	SAFE_FOPEN(mStream,inFilePath.c_str(),"rb");
 	return NULL == mStream ? PDFHummus::eFailure:PDFHummus::eSuccess;

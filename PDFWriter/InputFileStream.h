@@ -26,7 +26,7 @@
 #include <string>
 #include <stdio.h>
 
-using namespace std;
+
 
 
 class InputFileStream : public IByteReaderWithPosition
@@ -36,10 +36,10 @@ public:
 	virtual ~InputFileStream(void);
 
 	// input file path is in UTF8
-	InputFileStream(const string& inFilePath);
+	InputFileStream(const std::string& inFilePath);
 
 	// input file path is in UTF8
-	PDFHummus::EStatusCode Open(const string& inFilePath);
+	PDFHummus::EStatusCode Open(const std::string& inFilePath);
 	PDFHummus::EStatusCode Close();
 
 	// IByteReaderWithPosition implementation

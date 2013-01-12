@@ -26,9 +26,9 @@
 #include <algorithm>
 #include <vector>
 
-using namespace std;
 
-typedef vector<unsigned long> ULongVector;
+
+typedef std::vector<unsigned long> ULongVector;
 
 struct GlyphEncodingInfo
 {
@@ -44,8 +44,8 @@ struct GlyphEncodingInfo
 	{mEncodedCharacter = inEncodedCharacter; mUnicodeCharacters = inUnicodeCharacters;}
 };
 
-typedef map<unsigned int, GlyphEncodingInfo> UIntToGlyphEncodingInfoMap;
-typedef vector<unsigned int> UIntVector;
+typedef std::map<unsigned int, GlyphEncodingInfo> UIntToGlyphEncodingInfoMap;
+typedef std::vector<unsigned int> UIntVector;
 
 static UIntVector GetOrderedKeys(const UIntToGlyphEncodingInfoMap& inMap)
 {

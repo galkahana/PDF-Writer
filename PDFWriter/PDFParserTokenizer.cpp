@@ -49,7 +49,7 @@ void PDFParserTokenizer::ResetReadState()
 }
 
 static const Byte scBackSlash[] = {'\\'};
-static const string scStream = "stream";
+static const std::string scStream = "stream";
 static const char scCR = '\r';
 static const char scLF = '\n';
 BoolAndString PDFParserTokenizer::GetNextToken()

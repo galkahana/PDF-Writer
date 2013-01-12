@@ -29,7 +29,7 @@
 #include <map>
 #include <list>
 
-using namespace std;
+
 
 struct TableEntry
 {
@@ -38,7 +38,7 @@ struct TableEntry
 	unsigned long Length;
 };
 
-typedef map<unsigned long,TableEntry> ULongToTableEntryMap;
+typedef std::map<unsigned long,TableEntry> ULongToTableEntryMap;
 
 
 struct HeadTable
@@ -166,8 +166,8 @@ struct NameTable
 };
 
 typedef unsigned long* LocaTable;
-typedef list<unsigned long> ULongList;
-typedef list<unsigned int> UIntList;
+typedef std::list<unsigned long> ULongList;
+typedef std::list<unsigned int> UIntList;
 
 /* this time it's gonna be just what's intersting for my subsetting purposes - which is the 
    dependencies ('n some other stuff) */
@@ -183,7 +183,7 @@ struct GlyphEntry
 
 typedef GlyphEntry** GlyfTable;
 
-typedef map<unsigned short,GlyphEntry*> UShortToGlyphEntryMap;
+typedef std::map<unsigned short,GlyphEntry*> UShortToGlyphEntryMap;
 
 
 enum EOpenTypeInputType
@@ -199,7 +199,7 @@ public:
 	~OpenTypeFileInput(void);
 
 
-	PDFHummus::EStatusCode ReadOpenTypeFile(const string& inFontFilePath);
+	PDFHummus::EStatusCode ReadOpenTypeFile(const std::string& inFontFilePath);
 	PDFHummus::EStatusCode ReadOpenTypeFile(IByteReaderWithPosition* inTrueTypeFile);
 
 

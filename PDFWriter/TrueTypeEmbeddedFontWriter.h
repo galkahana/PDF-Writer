@@ -36,10 +36,10 @@
 class FreeTypeFaceWrapper;
 class ObjectsContext;
 
-using namespace std;
 
-typedef vector<unsigned int> UIntVector;
-typedef set<unsigned int> UIntSet;
+
+typedef std::vector<unsigned int> UIntVector;
+typedef std::set<unsigned int> UIntSet;
 
 class TrueTypeEmbeddedFontWriter
 {

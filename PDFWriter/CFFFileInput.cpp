@@ -23,6 +23,7 @@
 #include "CharStringType2Interpreter.h"
 #include "StandardEncoding.h"
 
+
 using namespace PDFHummus;
 
 #define N_STD_STRINGS 391
@@ -348,7 +349,7 @@ EStatusCode CFFFileInput::ReadNameIndex()
 		{
 			buffer = new Byte[offsets[i+1] - offsets[i]];
 			mPrimitivesReader.Read(buffer,offsets[i+1] - offsets[i]);
-			string aName((char*)buffer,offsets[i+1] - offsets[i]);
+			std::string aName((char*)buffer,offsets[i+1] - offsets[i]);
 			mName.push_back(aName);
 			if(buffer[0] != 0) // put in map only valid names
 				mNameToIndex.insert(StringToUShort::value_type(aName,i));
@@ -364,7 +365,7 @@ EStatusCode CFFFileInput::ReadNameIndex()
 		return mPrimitivesReader.GetInternalState();
 }
 
-BoolAndUShort CFFFileInput::GetIndexForFontName(const string& inFontName)
+BoolAndUShort CFFFileInput::GetIndexForFontName(const std::string& inFontName)
 {
 	StringToUShort::iterator it = mNameToIndex.find(inFontName);
 
@@ -495,7 +496,7 @@ EStatusCode CFFFileInput::ReadStringIndex()
 		return mPrimitivesReader.GetInternalState();
 }
 
-string CFFFileInput::GetStringForSID(unsigned short inSID)
+std::string CFFFileInput::GetStringForSID(unsigned short inSID)
 {
 	if(inSID < N_STD_STRINGS)
 		return scStandardStrings[inSID];
@@ -694,7 +695,7 @@ EStatusCode CFFFileInput::ReadLocalSubrsForPrivateDict(PrivateDictInfo* inPrivat
 	return status;
 }
 
-typedef map<LongFilePositionType,CharSetInfo*> LongFilePositionTypeToCharSetInfoMap;
+typedef std::map<LongFilePositionType,CharSetInfo*> LongFilePositionTypeToCharSetInfoMap;
 
 static const unsigned short scROS = 0xC1E;
 EStatusCode CFFFileInput::ReadCharsets()
@@ -755,7 +756,7 @@ EStatusCode CFFFileInput::ReadCharsets()
 }
 
 
-typedef map<LongFilePositionType,EncodingsInfo*> LongFilePositionTypeToEncodingsInfoMap;
+typedef std::map<LongFilePositionType,EncodingsInfo*> LongFilePositionTypeToEncodingsInfoMap;
 
 
 EStatusCode CFFFileInput::ReadEncodings()
@@ -1351,7 +1352,7 @@ LongFilePositionType CFFFileInput::GetFDSelectPosition(unsigned short inFontInde
 }
 
 
-EStatusCode CFFFileInput::ReadCFFFileByIndexOrName(IByteReaderWithPosition* inCFFFile,const string& inFontName,unsigned short inFontIndex)
+EStatusCode CFFFileInput::ReadCFFFileByIndexOrName(IByteReaderWithPosition* inCFFFile,const std::string& inFontName,unsigned short inFontIndex)
 {
 	// read either by font name or index. read by font name if not empty, otherwise by index
 	EStatusCode status;
@@ -1636,7 +1637,7 @@ EStatusCode CFFFileInput::ReadCFFFile(IByteReaderWithPosition* inCFFFile,unsigne
 	return ReadCFFFileByIndexOrName(inCFFFile,"",inFontIndex);
 }
 
-EStatusCode CFFFileInput::ReadCFFFile(IByteReaderWithPosition* inCFFFile,const string& inFontName)
+EStatusCode CFFFileInput::ReadCFFFile(IByteReaderWithPosition* inCFFFile,const std::string& inFontName)
 {
 	return ReadCFFFileByIndexOrName(inCFFFile,inFontName,0);
 }
@@ -1655,7 +1656,7 @@ unsigned short CFFFileInput::GetCharStringsCount(unsigned short inFontIndex)
 		return mCharStrings[inFontIndex].mCharStringsCount;
 }
 
-string CFFFileInput::GetGlyphName(unsigned short inFontIndex,unsigned short inGlyphIndex)
+std::string CFFFileInput::GetGlyphName(unsigned short inFontIndex,unsigned short inGlyphIndex)
 {
 	return GetStringForSID(GetGlyphSID(inFontIndex,inGlyphIndex));
 }

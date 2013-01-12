@@ -26,6 +26,7 @@
 #include "FreeTypeFaceWrapper.h"
 #include "Trace.h"
 
+
 using namespace PDFHummus;
 
 CFFDescendentFontWriter::CFFDescendentFontWriter(void)
@@ -41,10 +42,10 @@ static bool sEncodedGlypsSort(const UIntAndGlyphEncodingInfo& inLeft, const UInt
 	return inLeft.first < inRight.first;
 }
 
-static const string scCIDFontType0C = "CIDFontType0C";
+static const std::string scCIDFontType0C = "CIDFontType0C";
 static const char* scType1 = "Type 1";
 EStatusCode CFFDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID, 
-														const string& inFontName,
+														const std::string& inFontName,
 														FreeTypeFaceWrapper& inFontInfo,
 														const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
 														ObjectsContext* inObjectsContext)
@@ -93,7 +94,7 @@ EStatusCode CFFDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID
 	return descendentFontWriter.WriteFont(inDecendentObjectID,inFontName,inFontInfo,inEncodedGlyphs,inObjectsContext,this);
 }
 
-static const string scCIDFontType0 = "CIDFontType0";
+static const std::string scCIDFontType0 = "CIDFontType0";
 
 void CFFDescendentFontWriter::WriteSubTypeValue(DictionaryContext* inDescendentFontContext)
 {
@@ -105,7 +106,7 @@ void CFFDescendentFontWriter::WriteAdditionalKeys(DictionaryContext* inDescenden
 	// do nothing
 }
 
-static const string scFontFile3 = "FontFile3";
+static const std::string scFontFile3 = "FontFile3";
 void CFFDescendentFontWriter::WriteFontFileReference(DictionaryContext* inDescriptorContext,
 													ObjectsContext* inObjectsContext)
 {

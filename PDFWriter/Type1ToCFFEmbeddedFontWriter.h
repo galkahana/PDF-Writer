@@ -34,15 +34,15 @@
 #include <map>
 #include <utility>
 
-using namespace std;
+
 using namespace IOBasicTypes;
 
-typedef vector<unsigned int> UIntVector;
-typedef set<unsigned int> UIntSet;
-typedef vector<string> StringVector;
-typedef map<string,unsigned short> StringToUShortMap;
-typedef pair<bool,unsigned short> BoolAndUShort;
-typedef set<string> StringSet;
+typedef std::vector<unsigned int> UIntVector;
+typedef std::set<unsigned int> UIntSet;
+typedef std::vector<std::string> StringVector;
+typedef std::map<std::string,unsigned short> StringToUShortMap;
+typedef std::pair<bool,unsigned short> BoolAndUShort;
+typedef std::set<std::string> StringSet;
 
 class FreeTypeFaceWrapper;
 class ObjectsContext;
@@ -55,8 +55,8 @@ public:
 
 	PDFHummus::EStatusCode WriteEmbeddedFont(	FreeTypeFaceWrapper& inFontInfo,
 									const UIntVector& inSubsetGlyphIDs,
-									const string& inFontFile3SubType,
-									const string& inSubsetFontName,
+									const std::string& inFontFile3SubType,
+									const std::string& inSubsetFontName,
 									ObjectsContext* inObjectsContext,
 									ObjectIDType& outEmbeddedFontObjectID);
 
@@ -85,23 +85,23 @@ private:
 	PDFHummus::EStatusCode CreateCFFSubset(	
 								FreeTypeFaceWrapper& inFontInfo,
 								const UIntVector& inSubsetGlyphIDs,
-								const string& inSubsetFontName,
+								const std::string& inSubsetFontName,
 								bool& outNotEmbedded,
 								MyStringBuf& outFontProgram);
 	PDFHummus::EStatusCode AddDependentGlyphs(StringVector& ioSubsetGlyphIDs);
-	PDFHummus::EStatusCode AddComponentGlyphs(const string& inGlyphID,StringSet& ioComponents,bool &outFoundComponents);
+	PDFHummus::EStatusCode AddComponentGlyphs(const std::string& inGlyphID,StringSet& ioComponents,bool &outFoundComponents);
 	PDFHummus::EStatusCode WriteCFFHeader();
-	PDFHummus::EStatusCode WriteName(const string& inSubsetFontName);
+	PDFHummus::EStatusCode WriteName(const std::string& inSubsetFontName);
 	Byte GetMostCompressedOffsetSize(unsigned long inOffset);
 	PDFHummus::EStatusCode WriteTopIndex();
 	PDFHummus::EStatusCode WriteTopDictSegment(MyStringBuf& ioTopDictSegment);
-	unsigned short AddStringToStringsArray(const string& inString);
-	BoolAndUShort FindStandardString(const string& inStringToFind);
-	void AddStringOperandIfNotEmpty(CFFPrimitiveWriter& inWriter,const string& inString,unsigned short inOperator);
+	unsigned short AddStringToStringsArray(const std::string& inString);
+	BoolAndUShort FindStandardString(const std::string& inStringToFind);
+	void AddStringOperandIfNotEmpty(CFFPrimitiveWriter& inWriter,const std::string& inString,unsigned short inOperator);
 	void AddNumberOperandIfNotDefault(CFFPrimitiveWriter& inWriter,int inOperand,unsigned short inOperator,int inDefault);
 	void AddNumberOperandIfNotDefault(CFFPrimitiveWriter& inWriter,double inOperand,unsigned short inOperator,double inDefault);
-	void AddDeltaVectorIfNotEmpty(CFFPrimitiveWriter& inWriter,const vector<int>& inArray,unsigned short inOperator);
-	void AddDeltaVectorIfNotEmpty(CFFPrimitiveWriter& inWriter,const vector<double>& inArray,unsigned short inOperator);
+	void AddDeltaVectorIfNotEmpty(CFFPrimitiveWriter& inWriter,const std::vector<int>& inArray,unsigned short inOperator);
+	void AddDeltaVectorIfNotEmpty(CFFPrimitiveWriter& inWriter,const std::vector<double>& inArray,unsigned short inOperator);
 	PDFHummus::EStatusCode WriteStringIndex();
 	PDFHummus::EStatusCode WriteGlobalSubrsIndex();
 	PDFHummus::EStatusCode WriteEncodings(const StringVector& inSubsetGlyphIDs);

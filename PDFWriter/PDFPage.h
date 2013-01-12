@@ -28,7 +28,7 @@
 #include <list>
 #include <utility>
 
-typedef pair<bool,PDFRectangle> BoolAndPDFRectangle;
+typedef std::pair<bool,PDFRectangle> BoolAndPDFRectangle;
 
 class PageContentContext;
 

@@ -34,13 +34,13 @@
 #include <set>
 #include <map>
 
-using namespace std;
+
 using namespace IOBasicTypes;
 
-typedef vector<unsigned int> UIntVector;
-typedef set<unsigned int> UIntSet;
-typedef vector<unsigned short> UShortVector;
-typedef map<FontDictInfo*,Byte> FontDictInfoToByteMap;
+typedef std::vector<unsigned int> UIntVector;
+typedef std::set<unsigned int> UIntSet;
+typedef std::vector<unsigned short> UShortVector;
+typedef std::map<FontDictInfo*,Byte> FontDictInfoToByteMap;
 
 
 class FreeTypeFaceWrapper;
@@ -54,8 +54,8 @@ public:
 
 	PDFHummus::EStatusCode WriteEmbeddedFont(	FreeTypeFaceWrapper& inFontInfo,
 									const UIntVector& inSubsetGlyphIDs,
-									const string& inFontFile3SubType,
-									const string& inSubsetFontName,
+									const std::string& inFontFile3SubType,
+									const std::string& inSubsetFontName,
 									ObjectsContext* inObjectsContext,
 									ObjectIDType& outEmbeddedFontObjectID);
 
@@ -66,8 +66,8 @@ public:
 	// identity
 	PDFHummus::EStatusCode WriteEmbeddedFont(	FreeTypeFaceWrapper& inFontInfo,
 									const UIntVector& inSubsetGlyphIDs,
-									const string& inFontFile3SubType,
-									const string& inSubsetFontName,
+									const std::string& inFontFile3SubType,
+									const std::string& inSubsetFontName,
 									ObjectsContext* inObjectsContext,
 									UShortVector* inCIDMapping,
 									ObjectIDType& outEmbeddedFontObjectID);
@@ -79,7 +79,7 @@ private:
 	CFFPrimitiveWriter mPrimitivesWriter;
 	OutputStringBufferStream mFontFileStream;
 	bool mIsCID;
-	string mOptionalEmbeddedPostscript;
+	std::string mOptionalEmbeddedPostscript;
 
 	// placeholders positions
 	LongFilePositionType mCharsetPlaceHolderPosition;
@@ -101,13 +101,13 @@ private:
 					FreeTypeFaceWrapper& inFontInfo,
 					const UIntVector& inSubsetGlyphIDs,
 					UShortVector* inCIDMapping,
-					const string& inSubsetFontName,
+					const std::string& inSubsetFontName,
 					bool& outNotEmbedded,
 					MyStringBuf& outFontProgram);
 	PDFHummus::EStatusCode AddDependentGlyphs(UIntVector& ioSubsetGlyphIDs);
 	PDFHummus::EStatusCode AddComponentGlyphs(unsigned int inGlyphID,UIntSet& ioComponents,bool &outFoundComponents);
 	PDFHummus::EStatusCode WriteCFFHeader();
-	PDFHummus::EStatusCode WriteName(const string& inSubsetFontName);
+	PDFHummus::EStatusCode WriteName(const std::string& inSubsetFontName);
 	PDFHummus::EStatusCode WriteTopIndex();
 	Byte GetMostCompressedOffsetSize(unsigned long inOffset);
 	PDFHummus::EStatusCode WriteTopDictSegment(MyStringBuf& ioTopDictSegment);

@@ -36,7 +36,7 @@ InputFile::~InputFile(void)
 	CloseFile();
 }
 
-EStatusCode InputFile::OpenFile(const string& inFilePath)
+EStatusCode InputFile::OpenFile(const std::string& inFilePath)
 {
 	EStatusCode status;
 	do
@@ -87,7 +87,7 @@ IByteReaderWithPosition* InputFile::GetInputStream()
 	return mInputStream;
 }
 
-const string& InputFile::GetFilePath()
+const std::string& InputFile::GetFilePath()
 {
 	return mFilePath;
 }

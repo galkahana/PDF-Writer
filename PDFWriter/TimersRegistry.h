@@ -25,9 +25,9 @@
 #include <string>
 #include <map>
 
-using namespace std;
 
-typedef map<string,Timer> StringToTimerMap;
+
+typedef std::map<std::string,Timer> StringToTimerMap;
 
 class TimersRegistry
 {
@@ -35,12 +35,12 @@ public:
 	TimersRegistry(void);
 	~TimersRegistry(void);
 
-	void StartMeasure(const string& inTimerName);
-	void StopMeasureAndAccumulate(const string& inTimerName);
+	void StartMeasure(const std::string& inTimerName);
+	void StopMeasureAndAccumulate(const std::string& inTimerName);
 
-	double GetTotalMiliSeconds(const string& inTimerName);
+	double GetTotalMiliSeconds(const std::string& inTimerName);
 
-	Timer& GetTimer(const string& inTimerName);
+	Timer& GetTimer(const std::string& inTimerName);
 
 	void ReleaseAll();
 	void TraceAll();

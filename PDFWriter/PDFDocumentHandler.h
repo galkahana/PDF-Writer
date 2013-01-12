@@ -46,7 +46,7 @@ class IPageEmbedInFormCommand;
 class IPDFParserExtender;
 class ICategoryServicesCommand;
 
-using namespace std;
+
 
 namespace PDFHummus
 {
@@ -54,24 +54,24 @@ namespace PDFHummus
 }
 
 using namespace PDFHummus;
-typedef map<ObjectIDType,ObjectIDType> ObjectIDTypeToObjectIDTypeMap;
-typedef map<string,string> StringToStringMap;
-typedef set<ObjectIDType> ObjectIDTypeSet;
-typedef set<IDocumentContextExtender*> IDocumentContextExtenderSet;
+typedef std::map<ObjectIDType,ObjectIDType> ObjectIDTypeToObjectIDTypeMap;
+typedef std::map<std::string,std::string> StringToStringMap;
+typedef std::set<ObjectIDType> ObjectIDTypeSet;
+typedef std::set<IDocumentContextExtender*> IDocumentContextExtenderSet;
 
 struct ResourceTokenMarker
 {
-	ResourceTokenMarker(string inResourceToken,LongFilePositionType inResourceTokenPosition)
+	ResourceTokenMarker(std::string inResourceToken,LongFilePositionType inResourceTokenPosition)
 	{
 		ResourceToken = inResourceToken;
 		ResourceTokenPosition = inResourceTokenPosition;
 	}
 
-	string ResourceToken;
+	std::string ResourceToken;
 	LongFilePositionType ResourceTokenPosition;
 };
 
-typedef list<ResourceTokenMarker> ResourceTokenMarkerList;
+typedef std::list<ResourceTokenMarker> ResourceTokenMarkerList;
 
 class PDFDocumentHandler : public DocumentContextExtenderAdapter
 {
@@ -85,7 +85,7 @@ public:
 	// Create a list of XObjects from a PDF file.
 	// the list of objects can then be used to place the "pages" in various locations on the written
 	// PDF page.
-	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF( const string& inPDFFilePath,
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF( const std::string& inPDFFilePath,
 																const PDFPageRange& inPageRange,
 																EPDFPageBox inPageBoxToUseAsFormBox,
 																const double* inTransformationMatrix,
@@ -97,7 +97,7 @@ public:
 															 const double* inTransformationMatrix,
 															 const ObjectIDTypeList& inCopyAdditionalObjects);
 
-	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF( const string& inPDFFilePath,
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF( const std::string& inPDFFilePath,
 																const PDFPageRange& inPageRange,
 																const PDFRectangle& inCropBox,
 																const double* inTransformationMatrix,
@@ -110,7 +110,7 @@ public:
 															 const ObjectIDTypeList& inCopyAdditionalObjects);
 	
 	// appends pages from source PDF to the written PDF. returns object ID for the created pages
-	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const string& inPDFFilePath,
+	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const std::string& inPDFFilePath,
 														const PDFPageRange& inPageRange,
 														const ObjectIDTypeList& inCopyAdditionalObjects);
 
@@ -121,7 +121,7 @@ public:
 	// MergePDFPagesToPage, merge PDF pages content to an input page. good for single-placement of a page content, cheaper than creating
 	// and XObject and later placing, when the intention is to use this graphic just once.
 	PDFHummus::EStatusCode MergePDFPagesToPage(PDFPage* inPage,
-									const string& inPDFFilePath,
+									const std::string& inPDFFilePath,
 									const PDFPageRange& inPageRange,
 									const ObjectIDTypeList& inCopyAdditionalObjects);
 
@@ -143,7 +143,7 @@ public:
 
 
 	// copying context handling
-	PDFHummus::EStatusCode StartFileCopyingContext(const string& inPDFFilePath);
+	PDFHummus::EStatusCode StartFileCopyingContext(const std::string& inPDFFilePath);
 	PDFHummus::EStatusCode StartStreamCopyingContext(IByteReaderWithPosition* inPDFStream);
 	PDFHummus::EStatusCode StartParserCopyingContext(PDFParser* inPDFParser);
 	EStatusCodeAndObjectIDType CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
@@ -204,7 +204,7 @@ private:
 	PDFHummus::EStatusCode WriteObjectByType(PDFObject* inObject,ETokenSeparator inSeparator,ObjectIDTypeList& outSourceObjectsToAdd);
 	PDFHummus::EStatusCode WriteArrayObject(PDFArray* inArray,ETokenSeparator inSeparator,ObjectIDTypeList& outSourceObjectsToAdd);
 	PDFHummus::EStatusCode WriteArrayObject(PDFArray* inArray,ETokenSeparator inSeparator);
-	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const string& inPDFFilePath,
+	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const std::string& inPDFFilePath,
 															const PDFPageRange& inPageRange,
 															IPageEmbedInFormCommand* inPageEmbedCommand,
 															const double* inTransformationMatrix,
@@ -261,7 +261,7 @@ private:
                                          PDFDictionary* inPageObject,
                                          StringToStringMap& inMappedResourcesNames);
     
-	string AsEncodedName(const string& inName);
+	std::string AsEncodedName(const std::string& inName);
     void RegisterResourcesForResourcesCategory(PDFFormXObject* inTargetFormXObject,
                                                ICategoryServicesCommand* inCommand,
                                                PDFDictionary* inResourcesDictionary,

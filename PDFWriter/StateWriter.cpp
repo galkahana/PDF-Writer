@@ -39,7 +39,7 @@ StateWriter::~StateWriter(void)
 }
 
 
-EStatusCode StateWriter::Start(const string& inStateFilePath)
+EStatusCode StateWriter::Start(const std::string& inStateFilePath)
 {
 
 	// open the new file...
@@ -93,9 +93,9 @@ EStatusCode StateWriter::Finish()
 	return status;	
 }
 
-static const string scTrailer = "trailer";
-static const string scSize = "Size";
-static const string scRoot = "Root";
+static const std::string scTrailer = "trailer";
+static const std::string scSize = "Size";
+static const std::string scRoot = "Root";
 void StateWriter::WriteTrailerDictionary()
 {
 	DictionaryContext* dictionaryContext;
@@ -117,7 +117,7 @@ void StateWriter::SetRootObject(ObjectIDType inRootObjectID)
 	mRootObject = inRootObjectID;
 }
 
-static const string scStartXref = "startxref";
+static const std::string scStartXref = "startxref";
 void StateWriter::WriteXrefReference(LongFilePositionType inXrefTablePosition)
 {
 	mObjectsContext->WriteKeyword(scStartXref);

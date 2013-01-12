@@ -27,7 +27,7 @@
 class InputBufferedStream;
 class InputFileStream;
 
-using namespace std;
+
 
 class InputFile
 {
@@ -35,16 +35,16 @@ public:
 	InputFile(void);
 	~InputFile(void);
 
-	PDFHummus::EStatusCode OpenFile(const string& inFilePath);
+	PDFHummus::EStatusCode OpenFile(const std::string& inFilePath);
 	PDFHummus::EStatusCode CloseFile();
 
 	IByteReaderWithPosition* GetInputStream(); // returns buffered input stream
-	const string& GetFilePath();
+	const std::string& GetFilePath();
 	
 	LongFilePositionType GetFileSize();
 
 private:
-	string mFilePath;
+	std::string mFilePath;
 	InputBufferedStream* mInputStream;
 	InputFileStream* mFileStream;
 };

@@ -21,6 +21,7 @@
 #include "CFFPrimitiveWriter.h"
 #include <math.h>
 
+
 using namespace PDFHummus;
 
 CFFPrimitiveWriter::CFFPrimitiveWriter(IByteWriter* inCFFOutput)

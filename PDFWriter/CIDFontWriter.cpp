@@ -35,6 +35,7 @@
 
 #include <algorithm>
 
+
 using namespace PDFHummus;
 
 CIDFontWriter::CIDFontWriter(void)
@@ -45,14 +46,14 @@ CIDFontWriter::~CIDFontWriter(void)
 {
 }
 
-static const string scType = "Type";
-static const string scFont = "Font";
-static const string scSubtype = "Subtype";
-static const string scType0 = "Type0";
-static const string scBaseFont = "BaseFont";
-static const string scPlus = "+";
-static const string scDescendantFonts = "DescendantFonts";
-static const string scToUnicode = "ToUnicode";
+static const std::string scType = "Type";
+static const std::string scFont = "Font";
+static const std::string scSubtype = "Subtype";
+static const std::string scType0 = "Type0";
+static const std::string scBaseFont = "BaseFont";
+static const std::string scPlus = "+";
+static const std::string scDescendantFonts = "DescendantFonts";
+static const std::string scToUnicode = "ToUnicode";
 
 EStatusCode CIDFontWriter::WriteFont(FreeTypeFaceWrapper& inFontInfo,
 										WrittenFontRepresentation* inFontOccurrence,
@@ -125,8 +126,8 @@ EStatusCode CIDFontWriter::WriteFont(FreeTypeFaceWrapper& inFontInfo,
 	return status;
 }
 
-static const string scEncoding = "Encoding";
-static const string scIdentityH = "Identity-H";
+static const std::string scEncoding = "Encoding";
+static const std::string scIdentityH = "Identity-H";
 void CIDFontWriter::WriteEncoding(DictionaryContext* inFontContext)
 {
 	// Encoding
@@ -164,8 +165,8 @@ begincmap\n\
 static const char* scFourByteRangeStart = "0000";
 static const char* scFourByteRangeEnd = "FFFF";
 static const char* scEndCodeSpaceRange = "endcodespacerange\n";
-static const string scBeginBFChar = "beginbfchar";
-static const string scEndBFChar = "endbfchar";
+static const std::string scBeginBFChar = "beginbfchar";
+static const std::string scEndBFChar = "endbfchar";
 static const char* scCmapFooter = "endcmap CMapName currentdict /CMap defineresource pop end end\n";
 
 void CIDFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)

@@ -25,12 +25,12 @@
 #include <string>
 #include <list>
 
-using namespace std;
 
-typedef pair<PDFHummus::EStatusCode,string> EStatusCodeAndString;
-typedef list<unsigned long> ULongList;
-typedef list<unsigned short> UShortList;
-typedef pair<PDFHummus::EStatusCode,UShortList> EStatusCodeAndUShortList;
+
+typedef std::pair<PDFHummus::EStatusCode,std::string> EStatusCodeAndString;
+typedef std::list<unsigned long> ULongList;
+typedef std::list<unsigned short> UShortList;
+typedef std::pair<PDFHummus::EStatusCode,UShortList> EStatusCodeAndUShortList;
 
 class UnicodeString
 {
@@ -45,19 +45,19 @@ public:
 
 	bool operator==(const UnicodeString& inOtherString) const;
 
-	PDFHummus::EStatusCode FromUTF8(const string& inString);
+	PDFHummus::EStatusCode FromUTF8(const std::string& inString);
 	EStatusCodeAndString ToUTF8() const;
 
 	// convert from UTF16 string, requires BOM
-	PDFHummus::EStatusCode FromUTF16(const string& inString);
+	PDFHummus::EStatusCode FromUTF16(const std::string& inString);
 	PDFHummus::EStatusCode FromUTF16(const unsigned char* inString, unsigned long inLength);
 
 	// convert from UTF16BE, do not include BOM
-	PDFHummus::EStatusCode FromUTF16BE(const string& inString);
+	PDFHummus::EStatusCode FromUTF16BE(const std::string& inString);
 	PDFHummus::EStatusCode FromUTF16BE(const unsigned char* inString, unsigned long inLength);
 
 	// convert from UTF16LE do not include BOM
-	PDFHummus::EStatusCode FromUTF16LE(const string& inString);
+	PDFHummus::EStatusCode FromUTF16LE(const std::string& inString);
 	PDFHummus::EStatusCode FromUTF16LE(const unsigned char* inString, unsigned long inLength);
 
 	// convert from unsigned shorts, does not require BOM, assuming that byte ordering is according to OS

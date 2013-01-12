@@ -40,7 +40,7 @@ TrueTypeANSIFontWriter::~TrueTypeANSIFontWriter(void)
 {
 }
 
-static const string scPlus = "+";
+static const std::string scPlus = "+";
 EStatusCode TrueTypeANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 											WrittenFontRepresentation* inFontOccurrence,
 											ObjectsContext* inObjectsContext)
@@ -71,7 +71,7 @@ EStatusCode TrueTypeANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 	return fontWriter.WriteFont(inFontInfo,inFontOccurrence,inObjectsContext,this,subsetFontName);
 }
 
-static const string scTrueType = "TrueType";
+static const std::string scTrueType = "TrueType";
 
 void TrueTypeANSIFontWriter::WriteSubTypeValue(DictionaryContext* inDictionary)
 {
@@ -98,7 +98,7 @@ void TrueTypeANSIFontWriter::WriteCharSet(	DictionaryContext* inDescriptorContex
 	// do nothing. no charset writing for true types
 }
 
-static const string scFontFile2 = "FontFile2";
+static const std::string scFontFile2 = "FontFile2";
 
 void TrueTypeANSIFontWriter::WriteFontFileReference(	
 										DictionaryContext* inDescriptorContext,

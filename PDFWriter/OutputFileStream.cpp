@@ -36,13 +36,13 @@ OutputFileStream::~OutputFileStream(void)
 }
 
 
-OutputFileStream::OutputFileStream(const string& inFilePath,bool inAppend)
+OutputFileStream::OutputFileStream(const std::string& inFilePath,bool inAppend)
 {
 	mStream = NULL;
 	Open(inFilePath,inAppend);
 }
 
-EStatusCode OutputFileStream::Open(const string& inFilePath,bool inAppend)
+EStatusCode OutputFileStream::Open(const std::string& inFilePath,bool inAppend)
 {
 	SAFE_FOPEN(mStream,inFilePath.c_str(),inAppend ? "ab":"wb")
 

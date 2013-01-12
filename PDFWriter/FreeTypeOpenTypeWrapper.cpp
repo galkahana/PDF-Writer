@@ -23,6 +23,8 @@
 
 #include <math.h>
 
+
+
 FreeTypeOpenTypeWrapper::FreeTypeOpenTypeWrapper(FT_Face inFace)
 {
 	void* tableInfo = FT_Get_Sfnt_Table(inFace,ft_sfnt_post);
@@ -127,7 +129,7 @@ FT_UShort FreeTypeOpenTypeWrapper::GetStemV()
 		if(mOS2Table)
 			weight = mOS2Table->usWeightClass;
 		else if(mPCLTTable)
-			weight = max(mPCLTTable->StrokeWeight * 80 + 500,0) ; // what you see here is an attempt to use linear function to get from strokeweight to weight class
+			weight = std::max(mPCLTTable->StrokeWeight * 80 + 500,0) ; // what you see here is an attempt to use linear function to get from strokeweight to weight class
 		else
 			weight = 500;
 		return (FT_UShort)(50 + pow(weight/65.0,2)); // this is some heuristic i found in a web site...lord knows if it's true

@@ -33,7 +33,7 @@ StateReader::~StateReader(void)
 {
 }
 
-EStatusCode StateReader::Start(const string& inStateFilePath)
+EStatusCode StateReader::Start(const std::string& inStateFilePath)
 {
 	// open the new file...
 	if(mInputFile.OpenFile(inStateFilePath) != PDFHummus::eSuccess)

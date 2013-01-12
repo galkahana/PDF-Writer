@@ -23,7 +23,7 @@
 
 #include <string>
 
-using namespace std;
+
 
 class PDFSymbol : public PDFObject
 {
@@ -34,12 +34,12 @@ public:
 		eType = ePDFObjectSymbol
 	};
 
-	PDFSymbol(const string& inSymbol);
+	PDFSymbol(const std::string& inSymbol);
 	virtual ~PDFSymbol(void);
 
-	const string& GetValue() const;
+	const std::string& GetValue() const;
 
 private:
 
-	string mValue;
+	std::string mValue;
 };

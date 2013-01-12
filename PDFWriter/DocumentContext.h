@@ -39,7 +39,7 @@
 #include <list>
 #include <map>
 
-using namespace std;
+
 using namespace IOBasicTypes;
 
 class DictionaryContext;
@@ -61,17 +61,17 @@ class IResourceWritingTask;
 class IFormEndWritingTask;
 class PDFDocumentCopyingContext;
 
-typedef set<IDocumentContextExtender*> IDocumentContextExtenderSet;
-typedef pair<PDFHummus::EStatusCode,ObjectIDType> EStatusCodeAndObjectIDType;
-typedef list<ObjectIDType> ObjectIDTypeList;
-typedef set<ObjectIDType> ObjectIDTypeSet;
-typedef map<ObjectIDType,string> ObjectIDTypeToStringMap;
-typedef set<PDFDocumentCopyingContext*> PDFDocumentCopyingContextSet;
-typedef pair<ResourcesDictionary*,string> ResourcesDictionaryAndString;
-typedef list<IResourceWritingTask*> IResourceWritingTaskList;
-typedef map<ResourcesDictionaryAndString,IResourceWritingTaskList> ResourcesDictionaryAndStringToIResourceWritingTaskListMap;
-typedef list<IFormEndWritingTask*> IFormEndWritingTaskList;
-typedef map<PDFFormXObject*,IFormEndWritingTaskList> PDFFormXObjectToIFormEndWritingTaskListMap;
+typedef std::set<IDocumentContextExtender*> IDocumentContextExtenderSet;
+typedef std::pair<PDFHummus::EStatusCode,ObjectIDType> EStatusCodeAndObjectIDType;
+typedef std::list<ObjectIDType> ObjectIDTypeList;
+typedef std::set<ObjectIDType> ObjectIDTypeSet;
+typedef std::map<ObjectIDType,std::string> ObjectIDTypeToStringMap;
+typedef std::set<PDFDocumentCopyingContext*> PDFDocumentCopyingContextSet;
+typedef std::pair<ResourcesDictionary*,std::string> ResourcesDictionaryAndString;
+typedef std::list<IResourceWritingTask*> IResourceWritingTaskList;
+typedef std::map<ResourcesDictionaryAndString,IResourceWritingTaskList> ResourcesDictionaryAndStringToIResourceWritingTaskListMap;
+typedef std::list<IFormEndWritingTask*> IFormEndWritingTaskList;
+typedef std::map<PDFFormXObject*,IFormEndWritingTaskList> PDFFormXObjectToIFormEndWritingTaskListMap;
 
 namespace PDFHummus
 {
@@ -131,23 +131,23 @@ namespace PDFHummus
 		// JPEG - two variants
 		
 		// will return image xobject sized at 1X1
-		PDFImageXObject* CreateImageXObjectFromJPGFile(const string& inJPGFilePath);
+		PDFImageXObject* CreateImageXObjectFromJPGFile(const std::string& inJPGFilePath);
 		PDFImageXObject* CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream);
-		PDFImageXObject* CreateImageXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inImageXObjectID);
+		PDFImageXObject* CreateImageXObjectFromJPGFile(const std::string& inJPGFilePath,ObjectIDType inImageXObjectID);
 		PDFImageXObject* CreateImageXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inImageXObjectID);
 
 		// will return form XObject, which will include the xobject at it's size
-		PDFFormXObject* CreateFormXObjectFromJPGFile(const string& inJPGFilePath);
+		PDFFormXObject* CreateFormXObjectFromJPGFile(const std::string& inJPGFilePath);
 		PDFFormXObject* CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream);
-		PDFFormXObject* CreateFormXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inFormXObjectID);
+		PDFFormXObject* CreateFormXObjectFromJPGFile(const std::string& inJPGFilePath,ObjectIDType inFormXObjectID);
 		PDFFormXObject* CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inFormXObjectID);
 
 		// TIFF
-		PDFFormXObject* CreateFormXObjectFromTIFFFile(	const string& inTIFFFilePath,
+		PDFFormXObject* CreateFormXObjectFromTIFFFile(	const std::string& inTIFFFilePath,
 														const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 		PDFFormXObject* CreateFormXObjectFromTIFFStream(IByteReaderWithPosition* inTIFFStream,
 														const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
-		PDFFormXObject* CreateFormXObjectFromTIFFFile(	const string& inTIFFFilePath,
+		PDFFormXObject* CreateFormXObjectFromTIFFFile(	const std::string& inTIFFFilePath,
 														ObjectIDType inFormXObjectID,
 														const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 		PDFFormXObject* CreateFormXObjectFromTIFFStream(	IByteReaderWithPosition* inTIFFStream,
@@ -157,7 +157,7 @@ namespace PDFHummus
 		// PDF
 		// CreateFormXObjectsFromPDF is for using input PDF pages as objects in one page or more. you can used the returned IDs to place the 
 		// created form xobjects
-		EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const string& inPDFFilePath,
+		EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const std::string& inPDFFilePath,
 																 const PDFPageRange& inPageRange,
 																 EPDFPageBox inPageBoxToUseAsFormBox,
 																 const double* inTransformationMatrix = NULL,
@@ -170,7 +170,7 @@ namespace PDFHummus
 																 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 		
 		// CreateFormXObjectsFromPDF is an override to allow you to determine a custom crop for the page embed
-		EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const string& inPDFFilePath,
+		EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const std::string& inPDFFilePath,
 																 const PDFPageRange& inPageRange,
 																 const PDFRectangle& inCropBox,
 																 const double* inTransformationMatrix = NULL,
@@ -183,7 +183,7 @@ namespace PDFHummus
 																 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
 		// AppendPDFPagesFromPDF is for simple appending of the input PDF pages
-		EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const string& inPDFFilePath,
+		EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const std::string& inPDFFilePath,
 															const PDFPageRange& inPageRange,
 															const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 		
@@ -194,7 +194,7 @@ namespace PDFHummus
 		// MergePDFPagesToPage, merge PDF pages content to an input page. good for single-placement of a page content, cheaper than creating
 		// and XObject and later placing, when the intention is to use this graphic just once.
 		PDFHummus::EStatusCode MergePDFPagesToPage(PDFPage* inPage,
-										const string& inPDFFilePath,
+										const std::string& inPDFFilePath,
 										const PDFPageRange& inPageRange,
 										const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
@@ -203,17 +203,17 @@ namespace PDFHummus
 										const PDFPageRange& inPageRange,
 										const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
-		PDFDocumentCopyingContext* CreatePDFCopyingContext(const string& inPDFFilePath);
+		PDFDocumentCopyingContext* CreatePDFCopyingContext(const std::string& inPDFFilePath);
 		PDFDocumentCopyingContext* CreatePDFCopyingContext(IByteReaderWithPosition* inPDFStream);
         PDFDocumentCopyingContext* CreatePDFCopyingContext(PDFParser* inPDFParser);
 
 		// Font [Text]
-		PDFUsedFont* GetFontForFile(const string& inFontFilePath);
+		PDFUsedFont* GetFontForFile(const std::string& inFontFilePath);
 		// second overload is for type 1, when an additional metrics file is available
-		PDFUsedFont* GetFontForFile(const string& inFontFilePath,const string& inAdditionalMeticsFilePath);
+		PDFUsedFont* GetFontForFile(const std::string& inFontFilePath,const std::string& inAdditionalMeticsFilePath);
 
 		// URL should be encoded to be a valid URL, ain't gonna be checking that!
-		PDFHummus::EStatusCode AttachURLLinktoCurrentPage(const string& inURL,const PDFRectangle& inLinkClickArea);
+		PDFHummus::EStatusCode AttachURLLinktoCurrentPage(const std::string& inURL,const PDFRectangle& inLinkClickArea);
 
 		// Extensibility
 		void AddDocumentContextExtender(IDocumentContextExtender* inExtender);
@@ -226,14 +226,14 @@ namespace PDFHummus
         // is supposed to write one resource. it can write a direct object.
         // note that the task is supposed to both write the name and the content of the object.
         // returns the name of the newley added resource
-        string AddExtendedResourceMapping(PDFFormXObject* inFormXObject,
-                                          const string& inResourceCategoryName,
+        std::string AddExtendedResourceMapping(PDFFormXObject* inFormXObject,
+                                          const std::string& inResourceCategoryName,
                                           IResourceWritingTask* inWritingTask);
-        string AddExtendedResourceMapping(PDFPage* inPage,
-                                          const string& inResourceCategoryName,
+        std::string AddExtendedResourceMapping(PDFPage* inPage,
+                                          const std::string& inResourceCategoryName,
                                           IResourceWritingTask* inWritingTask);
-        string AddExtendedResourceMapping(ResourcesDictionary* inResourceDictionary,
-                                          const string& inResourceCategoryName,
+        std::string AddExtendedResourceMapping(ResourcesDictionary* inResourceDictionary,
+                                          const std::string& inResourceCategoryName,
                                           IResourceWritingTask* inWritingTask);
         
         // Extensibility option. option of writing a single time task for when a particular form ends
@@ -259,7 +259,7 @@ namespace PDFHummus
 		ObjectsContext* mObjectsContext;
 		TrailerInformation mTrailerInformation;
 		CatalogInformation mCatalogInformation;
-		string mOutputFilePath;
+		std::string mOutputFilePath;
 		IDocumentContextExtenderSet mExtenders;
 		JPEGImageHandler mJPEGImageHandler;
 		TIFFImageHandler mTIFFImageHandler;
@@ -269,7 +269,7 @@ namespace PDFHummus
 		IPDFParserExtender* mParserExtender;
 		PDFDocumentCopyingContextSet mCopyingContexts;
         bool mModifiedDocumentIDExists;
-        string mModifiedDocumentID;
+        std::string mModifiedDocumentID;
 		ObjectIDType mCurrentPageTreeIDInState;
         ResourcesDictionaryAndStringToIResourceWritingTaskListMap mResourcesTasks;
         PDFFormXObjectToIFormEndWritingTaskListMap mFormEndTasks;
@@ -289,15 +289,15 @@ namespace PDFHummus
 		void WriteInfoDictionary();
 		void WritePagesTree();
 		int WritePageTree(PageTree* inPageTreeToWrite);
-		string GenerateMD5IDForFile();
+		std::string GenerateMD5IDForFile();
 		PDFHummus::EStatusCode WriteResourcesDictionary(ResourcesDictionary& inResourcesDictionary);
         PDFHummus::EStatusCode WriteResourceDictionary(ResourcesDictionary* inResourcesDictionary,
                                                        DictionaryContext* inResourcesCategoryDictionary,
-                                                       const string& inResourceDictionaryLabel,
+                                                       const std::string& inResourceDictionaryLabel,
                                                        MapIterator<ObjectIDTypeToStringMap> inMapping);
 		bool IsIdentityMatrix(const double* inMatrix);
 		PDFHummus::EStatusCode WriteUsedFontsDefinitions();
-		EStatusCodeAndObjectIDType WriteAnnotationAndLinkForURL(const string& inURL,const PDFRectangle& inLinkClickArea);
+		EStatusCodeAndObjectIDType WriteAnnotationAndLinkForURL(const std::string& inURL,const PDFRectangle& inLinkClickArea);
 
 		void WriteTrailerState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
         void WriteReferenceState(ObjectsContext* inStateWriter,

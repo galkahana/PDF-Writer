@@ -84,9 +84,9 @@ bool ParsedPrimitiveHelper::IsNumber()
 typedef BoxingBaseWithRW<long long> LongLong;
 
 // strings (relevant for: names, literal string, hex string, real, integer, symbol, boolean)
-string ParsedPrimitiveHelper::ToString()
+std::string ParsedPrimitiveHelper::ToString()
 {
-    string result;
+    std::string result;
     
     switch(mWrappedObject->GetType())
     {

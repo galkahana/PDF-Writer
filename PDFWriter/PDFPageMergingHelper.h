@@ -24,7 +24,7 @@
 
 #include <string>
 
-using namespace std;
+
 
 class PDFPage;
 class IByteReaderWithPosition;
@@ -39,7 +39,7 @@ public:
 	virtual ~PDFPageMergingHelper(void);
     
     PDFHummus::EStatusCode MergePageContent(PDFDocumentCopyingContext* inCopyingContext,unsigned long inPageIndex);
-    PDFHummus::EStatusCode MergePageContent(PDFWriter* inWriter,const string& inPDFFilePath,unsigned long inPageIndex);
+    PDFHummus::EStatusCode MergePageContent(PDFWriter* inWriter,const std::string& inPDFFilePath,unsigned long inPageIndex);
     PDFHummus::EStatusCode MergePageContent(PDFWriter* inWriter,IByteReaderWithPosition* inPDFStream,unsigned long inPageIndex);
     
 private:

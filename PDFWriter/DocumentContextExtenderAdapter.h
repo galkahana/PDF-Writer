@@ -46,7 +46,7 @@ public:
 	// add items to a particular resource dictionary (will be called from all but procset array and xobjects dict)
 	virtual PDFHummus::EStatusCode OnResourceDictionaryWrite(
 							DictionaryContext* inResourceDictionary,
-							const string& inResourceDictionaryName,
+							const std::string& inResourceDictionaryName,
 							ObjectsContext* inPDFWriterObjectContext,
 							PDFHummus::DocumentContext* inDocumentContext){return PDFHummus::eSuccess;}
 

@@ -70,10 +70,10 @@ ULongList& UnicodeString::GetUnicodeList()
 	return mUnicodeCharacters;
 }
 
-EStatusCode UnicodeString::FromUTF8(const string& inString)
+EStatusCode UnicodeString::FromUTF8(const std::string& inString)
 {
 	mUnicodeCharacters.clear();
-	string::const_iterator it = inString.begin();
+	std::string::const_iterator it = inString.begin();
 	EStatusCode status = PDFHummus::eSuccess;
 	unsigned long unicodeCharacter;
 
@@ -144,7 +144,7 @@ EStatusCodeAndString UnicodeString::ToUTF8() const
 {
 	ULongList::const_iterator it = mUnicodeCharacters.begin();
 	EStatusCode status = PDFHummus::eSuccess;
-	stringstream result;
+	std::stringstream result;
 
 	for(; it != mUnicodeCharacters.end() && PDFHummus::eSuccess == status; ++it)
 	{
@@ -181,7 +181,7 @@ EStatusCodeAndString UnicodeString::ToUTF8() const
 	return EStatusCodeAndString(status,result.str());
 }
 
-EStatusCode UnicodeString::FromUTF16(const string& inString)
+EStatusCode UnicodeString::FromUTF16(const std::string& inString)
 {
 	return FromUTF16((const unsigned char*)inString.c_str(),(unsigned long)inString.length());
 }
@@ -200,7 +200,7 @@ EStatusCode UnicodeString::FromUTF16(const unsigned char* inString, unsigned lon
 		return PDFHummus::eFailure; // no bom
 }
 
-EStatusCode UnicodeString::FromUTF16BE(const string& inString)
+EStatusCode UnicodeString::FromUTF16BE(const std::string& inString)
 {
 	return FromUTF16BE((const unsigned char*)inString.c_str(),(unsigned long)inString.length());
 }
@@ -251,7 +251,7 @@ EStatusCode UnicodeString::FromUTF16BE(const unsigned char* inString, unsigned l
 	return status;
 }
 
-EStatusCode UnicodeString::FromUTF16LE(const string& inString)
+EStatusCode UnicodeString::FromUTF16LE(const std::string& inString)
 {
 	return FromUTF16LE((const unsigned char*)inString.c_str(),(unsigned long)inString.length());
 }
@@ -342,7 +342,7 @@ EStatusCodeAndString UnicodeString::ToUTF16BE(bool inPrependWithBom) const
 {
 	ULongList::const_iterator it = mUnicodeCharacters.begin();
 	EStatusCode status = PDFHummus::eSuccess;
-	stringstream result;
+	std::stringstream result;
 
 	if(inPrependWithBom)
 	{
@@ -381,7 +381,7 @@ EStatusCodeAndString UnicodeString::ToUTF16LE(bool inPrependWithBom) const
 {
 	ULongList::const_iterator it = mUnicodeCharacters.begin();
 	EStatusCode status = PDFHummus::eSuccess;
-	stringstream result;
+	std::stringstream result;
 
 	if(inPrependWithBom)
 	{

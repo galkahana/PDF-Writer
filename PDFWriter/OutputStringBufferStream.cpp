@@ -68,12 +68,12 @@ LongFilePositionType OutputStringBufferStream::GetCurrentPosition()
 	return mBuffer->GetCurrentWritePosition();
 }
 
-string OutputStringBufferStream::ToString() const
+std::string OutputStringBufferStream::ToString() const
 {
 	return mBuffer->str();
 }
 
-static const string scEmpty;
+static const std::string scEmpty;
 
 void OutputStringBufferStream::Reset()
 {
@@ -82,5 +82,5 @@ void OutputStringBufferStream::Reset()
 
 void OutputStringBufferStream::SetPosition(LongFilePositionType inOffsetFromStart)
 {
-	mBuffer->pubseekoff((long)inOffsetFromStart,ios_base::beg);
+	mBuffer->pubseekoff((long)inOffsetFromStart,std::ios_base::beg);
 }

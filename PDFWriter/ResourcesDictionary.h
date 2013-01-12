@@ -28,10 +28,10 @@
 #include <map>
 #include <string>
 
-using namespace std;
 
-typedef set<string> StringSet;
-typedef map<ObjectIDType,string> ObjectIDTypeToStringMap;
+
+typedef std::set<std::string> StringSet;
+typedef std::map<ObjectIDType,std::string> ObjectIDTypeToStringMap;
 
 class PDFImageXObject;
 
@@ -41,58 +41,58 @@ public:
 	ResourcesDictionary(void);
 	virtual ~ResourcesDictionary(void);
 
-	void AddProcsetResource(const string& inResourceName);
+	void AddProcsetResource(const std::string& inResourceName);
 	SingleValueContainerIterator<StringSet> GetProcesetsIterator();
 
 	// ExtGStates. 
-	string AddExtGStateMapping(ObjectIDType inExtGStateID);
-	void AddExtGStateMapping(ObjectIDType inExtGStateID, const string& inExtGStateName);
+	std::string AddExtGStateMapping(ObjectIDType inExtGStateID);
+	void AddExtGStateMapping(ObjectIDType inExtGStateID, const std::string& inExtGStateName);
 	MapIterator<ObjectIDTypeToStringMap> GetExtGStatesIterator();
 
 
 	// Fonts.
-	string AddFontMapping(ObjectIDType inFontObjectID);
-	void AddFontMapping(ObjectIDType inFontObjectID,const string& inFontObjectName);
+	std::string AddFontMapping(ObjectIDType inFontObjectID);
+	void AddFontMapping(ObjectIDType inFontObjectID,const std::string& inFontObjectName);
 	MapIterator<ObjectIDTypeToStringMap> GetFontsIterator();
 
 
 	// Color space
-	string AddColorSpaceMapping(ObjectIDType inColorspaceID);
+	std::string AddColorSpaceMapping(ObjectIDType inColorspaceID);
 	MapIterator<ObjectIDTypeToStringMap> GetColorSpacesIterator();
 
 	// Patterns
-	string AddPatternMapping(ObjectIDType inPatternID);
+	std::string AddPatternMapping(ObjectIDType inPatternID);
 	MapIterator<ObjectIDTypeToStringMap> GetPatternsIterator();
 
 	// Properties
-	string AddPropertyMapping(ObjectIDType inPropertyID);
+	std::string AddPropertyMapping(ObjectIDType inPropertyID);
 	MapIterator<ObjectIDTypeToStringMap> GetPropertiesIterator();
 	
 
 	// XObjects
-	string AddXObjectMapping(ObjectIDType inXObjectID);
+	std::string AddXObjectMapping(ObjectIDType inXObjectID);
 	MapIterator<ObjectIDTypeToStringMap> GetXObjectsIterator();
 
 	// Use AddFormXObjectMapping to use a form XObject in a content stream [page or xobject].
 	// AddFromXObjectMapping(inFormXObjectID) returns a string name that you can use for 'Do' calls
-	string AddFormXObjectMapping(ObjectIDType inFormXObjectID);
+	std::string AddFormXObjectMapping(ObjectIDType inFormXObjectID);
 	// AddFormXObjectMapping(inFormXObjectID,inFormXObjectName) should be used when the mechanism
 	// for determining XObject names is external to ResourcesDictionary. it is highly recommended
 	// that if One overload is used, it is used any time the particular resource dictionary is handled - this will avoid
 	// collisions in naming between the internal and external mechanism.
-	void AddFormXObjectMapping(ObjectIDType inFormXObjectID,const string& inFormXObjectName);
+	void AddFormXObjectMapping(ObjectIDType inFormXObjectID,const std::string& inFormXObjectName);
     
 	// images. same idea as forms. note that image define resources that should
 	// be added to the container resources dictionary
-	string AddImageXObjectMapping(PDFImageXObject* inImageXObject);
-	void AddImageXObjectMapping(PDFImageXObject* inImageXObject, const string& inImageXObjectName);
+	std::string AddImageXObjectMapping(PDFImageXObject* inImageXObject);
+	void AddImageXObjectMapping(PDFImageXObject* inImageXObject, const std::string& inImageXObjectName);
     
 	// images registration without the automatic addition of image resources to the container resources dictionary
-	string AddImageXObjectMapping(ObjectIDType inImageXObjectID);
-	void AddImageXObjectMapping(ObjectIDType inImageXObjectID, const string& inImageXObjectName);
+	std::string AddImageXObjectMapping(ObjectIDType inImageXObjectID);
+	void AddImageXObjectMapping(ObjectIDType inImageXObjectID, const std::string& inImageXObjectName);
     
 	// Shading
-	string AddShadingMapping(ObjectIDType inShadingID);
+	std::string AddShadingMapping(ObjectIDType inShadingID);
 	MapIterator<ObjectIDTypeToStringMap> GetShadingsIterator();
 
 private:
@@ -115,7 +115,7 @@ private:
 	ObjectIDTypeToStringMap mShading;
     unsigned long mShadingCount;
 
-	void AddImageXObjectMappingWithName(PDFImageXObject* inImageXObject, const string& inImageXObjectName);
+	void AddImageXObjectMappingWithName(PDFImageXObject* inImageXObject, const std::string& inImageXObjectName);
 
 };
 

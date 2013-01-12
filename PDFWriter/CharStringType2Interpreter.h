@@ -25,9 +25,9 @@
 
 #include <vector>
 
-using namespace std;
 
-typedef vector<CharStringOperand> CharStringOperandVector;
+
+typedef std::vector<CharStringOperand> CharStringOperandVector;
 
 class CharStringType2Interpreter
 {

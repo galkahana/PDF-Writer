@@ -25,9 +25,9 @@
 
 #include <map>
 
-using namespace std;
 
-class PDFNameLess : public binary_function<const PDFName*,const PDFName*,bool>
+
+class PDFNameLess : public std::binary_function<const PDFName*,const PDFName*,bool>
 {
 public:
 	bool operator( ) (const PDFName* left, 
@@ -37,7 +37,7 @@ public:
 	}
 };
 
-typedef map<PDFName*,PDFObject*,PDFNameLess> PDFNameToPDFObjectMap;
+typedef std::map<PDFName*,PDFObject*,PDFNameLess> PDFNameToPDFObjectMap;
 
 class PDFDictionary : public PDFObject
 {
@@ -54,8 +54,8 @@ public:
 	// AddRefs on both
 	void Insert(PDFName* inKeyObject, PDFObject* inValueObject);
 
-    bool Exists(string inName);
-	PDFObject* QueryDirectObject(string inName);
+    bool Exists(std::string inName);
+	PDFObject* QueryDirectObject(std::string inName);
 
 	MapIterator<PDFNameToPDFObjectMap> GetIterator();
 

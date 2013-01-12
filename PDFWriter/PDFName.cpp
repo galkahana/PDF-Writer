@@ -20,7 +20,7 @@
 */
 #include "PDFName.h"
 
-PDFName::PDFName(const string& inValue) : PDFObject(eType)
+PDFName::PDFName(const std::string& inValue) : PDFObject(eType)
 {
 	mValue = inValue;
 }
@@ -29,12 +29,12 @@ PDFName::~PDFName(void)
 {
 }
 
-const string& PDFName::GetValue() const
+const std::string& PDFName::GetValue() const
 {
 	return mValue;
 }
 
-PDFName::operator string() const
+PDFName::operator std::string() const
 {
 	return mValue;
 }

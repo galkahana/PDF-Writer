@@ -24,7 +24,7 @@
 
 #include <string>
 
-using namespace std;
+
 
 class PDFLiteralString : public PDFObject
 {
@@ -36,13 +36,13 @@ public:
 	};
 
 	// Value is the interpreted string (no enclosing paranthesis and escaped sequances as the result values)
-	PDFLiteralString(const string& inValue);
+	PDFLiteralString(const std::string& inValue);
 	virtual ~PDFLiteralString(void);
 
-	const string& GetValue() const;
-	operator string() const;
+	const std::string& GetValue() const;
+	operator std::string() const;
 
 private:
-	string mValue;
+	std::string mValue;
 
 };

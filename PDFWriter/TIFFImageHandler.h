@@ -79,7 +79,7 @@
 #include <string>
 #include <list>
 
-using namespace std;
+
 
 
 struct T2P;
@@ -100,9 +100,9 @@ namespace PDFHummus
 using namespace PDFHummus;
 
 
-typedef list<ObjectIDType> ObjectIDTypeList;
-typedef list<PDFImageXObject*> PDFImageXObjectList;
-typedef list<string> StringList;
+typedef std::list<ObjectIDType> ObjectIDTypeList;
+typedef std::list<PDFImageXObject*> PDFImageXObjectList;
+typedef std::list<std::string> StringList;
 
 //  tiff.h extracted defs [prefer to avoid including too much here]
 typedef	unsigned short uint16;	/* sizeof (uint16) must == 2 */
@@ -120,11 +120,11 @@ public:
 	virtual ~TIFFImageHandler(void);
 
 	// create a form XObject from an image (using form for 1. tiled images 2. to setup matrix, set color space...and leave you with just placing the image object
-	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const string& inTIFFFilePath,
+	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const std::string& inTIFFFilePath,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 	PDFFormXObject* CreateFormXObjectFromTIFFStream(IByteReaderWithPosition* inTIFFStream,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
-	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const string& inTIFFFilePath,
+	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const std::string& inTIFFFilePath,
 													ObjectIDType inFormXObjectID,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 	PDFFormXObject* CreateFormXObjectFromTIFFStream(IByteReaderWithPosition* inTIFFStream,

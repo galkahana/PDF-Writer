@@ -72,8 +72,8 @@ bool PDFDate::IsNull()
 
 */
 
-static const string scEmpty = "";
-string PDFDate::ToString()
+static const std::string scEmpty = "";
+std::string PDFDate::ToString()
 {
 	if(IsNull())
 		return scEmpty;
@@ -173,7 +173,7 @@ string PDFDate::ToString()
 	buffer[1] = ':';
 	buffer[0] = 'D';
 
-	return string(buffer);
+	return std::string(buffer);
 }
 
 void PDFDate::SetToCurrentTime()

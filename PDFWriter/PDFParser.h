@@ -39,7 +39,7 @@ class PDFDictionary;
 class PDFName;
 class IPDFParserExtender;
 
-typedef pair<PDFHummus::EStatusCode,IByteReader*> EStatusCodeAndIByteReader;
+typedef std::pair<PDFHummus::EStatusCode,IByteReader*> EStatusCodeAndIByteReader;
 
 #define LINE_BUFFER_SIZE 1024
 
@@ -85,7 +85,7 @@ private:
 	
 };
 
-typedef map<ObjectIDType,ObjectStreamHeaderEntry*> ObjectIDTypeToObjectStreamHeaderEntryMap;
+typedef std::map<ObjectIDType,ObjectStreamHeaderEntry*> ObjectIDTypeToObjectStreamHeaderEntryMap;
 
 class PDFParser
 {
@@ -115,7 +115,7 @@ public:
 
 	// Query a dictinary object, if indirect, go and fetch the indirect object and return it instead
 	// [if you want the direct dictionary value, use PDFDictionary::QueryDirectObject [will AddRef automatically]
-	PDFObject* QueryDictionaryObject(PDFDictionary* inDictionary,const string& inName);
+	PDFObject* QueryDictionaryObject(PDFDictionary* inDictionary,const std::string& inName);
 	
 	// Query an array object, if indirect, go and fetch the indirect object and return it instead
 	// [if you want the direct array value, use the PDFArray direct access to the vector [and use AddRef, cause it won't]

@@ -54,7 +54,7 @@ PDFWriter::~PDFWriter(void)
 }
 
 EStatusCode PDFWriter::StartPDF(
-							const string& inOutputFilePath,
+							const std::string& inOutputFilePath,
 							EPDFVersion inPDFVersion,
 							const LogConfiguration& inLogConfiguration,
 							const PDFCreationSettings& inPDFCreationSettings)
@@ -210,47 +210,47 @@ EStatusCode PDFWriter::EndFormXObjectAndRelease(PDFFormXObject* inFormXObject)
 	return mDocumentContext.EndFormXObjectAndRelease(inFormXObject);
 }
 
-PDFImageXObject* PDFWriter::CreateImageXObjectFromJPGFile(const string& inJPGFilePath)
+PDFImageXObject* PDFWriter::CreateImageXObjectFromJPGFile(const std::string& inJPGFilePath)
 {
 	return mDocumentContext.CreateImageXObjectFromJPGFile(inJPGFilePath); 
 }
 
-PDFFormXObject* PDFWriter::CreateFormXObjectFromJPGFile(const string& inJPGFilePath)
+PDFFormXObject* PDFWriter::CreateFormXObjectFromJPGFile(const std::string& inJPGFilePath)
 {
 	return mDocumentContext.CreateFormXObjectFromJPGFile(inJPGFilePath); 
 }
 
-PDFFormXObject* PDFWriter::CreateFormXObjectFromTIFFFile(const string& inTIFFFilePath,const TIFFUsageParameters& inTIFFUsageParameters)
+PDFFormXObject* PDFWriter::CreateFormXObjectFromTIFFFile(const std::string& inTIFFFilePath,const TIFFUsageParameters& inTIFFUsageParameters)
 {
 	return mDocumentContext.CreateFormXObjectFromTIFFFile(inTIFFFilePath,inTIFFUsageParameters); 
 }
 
-PDFImageXObject* PDFWriter::CreateImageXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inImageXObjectID)
+PDFImageXObject* PDFWriter::CreateImageXObjectFromJPGFile(const std::string& inJPGFilePath,ObjectIDType inImageXObjectID)
 {
 	return mDocumentContext.CreateImageXObjectFromJPGFile(inJPGFilePath,inImageXObjectID); 
 }
 
-PDFFormXObject* PDFWriter::CreateFormXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inImageXObjectID)
+PDFFormXObject* PDFWriter::CreateFormXObjectFromJPGFile(const std::string& inJPGFilePath,ObjectIDType inImageXObjectID)
 {
 	return mDocumentContext.CreateFormXObjectFromJPGFile(inJPGFilePath,inImageXObjectID); 
 }
 
-PDFFormXObject* PDFWriter::CreateFormXObjectFromTIFFFile(const string& inTIFFFilePath,ObjectIDType inFormXObjectID, const TIFFUsageParameters& inTIFFUsageParameters)
+PDFFormXObject* PDFWriter::CreateFormXObjectFromTIFFFile(const std::string& inTIFFFilePath,ObjectIDType inFormXObjectID, const TIFFUsageParameters& inTIFFUsageParameters)
 {
 	return mDocumentContext.CreateFormXObjectFromTIFFFile(inTIFFFilePath,inFormXObjectID,inTIFFUsageParameters); 
 }
 
-PDFUsedFont* PDFWriter::GetFontForFile(const string& inFontFilePath)
+PDFUsedFont* PDFWriter::GetFontForFile(const std::string& inFontFilePath)
 {
 	return mDocumentContext.GetFontForFile(inFontFilePath);
 }
 
-PDFUsedFont* PDFWriter::GetFontForFile(const string& inFontFilePath,const string& inAdditionalMeticsFilePath)
+PDFUsedFont* PDFWriter::GetFontForFile(const std::string& inFontFilePath,const std::string& inAdditionalMeticsFilePath)
 {
 	return mDocumentContext.GetFontForFile(inFontFilePath,inAdditionalMeticsFilePath);
 }
 
-EStatusCodeAndObjectIDTypeList PDFWriter::CreateFormXObjectsFromPDF(const string& inPDFFilePath,
+EStatusCodeAndObjectIDTypeList PDFWriter::CreateFormXObjectsFromPDF(const std::string& inPDFFilePath,
 																	  const PDFPageRange& inPageRange,
 																	  EPDFPageBox inPageBoxToUseAsFormBox,
 																	  const double* inTransformationMatrix,
@@ -263,7 +263,7 @@ EStatusCodeAndObjectIDTypeList PDFWriter::CreateFormXObjectsFromPDF(const string
 														inCopyAdditionalObjects);
 }
 
-EStatusCodeAndObjectIDTypeList PDFWriter::CreateFormXObjectsFromPDF(const string& inPDFFilePath,
+EStatusCodeAndObjectIDTypeList PDFWriter::CreateFormXObjectsFromPDF(const std::string& inPDFFilePath,
 																	 const PDFPageRange& inPageRange,
 																	 const PDFRectangle& inCropBox,
 																	 const double* inTransformationMatrix,
@@ -276,7 +276,7 @@ EStatusCodeAndObjectIDTypeList PDFWriter::CreateFormXObjectsFromPDF(const string
 														inCopyAdditionalObjects);
 }
 
-EStatusCodeAndObjectIDTypeList PDFWriter::AppendPDFPagesFromPDF(const string& inPDFFilePath,
+EStatusCodeAndObjectIDTypeList PDFWriter::AppendPDFPagesFromPDF(const std::string& inPDFFilePath,
 																const PDFPageRange& inPageRange,
 																const ObjectIDTypeList& inCopyAdditionalObjects)
 {
@@ -285,7 +285,7 @@ EStatusCodeAndObjectIDTypeList PDFWriter::AppendPDFPagesFromPDF(const string& in
 														inCopyAdditionalObjects);
 }
 
-EStatusCode PDFWriter::Shutdown(const string& inStateFilePath)
+EStatusCode PDFWriter::Shutdown(const std::string& inStateFilePath)
 {
 	EStatusCode status;
 
@@ -356,9 +356,9 @@ EStatusCode PDFWriter::Shutdown(const string& inStateFilePath)
 	return status;
 }
 
-EStatusCode PDFWriter::ContinuePDF(const string& inOutputFilePath,
-								   const string& inStateFilePath,
-                                   const string& inOptionalModifiedFile,
+EStatusCode PDFWriter::ContinuePDF(const std::string& inOutputFilePath,
+								   const std::string& inStateFilePath,
+                                   const std::string& inOptionalModifiedFile,
 								   const LogConfiguration& inLogConfiguration)
 {
 	
@@ -388,7 +388,7 @@ EStatusCode PDFWriter::ContinuePDF(const string& inOutputFilePath,
 
 }
 
-EStatusCode PDFWriter::SetupState(const string& inStateFilePath)
+EStatusCode PDFWriter::SetupState(const std::string& inStateFilePath)
 {
 	EStatusCode status;
 
@@ -433,7 +433,7 @@ EStatusCode PDFWriter::SetupState(const string& inStateFilePath)
 
 
 EStatusCode PDFWriter::ContinuePDFForStream(IByteWriterWithPosition* inOutputStream,
-											const string& inStateFilePath,
+											const std::string& inStateFilePath,
                                             IByteReaderWithPosition* inModifiedSourceStream,
 			 								const LogConfiguration& inLogConfiguration)
 {
@@ -450,18 +450,18 @@ EStatusCode PDFWriter::ContinuePDFForStream(IByteWriterWithPosition* inOutputStr
 }
 
 
-PDFDocumentCopyingContext* PDFWriter::CreatePDFCopyingContext(const string& inPDFFilePath)
+PDFDocumentCopyingContext* PDFWriter::CreatePDFCopyingContext(const std::string& inPDFFilePath)
 {
 	return mDocumentContext.CreatePDFCopyingContext(inPDFFilePath);
 }
 
-EStatusCode PDFWriter::AttachURLLinktoCurrentPage(const string& inURL,const PDFRectangle& inLinkClickArea)
+EStatusCode PDFWriter::AttachURLLinktoCurrentPage(const std::string& inURL,const PDFRectangle& inLinkClickArea)
 {
 	return mDocumentContext.AttachURLLinktoCurrentPage(inURL,inLinkClickArea);
 }
 
 EStatusCode PDFWriter::MergePDFPagesToPage(PDFPage* inPage,
-								const string& inPDFFilePath,
+								const std::string& inPDFFilePath,
 								const PDFPageRange& inPageRange,
 								const ObjectIDTypeList& inCopyAdditionalObjects)
 {
@@ -572,9 +572,9 @@ PDFDocumentCopyingContext* PDFWriter::CreatePDFCopyingContext(IByteReaderWithPos
 	return mDocumentContext.CreatePDFCopyingContext(inPDFStream);	
 }
 
-EStatusCode PDFWriter::ModifyPDF(const string& inModifiedFile,
+EStatusCode PDFWriter::ModifyPDF(const std::string& inModifiedFile,
                                             EPDFVersion inPDFVersion,
-                                            const string& inOptionalAlternativeOutputFile,
+                                            const std::string& inOptionalAlternativeOutputFile,
                                             const LogConfiguration& inLogConfiguration,
                                             const PDFCreationSettings& inPDFCreationSettings)
 {
@@ -664,7 +664,7 @@ EStatusCode PDFWriter::SetupStateFromModifiedStream(IByteReaderWithPosition* inM
     return status;
 }
 
-EStatusCode PDFWriter::SetupStateFromModifiedFile(const string& inModifiedFile,EPDFVersion inPDFVersion)
+EStatusCode PDFWriter::SetupStateFromModifiedFile(const std::string& inModifiedFile,EPDFVersion inPDFVersion)
 {
     EStatusCode status;
     

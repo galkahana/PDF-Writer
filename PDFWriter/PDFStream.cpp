@@ -140,7 +140,7 @@ DictionaryContext* PDFStream::GetStreamDictionaryForDirectExtentStream()
 
 void PDFStream::FlushStreamContentForDirectExtentStream()
 {
-    mTemporaryStream.pubseekoff(0,ios_base::beg);
+    mTemporaryStream.pubseekoff(0,std::ios_base::beg);
     
     // copy internal temporary stream to output
     InputStringBufferStream inputStreamForWrite(&mTemporaryStream);

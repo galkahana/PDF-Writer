@@ -31,8 +31,8 @@
 using namespace PDFHummus;
 
 PDFUsedFont::PDFUsedFont(FT_Face inInputFace,
-						 const string& inFontFilePath,
-						 const string& inAdditionalMetricsFontFilePath,
+						 const std::string& inFontFilePath,
+						 const std::string& inAdditionalMetricsFontFilePath,
 						 ObjectsContext* inObjectsContext):mFaceWrapper(inInputFace,inFontFilePath,inAdditionalMetricsFontFilePath)
 {
 	mObjectsContext = inObjectsContext;
@@ -62,7 +62,7 @@ EStatusCode PDFUsedFont::EncodeStringForShowing(const GlyphUnicodeMappingList& i
 	return PDFHummus::eSuccess;
 }
 
-EStatusCode PDFUsedFont::TranslateStringToGlyphs(const string& inText,GlyphUnicodeMappingList& outGlyphsUnicodeMapping)
+EStatusCode PDFUsedFont::TranslateStringToGlyphs(const std::string& inText,GlyphUnicodeMappingList& outGlyphsUnicodeMapping)
 {
 	UIntList glyphs;
 	UnicodeString unicode;

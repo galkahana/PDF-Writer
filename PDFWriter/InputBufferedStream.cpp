@@ -22,7 +22,7 @@
 #include <memory.h>
 #include <algorithm>
 
-using namespace std;
+
 
 InputBufferedStream::InputBufferedStream(void)
 {
@@ -93,7 +93,7 @@ LongBufferSizeType InputBufferedStream::Read(Byte* inBuffer,LongBufferSizeType i
 				{
 					mLastAvailableIndex = mBuffer + mSourceStream->Read(mBuffer,mBufferSize);
 					mCurrentBufferIndex = mBuffer;
-					bytesToReadToBuffer = min<LongBufferSizeType>(bytesToReadToBuffer,mLastAvailableIndex - mBuffer);
+					bytesToReadToBuffer = std::min<LongBufferSizeType>(bytesToReadToBuffer,mLastAvailableIndex - mBuffer);
 					if(bytesToReadToBuffer > 0)
 					{
 						memcpy(inBuffer + bytesRead,mCurrentBufferIndex,bytesToReadToBuffer);

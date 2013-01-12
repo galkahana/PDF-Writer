@@ -28,7 +28,7 @@
 #include <set>
 #include <string>
 
-using namespace std;
+
 
 class IByteWriter;
 class Type1Input;
@@ -39,7 +39,7 @@ struct ConversionNode
 	LongList mOperands;
 };
 
-typedef list<ConversionNode> ConversionNodeList;
+typedef std::list<ConversionNode> ConversionNodeList;
 
 struct Stem
 {
@@ -51,7 +51,7 @@ struct Stem
 	long mExtent;
 };
 
-class StemLess : public binary_function<const Stem,const Stem,bool>
+class StemLess : public std::binary_function<const Stem,const Stem,bool>
 {
 public:
 	bool operator( ) (const Stem& inLeft, 
@@ -64,10 +64,10 @@ public:
 	}
 };
 
-typedef vector<const Stem*> StemVector;
-typedef set<Stem,StemLess> StemSet;
-typedef set<size_t> SizeTSet;
-typedef map<Stem,size_t,StemLess> StemToSizeTMap;
+typedef std::vector<const Stem*> StemVector;
+typedef std::set<Stem,StemLess> StemSet;
+typedef std::set<size_t> SizeTSet;
+typedef std::map<Stem,size_t,StemLess> StemToSizeTMap;
 
 class Type1ToType2Converter : IType1InterpreterImplementation
 {
@@ -75,7 +75,7 @@ public:
 	Type1ToType2Converter(void);
 	~Type1ToType2Converter(void);
 
-	PDFHummus::EStatusCode WriteConvertedFontProgram(const string& inGlyphName,
+	PDFHummus::EStatusCode WriteConvertedFontProgram(const std::string& inGlyphName,
 										  Type1Input* inType1Input,
 										  IByteWriter* inByteWriter);
 

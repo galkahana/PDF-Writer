@@ -23,6 +23,7 @@
 #include "InputFile.h"
 #include "IByteReaderWithPosition.h"
 
+
 using namespace PDFHummus;
 
 
@@ -65,7 +66,7 @@ FreeTypeWrapper::~FreeTypeWrapper(void)
 }
 
 // using my own streams, to implement UTF8 paths
-FT_Face FreeTypeWrapper::NewFace(const string& inFilePath,FT_Long inFontIndex)
+FT_Face FreeTypeWrapper::NewFace(const std::string& inFilePath,FT_Long inFontIndex)
 {
 	FT_Face face;
 	FT_Open_Args openFaceArguments;
@@ -96,7 +97,7 @@ FT_Face FreeTypeWrapper::NewFace(const string& inFilePath,FT_Long inFontIndex)
 	return face;
 }
 
-EStatusCode FreeTypeWrapper::FillOpenFaceArgumentsForUTF8String(const string& inFilePath, FT_Open_Args& ioArgs)
+EStatusCode FreeTypeWrapper::FillOpenFaceArgumentsForUTF8String(const std::string& inFilePath, FT_Open_Args& ioArgs)
 {
 	ioArgs.flags = FT_OPEN_STREAM;
 	ioArgs.memory_base = NULL;
@@ -136,7 +137,7 @@ void FreeTypeWrapper::RegisterStreamForFace(FT_Face inFace,FT_Stream inStream)
 }
 
 
-FT_Face FreeTypeWrapper::NewFace(const string& inFilePath,const string& inSecondaryFilePath,FT_Long inFontIndex)
+FT_Face FreeTypeWrapper::NewFace(const std::string& inFilePath,const std::string& inSecondaryFilePath,FT_Long inFontIndex)
 {
 	FT_Open_Args attachStreamArguments;
 
@@ -220,7 +221,7 @@ static void InputFileClose(FT_Stream  stream)
 	stream->descriptor.pointer = NULL;
 }
 
-FT_Stream FreeTypeWrapper::CreateFTStreamForPath(const string& inFilePath)
+FT_Stream FreeTypeWrapper::CreateFTStreamForPath(const std::string& inFilePath)
 {
 	InputFile* inputFile = new InputFile;
 

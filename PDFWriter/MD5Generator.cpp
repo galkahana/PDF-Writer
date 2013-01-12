@@ -90,7 +90,7 @@ MD5Generator::~MD5Generator(void)
 }
 
 
-EStatusCode MD5Generator::Accumulate(const string& inString)
+EStatusCode MD5Generator::Accumulate(const std::string& inString)
 {
 	if(mIsFinalized)
 		return PDFHummus::eFailure;
@@ -323,7 +323,7 @@ const MD5Generator::uint1 MD5Generator::PADDING[64]={
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-string MD5Generator::ToString()
+std::string MD5Generator::ToString()
 {
 	if(!mIsFinalized)
 	{

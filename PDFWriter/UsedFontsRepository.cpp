@@ -56,7 +56,7 @@ void UsedFontsRepository::SetObjectsContext(ObjectsContext* inObjectsContext)
 	mObjectsContext = inObjectsContext;
 }
 
-PDFUsedFont* UsedFontsRepository::GetFontForFile(const string& inFontFilePath,const string& inOptionalMetricsFile)
+PDFUsedFont* UsedFontsRepository::GetFontForFile(const std::string& inFontFilePath,const std::string& inOptionalMetricsFile)
 {
 	if(!mObjectsContext)
 	{
@@ -113,12 +113,12 @@ EStatusCode UsedFontsRepository::WriteUsedFontsDefinitions()
 	return status;	
 }
 
-PDFUsedFont* UsedFontsRepository::GetFontForFile(const string& inFontFilePath)
+PDFUsedFont* UsedFontsRepository::GetFontForFile(const std::string& inFontFilePath)
 {
 	return GetFontForFile(inFontFilePath,"");
 }
 
-typedef list<ObjectIDType> ObjectIDTypeList;
+typedef std::list<ObjectIDType> ObjectIDTypeList;
 EStatusCode UsedFontsRepository::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
 {
 	EStatusCode status = PDFHummus::eSuccess;
@@ -228,7 +228,7 @@ EStatusCode UsedFontsRepository::ReadState(PDFParser* inStateReader,ObjectIDType
 		valueItem = it.GetItem();
 
 		PDFTextString aTextString(keyItem->GetValue());
-		string filePath = aTextString.ToUTF8String();
+		std::string filePath = aTextString.ToUTF8String();
 
 		FT_Face face;
 		face = mInputFontsInformation->NewFace(filePath);

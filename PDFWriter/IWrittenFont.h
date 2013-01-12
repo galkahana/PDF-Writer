@@ -27,11 +27,11 @@
 #include <list>
 #include <vector>
 
-using namespace std;
 
-typedef list<unsigned short> UShortList;
-typedef list<UShortList> UShortListList;
-typedef list<GlyphUnicodeMappingList> GlyphUnicodeMappingListList;
+
+typedef std::list<unsigned short> UShortList;
+typedef std::list<UShortList> UShortListList;
+typedef std::list<GlyphUnicodeMappingList> GlyphUnicodeMappingListList;
 
 class FreeTypeFaceWrapper;
 class ObjectsContext;

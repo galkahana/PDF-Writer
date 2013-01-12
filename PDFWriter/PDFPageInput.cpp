@@ -110,7 +110,7 @@ PDFRectangle PDFPageInput::GetTrimBox()
     return GetBoxAndDefaultWithCrop("TrimBox");
 }
 
-PDFRectangle PDFPageInput::GetBoxAndDefaultWithCrop(const string& inBoxName)
+PDFRectangle PDFPageInput::GetBoxAndDefaultWithCrop(const std::string& inBoxName)
 {
     PDFRectangle result;
     PDFObjectCastPtr<PDFArray> aBox(QueryInheritedValue(mPageObject.GetPtr(),inBoxName));
@@ -133,8 +133,8 @@ PDFRectangle PDFPageInput::GetArtBox()
 }
 
 
-static const string scParent = "Parent";
-PDFObject* PDFPageInput::QueryInheritedValue(PDFDictionary* inDictionary,const string& inName)
+static const std::string scParent = "Parent";
+PDFObject* PDFPageInput::QueryInheritedValue(PDFDictionary* inDictionary,const std::string& inName)
 {
 	if(inDictionary->Exists(inName))
 	{

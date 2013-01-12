@@ -170,7 +170,7 @@ PDFHummus::EStatusCode IndirectObjectsReferenceRegistry::MarkObjectAsUpdated(Obj
 }
 
 
-typedef list<ObjectIDType> ObjectIDTypeList;
+typedef std::list<ObjectIDType> ObjectIDTypeList;
 
 EStatusCode IndirectObjectsReferenceRegistry::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
 {

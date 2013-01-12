@@ -37,7 +37,8 @@
 
 #include <algorithm>
 
-using namespace std;
+
+
 using namespace PDFHummus;
 
 ANSIFontWriter::ANSIFontWriter(void)
@@ -48,12 +49,12 @@ ANSIFontWriter::~ANSIFontWriter(void)
 {
 }
 
-static const string scType = "Type";
-static const string scFont = "Font";
-static const string scSubtype = "Subtype";
-static const string scBaseFont = "BaseFont";
-static const string scToUnicode = "ToUnicode";
-static const string scFontDescriptor = "FontDescriptor";
+static const std::string scType = "Type";
+static const std::string scFont = "Font";
+static const std::string scSubtype = "Subtype";
+static const std::string scBaseFont = "BaseFont";
+static const std::string scToUnicode = "ToUnicode";
+static const std::string scFontDescriptor = "FontDescriptor";
 
 EStatusCode ANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 											WrittenFontRepresentation* inFontOccurrence,
@@ -152,9 +153,9 @@ void ANSIFontWriter::CalculateCharacterEncodingArray()
 	std::sort(mCharactersVector.begin(),mCharactersVector.end(),sUShortSort);
 }
 
-static const string scFirstChar = "FirstChar";
-static const string scLastChar = "LastChar";
-static const string scWidths = "Widths";
+static const std::string scFirstChar = "FirstChar";
+static const std::string scLastChar = "LastChar";
+static const std::string scWidths = "Widths";
 
 void ANSIFontWriter::WriteWidths(DictionaryContext* inFontContext)
 {
@@ -210,8 +211,8 @@ void ANSIFontWriter::CalculateDifferences()
 	}
 }
 
-static const string scEncoding = "Encoding";
-static const string scWinAnsiEncoding = "WinAnsiEncoding";
+static const std::string scEncoding = "Encoding";
+static const std::string scWinAnsiEncoding = "WinAnsiEncoding";
 void ANSIFontWriter::WriteEncoding(DictionaryContext* inFontContext)
 {
 	// Encoding
@@ -228,8 +229,8 @@ void ANSIFontWriter::WriteEncoding(DictionaryContext* inFontContext)
 	}
 }
 
-static const string scBaseEncoding = "BaseEncoding";
-static const string scDifferences = "Differences";
+static const std::string scBaseEncoding = "BaseEncoding";
+static const std::string scDifferences = "Differences";
 void ANSIFontWriter::WriteEncodingDictionary()
 {
 	DictionaryContext* encodingDictionary;
@@ -293,8 +294,8 @@ begincmap\n\
 static const char* scTwoByteRangeStart = "00";
 static const char* scTwoByteRangeEnd = "FF";
 static const char* scEndCodeSpaceRange = "endcodespacerange\n";
-static const string scBeginBFChar = "beginbfchar";
-static const string scEndBFChar = "endbfchar";
+static const std::string scBeginBFChar = "beginbfchar";
+static const std::string scEndBFChar = "endbfchar";
 static const char* scCmapFooter = "endcmap CMapName currentdict /CMap defineresource pop end end\n";
 
 

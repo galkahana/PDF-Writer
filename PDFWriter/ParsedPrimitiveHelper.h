@@ -28,7 +28,7 @@
 
 #include <string>
 
-using namespace std;
+
 
 class PDFObject;
 
@@ -45,7 +45,7 @@ public:
     bool IsNumber();
     
     // strings (relevant for: names, literal string, hex string, real, integer, symbol, boolean)
-    string ToString();
+    std::string ToString();
     
 private:
     

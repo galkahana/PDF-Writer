@@ -32,7 +32,7 @@ PDFDocumentCopyingContext::~PDFDocumentCopyingContext(void)
 	End();
 }
 
-EStatusCode PDFDocumentCopyingContext::Start(const string& inPDFFilePath,
+EStatusCode PDFDocumentCopyingContext::Start(const std::string& inPDFFilePath,
 											  DocumentContext* inDocumentContext,
 											  ObjectsContext* inObjectsContext,
 											  IPDFParserExtender* inParserExtender)

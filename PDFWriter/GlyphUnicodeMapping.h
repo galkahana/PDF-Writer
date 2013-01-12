@@ -23,9 +23,9 @@
 #include <vector>
 #include <list>
 
-using namespace std;
 
-typedef vector<unsigned long> ULongVector;
+
+typedef std::vector<unsigned long> ULongVector;
 
 struct GlyphUnicodeMapping
 {
@@ -50,4 +50,4 @@ struct GlyphUnicodeMapping
 	unsigned short mGlyphCode;	
 };
 
-typedef list<GlyphUnicodeMapping> GlyphUnicodeMappingList;
+typedef std::list<GlyphUnicodeMapping> GlyphUnicodeMappingList;

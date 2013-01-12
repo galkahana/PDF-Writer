@@ -34,6 +34,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+
 using namespace PDFHummus;
 
 CFFANSIFontWriter::CFFANSIFontWriter(void)
@@ -44,10 +45,10 @@ CFFANSIFontWriter::~CFFANSIFontWriter(void)
 {
 }
 
-static const string scType1C = "Type1C";
+static const std::string scType1C = "Type1C";
 static const char* scType1Type = "Type 1";
 static const char* scCFF = "CFF";
-static const string scPlus = "+";
+static const std::string scPlus = "+";
 EStatusCode CFFANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 											WrittenFontRepresentation* inFontOccurrence,
 											ObjectsContext* inObjectsContext)
@@ -121,7 +122,7 @@ bool CFFANSIFontWriter::CanWriteDifferencesFromWinAnsi()
 
 
 
-static const string scCharSet = "CharSet";
+static const std::string scCharSet = "CharSet";
 static const Byte scLeftParanthesis[] = {'('};
 static const Byte scRightParanthesis[] = {')'};
 
@@ -153,7 +154,7 @@ void CFFANSIFontWriter::WriteCharSet(	DictionaryContext* inDescriptorContext,
 	inObjectsContext->EndLine();
 }
 
-static const string scFontFile3 = "FontFile3";
+static const std::string scFontFile3 = "FontFile3";
 void CFFANSIFontWriter::WriteFontFileReference(	
 										DictionaryContext* inDescriptorContext,
 										ObjectsContext* inObjectsContext)

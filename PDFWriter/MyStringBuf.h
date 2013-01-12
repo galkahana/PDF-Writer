@@ -22,16 +22,16 @@
 
 #include <sstream>
 
-using namespace std;
 
-class MyStringBuf : public stringbuf
+
+class MyStringBuf : public std::stringbuf
 {
 public:
 
-	stringbuf::pos_type GetCurrentReadPosition() {return gptr()-eback();}
-	stringbuf::pos_type GetCurrentWritePosition() {return pptr()-pbase();}
+	std::stringbuf::pos_type GetCurrentReadPosition() {return gptr()-eback();}
+	std::stringbuf::pos_type GetCurrentWritePosition() {return pptr()-pbase();}
 	
-	stringbuf::pos_type GetReadSize() {return egptr()-eback();}
-	stringbuf::pos_type GetWriteSize() {return epptr()-pbase();}
+	std::stringbuf::pos_type GetReadSize() {return egptr()-eback();}
+	std::stringbuf::pos_type GetWriteSize() {return epptr()-pbase();}
 
 };

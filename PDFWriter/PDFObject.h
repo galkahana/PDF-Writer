@@ -24,7 +24,7 @@
 
 #include <string>
 
-using namespace std;
+
 
 class PDFObject : public RefCountObject
 {

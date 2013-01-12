@@ -29,6 +29,7 @@
 #include "SafeBufferMacrosDefs.h"
 #include "OutputStreamTraits.h"
 
+
 using namespace PDFHummus;
 
 AbstractContentContext::AbstractContentContext(void)
@@ -44,13 +45,13 @@ void AbstractContentContext::SetPDFStreamForWrite(PDFStream* inStream)
 	mPrimitiveWriter.SetStreamForWriting(inStream->GetWriteStream());	
 }
 
-void AbstractContentContext::AssertProcsetAvailable(const string& inProcsetName)
+void AbstractContentContext::AssertProcsetAvailable(const std::string& inProcsetName)
 {
 	GetResourcesDictionary()->AddProcsetResource(inProcsetName);	
 }
 
 
-static const string scAddRectangleToPath = "re";
+static const std::string scAddRectangleToPath = "re";
 void AbstractContentContext::re(double inLeft,double inBottom, double inWidth,double inHeight)
 {
 	RenewStreamConnection();
@@ -63,7 +64,7 @@ void AbstractContentContext::re(double inLeft,double inBottom, double inWidth,do
 	mPrimitiveWriter.WriteKeyword(scAddRectangleToPath);
 }
 
-static const string scFill = "f";
+static const std::string scFill = "f";
 void AbstractContentContext::f()
 {
 	RenewStreamConnection();
@@ -295,7 +296,7 @@ void AbstractContentContext::d(int* inDashArray, int inDashArrayLength,int inDas
 	mPrimitiveWriter.WriteKeyword("d");
 }
 
-void AbstractContentContext::ri(const string& inRenderingIntentName)
+void AbstractContentContext::ri(const std::string& inRenderingIntentName)
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
@@ -313,7 +314,7 @@ void AbstractContentContext::i(int inFlatness)
 	mPrimitiveWriter.WriteKeyword("i");
 }
 
-void AbstractContentContext::gs(const string& inGraphicStateName)
+void AbstractContentContext::gs(const std::string& inGraphicStateName)
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
@@ -323,7 +324,7 @@ void AbstractContentContext::gs(const string& inGraphicStateName)
 }
 
 
-void AbstractContentContext::CS(const string& inColorSpaceName)
+void AbstractContentContext::CS(const std::string& inColorSpaceName)
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
@@ -332,7 +333,7 @@ void AbstractContentContext::CS(const string& inColorSpaceName)
 	mPrimitiveWriter.WriteKeyword("CS");
 }
 
-void AbstractContentContext::cs(const string& inColorSpaceName)
+void AbstractContentContext::cs(const std::string& inColorSpaceName)
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
@@ -361,7 +362,7 @@ void AbstractContentContext::SCN(double* inColorComponents, int inColorComponent
 	mPrimitiveWriter.WriteKeyword("SCN");
 }
 
-void AbstractContentContext::SCN(double* inColorComponents, int inColorComponentsLength,const string& inPatternName)
+void AbstractContentContext::SCN(double* inColorComponents, int inColorComponentsLength,const std::string& inPatternName)
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
@@ -392,7 +393,7 @@ void AbstractContentContext::scn(double* inColorComponents, int inColorComponent
 	mPrimitiveWriter.WriteKeyword("scn");
 }
 
-void AbstractContentContext::scn(double* inColorComponents, int inColorComponentsLength,const string& inPatternName)
+void AbstractContentContext::scn(double* inColorComponents, int inColorComponentsLength,const std::string& inPatternName)
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
@@ -483,7 +484,7 @@ void AbstractContentContext::WStar()
 	mPrimitiveWriter.WriteKeyword("W*");
 }
 
-void AbstractContentContext::Do(const string& inXObjectName)
+void AbstractContentContext::Do(const std::string& inXObjectName)
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
@@ -532,7 +533,7 @@ void AbstractContentContext::TL(double inTextLeading)
 	mPrimitiveWriter.WriteKeyword("TL");
 }
 
-void AbstractContentContext::TfLow(const string& inFontName,double inFontSize)
+void AbstractContentContext::TfLow(const std::string& inFontName,double inFontSize)
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
@@ -631,7 +632,7 @@ void AbstractContentContext::TStar()
 }
 
 
-void AbstractContentContext::TjLow(const string& inText)
+void AbstractContentContext::TjLow(const std::string& inText)
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
@@ -641,7 +642,7 @@ void AbstractContentContext::TjLow(const string& inText)
 	mPrimitiveWriter.WriteKeyword("Tj");
 }
 
-void AbstractContentContext::TjHexLow(const string& inText)
+void AbstractContentContext::TjHexLow(const std::string& inText)
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
@@ -651,7 +652,7 @@ void AbstractContentContext::TjHexLow(const string& inText)
 	mPrimitiveWriter.WriteKeyword("Tj");
 }
 
-void AbstractContentContext::QuoteLow(const string& inText)
+void AbstractContentContext::QuoteLow(const std::string& inText)
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
@@ -661,7 +662,7 @@ void AbstractContentContext::QuoteLow(const string& inText)
 	mPrimitiveWriter.WriteKeyword("'");
 }
 
-void AbstractContentContext::QuoteHexLow(const string& inText)
+void AbstractContentContext::QuoteHexLow(const std::string& inText)
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
@@ -673,7 +674,7 @@ void AbstractContentContext::QuoteHexLow(const string& inText)
 
 void AbstractContentContext::DoubleQuoteLow(	double inWordSpacing, 
 											double inCharacterSpacing, 
-											const string& inText)
+											const std::string& inText)
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
@@ -685,7 +686,7 @@ void AbstractContentContext::DoubleQuoteLow(	double inWordSpacing,
 	mPrimitiveWriter.WriteKeyword("\"");
 }
 
-void AbstractContentContext::DoubleQuoteHexLow(double inWordSpacing, double inCharacterSpacing, const string& inText)
+void AbstractContentContext::DoubleQuoteHexLow(double inWordSpacing, double inCharacterSpacing, const std::string& inText)
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
@@ -751,11 +752,11 @@ class ITextCommand
 {
 public:
 
-	virtual void WriteHexStringCommand(const string& inStringToWrite) = 0;
-	virtual void WriteLiteralStringCommand(const string& inStringToWrite) = 0;
+	virtual void WriteHexStringCommand(const std::string& inStringToWrite) = 0;
+	virtual void WriteLiteralStringCommand(const std::string& inStringToWrite) = 0;
 };
 
-EStatusCode AbstractContentContext::WriteTextCommandWithEncoding(const string& inUnicodeText,ITextCommand* inTextCommand)
+EStatusCode AbstractContentContext::WriteTextCommandWithEncoding(const std::string& inUnicodeText,ITextCommand* inTextCommand)
 {
 	PDFUsedFont* currentFont = mGraphicStack.GetCurrentState().mFont;
 	if(!currentFont)
@@ -780,13 +781,13 @@ class TjCommand : public ITextCommand
 public:
 	TjCommand(AbstractContentContext* inContext) {mContext = inContext;}
 
-	virtual void WriteHexStringCommand(const string& inStringToWrite){mContext->TjHexLow(inStringToWrite);}
-	virtual void WriteLiteralStringCommand(const string& inStringToWrite){mContext->TjLow(inStringToWrite);}
+	virtual void WriteHexStringCommand(const std::string& inStringToWrite){mContext->TjHexLow(inStringToWrite);}
+	virtual void WriteLiteralStringCommand(const std::string& inStringToWrite){mContext->TjLow(inStringToWrite);}
 private:
 	AbstractContentContext* mContext;
 };
 
-EStatusCode AbstractContentContext::Tj(const string& inText)
+EStatusCode AbstractContentContext::Tj(const std::string& inText)
 {
 	TjCommand command(this);
 	return WriteTextCommandWithEncoding(inText,&command);
@@ -797,13 +798,13 @@ class QuoteCommand : public ITextCommand
 public:
 	QuoteCommand(AbstractContentContext* inContext) {mContext = inContext;}
 
-	virtual void WriteHexStringCommand(const string& inStringToWrite){mContext->QuoteHexLow(inStringToWrite);}
-	virtual void WriteLiteralStringCommand(const string& inStringToWrite){mContext->QuoteLow(inStringToWrite);}
+	virtual void WriteHexStringCommand(const std::string& inStringToWrite){mContext->QuoteHexLow(inStringToWrite);}
+	virtual void WriteLiteralStringCommand(const std::string& inStringToWrite){mContext->QuoteLow(inStringToWrite);}
 private:
 	AbstractContentContext* mContext;
 };
 
-EStatusCode AbstractContentContext::Quote(const string& inText)
+EStatusCode AbstractContentContext::Quote(const std::string& inText)
 {
 	QuoteCommand command(this);
 	return WriteTextCommandWithEncoding(inText,&command);
@@ -816,15 +817,15 @@ public:
 						double inWordSpacing,
 						double inCharacterSpacing) {mContext = inContext;mWordSpacing = inWordSpacing;mCharacterSpacing = inCharacterSpacing;}
 
-	virtual void WriteHexStringCommand(const string& inStringToWrite){mContext->DoubleQuoteHexLow(mWordSpacing,mCharacterSpacing,inStringToWrite);}
-	virtual void WriteLiteralStringCommand(const string& inStringToWrite){mContext->DoubleQuoteLow(mWordSpacing,mCharacterSpacing,inStringToWrite);}
+	virtual void WriteHexStringCommand(const std::string& inStringToWrite){mContext->DoubleQuoteHexLow(mWordSpacing,mCharacterSpacing,inStringToWrite);}
+	virtual void WriteLiteralStringCommand(const std::string& inStringToWrite){mContext->DoubleQuoteLow(mWordSpacing,mCharacterSpacing,inStringToWrite);}
 private:
 	AbstractContentContext* mContext;
 	double mWordSpacing;
 	double mCharacterSpacing;
 };
 
-EStatusCode AbstractContentContext::DoubleQuote(double inWordSpacing, double inCharacterSpacing, const string& inText)
+EStatusCode AbstractContentContext::DoubleQuote(double inWordSpacing, double inCharacterSpacing, const std::string& inText)
 {
 	DoubleQuoteCommand command(this,inWordSpacing,inCharacterSpacing);
 	return WriteTextCommandWithEncoding(inText,&command);
@@ -1031,7 +1032,7 @@ EStatusCode AbstractContentContext::TJ(const GlyphUnicodeMappingListOrDoubleList
 	return PDFHummus::eSuccess;	
 }
 
-void AbstractContentContext::WriteFreeCode(const string& inFreeCode)
+void AbstractContentContext::WriteFreeCode(const std::string& inFreeCode)
 {
     RenewStreamConnection();
     mPrimitiveWriter.GetWritingStream()->Write((const Byte*)(inFreeCode.c_str()),inFreeCode.length());

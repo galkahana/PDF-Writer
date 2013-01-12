@@ -47,6 +47,7 @@
 #include "IResourceWritingTask.h"
 #include "IFormEndWritingTask.h"
 
+
 using namespace PDFHummus;
 
 DocumentContext::DocumentContext()
@@ -115,14 +116,14 @@ EStatusCode	DocumentContext::WriteHeader(EPDFVersion inPDFVersion)
 		return PDFHummus::eFailure;
 }
 
-static const string scPDFVersion10 = "PDF-1.0";
-static const string scPDFVersion11 = "PDF-1.1";
-static const string scPDFVersion12 = "PDF-1.2";
-static const string scPDFVersion13 = "PDF-1.3";
-static const string scPDFVersion14 = "PDF-1.4";
-static const string scPDFVersion15 = "PDF-1.5";
-static const string scPDFVersion16 = "PDF-1.6";
-static const string scPDFVersion17 = "PDF-1.7";
+static const std::string scPDFVersion10 = "PDF-1.0";
+static const std::string scPDFVersion11 = "PDF-1.1";
+static const std::string scPDFVersion12 = "PDF-1.2";
+static const std::string scPDFVersion13 = "PDF-1.3";
+static const std::string scPDFVersion14 = "PDF-1.4";
+static const std::string scPDFVersion15 = "PDF-1.5";
+static const std::string scPDFVersion16 = "PDF-1.6";
+static const std::string scPDFVersion17 = "PDF-1.7";
 
 void DocumentContext::WriteHeaderComment(EPDFVersion inPDFVersion)
 {
@@ -205,7 +206,7 @@ EStatusCode	DocumentContext::FinalizeNewPDF()
 }
 
 
-static const string scStartXref = "startxref";
+static const std::string scStartXref = "startxref";
 void DocumentContext::WriteXrefReference(LongFilePositionType inXrefTablePosition)
 {
 	mObjectsContext->WriteKeyword(scStartXref);
@@ -221,13 +222,13 @@ void DocumentContext::WriteFinalEOF()
 	mObjectsContext->EndFreeContext();
 }
 
-static const string scTrailer = "trailer";
-static const string scSize = "Size";
-static const string scPrev = "Prev";
-static const string scRoot = "Root";
-static const string scEncrypt = "Encrypt";
-static const string scInfo = "Info";
-static const string scID = "ID";
+static const std::string scTrailer = "trailer";
+static const std::string scSize = "Size";
+static const std::string scPrev = "Prev";
+static const std::string scRoot = "Root";
+static const std::string scEncrypt = "Encrypt";
+static const std::string scInfo = "Info";
+static const std::string scID = "ID";
 EStatusCode DocumentContext::WriteTrailerDictionary()
 {
 	DictionaryContext* dictionaryContext;
@@ -293,7 +294,7 @@ EStatusCode DocumentContext::WriteTrailerDictionaryValues(DictionaryContext* inD
 
 		// write ID
 
-		string id = GenerateMD5IDForFile();
+		std::string id = GenerateMD5IDForFile();
 		inDictionaryContext->WriteKey(scID);
 		mObjectsContext->StartArray();
         
@@ -311,17 +312,17 @@ EStatusCode DocumentContext::WriteTrailerDictionaryValues(DictionaryContext* inD
 	return status;
 }
 
-static const string scTitle = "Title";
-static const string scAuthor = "Author";
-static const string scSubject = "Subject";
-static const string scKeywords = "Keywords";
-static const string scCreator = "Creator";
-static const string scProducer = "Producer";
-static const string scCreationDate = "CreationDate";
-static const string scModDate = "ModDate";
-static const string scTrapped = "Trapped";
-static const string scTrue = "True";
-static const string scFalse = "False";
+static const std::string scTitle = "Title";
+static const std::string scAuthor = "Author";
+static const std::string scSubject = "Subject";
+static const std::string scKeywords = "Keywords";
+static const std::string scCreator = "Creator";
+static const std::string scProducer = "Producer";
+static const std::string scCreationDate = "CreationDate";
+static const std::string scModDate = "ModDate";
+static const std::string scTrapped = "Trapped";
+static const std::string scTrue = "True";
+static const std::string scFalse = "False";
 
 void DocumentContext::WriteInfoDictionary()
 {
@@ -406,9 +407,9 @@ CatalogInformation& DocumentContext::GetCatalogInformation()
 	return mCatalogInformation;
 }
 
-static const string scType = "Type";
-static const string scCatalog = "Catalog";
-static const string scPages = "Pages";
+static const std::string scType = "Type";
+static const std::string scCatalog = "Catalog";
+static const std::string scPages = "Pages";
 EStatusCode DocumentContext::WriteCatalogObjectOfNewPDF()
 {
     return WriteCatalogObject(mCatalogInformation.GetPageTreeRoot(mObjectsContext->GetInDirectObjectsRegistry())->GetID());
@@ -450,9 +451,9 @@ void DocumentContext::WritePagesTree()
 	WritePageTree(pageTreeRoot);
 }
 
-static const string scCount = "Count";
-static const string scKids = "Kids";
-static const string scParent = "Parent";
+static const std::string scCount = "Count";
+static const std::string scKids = "Kids";
+static const std::string scParent = "Parent";
 
 // Recursion to write a page tree node. the return result is the page nodes count, for
 // accumulation at higher levels
@@ -536,14 +537,14 @@ int DocumentContext::WritePageTree(PageTree* inPageTreeToWrite)
 	}
 }
 
-static const string scResources = "Resources";
-static const string scPage = "Page";
-static const string scMediaBox = "MediaBox";
-static const string scCropBox = "CropBox";
-static const string scBleedBox = "BleedBox";
-static const string scTrimBox = "TrimBox";
-static const string scArtBox = "ArtBox";
-static const string scContents = "Contents";
+static const std::string scResources = "Resources";
+static const std::string scPage = "Page";
+static const std::string scMediaBox = "MediaBox";
+static const std::string scCropBox = "CropBox";
+static const std::string scBleedBox = "BleedBox";
+static const std::string scTrimBox = "TrimBox";
+static const std::string scArtBox = "ArtBox";
+static const std::string scContents = "Contents";
 
 EStatusCodeAndObjectIDType DocumentContext::WritePage(PDFPage* inPage)
 {
@@ -676,8 +677,8 @@ EStatusCodeAndObjectIDType DocumentContext::WritePageAndRelease(PDFPage* inPage)
 	return status;
 }
 
-static const string scUnknown = "Unknown";
-string DocumentContext::GenerateMD5IDForFile()
+static const std::string scUnknown = "Unknown";
+std::string DocumentContext::GenerateMD5IDForFile()
 {
 	MD5Generator md5;
 
@@ -743,12 +744,12 @@ EStatusCode DocumentContext::EndPageContentContext(PageContentContext* inPageCon
 	return status;
 }
 
-static const string scXObject = "XObject";
-static const string scSubType = "Subtype";
-static const string scForm = "Form";
-static const string scBBox = "BBox";
-static const string scFormType = "FormType";
-static const string scMatrix = "Matrix";
+static const std::string scXObject = "XObject";
+static const std::string scSubType = "Subtype";
+static const std::string scForm = "Form";
+static const std::string scBBox = "BBox";
+static const std::string scFormType = "FormType";
+static const std::string scMatrix = "Matrix";
 PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBoundingBox,ObjectIDType inFormXObjectID,const double* inMatrix)
 {
 	PDFFormXObject* aFormXObject = NULL;
@@ -854,14 +855,14 @@ EStatusCode DocumentContext::EndFormXObjectAndRelease(PDFFormXObject* inFormXObj
 	return status;
 }
 
-static const string scProcesets = "ProcSet";
-static const string scXObjects = "XObject";
-static const string scExtGStates = "ExtGState";
-static const string scFonts = "Font";
-static const string scColorSpaces = "ColorSpace";
-static const string scPatterns = "Pattern";
-static const string scShadings = "Shading";
-static const string scProperties = "Properties";
+static const std::string scProcesets = "ProcSet";
+static const std::string scXObjects = "XObject";
+static const std::string scExtGStates = "ExtGState";
+static const std::string scFonts = "Font";
+static const std::string scColorSpaces = "ColorSpace";
+static const std::string scPatterns = "Pattern";
+static const std::string scShadings = "Shading";
+static const std::string scProperties = "Properties";
 EStatusCode DocumentContext::WriteResourcesDictionary(ResourcesDictionary& inResourcesDictionary)
 {
 	EStatusCode status = PDFHummus::eSuccess;
@@ -939,7 +940,7 @@ EStatusCode DocumentContext::WriteResourcesDictionary(ResourcesDictionary& inRes
 
 EStatusCode DocumentContext::WriteResourceDictionary(ResourcesDictionary* inResourcesDictionary,
                                               DictionaryContext* inResourcesCategoryDictionary,
-											const string& inResourceDictionaryLabel,
+											const std::string& inResourceDictionaryLabel,
 											MapIterator<ObjectIDTypeToStringMap> inMapping)
 {
     EStatusCode status = eSuccess;
@@ -1014,12 +1015,12 @@ bool DocumentContext::IsIdentityMatrix(const double* inMatrix)
 
 }
 
-PDFImageXObject* DocumentContext::CreateImageXObjectFromJPGFile(const string& inJPGFilePath)
+PDFImageXObject* DocumentContext::CreateImageXObjectFromJPGFile(const std::string& inJPGFilePath)
 {
 	return mJPEGImageHandler.CreateImageXObjectFromJPGFile(inJPGFilePath);
 }
 
-PDFFormXObject* DocumentContext::CreateFormXObjectFromJPGFile(const string& inJPGFilePath)
+PDFFormXObject* DocumentContext::CreateFormXObjectFromJPGFile(const std::string& inJPGFilePath)
 {
 	return mJPEGImageHandler.CreateFormXObjectFromJPGFile(inJPGFilePath);
 }
@@ -1029,25 +1030,25 @@ JPEGImageHandler& DocumentContext::GetJPEGImageHandler()
 	return mJPEGImageHandler;
 }
 
-PDFFormXObject* DocumentContext::CreateFormXObjectFromTIFFFile(	const string& inTIFFFilePath,
+PDFFormXObject* DocumentContext::CreateFormXObjectFromTIFFFile(	const std::string& inTIFFFilePath,
 																const TIFFUsageParameters& inTIFFUsageParameters)
 {
 	
 	return mTIFFImageHandler.CreateFormXObjectFromTIFFFile(inTIFFFilePath,inTIFFUsageParameters);
 }
 
-PDFImageXObject* DocumentContext::CreateImageXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inImageXObjectID)
+PDFImageXObject* DocumentContext::CreateImageXObjectFromJPGFile(const std::string& inJPGFilePath,ObjectIDType inImageXObjectID)
 {
 	return mJPEGImageHandler.CreateImageXObjectFromJPGFile(inJPGFilePath,inImageXObjectID);
 }
 
-PDFFormXObject* DocumentContext::CreateFormXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inFormXObjectID)
+PDFFormXObject* DocumentContext::CreateFormXObjectFromJPGFile(const std::string& inJPGFilePath,ObjectIDType inFormXObjectID)
 {
 	return mJPEGImageHandler.CreateFormXObjectFromJPGFile(inJPGFilePath,inFormXObjectID);
 }
 
 PDFFormXObject* DocumentContext::CreateFormXObjectFromTIFFFile(	
-												const string& inTIFFFilePath,
+												const std::string& inTIFFFilePath,
 												ObjectIDType inFormXObjectID,
 												const TIFFUsageParameters& inTIFFUsageParameters)
 {
@@ -1055,7 +1056,7 @@ PDFFormXObject* DocumentContext::CreateFormXObjectFromTIFFFile(
 }
 
 
-PDFUsedFont* DocumentContext::GetFontForFile(const string& inFontFilePath)
+PDFUsedFont* DocumentContext::GetFontForFile(const std::string& inFontFilePath)
 {
 	return mUsedFontsRepository.GetFontForFile(inFontFilePath);
 }
@@ -1065,12 +1066,12 @@ EStatusCode DocumentContext::WriteUsedFontsDefinitions()
 	return mUsedFontsRepository.WriteUsedFontsDefinitions();
 }
 
-PDFUsedFont* DocumentContext::GetFontForFile(const string& inFontFilePath,const string& inAdditionalMeticsFilePath)
+PDFUsedFont* DocumentContext::GetFontForFile(const std::string& inFontFilePath,const std::string& inAdditionalMeticsFilePath)
 {
 	return mUsedFontsRepository.GetFontForFile(inFontFilePath,inAdditionalMeticsFilePath);
 }
 
-EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(const string& inPDFFilePath,
+EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(const std::string& inPDFFilePath,
 																			const PDFPageRange& inPageRange,
 																			EPDFPageBox inPageBoxToUseAsFormBox,
 																			const double* inTransformationMatrix,
@@ -1080,7 +1081,7 @@ EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(const 
 
 }
 
-EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(const string& inPDFFilePath,
+EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(const std::string& inPDFFilePath,
 																			const PDFPageRange& inPageRange,
 																			const PDFRectangle& inCropBox,
 																			const double* inTransformationMatrix,
@@ -1089,7 +1090,7 @@ EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(const 
 	return mPDFDocumentHandler.CreateFormXObjectsFromPDF(inPDFFilePath,inPageRange,inCropBox,inTransformationMatrix,inCopyAdditionalObjects);	
 
 }
-EStatusCodeAndObjectIDTypeList DocumentContext::AppendPDFPagesFromPDF(const string& inPDFFilePath,
+EStatusCodeAndObjectIDTypeList DocumentContext::AppendPDFPagesFromPDF(const std::string& inPDFFilePath,
 																	  const PDFPageRange& inPageRange,
 																	  const ObjectIDTypeList& inCopyAdditionalObjects)
 {
@@ -1555,7 +1556,7 @@ void DocumentContext::ReadPageTreeState(PDFParser* inStateReader,PDFDictionary* 
 	}
 }
 
-PDFDocumentCopyingContext* DocumentContext::CreatePDFCopyingContext(const string& inFilePath)
+PDFDocumentCopyingContext* DocumentContext::CreatePDFCopyingContext(const std::string& inFilePath)
 {
 	PDFDocumentCopyingContext* context = new PDFDocumentCopyingContext();
 
@@ -1568,7 +1569,7 @@ PDFDocumentCopyingContext* DocumentContext::CreatePDFCopyingContext(const string
 		return context;
 }
 
-EStatusCode DocumentContext::AttachURLLinktoCurrentPage(const string& inURL,const PDFRectangle& inLinkClickArea)
+EStatusCode DocumentContext::AttachURLLinktoCurrentPage(const std::string& inURL,const PDFRectangle& inLinkClickArea)
 {
 	EStatusCodeAndObjectIDType writeResult = WriteAnnotationAndLinkForURL(inURL,inLinkClickArea);
 
@@ -1579,17 +1580,17 @@ EStatusCode DocumentContext::AttachURLLinktoCurrentPage(const string& inURL,cons
 	return PDFHummus::eSuccess;
 }
 
-static const string scAnnot = "Annot";
-static const string scLink = "Link";
-static const string scRect = "Rect";
-static const string scF = "F";
-static const string scW = "W";
-static const string scA = "A";
-static const string scBS = "BS";
-static const string scAction = "Action";
-static const string scS = "S";
-static const string scURI = "URI";
-EStatusCodeAndObjectIDType DocumentContext::WriteAnnotationAndLinkForURL(const string& inURL,const PDFRectangle& inLinkClickArea)
+static const std::string scAnnot = "Annot";
+static const std::string scLink = "Link";
+static const std::string scRect = "Rect";
+static const std::string scF = "F";
+static const std::string scW = "W";
+static const std::string scA = "A";
+static const std::string scBS = "BS";
+static const std::string scAction = "Action";
+static const std::string scS = "S";
+static const std::string scURI = "URI";
+EStatusCodeAndObjectIDType DocumentContext::WriteAnnotationAndLinkForURL(const std::string& inURL,const PDFRectangle& inLinkClickArea)
 {
 	EStatusCodeAndObjectIDType result(PDFHummus::eFailure,0);
 
@@ -1663,7 +1664,7 @@ void DocumentContext::RegisterAnnotationReferenceForNextPageWrite(ObjectIDType i
 }
 
 EStatusCode DocumentContext::MergePDFPagesToPage(PDFPage* inPage,
-								const string& inPDFFilePath,
+								const std::string& inPDFFilePath,
 								const PDFPageRange& inPageRange,
 								const ObjectIDTypeList& inCopyAdditionalObjects)
 {
@@ -2212,15 +2213,15 @@ PDFDocumentCopyingContext* DocumentContext::CreatePDFCopyingContext(PDFParser* i
 }
 
 
-string DocumentContext::AddExtendedResourceMapping(PDFPage* inPage,
-                                  const string& inResourceCategoryName,
+std::string DocumentContext::AddExtendedResourceMapping(PDFPage* inPage,
+                                  const std::string& inResourceCategoryName,
                                   IResourceWritingTask* inWritingTask)
 {
     return AddExtendedResourceMapping(&inPage->GetResourcesDictionary(),inResourceCategoryName,inWritingTask);
 }
 
-string DocumentContext::AddExtendedResourceMapping(ResourcesDictionary* inResourceDictionary,
-                                  const string& inResourceCategoryName,
+std::string DocumentContext::AddExtendedResourceMapping(ResourcesDictionary* inResourceDictionary,
+                                  const std::string& inResourceCategoryName,
                                   IResourceWritingTask* inWritingTask)
 {
     // do two things. first is to include this writing task as part of the tasks to write
@@ -2239,7 +2240,7 @@ string DocumentContext::AddExtendedResourceMapping(ResourcesDictionary* inResour
     
     it->second.push_back(inWritingTask);
     
-    string newResourceName;
+    std::string newResourceName;
     
     if(inResourceCategoryName == scXObjects)
         newResourceName = inResourceDictionary->AddXObjectMapping(0);
@@ -2261,8 +2262,8 @@ string DocumentContext::AddExtendedResourceMapping(ResourcesDictionary* inResour
     return newResourceName;
 }
 
-string DocumentContext::AddExtendedResourceMapping(PDFFormXObject* inFormXObject,
-                                                   const string& inResourceCategoryName,
+std::string DocumentContext::AddExtendedResourceMapping(PDFFormXObject* inFormXObject,
+                                                   const std::string& inResourceCategoryName,
                                                    IResourceWritingTask* inWritingTask)
 {
     return AddExtendedResourceMapping(&inFormXObject->GetResourcesDictionary(),inResourceCategoryName,inWritingTask);

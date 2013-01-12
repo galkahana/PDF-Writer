@@ -23,9 +23,9 @@
 #include <string>
 #include <utility>
 
-using namespace std;
 
-typedef pair<bool,string> BoolAndString;
+
+typedef std::pair<bool,std::string> BoolAndString;
 
 class Ascii7Encoding
 {
@@ -33,5 +33,5 @@ public:
 	Ascii7Encoding(void);
 	~Ascii7Encoding(void);
 
-	BoolAndString Encode(const string& inString);
+	BoolAndString Encode(const std::string& inString);
 };

@@ -24,7 +24,7 @@
 #include "MyStringBuf.h"
 #include <string>
 
-using namespace std;
+
 
 class OutputStringBufferStream : public IByteWriterWithPosition
 {
@@ -44,7 +44,7 @@ public:
 	// IByteWriterWithPosition implementation
 	virtual IOBasicTypes::LongFilePositionType GetCurrentPosition();
 
-	string ToString() const;
+	std::string ToString() const;
 	void Reset();
 	void SetPosition(IOBasicTypes::LongFilePositionType inOffsetFromStart);
 

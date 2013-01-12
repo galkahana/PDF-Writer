@@ -36,9 +36,9 @@ class ObjectsContext;
 class DictionaryContext;
 
 
-using namespace std;
 
-typedef list<FT_Pos> FTPosList;
+
+typedef std::list<FT_Pos> FTPosList;
 
 class DescendentFontWriter : public IFontDescriptorHelper
 {
@@ -48,7 +48,7 @@ public:
 
 	// the IDescendentFontWriter input pointer will implement the font specific differences
 	virtual PDFHummus::EStatusCode WriteFont(	ObjectIDType inDecendentObjectID, 
-									const string& inFontName,
+									const std::string& inFontName,
 									FreeTypeFaceWrapper& inFontInfo,
 									const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
 									ObjectsContext* inObjectsContext,

@@ -21,7 +21,9 @@
 #include "FreeTypeType1Wrapper.h"
 #include "Trace.h"
 
-FreeTypeType1Wrapper::FreeTypeType1Wrapper(FT_Face inFace,const string& inPFMFilePath)
+
+
+FreeTypeType1Wrapper::FreeTypeType1Wrapper(FT_Face inFace,const std::string& inPFMFilePath)
 {
 	if(FT_Get_PS_Font_Info(inFace,&mPSFontInfo) != 0)
 	{

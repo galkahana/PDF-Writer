@@ -20,7 +20,7 @@
 */
 #include "PDFHexString.h"
 
-PDFHexString::PDFHexString(const string& inValue):PDFObject(eType)
+PDFHexString::PDFHexString(const std::string& inValue):PDFObject(eType)
 {
 	mValue = inValue;
 }
@@ -29,12 +29,12 @@ PDFHexString::~PDFHexString(void)
 {
 }
 
-const string& PDFHexString::GetValue() const
+const std::string& PDFHexString::GetValue() const
 {
 	return mValue;
 }
 
-PDFHexString::operator string() const
+PDFHexString::operator std::string() const
 {
 	return mValue;
 }

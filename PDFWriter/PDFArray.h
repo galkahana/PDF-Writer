@@ -24,9 +24,9 @@
 
 #include <vector>
 
-using namespace std;
 
-typedef vector<PDFObject*> PDFObjectVector;
+
+typedef std::vector<PDFObject*> PDFObjectVector;
 
 class PDFArray : public PDFObject
 {

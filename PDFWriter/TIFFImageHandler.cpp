@@ -86,7 +86,7 @@
 #include "IByteReaderWithPosition.h"
 
 // tiff lib includes
-#include "tif_config.h"
+#include "tiffconf.h"
 #include "tiffio.h"
 
 #include <stdlib.h> 
@@ -272,7 +272,7 @@ struct T2P{
 
 	TIFF* input;
 	TIFF* output;
-	string inputFilePath;
+	std::string inputFilePath;
 	PDFStream* pdfStream;
 	ObjectIDType pdf_transfer_functions_gstate;
 
@@ -348,14 +348,14 @@ struct T2P{
 
 typedef	void (*TIFFErrorHandler)(const char*, const char*, va_list);
 
-static const string scWarningString(": Warning, ");
-static const string scDot(".");
-static const string scErrorString(": Error, ");
+static const std::string scWarningString(": Warning, ");
+static const std::string scDot(".");
+static const std::string scErrorString(": Error, ");
 
 void ReportWarning(const char* inModel, const char* inFormat, va_list inParametersList)
 {
 	char buffer[5001];
-	stringstream formatter;
+	std::stringstream formatter;
 	formatter<<inModel<<scWarningString<<inFormat<<scDot;
 
 	SAFE_VSPRINTF(buffer,5001,formatter.str().c_str(),inParametersList);
@@ -366,7 +366,7 @@ void ReportWarning(const char* inModel, const char* inFormat, va_list inParamete
 void ReportError(const char* inModel, const char* inFormat, va_list inParametersList)
 {
 	char buffer[5001];
-	stringstream formatter;
+	std::stringstream formatter;
 	formatter<<inModel<<scErrorString<<inFormat<<scDot;
 
 	SAFE_VSPRINTF(buffer,5001,formatter.str().c_str(),inParametersList);
@@ -398,7 +398,7 @@ void TIFFImageHandler::SetOperationsContexts(DocumentContext* inContainerDocumen
 	mContainerDocumentContext = inContainerDocumentContext;
 }
 
-PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFFile(const string& inTIFFFilePath,
+PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFFile(const std::string& inTIFFFilePath,
 																const TIFFUsageParameters& inTIFFUsageParameters)
 {
 	if(!mObjectsContext)
@@ -410,7 +410,7 @@ PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFFile(const string& in
 	return CreateFormXObjectFromTIFFFile(inTIFFFilePath,mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID(),inTIFFUsageParameters);
 }
 
-PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFFile(const string& inTIFFFilePath,
+PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFFile(const std::string& inTIFFFilePath,
 																ObjectIDType inFormXObjectID,
 																const TIFFUsageParameters& inTIFFUsageParameters)
 
@@ -1648,11 +1648,11 @@ void TIFFImageHandler::ComposePDFPageOrientFlip(T2P_BOX* boxp, uint16 orientatio
 	}
 }
 
-static const string scFunctionType = "FunctionType";
-static const string scDomain = "Domain";
-static const string scRange = "Range";
-static const string scSize = "Size";
-static const string scBitsPerSample = "BitsPerSample";
+static const std::string scFunctionType = "FunctionType";
+static const std::string scDomain = "Domain";
+static const std::string scRange = "Range";
+static const std::string scSize = "Size";
+static const std::string scBitsPerSample = "BitsPerSample";
 
 ObjectIDType TIFFImageHandler::WriteTransferFunction(int i)
 {
@@ -1695,10 +1695,10 @@ ObjectIDType TIFFImageHandler::WriteTransferFunction(int i)
 	return transferFunctionID;
 }
 
-static const string scType = "Type";
-static const string scExtGState = "ExtGState";
-static const string scIdentity = "Identity";
-static const string scTR = "TR";
+static const std::string scType = "Type";
+static const std::string scExtGState = "ExtGState";
+static const std::string scIdentity = "Identity";
+static const std::string scTR = "TR";
 
 ObjectIDType TIFFImageHandler::WriteTransferFunctionsExtGState(const ObjectIDTypeList& inTransferFunctions)
 {
@@ -1741,8 +1741,8 @@ ObjectIDType TIFFImageHandler::WritePaletteCS()
 	return palleteID;
 }
 
-static const string scN = "N";
-static const string scAlternate = "Alternate";
+static const std::string scN = "N";
+static const std::string scAlternate = "Alternate";
 
 ObjectIDType TIFFImageHandler::WriteICCCS()
 {
@@ -1771,13 +1771,13 @@ ObjectIDType TIFFImageHandler::WriteICCCS()
 	return ICCID;	
 }
 
-static const string scICCBased = "ICCBased";
-static const string scIndexed = "Indexed";
-static const string scDeviceGray = "DeviceGray";
-static const string scDeviceRGB = "DeviceRGB";
-static const string scDeviceCMYK = "DeviceCMYK";
-static const string scLab = "Lab";
-static const string scWhitePoint = "WhitePoint";
+static const std::string scICCBased = "ICCBased";
+static const std::string scIndexed = "Indexed";
+static const std::string scDeviceGray = "DeviceGray";
+static const std::string scDeviceRGB = "DeviceRGB";
+static const std::string scDeviceCMYK = "DeviceCMYK";
+static const std::string scLab = "Lab";
+static const std::string scWhitePoint = "WhitePoint";
 
 void TIFFImageHandler::WriteXObjectCS(DictionaryContext* inContainerDictionary)
 {
@@ -1905,10 +1905,10 @@ void TIFFImageHandler::WriteXObjectCS(DictionaryContext* inContainerDictionary)
 	}
 }
 
-static const string scCalGray = "CalGray";
-static const string scCalRGB = "CalRGB";
-static const string scGamma = "Gamma";
-static const string scMatrix = "Matrix";
+static const std::string scCalGray = "CalGray";
+static const std::string scCalRGB = "CalRGB";
+static const std::string scGamma = "Gamma";
+static const std::string scMatrix = "Matrix";
 void TIFFImageHandler::WriteXObjectCALCS()
 {
 
@@ -2027,15 +2027,15 @@ void TIFFImageHandler::WriteXObjectCALCS()
 	mObjectsContext->EndArray(eTokenSeparatorEndLine);
 }
 
-static const string scXObject = "XObject";
-static const string scSubType = "Subtype";
-static const string scImage = "Image";
-static const string scWidth = "Width";
-static const string scHeight = "Height";
-static const string scName = "Name";
-static const string scBitsPerComponent = "BitsPerComponent";
-static const string scColorSpace = "ColorSpace";
-static const string scInterpolate = "Interpolate";
+static const std::string scXObject = "XObject";
+static const std::string scSubType = "Subtype";
+static const std::string scImage = "Image";
+static const std::string scWidth = "Width";
+static const std::string scHeight = "Height";
+static const std::string scName = "Name";
+static const std::string scBitsPerComponent = "BitsPerComponent";
+static const std::string scColorSpace = "ColorSpace";
+static const std::string scInterpolate = "Interpolate";
 PDFImageXObject* TIFFImageHandler::WriteTileImageXObject(int inTileIndex)
 {
 	PDFImageXObject* imageXObject = NULL;
@@ -2111,7 +2111,7 @@ bool TIFFImageHandler::TileIsBottomEdge(int inTileIndex)
 			mT2p->tiff_tiles[mT2p->pdf_page].tiles_edgetilelength != 0);	
 }
 
-static const string scDecode = "Decode";
+static const std::string scDecode = "Decode";
 void TIFFImageHandler::WriteImageXObjectDecode(DictionaryContext* inImageDictionary)
 {
 	// Decode
@@ -2153,16 +2153,16 @@ void TIFFImageHandler::WriteImageXObjectDecode(DictionaryContext* inImageDiction
 	mObjectsContext->EndArray(eTokenSeparatorEndLine);
 }
 
-static const string scFilter = "Filter";
-static const string scCCITTFaxDecode = "CCITTFaxDecode";
-static const string scDecodeParms = "DecodeParms";
-static const string scK = "K";
-static const string scColumns = "Columns";
-static const string scRows = "Rows";
-static const string scBlackIs1 = "BlackIs1";
-static const string scFlateDecode = "FlateDecode";
-static const string scPredictor = "Predictor";
-static const string scColors = "Colors";
+static const std::string scFilter = "Filter";
+static const std::string scCCITTFaxDecode = "CCITTFaxDecode";
+static const std::string scDecodeParms = "DecodeParms";
+static const std::string scK = "K";
+static const std::string scColumns = "Columns";
+static const std::string scRows = "Rows";
+static const std::string scBlackIs1 = "BlackIs1";
+static const std::string scFlateDecode = "FlateDecode";
+static const std::string scPredictor = "Predictor";
+static const std::string scColors = "Colors";
 
 
 // tile index will be ignored if not tiles exist for this image
@@ -2719,7 +2719,7 @@ PDFImageXObject* TIFFImageHandler::WriteUntiledImageXObject()
 	
 }
 
-static const string scImageMask = "ImageMask";
+static const std::string scImageMask = "ImageMask";
 void TIFFImageHandler::WriteCommonImageDictionaryProperties(DictionaryContext* inImageContext)
 {
 	// type
@@ -3308,7 +3308,7 @@ void TIFFImageHandler::WriteIndexedCSForBiLevelColorMap()
 	double max[4],min[4];
 	double maxStep[4],minStep[4];
 	char colorsBuffer[10];
-	stringstream mPalleteStream;
+	std::stringstream mPalleteStream;
 
 	mObjectsContext->StartArray();
 	mObjectsContext->WriteName(scIndexed);

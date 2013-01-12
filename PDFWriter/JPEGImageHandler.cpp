@@ -60,7 +60,7 @@ void JPEGImageHandler::SetOperationsContexts(DocumentContext* inDocumentContext,
 	mDocumentContext = inDocumentContext;
 }
 
-PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inImageXObjectID)
+PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGFile(const std::string& inJPGFilePath,ObjectIDType inImageXObjectID)
 {
 	PDFImageXObject* imageXObject = NULL;
 
@@ -83,22 +83,22 @@ PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGFile(const string& i
 
 }
 
-static const string scType = "Type";
-static const string scXObject = "XObject";
-static const string scSubType = "Subtype";
+static const std::string scType = "Type";
+static const std::string scXObject = "XObject";
+static const std::string scSubType = "Subtype";
 
-static const string scImage = "Image";
-static const string scWidth = "Width";
-static const string scHeight = "Height";
-static const string scColorSpace = "ColorSpace";
-static const string scDeviceGray = "DeviceGray";
-static const string scDeviceRGB = "DeviceRGB";
-static const string scDeviceCMYK = "DeviceCMYK";
-static const string scDecode = "Decode";
-static const string scBitsPerComponent = "BitsPerComponent";
-static const string scFilter = "Filter";
-static const string scDCTDecode = "DCTDecode";
-PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(const string& inJPGFilePath,
+static const std::string scImage = "Image";
+static const std::string scWidth = "Width";
+static const std::string scHeight = "Height";
+static const std::string scColorSpace = "ColorSpace";
+static const std::string scDeviceGray = "DeviceGray";
+static const std::string scDeviceRGB = "DeviceRGB";
+static const std::string scDeviceCMYK = "DeviceCMYK";
+static const std::string scDecode = "Decode";
+static const std::string scBitsPerComponent = "BitsPerComponent";
+static const std::string scFilter = "Filter";
+static const std::string scDCTDecode = "DCTDecode";
+PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(const std::string& inJPGFilePath,
 																				ObjectIDType inImageXObjectID,
 																				const JPEGImageInformation& inJPGImageInformation)
 {
@@ -230,7 +230,7 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 }
 
 
-BoolAndJPEGImageInformation JPEGImageHandler::RetrieveImageInformation(const string& inJPGFilePath)
+BoolAndJPEGImageInformation JPEGImageHandler::RetrieveImageInformation(const std::string& inJPGFilePath)
 {
 	BoolAndJPEGImageInformation imageInformationResult(false,mNullInformation);
 
@@ -289,7 +289,7 @@ void JPEGImageHandler::RemoveDocumentContextExtender(IDocumentContextExtender* i
 }
 
 
-PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGFile(const string& inJPGFilePath,ObjectIDType inFormXObjectID)
+PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGFile(const std::string& inJPGFilePath,ObjectIDType inFormXObjectID)
 {
 	PDFImageXObject* imageXObject = NULL;
 	PDFFormXObject* imageFormXObject = NULL;
@@ -441,7 +441,7 @@ DoubleAndDoublePair JPEGImageHandler::GetImageDimensions(const JPEGImageInformat
 	return returnResult;
 }
 
-PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGFile(const string& inJPGFilePath)
+PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGFile(const std::string& inJPGFilePath)
 {
 	if(!mObjectsContext)
 	{
@@ -452,7 +452,7 @@ PDFImageXObject* JPEGImageHandler::CreateImageXObjectFromJPGFile(const string& i
 	return CreateImageXObjectFromJPGFile(inJPGFilePath,mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID());
 }
 
-PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGFile(const string& inJPGFilePath)
+PDFFormXObject* JPEGImageHandler::CreateFormXObjectFromJPGFile(const std::string& inJPGFilePath)
 {
 	if(!mObjectsContext)
 	{

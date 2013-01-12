@@ -26,9 +26,7 @@
 #include <string>
 #include <map>
 
-using namespace std;
-
-typedef std::map<string,PDFTextString> StringToPDFTextString;
+typedef std::map<std::string,PDFTextString> StringToPDFTextString;
 
 enum EInfoTrapped
 {
@@ -53,11 +51,11 @@ public:
 	PDFDate ModDate;
 	EInfoTrapped Trapped;
 
-	void AddAdditionalInfoEntry(const string& inKey,
+	void AddAdditionalInfoEntry(const std::string& inKey,
 								const PDFTextString& inValue);
-	void RemoveAdditionalInfoEntry(const string& inKey);
+	void RemoveAdditionalInfoEntry(const std::string& inKey);
 	void ClearAdditionalInfoEntries();
-	PDFTextString GetAdditionalInfoEntry(const string& inKey);
+	PDFTextString GetAdditionalInfoEntry(const std::string& inKey);
 
 	MapIterator<StringToPDFTextString> GetAdditionaEntriesIterator();
 

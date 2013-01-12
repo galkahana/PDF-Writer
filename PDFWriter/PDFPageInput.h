@@ -36,7 +36,7 @@
 
 #include <string>
 
-using namespace std;
+
 
 class PDFObject;
 class PDFParser;
@@ -68,11 +68,11 @@ private:
     PDFParser* mParser;
     PDFObjectCastPtr<PDFDictionary> mPageObject;
     
-	PDFObject* QueryInheritedValue(PDFDictionary* inDictionary,const string& inName);
+	PDFObject* QueryInheritedValue(PDFDictionary* inDictionary,const std::string& inName);
     void SetPDFRectangleFromPDFArray(PDFArray* inPDFArray,PDFRectangle& outPDFRectangle);
     
     void AssertPageObjectValid();
-    PDFRectangle GetBoxAndDefaultWithCrop(const string& inBoxName);
+    PDFRectangle GetBoxAndDefaultWithCrop(const std::string& inBoxName);
 
 
 };

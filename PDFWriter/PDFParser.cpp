@@ -140,7 +140,7 @@ PDFObjectParser& PDFParser::GetObjectParser()
 	return mObjectParser;
 }
 
-static const string scPDFMagic = "%PDF-";
+static const std::string scPDFMagic = "%PDF-";
 EStatusCode PDFParser::ParseHeaderLine()
 {
 	PDFParserTokenizer tokenizer;
@@ -164,7 +164,7 @@ EStatusCode PDFParser::ParseHeaderLine()
 	return PDFHummus::eSuccess;
 }
 
-static const string scEOF = "%%EOF";
+static const std::string scEOF = "%%EOF";
 EStatusCode PDFParser::ParseEOFLine()
 {
 	/* go back till you hit token. this should be the EOF. go back till line start and get the token...if it's not EOF, fail.
@@ -308,7 +308,7 @@ bool PDFParser::IsBeginOfFile()
 	return mEncounteredFileStart && (mCurrentBufferIndex == mLinesBuffer);
 }
 
-static const string scStartxref = "startxref";
+static const std::string scStartxref = "startxref";
 EStatusCode PDFParser::ParseLastXrefPosition()
 {
 	EStatusCode status = PDFHummus::eSuccess;
@@ -393,7 +393,7 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 
 }
 
-static const string scTrailer = "trailer";
+static const std::string scTrailer = "trailer";
 EStatusCode PDFParser::ParseTrailerDictionary()
 {
 
@@ -503,7 +503,7 @@ typedef BoxingBaseWithRW<ObjectIDType> ObjectIDTypeBox;
 typedef BoxingBaseWithRW<unsigned long> ULong;
 typedef BoxingBaseWithRW<LongFilePositionType> LongFilePositionTypeBox;
 
-static const string scXref = "xref";
+static const std::string scXref = "xref";
 EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,ObjectIDType inXrefSize,LongFilePositionType inXrefPosition)
 {
 	// K. cross ref starts at  xref position
@@ -650,7 +650,7 @@ ObjectIDType PDFParser::GetObjectsCount()
 	return mXrefSize;
 }
 
-static const string scObj = "obj";
+static const std::string scObj = "obj";
 PDFObject* PDFParser::ParseExistingInDirectObject(ObjectIDType inObjectID)
 {
 	PDFObject* readObject = NULL;
@@ -791,8 +791,8 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 	return ParsePagesIDs(inPageNode,inNodeObjectID,currentPageIndex);
 }
 
-static const string scPage = "Page";
-static const string scPages = "Pages";
+static const std::string scPage = "Page";
+static const std::string scPages = "Pages";
 EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID,unsigned long& ioCurrentPageIndex)
 {
 	// recursion.
@@ -909,7 +909,7 @@ PDFDictionary* PDFParser::ParsePage(unsigned long inPageIndex)
 	}
 }
 
-PDFObject* PDFParser::QueryDictionaryObject(PDFDictionary* inDictionary,const string& inName)
+PDFObject* PDFParser::QueryDictionaryObject(PDFDictionary* inDictionary,const std::string& inName)
 {
 	RefCountPtr<PDFObject> anObject(inDictionary->QueryDirectObject(inName));
 
@@ -1398,7 +1398,7 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,Objec
 					break;
 				}
 				ObjectIDType objectsCount = (ObjectIDType)segmentValue->GetValue();
-				status = ReadXrefStreamSegment(inXrefTable,startObject,min<ObjectIDType>(objectsCount,inXrefSize - startObject),xrefStreamSource,widthsArray,wArray->GetLength());
+				status = ReadXrefStreamSegment(inXrefTable,startObject,std::min<ObjectIDType>(objectsCount,inXrefSize - startObject),xrefStreamSource,widthsArray,wArray->GetLength());
 			}
 		}
 	}while(false);

@@ -48,14 +48,14 @@ void PrimitiveObjectsWriter::EndLine()
 	mStreamForWriting->Write(scNewLine,2);
 }
 
-void PrimitiveObjectsWriter::WriteKeyword(const string& inKeyword)
+void PrimitiveObjectsWriter::WriteKeyword(const std::string& inKeyword)
 {
 	mStreamForWriting->Write((const IOBasicTypes::Byte *)inKeyword.c_str(),inKeyword.size());
 	EndLine();
 }
 
 static const IOBasicTypes::Byte scSlash[1] = {'/'};
-void PrimitiveObjectsWriter::WriteName(const string& inName,ETokenSeparator inSeparate)
+void PrimitiveObjectsWriter::WriteName(const std::string& inName,ETokenSeparator inSeparate)
 {
 /*
 from the pdf reference:
@@ -66,7 +66,7 @@ it is recommended but not required for characters whose codes are outside the ra
 	mStreamForWriting->Write(scSlash,1);
 
 	IOBasicTypes::Byte buffer[5];
-	string::const_iterator it = inName.begin();
+	std::string::const_iterator it = inName.begin();
 	for(;it != inName.end();++it)
 	{
 		Byte aValue = *it;
@@ -98,7 +98,7 @@ void PrimitiveObjectsWriter::WriteInteger(long long inIntegerToken,ETokenSeparat
 static const IOBasicTypes::Byte scLeftParanthesis[1] = {'('};
 static const IOBasicTypes::Byte scRightParanthesis[1] = {')'};
 
-void PrimitiveObjectsWriter::WriteUnsafeLiteralString(const string& inString,ETokenSeparator inSeparate)
+void PrimitiveObjectsWriter::WriteUnsafeLiteralString(const std::string& inString,ETokenSeparator inSeparate)
 {
 	mStreamForWriting->Write(scLeftParanthesis,1);
 	mStreamForWriting->Write((const IOBasicTypes::Byte *)inString.c_str(),inString.size());
@@ -106,12 +106,12 @@ void PrimitiveObjectsWriter::WriteUnsafeLiteralString(const string& inString,ETo
 	WriteTokenSeparator(inSeparate);
 }
 
-void PrimitiveObjectsWriter::WriteLiteralString(const string& inString,ETokenSeparator inSeparate)
+void PrimitiveObjectsWriter::WriteLiteralString(const std::string& inString,ETokenSeparator inSeparate)
 {
 	mStreamForWriting->Write(scLeftParanthesis,1);
 	// doing some string conversion, so that charachters are written as safe ones.
 	IOBasicTypes::Byte buffer[5];
-	string::const_iterator it = inString.begin();
+	std::string::const_iterator it = inString.begin();
 	for(;it != inString.end();++it)
 	{
 		Byte aValue = *it;
@@ -203,7 +203,7 @@ void PrimitiveObjectsWriter::EndArray(ETokenSeparator inSeparate)
 
 static const IOBasicTypes::Byte scLeftAngle[1] = {'<'};
 static const IOBasicTypes::Byte scRightAngle[1] = {'>'};
-void PrimitiveObjectsWriter::WriteHexString(const string& inString,ETokenSeparator inSeparate)
+void PrimitiveObjectsWriter::WriteHexString(const std::string& inString,ETokenSeparator inSeparate)
 {
 	mStreamForWriting->Write(scLeftAngle,1);
 	mStreamForWriting->Write((const IOBasicTypes::Byte *)inString.c_str(),inString.size());

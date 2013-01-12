@@ -36,7 +36,7 @@ void STATIC_LogEntryToStream(Log* inThis,const Byte* inMessage, LongBufferSizeTy
 
 static const Byte scUTF8Bom[3] = {0xEF,0xBB,0xBF};
 
-Log::Log(const string& inLogFilePath,bool inPlaceUTF8Bom)
+Log::Log(const std::string& inLogFilePath,bool inPlaceUTF8Bom)
 {
 	mFilePath = inLogFilePath;
 	mLogStream = NULL;
@@ -73,7 +73,7 @@ Log::~Log(void)
 {
 }
 
-void Log::LogEntry(const string& inMessage)
+void Log::LogEntry(const std::string& inMessage)
 {
 	LogEntry((const Byte*)inMessage.c_str(), inMessage.length());
 }
@@ -100,13 +100,13 @@ void Log::LogEntryToStream(const Byte* inMessage, LongBufferSizeType inMessageSi
 
 void Log::WriteLogEntryToStream(const Byte* inMessage, LongBufferSizeType inMessageSize,IByteWriter* inStream)
 {
-	string formattedTimeString = GetFormattedTimeString();
+	std::string formattedTimeString = GetFormattedTimeString();
 	inStream->Write((const Byte*)formattedTimeString.c_str(),formattedTimeString.length());
 	inStream->Write(inMessage,inMessageSize);
 	inStream->Write(scEndLine,2);
 }
 
-string Log::GetFormattedTimeString()
+std::string Log::GetFormattedTimeString()
 {
 	// create a local time string (date + time) that looks like this: "[ dd/mm/yyyy hh:mm:ss ] "
 	char buffer[26];

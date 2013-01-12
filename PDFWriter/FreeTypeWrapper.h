@@ -29,10 +29,10 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-using namespace std;
 
-typedef list<FT_Stream> FTStreamList;
-typedef map<FT_Face,FTStreamList> FTFaceToFTStreamListMap;
+
+typedef std::list<FT_Stream> FTStreamList;
+typedef std::map<FT_Face,FTStreamList> FTFaceToFTStreamListMap;
 
 class FreeTypeWrapper
 {
@@ -40,8 +40,8 @@ public:
 	FreeTypeWrapper(void);
 	~FreeTypeWrapper(void);
 
-	FT_Face NewFace(const string& inFilePath,FT_Long inFontIndex = 0);
-	FT_Face NewFace(const string& inFilePath,const string& inSecondaryFilePath,FT_Long inFontIndex = 0);
+	FT_Face NewFace(const std::string& inFilePath,FT_Long inFontIndex = 0);
+	FT_Face NewFace(const std::string& inFilePath,const std::string& inSecondaryFilePath,FT_Long inFontIndex = 0);
 	FT_Error DoneFace(FT_Face ioFace);
 
 	FT_Library operator->();
@@ -52,8 +52,8 @@ private:
 	FT_Library mFreeType;
 	FTFaceToFTStreamListMap mOpenStreams;
 
-	FT_Stream CreateFTStreamForPath(const string& inFilePath);
-	PDFHummus::EStatusCode FillOpenFaceArgumentsForUTF8String(const string& inFilePath, FT_Open_Args& ioArgs);
+	FT_Stream CreateFTStreamForPath(const std::string& inFilePath);
+	PDFHummus::EStatusCode FillOpenFaceArgumentsForUTF8String(const std::string& inFilePath, FT_Open_Args& ioArgs);
 	void CloseOpenFaceArgumentsStream(FT_Open_Args& ioArgs);
 	void RegisterStreamForFace(FT_Face inFace,FT_Stream inStream);
 	void CleanStreamsForFace(FT_Face inFace);

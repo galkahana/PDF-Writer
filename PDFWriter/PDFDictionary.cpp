@@ -35,7 +35,7 @@ PDFDictionary::~PDFDictionary(void)
 	}
 }
 
-PDFObject* PDFDictionary::QueryDirectObject(string inName)
+PDFObject* PDFDictionary::QueryDirectObject(std::string inName)
 {
 	PDFName key(inName);
 	PDFNameToPDFObjectMap::iterator it = mValues.find(&key);
@@ -60,7 +60,7 @@ void PDFDictionary::Insert(PDFName* inKeyObject, PDFObject* inValueObject)
 }
 
 
-bool PDFDictionary::Exists(string inName)
+bool PDFDictionary::Exists(std::string inName)
 {
 	PDFName key(inName);
 	return mValues.find(&key) != mValues.end();

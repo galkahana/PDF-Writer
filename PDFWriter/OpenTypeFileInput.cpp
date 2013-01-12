@@ -59,7 +59,7 @@ void OpenTypeFileInput::FreeTables()
 	mActualGlyphs.clear();
 }
 
-EStatusCode OpenTypeFileInput::ReadOpenTypeFile(const string& inFontFilePath)
+EStatusCode OpenTypeFileInput::ReadOpenTypeFile(const std::string& inFontFilePath)
 {
 	InputFile fontFile;
 

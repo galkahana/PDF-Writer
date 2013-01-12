@@ -29,6 +29,7 @@
 
 #include FT_CID_H 
 
+
 using namespace PDFHummus;
 
 DescendentFontWriter::DescendentFontWriter(void)
@@ -39,15 +40,15 @@ DescendentFontWriter::~DescendentFontWriter(void)
 {
 }
 
-static const string scType = "Type";
-static const string scFont = "Font";
-static const string scSubtype = "Subtype";
-static const string scBaseFont = "BaseFont";
-static const string scFontDescriptor = "FontDescriptor";
-static const string scCIDSystemInfo = "CIDSystemInfo";
+static const std::string scType = "Type";
+static const std::string scFont = "Font";
+static const std::string scSubtype = "Subtype";
+static const std::string scBaseFont = "BaseFont";
+static const std::string scFontDescriptor = "FontDescriptor";
+static const std::string scCIDSystemInfo = "CIDSystemInfo";
 
 EStatusCode DescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID, 
-												const string& inFontName,
+												const std::string& inFontName,
 												FreeTypeFaceWrapper& inFontInfo,
 												const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
 												ObjectsContext* inObjectsContext,
@@ -111,8 +112,8 @@ EStatusCode DescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID,
 	return status;	
 }
 
-static const string scDW = "DW";
-static const string scW = "W";
+static const std::string scDW = "DW";
+static const std::string scW = "W";
 
 void DescendentFontWriter::WriteWidths(const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
 										  DictionaryContext* inFontContext)
@@ -207,9 +208,9 @@ void DescendentFontWriter::WriteWidthsItem(bool inAllWidthsSame,const FTPosList&
 
 static const char* scIdentity = "Identity";
 static const char* scAdobe = "Adobe";
-static const string scOrdering = "Ordering";
-static const string scRegistry = "Registry";
-static const string scSupplement = "Supplement";
+static const std::string scOrdering = "Ordering";
+static const std::string scRegistry = "Registry";
+static const std::string scSupplement = "Supplement";
 
 void DescendentFontWriter::WriteCIDSystemInfo(ObjectIDType inCIDSystemInfoObjectID)
 {
@@ -249,7 +250,7 @@ void DescendentFontWriter::WriteCIDSystemInfo(ObjectIDType inCIDSystemInfoObject
 	mObjectsContext->EndIndirectObject();
 }
 
-static const string scCIDSet = "CIDSet";
+static const std::string scCIDSet = "CIDSet";
 
 void DescendentFontWriter::WriteCharSet(	DictionaryContext* inDescriptorContext,
 											ObjectsContext* inObjectsContext,

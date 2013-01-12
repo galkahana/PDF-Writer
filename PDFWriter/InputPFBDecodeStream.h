@@ -31,7 +31,7 @@
 #include <utility>
 #include <string>
 
-using namespace std;
+
 using namespace IOBasicTypes;
 
 class InputPFBDecodeStream;
@@ -41,7 +41,7 @@ typedef PDFHummus::EStatusCode (*DecodeMethod)(
 	Byte& outByte 
  );
 
-typedef pair<bool,string> BoolAndString;
+typedef std::pair<bool,std::string> BoolAndString;
 
 class InputPFBDecodeStream : public IByteReader
 {

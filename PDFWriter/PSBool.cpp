@@ -20,7 +20,9 @@
 */
 #include "PSBool.h"
 
-void PSBoolReader::Read(const string& inReadFrom,bool& outValue)
+
+
+void PSBoolReader::Read(const std::string& inReadFrom,bool& outValue)
 {
 	if(inReadFrom.compare("true") == 0)
 		outValue = true;
@@ -28,7 +30,7 @@ void PSBoolReader::Read(const string& inReadFrom,bool& outValue)
 		outValue = false;
 }
 
-void PSBoolReader::Read(const wstring& inReadFrom,bool& outValue)
+void PSBoolReader::Read(const std::wstring& inReadFrom,bool& outValue)
 {
 	if(inReadFrom.compare(L"true") == 0)
 		outValue = true;
@@ -36,7 +38,7 @@ void PSBoolReader::Read(const wstring& inReadFrom,bool& outValue)
 		outValue = false;
 }
 
-void PSBoolWriter::Write(const bool& inValue,string& outWriteTo)
+void PSBoolWriter::Write(const bool& inValue,std::string& outWriteTo)
 {
 	if(inValue)
 		outWriteTo = "true";
@@ -44,7 +46,7 @@ void PSBoolWriter::Write(const bool& inValue,string& outWriteTo)
 		outWriteTo = "false";
 }
 
-void PSBoolWriter::Write(const bool& inValue,wstring& outWriteTo)
+void PSBoolWriter::Write(const bool& inValue,std::wstring& outWriteTo)
 {
 	if(inValue)
 		outWriteTo = L"true";

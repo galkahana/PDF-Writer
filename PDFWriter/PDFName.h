@@ -23,7 +23,7 @@
 
 #include <string>
 
-using namespace std;
+
 
 class PDFName : public PDFObject
 {
@@ -35,13 +35,13 @@ public:
 	};
 
 	// value must be the already interpreted name - no initial slash, and all special charachters (with # definition) interpreted
-	PDFName(const string& inValue);
+	PDFName(const std::string& inValue);
 	virtual ~PDFName(void);
 
-	const string& GetValue() const;
-	operator string() const;
+	const std::string& GetValue() const;
+	operator std::string() const;
 
 private:
 
-	string mValue;
+	std::string mValue;
 };

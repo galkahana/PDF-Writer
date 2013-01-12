@@ -26,9 +26,9 @@
 #include <string>
 #include <set>
 
-using namespace std;
 
-typedef set<string> StringSet;
+
+typedef std::set<std::string> StringSet;
 
 class ObjectsContext;
 
@@ -38,14 +38,14 @@ public:
 	DictionaryContext(ObjectsContext* inObjectsContext,size_t inIndentLevel);
 	~DictionaryContext(void);
 
-	PDFHummus::EStatusCode WriteKey(const string& inKey);
+	PDFHummus::EStatusCode WriteKey(const std::string& inKey);
 	
 	void WriteIntegerValue(long long inValue);
-	void WriteLiteralStringValue(const string& inValue);
-	void WriteHexStringValue(const string& inValue);
+	void WriteLiteralStringValue(const std::string& inValue);
+	void WriteHexStringValue(const std::string& inValue);
 	void WriteNullValue();
-	void WriteNameValue(const string& inValue);
-	void WriteKeywordValue(const string& inValue);
+	void WriteNameValue(const std::string& inValue);
+	void WriteKeywordValue(const std::string& inValue);
 	void WriteObjectReferenceValue(const ObjectReference& inObjectReference);
 	void WriteObjectReferenceValue(ObjectIDType inObjectID,unsigned long inGenerationNumber);
     void WriteNewObjectReferenceValue(ObjectIDType inObjectID);

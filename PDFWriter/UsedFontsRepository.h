@@ -26,15 +26,15 @@
 #include <string>
 #include <map>
 
-using namespace std;
+
 
 class FreeTypeWrapper;
 class PDFUsedFont;
 class ObjectsContext;
 class PDFParser;
 
-typedef map<string,PDFUsedFont*> StringToPDFUsedFontMap;
-typedef map<string,string> StringToStringMap;
+typedef std::map<std::string,PDFUsedFont*> StringToPDFUsedFontMap;
+typedef std::map<std::string,std::string> StringToStringMap;
 
 class UsedFontsRepository
 {
@@ -44,9 +44,9 @@ public:
 
 	void SetObjectsContext(ObjectsContext* inObjectsContext);
 
-	PDFUsedFont* GetFontForFile(const string& inFontFilePath);
+	PDFUsedFont* GetFontForFile(const std::string& inFontFilePath);
 	// second overload is for type 1, when an additional metrics file is available
-	PDFUsedFont* GetFontForFile(const string& inFontFilePath,const string& inOptionalMetricsFile);
+	PDFUsedFont* GetFontForFile(const std::string& inFontFilePath,const std::string& inOptionalMetricsFile);
 
 	PDFHummus::EStatusCode WriteUsedFontsDefinitions();
 

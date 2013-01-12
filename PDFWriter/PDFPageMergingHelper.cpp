@@ -44,7 +44,7 @@ EStatusCode PDFPageMergingHelper::MergePageContent(PDFDocumentCopyingContext* in
 }
 
 
-EStatusCode PDFPageMergingHelper::MergePageContent(PDFWriter* inWriter,const string& inPDFFilePath,unsigned long inPageIndex)
+EStatusCode PDFPageMergingHelper::MergePageContent(PDFWriter* inWriter,const std::string& inPDFFilePath,unsigned long inPageIndex)
 {
     EStatusCode status = eSuccess;
     

@@ -27,7 +27,7 @@
 
 #include <string>
 
-using namespace std;
+
 
 class StateReader
 {
@@ -35,7 +35,7 @@ public:
 	StateReader(void);
 	~StateReader(void);
 
-	PDFHummus::EStatusCode Start(const string& inStateFilePath);
+	PDFHummus::EStatusCode Start(const std::string& inStateFilePath);
 	PDFParser* GetObjectsReader();
 	ObjectIDType GetRootObjectID();
 	void Finish();

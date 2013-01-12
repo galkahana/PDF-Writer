@@ -26,7 +26,7 @@
 #include <string>
 #include <stdio.h>
 
-using namespace std;
+
 
 
 class OutputFileStream : public IByteWriterWithPosition
@@ -36,10 +36,10 @@ public:
 	virtual ~OutputFileStream(void);
 
 	// input file path is in UTF8
-	OutputFileStream(const string& inFilePath,bool inAppend = false);
+	OutputFileStream(const std::string& inFilePath,bool inAppend = false);
 
 	// input file path is in UTF8
-	PDFHummus::EStatusCode Open(const string& inFilePath,bool inAppend = false);
+	PDFHummus::EStatusCode Open(const std::string& inFilePath,bool inAppend = false);
 	PDFHummus::EStatusCode Close();
 
 	// IByteWriter implementation

@@ -21,6 +21,7 @@
 #include "GraphicStateStack.h"
 #include "Trace.h"
 
+
 using namespace PDFHummus;
 
 GraphicStateStack::GraphicStateStack(void)

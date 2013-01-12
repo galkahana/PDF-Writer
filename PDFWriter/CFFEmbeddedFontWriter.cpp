@@ -34,6 +34,7 @@
 #include <utility>
 #include <list>
 
+
 using namespace PDFHummus;
 
 CFFEmbeddedFontWriter::CFFEmbeddedFontWriter(void)
@@ -44,13 +45,13 @@ CFFEmbeddedFontWriter::~CFFEmbeddedFontWriter(void)
 {
 }
 
-static const string scSubtype = "Subtype";
+static const std::string scSubtype = "Subtype";
 
 EStatusCode CFFEmbeddedFontWriter::WriteEmbeddedFont(	
 								FreeTypeFaceWrapper& inFontInfo,
 								const UIntVector& inSubsetGlyphIDs,
-								const string& inFontFile3SubType,
-								const string& inSubsetFontName,
+								const std::string& inFontFile3SubType,
+								const std::string& inSubsetFontName,
 								ObjectsContext* inObjectsContext,
 								ObjectIDType& outEmbeddedFontObjectID)
 {
@@ -60,8 +61,8 @@ EStatusCode CFFEmbeddedFontWriter::WriteEmbeddedFont(
 EStatusCode CFFEmbeddedFontWriter::WriteEmbeddedFont(
 	FreeTypeFaceWrapper& inFontInfo,
 	const UIntVector& inSubsetGlyphIDs,
-	const string& inFontFile3SubType,
-	const string& inSubsetFontName,
+	const std::string& inFontFile3SubType,
+	const std::string& inSubsetFontName,
 	ObjectsContext* inObjectsContext,
 	UShortVector* inCIDMapping,
 	ObjectIDType& outEmbeddedFontObjectID)
@@ -93,7 +94,7 @@ EStatusCode CFFEmbeddedFontWriter::WriteEmbeddedFont(
 		
 		DictionaryContext* fontProgramDictionaryContext = inObjectsContext->StartDictionary();
 
-		rawFontProgram.pubseekoff(0,ios_base::beg);
+		rawFontProgram.pubseekoff(0,std::ios_base::beg);
 
 		fontProgramDictionaryContext->WriteKey(scSubtype);
 		fontProgramDictionaryContext->WriteNameValue(inFontFile3SubType);
@@ -123,7 +124,7 @@ EStatusCode CFFEmbeddedFontWriter::CreateCFFSubset(
 									FreeTypeFaceWrapper& inFontInfo,
 									const UIntVector& inSubsetGlyphIDs,
 									UShortVector* inCIDMapping,
-									const string& inSubsetFontName,
+									const std::string& inSubsetFontName,
 									bool& outNotEmbedded,
 									MyStringBuf& outFontProgram)
 {
@@ -339,11 +340,11 @@ EStatusCode CFFEmbeddedFontWriter::WriteCFFHeader()
 	return streamCopier.CopyToOutputStream(mOpenTypeFile.GetInputStream(),mOpenTypeInput.mCFF.mHeader.hdrSize);
 }
 
-EStatusCode CFFEmbeddedFontWriter::WriteName(const string& inSubsetFontName)
+EStatusCode CFFEmbeddedFontWriter::WriteName(const std::string& inSubsetFontName)
 {
 	// get the first name from the name table, and write it here
 
-	string fontName = inSubsetFontName.size() == 0 ? mOpenTypeInput.mCFF.mName.front() : inSubsetFontName;
+	std::string fontName = inSubsetFontName.size() == 0 ? mOpenTypeInput.mCFF.mName.front() : inSubsetFontName;
 
 	Byte sizeOfOffset = GetMostCompressedOffsetSize((unsigned long)fontName.size() + 1);
 
@@ -406,7 +407,7 @@ EStatusCode CFFEmbeddedFontWriter::WriteTopIndex()
 		mPrimitivesWriter.WriteOffset(1);
 		mPrimitivesWriter.WriteOffset((unsigned long)topDictSegment.GetCurrentWritePosition() + 1);
 
-		topDictSegment.pubseekoff(0,ios_base::beg);
+		topDictSegment.pubseekoff(0,std::ios_base::beg);
 
 		LongFilePositionType topDictDataOffset = mFontFileStream.GetCurrentPosition();
 
@@ -477,7 +478,7 @@ EStatusCode CFFEmbeddedFontWriter::WriteTopDictSegment(MyStringBuf& ioTopDictSeg
 	{
 		// no need for sophistication here...you can consider this as the only string to be added.
 		// so can be sure that its index would be the current count 
-		stringstream formatter;
+		std::stringstream formatter;
 		formatter<<"/FSType "<<mOpenTypeInput.mOS2.fsType<<" def";
 		mOptionalEmbeddedPostscript = formatter.str();
 		dictPrimitiveWriter.WriteIntegerOperand(mOpenTypeInput.mCFF.mStringsCount + N_STD_STRINGS);
@@ -584,8 +585,8 @@ EStatusCode CFFEmbeddedFontWriter::WriteGlobalSubrsIndex()
 }
 
 
-typedef pair<Byte,unsigned short> ByteAndUShort;
-typedef list<ByteAndUShort> ByteAndUShortList;
+typedef std::pair<Byte,unsigned short> ByteAndUShort;
+typedef std::list<ByteAndUShort> ByteAndUShortList;
 
 EStatusCode CFFEmbeddedFontWriter::WriteEncodings(const UIntVector& inSubsetGlyphIDs)
 {
@@ -724,7 +725,7 @@ EStatusCode CFFEmbeddedFontWriter::WriteCharStrings(const UIntVector& inSubsetGl
 
 		offsets[i] = (unsigned long)charStringsDataWriteStream.GetCurrentPosition();
 
-		charStringsData.pubseekoff(0,ios_base::beg);
+		charStringsData.pubseekoff(0,std::ios_base::beg);
 
 		// write index section
 		mCharStringPosition = mFontFileStream.GetCurrentPosition();
@@ -778,9 +779,9 @@ EStatusCode CFFEmbeddedFontWriter::WritePrivateDictionaryBody(const PrivateDictI
 	}
 }
 
-typedef set<FontDictInfo*> FontDictInfoSet;
-typedef pair<LongFilePositionType,LongFilePositionType> LongFilePositionTypePair;
-typedef map<FontDictInfo*,LongFilePositionTypePair> FontDictInfoToLongFilePositionTypePairMap;
+typedef std::set<FontDictInfo*> FontDictInfoSet;
+typedef std::pair<LongFilePositionType,LongFilePositionType> LongFilePositionTypePair;
+typedef std::map<FontDictInfo*,LongFilePositionTypePair> FontDictInfoToLongFilePositionTypePairMap;
 
 void CFFEmbeddedFontWriter::DetermineFDArrayIndexes(const UIntVector& inSubsetGlyphIDs,FontDictInfoToByteMap& outNewFontDictsIndexes)
 {
@@ -866,7 +867,7 @@ EStatusCode CFFEmbeddedFontWriter::WriteFDArray(const UIntVector& inSubsetGlyphI
 
 		offsets[i] = (unsigned long)fontDictDataWriteStream.GetCurrentPosition();
 
-		fontDictsInfoData.pubseekoff(0,ios_base::beg);
+		fontDictsInfoData.pubseekoff(0,std::ios_base::beg);
 
 		// write index section
 		mFDArrayPosition = mFontFileStream.GetCurrentPosition();

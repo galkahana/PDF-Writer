@@ -27,7 +27,7 @@
 
 #include <string>
 
-using namespace std;
+
 
 class ObjectsContext;
 class PDFParser;
@@ -47,7 +47,7 @@ public:
 	PDFDocumentCopyingContext();
 	~PDFDocumentCopyingContext(void);
 
-	PDFHummus::EStatusCode Start(const string& inPDFFilePath,
+	PDFHummus::EStatusCode Start(const std::string& inPDFFilePath,
 					  DocumentContext* inDocumentContext,
 					  ObjectsContext* inObjectsContext,
 					  IPDFParserExtender* inParserExtender);

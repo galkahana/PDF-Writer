@@ -30,7 +30,7 @@ PDFTextString::PDFTextString(void)
 {
 }
 
-PDFTextString::PDFTextString(const string& inString)
+PDFTextString::PDFTextString(const std::string& inString)
 {
 	mTextString = inString;
 }
@@ -41,7 +41,7 @@ PDFTextString::~PDFTextString(void)
 
 const PDFTextString PDFTextString::Empty;
 
-PDFTextString& PDFTextString::FromUTF8(const string& inString)
+PDFTextString& PDFTextString::FromUTF8(const std::string& inString)
 {
 	ConvertFromUTF8(inString);
 	return *this;
@@ -52,7 +52,7 @@ bool PDFTextString::IsEmpty() const
 	return mTextString.size() == 0;
 }
 
-const string& PDFTextString::ToString() const
+const std::string& PDFTextString::ToString() const
 {
 	return mTextString;
 }
@@ -68,7 +68,7 @@ PDFTextString& PDFTextString::operator=(const PDFTextString& inString)
 	return *this;
 }
 
-void PDFTextString::ConvertFromUTF8(const string& inStringToConvert)
+void PDFTextString::ConvertFromUTF8(const std::string& inStringToConvert)
 {
 	OutputStringBufferStream aStringStream;
 
@@ -89,7 +89,7 @@ void PDFTextString::ConvertFromUTF8(const string& inStringToConvert)
 	}
 }
 
-bool PDFTextString::ConvertUTF8ToPDFDocEncoding(const string& inStringToConvert,OutputStringBufferStream& refResult)
+bool PDFTextString::ConvertUTF8ToPDFDocEncoding(const std::string& inStringToConvert,OutputStringBufferStream& refResult)
 {
 	BoolAndByte encodingResult;
 	PDFDocEncoding pdfDocEncoding;
@@ -112,13 +112,13 @@ bool PDFTextString::ConvertUTF8ToPDFDocEncoding(const string& inStringToConvert,
 	return PDFEncodingOK;
 }
 
-PDFTextString& PDFTextString::operator=(const string& inString)
+PDFTextString& PDFTextString::operator=(const std::string& inString)
 {
 	mTextString = inString;
 	return *this;
 }
 
-string PDFTextString::ToUTF8String() const
+std::string PDFTextString::ToUTF8String() const
 {
 	if(mTextString.size() >= 2 && (Byte)mTextString.at(0) == 0xFE && (Byte)mTextString.at(1) == 0xFF)
 		return ToUTF8FromUTF16BE();
@@ -126,7 +126,7 @@ string PDFTextString::ToUTF8String() const
 		return ToUTF8FromPDFDocEncoding();
 }
 
-string PDFTextString::ToUTF8FromUTF16BE() const
+std::string PDFTextString::ToUTF8FromUTF16BE() const
 {
 	UnicodeString unicodeString;
 
@@ -137,13 +137,13 @@ string PDFTextString::ToUTF8FromUTF16BE() const
 }
 
 
-string PDFTextString::ToUTF8FromPDFDocEncoding() const
+std::string PDFTextString::ToUTF8FromPDFDocEncoding() const
 {
 	ULongList unicodes;
 	UnicodeString decoder;
 	PDFDocEncoding pdfDocEncoding;
 
-	string::const_iterator it = mTextString.begin();
+	std::string::const_iterator it = mTextString.begin();
 
 	for(; it != mTextString.end();++it)
 		unicodes.push_back(pdfDocEncoding.Decode(*it));

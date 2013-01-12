@@ -35,13 +35,13 @@ class DictionaryContext;
 class IANSIFontWriterHelper;
 class IByteWriter;
 
-using namespace std;
 
-typedef pair<unsigned short,string>  UShortAndString;
-typedef list<UShortAndString> UShortAndStringList;
 
-typedef pair<unsigned int, GlyphEncodingInfo> UIntAndGlyphEncodingInfo;
-typedef vector<UIntAndGlyphEncodingInfo> UIntAndGlyphEncodingInfoVector;
+typedef std::pair<unsigned short,std::string>  UShortAndString;
+typedef std::list<UShortAndString> UShortAndStringList;
+
+typedef std::pair<unsigned int, GlyphEncodingInfo> UIntAndGlyphEncodingInfo;
+typedef std::vector<UIntAndGlyphEncodingInfo> UIntAndGlyphEncodingInfoVector;
 
 class ANSIFontWriter 
 {

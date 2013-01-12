@@ -25,15 +25,15 @@
 class PSBoolReader
 {
 public:
-	void Read(const string& inReadFrom,bool& outValue);
-	void Read(const wstring& inReadFrom,bool& outValue);
+	void Read(const std::string& inReadFrom,bool& outValue);
+	void Read(const std::wstring& inReadFrom,bool& outValue);
 };
 
 class PSBoolWriter
 {
 public:
-	void Write(const bool& inValue,string& outWriteTo);
-	void Write(const bool& inValue,wstring& outWriteTo);
+	void Write(const bool& inValue,std::string& outWriteTo);
+	void Write(const bool& inValue,std::wstring& outWriteTo);
 };
 
 typedef BoxingBaseWithRW<bool,PSBoolReader,PSBoolWriter> PSBool;

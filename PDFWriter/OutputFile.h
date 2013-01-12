@@ -27,7 +27,7 @@ class IByteWriterWithPosition;
 class OutputBufferedStream;
 class OutputFileStream;
 
-using namespace std;
+
 
 class OutputFile
 {
@@ -35,13 +35,13 @@ public:
 	OutputFile(void);
 	~OutputFile(void);
 
-	PDFHummus::EStatusCode OpenFile(const string& inFilePath, bool inAppend = false);
+	PDFHummus::EStatusCode OpenFile(const std::string& inFilePath, bool inAppend = false);
 	PDFHummus::EStatusCode CloseFile();
 
 	IByteWriterWithPosition* GetOutputStream(); // returns buffered output stream
-	const string& GetFilePath();
+	const std::string& GetFilePath();
 private:
-	string mFilePath;
+	std::string mFilePath;
 	OutputBufferedStream* mOutputStream;
 	OutputFileStream* mFileStream;
 };

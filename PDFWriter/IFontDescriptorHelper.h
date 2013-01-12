@@ -25,15 +25,15 @@
 #include <utility>
 #include <vector>
 
-using namespace std;
+
 
 class DictionaryContext;
 class ObjectsContext;
 class FreeTypeFaceWrapper;
 
-typedef pair<unsigned int, GlyphEncodingInfo> UIntAndGlyphEncodingInfo;
-typedef vector<UIntAndGlyphEncodingInfo> UIntAndGlyphEncodingInfoVector;
-typedef vector<unsigned int> UIntVector;
+typedef std::pair<unsigned int, GlyphEncodingInfo> UIntAndGlyphEncodingInfo;
+typedef std::vector<UIntAndGlyphEncodingInfo> UIntAndGlyphEncodingInfoVector;
+typedef std::vector<unsigned int> UIntVector;
 
 class IFontDescriptorHelper
 {

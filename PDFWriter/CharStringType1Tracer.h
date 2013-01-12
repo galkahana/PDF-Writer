@@ -27,7 +27,7 @@
 class Type1Input;
 class IByteWriter;
 
-using namespace std;
+
 
 class CharStringType1Tracer: public IType1InterpreterImplementation
 {
@@ -36,7 +36,7 @@ public:
 	~CharStringType1Tracer(void);
 
 	PDFHummus::EStatusCode TraceGlyphProgram(Byte inGlyphIndex, Type1Input* inType1Input, IByteWriter* inWriter);
-	PDFHummus::EStatusCode TraceGlyphProgram(const string& inGlyphName, Type1Input* inType1Input, IByteWriter* inWriter);
+	PDFHummus::EStatusCode TraceGlyphProgram(const std::string& inGlyphName, Type1Input* inType1Input, IByteWriter* inWriter);
 
 	// IType1InterpreterImplementation
 	virtual PDFHummus::EStatusCode Type1Hstem(const LongList& inOperandList);

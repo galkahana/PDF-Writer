@@ -27,10 +27,10 @@
 #include <vector>
 #include <utility>
 
-using namespace std;
 
-typedef pair<unsigned int, GlyphEncodingInfo> UIntAndGlyphEncodingInfo;
-typedef vector<UIntAndGlyphEncodingInfo> UIntAndGlyphEncodingInfoVector;
+
+typedef std::pair<unsigned int, GlyphEncodingInfo> UIntAndGlyphEncodingInfo;
+typedef std::vector<UIntAndGlyphEncodingInfo> UIntAndGlyphEncodingInfoVector;
 
 class FreeTypeFaceWrapper;
 class ObjectsContext;
@@ -43,7 +43,7 @@ public:
 	~FontDescriptorWriter(void);
 
 	void WriteFontDescriptor(	ObjectIDType inFontDescriptorObjectID,
-								const string& inFontPostscriptName,
+								const std::string& inFontPostscriptName,
 								FreeTypeFaceWrapper* inFontInfo,
 								const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
 								ObjectsContext* inObjectsContext,

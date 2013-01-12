@@ -38,7 +38,7 @@ Trace::~Trace(void)
 	delete mLog;
 }
 
-void Trace::SetLogSettings(const string& inLogFilePath,bool inShouldLog,bool inPlaceUTF8Bom)
+void Trace::SetLogSettings(const std::string& inLogFilePath,bool inShouldLog,bool inPlaceUTF8Bom)
 {
 	mShouldLog = inShouldLog;
 	mPlaceUTF8Bom = inPlaceUTF8Bom;
@@ -86,7 +86,7 @@ void Trace::TraceToLog(const char* inFormat,...)
 		SAFE_VSPRINTF(mBuffer,5001,inFormat,argptr);
 		va_end(argptr);
 
-		mLog->LogEntry(string(mBuffer));
+		mLog->LogEntry(std::string(mBuffer));
 	}
 }
 
@@ -104,7 +104,7 @@ void Trace::TraceToLog(const char* inFormat,va_list inList)
 
 		SAFE_VSPRINTF(mBuffer,5001,inFormat,inList);
 
-		mLog->LogEntry(string(mBuffer));
+		mLog->LogEntry(std::string(mBuffer));
 	}
 
 }

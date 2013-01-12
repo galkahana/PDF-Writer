@@ -24,7 +24,7 @@
 
 #include <string>
 
-using namespace std;
+
 
 class PDFHexString : public PDFObject
 {
@@ -36,13 +36,13 @@ public:
 	};
 
 	// Value is the hex charactes string
-	PDFHexString(const string& inValue);
+	PDFHexString(const std::string& inValue);
 	virtual ~PDFHexString(void);
 
-	const string& GetValue() const;
-	operator string() const;
+	const std::string& GetValue() const;
+	operator std::string() const;
 
 private:
-	string mValue;
+	std::string mValue;
 
 };

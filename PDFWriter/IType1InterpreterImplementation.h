@@ -25,7 +25,7 @@
 
 #include <list>
 
-using namespace std;
+
 using namespace IOBasicTypes;
 
 struct Type1CharString
@@ -34,7 +34,7 @@ struct Type1CharString
 	int CodeLength;
 };
 
-typedef list<long> LongList;
+typedef std::list<long> LongList;
 
 class IType1InterpreterImplementation
 {

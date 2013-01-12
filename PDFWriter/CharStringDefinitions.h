@@ -24,7 +24,7 @@
 #include <list>
 
 using namespace IOBasicTypes;
-using namespace std;
+
 
 struct IndexElement
 {
@@ -47,4 +47,4 @@ struct CharStringOperand
 	};
 };
 
-typedef list<CharStringOperand> CharStringOperandList;
+typedef std::list<CharStringOperand> CharStringOperandList;

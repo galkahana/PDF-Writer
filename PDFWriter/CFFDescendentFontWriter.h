@@ -29,7 +29,7 @@ public:
 
 	// IDescendentFontWriter implementation [used also as helper for the DescendentFontWriter]
 	virtual PDFHummus::EStatusCode WriteFont(	ObjectIDType inDecendentObjectID, 
-									const string& inFontName,
+									const std::string& inFontName,
 									FreeTypeFaceWrapper& inFontInfo,
 									const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
 									ObjectsContext* inObjectsContext);

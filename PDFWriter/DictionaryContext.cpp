@@ -23,10 +23,12 @@
 #include "Trace.h"
 #include "IByteWriterWithPosition.h"
 
-static const string scStartDictionary = "<<";
-static const string scEndDictionary = ">>";
 
 using namespace PDFHummus;
+
+static const std::string scStartDictionary = "<<";
+static const std::string scEndDictionary = ">>";
+
 
 DictionaryContext::DictionaryContext(ObjectsContext* inObjectsContext,size_t inIndentLevel)
 {
@@ -46,7 +48,7 @@ DictionaryContext::~DictionaryContext(void)
 	mObjectsContext->WriteKeyword(scEndDictionary);
 }
 
-EStatusCode DictionaryContext::WriteKey(const string& inKey)
+EStatusCode DictionaryContext::WriteKey(const std::string& inKey)
 {
 	if(mKeys.find(inKey) == mKeys.end())
 	{
@@ -92,18 +94,18 @@ void DictionaryContext::WriteNewObjectReferenceValue(ObjectIDType inObjectRefere
     WriteObjectReferenceValue(inObjectReference,0);
 }
 
-void DictionaryContext::WriteLiteralStringValue(const string& inValue)
+void DictionaryContext::WriteLiteralStringValue(const std::string& inValue)
 {
 	mObjectsContext->WriteLiteralString(inValue,eTokenSeparatorEndLine);
 }
 
-void DictionaryContext::WriteKeywordValue(const string& inValue)
+void DictionaryContext::WriteKeywordValue(const std::string& inValue)
 {
 	mObjectsContext->WriteKeyword(inValue);
 }
 
 
-void DictionaryContext::WriteHexStringValue(const string& inValue)
+void DictionaryContext::WriteHexStringValue(const std::string& inValue)
 {
 	mObjectsContext->WriteHexString(inValue,eTokenSeparatorEndLine);
 }
@@ -113,7 +115,7 @@ void DictionaryContext::WriteNullValue()
 	mObjectsContext->WriteNull(eTokenSeparatorEndLine);
 }
 
-void DictionaryContext::WriteNameValue(const string& inValue)
+void DictionaryContext::WriteNameValue(const std::string& inValue)
 {
 	mObjectsContext->WriteName(inValue,eTokenSeparatorEndLine);	
 }

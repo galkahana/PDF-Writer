@@ -24,10 +24,10 @@
 #include <utility>
 #include <list>
 
-using namespace std;
 
-typedef pair<unsigned char,unsigned char> UCharAndUChar;
-typedef list<UCharAndUChar> UCharAndUCharList;
+
+typedef std::pair<unsigned char,unsigned char> UCharAndUChar;
+typedef std::list<UCharAndUChar> UCharAndUCharList;
 
 
 class WrittenFontCFF : public AbstractWrittenFont

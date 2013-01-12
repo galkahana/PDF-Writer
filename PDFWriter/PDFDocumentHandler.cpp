@@ -117,7 +117,7 @@ private:
 };
 
 
-EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const string& inPDFFilePath,
+EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const std::string& inPDFFilePath,
 																				const PDFPageRange& inPageRange,
 																				IPageEmbedInFormCommand* inPageEmbedCommand,
 																				const double* inTransformationMatrix,
@@ -231,7 +231,7 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDFInCo
 
 }
 
-EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const string& inPDFFilePath,
+EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const std::string& inPDFFilePath,
 																				const PDFPageRange& inPageRange,
 																				EPDFPageBox inPageBoxToUseAsFormBox,
 																				const double* inTransformationMatrix,
@@ -241,7 +241,7 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	co
 	return CreateFormXObjectsFromPDF(inPDFFilePath,inPageRange,&embedCommand,inTransformationMatrix,inCopyAdditionalObjects);
 }
 
-EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const string& inPDFFilePath,
+EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const std::string& inPDFFilePath,
 																				const PDFPageRange& inPageRange,
 																				const PDFRectangle& inCropBox,
 																				const double* inTransformationMatrix,
@@ -849,7 +849,7 @@ EStatusCode PDFDocumentHandler::OnResourcesWrite(
 	return status;
 }
 
-EStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDF(const string& inPDFFilePath,
+EStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDF(const std::string& inPDFFilePath,
 																		const PDFPageRange& inPageRange,
 																		const ObjectIDTypeList& inCopyAdditionalObjects)
 {
@@ -1106,7 +1106,7 @@ EStatusCode PDFDocumentHandler::WritePDFStreamInputToContentContext(PageContentC
 
 }
 
-EStatusCode PDFDocumentHandler::StartFileCopyingContext(const string& inPDFFilePath)
+EStatusCode PDFDocumentHandler::StartFileCopyingContext(const std::string& inPDFFilePath)
 {
 	if(mPDFFile.OpenFile(inPDFFilePath) != PDFHummus::eSuccess)
 	{
@@ -1336,7 +1336,7 @@ void PDFDocumentHandler::RemoveDocumentContextExtender(IDocumentContextExtender*
 
 
 EStatusCode PDFDocumentHandler::MergePDFPagesToPage(PDFPage* inPage,
-													const string& inPDFFilePath,
+													const std::string& inPDFFilePath,
 													const PDFPageRange& inPageRange,
 													const ObjectIDTypeList& inCopyAdditionalObjects)
 {
@@ -1652,7 +1652,7 @@ EStatusCode PDFDocumentHandler::MergeResourcesToPage(PDFPage* inTargetPage,PDFDi
 	return status;
 }
 
-string PDFDocumentHandler::AsEncodedName(const string& inName)
+std::string PDFDocumentHandler::AsEncodedName(const std::string& inName)
 {
 	// for later comparisons and replacement, i'd like to have the name as it appears in a PDF stream, with all spaces encoded.
 	// i know there's little chance that resource names will contain spaces...but i want to be safe.
@@ -2209,8 +2209,8 @@ public:
     
     virtual ~ICategoryServicesCommand(){}
     
-    virtual string GetResourcesCategoryName() = 0;
-    virtual string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister) = 0;
+    virtual std::string GetResourcesCategoryName() = 0;
+    virtual std::string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister) = 0;
 };
 
 class ExtGStateCategoryServices : public ICategoryServicesCommand
@@ -2218,8 +2218,8 @@ class ExtGStateCategoryServices : public ICategoryServicesCommand
 public:
     ExtGStateCategoryServices(ResourcesDictionary& inTargetResourcesDictionary):mTargetRersourcesDictionary(inTargetResourcesDictionary){}
     
-    virtual string GetResourcesCategoryName(){return "ExtGState";}
-    virtual string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister){
+    virtual std::string GetResourcesCategoryName(){return "ExtGState";}
+    virtual std::string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister){
         return mTargetRersourcesDictionary.AddExtGStateMapping(inResourceToRegister);}
 
 private:
@@ -2232,8 +2232,8 @@ class ColorSpaceCategoryServices : public ICategoryServicesCommand
 public:
     ColorSpaceCategoryServices(ResourcesDictionary& inTargetResourcesDictionary):mTargetRersourcesDictionary(inTargetResourcesDictionary){}
     
-    virtual string GetResourcesCategoryName(){return "ColorSpace";}
-    virtual string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister){
+    virtual std::string GetResourcesCategoryName(){return "ColorSpace";}
+    virtual std::string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister){
         return mTargetRersourcesDictionary.AddColorSpaceMapping(inResourceToRegister);}
     
 private:
@@ -2246,8 +2246,8 @@ class PatternCategoryServices : public ICategoryServicesCommand
 public:
     PatternCategoryServices(ResourcesDictionary& inTargetResourcesDictionary):mTargetRersourcesDictionary(inTargetResourcesDictionary){}
     
-    virtual string GetResourcesCategoryName(){return "Pattern";}
-    virtual string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister){
+    virtual std::string GetResourcesCategoryName(){return "Pattern";}
+    virtual std::string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister){
         return mTargetRersourcesDictionary.AddPatternMapping(inResourceToRegister);}
     
 private:
@@ -2259,8 +2259,8 @@ class ShadingCategoryServices : public ICategoryServicesCommand
 public:
     ShadingCategoryServices(ResourcesDictionary& inTargetResourcesDictionary):mTargetRersourcesDictionary(inTargetResourcesDictionary){}
     
-    virtual string GetResourcesCategoryName(){return "Shading";}
-    virtual string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister){
+    virtual std::string GetResourcesCategoryName(){return "Shading";}
+    virtual std::string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister){
         return mTargetRersourcesDictionary.AddShadingMapping(inResourceToRegister);}
     
 private:
@@ -2272,8 +2272,8 @@ class XObjectCategoryServices : public ICategoryServicesCommand
 public:
     XObjectCategoryServices(ResourcesDictionary& inTargetResourcesDictionary):mTargetRersourcesDictionary(inTargetResourcesDictionary){}
     
-    virtual string GetResourcesCategoryName(){return "XObject";}
-    virtual string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister){
+    virtual std::string GetResourcesCategoryName(){return "XObject";}
+    virtual std::string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister){
         return mTargetRersourcesDictionary.AddXObjectMapping(inResourceToRegister);}
     
 private:
@@ -2285,8 +2285,8 @@ class FontCategoryServices : public ICategoryServicesCommand
 public:
     FontCategoryServices(ResourcesDictionary& inTargetResourcesDictionary):mTargetRersourcesDictionary(inTargetResourcesDictionary){}
     
-    virtual string GetResourcesCategoryName(){return "Font";}
-    virtual string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister){
+    virtual std::string GetResourcesCategoryName(){return "Font";}
+    virtual std::string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister){
         return mTargetRersourcesDictionary.AddFontMapping(inResourceToRegister);}
     
 private:
@@ -2298,8 +2298,8 @@ class PropertyCategoryServices : public ICategoryServicesCommand
 public:
     PropertyCategoryServices(ResourcesDictionary& inTargetResourcesDictionary):mTargetRersourcesDictionary(inTargetResourcesDictionary){}
     
-    virtual string GetResourcesCategoryName(){return "Properties";}
-    virtual string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister){
+    virtual std::string GetResourcesCategoryName(){return "Properties";}
+    virtual std::string RegisterInDirectResourceInFormResources(ObjectIDType inResourceToRegister){
         return mTargetRersourcesDictionary.AddPropertyMapping(inResourceToRegister);}
     
 private:
@@ -2383,7 +2383,7 @@ public:
         mFormXObject = inFormXObject;
     }
     
-    void SetResourceName(const string& inResourceName)
+    void SetResourceName(const std::string& inResourceName)
     {
         mResourceName = inResourceName;
     }
@@ -2410,7 +2410,7 @@ public:
 private:
     PDFDocumentHandler* mCopier;
     PDFObject* mObjectToCopy;
-    string mResourceName;
+    std::string mResourceName;
     PDFFormXObject* mFormXObject;
 
 };

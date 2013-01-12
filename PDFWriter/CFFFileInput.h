@@ -32,7 +32,7 @@
 #include <utility>
 #include <vector>
 
-using namespace std;
+
 
 struct CFFHeader
 {
@@ -42,11 +42,11 @@ struct CFFHeader
 	Byte offSize;
 };
 
-typedef list<string> StringList;
-typedef map<string,unsigned short> StringToUShort;
-typedef pair<bool,unsigned short> BoolAndUShort;
+typedef std::list<std::string> StringList;
+typedef std::map<std::string,unsigned short> StringToUShort;
+typedef std::pair<bool,unsigned short> BoolAndUShort;
 
-typedef list<CharString*> CharStringList;
+typedef std::list<CharString*> CharStringList;
 
 typedef CharString* CharStringsIndex;
 
@@ -68,7 +68,7 @@ enum ECharSetType
 	eCharSetCustom
 };
 
-typedef map<unsigned short,CharString*> UShortToCharStringMap;
+typedef std::map<unsigned short,CharString*> UShortToCharStringMap;
 
 struct CharSetInfo
 {	
@@ -79,7 +79,7 @@ struct CharSetInfo
 	unsigned short* mSIDs; // count is like glyphs count
 };
 
-typedef vector<CharSetInfo*> CharSetInfoVector;
+typedef std::vector<CharSetInfo*> CharSetInfoVector;
 
 
 enum EEncodingType
@@ -89,10 +89,10 @@ enum EEncodingType
 	eEncodingCustom
 };
 
-typedef list<Byte> ByteList;
-typedef map<unsigned short,ByteList> UShortToByteList;
+typedef std::list<Byte> ByteList;
+typedef std::map<unsigned short,ByteList> UShortToByteList;
 
-typedef pair<Byte,unsigned short> ByteAndUShort;
+typedef std::pair<Byte,unsigned short> ByteAndUShort;
 
 struct EncodingsInfo
 {
@@ -119,7 +119,7 @@ struct PrivateDictInfo
 
 };
 
-typedef map<LongFilePositionType,CharStrings*> LongFilePositionTypeToCharStringsMap;
+typedef std::map<LongFilePositionType,CharStrings*> LongFilePositionTypeToCharStringsMap;
 
 struct FontDictInfo
 {
@@ -145,12 +145,12 @@ struct TopDictInfo
 	FontDictInfo** mFDSelect; // size is like glyphsize. each cell references the relevant FontDict
 };
 
-typedef vector<EncodingsInfo*> EncodingsInfoVector;
+typedef std::vector<EncodingsInfo*> EncodingsInfoVector;
 
 
 
 
-class StringLess : public binary_function<const char*,const char*,bool>
+class StringLess : public std::binary_function<const char*,const char*,bool>
 {
 public:
 	bool operator( ) (const char* left, 
@@ -160,7 +160,7 @@ public:
 	}
 };
 
-typedef set<unsigned short> UShortSet;
+typedef std::set<unsigned short> UShortSet;
 
 struct CharString2Dependencies
 {
@@ -169,7 +169,7 @@ struct CharString2Dependencies
 	UShortSet mLocalSubrs; // from callsubr
 };
 
-typedef map<const char*,unsigned short,StringLess> CharPToUShortMap;
+typedef std::map<const char*,unsigned short,StringLess> CharPToUShortMap;
 
 class CFFFileInput : public Type2InterpreterImplementationAdapter
 {
@@ -183,7 +183,7 @@ public:
 	// according to how it appears in the CFF
 	PDFHummus::EStatusCode ReadCFFFile(IByteReaderWithPosition* inCFFFile,unsigned short inFontIndex);
 	// parses the CFF file just for the particular named font
-	PDFHummus::EStatusCode ReadCFFFile(IByteReaderWithPosition* inCFFFile,const string& inFontName);
+	PDFHummus::EStatusCode ReadCFFFile(IByteReaderWithPosition* inCFFFile,const std::string& inFontName);
 
 	// call only <i> after </i> calling the read method...got it?
 	// calculate dependencies for a given charstring [it can be char, gsubr or localsubr].
@@ -198,7 +198,7 @@ public:
 
 	unsigned short GetFontsCount(unsigned short inFontIndex);
 	unsigned short GetCharStringsCount(unsigned short inFontIndex);
-	string GetGlyphName(unsigned short inFontIndex,unsigned short inGlyphIndex);
+	std::string GetGlyphName(unsigned short inFontIndex,unsigned short inGlyphIndex);
 	unsigned short GetGlyphSID(unsigned short inFontIndex,unsigned short inGlyphIndex);
 	CharString* GetGlyphCharString(unsigned short inFontIndex,
 				 				   unsigned short inCharStringIndex);
@@ -258,7 +258,7 @@ private:
 	CharStringList mAdditionalGlyphs;
 	CharSetInfo* mCurrentCharsetInfo;
 
-	string GetStringForSID(unsigned short inSID);	
+	std::string GetStringForSID(unsigned short inSID);	
 	PDFHummus::EStatusCode ReadHeader();
 	PDFHummus::EStatusCode ReadNameIndex();
 	PDFHummus::EStatusCode ReadIndexHeader(unsigned long** outOffsets,unsigned short& outItemsCount);
@@ -297,7 +297,7 @@ private:
 	PDFHummus::EStatusCode ReadPrivateDict(const UShortToDictOperandListMap& inReferencingDict,PrivateDictInfo* outPrivateDict);
 	PDFHummus::EStatusCode ReadLocalSubrsForPrivateDict(PrivateDictInfo* inPrivateDict,Byte inCharStringType);
 	LongFilePositionType GetFDSelectPosition(unsigned short inFontIndex);
-	BoolAndUShort GetIndexForFontName(const string& inFontName);
+	BoolAndUShort GetIndexForFontName(const std::string& inFontName);
 	PDFHummus::EStatusCode ReadTopDictIndex(unsigned short inFontIndex);
 	PDFHummus::EStatusCode ReadCharStrings(unsigned short inFontIndex);
 	PDFHummus::EStatusCode ReadPrivateDicts(unsigned short inFontIndex);
@@ -306,6 +306,6 @@ private:
 	void ReadEncoding(EncodingsInfo* inEncoding,LongFilePositionType inEncodingPosition);
 	PDFHummus::EStatusCode ReadEncodings(unsigned short inFontIndex);
 	PDFHummus::EStatusCode ReadCIDInformation(unsigned short inFontIndex);
-	PDFHummus::EStatusCode ReadCFFFileByIndexOrName(IByteReaderWithPosition* inCFFFile,const string& inFontName,unsigned short inFontIndex);
+	PDFHummus::EStatusCode ReadCFFFileByIndexOrName(IByteReaderWithPosition* inCFFFile,const std::string& inFontName,unsigned short inFontIndex);
 };
 

@@ -132,13 +132,13 @@ static unsigned short scSortedStandardStringsPositions[N_STD_STRINGS] = {
 	326
 };
 
-static const string scSubtype = "Subtype";
+static const std::string scSubtype = "Subtype";
 
 EStatusCode Type1ToCFFEmbeddedFontWriter::WriteEmbeddedFont(	
 															FreeTypeFaceWrapper& inFontInfo,
 															const UIntVector& inSubsetGlyphIDs,
-															const string& inFontFile3SubType,
-															const string& inSubsetFontName,
+															const std::string& inFontFile3SubType,
+															const std::string& inSubsetFontName,
 															ObjectsContext* inObjectsContext,
 															ObjectIDType& outEmbeddedFontObjectID)
 {
@@ -169,7 +169,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteEmbeddedFont(
 		
 		DictionaryContext* fontProgramDictionaryContext = inObjectsContext->StartDictionary();
 
-		rawFontProgram.pubseekoff(0,ios_base::beg);
+		rawFontProgram.pubseekoff(0,std::ios_base::beg);
 
 		fontProgramDictionaryContext->WriteKey(scSubtype);
 		fontProgramDictionaryContext->WriteNameValue(inFontFile3SubType);
@@ -198,7 +198,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteEmbeddedFont(
 EStatusCode Type1ToCFFEmbeddedFontWriter::CreateCFFSubset(	
 															FreeTypeFaceWrapper& inFontInfo,
 															const UIntVector& inSubsetGlyphIDs,
-															const string& inSubsetFontName,
+															const std::string& inSubsetFontName,
 															bool& outNotEmbedded,
 															MyStringBuf& outFontProgram)
 {
@@ -375,7 +375,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::AddDependentGlyphs(StringVector& ioSub
 	return status;	
 }
 
-EStatusCode Type1ToCFFEmbeddedFontWriter::AddComponentGlyphs(const string& inGlyphID,StringSet& ioComponents,bool &outFoundComponents)
+EStatusCode Type1ToCFFEmbeddedFontWriter::AddComponentGlyphs(const std::string& inGlyphID,StringSet& ioComponents,bool &outFoundComponents)
 {
 	CharString1Dependencies dependencies;
 	EStatusCode status = mType1Input.CalculateDependenciesForCharIndex(inGlyphID,dependencies);
@@ -386,7 +386,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::AddComponentGlyphs(const string& inGly
 		for(; it != dependencies.mCharCodes.end() && PDFHummus::eSuccess == status; ++it)
 		{
 			bool dummyFound;
-			string glyphName = mType1Input.GetGlyphCharStringName(*it);
+			std::string glyphName = mType1Input.GetGlyphCharStringName(*it);
 			ioComponents.insert(glyphName);
 			status = AddComponentGlyphs(glyphName,ioComponents,dummyFound);
 		}
@@ -409,11 +409,11 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteCFFHeader()
 	return mPrimitivesWriter.GetInternalState();
 }
 
-EStatusCode Type1ToCFFEmbeddedFontWriter::WriteName(const string& inSubsetFontName)
+EStatusCode Type1ToCFFEmbeddedFontWriter::WriteName(const std::string& inSubsetFontName)
 {	
 	// get the first name from the name table, and write it here
 
-	string fontName = inSubsetFontName.size() == 0 ? mType1Input.mFontDictionary.FontName : inSubsetFontName;
+	std::string fontName = inSubsetFontName.size() == 0 ? mType1Input.mFontDictionary.FontName : inSubsetFontName;
 
 	Byte sizeOfOffset = GetMostCompressedOffsetSize((unsigned long)fontName.size() + 1);
 
@@ -464,7 +464,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteTopIndex()
 		mPrimitivesWriter.WriteOffset(1);
 		mPrimitivesWriter.WriteOffset((unsigned long)topDictSegment.GetCurrentWritePosition() + 1);
 
-		topDictSegment.pubseekoff(0,ios_base::beg);
+		topDictSegment.pubseekoff(0,std::ios_base::beg);
 
 		LongFilePositionType topDictDataOffset = mFontFileStream.GetCurrentPosition();
 
@@ -549,7 +549,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteTopDictSegment(MyStringBuf& ioTop
 	// FSType if required. format as an embedded postscript string. /FSType fstype def
 	if(mType1Input.mFontDictionary.FSTypeValid || mType1Input.mFontInfoDictionary.FSTypeValid)
 	{
-		stringstream formatter;
+		std::stringstream formatter;
 		formatter<<"/FSType "<<
 						(mType1Input.mFontInfoDictionary.FSTypeValid ? 
 							mType1Input.mFontInfoDictionary.fsType :
@@ -587,7 +587,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteTopDictSegment(MyStringBuf& ioTop
 	return dictPrimitiveWriter.GetInternalState();
 }
 
-void Type1ToCFFEmbeddedFontWriter::AddStringOperandIfNotEmpty(CFFPrimitiveWriter& inWriter,const string& inString,unsigned short inOperator)
+void Type1ToCFFEmbeddedFontWriter::AddStringOperandIfNotEmpty(CFFPrimitiveWriter& inWriter,const std::string& inString,unsigned short inOperator)
 {
 	if(inString.size() != 0)
 	{
@@ -617,7 +617,7 @@ void Type1ToCFFEmbeddedFontWriter::AddNumberOperandIfNotDefault(CFFPrimitiveWrit
 
 
 
-unsigned short Type1ToCFFEmbeddedFontWriter::AddStringToStringsArray(const string& inString)
+unsigned short Type1ToCFFEmbeddedFontWriter::AddStringToStringsArray(const std::string& inString)
 {
 	// first - see if this string exists in the standard strings array
 	BoolAndUShort findResult = FindStandardString(inString);	
@@ -638,7 +638,7 @@ unsigned short Type1ToCFFEmbeddedFontWriter::AddStringToStringsArray(const strin
 	return it->second + N_STD_STRINGS;
 }
 
-BoolAndUShort Type1ToCFFEmbeddedFontWriter::FindStandardString(const string& inStringToFind)
+BoolAndUShort Type1ToCFFEmbeddedFontWriter::FindStandardString(const std::string& inStringToFind)
 {
 	unsigned short upperBound = N_STD_STRINGS;
 	unsigned short lowerBound = 0;
@@ -775,7 +775,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteCharStrings(const StringVector& i
 
 		offsets[i] = (unsigned long)charStringsDataWriteStream.GetCurrentPosition();
 
-		charStringsData.pubseekoff(0,ios_base::beg);
+		charStringsData.pubseekoff(0,std::ios_base::beg);
 
 		// write index section
 		mCharStringPosition = mFontFileStream.GetCurrentPosition();
@@ -825,14 +825,14 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WritePrivateDictionary()
 	return mPrimitivesWriter.GetInternalState();
 }
 
-void Type1ToCFFEmbeddedFontWriter::AddDeltaVectorIfNotEmpty(CFFPrimitiveWriter& inWriter,const vector<int>& inArray,unsigned short inOperator)
+void Type1ToCFFEmbeddedFontWriter::AddDeltaVectorIfNotEmpty(CFFPrimitiveWriter& inWriter,const std::vector<int>& inArray,unsigned short inOperator)
 {
 	if(inArray.size() == 0)
 		return;
 
 	int currentValue = 0;
 
-	vector<int>::const_iterator it = inArray.begin();
+	std::vector<int>::const_iterator it = inArray.begin();
 	for(; it != inArray.end();++it)
 	{
 		inWriter.WriteIntegerOperand(*it - currentValue);
@@ -841,14 +841,14 @@ void Type1ToCFFEmbeddedFontWriter::AddDeltaVectorIfNotEmpty(CFFPrimitiveWriter& 
 	inWriter.WriteDictOperator(inOperator);
 }
 
-void Type1ToCFFEmbeddedFontWriter::AddDeltaVectorIfNotEmpty(CFFPrimitiveWriter& inWriter,const vector<double>& inArray,unsigned short inOperator)
+void Type1ToCFFEmbeddedFontWriter::AddDeltaVectorIfNotEmpty(CFFPrimitiveWriter& inWriter,const std::vector<double>& inArray,unsigned short inOperator)
 {
 	if(inArray.size() == 0)
 		return;
 
 	double currentValue = 0;
 
-	vector<double>::const_iterator it = inArray.begin();
+	std::vector<double>::const_iterator it = inArray.begin();
 	for(; it != inArray.end();++it)
 	{
 		inWriter.WriteRealOperand(*it - currentValue);
@@ -885,7 +885,7 @@ void Type1ToCFFEmbeddedFontWriter::TranslateFromFreeTypeToType1(FreeTypeFaceWrap
 	for(; it != inSubsetGlyphIDs.end(); ++it)
 	{
 		FT_Get_Glyph_Name(inFontInfo,*it,buffer,100);
-		string aName(buffer,strlen(buffer));
+		std::string aName(buffer,strlen(buffer));
 		outGlyphNames.push_back(aName);
 	}
 }

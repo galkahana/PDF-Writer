@@ -22,6 +22,7 @@
 #include "InputByteArrayStream.h"
 #include "Trace.h"
 
+
 using namespace PDFHummus;
 
 CharStringType1Interpreter::CharStringType1Interpreter(void)

@@ -21,7 +21,7 @@
 #pragma once
 
 #include <string>
-using namespace std;
+
 
 class UppercaseSequance
 {
@@ -29,18 +29,18 @@ public:
 	UppercaseSequance(void);
 	~UppercaseSequance(void);
 
-	UppercaseSequance(string inSequanceString);
+	UppercaseSequance(std::string inSequanceString);
 
 	// returns the string after the increase
-	const string& GetNextValue();
+	const std::string& GetNextValue();
 
 	// get the current value
-	const string& ToString();
-	void SetSequanceString(const string& inSequanceString);
+	const std::string& ToString();
+	void SetSequanceString(const std::string& inSequanceString);
 
 	// reset to beginning value
 	void Reset();
 private:
-	string mSequanceString;
+	std::string mSequanceString;
 
 };

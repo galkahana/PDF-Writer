@@ -21,6 +21,8 @@
 #include "Ascii7Encoding.h"
 #include "OutputStringBufferStream.h"
 
+
+
 Ascii7Encoding::Ascii7Encoding(void)
 {
 }
@@ -29,12 +31,12 @@ Ascii7Encoding::~Ascii7Encoding(void)
 {
 }
 
-BoolAndString Ascii7Encoding::Encode(const string& inString)
+BoolAndString Ascii7Encoding::Encode(const std::string& inString)
 {
 	OutputStringBufferStream asciiString;
 	bool encodingGood = true;
 	IOBasicTypes::Byte buffer;
-	string::const_iterator it = inString.begin();
+	std::string::const_iterator it = inString.begin();
 
 	for(;it != inString.end() && encodingGood;++it)
 	{

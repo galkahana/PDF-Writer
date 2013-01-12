@@ -20,7 +20,7 @@
 */
 #include "PDFLiteralString.h"
 
-PDFLiteralString::PDFLiteralString(const string& inValue):PDFObject(eType)
+PDFLiteralString::PDFLiteralString(const std::string& inValue):PDFObject(eType)
 {
 	mValue = inValue;
 }
@@ -29,12 +29,12 @@ PDFLiteralString::~PDFLiteralString(void)
 {
 }
 
-const string& PDFLiteralString::GetValue() const
+const std::string& PDFLiteralString::GetValue() const
 {
 	return mValue;
 }
 
-PDFLiteralString::operator string() const
+PDFLiteralString::operator std::string() const
 {
 	return mValue;
 }

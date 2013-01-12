@@ -59,7 +59,7 @@ void InfoDictionary::Reset()
 	ModDate.SetTime(-1);
 }
 
-void InfoDictionary::AddAdditionalInfoEntry(const string& inKey,
+void InfoDictionary::AddAdditionalInfoEntry(const std::string& inKey,
 											const PDFTextString& inValue)
 {
 	if(mAdditionalInfoEntries.find(inKey) != mAdditionalInfoEntries.end())
@@ -68,7 +68,7 @@ void InfoDictionary::AddAdditionalInfoEntry(const string& inKey,
 		mAdditionalInfoEntries.insert(StringToPDFTextString::value_type(inKey,inValue));
 }
 
-void InfoDictionary::RemoveAdditionalInfoEntry(const string& inKey)
+void InfoDictionary::RemoveAdditionalInfoEntry(const std::string& inKey)
 {
 	StringToPDFTextString::iterator it = mAdditionalInfoEntries.find(inKey);
 	if(it != mAdditionalInfoEntries.end())
@@ -80,7 +80,7 @@ void InfoDictionary::ClearAdditionalInfoEntries()
 	mAdditionalInfoEntries.clear();
 }
 
-PDFTextString InfoDictionary::GetAdditionalInfoEntry(const string& inKey)
+PDFTextString InfoDictionary::GetAdditionalInfoEntry(const std::string& inKey)
 {
 	StringToPDFTextString::iterator it = mAdditionalInfoEntries.find(inKey);
 

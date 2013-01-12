@@ -23,7 +23,7 @@
 
 #include <string>
 
-using namespace std;
+
 
 // good for tracing upto 5K wide chars messages
 
@@ -36,7 +36,7 @@ public:
 	Trace();
 	~Trace(void);
 
-	void SetLogSettings(const string& inLogFilePath,bool inShouldLog,bool inPlaceUTF8Bom);
+	void SetLogSettings(const std::string& inLogFilePath,bool inShouldLog,bool inPlaceUTF8Bom);
 	void SetLogSettings(IByteWriter* inLogStream,bool inShouldLog);
 
 	void TraceToLog(const char* inFormat,...);
@@ -47,7 +47,7 @@ private:
 	char mBuffer[5001];
 	Log* mLog;
 
-	string mLogFilePath;
+	std::string mLogFilePath;
 	IByteWriter* mLogStream;
 	bool mShouldLog;
 	bool mPlaceUTF8Bom;

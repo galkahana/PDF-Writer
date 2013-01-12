@@ -115,7 +115,7 @@ public:
 	PFMFileReader(void);
 	~PFMFileReader(void);
 
-	PDFHummus::EStatusCode Read(const string& inPFMFilePath);
+	PDFHummus::EStatusCode Read(const std::string& inPFMFilePath);
 
 	PFMHeader Header;
 	PFMExtension Extension;

@@ -23,6 +23,7 @@
 #include "Type1Input.h"
 #include "Trace.h"
 
+
 using namespace PDFHummus;
 
 CharStringType1Tracer::CharStringType1Tracer(void)
@@ -52,7 +53,7 @@ EStatusCode CharStringType1Tracer::TraceGlyphProgram(Byte inGlyphIndex, Type1Inp
 	return interpreter.Intepret(*charString,this);
 }*/
 
-EStatusCode CharStringType1Tracer::TraceGlyphProgram(const string& inGlyphName, Type1Input* inType1Input, IByteWriter* inWriter)
+EStatusCode CharStringType1Tracer::TraceGlyphProgram(const std::string& inGlyphName, Type1Input* inType1Input, IByteWriter* inWriter)
 {
 	CharStringType1Interpreter interpreter;
 

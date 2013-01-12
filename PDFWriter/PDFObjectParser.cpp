@@ -67,12 +67,12 @@ void PDFObjectParser::ResetReadState()
 	mTokenizer.ResetReadState();
 }
 
-static const string scR = "R";
-static const string scStream = "stream";
+static const std::string scR = "R";
+static const std::string scStream = "stream";
 PDFObject* PDFObjectParser::ParseNewObject(IPDFParserExtender* inParserExtender)
 {
 	PDFObject* pdfObject = NULL;
-	string token;
+	std::string token;
 
 	do
 	{
@@ -124,7 +124,7 @@ PDFObject* PDFObjectParser::ParseNewObject(IPDFParserExtender* inParserExtender)
 				((PDFInteger*)pdfObject)->GetValue() > 0)
 			{
 				// try parse version
-				string numberToken;
+				std::string numberToken;
 				if(!GetNextToken(numberToken)) // k. no next token...cant be reference
 					break;
 
@@ -147,7 +147,7 @@ PDFObject* PDFObjectParser::ParseNewObject(IPDFParserExtender* inParserExtender)
 					}
 
 					// try parse R keyword
-					string keywordToken;
+					std::string keywordToken;
 					if(!GetNextToken(keywordToken)) // k. no next token...cant be reference
 						break;
 
@@ -215,7 +215,7 @@ PDFObject* PDFObjectParser::ParseNewObject(IPDFParserExtender* inParserExtender)
 
 }
 
-bool PDFObjectParser::GetNextToken(string& outToken)
+bool PDFObjectParser::GetNextToken(std::string& outToken)
 {
 	if(mTokenBuffer.size() > 0)
 	{
@@ -241,30 +241,30 @@ bool PDFObjectParser::GetNextToken(string& outToken)
 	}
 }
 
-static const string scTrue = "true";
-static const string scFalse = "false";
-bool PDFObjectParser::IsBoolean(const string& inToken)
+static const std::string scTrue = "true";
+static const std::string scFalse = "false";
+bool PDFObjectParser::IsBoolean(const std::string& inToken)
 {
 	return (scTrue == inToken || scFalse == inToken);	
 }
 
-PDFObject* PDFObjectParser::ParseBoolean(const string& inToken)
+PDFObject* PDFObjectParser::ParseBoolean(const std::string& inToken)
 {
 	return new PDFBoolean(scTrue == inToken);
 }
 
 static const char scLeftParanthesis = '(';
-bool PDFObjectParser::IsLiteralString(const string& inToken)
+bool PDFObjectParser::IsLiteralString(const std::string& inToken)
 {
 	return inToken.at(0) == scLeftParanthesis;
 }
 
 static const char scRightParanthesis = ')';
-PDFObject* PDFObjectParser::ParseLiteralString(const string& inToken,IPDFParserExtender* inParserExtender)
+PDFObject* PDFObjectParser::ParseLiteralString(const std::string& inToken,IPDFParserExtender* inParserExtender)
 {
-	stringbuf stringBuffer;
+  std::stringbuf stringBuffer;
 	Byte buffer;
-	string::const_iterator it = inToken.begin();
+	std::string::const_iterator it = inToken.begin();
 	size_t i=1;
 	++it; // skip first paranthesis
 	
@@ -340,7 +340,7 @@ PDFObject* PDFObjectParser::ParseLiteralString(const string& inToken,IPDFParserE
 }
 
 static const char scLeftAngle = '<';
-bool PDFObjectParser::IsHexadecimalString(const string& inToken)
+bool PDFObjectParser::IsHexadecimalString(const std::string& inToken)
 {
 	// first char should be left angle brackets, and the one next must not (otherwise it's a dictionary start)
 	return (inToken.at(0) == scLeftAngle) && (inToken.size() < 2 || inToken.at(1) != scLeftAngle);
@@ -348,7 +348,7 @@ bool PDFObjectParser::IsHexadecimalString(const string& inToken)
 
 
 static const char scRightAngle = '>';
-PDFObject* PDFObjectParser::ParseHexadecimalString(const string& inToken,IPDFParserExtender* inParserExtender)
+PDFObject* PDFObjectParser::ParseHexadecimalString(const std::string& inToken,IPDFParserExtender* inParserExtender)
 {
 	// verify that last character is '>'
 	if(inToken.at(inToken.size()-1) != scRightAngle)
@@ -362,26 +362,26 @@ PDFObject* PDFObjectParser::ParseHexadecimalString(const string& inToken,IPDFPar
 		return new PDFHexString(inToken.substr(1,inToken.size()-2));
 }
 
-static const string scNull = "null";
-bool PDFObjectParser::IsNull(const string& inToken)
+static const std::string scNull = "null";
+bool PDFObjectParser::IsNull(const std::string& inToken)
 {
 	return scNull == inToken;
 }
 
 static const char scSlash = '/';
-bool PDFObjectParser::IsName(const string& inToken)
+bool PDFObjectParser::IsName(const std::string& inToken)
 {
 	return inToken.at(0) == scSlash;
 }
 
 static const char scSharp = '#';
-PDFObject* PDFObjectParser::ParseName(const string& inToken)
+PDFObject* PDFObjectParser::ParseName(const std::string& inToken)
 {
 	EStatusCode status = PDFHummus::eSuccess;
-	stringbuf stringBuffer;
+	std::stringbuf stringBuffer;
 	BoolAndByte hexResult;
 	Byte buffer;
-	string::const_iterator it = inToken.begin();
+	std::string::const_iterator it = inToken.begin();
 	++it; // skip initial slash
 
 	for(; it != inToken.end() && PDFHummus::eSuccess == status; ++it)
@@ -438,7 +438,7 @@ static const char scMinus = '-';
 static const char scNine = '9';
 static const char scZero = '0';
 static const char scDot = '.';
-bool PDFObjectParser::IsNumber(const string& inToken)
+bool PDFObjectParser::IsNumber(const std::string& inToken)
 {
 	// it's a number if the first char is either a sign or digit, and the rest is 
 	// digits, with the exception of a dot which can appear just once.
@@ -448,7 +448,7 @@ bool PDFObjectParser::IsNumber(const string& inToken)
 
 	bool isNumber = true;
 	bool dotEncountered = false;
-	string::const_iterator it = inToken.begin();
+	std::string::const_iterator it = inToken.begin();
 	++it; //verified the first char already
 
 	// only sign is not a number
@@ -473,7 +473,7 @@ bool PDFObjectParser::IsNumber(const string& inToken)
 
 typedef BoxingBaseWithRW<long long> LongLong;
 
-PDFObject* PDFObjectParser::ParseNumber(const string& inToken)
+PDFObject* PDFObjectParser::ParseNumber(const std::string& inToken)
 {
 	// once we know this is a number, then parsing is easy. just determine if it's a real or integer, so as to separate classes for better accuracy
 	if(inToken.find(scDot) != inToken.npos)
@@ -482,18 +482,18 @@ PDFObject* PDFObjectParser::ParseNumber(const string& inToken)
 		return new PDFInteger(LongLong(inToken));
 }
 
-static const string scLeftSquare = "[";
-bool PDFObjectParser::IsArray(const string& inToken)
+static const std::string scLeftSquare = "[";
+bool PDFObjectParser::IsArray(const std::string& inToken)
 {
 	return scLeftSquare == inToken;
 }
 
-static const string scRightSquare = "]";
+static const std::string scRightSquare = "]";
 PDFObject* PDFObjectParser::ParseArray(IPDFParserExtender* inParserExtender)
 {
 	PDFArray* anArray = new PDFArray();
 	bool arrayEndEncountered = false;
-	string token;
+	std::string token;
 	EStatusCode status = PDFHummus::eSuccess;
 
 	// easy one. just loop till you get to a closing bracket token and recurse
@@ -528,28 +528,28 @@ PDFObject* PDFObjectParser::ParseArray(IPDFParserExtender* inParserExtender)
 	}
 }
 
-void PDFObjectParser::SaveTokenToBuffer(string& inToken)
+void PDFObjectParser::SaveTokenToBuffer(std::string& inToken)
 {
 	mTokenBuffer.push_back(inToken);
 }
 
-void PDFObjectParser::ReturnTokenToBuffer(string& inToken)
+void PDFObjectParser::ReturnTokenToBuffer(std::string& inToken)
 {
 	mTokenBuffer.push_front(inToken);
 }
 
-static const string scDoubleLeftAngle = "<<";
-bool PDFObjectParser::IsDictionary(const string& inToken)
+static const std::string scDoubleLeftAngle = "<<";
+bool PDFObjectParser::IsDictionary(const std::string& inToken)
 {
 	return scDoubleLeftAngle == inToken;
 }
 
-static const string scDoubleRightAngle = ">>";
+static const std::string scDoubleRightAngle = ">>";
 PDFObject* PDFObjectParser::ParseDictionary(IPDFParserExtender* inParserExtender)
 {
 	PDFDictionary* aDictionary = new PDFDictionary();
 	bool dictionaryEndEncountered = false;
-	string token;
+	std::string token;
 	EStatusCode status = PDFHummus::eSuccess;
 
 	while(GetNextToken(token) && PDFHummus::eSuccess == status)
@@ -603,7 +603,7 @@ PDFObject* PDFObjectParser::ParseDictionary(IPDFParserExtender* inParserExtender
 }
 
 static const char scCommentStart = '%';
-bool PDFObjectParser::IsComment(const string& inToken)
+bool PDFObjectParser::IsComment(const std::string& inToken)
 {
 	return inToken.at(0) == scCommentStart;
 }

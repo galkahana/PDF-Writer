@@ -28,7 +28,7 @@
 #include <string>
 #include <list>
 
-using namespace std;
+
 
 class IByteWriterWithPosition;
 class DictionaryContext;
@@ -37,7 +37,7 @@ class IObjectsContextExtender;
 class ObjectsContext;
 class PDFParser;
 
-typedef list<DictionaryContext*> DictionaryContextList;
+typedef std::list<DictionaryContext*> DictionaryContextList;
 
 class ObjectsContext
 {
@@ -71,14 +71,14 @@ public:
 	// Objects Writing
 
 	// write comment line. ends line
-	void WriteComment(const string& inCommentText);
+	void WriteComment(const std::string& inCommentText);
 	// write keyword. ends line
-	void WriteKeyword(const string& inKeyword);
+	void WriteKeyword(const std::string& inKeyword);
 
-	void WriteName(const string& inName,ETokenSeparator inSeparate = eTokenSeparatorSpace);
+	void WriteName(const std::string& inName,ETokenSeparator inSeparate = eTokenSeparatorSpace);
 	void WriteInteger(long long inIntegerToken,ETokenSeparator inSeparate = eTokenSeparatorSpace);
-	void WriteLiteralString(const string& inString,ETokenSeparator inSeparate = eTokenSeparatorSpace);
-	void WriteHexString(const string& inString,ETokenSeparator inSeparate = eTokenSeparatorSpace);
+	void WriteLiteralString(const std::string& inString,ETokenSeparator inSeparate = eTokenSeparatorSpace);
+	void WriteHexString(const std::string& inString,ETokenSeparator inSeparate = eTokenSeparatorSpace);
 	void WriteIndirectObjectReference(ObjectIDType inIndirectObjectID,unsigned long inGenerationNumber,ETokenSeparator inSeparate = eTokenSeparatorSpace);
 	void WriteIndirectObjectReference(const ObjectReference& inObjectReference,ETokenSeparator inSeparate = eTokenSeparatorSpace);
     void WriteNewIndirectObjectReference(ObjectIDType indirectObjectID,ETokenSeparator inSeparate = eTokenSeparatorSpace);
@@ -123,7 +123,7 @@ public:
 
 	// as the obly common context around...i'm using the objects context to create
 	// subset fonts prefixes. might want to consider a more relevant object...
-	string GenerateSubsetFontPrefix();
+	std::string GenerateSubsetFontPrefix();
 
     // setup for modified file workflow
     void SetupModifiedFile(PDFParser* inModifiedFileParser);

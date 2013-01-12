@@ -33,10 +33,10 @@ class DictionaryContext;
 class IDescendentFontWriter;
 class IByteWriter;
 
-using namespace std;
 
-typedef pair<unsigned int, GlyphEncodingInfo> UIntAndGlyphEncodingInfo;
-typedef vector<UIntAndGlyphEncodingInfo> UIntAndGlyphEncodingInfoVector;
+
+typedef std::pair<unsigned int, GlyphEncodingInfo> UIntAndGlyphEncodingInfo;
+typedef std::vector<UIntAndGlyphEncodingInfo> UIntAndGlyphEncodingInfoVector;
 
 class CIDFontWriter
 {

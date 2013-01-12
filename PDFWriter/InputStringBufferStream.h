@@ -26,7 +26,7 @@
 #include <sstream>
 #include <string>
 
-using namespace std;
+
 
 class InputStringBufferStream : public IByteReaderWithPosition
 {

@@ -26,11 +26,11 @@
 #include <utility>
 #include <string>
 
-using namespace std;
+
 
 class IByteReader;
 
-typedef pair<bool,string> BoolAndString;
+typedef std::pair<bool,std::string> BoolAndString;
 
 
 class PDFParserTokenizer
