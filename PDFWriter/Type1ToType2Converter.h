@@ -116,6 +116,7 @@ private:
 	bool mHintReplacementEncountered;
 	bool mHintAdditionEncountered;
 	bool mFirstPathConstructionEncountered;
+    bool mIsFirst2Coordinates;
 	long mSideBearing[2];
 	long mWidth[2];
 

@@ -52,6 +52,7 @@ EStatusCode Type1ToType2Converter::WriteConvertedFontProgram(const std::string& 
 		mHintAdditionEncountered = false;
 		mFirstPathConstructionEncountered = false;
 		mInFlexCollectionMode = false;
+        mIsFirst2Coordinates = false;
 		mCurrentHints.clear();
 		mFlexParameters.clear();
 
@@ -110,6 +111,7 @@ bool Type1ToType2Converter::IsOtherSubrSupported(long inOtherSubrsIndex)
 	else if(1 == inOtherSubrsIndex)
 	{
 		mInFlexCollectionMode = true;
+        mIsFirst2Coordinates = true;
 	}
 	else if(0 == inOtherSubrsIndex)
 	{
@@ -151,6 +153,7 @@ EStatusCode Type1ToType2Converter::CallOtherSubr(const LongList& inOperandList,L
 	// cleanup flex mode
 	mFlexParameters.clear();
 	mInFlexCollectionMode = false;
+    mIsFirst2Coordinates = false;
 	return status;
 }
 
@@ -319,13 +322,14 @@ EStatusCode Type1ToType2Converter::Type1RMoveto(const LongList& inOperandList)
 
 		// note a paculiarness for the 2nd pair of coordinates.
 		// in type1 flex, the first 2 coordinates summed are the first edge coordinate
-		if(mFlexParameters.size() == 2)
+		if(mFlexParameters.size() == 2 && mIsFirst2Coordinates)
 		{
 			LongList::iterator itFlex = mFlexParameters.begin();
 			*itFlex += *it;
 			++it;
 			++itFlex;
 			*itFlex += *it;
+            mIsFirst2Coordinates = false;
 		}
 		else
 		{

@@ -466,6 +466,7 @@ EStatusCode Type1Input::ReadPrivateDictionary()
 {
 
 	EStatusCode status = PDFHummus::eSuccess;
+    bool readCharString = false; // don't leave before you read CharStrings. so i'm having a little flag
 	BoolAndString token;
 
 	while(mPFBDecoder.NotEnded() && PDFHummus::eSuccess == status)
@@ -480,7 +481,7 @@ EStatusCode Type1Input::ReadPrivateDictionary()
 			continue;
 
 		// "end" encountered, dictionary finished, return.
-		if(token.second.compare("end") == 0) 
+		if(token.second.compare("end") == 0 && readCharString)
 			break;
 
 		if(token.second.compare("/UniqueID") == 0)
@@ -577,6 +578,7 @@ EStatusCode Type1Input::ReadPrivateDictionary()
 		if(token.second.compare("/CharStrings") == 0)
 		{
 			status = ParseCharstrings();
+            readCharString = true;
 			continue;
 
 		}
