@@ -881,10 +881,10 @@ EStatusCode AbstractContentContext::WriteTextCommandWithDirectGlyphSelection(con
 	}
 
 	ObjectIDType fontObjectID;
-	UShortList encodedCharachtersList;
+	UShortList encodedCharactersList;
 	bool writeAsCID;	
 
-	if(currentFont->EncodeStringForShowing(inText,fontObjectID,encodedCharachtersList,writeAsCID) != PDFHummus::eSuccess)
+	if(currentFont->EncodeStringForShowing(inText,fontObjectID,encodedCharactersList,writeAsCID) != PDFHummus::eSuccess)
 	{
 		TRACE_LOG("AbstractcontextContext::WriteTextCommandWithDirectGlyphSelection, Unexepcted failure, Cannot encode characters");
 		return PDFHummus::eFailure;
@@ -901,10 +901,10 @@ EStatusCode AbstractContentContext::WriteTextCommandWithDirectGlyphSelection(con
 	// Now write the string using the text command
 	OutputStringBufferStream stringStream;
 	char formattingBuffer[5];
-	UShortList::iterator it = encodedCharachtersList.begin();
+	UShortList::iterator it = encodedCharactersList.begin();
 	if(writeAsCID)
 	{
-		for(;it!= encodedCharachtersList.end();++it)
+		for(;it!= encodedCharactersList.end();++it)
 		{
 			SAFE_SPRINTF_2(formattingBuffer,5,"%02x%02x",((*it)>>8) & 0x00ff,(*it) & 0x00ff);
 			stringStream.Write((const Byte*)formattingBuffer,4);
@@ -913,7 +913,7 @@ EStatusCode AbstractContentContext::WriteTextCommandWithDirectGlyphSelection(con
 	}
 	else
 	{
-		for(;it!= encodedCharachtersList.end();++it)
+		for(;it!= encodedCharactersList.end();++it)
 		{
 			formattingBuffer[0] = (*it) & 0x00ff;
 			stringStream.Write((const Byte*)formattingBuffer,1);

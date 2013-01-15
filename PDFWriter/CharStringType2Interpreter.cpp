@@ -738,7 +738,7 @@ Byte* CharStringType2Interpreter::InterpretAbs(Byte* inProgramCounter)
 	mOperandStack.pop_back();
 
 	if(value.IsInteger)
-		newOperand.IntegerValue = abs(value.IntegerValue);
+		newOperand.IntegerValue = labs(value.IntegerValue);
 	else
 		newOperand.RealValue = fabs(value.RealValue);
 	mOperandStack.push_back(newOperand);
