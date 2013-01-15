@@ -43,7 +43,10 @@ public:
 	virtual bool HasSerifs();
 	virtual bool IsScript();
 	virtual	bool IsForceBold();
-
+    virtual bool HasPrivateEncoding();
+    virtual unsigned int GetGlyphForUnicodeChar(unsigned long inChar);
+    virtual std::string GetPrivateGlyphName(unsigned int inGlyphIndex);
+    virtual unsigned int GetFreeTypeGlyphIndexFromEncodingGlyphIndex(unsigned int inGlyphIndex);
 
 private:
 	TT_Postscript* mPostScriptTable;

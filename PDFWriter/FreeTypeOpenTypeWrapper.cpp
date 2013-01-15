@@ -244,3 +244,26 @@ bool FreeTypeOpenTypeWrapper::IsForceBold()
 	return false;
 }
 
+bool FreeTypeOpenTypeWrapper::HasPrivateEncoding()
+{
+    return false;
+}
+
+unsigned int FreeTypeOpenTypeWrapper::GetGlyphForUnicodeChar(unsigned long inChar)
+{
+    // emtpy implementation (always false at "GetPrivateEncoding")
+    return 0;
+}
+
+std::string FreeTypeOpenTypeWrapper::GetPrivateGlyphName(unsigned int inGlyphIndex)
+{
+    // empty implementation (always false at "GetPrivateEncoding);
+    return ".notdef";
+}
+
+unsigned int FreeTypeOpenTypeWrapper::GetFreeTypeGlyphIndexFromEncodingGlyphIndex(unsigned int inGlyphIndex)
+{
+    return inGlyphIndex;
+}
+
+

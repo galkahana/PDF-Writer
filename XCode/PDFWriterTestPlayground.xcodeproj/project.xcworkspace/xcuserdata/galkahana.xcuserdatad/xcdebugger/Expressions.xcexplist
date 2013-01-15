@@ -3,14 +3,6 @@
    version = "1.0">
    <ContextStates>
       <ContextState
-         contextName = "JpegLibTest::Run(TestConfiguration const&amp;):JpegLibTest.cpp">
-         <PersistentStrings>
-            <PersistentString
-               value = "cinfo.output_scanline">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
          contextName = "InputBufferedStream::Skip(unsigned long):InputBufferedStream.cpp">
          <PersistentStrings>
             <PersistentString
@@ -43,6 +35,88 @@
                value = "(unsigned long)((unsigned int)inBuffer[3] + (unsigned int)inBuffer[2] * 0x100 + (unsigned int)inBuffer[1] * 0x10000 + (unsigned int)inBuffer[0] * 0x1000000)">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "Type1ToCFFEmbeddedFontWriter::TranslateFromFreeTypeToType1(FreeTypeFaceWrapper&amp;, std::vector&lt;unsigned int, std::allocator&lt;unsigned int&gt; &gt; const&amp;, std::vector&lt;std::string, std::allocator&lt;std::string&gt; &gt;&amp;):Type1ToCFFEmbeddedFontWriter.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "aName.c_str()">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "Type2CharStringWriter::WriteByte(unsigned char):Type2CharStringWriter.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "inValue">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "FreeTypeFaceWrapper::GetGlyphsForUnicodeText(std::list&lt;unsigned long, std::allocator&lt;unsigned long&gt; &gt; const&amp;, std::list&lt;unsigned int, std::allocator&lt;unsigned int&gt; &gt;&amp;):FreeTypeFaceWrapper.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "inUnicodeCharacters">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "AbstractContentContext::WriteTextCommandWithDirectGlyphSelection(std::list&lt;GlyphUnicodeMapping, std::allocator&lt;GlyphUnicodeMapping&gt; &gt; const&amp;, ITextCommand*):AbstractContentContext.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "encodedCharachtersList">
+            </PersistentString>
+            <PersistentString
+               value = "formattingBuffer[0]">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "Type1Input::ParseEncoding():Type1Input.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "token.second.c_str()">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "Type1ToType2Converter::Type1RMoveto(std::list&lt;long, std::allocator&lt;long&gt; &gt; const&amp;):Type1ToType2Converter.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "Type1Input::ReadPrivateDictionary():Type1Input.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "token.second.c_str()">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "JpegLibTest::Run(TestConfiguration const&amp;):JpegLibTest.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "cinfo.output_scanline">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "Type1Input::ReadFontDictionary():Type1Input.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "token.second">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "Type1Input::GetGlyphCharStringName(unsigned char):Type1Input.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "ANSIFontWriter::CalculateDifferences():ANSIFontWriter.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "PDFUsedFont::EncodeStringForShowing(std::list&lt;GlyphUnicodeMapping, std::allocator&lt;GlyphUnicodeMapping&gt; &gt; const&amp;, unsigned long&amp;, std::list&lt;unsigned short, std::allocator&lt;unsigned short&gt; &gt;&amp;, bool&amp;):PDFUsedFont.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "FreeTypeType1Wrapper::FreeTypeType1Wrapper(FT_FaceRec_*, std::string const&amp;):FreeTypeType1Wrapper.cpp">
       </ContextState>
    </ContextStates>
 </VariablesViewState>

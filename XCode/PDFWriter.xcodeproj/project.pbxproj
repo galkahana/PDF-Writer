@@ -2384,7 +2384,7 @@
 		499C420515498FFA00149723 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0440;
+				LastUpgradeCheck = 0450;
 				ORGANIZATIONNAME = "gal.kahana@hotmail.com";
 			};
 			buildConfigurationList = 499C420815498FFA00149723 /* Build configuration list for PBXProject "PDFWriter" */;
@@ -2928,7 +2928,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos6.0;
+				SDKROOT = iphoneos;
 			};
 			name = Debug;
 		};
@@ -2936,7 +2936,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos6.0;
+				SDKROOT = iphoneos;
 			};
 			name = Release;
 		};
@@ -3039,6 +3039,7 @@
 				4947D51E16986BA5008971EF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		4947D52F16986C02008971EF /* Build configuration list for PBXNativeTarget "PDFWriter-iphoneos" */ = {
 			isa = XCConfigurationList;
@@ -3047,6 +3048,7 @@
 				4947D53116986C02008971EF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		4947D87D16986DE2008971EF /* Build configuration list for PBXAggregateTarget "PDFWriterIOSUniversal" */ = {
 			isa = XCConfigurationList;
@@ -3055,6 +3057,7 @@
 				4947D87F16986DE2008971EF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		499C420815498FFA00149723 /* Build configuration list for PBXProject "PDFWriter" */ = {
 			isa = XCConfigurationList;

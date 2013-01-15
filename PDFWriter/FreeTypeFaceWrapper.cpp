@@ -37,7 +37,7 @@ FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const std::string& inFon
 {
 	mFace = inFace;
 	mFontFilePath = inFontFilePath;
-	SetupFormatSpecificExtender("");	
+	SetupFormatSpecificExtender(inFontFilePath,"");
 	mDoesOwn = inDoOwn;
 }
 
@@ -47,9 +47,9 @@ FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const std::string& inFon
 	mFontFilePath = inFontFilePath;
 	std::string fileExtension = GetExtension(inPFMFilePath);
 	if(fileExtension == "PFM" || fileExtension ==  "pfm") // just don't bother if it's not PFM
-		SetupFormatSpecificExtender(inPFMFilePath);
+		SetupFormatSpecificExtender(inFontFilePath,inPFMFilePath);
 	else
-		SetupFormatSpecificExtender("");
+		SetupFormatSpecificExtender(inFontFilePath,"");
 	mDoesOwn = inDoOwn;
 }
 
@@ -74,14 +74,14 @@ static const char* scType1 = "Type 1";
 static const char* scTrueType = "TrueType";
 static const char* scCFF = "CFF";
 
-void FreeTypeFaceWrapper::SetupFormatSpecificExtender(const std::string& inPFMFilePath /*pass empty if non existant or irrelevant*/)
+void FreeTypeFaceWrapper::SetupFormatSpecificExtender(const std::string& inFontFilePath,const std::string& inPFMFilePath /*pass empty if non existant or irrelevant*/)
 {
 	if(mFace)
 	{
 		const char* fontFormat = FT_Get_X11_Font_Format(mFace);
 
 		if(strcmp(fontFormat,scType1) == 0)
-			mFormatParticularWrapper = new FreeTypeType1Wrapper(mFace,inPFMFilePath);
+			mFormatParticularWrapper = new FreeTypeType1Wrapper(mFace,inFontFilePath,inPFMFilePath);
 		else if(strcmp(fontFormat,scCFF) == 0 || strcmp(fontFormat,scTrueType) == 0)
 			mFormatParticularWrapper = new FreeTypeOpenTypeWrapper(mFace);
 		else
@@ -490,6 +490,21 @@ bool FreeTypeFaceWrapper::IsForceBold()
 	return mFormatParticularWrapper ? mFormatParticularWrapper->IsForceBold() : false;
 }
 
+std::string FreeTypeFaceWrapper::GetGlyphName(unsigned int inGlyphIndex)
+{
+    if(mFormatParticularWrapper && mFormatParticularWrapper->HasPrivateEncoding())
+    {
+        return mFormatParticularWrapper->GetPrivateGlyphName(inGlyphIndex);
+    }
+    else
+    {
+        char buffer[100];
+        FT_Get_Glyph_Name(mFace,inGlyphIndex,buffer,100);
+        return std::string(buffer);
+        
+    }
+}
+
 EStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const ULongList& inUnicodeCharacters,UIntList& outGlyphs)
 {
 	if(mFace)
@@ -502,7 +517,7 @@ EStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const ULongList& inUnic
 		ULongList::const_iterator it = inUnicodeCharacters.begin();
 		for(; it != inUnicodeCharacters.end(); ++it)
 		{
-			glyphIndex = FT_Get_Char_Index(mFace,*it);
+			glyphIndex = mFormatParticularWrapper && mFormatParticularWrapper->HasPrivateEncoding() ? mFormatParticularWrapper->GetGlyphForUnicodeChar(*it) : FT_Get_Char_Index(mFace,*it);
 			outGlyphs.push_back(glyphIndex);
 			if(0 == glyphIndex)
 			{
@@ -608,4 +623,13 @@ FT_Pos FreeTypeFaceWrapper::GetInPDFMeasurements(FT_Pos inFontMeasurement)
 	}
 	else
 		return 0;
+}
+
+FT_Pos FreeTypeFaceWrapper::GetGlyphWidth(unsigned int inGlyphIndex)
+{
+    if(mFormatParticularWrapper && mFormatParticularWrapper->HasPrivateEncoding())
+        FT_Load_Glyph(mFace,mFormatParticularWrapper->GetFreeTypeGlyphIndexFromEncodingGlyphIndex(inGlyphIndex),FT_LOAD_NO_SCALE);
+    else
+        FT_Load_Glyph(mFace,inGlyphIndex,FT_LOAD_NO_SCALE);
+    return GetInPDFMeasurements(mFace->glyph->metrics.horiAdvance);
 }

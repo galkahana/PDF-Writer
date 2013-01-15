@@ -162,9 +162,9 @@ void ANSIFontWriter::WriteWidths(DictionaryContext* inFontContext)
 
 	// FirstChar
 	inFontContext->WriteKey(scFirstChar);
-	inFontContext->WriteIntegerValue((mCharactersVector.begin()+1)->second.mEncodedCharacter); // skip the 0 glyph when writing widths
-
-	// LastChar
+	inFontContext->WriteIntegerValue((mCharactersVector.begin())->second.mEncodedCharacter);
+	
+    // LastChar
 	inFontContext->WriteKey(scLastChar);
 	inFontContext->WriteIntegerValue(mCharactersVector.back().second.mEncodedCharacter);
 
@@ -173,13 +173,12 @@ void ANSIFontWriter::WriteWidths(DictionaryContext* inFontContext)
 
 	mObjectsContext->StartArray();
 	
-	UIntAndGlyphEncodingInfoVector::iterator itCharacters = mCharactersVector.begin() + 1; // ignore the 0 glyph when writing widths
+	UIntAndGlyphEncodingInfoVector::iterator itCharacters = mCharactersVector.begin();
 	for(unsigned short i = itCharacters->second.mEncodedCharacter; i <= mCharactersVector.back().second.mEncodedCharacter; ++i)
 	{
 		if(itCharacters->second.mEncodedCharacter == i)
 		{
-			FT_Load_Glyph(*mFontInfo,itCharacters->first,FT_LOAD_NO_SCALE);
-			mObjectsContext->WriteInteger(mFontInfo->GetInPDFMeasurements((*mFontInfo)->glyph->metrics.horiAdvance));
+			mObjectsContext->WriteInteger(mFontInfo->GetGlyphWidth(itCharacters->first));
 			++itCharacters;
 		}
 		else
@@ -197,7 +196,6 @@ void ANSIFontWriter::CalculateDifferences()
 	// go over the encoded charachters. find differences from WinAnsiEncoding.
 	// whenever glyph name is different, add to differences array
 	WinAnsiEncoding winAnsiEncoding;
-	char buffer[100];
 
 	UIntAndGlyphEncodingInfoVector::iterator it = mCharactersVector.begin();
 
@@ -205,9 +203,9 @@ void ANSIFontWriter::CalculateDifferences()
 	{
 		// hmm. there should always be a glyph name for a CFF or Type1 glyph. so it shouldn't be a problem
 		// to ask them here. should be sufficient length as well.
-		FT_Get_Glyph_Name(*mFontInfo,it->first,buffer,100);
-		if(strcmp(buffer,winAnsiEncoding.GetEncodedGlyphName((IOBasicTypes::Byte)it->second.mEncodedCharacter)) != 0)
-			mDifferences.push_back(UShortAndString(it->second.mEncodedCharacter,buffer));
+        std::string glyphName = mFontInfo->GetGlyphName(it->first);
+		if(strcmp(glyphName.c_str(),winAnsiEncoding.GetEncodedGlyphName((IOBasicTypes::Byte)it->second.mEncodedCharacter)) != 0)
+			mDifferences.push_back(UShortAndString(it->second.mEncodedCharacter,glyphName));
 	}
 }
 

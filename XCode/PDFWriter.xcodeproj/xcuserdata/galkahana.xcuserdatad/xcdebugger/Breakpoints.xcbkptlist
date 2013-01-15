@@ -81,5 +81,70 @@
          landmarkName = "HummusFillInputBuffer (j_decompress_ptr cinfo)"
          landmarkType = "7">
       </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "../PDFWriter/Type1ToType2Converter.cpp"
+         timestampString = "379793948.969854"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "105"
+         endingLineNumber = "105"
+         landmarkName = "Type1ToType2Converter::IsOtherSubrSupported(long inOtherSubrsIndex)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "../PDFWriter/Type1ToType2Converter.cpp"
+         timestampString = "379795593.873946"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "108"
+         endingLineNumber = "108"
+         landmarkName = "Type1ToType2Converter::IsOtherSubrSupported(long inOtherSubrsIndex)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "../PDFWriter/Type1ToType2Converter.cpp"
+         timestampString = "379795650.656509"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "149"
+         endingLineNumber = "149"
+         landmarkName = "Type1ToType2Converter::CallOtherSubr(const LongList&amp; inOperandList,LongList&amp; outPostScriptOperandStack)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "../PDFWriter/Type2CharStringWriter.cpp"
+         timestampString = "379796049.930621"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "134"
+         endingLineNumber = "134"
+         landmarkName = "Type2CharStringWriter::WriteOperator(unsigned short inOperatorCode)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "../PDFWriter/Type1ToCFFEmbeddedFontWriter.cpp"
+         timestampString = "379893360.034729"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "887"
+         endingLineNumber = "887"
+         landmarkName = "Type1ToCFFEmbeddedFontWriter::TranslateFromFreeTypeToType1(FreeTypeFaceWrapper&amp; inFontInfo, const UIntVector&amp; inSubsetGlyphIDs, StringVector&amp; outGlyphNames)"
+         landmarkType = "5">
+      </FileBreakpoint>
    </FileBreakpoints>
 </Bucket>

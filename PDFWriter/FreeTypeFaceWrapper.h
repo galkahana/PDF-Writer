@@ -78,6 +78,8 @@ public:
 	// these would be flags for the font as a whole. if subsetting, match to the character set
 	unsigned int GetFontFlags();
 	const char* GetTypeString();
+    std::string GetGlyphName(unsigned int inGlyphIndex);
+    FT_Pos GetGlyphWidth(unsigned int inGlyphIndex);
 
 	// Create the written font object, matching to write this font in the best way.
 	IWrittenFont* CreateWrittenFontObject(ObjectsContext* inObjectsContext);
@@ -116,7 +118,7 @@ private:
 
 
 	std::string GetExtension(const std::string& inFilePath);
-	void SetupFormatSpecificExtender(const std::string& inPFMFilePath);
+	void SetupFormatSpecificExtender(const std::string& inFilePath, const std::string& inPFMFilePath);
 	BoolAndFTShort CapHeightFromHHeight();
 	BoolAndFTShort XHeightFromLowerXHeight();
 	BoolAndFTShort GetYBearingForUnicodeChar(unsigned short unicodeCharCode);

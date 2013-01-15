@@ -27,6 +27,7 @@
 #include FT_TYPES_H
 
 #include <utility>
+#include <string>
 
 typedef std::pair<bool,FT_Short> BoolAndFTShort;
 
@@ -61,4 +62,19 @@ public:
 
 	// return a good answer or false if you don't know. no fallback here
 	virtual bool IsForceBold() = 0;
+    
+    // return true if would like to use independent encoding method, or false if to use the generic freetype
+    virtual bool HasPrivateEncoding() = 0;
+    
+    // if the answer for HasPrivateEncoding is true, this should provide the private encoding (namely what glyph index matches the char)
+    virtual unsigned int GetGlyphForUnicodeChar(unsigned long inChar) = 0;
+    
+    // if the answer for HasPrivateEncoding is true, this should return the glyph name in the private encoding
+    virtual std::string GetPrivateGlyphName(unsigned int inGlyphIndex) = 0;
+    
+    // for queries to freetype, in the case of HasPrivateEncoding is true, get the freetype glyph index for a given font glyph index
+    // (this will be different in case the 0 glyph index is not .notdef)
+    virtual unsigned int GetFreeTypeGlyphIndexFromEncodingGlyphIndex(unsigned int inGlyphIndex) = 0;
+    
+    
 };

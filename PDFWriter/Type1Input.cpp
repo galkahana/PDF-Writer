@@ -432,6 +432,11 @@ EStatusCode Type1Input::ParseEncoding()
 	return status;
 }
 
+bool Type1Input::IsCustomEncoding()
+{
+    return mEncoding.EncodingType;
+}
+
 void Type1Input::CalculateReverseEncoding()
 {
 	StringToByteMap::iterator it;
@@ -440,7 +445,7 @@ void Type1Input::CalculateReverseEncoding()
 	mReverseEncoding.insert(StringToByteMap::value_type(".notdef",0));
 	if(eType1EncodingTypeCustom == mEncoding.EncodingType)
 	{
-		for(int i=1; i <256;++i)
+		for(int i=0; i <256;++i)
 		{
 			it = mReverseEncoding.find(mEncoding.mCustomEncoding[i]);
 			if(it == mReverseEncoding.end())
@@ -452,7 +457,7 @@ void Type1Input::CalculateReverseEncoding()
 	{
 		StandardEncoding standardEncoding;
 
-		for(int i=1; i <256;++i)
+		for(int i=0; i <256;++i)
 		{
 			it = mReverseEncoding.find(standardEncoding.GetEncodedGlyphName(i));
 			if(it == mReverseEncoding.end())

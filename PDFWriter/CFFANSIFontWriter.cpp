@@ -142,12 +142,11 @@ void CFFANSIFontWriter::WriteCharSet(	DictionaryContext* inDescriptorContext,
 	directStream->Write(scLeftParanthesis,1);
 
 	UIntAndGlyphEncodingInfoVector::const_iterator it = inEncodedGlyphs.begin()+1; // skip 0 character
-	char buffer[100];
 	
 	for(; it != inEncodedGlyphs.end(); ++it)
 	{
-		FT_Get_Glyph_Name(*inFontInfo,it->first,buffer,100);
-		primitiveWriter.WriteName(buffer,eTokenSepratorNone);
+        std::string glyphName = inFontInfo->GetGlyphName(it->first);
+		primitiveWriter.WriteName(glyphName.c_str(),eTokenSepratorNone);
 	}
 	directStream->Write(scRightParanthesis,1);
 	inObjectsContext->EndFreeContext();

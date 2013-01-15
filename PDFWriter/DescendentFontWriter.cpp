@@ -128,8 +128,7 @@ void DescendentFontWriter::WriteWidths(const UIntAndGlyphEncodingInfoVector& inE
 
 	// DW
 	inFontContext->WriteKey(scDW);
-	FT_Load_Glyph(*mFontInfo,it->first,FT_LOAD_NO_SCALE);
-	defaultWidth = mFontInfo->GetInPDFMeasurements((*mFontInfo)->glyph->metrics.horiAdvance);
+	defaultWidth = mFontInfo->GetGlyphWidth(it->first);
 	inFontContext->WriteIntegerValue(defaultWidth);
 
 	++it;
@@ -137,8 +136,7 @@ void DescendentFontWriter::WriteWidths(const UIntAndGlyphEncodingInfoVector& inE
 	// find the first which is not default width
 	for(; it != inEncodedGlyphs.end();++it)
 	{
-		FT_Load_Glyph(*mFontInfo,it->first,FT_LOAD_NO_SCALE);
-		currentWidth = mFontInfo->GetInPDFMeasurements((*mFontInfo)->glyph->metrics.horiAdvance);
+		currentWidth =  mFontInfo->GetGlyphWidth(it->first);
 		if(currentWidth != defaultWidth)
 		{
 			widthsList.push_back(currentWidth);
@@ -158,9 +156,8 @@ void DescendentFontWriter::WriteWidths(const UIntAndGlyphEncodingInfoVector& inE
 
 		for(; it != inEncodedGlyphs.end();++it)
 		{
-			FT_Load_Glyph(*mFontInfo,it->first,FT_LOAD_NO_SCALE);
-			currentWidth = mFontInfo->GetInPDFMeasurements((*mFontInfo)->glyph->metrics.horiAdvance);
-			if(currentWidth != defaultWidth)
+			currentWidth = mFontInfo->GetGlyphWidth(it->first);
+            if(currentWidth != defaultWidth)
 			{
 				if(it->second.mEncodedCharacter == previousCIDInList + 1)
 				{

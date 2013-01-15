@@ -127,7 +127,8 @@ public:
 	std::string GetGlyphCharStringName(Byte inCharStringIndex);
 	bool IsValidGlyphIndex(Byte inCharStringIndex);
 	Byte GetEncoding(const std::string& inCharStringName);
-	
+    bool IsCustomEncoding();
+    
 	// some structs for you all laddies and lasses
 	Type1FontDictionary mFontDictionary;
 	Type1FontInfoDictionary mFontInfoDictionary;

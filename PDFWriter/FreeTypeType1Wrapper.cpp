@@ -19,11 +19,12 @@
    
 */
 #include "FreeTypeType1Wrapper.h"
+#include "InputFile.h"
 #include "Trace.h"
 
 
 
-FreeTypeType1Wrapper::FreeTypeType1Wrapper(FT_Face inFace,const std::string& inPFMFilePath)
+FreeTypeType1Wrapper::FreeTypeType1Wrapper(FT_Face inFace,const std::string& inFontFilePath,const std::string& inPFMFilePath)
 {
 	if(FT_Get_PS_Font_Info(inFace,&mPSFontInfo) != 0)
 	{
@@ -40,10 +41,27 @@ FreeTypeType1Wrapper::FreeTypeType1Wrapper(FT_Face inFace,const std::string& inP
 		mPSPrivateAvailable = false; // this is obviousy an exception
 	}
 	else
-		mPSPrivateAvailable = true; 
+		mPSPrivateAvailable = true;
+    
+    T1_EncodingType encodingType;
+    FT_Get_PS_Font_Value(inFace, PS_DICT_ENCODING_TYPE, 0, (void*)&encodingType, sizeof(encodingType));
+    mIsCustomEncoding = encodingType == T1_ENCODING_TYPE_ARRAY;
 
 	mPFMFileInfoRelevant = 
 		(inPFMFilePath.size() != 0 && mPFMReader.Read(inPFMFilePath) != PDFHummus::eFailure);
+    
+    // parse type 1 input file (my own parsing), to get extra info about encoding
+    if(inFontFilePath.size() != 0)
+    {
+        InputFile type1File;
+    
+        type1File.OpenFile(inFontFilePath);
+        mType1File.ReadType1File(type1File.GetInputStream());
+    
+        type1File.CloseFile();
+    }
+    
+    mFace = inFace;
 }
 
 FreeTypeType1Wrapper::~FreeTypeType1Wrapper(void)
@@ -109,3 +127,25 @@ bool FreeTypeType1Wrapper::IsForceBold()
 {
 	return mPSPrivateAvailable ? (1 == mPrivateInfo.force_bold) : false;
 }
+
+bool FreeTypeType1Wrapper::HasPrivateEncoding()
+{
+    return mIsCustomEncoding;
+}
+
+unsigned int FreeTypeType1Wrapper::GetGlyphForUnicodeChar(unsigned long inChar)
+{
+    return (unsigned int)inChar; // will run only if custom encoding, in which case input value should be output value
+}
+
+
+std::string FreeTypeType1Wrapper::GetPrivateGlyphName(unsigned int inGlyphIndex)
+{
+    return mType1File.GetGlyphCharStringName(inGlyphIndex);
+}
+
+unsigned int FreeTypeType1Wrapper::GetFreeTypeGlyphIndexFromEncodingGlyphIndex(unsigned int inGlyphIndex)
+{
+    return FT_Get_Name_Index(mFace,(FT_String*)(GetPrivateGlyphName(inGlyphIndex).c_str()));
+}
+
