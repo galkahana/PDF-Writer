@@ -110,6 +110,7 @@ private:
 	IFreeTypeFaceExtender* mFormatParticularWrapper;
 	bool mHaslowercase;
 	std::string mFontFilePath;
+    std::string mNotDefGlyphName;
 	bool mDoesOwn;
 
 	BoolAndFTShort GetCapHeightInternal(); 
@@ -126,5 +127,6 @@ private:
 	FT_UShort WeightFromName();
 	bool IsSymbolic();
 	bool IsDefiningCharsNotInAdobeStandardLatin();
+    void SetupNotDefGlyph();
 };
 

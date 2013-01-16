@@ -39,11 +39,12 @@ FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const std::string& inFon
 	mFontFilePath = inFontFilePath;
 	SetupFormatSpecificExtender(inFontFilePath,"");
 	mDoesOwn = inDoOwn;
+    SetupNotDefGlyph();
 }
 
 FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const std::string& inFontFilePath,const std::string& inPFMFilePath, bool inDoOwn)
 {
-	mFace = inFace;
+    mFace = inFace;
 	mFontFilePath = inFontFilePath;
 	std::string fileExtension = GetExtension(inPFMFilePath);
 	if(fileExtension == "PFM" || fileExtension ==  "pfm") // just don't bother if it's not PFM
@@ -51,6 +52,24 @@ FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const std::string& inFon
 	else
 		SetupFormatSpecificExtender(inFontFilePath,"");
 	mDoesOwn = inDoOwn;
+    SetupNotDefGlyph();
+}
+
+void FreeTypeFaceWrapper::SetupNotDefGlyph()
+{
+    // for special case of fonts that have glyph names, but don't define .notdef, use one of the existing chars (found a custom type 1 with that)
+    
+    if(FT_HAS_GLYPH_NAMES(mFace))
+    {
+        char* aString = (char*)".notdef";
+        if(FT_Get_Name_Index(mFace,aString) == 0)
+            mNotDefGlyphName = GetGlyphName(0);
+        else
+            mNotDefGlyphName = ".notdef";
+    }
+    else
+        mNotDefGlyphName = ".notdef";
+    
 }
 
 std::string FreeTypeFaceWrapper::GetExtension(const std::string& inFilePath)
@@ -494,7 +513,11 @@ std::string FreeTypeFaceWrapper::GetGlyphName(unsigned int inGlyphIndex)
 {
     if(mFormatParticularWrapper && mFormatParticularWrapper->HasPrivateEncoding())
     {
-        return mFormatParticularWrapper->GetPrivateGlyphName(inGlyphIndex);
+        std::string glyphName = mFormatParticularWrapper->GetPrivateGlyphName(inGlyphIndex);
+        if(glyphName == ".notdef")
+            return mNotDefGlyphName; // handling fonts that don't have notdef
+        else
+            return glyphName;
     }
     else
     {
@@ -505,7 +528,7 @@ std::string FreeTypeFaceWrapper::GetGlyphName(unsigned int inGlyphIndex)
             return std::string(buffer);
         }
         else
-            return ".notdef";
+            return mNotDefGlyphName; // normally this will be .notdef (in am allowing edge/illegal cases where there's a font with no .notdef)
     }
 }
 

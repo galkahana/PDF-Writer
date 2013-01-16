@@ -639,7 +639,13 @@ EStatusCode Type1Input::ParseSubrs()
 		return PDFHummus::eFailure;
 
 	mSubrsCount = (Byte)Int(token.second);
-	mSubrs = new Type1CharString[mSubrsCount];
+    if(mSubrsCount == 0)
+    {
+        mSubrs = NULL;
+        return PDFHummus::eSuccess;
+    }
+    else
+        mSubrs = new Type1CharString[mSubrsCount];
 
 	// parse the subrs. they look like this: 	
 	// dup index nbytes RD ~n~binary~bytes~ NP
