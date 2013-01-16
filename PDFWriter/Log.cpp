@@ -38,26 +38,39 @@ static const Byte scUTF8Bom[3] = {0xEF,0xBB,0xBF};
 
 Log::Log(const std::string& inLogFilePath,bool inPlaceUTF8Bom)
 {
-	mFilePath = inLogFilePath;
-	mLogStream = NULL;
-	mLogMethod = STATIC_LogEntryToFile;
-
 	// check if file exists or not...if not, create new one and place a bom in its beginning
 	FILE* logFile;
 	bool exists;
-	SAFE_FOPEN(logFile,mFilePath.c_str(),"r")
+	SAFE_FOPEN(logFile,inLogFilePath.c_str(),"r")
 	exists = (logFile!= NULL);
 	if(logFile)
 		fclose(logFile);
 
 	if(!exists)
 	{
-		mLogFile.OpenFile(mFilePath);
-		// put utf 8 header
-		if(inPlaceUTF8Bom)
-			mLogFile.GetOutputStream()->Write(scUTF8Bom,3);	
-		mLogFile.CloseFile();
+        // first, test if i can open the file. don't use mLogFile, becuase if file cannot be opened
+        // will get into infinite recursion due to trying to log the fact that it cant open the file...
+        SAFE_FOPEN(logFile,inLogFilePath.c_str(),"wb")
+        if(logFile)
+        {
+            fclose(logFile); // continue with using the regular file implementation
+            mLogFile.OpenFile(inLogFilePath);
+            
+            // put utf 8 header
+            if(inPlaceUTF8Bom)
+                mLogFile.GetOutputStream()->Write(scUTF8Bom,3);
+            mLogFile.CloseFile();
+            mFilePath = inLogFilePath;
+        }
+        else
+        {
+            mFilePath = "";
+        }
 	}
+    else
+        mFilePath = inLogFilePath;
+    mLogStream = NULL;
+    mLogMethod = STATIC_LogEntryToFile;
 }
 
 Log::Log(IByteWriter* inLogStream)
@@ -87,14 +100,18 @@ static const Byte scEndLine[2] = {'\r','\n'};
 
 void Log::LogEntryToFile(const Byte* inMessage, LongBufferSizeType inMessageSize)
 {
-	mLogFile.OpenFile(mFilePath,true);
-	WriteLogEntryToStream(inMessage,inMessageSize,mLogFile.GetOutputStream());
-	mLogFile.CloseFile();
+    if(mFilePath.size() > 0)
+    {
+        mLogFile.OpenFile(mFilePath,true);
+        WriteLogEntryToStream(inMessage,inMessageSize,mLogFile.GetOutputStream());
+        mLogFile.CloseFile();
+    }
 }
 
 void Log::LogEntryToStream(const Byte* inMessage, LongBufferSizeType inMessageSize)
 {
-	WriteLogEntryToStream(inMessage,inMessageSize,mLogStream);
+    if(mLogStream)
+        WriteLogEntryToStream(inMessage,inMessageSize,mLogStream);
 }
 
 

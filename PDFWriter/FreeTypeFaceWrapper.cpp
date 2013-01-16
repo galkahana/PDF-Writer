@@ -498,10 +498,14 @@ std::string FreeTypeFaceWrapper::GetGlyphName(unsigned int inGlyphIndex)
     }
     else
     {
-        char buffer[100];
-        FT_Get_Glyph_Name(mFace,inGlyphIndex,buffer,100);
-        return std::string(buffer);
-        
+        if(inGlyphIndex < mFace->num_glyphs)
+        {
+            char buffer[100];
+            FT_Get_Glyph_Name(mFace,inGlyphIndex,buffer,100);
+            return std::string(buffer);
+        }
+        else
+            return ".notdef";
     }
 }
 

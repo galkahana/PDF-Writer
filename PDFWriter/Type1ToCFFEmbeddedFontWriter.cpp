@@ -245,7 +245,8 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::CreateCFFSubset(
 
 
 		// Found big gap between FreeType indexing and the way it's in the Type 1. obvioulsy due to encoding differences.
-		// So i'm replacing the indexes of free type, with names...should be safer
+		// So i'm replacing the indexes of free type, with names...should be safer (also cleans up invalid glyph ids, in case
+        // direct glyphs placement put them here)
         TranslateFromFreeTypeToType1(inFontInfo,subsetGlyphIDs,subsetGlyphNames);
 
 		status = AddDependentGlyphs(subsetGlyphNames);
@@ -880,20 +881,8 @@ void Type1ToCFFEmbeddedFontWriter::TranslateFromFreeTypeToType1(FreeTypeFaceWrap
 																StringVector& outGlyphNames)
 {
 	UIntVector::const_iterator it = inSubsetGlyphIDs.begin();
-	char buffer[100];
-
-    if(mType1Input.IsCustomEncoding()) // for custom encoding use the custom encoding glyph names, cause freetype may screw it up in case 0 glyph is not .notdef
-    {
-        for(; it != inSubsetGlyphIDs.end(); ++it)
-            outGlyphNames.push_back(mType1Input.GetGlyphCharStringName((Byte)*it));
-    }
-    else
-    {
-        for(; it != inSubsetGlyphIDs.end(); ++it)
-        {
-            FT_Get_Glyph_Name(inFontInfo,*it,buffer,100);
-            std::string aName(buffer,strlen(buffer));
-            outGlyphNames.push_back(aName);
-        }
-    }
+	
+    for(; it != inSubsetGlyphIDs.end(); ++it)
+        outGlyphNames.push_back(inFontInfo.GetGlyphName(*it));
+    
 }
