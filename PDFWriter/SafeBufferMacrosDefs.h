@@ -24,16 +24,16 @@
 	#include "UnicodeString.h"
 	#include <string>
 	#include <sstream>
-	static std::std::wstring UTF8ToUTF16Wide(const std::string& inUTF8String);
+	static std::wstring UTF8ToUTF16Wide(const std::string& inUTF8String);
 
-	std::std::wstring UTF8ToUTF16Wide(const std::string& inUTF8String)
+	std::wstring UTF8ToUTF16Wide(const std::string& inUTF8String)
 	{
 		UnicodeString unicodeString;
 		unicodeString.FromUTF8(inUTF8String);
 
 		EStatusCodeAndUShortList result = unicodeString.ToUTF16UShort();
 		
-		std::std::wstringstream stream;
+		std::wstringstream stream;
 
 		UShortList::const_iterator it = result.second.begin();
 

@@ -434,7 +434,7 @@ EStatusCode Type1Input::ParseEncoding()
 
 bool Type1Input::IsCustomEncoding()
 {
-    return mEncoding.EncodingType;
+    return eType1EncodingTypeCustom == mEncoding.EncodingType;
 }
 
 void Type1Input::CalculateReverseEncoding()
