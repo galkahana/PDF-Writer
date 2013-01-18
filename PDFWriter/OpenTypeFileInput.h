@@ -198,15 +198,18 @@ public:
 	OpenTypeFileInput(void);
 	~OpenTypeFileInput(void);
 
-
-	PDFHummus::EStatusCode ReadOpenTypeFile(const std::string& inFontFilePath);
-	PDFHummus::EStatusCode ReadOpenTypeFile(IByteReaderWithPosition* inTrueTypeFile);
+	PDFHummus::EStatusCode ReadOpenTypeFile(const std::string& inFontFilePath, unsigned short inFaceIndex = 0);
+	PDFHummus::EStatusCode ReadOpenTypeFile(IByteReaderWithPosition* inTrueTypeFile, unsigned short inFaceIndex = 0);
 
 
 	EOpenTypeInputType GetOpenTypeFontType();
 
 	unsigned short GetGlyphsCount();
 
+    unsigned long mHeaderOffset;
+    
+    unsigned short mFaceIndex;
+    
 	// read tables
 	HeadTable mHead;
 	MaxpTable mMaxp;
@@ -238,6 +241,7 @@ private:
 
 	PDFHummus::EStatusCode ReadOpenTypeHeader();
 	PDFHummus::EStatusCode ReadOpenTypeSFNT();
+    PDFHummus::EStatusCode ReadOpenTypeSFNTFromDfont();
 	PDFHummus::EStatusCode ReadHead();
 	PDFHummus::EStatusCode ReadMaxP();
 	PDFHummus::EStatusCode ReadHHea();
