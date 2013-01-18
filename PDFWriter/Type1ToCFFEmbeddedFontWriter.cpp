@@ -717,8 +717,8 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteEncodings(const StringVector& inS
 	Byte encodingGlyphsCount = (Byte)(std::min<size_t>(inSubsetGlyphIDs.size()-1,255)); 
 
 	mPrimitivesWriter.WriteCard8(encodingGlyphsCount);
-	for(Byte i=1; i < encodingGlyphsCount+1;++i)
-		mPrimitivesWriter.WriteCard8(mType1Input.GetEncoding(inSubsetGlyphIDs[i]));
+	for(Byte i=0; i < encodingGlyphsCount;++i)
+		mPrimitivesWriter.WriteCard8(mType1Input.GetEncoding(inSubsetGlyphIDs[i+1]));
 
 	return mPrimitivesWriter.GetInternalState();
 }
