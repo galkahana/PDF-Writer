@@ -27,6 +27,7 @@ using namespace PDFHummus;
 OpenTypeFileInput::OpenTypeFileInput(void)
 {
     mHeaderOffset = 0;
+    mTableOffset = 0;
 	mHMtx = NULL;
 	mName.mNameEntries = NULL;
 	mLoca = NULL;
@@ -89,6 +90,7 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeFile(IByteReaderWithPosition* inTrueT
 		mPrimitivesReader.SetOpenTypeStream(inTrueTypeFile);
 
         mHeaderOffset = mPrimitivesReader.GetCurrentPosition();
+        mTableOffset = mPrimitivesReader.GetCurrentPosition();
 
 		status = ReadOpenTypeHeader();
 		if(status != PDFHummus::eSuccess)
@@ -223,7 +225,7 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeHeader()
 			mPrimitivesReader.ReadULONG(tableEntry.CheckSum);
 			mPrimitivesReader.ReadULONG(tableEntry.Offset);
 			mPrimitivesReader.ReadULONG(tableEntry.Length);
-            tableEntry.Offset += mHeaderOffset;
+            tableEntry.Offset += mTableOffset;
 			mTables.insert(ULongToTableEntryMap::value_type(tableTag,tableEntry));
 		}
 		status = mPrimitivesReader.GetInternalState();
@@ -239,11 +241,17 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeSFNT()
 
     mPrimitivesReader.SetOffset(mHeaderOffset);
 	mPrimitivesReader.ReadULONG(sfntVersion);
-
+    
+    if(mPrimitivesReader.GetInternalState() != PDFHummus::eSuccess)
+    {
+        return PDFHummus::eFailure;
+    }
+    
     if((0x74746366 /* ttcf */ == sfntVersion))
     {
-        /* mgubi: a TrueType composite font, just go to the first table */
-
+        // mgubi: a TrueType composite font, just get to the right face table 
+        // for the format see http://www.microsoft.com/typography/otspec/otff.htm
+        
         unsigned long ttcVersion;
         unsigned long numFonts;
         unsigned long offsetTable;
@@ -261,14 +269,7 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeSFNT()
             mPrimitivesReader.ReadULONG(offsetTable);
         }
         
-        mPrimitivesReader.SetOffset(offsetTable);
-        
-        if(mPrimitivesReader.GetInternalState() != PDFHummus::eSuccess)
-        {
-          return PDFHummus::eFailure;
-        }
-        
-        mHeaderOffset = mPrimitivesReader.GetCurrentPosition();
+        mHeaderOffset = mHeaderOffset + offsetTable;
         
         return ReadOpenTypeSFNT();
     } else if((0x10000 == sfntVersion) || (0x74727565 /* true */ == sfntVersion))
@@ -281,7 +282,7 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeSFNT()
 		mFontType = EOpenTypeCFF;
 		return PDFHummus::eSuccess;
 	}
-	else if (ReadOpenTypeSFNTFromDfont() == PDFHummus::eSuccess)
+	else if ((ReadOpenTypeSFNTFromDfont() == PDFHummus::eSuccess))
     {
 		return PDFHummus::eSuccess;
     }
@@ -400,6 +401,7 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeSFNTFromDfont()
             }
             
             mHeaderOffset = fontOffset + 4; // skip the size of the resource
+            mTableOffset = mHeaderOffset; 
 
             // try to open the resource as a TrueType font specification
             return ReadOpenTypeSFNT();
@@ -715,6 +717,12 @@ EStatusCode OpenTypeFileInput::ReadGlyfForDependencies()
 				{
 					mPrimitivesReader.ReadUSHORT(flags);
 					mPrimitivesReader.ReadUSHORT(glyphIndex);
+                    
+                    if (glyphIndex >= mMaxp.NumGlyphs) {
+                        TRACE_LOG("OpenTypeFileInput::ReadGlyfForDependencies, dependent glyph out of range");
+                        return PDFHummus::eFailure;
+                    }
+                    
 					mGlyf[i]->mComponentGlyphs.push_back(glyphIndex);
 					if((flags & 1) != 0) // 
 						mPrimitivesReader.Skip(4); // skip 2 shorts, ARG_1_AND_2_ARE_WORDS

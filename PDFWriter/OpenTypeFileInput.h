@@ -207,6 +207,7 @@ public:
 	unsigned short GetGlyphsCount();
 
     unsigned long mHeaderOffset;
+    unsigned long mTableOffset;
     
     unsigned short mFaceIndex;
     
