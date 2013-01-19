@@ -26,6 +26,8 @@ using namespace PDFHummus;
 
 OpenTypeFileInput::OpenTypeFileInput(void)
 {
+    mHeaderOffset = 0;
+    mTableOffset = 0;
 	mHMtx = NULL;
 	mName.mNameEntries = NULL;
 	mLoca = NULL;
@@ -59,7 +61,7 @@ void OpenTypeFileInput::FreeTables()
 	mActualGlyphs.clear();
 }
 
-EStatusCode OpenTypeFileInput::ReadOpenTypeFile(const std::string& inFontFilePath)
+EStatusCode OpenTypeFileInput::ReadOpenTypeFile(const std::string& inFontFilePath, unsigned short inFaceIndex)
 {
 	InputFile fontFile;
 
@@ -70,20 +72,25 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeFile(const std::string& inFontFilePat
 		return status;
 	}
 
-	status = ReadOpenTypeFile(fontFile.GetInputStream());
+	status = ReadOpenTypeFile(fontFile.GetInputStream(), inFaceIndex);
 	fontFile.CloseFile();
 	return status;
 }
 
-EStatusCode OpenTypeFileInput::ReadOpenTypeFile(IByteReaderWithPosition* inTrueTypeFile)
+EStatusCode OpenTypeFileInput::ReadOpenTypeFile(IByteReaderWithPosition* inTrueTypeFile, unsigned short inFaceIndex)
 {
 	EStatusCode status;
 
+    mFaceIndex = inFaceIndex;
+    
 	do
 	{
 		FreeTables();
 
 		mPrimitivesReader.SetOpenTypeStream(inTrueTypeFile);
+
+        mHeaderOffset = mPrimitivesReader.GetCurrentPosition();
+        mTableOffset = mPrimitivesReader.GetCurrentPosition();
 
 		status = ReadOpenTypeHeader();
 		if(status != PDFHummus::eSuccess)
@@ -187,12 +194,22 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeHeader()
 	do
 	{
 		status = ReadOpenTypeSFNT();
+        
 		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("OpenTypeFileInput::ReaderTrueTypeHeader, SFNT header not open type");
 			break;
 		}
 
+        unsigned long sfntVersion;
+        
+        mPrimitivesReader.SetOffset(mHeaderOffset);
+        mPrimitivesReader.ReadULONG(sfntVersion);
+        char buf[4];
+        buf[0]= sfntVersion & 0xFF;
+        buf[1]= (sfntVersion >> 8) & 0xFF;
+        buf[2]= (sfntVersion >> 16) & 0xFF;
+        buf[3]= (sfntVersion >> 24) & 0xFF;
 		mPrimitivesReader.ReadUSHORT(mTablesCount);
 		// skip the next 6. i don't give a rats...
 		mPrimitivesReader.Skip(6);
@@ -200,9 +217,15 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeHeader()
 		for(unsigned short i = 0; i < mTablesCount; ++i)
 		{
 			mPrimitivesReader.ReadULONG(tableTag);
+            char buf[4];
+            buf[0]= tableTag & 0xFF;
+            buf[1]= (tableTag >> 8) & 0xFF;
+            buf[2]= (tableTag >> 16) & 0xFF;
+            buf[3]= (tableTag >> 24) & 0xFF;
 			mPrimitivesReader.ReadULONG(tableEntry.CheckSum);
 			mPrimitivesReader.ReadULONG(tableEntry.Offset);
 			mPrimitivesReader.ReadULONG(tableEntry.Length);
+            tableEntry.Offset += mTableOffset;
 			mTables.insert(ULongToTableEntryMap::value_type(tableTag,tableEntry));
 		}
 		status = mPrimitivesReader.GetInternalState();
@@ -216,9 +239,40 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeSFNT()
 {
 	unsigned long sfntVersion;
 
+    mPrimitivesReader.SetOffset(mHeaderOffset);
 	mPrimitivesReader.ReadULONG(sfntVersion);
-
-	if((0x10000 == sfntVersion) || (0x74727565 /* true */ == sfntVersion))
+    
+    if(mPrimitivesReader.GetInternalState() != PDFHummus::eSuccess)
+    {
+        return PDFHummus::eFailure;
+    }
+    
+    if((0x74746366 /* ttcf */ == sfntVersion))
+    {
+        // mgubi: a TrueType composite font, just get to the right face table 
+        // for the format see http://www.microsoft.com/typography/otspec/otff.htm
+        
+        unsigned long ttcVersion;
+        unsigned long numFonts;
+        unsigned long offsetTable;
+        
+        mPrimitivesReader.ReadULONG(ttcVersion);
+        mPrimitivesReader.ReadULONG(numFonts);
+        
+        if (mFaceIndex >= numFonts) 
+        {
+            TRACE_LOG("OpenTypeFileInput::ReadOpenTypeSFNT, face index out of range");
+            return PDFHummus::eFailure;
+        }
+        
+        for (int i= 0; i<= mFaceIndex; ++i) {
+            mPrimitivesReader.ReadULONG(offsetTable);
+        }
+        
+        mHeaderOffset = mHeaderOffset + offsetTable;
+        
+        return ReadOpenTypeSFNT();
+    } else if((0x10000 == sfntVersion) || (0x74727565 /* true */ == sfntVersion))
 	{
 		mFontType = EOpenTypeTrueType;
 		return PDFHummus::eSuccess;
@@ -228,8 +282,132 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeSFNT()
 		mFontType = EOpenTypeCFF;
 		return PDFHummus::eSuccess;
 	}
-	else
+	else if ((ReadOpenTypeSFNTFromDfont() == PDFHummus::eSuccess))
+    {
+		return PDFHummus::eSuccess;
+    }
+    else
 		return PDFHummus::eFailure;
+}
+
+EStatusCode OpenTypeFileInput::ReadOpenTypeSFNTFromDfont()
+{
+    // mac resource fork header parsing
+    // see: https://developer.apple.com/legacy/mac/library/documentation/mac/pdf/MoreMacintoshToolbox.pdf
+
+    unsigned long rdata_pos, map_pos, rdata_len, map_len, map_offset;
+
+    // verify that the header is composed as expected
+    {
+        Byte head[16], head2[16];
+        
+        mPrimitivesReader.SetOffset(mHeaderOffset);
+        
+        for(unsigned short i=0; i<16; i++)
+            mPrimitivesReader.ReadBYTE(head[i]);
+        
+        rdata_pos = ( head[0] << 24 )  | ( head[1] << 16 )  | ( head[2] <<  8 )  | head[3] ;
+        map_pos   = ( head[4] << 24 )  | ( head[5] << 16 )  | ( head[6] <<  8 )  | head[7] ;
+        rdata_len = ( head[8] << 24 )  | ( head[9] << 16 )  | ( head[10] <<  8 ) | head[11] ;
+        map_len   = ( head[12] << 24 ) | ( head[13] << 16 ) | ( head[14] <<  8 ) | head[15] ;
+        
+        if ( rdata_pos + rdata_len != map_pos || map_pos == 0 ) {
+            return PDFHummus::eFailure;
+        }
+        
+        mPrimitivesReader.SetOffset(map_pos);
+        
+        head2[15] = (Byte)(head[15]+1); // make it be different
+        
+        for(unsigned short i=0; i<16; i++)
+            mPrimitivesReader.ReadBYTE(head2[i]);
+        
+        {
+            // check that the two headers match
+            
+            int allzeros = 1, allmatch = 1;
+            for (int i = 0; i < 16; ++i )
+            {
+                if ( head[i] != 0 ) allzeros = 0;
+                if ( head2[i] != head[i] ) allmatch = 0;
+            }
+            if ( !allzeros && !allmatch ) return PDFHummus::eFailure;
+        }
+    }
+
+    /* If we have reached this point then it is probably a mac resource */
+    /* file.  Now, does it contain any interesting resources?           */
+
+    mPrimitivesReader.Skip(4      /* skip handle to next resource map */
+                           + 2    /* skip file resource number */
+                           + 2);  /* skip attributes */
+    
+    unsigned short type_list;
+    mPrimitivesReader.ReadUSHORT(type_list);
+   
+    map_offset  = map_pos + type_list;
+    
+    mPrimitivesReader.SetOffset(map_offset);
+
+    // read the resource type list
+
+    unsigned short cnt;
+    mPrimitivesReader.ReadUSHORT(cnt);
+
+    for (int i = 0; i < cnt; ++i )
+    {
+        long tag;
+        unsigned short subcnt, rpos;
+        mPrimitivesReader.ReadLONG(tag);
+        mPrimitivesReader.ReadUSHORT(subcnt);
+        mPrimitivesReader.ReadUSHORT(rpos);
+        
+        if ( tag == GetTag("sfnt") ) {
+            
+            mPrimitivesReader.SetOffset(map_offset + rpos);
+
+            // read the reference list for the 'sfnt' resources
+            // the map is used to order the references by reference id
+            
+            std::map<unsigned short, unsigned long> resOffsetsMap;
+
+            for (int j = 0; j < subcnt + 1; ++j )
+            {
+                unsigned short res_id, res_name;
+                unsigned long temp, mbz, res_offset;
+                mPrimitivesReader.ReadUSHORT(res_id);
+                mPrimitivesReader.ReadUSHORT(res_name);
+                mPrimitivesReader.ReadULONG(temp);
+                mPrimitivesReader.ReadULONG(mbz);
+                res_offset = temp & 0xFFFFFFL;
+                resOffsetsMap.insert(std::pair<unsigned short, unsigned long>(res_id,rdata_pos + res_offset));
+            }
+            
+            int face_index = mFaceIndex, cur_face = 0; // Hack: for now just take the first font
+            unsigned long fontOffset = 0;
+            
+            for (std::map<unsigned short, unsigned long>::iterator it=resOffsetsMap.begin();
+                 it!=resOffsetsMap.end(); ++it, ++cur_face) {
+                if (cur_face == face_index) {
+                    fontOffset = it->second;
+                    break;
+                }
+            }
+
+            if (cur_face != face_index)
+            {
+                TRACE_LOG("OpenTypeFileInput::ReadOpenTypeSFNTFromDfont, could not find face inside resource");
+                return PDFHummus::eFailure;
+            }
+            
+            mHeaderOffset = fontOffset + 4; // skip the size of the resource
+            mTableOffset = mHeaderOffset; 
+
+            // try to open the resource as a TrueType font specification
+            return ReadOpenTypeSFNT();
+        }
+    }
+    return PDFHummus::eFailure;
 }
 
 unsigned long OpenTypeFileInput::GetTag(const char* inTagName)
@@ -539,6 +717,12 @@ EStatusCode OpenTypeFileInput::ReadGlyfForDependencies()
 				{
 					mPrimitivesReader.ReadUSHORT(flags);
 					mPrimitivesReader.ReadUSHORT(glyphIndex);
+                    
+                    if (glyphIndex >= mMaxp.NumGlyphs) {
+                        TRACE_LOG("OpenTypeFileInput::ReadGlyfForDependencies, dependent glyph out of range");
+                        return PDFHummus::eFailure;
+                    }
+                    
 					mGlyf[i]->mComponentGlyphs.push_back(glyphIndex);
 					if((flags & 1) != 0) // 
 						mPrimitivesReader.Skip(4); // skip 2 shorts, ARG_1_AND_2_ARE_WORDS
