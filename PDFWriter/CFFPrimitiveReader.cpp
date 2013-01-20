@@ -221,7 +221,7 @@ EStatusCode CFFPrimitiveReader::Read4ByteSigned(long& outValue)
 	if(status != PDFHummus::eSuccess)
 		return PDFHummus::eFailure;
 
-	outValue = (long)buffer;
+	outValue = (int32_t)buffer; // very important to cast to 32, to get the sign right
 
 	return PDFHummus::eSuccess;
 }

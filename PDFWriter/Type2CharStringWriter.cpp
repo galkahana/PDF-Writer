@@ -123,32 +123,8 @@ EStatusCode Type2CharStringWriter::WriteIntegerOperand(long inOperand)
 		return PDFHummus::eSuccess;
 	}
 	else
-    {
-		Byte byte1,byte2,byte3,byte4;
-        
-		byte1 = (value >> 24) & 0xff;
-		byte2 = (value >> 16) & 0xff;
-		byte3 = (value >> 8) & 0xff;
-		byte4 = value & 0xff;
-        
-		if(WriteByte(29) != PDFHummus::eSuccess)
-			return PDFHummus::eFailure;
-        
-		if(WriteByte(byte1) != PDFHummus::eSuccess)
-			return PDFHummus::eFailure;
-        
-		if(WriteByte(byte2) != PDFHummus::eSuccess)
-			return PDFHummus::eFailure;
-
-        if(WriteByte(byte3) != PDFHummus::eSuccess)
-			return PDFHummus::eFailure;
-
-        if(WriteByte(byte4) != PDFHummus::eSuccess)
-			return PDFHummus::eFailure;
-		
-        return PDFHummus::eSuccess;
-        
-    }
+        return PDFHummus::eFailure;
+    
 }
 
 EStatusCode Type2CharStringWriter::WriteOperator(unsigned short inOperatorCode)
