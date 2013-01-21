@@ -62,14 +62,18 @@ void FreeTypeFaceWrapper::SetupNotDefGlyph()
     if(FT_HAS_GLYPH_NAMES(mFace))
     {
         char* aString = (char*)".notdef";
-        if(FT_Get_Name_Index(mFace,aString) == 0)
-            mNotDefGlyphName = GetGlyphName(0);
+      if(FT_Get_Name_Index(mFace,aString) == 0) {
+        FT_ULong  charcode;
+        FT_UInt   gindex;
+        charcode = FT_Get_First_Char( mFace, &gindex ); 
+        mNotDefGlyphName = GetGlyphName(gindex);
+        // WARNING: it can happen that (mNotDefGlyphName == "")
+      }
         else
             mNotDefGlyphName = ".notdef";
     }
-    else
-        mNotDefGlyphName = ".notdef";
-    
+  
+    if (mNotDefGlyphName == "")  mNotDefGlyphName = ".notdef";
 }
 
 std::string FreeTypeFaceWrapper::GetExtension(const std::string& inFilePath)
