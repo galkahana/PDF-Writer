@@ -268,7 +268,10 @@ void ANSIFontWriter::WriteEncodingDictionary()
 			mObjectsContext->WriteTokenSeparator(eTokenSeparatorSpace);
 			mObjectsContext->WriteTokenSeparator(eTokenSeparatorSpace);
 		}
-		encodingDictionary->WriteNameValue(it->second);
+    else
+    {
+      encodingDictionary->WriteNameValue(it->second);
+    }
 		previousEncoding = it->first;
 	}
 
