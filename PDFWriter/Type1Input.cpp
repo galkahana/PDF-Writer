@@ -43,7 +43,7 @@ Type1Input::~Type1Input(void)
 
 void Type1Input::FreeTables()
 {
-	for(Byte i=0;i<mSubrsCount;++i)
+	for(long i=0;i<mSubrsCount;++i)
 		delete[] mSubrs[i].Code;
 	delete[] mSubrs;
 	mSubrs = NULL;
@@ -638,7 +638,7 @@ EStatusCode Type1Input::ParseSubrs()
 	if(!token.first)
 		return PDFHummus::eFailure;
 
-	mSubrsCount = (Byte)Int(token.second);
+	mSubrsCount = Long(token.second);
     if(mSubrsCount == 0)
     {
         mSubrs = NULL;
@@ -660,7 +660,7 @@ EStatusCode Type1Input::ParseSubrs()
 	if(!token.first)
 		return PDFHummus::eFailure;
 
-	for(Byte i=0;i<mSubrsCount && token.first;++i)
+	for(long i=0;i<mSubrsCount && token.first;++i)
 	{
 		token = mPFBDecoder.GetNextToken();
 		if(!token.first)

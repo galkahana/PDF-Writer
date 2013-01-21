@@ -215,14 +215,14 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::CreateCFFSubset(
 		status = mType1File.OpenFile(inFontInfo.GetFontFilePath());
 		if(status != PDFHummus::eSuccess)
 		{
-			TRACE_LOG1("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, cannot open type font file at %s",inFontInfo.GetFontFilePath().c_str());
+			TRACE_LOG1("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, cannot open Type 1 font file at %s",inFontInfo.GetFontFilePath().c_str());
 			break;
 		}
 
 		status = mType1Input.ReadType1File(mType1File.GetInputStream());
 		if(status != PDFHummus::eSuccess)
 		{
-			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, failed to read true type file");
+			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, failed to read Type 1 file");
 			break;
 		}
 
@@ -641,7 +641,7 @@ unsigned short Type1ToCFFEmbeddedFontWriter::AddStringToStringsArray(const std::
 
 BoolAndUShort Type1ToCFFEmbeddedFontWriter::FindStandardString(const std::string& inStringToFind)
 {
-	unsigned short upperBound = N_STD_STRINGS;
+	unsigned short upperBound = N_STD_STRINGS-1;
 	unsigned short lowerBound = 0;
 	unsigned short pivot = upperBound/2;
 

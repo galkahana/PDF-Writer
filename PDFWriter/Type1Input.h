@@ -143,7 +143,7 @@ public:
 private:
 	Type1Encoding mEncoding;
 	StringToByteMap mReverseEncoding;
-	Byte mSubrsCount;
+	long mSubrsCount;
 	Type1CharString* mSubrs;
 	StringToType1CharStringMap mCharStrings;
 
