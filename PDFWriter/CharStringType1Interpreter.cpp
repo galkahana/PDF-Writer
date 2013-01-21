@@ -227,7 +227,7 @@ EStatusCode CharStringType1Interpreter::InterpretNumber(Byte inBuffer,InputCharS
 			return PDFHummus::eFailure;
 
 
-		operand = (int32_t)(
+		operand = (int)(
 						((unsigned long)(byte1) << 24) + 
 						((unsigned long)(byte2) << 16) + 
 						((unsigned long)(byte3) << 8) + 
