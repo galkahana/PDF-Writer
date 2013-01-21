@@ -205,11 +205,6 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeHeader()
         
         mPrimitivesReader.SetOffset(mHeaderOffset);
         mPrimitivesReader.ReadULONG(sfntVersion);
-        char buf[4];
-        buf[0]= sfntVersion & 0xFF;
-        buf[1]= (sfntVersion >> 8) & 0xFF;
-        buf[2]= (sfntVersion >> 16) & 0xFF;
-        buf[3]= (sfntVersion >> 24) & 0xFF;
 		mPrimitivesReader.ReadUSHORT(mTablesCount);
 		// skip the next 6. i don't give a rats...
 		mPrimitivesReader.Skip(6);
@@ -217,11 +212,6 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeHeader()
 		for(unsigned short i = 0; i < mTablesCount; ++i)
 		{
 			mPrimitivesReader.ReadULONG(tableTag);
-            char buf[4];
-            buf[0]= tableTag & 0xFF;
-            buf[1]= (tableTag >> 8) & 0xFF;
-            buf[2]= (tableTag >> 16) & 0xFF;
-            buf[3]= (tableTag >> 24) & 0xFF;
 			mPrimitivesReader.ReadULONG(tableEntry.CheckSum);
 			mPrimitivesReader.ReadULONG(tableEntry.Offset);
 			mPrimitivesReader.ReadULONG(tableEntry.Length);
