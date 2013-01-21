@@ -548,13 +548,20 @@ EStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const ULongList& inUnic
 		ULongList::const_iterator it = inUnicodeCharacters.begin();
 		for(; it != inUnicodeCharacters.end(); ++it)
 		{
-			glyphIndex = mFormatParticularWrapper && mFormatParticularWrapper->HasPrivateEncoding() ? mFormatParticularWrapper->GetGlyphForUnicodeChar(*it) : FT_Get_Char_Index(mFace,*it);
+      if ( mFormatParticularWrapper && mFormatParticularWrapper->HasPrivateEncoding() ) {
+			  glyphIndex = mFormatParticularWrapper->GetGlyphForUnicodeChar(*it);
+        // glyphIndex == 0 is allowed in some Type1 fonts with custom encoding
+      }
+      else
+      {
+        glyphIndex =  FT_Get_Char_Index(mFace,*it);
+        if(0 == glyphIndex)
+        {
+          TRACE_LOG1("FreeTypeFaceWrapper::GetGlyphsForUnicodeText, failed to find glyph for charachter 0x%04x",*it);
+          status = PDFHummus::eFailure;
+        }
+      }
 			outGlyphs.push_back(glyphIndex);
-			if(0 == glyphIndex)
-			{
-				TRACE_LOG1("FreeTypeFaceWrapper::GetGlyphsForUnicodeText, failed to find glyph for charachter 0x%04x",*it);
-				status = PDFHummus::eFailure;
-			}
 		}
 
 		return status;
