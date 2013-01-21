@@ -320,22 +320,24 @@ void ANSIFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 	else
 		primitiveWriter.WriteInteger(100);
 	primitiveWriter.WriteKeyword(scBeginBFChar);
-
-	WriteGlyphEntry(cmapWriteContext,it->second.mEncodedCharacter,it->second.mUnicodeCharacters);
-	++it;
-
-	for(; it != mCharactersVector.end(); ++it,++i)
-	{
-		if(i % 100 == 0)
-		{
-			primitiveWriter.WriteKeyword(scEndBFChar);
-			if(vectorSize - i < 100)
-				primitiveWriter.WriteInteger(vectorSize - i);
-			else
-				primitiveWriter.WriteInteger(100);
-			primitiveWriter.WriteKeyword(scBeginBFChar);
-		}
+	// vectorSize can be zero in a font with custom encoding with a meaningful zero glyph
+	if (vectorSize>0) {
 		WriteGlyphEntry(cmapWriteContext,it->second.mEncodedCharacter,it->second.mUnicodeCharacters);
+		++it;
+
+		for(; it != mCharactersVector.end(); ++it,++i)
+		{
+			if(i % 100 == 0)
+			{
+				primitiveWriter.WriteKeyword(scEndBFChar);
+				if(vectorSize - i < 100)
+					primitiveWriter.WriteInteger(vectorSize - i);
+				else
+					primitiveWriter.WriteInteger(100);
+				primitiveWriter.WriteKeyword(scBeginBFChar);
+			}
+			WriteGlyphEntry(cmapWriteContext,it->second.mEncodedCharacter,it->second.mUnicodeCharacters);
+		}
 	}
 	primitiveWriter.WriteKeyword(scEndBFChar);
 	cmapWriteContext->Write((const Byte*)scCmapFooter,strlen(scCmapFooter));
