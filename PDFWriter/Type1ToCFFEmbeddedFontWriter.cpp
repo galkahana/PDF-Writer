@@ -641,7 +641,7 @@ unsigned short Type1ToCFFEmbeddedFontWriter::AddStringToStringsArray(const std::
 
 BoolAndUShort Type1ToCFFEmbeddedFontWriter::FindStandardString(const std::string& inStringToFind)
 {
-	unsigned short upperBound = N_STD_STRINGS;
+	unsigned short upperBound = N_STD_STRINGS-1;
 	unsigned short lowerBound = 0;
 	unsigned short pivot = upperBound/2;
 
