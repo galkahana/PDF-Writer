@@ -3,18 +3,86 @@
    version = "1.0">
    <ContextStates>
       <ContextState
-         contextName = "InputBufferedStream::Skip(unsigned long):InputBufferedStream.cpp">
+         contextName = "CharStringType1Interpreter::InterpretNumber(unsigned char, InputCharStringDecodeStream*):CharStringType1Interpreter.cpp">
          <PersistentStrings>
             <PersistentString
-               value = "*(mCurrentBufferIndex+1)">
+               value = "inBuffer">
             </PersistentString>
             <PersistentString
-               value = "*(mCurrentBufferIndex+2)">
-            </PersistentString>
-            <PersistentString
-               value = "*(mCurrentBufferIndex+3)">
+               value = "operand">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "Type1ToCFFEmbeddedFontWriter::TranslateFromFreeTypeToType1(FreeTypeFaceWrapper&amp;, std::vector&lt;unsigned int, std::allocator&lt;unsigned int&gt; &gt; const&amp;, std::vector&lt;std::string, std::allocator&lt;std::string&gt; &gt;&amp;):Type1ToCFFEmbeddedFontWriter.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "inSubsetGlyphIDs">
+            </PersistentString>
+            <PersistentString
+               value = "aName.c_str()">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "Type1Input::GetGlyphCharStringName(unsigned char):Type1Input.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "AbstractContentContext::WriteTextCommandWithDirectGlyphSelection(std::list&lt;GlyphUnicodeMapping, std::allocator&lt;GlyphUnicodeMapping&gt; &gt; const&amp;, ITextCommand*):AbstractContentContext.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "encodedCharachtersList">
+            </PersistentString>
+            <PersistentString
+               value = "formattingBuffer[0]">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ANSIFontWriter::WriteToUnicodeMap(unsigned long):ANSIFontWriter.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "mCharactersVector">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "t1_get_glyph_name:t1driver.c">
+         <PersistentStrings>
+            <PersistentString
+               value = "glyph_index">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "Type1ToCFFEmbeddedFontWriter::CreateCFFSubset(FreeTypeFaceWrapper&amp;, std::vector&lt;unsigned int, std::allocator&lt;unsigned int&gt; &gt; const&amp;, std::string const&amp;, bool&amp;, MyStringBuf&amp;):Type1ToCFFEmbeddedFontWriter.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "subsetGlyphNames">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "Type1ToCFFEmbeddedFontWriter::AddDependentGlyphs(std::vector&lt;std::string, std::allocator&lt;std::string&gt; &gt;&amp;):Type1ToCFFEmbeddedFontWriter.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "status">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "Type1ToType2Converter::WriteProgramToStream(IByteWriter*):Type1ToType2Converter.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "it-&gt;mOperands">
+            </PersistentString>
+            <PersistentString
+               value = "it-&gt;mMarkerType">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "FreeTypeType1Wrapper::FreeTypeType1Wrapper(FT_FaceRec_*, std::string const&amp;):FreeTypeType1Wrapper.cpp">
       </ContextState>
       <ContextState
          contextName = "JPEGImageParser::GetLongValue(unsigned char const*, bool):JPEGImageParser.cpp">
@@ -37,10 +105,10 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "Type1ToCFFEmbeddedFontWriter::TranslateFromFreeTypeToType1(FreeTypeFaceWrapper&amp;, std::vector&lt;unsigned int, std::allocator&lt;unsigned int&gt; &gt; const&amp;, std::vector&lt;std::string, std::allocator&lt;std::string&gt; &gt;&amp;):Type1ToCFFEmbeddedFontWriter.cpp">
+         contextName = "Type1ToType2Converter::AddHStem(long, long):Type1ToType2Converter.cpp">
          <PersistentStrings>
             <PersistentString
-               value = "aName.c_str()">
+               value = "inOrigin">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -53,6 +121,33 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "ANSIFontWriter::WriteGlyphEntry(IByteWriter*, unsigned short, std::vector&lt;unsigned long, std::allocator&lt;unsigned long&gt; &gt; const&amp;):ANSIFontWriter.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "inUnicodeValues">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "Type1Input::ReadFontDictionary():Type1Input.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "token.second">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "FT_Get_Glyph_Name:ftobjs.c">
+         <PersistentStrings>
+            <PersistentString
+               value = "face">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "FreeTypeFaceWrapper::SetupNotDefGlyph():FreeTypeFaceWrapper.cpp">
+      </ContextState>
+      <ContextState
          contextName = "FreeTypeFaceWrapper::GetGlyphsForUnicodeText(std::list&lt;unsigned long, std::allocator&lt;unsigned long&gt; &gt; const&amp;, std::list&lt;unsigned int, std::allocator&lt;unsigned int&gt; &gt;&amp;):FreeTypeFaceWrapper.cpp">
          <PersistentStrings>
             <PersistentString
@@ -61,29 +156,18 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "AbstractContentContext::WriteTextCommandWithDirectGlyphSelection(std::list&lt;GlyphUnicodeMapping, std::allocator&lt;GlyphUnicodeMapping&gt; &gt; const&amp;, ITextCommand*):AbstractContentContext.cpp">
+         contextName = "Type1ToType2Converter::Type1RMoveto(std::list&lt;long, std::allocator&lt;long&gt; &gt; const&amp;):Type1ToType2Converter.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "Type1ToType2Converter::Type1Hsbw(std::list&lt;long, std::allocator&lt;long&gt; &gt; const&amp;):Type1ToType2Converter.cpp">
          <PersistentStrings>
             <PersistentString
-               value = "encodedCharachtersList">
-            </PersistentString>
-            <PersistentString
-               value = "formattingBuffer[0]">
+               value = "mSideBearing">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
       <ContextState
          contextName = "Type1Input::ParseEncoding():Type1Input.cpp">
-         <PersistentStrings>
-            <PersistentString
-               value = "token.second.c_str()">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "Type1ToType2Converter::Type1RMoveto(std::list&lt;long, std::allocator&lt;long&gt; &gt; const&amp;):Type1ToType2Converter.cpp">
-      </ContextState>
-      <ContextState
-         contextName = "Type1Input::ReadPrivateDictionary():Type1Input.cpp">
          <PersistentStrings>
             <PersistentString
                value = "token.second.c_str()">
@@ -99,24 +183,35 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "Type1Input::ReadFontDictionary():Type1Input.cpp">
-         <PersistentStrings>
-            <PersistentString
-               value = "token.second">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "Type1Input::GetGlyphCharStringName(unsigned char):Type1Input.cpp">
-      </ContextState>
-      <ContextState
-         contextName = "ANSIFontWriter::CalculateDifferences():ANSIFontWriter.cpp">
+         contextName = "Type1ToType2Converter::ConvertStems():Type1ToType2Converter.cpp">
       </ContextState>
       <ContextState
          contextName = "PDFUsedFont::EncodeStringForShowing(std::list&lt;GlyphUnicodeMapping, std::allocator&lt;GlyphUnicodeMapping&gt; &gt; const&amp;, unsigned long&amp;, std::list&lt;unsigned short, std::allocator&lt;unsigned short&gt; &gt;&amp;, bool&amp;):PDFUsedFont.cpp">
       </ContextState>
       <ContextState
-         contextName = "FreeTypeType1Wrapper::FreeTypeType1Wrapper(FT_FaceRec_*, std::string const&amp;):FreeTypeType1Wrapper.cpp">
+         contextName = "InputBufferedStream::Skip(unsigned long):InputBufferedStream.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "*(mCurrentBufferIndex+1)">
+            </PersistentString>
+            <PersistentString
+               value = "*(mCurrentBufferIndex+2)">
+            </PersistentString>
+            <PersistentString
+               value = "*(mCurrentBufferIndex+3)">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ANSIFontWriter::CalculateDifferences():ANSIFontWriter.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "Type1Input::ReadPrivateDictionary():Type1Input.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "token.second.c_str()">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
    </ContextStates>
 </VariablesViewState>

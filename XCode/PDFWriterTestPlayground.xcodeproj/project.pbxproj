@@ -10,11 +10,9 @@
 		490BBEA915657BE900C28250 /* WindowsPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 490BBEA815657BE900C28250 /* WindowsPath.cpp */; };
 		490BBEAB15657C5900C28250 /* FileURL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 490BBEAA15657C5900C28250 /* FileURL.cpp */; };
 		490BBEAF1566B80D00C28250 /* PosixPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 490BBEAE1566B80D00C28250 /* PosixPath.cpp */; };
-		49546A1416A28F4000A88DA7 /* CMRFontBug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49546A1216A28F4000A88DA7 /* CMRFontBug.cpp */; };
 		497CD3C215A87136000B3C7C /* BasicModification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 497CD3C115A87136000B3C7C /* BasicModification.cpp */; };
 		497CD3C415A8ABBE000B3C7C /* AppendingAndReading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 497CD3C315A8ABBE000B3C7C /* AppendingAndReading.cpp */; };
 		497EF61A15C1E50E00286CAC /* MergeToPDFForm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 497EF61915C1E50E00286CAC /* MergeToPDFForm.cpp */; };
-		4983E2161587D73900F3F62A /* JPGImageBugTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4983E2151587D73900F3F62A /* JPGImageBugTest.cpp */; };
 		4989F37C15BA977800F91EAF /* ModifyingExistingFileContent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4989F37B15BA977800F91EAF /* ModifyingExistingFileContent.cpp */; };
 		4989F38215BAB98000F91EAF /* PDFComment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4989F37E15BAB97F00F91EAF /* PDFComment.cpp */; };
 		4989F38315BAB98000F91EAF /* PDFCommentWriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4989F38015BAB97F00F91EAF /* PDFCommentWriter.cpp */; };
@@ -61,10 +59,6 @@
 		49B70E23155C5F3500C0FD9F /* Type1Test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49B70DF9155C5F3500C0FD9F /* Type1Test.cpp */; };
 		49B70E24155C5F3500C0FD9F /* UppercaseSequanceTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49B70DFB155C5F3500C0FD9F /* UppercaseSequanceTest.cpp */; };
 		49BADF7A155C629C00BE7C32 /* libLibTiff.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 49BADF79155C629C00BE7C32 /* libLibTiff.a */; };
-		49CD30EA157106AB00413969 /* AmitsTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49CD30E8157106AB00413969 /* AmitsTest.cpp */; };
-		49D90ED1169A041F00C2EC5B /* ExifBugTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49D90EC8169A041F00C2EC5B /* ExifBugTest.cpp */; };
-		49D90ED2169A041F00C2EC5B /* MyTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49D90ECB169A041F00C2EC5B /* MyTest.cpp */; };
-		49D90ED3169A041F00C2EC5B /* SudokuPDFCreation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 49D90ECF169A041F00C2EC5B /* SudokuPDFCreation.cpp */; };
 		49E5A56C155C601B00ED8A29 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 49E5A56B155C601B00ED8A29 /* CoreFoundation.framework */; };
 		49E5A56F155C602500ED8A29 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 49E5A56E155C602500ED8A29 /* libz.dylib */; };
 		49E5A571155C603300ED8A29 /* libPDFWriter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 49E5A570155C603300ED8A29 /* libPDFWriter.a */; };
@@ -89,16 +83,12 @@
 		490BBEAC15657C6A00C28250 /* FileURL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileURL.h; sourceTree = "<group>"; };
 		490BBEAD1566B7FD00C28250 /* PosixPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PosixPath.h; sourceTree = "<group>"; };
 		490BBEAE1566B80D00C28250 /* PosixPath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PosixPath.cpp; sourceTree = "<group>"; };
-		49546A1216A28F4000A88DA7 /* CMRFontBug.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CMRFontBug.cpp; sourceTree = "<group>"; };
-		49546A1316A28F4000A88DA7 /* CMRFontBug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMRFontBug.h; sourceTree = "<group>"; };
 		497CD3C015A87124000B3C7C /* BasicModification.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BasicModification.h; sourceTree = "<group>"; };
 		497CD3C115A87136000B3C7C /* BasicModification.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BasicModification.cpp; sourceTree = "<group>"; };
 		497CD3C315A8ABBE000B3C7C /* AppendingAndReading.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppendingAndReading.cpp; sourceTree = "<group>"; };
 		497CD3C515A8ABCF000B3C7C /* AppendingAndReading.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppendingAndReading.h; sourceTree = "<group>"; };
 		497EF61715C1E4F600286CAC /* MergeToPDFForm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MergeToPDFForm.h; sourceTree = "<group>"; };
 		497EF61915C1E50E00286CAC /* MergeToPDFForm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MergeToPDFForm.cpp; sourceTree = "<group>"; };
-		4983E2151587D73900F3F62A /* JPGImageBugTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JPGImageBugTest.cpp; sourceTree = "<group>"; };
-		4983E2181587D77100F3F62A /* JPGImageBugTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JPGImageBugTest.h; sourceTree = "<group>"; };
 		4989C52A155C5EED00D93089 /* PDFWriterTestPlayground */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = PDFWriterTestPlayground; sourceTree = BUILT_PRODUCTS_DIR; };
 		4989F37915BA976700F91EAF /* ModifyingExistingFileContent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ModifyingExistingFileContent.h; sourceTree = "<group>"; };
 		4989F37B15BA977800F91EAF /* ModifyingExistingFileContent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ModifyingExistingFileContent.cpp; sourceTree = "<group>"; };
@@ -189,14 +179,6 @@
 		49B70DFB155C5F3500C0FD9F /* UppercaseSequanceTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UppercaseSequanceTest.cpp; path = ../PDFWriterTestPlayground/UppercaseSequanceTest.cpp; sourceTree = SOURCE_ROOT; };
 		49B70DFC155C5F3500C0FD9F /* UppercaseSequanceTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UppercaseSequanceTest.h; path = ../PDFWriterTestPlayground/UppercaseSequanceTest.h; sourceTree = SOURCE_ROOT; };
 		49BADF79155C629C00BE7C32 /* libLibTiff.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libLibTiff.a; path = Build/Products/Debug/libLibTiff.a; sourceTree = "<group>"; };
-		49CD30E8157106AB00413969 /* AmitsTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AmitsTest.cpp; sourceTree = "<group>"; };
-		49CD30E9157106AB00413969 /* AmitsTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AmitsTest.h; sourceTree = "<group>"; };
-		49D90EC8169A041F00C2EC5B /* ExifBugTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ExifBugTest.cpp; sourceTree = "<group>"; };
-		49D90EC9169A041F00C2EC5B /* ExifBugTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExifBugTest.h; sourceTree = "<group>"; };
-		49D90ECB169A041F00C2EC5B /* MyTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MyTest.cpp; sourceTree = "<group>"; };
-		49D90ECC169A041F00C2EC5B /* MyTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyTest.h; sourceTree = "<group>"; };
-		49D90ECF169A041F00C2EC5B /* SudokuPDFCreation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SudokuPDFCreation.cpp; sourceTree = "<group>"; };
-		49D90ED0169A041F00C2EC5B /* SudokuPDFCreation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SudokuPDFCreation.h; sourceTree = "<group>"; };
 		49E5A56B155C601B00ED8A29 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		49E5A56E155C602500ED8A29 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		49E5A570155C603300ED8A29 /* libPDFWriter.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libPDFWriter.a; path = Build/Products/Debug/libPDFWriter.a; sourceTree = "<group>"; };
@@ -306,7 +288,6 @@
 			children = (
 				498C3F0315C5B3C1009EA9F8 /* DCT decode */,
 				497CD3BE15A8710D000B3C7C /* Modification */,
-				49CD30E61571069C00413969 /* bugs */,
 				49DB92AD155D149C00C949D7 /* Type1 */,
 				49DB92AC155D149300C949D7 /* TrueType */,
 				49DB92A8155D145E00C949D7 /* PDFs */,
@@ -321,25 +302,6 @@
 			name = Tests;
 			path = ../PDFWriterTestPlayground;
 			sourceTree = SOURCE_ROOT;
-		};
-		49CD30E61571069C00413969 /* bugs */ = {
-			isa = PBXGroup;
-			children = (
-				49D90EC8169A041F00C2EC5B /* ExifBugTest.cpp */,
-				49D90EC9169A041F00C2EC5B /* ExifBugTest.h */,
-				49D90ECB169A041F00C2EC5B /* MyTest.cpp */,
-				49D90ECC169A041F00C2EC5B /* MyTest.h */,
-				49D90ECF169A041F00C2EC5B /* SudokuPDFCreation.cpp */,
-				49D90ED0169A041F00C2EC5B /* SudokuPDFCreation.h */,
-				49CD30E8157106AB00413969 /* AmitsTest.cpp */,
-				49CD30E9157106AB00413969 /* AmitsTest.h */,
-				4983E2151587D73900F3F62A /* JPGImageBugTest.cpp */,
-				4983E2181587D77100F3F62A /* JPGImageBugTest.h */,
-				49546A1216A28F4000A88DA7 /* CMRFontBug.cpp */,
-				49546A1316A28F4000A88DA7 /* CMRFontBug.h */,
-			);
-			name = bugs;
-			sourceTree = "<group>";
 		};
 		49DB929F155D12B300C949D7 /* Main */ = {
 			isa = PBXGroup;
@@ -428,24 +390,24 @@
 		49DB92A7155D13E500C949D7 /* PDFEmbedding */ = {
 			isa = PBXGroup;
 			children = (
-				49B70DE4155C5F3500C0FD9F /* RefCountTest.cpp */,
-				49B70DE5155C5F3500C0FD9F /* RefCountTest.h */,
-				49B70DDA155C5F3500C0FD9F /* PDFParserTest.cpp */,
-				49B70DDB155C5F3500C0FD9F /* PDFParserTest.h */,
-				49B70DD8155C5F3500C0FD9F /* PDFObjectCastTest.cpp */,
-				49B70DD9155C5F3500C0FD9F /* PDFObjectCastTest.h */,
-				49B70DD6155C5F3500C0FD9F /* PDFEmbedTest.cpp */,
-				49B70DD7155C5F3500C0FD9F /* PDFEmbedTest.h */,
-				49B70DD2155C5F3500C0FD9F /* PDFCopyingContextTest.cpp */,
-				49B70DD3155C5F3500C0FD9F /* PDFCopyingContextTest.h */,
-				49B70DCA155C5F3500C0FD9F /* MergePDFPages.cpp */,
-				49B70DCB155C5F3500C0FD9F /* MergePDFPages.h */,
-				49B70DBF155C5F3500C0FD9F /* InputFlateDecodeTester.cpp */,
-				49B70DC0155C5F3500C0FD9F /* InputFlateDecodeTester.h */,
 				49B70DA8155C5F3500C0FD9F /* AppendPagesTest.cpp */,
 				49B70DA9155C5F3500C0FD9F /* AppendPagesTest.h */,
 				49B70DAA155C5F3500C0FD9F /* AppendSpecialPagesTest.cpp */,
 				49B70DAB155C5F3500C0FD9F /* AppendSpecialPagesTest.h */,
+				49B70DBF155C5F3500C0FD9F /* InputFlateDecodeTester.cpp */,
+				49B70DC0155C5F3500C0FD9F /* InputFlateDecodeTester.h */,
+				49B70DCA155C5F3500C0FD9F /* MergePDFPages.cpp */,
+				49B70DCB155C5F3500C0FD9F /* MergePDFPages.h */,
+				49B70DD2155C5F3500C0FD9F /* PDFCopyingContextTest.cpp */,
+				49B70DD3155C5F3500C0FD9F /* PDFCopyingContextTest.h */,
+				49B70DD6155C5F3500C0FD9F /* PDFEmbedTest.cpp */,
+				49B70DD7155C5F3500C0FD9F /* PDFEmbedTest.h */,
+				49B70DD8155C5F3500C0FD9F /* PDFObjectCastTest.cpp */,
+				49B70DD9155C5F3500C0FD9F /* PDFObjectCastTest.h */,
+				49B70DE4155C5F3500C0FD9F /* RefCountTest.cpp */,
+				49B70DE5155C5F3500C0FD9F /* RefCountTest.h */,
+				49B70DDA155C5F3500C0FD9F /* PDFParserTest.cpp */,
+				49B70DDB155C5F3500C0FD9F /* PDFParserTest.h */,
 				497EF61715C1E4F600286CAC /* MergeToPDFForm.h */,
 				497EF61915C1E50E00286CAC /* MergeToPDFForm.cpp */,
 			);
@@ -634,8 +596,6 @@
 				490BBEA915657BE900C28250 /* WindowsPath.cpp in Sources */,
 				490BBEAB15657C5900C28250 /* FileURL.cpp in Sources */,
 				490BBEAF1566B80D00C28250 /* PosixPath.cpp in Sources */,
-				49CD30EA157106AB00413969 /* AmitsTest.cpp in Sources */,
-				4983E2161587D73900F3F62A /* JPGImageBugTest.cpp in Sources */,
 				497CD3C215A87136000B3C7C /* BasicModification.cpp in Sources */,
 				497CD3C415A8ABBE000B3C7C /* AppendingAndReading.cpp in Sources */,
 				4989F37C15BA977800F91EAF /* ModifyingExistingFileContent.cpp in Sources */,
@@ -644,10 +604,6 @@
 				497EF61A15C1E50E00286CAC /* MergeToPDFForm.cpp in Sources */,
 				498C3F0715C5B67E009EA9F8 /* JpegLibTest.cpp in Sources */,
 				498C3F1615CBF64E009EA9F8 /* DCTDecodeFilterTest.cpp in Sources */,
-				49D90ED1169A041F00C2EC5B /* ExifBugTest.cpp in Sources */,
-				49D90ED2169A041F00C2EC5B /* MyTest.cpp in Sources */,
-				49D90ED3169A041F00C2EC5B /* SudokuPDFCreation.cpp in Sources */,
-				49546A1416A28F4000A88DA7 /* CMRFontBug.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
