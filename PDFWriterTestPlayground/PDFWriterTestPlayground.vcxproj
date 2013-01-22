@@ -178,10 +178,14 @@
   <ItemGroup>
     <ClCompile Include="AppendingAndReading.cpp" />
     <ClCompile Include="BasicModification.cpp" />
+    <ClCompile Include="CustomLogTest.cpp" />
     <ClCompile Include="DCTDecodeFilterTest.cpp" />
     <ClCompile Include="FileURL.cpp" />
+    <ClCompile Include="InputImagesAsStreamsTest.cpp" />
     <ClCompile Include="JpegLibTest.cpp" />
+    <ClCompile Include="LinksTest.cpp" />
     <ClCompile Include="MergePDFPages.cpp" />
+    <ClCompile Include="MergeToPDFForm.cpp" />
     <ClCompile Include="ModifyingExistingFileContent.cpp" />
     <ClCompile Include="PDFComment.cpp" />
     <ClCompile Include="PDFCommentWriter.cpp" />
@@ -219,7 +223,6 @@
     <ClCompile Include="FreeTypeInitializationTest.cpp" />
     <ClCompile Include="TrueTypeTest.cpp" />
     <ClCompile Include="OpenTypeTest.cpp" />
-    <ClCompile Include="MyTest.cpp" />
     <ClCompile Include="PFBStreamTest.cpp" />
     <ClCompile Include="Type1Test.cpp" />
     <ClCompile Include="AppendPagesTest.cpp" />
@@ -235,11 +238,15 @@
   <ItemGroup>
     <ClInclude Include="AppendingAndReading.h" />
     <ClInclude Include="BasicModification.h" />
+    <ClInclude Include="CustomLogTest.h" />
     <ClInclude Include="DCTDecodeFilterTest.h" />
     <ClInclude Include="FileURL.h" />
+    <ClInclude Include="InputImagesAsStreamsTest.h" />
     <ClInclude Include="ITestUnit.h" />
     <ClInclude Include="JpegLibTest.h" />
+    <ClInclude Include="LinksTest.h" />
     <ClInclude Include="MergePDFPages.h" />
+    <ClInclude Include="MergeToPDFForm.h" />
     <ClInclude Include="ModifyingExistingFileContent.h" />
     <ClInclude Include="PDFComment.h" />
     <ClInclude Include="PDFCommentWriter.h" />
@@ -267,7 +274,6 @@
     <ClInclude Include="FreeTypeInitializationTest.h" />
     <ClInclude Include="TrueTypeTest.h" />
     <ClInclude Include="OpenTypeTest.h" />
-    <ClInclude Include="MyTest.h" />
     <ClInclude Include="PFBStreamTest.h" />
     <ClInclude Include="Type1Test.h" />
     <ClInclude Include="AppendPagesTest.h" />
