@@ -525,7 +525,7 @@ std::string FreeTypeFaceWrapper::GetGlyphName(unsigned int inGlyphIndex)
     }
     else
     {
-        if(inGlyphIndex < mFace->num_glyphs)
+        if(inGlyphIndex < (unsigned int)mFace->num_glyphs)
         {
             char buffer[100];
             FT_Get_Glyph_Name(mFace,inGlyphIndex,buffer,100);

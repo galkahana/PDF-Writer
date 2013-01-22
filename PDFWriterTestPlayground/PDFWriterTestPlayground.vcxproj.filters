@@ -52,9 +52,6 @@
     <Filter Include="TestingSystem\Hummus Paths">
       <UniqueIdentifier>{6ac9ed7e-7102-4e0f-9a8d-1f7ff3678b51}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Tests\bugs">
-      <UniqueIdentifier>{1e3315cb-b64c-4f4b-be77-d7fc92c6492e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Tests\DCT Decode">
       <UniqueIdentifier>{36655f11-6c0c-4f7a-9c3b-5c628a626031}</UniqueIdentifier>
     </Filter>
@@ -182,9 +179,6 @@
     </ClCompile>
     <ClCompile Include="PosixPath.cpp">
       <Filter>TestingSystem\Hummus Paths</Filter>
-    </ClCompile>
-    <ClCompile Include="AmitsTest.cpp">
-      <Filter>Tests\bugs</Filter>
     </ClCompile>
     <ClCompile Include="DCTDecodeFilterTest.cpp">
       <Filter>Tests\DCT Decode</Filter>
@@ -325,9 +319,6 @@
     </ClInclude>
     <ClInclude Include="FileURL.h">
       <Filter>TestingSystem\Hummus Paths</Filter>
-    </ClInclude>
-    <ClInclude Include="AmitsTest.h">
-      <Filter>Tests\bugs</Filter>
     </ClInclude>
     <ClInclude Include="DCTDecodeFilterTest.h">
       <Filter>Tests\DCT Decode</Filter>

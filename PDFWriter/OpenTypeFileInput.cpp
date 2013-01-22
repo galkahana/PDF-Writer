@@ -89,8 +89,8 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeFile(IByteReaderWithPosition* inTrueT
 
 		mPrimitivesReader.SetOpenTypeStream(inTrueTypeFile);
 
-        mHeaderOffset = mPrimitivesReader.GetCurrentPosition();
-        mTableOffset = mPrimitivesReader.GetCurrentPosition();
+        mHeaderOffset = (unsigned long)mPrimitivesReader.GetCurrentPosition();
+        mTableOffset = (unsigned long)mPrimitivesReader.GetCurrentPosition();
 
 		status = ReadOpenTypeHeader();
 		if(status != PDFHummus::eSuccess)

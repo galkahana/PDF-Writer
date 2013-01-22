@@ -176,7 +176,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AmitsTest.cpp" />
     <ClCompile Include="AppendingAndReading.cpp" />
     <ClCompile Include="BasicModification.cpp" />
     <ClCompile Include="DCTDecodeFilterTest.cpp" />
@@ -234,7 +233,6 @@
     <ClCompile Include="WindowsPath.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AmitsTest.h" />
     <ClInclude Include="AppendingAndReading.h" />
     <ClInclude Include="BasicModification.h" />
     <ClInclude Include="DCTDecodeFilterTest.h" />
