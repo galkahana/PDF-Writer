@@ -47,6 +47,7 @@ public:
 	PDFUsedFont(FT_Face inInputFace,
 				const std::string& inFontFilePath,
 				const std::string& inAdditionalMetricsFontFilePath,
+                long inFontIndex,
 				ObjectsContext* inObjectsContext);
 	virtual ~PDFUsedFont(void);
 
@@ -81,7 +82,7 @@ public:
 
 private:
 	FreeTypeFaceWrapper mFaceWrapper;
-	IWrittenFont* mWrittenFont;
+    IWrittenFont* mWrittenFont;
 	ObjectsContext* mObjectsContext;
 
 

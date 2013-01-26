@@ -10,6 +10,8 @@
 		490BBEA915657BE900C28250 /* WindowsPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 490BBEA815657BE900C28250 /* WindowsPath.cpp */; };
 		490BBEAB15657C5900C28250 /* FileURL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 490BBEAA15657C5900C28250 /* FileURL.cpp */; };
 		490BBEAF1566B80D00C28250 /* PosixPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 490BBEAE1566B80D00C28250 /* PosixPath.cpp */; };
+		495F847616B40B440047C11A /* TTCTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 495F847416B40B440047C11A /* TTCTest.cpp */; };
+		495F847916B434780047C11A /* DFontTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 495F847716B434780047C11A /* DFontTest.cpp */; };
 		497CD3C215A87136000B3C7C /* BasicModification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 497CD3C115A87136000B3C7C /* BasicModification.cpp */; };
 		497CD3C415A8ABBE000B3C7C /* AppendingAndReading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 497CD3C315A8ABBE000B3C7C /* AppendingAndReading.cpp */; };
 		497EF61A15C1E50E00286CAC /* MergeToPDFForm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 497EF61915C1E50E00286CAC /* MergeToPDFForm.cpp */; };
@@ -83,6 +85,10 @@
 		490BBEAC15657C6A00C28250 /* FileURL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileURL.h; sourceTree = "<group>"; };
 		490BBEAD1566B7FD00C28250 /* PosixPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PosixPath.h; sourceTree = "<group>"; };
 		490BBEAE1566B80D00C28250 /* PosixPath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PosixPath.cpp; sourceTree = "<group>"; };
+		495F847416B40B440047C11A /* TTCTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TTCTest.cpp; sourceTree = "<group>"; };
+		495F847516B40B440047C11A /* TTCTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TTCTest.h; sourceTree = "<group>"; };
+		495F847716B434780047C11A /* DFontTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DFontTest.cpp; sourceTree = "<group>"; };
+		495F847816B434780047C11A /* DFontTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DFontTest.h; sourceTree = "<group>"; };
 		497CD3C015A87124000B3C7C /* BasicModification.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BasicModification.h; sourceTree = "<group>"; };
 		497CD3C115A87136000B3C7C /* BasicModification.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BasicModification.cpp; sourceTree = "<group>"; };
 		497CD3C315A8ABBE000B3C7C /* AppendingAndReading.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppendingAndReading.cpp; sourceTree = "<group>"; };
@@ -214,6 +220,17 @@
 			name = "Hummus Paths";
 			sourceTree = "<group>";
 		};
+		495F846F16B40ACA0047C11A /* Font Packages */ = {
+			isa = PBXGroup;
+			children = (
+				495F847416B40B440047C11A /* TTCTest.cpp */,
+				495F847516B40B440047C11A /* TTCTest.h */,
+				495F847716B434780047C11A /* DFontTest.cpp */,
+				495F847816B434780047C11A /* DFontTest.h */,
+			);
+			name = "Font Packages";
+			sourceTree = "<group>";
+		};
 		497CD3BE15A8710D000B3C7C /* Modification */ = {
 			isa = PBXGroup;
 			children = (
@@ -286,6 +303,7 @@
 		49B70E25155C5F5000C0FD9F /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				495F846F16B40ACA0047C11A /* Font Packages */,
 				498C3F0315C5B3C1009EA9F8 /* DCT decode */,
 				497CD3BE15A8710D000B3C7C /* Modification */,
 				49DB92AD155D149C00C949D7 /* Type1 */,
@@ -604,6 +622,8 @@
 				497EF61A15C1E50E00286CAC /* MergeToPDFForm.cpp in Sources */,
 				498C3F0715C5B67E009EA9F8 /* JpegLibTest.cpp in Sources */,
 				498C3F1615CBF64E009EA9F8 /* DCTDecodeFilterTest.cpp in Sources */,
+				495F847616B40B440047C11A /* TTCTest.cpp in Sources */,
+				495F847916B434780047C11A /* DFontTest.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

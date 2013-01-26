@@ -240,14 +240,14 @@ PDFFormXObject* PDFWriter::CreateFormXObjectFromTIFFFile(const std::string& inTI
 	return mDocumentContext.CreateFormXObjectFromTIFFFile(inTIFFFilePath,inFormXObjectID,inTIFFUsageParameters); 
 }
 
-PDFUsedFont* PDFWriter::GetFontForFile(const std::string& inFontFilePath)
+PDFUsedFont* PDFWriter::GetFontForFile(const std::string& inFontFilePath,long inFontIndex)
 {
-	return mDocumentContext.GetFontForFile(inFontFilePath);
+	return mDocumentContext.GetFontForFile(inFontFilePath,inFontIndex);
 }
 
-PDFUsedFont* PDFWriter::GetFontForFile(const std::string& inFontFilePath,const std::string& inAdditionalMeticsFilePath)
+PDFUsedFont* PDFWriter::GetFontForFile(const std::string& inFontFilePath,const std::string& inAdditionalMeticsFilePath,long inFontIndex)
 {
-	return mDocumentContext.GetFontForFile(inFontFilePath,inAdditionalMeticsFilePath);
+	return mDocumentContext.GetFontForFile(inFontFilePath,inAdditionalMeticsFilePath,inFontIndex);
 }
 
 EStatusCodeAndObjectIDTypeList PDFWriter::CreateFormXObjectsFromPDF(const std::string& inPDFFilePath,

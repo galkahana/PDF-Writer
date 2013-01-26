@@ -26,7 +26,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "617"
          endingLineNumber = "617"
-         landmarkName = "PDFWriter::ModifyPDF(const string&amp; inModifiedFile, EPDFVersion inPDFVersion, const string&amp; inOptionalAlternativeOutputFile, const LogConfiguration&amp; inLogConfiguration, const PDFCreationSettings&amp; inPDFCreationSettings)"
+         landmarkName = "PDFWriter::ModifyPDF(const std::string&amp; inModifiedFile, EPDFVersion inPDFVersion, const std::string&amp; inOptionalAlternativeOutputFile, const LogConfiguration&amp; inLogConfiguration, const PDFCreationSettings&amp; inPDFCreationSettings)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint

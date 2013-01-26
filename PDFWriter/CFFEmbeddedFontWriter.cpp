@@ -140,7 +140,7 @@ EStatusCode CFFEmbeddedFontWriter::CreateCFFSubset(
 			break;
 		}
 
-		status = mOpenTypeInput.ReadOpenTypeFile(mOpenTypeFile.GetInputStream());
+		status = mOpenTypeInput.ReadOpenTypeFile(mOpenTypeFile.GetInputStream(),(unsigned short)inFontInfo.GetFontIndex());
 		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFEmbeddedFontWriter::CreateCFFSubset, failed to read true type file");
@@ -154,7 +154,7 @@ EStatusCode CFFEmbeddedFontWriter::CreateCFFSubset(
 		}
 
 		// see if font may be embedded
-		if(!FSType(mOpenTypeInput.mOS2.fsType).CanEmbed())
+		if(mOpenTypeInput.mOS2Exists && !FSType(mOpenTypeInput.mOS2.fsType).CanEmbed())
 		{
 			outNotEmbedded = true;
 			return PDFHummus::eSuccess;
@@ -474,7 +474,7 @@ EStatusCode CFFEmbeddedFontWriter::WriteTopDictSegment(MyStringBuf& ioTopDictSeg
 	}
 	// check if it had an embedded postscript (which would normally be the FSType implementation).
 	// if not...create one to implement the FSType
-	if(originalTopDictRef.find(scEmbeddedPostscript) == originalTopDictRef.end())
+	if(originalTopDictRef.find(scEmbeddedPostscript) == originalTopDictRef.end() && mOpenTypeInput.mOS2Exists)
 	{
 		// no need for sophistication here...you can consider this as the only string to be added.
 		// so can be sure that its index would be the current count 

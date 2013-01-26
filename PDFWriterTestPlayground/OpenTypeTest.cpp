@@ -87,7 +87,7 @@ EStatusCode OpenTypeTest::TestFont(const TestConfiguration& inTestConfiguration)
 
 		OpenTypeFileInput openTypeReader;
 
-		status = openTypeReader.ReadOpenTypeFile(otfFile.GetInputStream());
+		status = openTypeReader.ReadOpenTypeFile(otfFile.GetInputStream(),0);
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"could not read open type file\n";

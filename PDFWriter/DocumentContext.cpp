@@ -1056,9 +1056,9 @@ PDFFormXObject* DocumentContext::CreateFormXObjectFromTIFFFile(
 }
 
 
-PDFUsedFont* DocumentContext::GetFontForFile(const std::string& inFontFilePath)
+PDFUsedFont* DocumentContext::GetFontForFile(const std::string& inFontFilePath,long inFontIndex)
 {
-	return mUsedFontsRepository.GetFontForFile(inFontFilePath);
+	return mUsedFontsRepository.GetFontForFile(inFontFilePath,inFontIndex);
 }
 
 EStatusCode DocumentContext::WriteUsedFontsDefinitions()
@@ -1066,9 +1066,9 @@ EStatusCode DocumentContext::WriteUsedFontsDefinitions()
 	return mUsedFontsRepository.WriteUsedFontsDefinitions();
 }
 
-PDFUsedFont* DocumentContext::GetFontForFile(const std::string& inFontFilePath,const std::string& inAdditionalMeticsFilePath)
+PDFUsedFont* DocumentContext::GetFontForFile(const std::string& inFontFilePath,const std::string& inAdditionalMeticsFilePath,long inFontIndex)
 {
-	return mUsedFontsRepository.GetFontForFile(inFontFilePath,inAdditionalMeticsFilePath);
+	return mUsedFontsRepository.GetFontForFile(inFontFilePath,inAdditionalMeticsFilePath,inFontIndex);
 }
 
 EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(const std::string& inPDFFilePath,

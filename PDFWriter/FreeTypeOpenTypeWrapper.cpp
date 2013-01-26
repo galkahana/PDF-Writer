@@ -45,7 +45,6 @@ FreeTypeOpenTypeWrapper::FreeTypeOpenTypeWrapper(FT_Face inFace)
 	}
 	else
 	{
-		TRACE_LOG("FreeTypeOpenTypeWrapper::FreeTypeOpenTypeWrapper, Warning, Failed to retrieve OS2 table");
 		mOS2Table = NULL;
 	}
 
@@ -58,7 +57,6 @@ FreeTypeOpenTypeWrapper::FreeTypeOpenTypeWrapper(FT_Face inFace)
 		}
 		else
 		{
-			TRACE_LOG("FreeTypeOpenTypeWrapper::FreeTypeOpenTypeWrapper, Warning, Failed to retrieve PCLT table");
 			mPCLTTable = NULL;
 		}
 	}

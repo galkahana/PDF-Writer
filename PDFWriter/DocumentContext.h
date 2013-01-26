@@ -207,10 +207,10 @@ namespace PDFHummus
 		PDFDocumentCopyingContext* CreatePDFCopyingContext(IByteReaderWithPosition* inPDFStream);
         PDFDocumentCopyingContext* CreatePDFCopyingContext(PDFParser* inPDFParser);
 
-		// Font [Text]
-		PDFUsedFont* GetFontForFile(const std::string& inFontFilePath);
+		// Font [Text] (font index is for multi-font files. for single file fonts, pass 0)
+		PDFUsedFont* GetFontForFile(const std::string& inFontFilePath,long inFontIndex);
 		// second overload is for type 1, when an additional metrics file is available
-		PDFUsedFont* GetFontForFile(const std::string& inFontFilePath,const std::string& inAdditionalMeticsFilePath);
+		PDFUsedFont* GetFontForFile(const std::string& inFontFilePath,const std::string& inAdditionalMeticsFilePath,long inFontIndex);
 
 		// URL should be encoded to be a valid URL, ain't gonna be checking that!
 		PDFHummus::EStatusCode AttachURLLinktoCurrentPage(const std::string& inURL,const PDFRectangle& inLinkClickArea);

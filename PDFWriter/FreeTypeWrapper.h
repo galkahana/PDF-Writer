@@ -40,8 +40,8 @@ public:
 	FreeTypeWrapper(void);
 	~FreeTypeWrapper(void);
 
-	FT_Face NewFace(const std::string& inFilePath,FT_Long inFontIndex = 0);
-	FT_Face NewFace(const std::string& inFilePath,const std::string& inSecondaryFilePath,FT_Long inFontIndex = 0);
+	FT_Face NewFace(const std::string& inFilePath,FT_Long inFontIndex);
+	FT_Face NewFace(const std::string& inFilePath,const std::string& inSecondaryFilePath,FT_Long inFontIndex);
 	FT_Error DoneFace(FT_Face ioFace);
 
 	FT_Library operator->();

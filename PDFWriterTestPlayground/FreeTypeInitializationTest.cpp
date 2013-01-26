@@ -88,9 +88,9 @@ EStatusCode FreeTypeInitializationTest::ShowFaceProperties(FreeTypeWrapper& inFr
 	{
 		cout<<"Start Font\n";
 		if(inSecondaryFontFilePath.length() > 0)
-			face = inFreeType.NewFace(inFontFilePath,inSecondaryFontFilePath);
+			face = inFreeType.NewFace(inFontFilePath,inSecondaryFontFilePath,0);
 		else
-			face = inFreeType.NewFace(inFontFilePath);
+			face = inFreeType.NewFace(inFontFilePath,0);
 		if(!face)
 		{
 			status = PDFHummus::eFailure;
@@ -110,7 +110,7 @@ EStatusCode FreeTypeInitializationTest::ShowGlobalFontProperties(FreeTypeWrapper
 {
 	EStatusCode status = PDFHummus::eSuccess;
 
-	FreeTypeFaceWrapper face(inFace,"",false);
+	FreeTypeFaceWrapper face(inFace,"",0,false);
 
 	cout<<"Font Family = "<<(face->family_name ? face->family_name : "somefont")<<"\n";
 	cout<<"Font Style = "<<(face->style_name ? face->style_name : "somestyle")<<"\n";

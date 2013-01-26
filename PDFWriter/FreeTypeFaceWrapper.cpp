@@ -33,19 +33,21 @@
 
 using namespace PDFHummus;
 
-FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const std::string& inFontFilePath,bool inDoOwn)
+FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const std::string& inFontFilePath,long inFontIndex,bool inDoOwn)
 {
 	mFace = inFace;
 	mFontFilePath = inFontFilePath;
-	SetupFormatSpecificExtender(inFontFilePath,"");
+	mFontIndex = inFontIndex;
+    SetupFormatSpecificExtender(inFontFilePath,"");
 	mDoesOwn = inDoOwn;
     SetupNotDefGlyph();
 }
 
-FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const std::string& inFontFilePath,const std::string& inPFMFilePath, bool inDoOwn)
+FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const std::string& inFontFilePath,const std::string& inPFMFilePath,long inFontIndex, bool inDoOwn)
 {
     mFace = inFace;
 	mFontFilePath = inFontFilePath;
+    mFontIndex = inFontIndex;
 	std::string fileExtension = GetExtension(inPFMFilePath);
 	if(fileExtension == "PFM" || fileExtension ==  "pfm") // just don't bother if it's not PFM
 		SetupFormatSpecificExtender(inFontFilePath,inPFMFilePath);
@@ -622,6 +624,11 @@ IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObj
 const std::string& FreeTypeFaceWrapper::GetFontFilePath()
 {
 	return mFontFilePath;
+}
+
+long FreeTypeFaceWrapper::GetFontIndex()
+{
+    return mFontIndex;
 }
 
 FT_Short FreeTypeFaceWrapper::GetInPDFMeasurements(FT_Short inFontMeasurement)

@@ -198,8 +198,8 @@ public:
 	OpenTypeFileInput(void);
 	~OpenTypeFileInput(void);
 
-	PDFHummus::EStatusCode ReadOpenTypeFile(const std::string& inFontFilePath, unsigned short inFaceIndex = 0);
-	PDFHummus::EStatusCode ReadOpenTypeFile(IByteReaderWithPosition* inTrueTypeFile, unsigned short inFaceIndex = 0);
+	PDFHummus::EStatusCode ReadOpenTypeFile(const std::string& inFontFilePath, unsigned short inFaceIndex);
+	PDFHummus::EStatusCode ReadOpenTypeFile(IByteReaderWithPosition* inTrueTypeFile, unsigned short inFaceIndex);
 
 
 	EOpenTypeInputType GetOpenTypeFontType();
@@ -221,6 +221,9 @@ public:
 	LocaTable mLoca;
 	GlyfTable mGlyf;
 
+    // OS2 (surprise may not always exist. in dfonts for instance)
+    bool mOS2Exists;
+    
 	// not read, but can tell if they are there
 	bool mCVTExists;
 	bool mFPGMExists;

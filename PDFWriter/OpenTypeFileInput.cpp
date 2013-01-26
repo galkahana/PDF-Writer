@@ -127,7 +127,7 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeFile(IByteReaderWithPosition* inTrueT
 			break;
 		}
 
-		status = ReadOS2();
+		status = ReadOS2(); // Note that OS/2 is supposedly required, but some dfonts don't contain it...and it's fine
 		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("OpenTypeFileInput::ReadOpenTypeFile, failed to read os2 table");
@@ -251,7 +251,7 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeSFNT()
         
         if (mFaceIndex >= numFonts) 
         {
-            TRACE_LOG("OpenTypeFileInput::ReadOpenTypeSFNT, face index out of range");
+            TRACE_LOG2("OpenTypeFileInput::ReadOpenTypeSFNT, face index %d out of range. Max font count is %ld",mFaceIndex,numFonts);
             return PDFHummus::eFailure;
         }
         
@@ -344,7 +344,7 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeSFNTFromDfont()
     unsigned short cnt;
     mPrimitivesReader.ReadUSHORT(cnt);
 
-    for (int i = 0; i < cnt; ++i )
+    for (int i = 0; i < cnt + 1; ++i )
     {
         long tag;
         unsigned short subcnt, rpos;
@@ -360,7 +360,7 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeSFNTFromDfont()
             // the map is used to order the references by reference id
             
             std::map<unsigned short, unsigned long> resOffsetsMap;
-
+ 
             for (int j = 0; j < subcnt + 1; ++j )
             {
                 unsigned short res_id, res_name;
@@ -370,12 +370,12 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeSFNTFromDfont()
                 mPrimitivesReader.ReadULONG(temp);
                 mPrimitivesReader.ReadULONG(mbz);
                 res_offset = temp & 0xFFFFFFL;
-                resOffsetsMap.insert(std::pair<unsigned short, unsigned long>(res_id,rdata_pos + res_offset));
+               resOffsetsMap.insert(std::pair<unsigned short, unsigned long>(res_id,rdata_pos + res_offset));
             }
-            
-            int face_index = mFaceIndex, cur_face = 0; // Hack: for now just take the first font
-            unsigned long fontOffset = 0;
-            
+           
+            int face_index = mFaceIndex, cur_face = 0; 
+           unsigned long fontOffset = 0;
+             
             for (std::map<unsigned short, unsigned long>::iterator it=resOffsetsMap.begin();
                  it!=resOffsetsMap.end(); ++it, ++cur_face) {
                 if (cur_face == face_index) {
@@ -389,6 +389,7 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeSFNTFromDfont()
                 TRACE_LOG("OpenTypeFileInput::ReadOpenTypeSFNTFromDfont, could not find face inside resource");
                 return PDFHummus::eFailure;
             }
+            
             
             mHeaderOffset = fontOffset + 4; // skip the size of the resource
             mTableOffset = mHeaderOffset; 
@@ -541,16 +542,19 @@ EStatusCode OpenTypeFileInput::ReadHMtx()
 
 EStatusCode OpenTypeFileInput::ReadOS2()
 {
+	memset(&mOS2,0,sizeof(OS2Table));
+
 	ULongToTableEntryMap::iterator it = mTables.find(GetTag("OS/2"));
 	if(it == mTables.end())
 	{
-		TRACE_LOG("OpenTypeFileInput::ReadOS2, could not find os2 table");
-		return PDFHummus::eFailure;
+        mOS2Exists = false;
+        return eSuccess;
 	}
+    
+    mOS2Exists = false;
 
 	mPrimitivesReader.SetOffset(it->second.Offset);
 
-	memset(&mOS2,0,sizeof(OS2Table));
 
 	mPrimitivesReader.ReadUSHORT(mOS2.Version);
 	mPrimitivesReader.ReadSHORT(mOS2.AvgCharWidth);

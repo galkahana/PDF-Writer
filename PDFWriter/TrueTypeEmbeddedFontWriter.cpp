@@ -120,7 +120,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 			break;
 		}
 
-		status = mTrueTypeInput.ReadOpenTypeFile(mTrueTypeFile.GetInputStream());
+		status = mTrueTypeInput.ReadOpenTypeFile(mTrueTypeFile.GetInputStream(),inFontInfo.GetFontIndex());
 		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to read true type file");
@@ -134,7 +134,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 		}
 	
 		// see if font may be embedded
-		if(!FSType(mTrueTypeInput.mOS2.fsType).CanEmbed())
+		if(mTrueTypeInput.mOS2Exists && !FSType(mTrueTypeInput.mOS2.fsType).CanEmbed())
 		{
 			outNotEmbedded = true;
 			return PDFHummus::eSuccess;
@@ -236,12 +236,15 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 			break;	
 		}
 
-		status = WriteOS2();
-		if(status != PDFHummus::eSuccess)
-		{
-			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to write os2 table");
-			break;	
-		}
+        if(mTrueTypeInput.mOS2Exists)
+        {
+            status = WriteOS2();
+            if(status != PDFHummus::eSuccess)
+            {
+                TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to write os2 table");
+                break;
+            }
+        }
 
 		status = WriteCMAP();
 		if(status != PDFHummus::eSuccess)
@@ -374,7 +377,8 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteTrueTypeHeader()
 	WriteEmptyTableEntry("loca",mLOCAEntryWritingOffset);
 	WriteEmptyTableEntry("maxp",mMAXPEntryWritingOffset);
 	WriteEmptyTableEntry("name",mNAMEEntryWritingOffset);
-	WriteEmptyTableEntry("OS/2",mOS2EntryWritingOffset);
+    if(mTrueTypeInput.mOS2Exists)
+        WriteEmptyTableEntry("OS/2",mOS2EntryWritingOffset);
 	if(mTrueTypeInput.mPREPExists)
 		WriteEmptyTableEntry("prep",mPREPEntryWritingOffset);
 

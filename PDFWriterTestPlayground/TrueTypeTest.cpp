@@ -51,7 +51,7 @@ EStatusCode TrueTypeTest::Run(const TestConfiguration& inTestConfiguration)
 
 		OpenTypeFileInput trueTypeReader;
 
-		status = trueTypeReader.ReadOpenTypeFile(ttfFile.GetInputStream());
+		status = trueTypeReader.ReadOpenTypeFile(ttfFile.GetInputStream(),0);
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"could not read true type file\n";
