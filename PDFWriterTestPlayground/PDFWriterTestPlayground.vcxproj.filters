@@ -64,6 +64,9 @@
     <Filter Include="Tests\PDFs\CustomStreamsIO">
       <UniqueIdentifier>{847b8432-7229-4916-9076-f9639ebe8772}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tests\Font Packages">
+      <UniqueIdentifier>{337e38ac-be9d-4d6d-a749-46d9c6839b6f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PDFWriterTestPlayground.cpp">
@@ -213,6 +216,12 @@
     <ClCompile Include="InputImagesAsStreamsTest.cpp">
       <Filter>Tests\PDFs\CustomStreamsIO</Filter>
     </ClCompile>
+    <ClCompile Include="DFontTest.cpp">
+      <Filter>Tests\Font Packages</Filter>
+    </ClCompile>
+    <ClCompile Include="TTCTest.cpp">
+      <Filter>Tests\Font Packages</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ITestUnit.h">
@@ -361,6 +370,12 @@
     </ClInclude>
     <ClInclude Include="InputImagesAsStreamsTest.h">
       <Filter>Tests\PDFs\CustomStreamsIO</Filter>
+    </ClInclude>
+    <ClInclude Include="DFontTest.h">
+      <Filter>Tests\Font Packages</Filter>
+    </ClInclude>
+    <ClInclude Include="TTCTest.h">
+      <Filter>Tests\Font Packages</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
