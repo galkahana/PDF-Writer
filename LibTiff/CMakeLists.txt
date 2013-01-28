@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6) 
-
+project(LibTiff)
 add_library (LibTiff 
 #sources
 tif_aux.c
