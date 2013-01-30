@@ -251,6 +251,11 @@ EStatusCode Type1Input::ReadFontInfoDictionary()
 	EStatusCode status = PDFHummus::eSuccess;
 	BoolAndString token;
 
+  // initialize some values to defaults
+  mFontInfoDictionary.ItalicAngle = 0.0;
+  mFontInfoDictionary.UnderlinePosition = 0.0;
+  mFontInfoDictionary.UnderlineThickness = 0.0;
+  
 	while(mPFBDecoder.NotEnded() && PDFHummus::eSuccess == status)
 	{
 		token = mPFBDecoder.GetNextToken();
