@@ -70,6 +70,9 @@
 
 
 */
+
+#ifndef NO_TIFF
+
 #include "TIFFImageHandler.h"
 #include "Trace.h"
 #include "ObjectsContext.h"
@@ -3506,3 +3509,5 @@ PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFStream(	IByteReaderWi
 
 	return imageFormXObject;
 }
+
+#endif

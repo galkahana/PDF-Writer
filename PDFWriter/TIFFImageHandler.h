@@ -72,6 +72,8 @@
 */
 #pragma once
 
+#ifndef NO_TIFF
+
 #include "EStatusCode.h"
 #include "ObjectsBasicTypes.h"
 #include "TIFFUsageParameters.h"
@@ -191,3 +193,5 @@ private:
 	void AddImagesProcsets(PDFImageXObject* inImageXObject);
 	void WriteIndexedCSForBiLevelColorMap();
 };
+
+#endif

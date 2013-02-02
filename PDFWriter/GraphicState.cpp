@@ -45,6 +45,7 @@ GraphicState& GraphicState::operator=(const GraphicState& inGraphicState)
 	mFont = inGraphicState.mFont;
 	mFontSize = inGraphicState.mFontSize;
 	mPlacedFontName = inGraphicState.mPlacedFontName;
+    mPlacedFontSize = inGraphicState.mPlacedFontSize;
 	return *this;
 
 }

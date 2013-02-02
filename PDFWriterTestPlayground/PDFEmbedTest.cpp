@@ -45,7 +45,7 @@ EStatusCode PDFEmbedTest::Run(const TestConfiguration& inTestConfiguration)
 
 	do
 	{
-		status = pdfWriter.StartPDF("C:\\PDFLibTests\\PDFEmbedTest.PDF",ePDFVersion13);
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"PDFEmbedTest.pdf"),ePDFVersion13);
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";

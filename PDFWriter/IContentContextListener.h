@@ -1,8 +1,8 @@
 /*
- Source File : JpegLibTest
+ Source File : IContentContextListener.h
  
  
- Copyright 2012 Gal Kahana PDFWriter
+ Copyright 2013 Gal Kahana PDFWriter
  
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -18,21 +18,23 @@
  
  
  */
-
 #pragma once
 
-#ifndef NO_DCT
+/*
+    listener for content context events. right now we're just having a save/restore notification
+    so you can implement your graphic stack implementation
+ */
 
-#include "ITestUnit.h"
+class AbstractContentContext;
 
-class JpegLibTest : public ITestUnit
+class IContentContextListener
 {
 public:
-	JpegLibTest(void);
-	virtual ~JpegLibTest(void);
+    virtual ~IContentContextListener(){}
     
-	virtual PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration);
+    virtual void OnQ(AbstractContentContext* inContext) = 0;
+    virtual void Onq(AbstractContentContext* inContext) = 0;
     
 };
 
-#endif
+

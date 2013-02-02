@@ -18,6 +18,9 @@
 
    
 */
+
+#ifndef NO_TIFF
+
 #include "TIFFImageTest.h"
 #include "TestsRunner.h"
 #include "PDFWriter.h"
@@ -239,3 +242,5 @@ EStatusCode TIFFImageTest::AddPageForTIFF(PDFWriter& inpdfWriter, const string& 
 }
 
 ADD_CATEGORIZED_TEST(TIFFImageTest,"PDF Images")
+
+#endif

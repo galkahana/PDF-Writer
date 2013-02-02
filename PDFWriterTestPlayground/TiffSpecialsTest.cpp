@@ -18,6 +18,9 @@
 
    
 */
+
+#ifndef NO_TIFF
+
 #include "TiffSpecialsTest.h"
 #include "TestsRunner.h"
 #include "PDFWriter.h"
@@ -337,3 +340,6 @@ EStatusCode TiffSpecialsTest::CreateBiLevelGrayScales(const TestConfiguration& i
 }
 
 ADD_CATEGORIZED_TEST(TiffSpecialsTest,"PDF Images")
+
+
+#endif

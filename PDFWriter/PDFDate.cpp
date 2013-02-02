@@ -219,8 +219,8 @@ void PDFDate::SetToCurrentTime()
 		else
 		{
 			UTC = timeZoneSecondsDifference > 0 ? eLater:eEarlier;
-			HourFromUTC = labs(timeZoneSecondsDifference) / 3600;
-			MinuteFromUTC = (labs(timeZoneSecondsDifference) - (labs(timeZoneSecondsDifference) / 3600)*3600) / 60;
+			HourFromUTC = (int)(labs(timeZoneSecondsDifference) / 3600);
+			MinuteFromUTC = (int)((labs(timeZoneSecondsDifference) - (labs(timeZoneSecondsDifference) / 3600)*3600) / 60);
 		}
 	}
 	else

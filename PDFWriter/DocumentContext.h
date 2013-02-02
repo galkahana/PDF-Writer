@@ -143,6 +143,7 @@ namespace PDFHummus
 		PDFFormXObject* CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inFormXObjectID);
 
 		// TIFF
+#ifndef NO_TIFF
 		PDFFormXObject* CreateFormXObjectFromTIFFFile(	const std::string& inTIFFFilePath,
 														const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 		PDFFormXObject* CreateFormXObjectFromTIFFStream(IByteReaderWithPosition* inTIFFStream,
@@ -153,7 +154,7 @@ namespace PDFHummus
 		PDFFormXObject* CreateFormXObjectFromTIFFStream(	IByteReaderWithPosition* inTIFFStream,
 														ObjectIDType inFormXObjectID,
 														const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
-		
+#endif
 		// PDF
 		// CreateFormXObjectsFromPDF is for using input PDF pages as objects in one page or more. you can used the returned IDs to place the 
 		// created form xobjects
@@ -262,7 +263,9 @@ namespace PDFHummus
 		std::string mOutputFilePath;
 		IDocumentContextExtenderSet mExtenders;
 		JPEGImageHandler mJPEGImageHandler;
+#ifndef NO_TIFF
 		TIFFImageHandler mTIFFImageHandler;
+#endif
 		PDFDocumentHandler mPDFDocumentHandler;
 		UsedFontsRepository mUsedFontsRepository;
 		ObjectIDTypeSet mAnnotations;

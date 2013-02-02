@@ -92,6 +92,7 @@ EStatusCode InputImagesAsStreamsTest::Run(const TestConfiguration& inTestConfigu
 		}
 
 		// TIFF image
+#ifndef NO_TIFF
 		page = new PDFPage();
 		page->SetMediaBox(PDFRectangle(0,0,595,842));
 
@@ -101,8 +102,8 @@ EStatusCode InputImagesAsStreamsTest::Run(const TestConfiguration& inTestConfigu
 		{
 			cout<<"failed to open TIFF image in"<<"TestMaterials/images/tiff/FLAG_T24.TIF"<<"\n";
 			break;
-		}
-
+	
+        }
 		formXObject = pdfWriter.CreateFormXObjectFromTIFFStream(tiffFile.GetInputStream());
 		if(!formXObject)
 		{
@@ -112,7 +113,6 @@ EStatusCode InputImagesAsStreamsTest::Run(const TestConfiguration& inTestConfigu
 		}
 
 		tiffFile.CloseFile();
-
 		pageContentContext = pdfWriter.StartPageContentContext(page);
 		if(NULL == pageContentContext)
 		{
@@ -141,6 +141,7 @@ EStatusCode InputImagesAsStreamsTest::Run(const TestConfiguration& inTestConfigu
 			cout<<"failed to write page, for TIFF\n";
 			break;
 		}
+#endif
 
 		// PDF
 		

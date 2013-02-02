@@ -20,6 +20,8 @@
  */
 #pragma once
 
+#ifndef NO_DCT
+
 #include "EStatusCode.h"
 #include "IByteReader.h"
 #include "jpeglib.h"
@@ -62,3 +64,5 @@ private:
     IOBasicTypes::Byte* CopySamplesArrayToBuffer(IOBasicTypes::Byte* inBuffer, IOBasicTypes::LongBufferSizeType inBufferSize);
 
 };
+
+#endif

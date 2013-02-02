@@ -91,11 +91,13 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run(const TestConfiguration& inT
 		pageContentContext->Do(page->GetResourcesDictionary().AddFormXObjectMapping(formXObjectID));
 		pageContentContext->Q();
 
+#ifndef NO_TIFF
 		pageContentContext->q();
 		ObjectIDType tiffFormXObjectID = pdfWriter.GetObjectsContext().GetInDirectObjectsRegistry().AllocateNewObjectID();
 		pageContentContext->Do(page->GetResourcesDictionary().AddFormXObjectMapping(tiffFormXObjectID));
 		pageContentContext->Q();
-
+#endif
+        
 		pageContentContext->q();
 		pageContentContext->cm(1,0,0,1,100,500);
 		ObjectIDType simpleFormXObjectID = pdfWriter.GetObjectsContext().GetInDirectObjectsRegistry().AllocateNewObjectID();
@@ -136,6 +138,7 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run(const TestConfiguration& inT
 			break;
 		}
 
+#ifndef NO_TIFF
 		PDFFormXObject* tiffFormXObject = pdfWriter.CreateFormXObjectFromTIFFFile(
             RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/images/tiff/jim___ah.tif"),tiffFormXObjectID);
 		if(!tiffFormXObject)
@@ -144,11 +147,11 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run(const TestConfiguration& inT
 			status = PDFHummus::eFailure;
 			break;
 		}
-
+		delete tiffFormXObject;
+#endif
 
 		delete imageXObject;
 		delete formXObject;
-		delete tiffFormXObject;
 
 
 		// define an xobject form to draw a 200X100 points red rectangle

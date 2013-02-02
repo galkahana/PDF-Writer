@@ -20,6 +20,9 @@
  */
 
 #include "DCTDecodeFilterTest.h"
+
+#ifndef NO_DCT
+
 #include "TestsRunner.h"
 #include "Trace.h"
 #include "PDFWriter.h"
@@ -321,6 +324,12 @@ EStatusCode DCTDecodeFilterTest::ModifyImageObject(PDFWriter* inWriter,ObjectIDT
         
         // copy source stream through read filter
         IByteReader* sourceImage = modifiedFileContext->GetSourceDocumentParser()->StartReadingFromStream(imageStream.GetPtr());
+        if(!sourceImage)
+        {
+            cout<<"failed to read DCT stream\n";
+            status = eFailure;
+            break;
+        }
         
         OutputStreamTraits traits(newImageStream->GetWriteStream());
         status = traits.CopyToOutputStream(sourceImage);
@@ -346,3 +355,5 @@ EStatusCode DCTDecodeFilterTest::ModifyImageObject(PDFWriter* inWriter,ObjectIDT
 
 
 ADD_CATEGORIZED_TEST(DCTDecodeFilterTest,"DCTDecode")
+
+#endif

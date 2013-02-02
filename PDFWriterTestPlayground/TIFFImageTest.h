@@ -19,6 +19,10 @@
    
 */
 #pragma once
+
+
+#ifndef NO_TIFF
+
 #include "ITestUnit.h"
 
 class PDFWriter;
@@ -34,3 +38,5 @@ public:
 private:
 	PDFHummus::EStatusCode AddPageForTIFF(PDFWriter& inPDFWriter, const string& inTiffFilePath);
 };
+
+#endif

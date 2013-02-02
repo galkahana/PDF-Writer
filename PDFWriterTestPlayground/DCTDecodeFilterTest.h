@@ -20,6 +20,9 @@
  */
 
 #pragma once
+
+#ifndef NO_DCT
+
 #include "ITestUnit.h"
 #include "ObjectsBasicTypes.h"
 
@@ -40,3 +43,5 @@ private:
     ObjectIDType FindDCTDecodedImageObject(PDFParser* inParser);
     PDFHummus::EStatusCode ModifyImageObject(PDFWriter* inWriter,ObjectIDType inImageObject);
 };
+
+#endif

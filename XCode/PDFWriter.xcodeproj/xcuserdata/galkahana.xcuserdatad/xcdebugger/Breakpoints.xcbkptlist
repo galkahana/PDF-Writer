@@ -72,19 +72,6 @@
          shouldBeEnabled = "Yes"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
-         filePath = "../PDFWriter/InputDCTDecodeStream.cpp"
-         timestampString = "365719225.735342"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "64"
-         endingLineNumber = "64"
-         landmarkName = "HummusFillInputBuffer (j_decompress_ptr cinfo)"
-         landmarkType = "7">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
          filePath = "../PDFWriter/Type1ToType2Converter.cpp"
          timestampString = "379793948.969854"
          startingColumnNumber = "9223372036854775807"

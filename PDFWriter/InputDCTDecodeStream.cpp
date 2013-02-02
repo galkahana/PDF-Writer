@@ -21,6 +21,8 @@
 #include "InputDCTDecodeStream.h"
 #include "Trace.h"
 
+#ifndef NO_DCT
+
 using namespace IOBasicTypes;
 using namespace PDFHummus;
 
@@ -287,3 +289,5 @@ bool InputDCTDecodeStream::NotEnded()
         return (!mIsHeaderRead || (mCurrentSampleRow < mTotalSampleRows) || (mJPGState.output_scanline < mJPGState.output_height));
     
 }
+
+#endif

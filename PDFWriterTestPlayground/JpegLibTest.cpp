@@ -18,6 +18,7 @@
  
  
  */
+#ifndef NO_DCT
 
 #include "JpegLibTest.h"
 #include "TestsRunner.h"
@@ -195,3 +196,5 @@ EStatusCode JpegLibTest::Run(const TestConfiguration& inTestConfiguration)
 
 
 ADD_CATEGORIZED_TEST(JpegLibTest,"DCTDecode")
+
+#endif

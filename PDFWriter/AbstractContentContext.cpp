@@ -28,7 +28,7 @@
 #include "OutputStringBufferStream.h"
 #include "SafeBufferMacrosDefs.h"
 #include "OutputStreamTraits.h"
-
+#include "IContentContextListener.h"
 
 using namespace PDFHummus;
 
@@ -222,6 +222,10 @@ void AbstractContentContext::q()
 
 	mPrimitiveWriter.WriteKeyword("q");
 	mGraphicStack.Push();
+    
+    IContentContextListenerSet::iterator it = mListeners.begin();
+    for(; it != mListeners.end();++it)
+        (*it)->Onq(this);
 }
 
 EStatusCode AbstractContentContext::Q()
@@ -230,7 +234,13 @@ EStatusCode AbstractContentContext::Q()
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteKeyword("Q");
-	return mGraphicStack.Pop();
+	EStatusCode status = mGraphicStack.Pop();
+    
+    IContentContextListenerSet::iterator it = mListeners.begin();
+    for(; it != mListeners.end();++it)
+        (*it)->OnQ(this);
+    
+    return status;
 }
 
 void AbstractContentContext::cm(double inA, double inB, double inC, double inD, double inE, double inF)
@@ -1043,4 +1053,14 @@ void AbstractContentContext::WriteFreeCode(IByteReader* inFreeCodeSource)
     
     OutputStreamTraits traits(mPrimitiveWriter.GetWritingStream());
     traits.CopyToOutputStream(inFreeCodeSource);
+}
+
+void AbstractContentContext::AddContentContextListener(IContentContextListener* inExtender)
+{
+    mListeners.insert(inExtender);
+}
+
+void AbstractContentContext::RemoveContentContextListener(IContentContextListener* inExtender)
+{
+    mListeners.erase(inExtender);
 }

@@ -19,6 +19,9 @@
    
 */
 #pragma once
+
+#ifndef NO_TIFF
+
 #include "ITestUnit.h"
 
 class PDFWriter;
@@ -37,3 +40,5 @@ private:
 	PDFHummus::EStatusCode CreateBlackAndWhiteMaskImage(const TestConfiguration& inTestConfiguration,PDFWriter& inPDFWriter);
 	PDFHummus::EStatusCode CreateBiLevelGrayScales(const TestConfiguration& inTestConfiguration,PDFWriter& inPDFWriter);
 };
+
+#endif

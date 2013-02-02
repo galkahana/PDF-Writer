@@ -906,6 +906,9 @@
 		499D53F1155C59EF006F6E28 /* WrittenFontTrueType.h in Headers */ = {isa = PBXBuildFile; fileRef = 499D52D1155C59EF006F6E28 /* WrittenFontTrueType.h */; };
 		499D53F2155C59EF006F6E28 /* XObjectContentContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 499D52D2155C59EF006F6E28 /* XObjectContentContext.cpp */; };
 		499D53F3155C59EF006F6E28 /* XObjectContentContext.h in Headers */ = {isa = PBXBuildFile; fileRef = 499D52D3155C59EF006F6E28 /* XObjectContentContext.h */; };
+		49EF594A16BD372300531FD7 /* IContentContextListener.h in Headers */ = {isa = PBXBuildFile; fileRef = 49EF594916BD372300531FD7 /* IContentContextListener.h */; };
+		49EF594B16BD372300531FD7 /* IContentContextListener.h in Headers */ = {isa = PBXBuildFile; fileRef = 49EF594916BD372300531FD7 /* IContentContextListener.h */; };
+		49EF594C16BD372300531FD7 /* IContentContextListener.h in Headers */ = {isa = PBXBuildFile; fileRef = 49EF594916BD372300531FD7 /* IContentContextListener.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -1228,6 +1231,7 @@
 		499D52D1155C59EF006F6E28 /* WrittenFontTrueType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WrittenFontTrueType.h; path = ../PDFWriter/WrittenFontTrueType.h; sourceTree = "<group>"; };
 		499D52D2155C59EF006F6E28 /* XObjectContentContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XObjectContentContext.cpp; path = ../PDFWriter/XObjectContentContext.cpp; sourceTree = "<group>"; };
 		499D52D3155C59EF006F6E28 /* XObjectContentContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XObjectContentContext.h; path = ../PDFWriter/XObjectContentContext.h; sourceTree = "<group>"; };
+		49EF594916BD372300531FD7 /* IContentContextListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IContentContextListener.h; path = ../PDFWriter/IContentContextListener.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1329,6 +1333,7 @@
 				499D51BC155C59EF006F6E28 /* CatalogInformation.h */,
 				4988223415C094DD007F9448 /* IResourceWritingTask.h */,
 				4988223215C094CE007F9448 /* IFormEndWritingTask.h */,
+				49EF594916BD372300531FD7 /* IContentContextListener.h */,
 			);
 			name = "Document Context Level";
 			sourceTree = "<group>";
@@ -1372,7 +1377,6 @@
 				498709FA155D01A000C9B080 /* Basics */,
 				498709FB155D01B600C9B080 /* Encoding */,
 				498709FC155D01C000C9B080 /* Encryption */,
-				498709FD155D01CA00C9B080 /* IO */,
 				498709FE155D01D100C9B080 /* Patterns */,
 				498709FF155D01DB00C9B080 /* Timers */,
 				49870A00155D01E200C9B080 /* Trace & Log */,
@@ -1413,6 +1417,7 @@
 		498709FC155D01C000C9B080 /* Encryption */ = {
 			isa = PBXGroup;
 			children = (
+				498709FD155D01CA00C9B080 /* IO */,
 				499D5236155C59EF006F6E28 /* MD5Generator.cpp */,
 				499D5237155C59EF006F6E28 /* MD5Generator.h */,
 			);
@@ -1967,6 +1972,7 @@
 				4947D75116986CFE008971EF /* InputCharStringDecodeStream.h in Headers */,
 				4947D75216986CFE008971EF /* CharStringType1Interpreter.h in Headers */,
 				4947D75316986CFF008971EF /* CharStringType1Tracer.h in Headers */,
+				49EF594B16BD372300531FD7 /* IContentContextListener.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2143,6 +2149,7 @@
 				4947D87916986D62008971EF /* InputCharStringDecodeStream.h in Headers */,
 				4947D87A16986D62008971EF /* CharStringType1Interpreter.h in Headers */,
 				4947D87B16986D62008971EF /* CharStringType1Tracer.h in Headers */,
+				49EF594C16BD372300531FD7 /* IContentContextListener.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2319,6 +2326,7 @@
 				497EF62215C41ABB00286CAC /* PDFPageInput.h in Headers */,
 				497EF62815C4553D00286CAC /* ParsedPrimitiveHelper.h in Headers */,
 				498C3F1115CB0A5D009EA9F8 /* InputDCTDecodeStream.h in Headers */,
+				49EF594A16BD372300531FD7 /* IContentContextListener.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2384,7 +2392,7 @@
 		499C420515498FFA00149723 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0450;
+				LastUpgradeCheck = 0460;
 				ORGANIZATIONNAME = "gal.kahana@hotmail.com";
 			};
 			buildConfigurationList = 499C420815498FFA00149723 /* Build configuration list for PBXProject "PDFWriter" */;
@@ -2836,11 +2844,7 @@
 				DSTROOT = /tmp/PDFWriter_iphonesimulator.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
-				HEADER_SEARCH_PATHS = (
-					../LibTiff,
-					../LibJpeg,
-					../FreeType/Include,
-				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2860,11 +2864,7 @@
 				DSTROOT = /tmp/PDFWriter_iphonesimulator.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
-				HEADER_SEARCH_PATHS = (
-					../LibTiff,
-					../LibJpeg,
-					../FreeType/Include,
-				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2885,11 +2885,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				DSTROOT = /tmp/PDFWriter_iphoneos.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				HEADER_SEARCH_PATHS = (
-					../LibTiff,
-					../LibJpeg,
-					../FreeType/Include,
-				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2909,11 +2905,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				DSTROOT = /tmp/PDFWriter_iphoneos.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				HEADER_SEARCH_PATHS = (
-					../LibTiff,
-					../LibJpeg,
-					../FreeType/Include,
-				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2927,6 +2919,7 @@
 		4947D87E16986DE2008971EF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 			};
@@ -2935,6 +2928,7 @@
 		4947D87F16986DE2008971EF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 			};
@@ -2946,15 +2940,16 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
+				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -2962,9 +2957,9 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"/usr/X11/include/**",
-					"/usr/X11/include/freetype2/**",
-					"../LibTiff/**",
+					../FreeType/include,
+					../LibJpeg,
+					../LibTiff,
 				);
 				LIBRARY_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
@@ -2980,19 +2975,24 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"/usr/X11/include/**",
-					"/usr/X11/include/freetype2/**",
-					"../LibTiff/**",
+					../FreeType/include,
+					../LibJpeg,
+					../LibTiff,
 				);
 				LIBRARY_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
@@ -3006,11 +3006,9 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_PREFIX = lib;
-				HEADER_SEARCH_PATHS = (
-					"../LibTiff/**",
-					"../LibJpeg/**",
-					"../FreeType/Include/**",
-				);
+				GCC_PREPROCESSOR_DEFINITIONS = "";
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "";
+				HEADER_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -3020,11 +3018,9 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_PREFIX = lib;
-				HEADER_SEARCH_PATHS = (
-					"../LibTiff/**",
-					"../LibJpeg/**",
-					"../FreeType/Include/**",
-				);
+				GCC_PREPROCESSOR_DEFINITIONS = "";
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "";
+				HEADER_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

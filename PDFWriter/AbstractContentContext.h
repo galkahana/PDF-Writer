@@ -38,6 +38,7 @@
 #include "GlyphUnicodeMapping.h"
 #include <string>
 #include <list>
+#include <set>
 
 
 
@@ -47,6 +48,7 @@ class ResourcesDictionary;
 class PDFImageXObject;
 class ITextCommand;
 class IByteReader;
+class IContentContextListener;
 
 template <typename T>
 struct SomethingOrDouble
@@ -65,6 +67,9 @@ typedef SomethingOrDouble<GlyphUnicodeMappingList> GlyphUnicodeMappingListOrDoub
 
 typedef std::list<StringOrDouble> StringOrDoubleList;
 typedef std::list<GlyphUnicodeMappingListOrDouble> GlyphUnicodeMappingListOrDoubleList;
+
+typedef std::set<IContentContextListener*> IContentContextListenerSet;
+
 
 class AbstractContentContext
 {
@@ -217,6 +222,11 @@ public:
     void WriteFreeCode(const std::string& inFreeCode);
     void WriteFreeCode(IByteReader* inFreeCodeSource);
 
+    // Extensibility
+    void AddContentContextListener(IContentContextListener* inExtender);
+    void RemoveContentContextListener(IContentContextListener* inExtender);
+
+    
 protected:
 
 	// Derived classes should use this method to update the stream for writing
@@ -232,6 +242,9 @@ private:
 
 	// graphic stack to monitor high-level graphic usage (now - fonts)
 	GraphicStateStack mGraphicStack;
+    
+    // listeners
+    IContentContextListenerSet mListeners;
 
 	void AssertProcsetAvailable(const std::string& inProcsetName);
 
