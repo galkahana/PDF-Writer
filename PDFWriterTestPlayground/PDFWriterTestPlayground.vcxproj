@@ -180,6 +180,7 @@
     <ClCompile Include="BasicModification.cpp" />
     <ClCompile Include="CustomLogTest.cpp" />
     <ClCompile Include="DCTDecodeFilterTest.cpp" />
+    <ClCompile Include="DFontTest.cpp" />
     <ClCompile Include="FileURL.cpp" />
     <ClCompile Include="InputImagesAsStreamsTest.cpp" />
     <ClCompile Include="JpegLibTest.cpp" />
@@ -207,6 +208,7 @@
     </ClCompile>
     <ClCompile Include="PDFDateTest.cpp" />
     <ClCompile Include="PDFTextStringTest.cpp" />
+    <ClCompile Include="TTCTest.cpp" />
     <ClCompile Include="UppercaseSequanceTest.cpp" />
     <ClCompile Include="ImagesAndFormsForwardReferenceTest.cpp" />
     <ClCompile Include="JPGImageTest.cpp" />
@@ -240,6 +242,7 @@
     <ClInclude Include="BasicModification.h" />
     <ClInclude Include="CustomLogTest.h" />
     <ClInclude Include="DCTDecodeFilterTest.h" />
+    <ClInclude Include="DFontTest.h" />
     <ClInclude Include="FileURL.h" />
     <ClInclude Include="InputImagesAsStreamsTest.h" />
     <ClInclude Include="ITestUnit.h" />
@@ -258,6 +261,7 @@
     <ClInclude Include="OutputFileStreamTest.h" />
     <ClInclude Include="PDFDateTest.h" />
     <ClInclude Include="PDFTextStringTest.h" />
+    <ClInclude Include="TTCTest.h" />
     <ClInclude Include="UppercaseSequanceTest.h" />
     <ClInclude Include="ImagesAndFormsForwardReferenceTest.h" />
     <ClInclude Include="JPGImageTest.h" />

@@ -120,7 +120,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 			break;
 		}
 
-		status = mTrueTypeInput.ReadOpenTypeFile(mTrueTypeFile.GetInputStream(),inFontInfo.GetFontIndex());
+		status = mTrueTypeInput.ReadOpenTypeFile(mTrueTypeFile.GetInputStream(),(unsigned short)inFontInfo.GetFontIndex());
 		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to read true type file");
