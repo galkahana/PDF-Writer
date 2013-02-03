@@ -1,8 +1,18 @@
 project(PDFWriter)
 include_directories (${Zlib_SOURCE_DIR})
-include_directories (${LibJpeg_SOURCE_DIR})
 
-include_directories (${LibTiff_SOURCE_DIR})  
+if(NOT NO_DCT)
+	include_directories (${LibJpeg_SOURCE_DIR})
+else(NOT NO_DCT)
+	add_definitions(-DNO_DCT=1)
+endif(NOT NO_DCT)
+
+if(NOT NO_TIFF)
+	include_directories (${LibTiff_SOURCE_DIR})  
+else(NOT NO_TIFF)
+	add_definitions(-DNO_TIFF=1)
+endif(NOT NO_TIFF)
+
 include_directories (${FreeType_SOURCE_DIR}/include) 
 add_library (PDFWriter 
 #sources
@@ -180,6 +190,7 @@ IByteReader.h
 IByteReaderWithPosition.h
 IByteWriter.h
 IByteWriterWithPosition.h
+IContentContextListener.h
 IDescendentFontWriter.h
 IDocumentContextExtender.h
 IFontDescriptorHelper.h
