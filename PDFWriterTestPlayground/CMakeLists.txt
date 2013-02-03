@@ -144,3 +144,7 @@ target_link_libraries (PDFWriterTestPlayground Zlib)
 if(NOT NO_TIFF)
 	target_link_libraries (PDFWriterTestPlayground LibTiff)
 endif(NOT NO_TIFF)
+
+if(APPLE)
+	set(CMAKE_EXE_LINKER_FLAGS "-framework CoreFoundation")
+endif(APPLE)

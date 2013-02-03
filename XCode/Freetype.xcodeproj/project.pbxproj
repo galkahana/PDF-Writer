@@ -199,55 +199,55 @@
 
 /* Begin PBXFileReference section */
 		492079FD169E1A2E00E2D9FC /* libFreetype.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libFreetype.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		49207A0C169E1B5600E2D9FC /* ft2build.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ft2build.h; path = "../freetype-2.4.11/include/ft2build.h"; sourceTree = "<group>"; };
-		49207A0E169E1B7C00E2D9FC /* ftconfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ftconfig.h; path = "../freetype-2.4.11/include/freetype/config/ftconfig.h"; sourceTree = "<group>"; };
-		49207A0F169E1B7C00E2D9FC /* ftheader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ftheader.h; path = "../freetype-2.4.11/include/freetype/config/ftheader.h"; sourceTree = "<group>"; };
-		49207A10169E1B7C00E2D9FC /* ftmodule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ftmodule.h; path = "../freetype-2.4.11/include/freetype/config/ftmodule.h"; sourceTree = "<group>"; };
-		49207A11169E1B7C00E2D9FC /* ftoption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ftoption.h; path = "../freetype-2.4.11/include/freetype/config/ftoption.h"; sourceTree = "<group>"; };
-		49207A12169E1B7C00E2D9FC /* ftstdlib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ftstdlib.h; path = "../freetype-2.4.11/include/freetype/config/ftstdlib.h"; sourceTree = "<group>"; };
-		49207A19169E1BD200E2D9FC /* autofit.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = autofit.c; path = "../freetype-2.4.11/src/autofit/autofit.c"; sourceTree = "<group>"; };
-		49207A1B169E1BE200E2D9FC /* bdf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = bdf.c; path = "../freetype-2.4.11/src/bdf/bdf.c"; sourceTree = "<group>"; };
-		49207A1D169E1BEC00E2D9FC /* cff.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = cff.c; path = "../freetype-2.4.11/src/cff/cff.c"; sourceTree = "<group>"; };
-		49207A1F169E1C0300E2D9FC /* ftbase.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftbase.c; path = "../freetype-2.4.11/src/base/ftbase.c"; sourceTree = "<group>"; };
-		49207A20169E1C0300E2D9FC /* ftbitmap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftbitmap.c; path = "../freetype-2.4.11/src/base/ftbitmap.c"; sourceTree = "<group>"; };
-		49207A23169E1C1400E2D9FC /* ftcache.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftcache.c; path = "../freetype-2.4.11/src/cache/ftcache.c"; sourceTree = "<group>"; };
-		49207A25169E1C2D00E2D9FC /* ftcid.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftcid.c; path = "../freetype-2.4.11/src/base/ftcid.c"; sourceTree = "<group>"; };
-		49207A27169E1C8300E2D9FC /* ftdebug.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftdebug.c; path = "../freetype-2.4.11/src/base/ftdebug.c"; sourceTree = "<group>"; };
-		49207A28169E1C8300E2D9FC /* ftfstype.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftfstype.c; path = "../freetype-2.4.11/src/base/ftfstype.c"; sourceTree = "<group>"; };
-		49207A29169E1C8300E2D9FC /* ftgasp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftgasp.c; path = "../freetype-2.4.11/src/base/ftgasp.c"; sourceTree = "<group>"; };
-		49207A2A169E1C8300E2D9FC /* ftglyph.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftglyph.c; path = "../freetype-2.4.11/src/base/ftglyph.c"; sourceTree = "<group>"; };
-		49207A2B169E1C8300E2D9FC /* ftinit.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftinit.c; path = "../freetype-2.4.11/src/base/ftinit.c"; sourceTree = "<group>"; };
-		49207A33169E1CA300E2D9FC /* ftfstype.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftfstype.c; path = "../freetype-2.4.11/src/base/ftfstype.c"; sourceTree = "<group>"; };
-		49207A35169E1CBB00E2D9FC /* ftgzip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftgzip.c; path = "../freetype-2.4.11/src/gzip/ftgzip.c"; sourceTree = "<group>"; };
-		49207A37169E1CCD00E2D9FC /* ftlzw.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftlzw.c; path = "../freetype-2.4.11/src/lzw/ftlzw.c"; sourceTree = "<group>"; };
-		49207A39169E1CEB00E2D9FC /* ftstroke.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftstroke.c; path = "../freetype-2.4.11/src/base/ftstroke.c"; sourceTree = "<group>"; };
-		49207A3B169E1CFB00E2D9FC /* ftsystem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftsystem.c; path = "../freetype-2.4.11/src/base/ftsystem.c"; sourceTree = "<group>"; };
-		49207A3D169E1D1E00E2D9FC /* smooth.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = smooth.c; path = "../freetype-2.4.11/src/smooth/smooth.c"; sourceTree = "<group>"; };
-		49207A40169E1DB100E2D9FC /* ftbbox.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftbbox.c; path = "../freetype-2.4.11/src/base/ftbbox.c"; sourceTree = "<group>"; };
-		49207A41169E1DB100E2D9FC /* ftgxval.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftgxval.c; path = "../freetype-2.4.11/src/base/ftgxval.c"; sourceTree = "<group>"; };
-		49207A42169E1DB100E2D9FC /* ftlcdfil.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftlcdfil.c; path = "../freetype-2.4.11/src/base/ftlcdfil.c"; sourceTree = "<group>"; };
-		49207A43169E1DB100E2D9FC /* ftmm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftmm.c; path = "../freetype-2.4.11/src/base/ftmm.c"; sourceTree = "<group>"; };
-		49207A44169E1DB100E2D9FC /* ftotval.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftotval.c; path = "../freetype-2.4.11/src/base/ftotval.c"; sourceTree = "<group>"; };
-		49207A45169E1DB100E2D9FC /* ftpatent.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftpatent.c; path = "../freetype-2.4.11/src/base/ftpatent.c"; sourceTree = "<group>"; };
-		49207A46169E1DB100E2D9FC /* ftpfr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftpfr.c; path = "../freetype-2.4.11/src/base/ftpfr.c"; sourceTree = "<group>"; };
-		49207A47169E1DB100E2D9FC /* ftsynth.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftsynth.c; path = "../freetype-2.4.11/src/base/ftsynth.c"; sourceTree = "<group>"; };
-		49207A48169E1DB100E2D9FC /* fttype1.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = fttype1.c; path = "../freetype-2.4.11/src/base/fttype1.c"; sourceTree = "<group>"; };
-		49207A49169E1DB100E2D9FC /* ftwinfnt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftwinfnt.c; path = "../freetype-2.4.11/src/base/ftwinfnt.c"; sourceTree = "<group>"; };
-		49207A4A169E1DB100E2D9FC /* ftxf86.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftxf86.c; path = "../freetype-2.4.11/src/base/ftxf86.c"; sourceTree = "<group>"; };
-		49207A56169E1DC100E2D9FC /* otvalid.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = otvalid.c; path = "../freetype-2.4.11/src/otvalid/otvalid.c"; sourceTree = "<group>"; };
-		49207A58169E1DCD00E2D9FC /* pcf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pcf.c; path = "../freetype-2.4.11/src/pcf/pcf.c"; sourceTree = "<group>"; };
-		49207A5A169E1DD600E2D9FC /* pfr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pfr.c; path = "../freetype-2.4.11/src/pfr/pfr.c"; sourceTree = "<group>"; };
-		49207A5C169E1DEB00E2D9FC /* psaux.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = psaux.c; path = "../freetype-2.4.11/src/psaux/psaux.c"; sourceTree = "<group>"; };
-		49207A5E169E1DF200E2D9FC /* pshinter.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pshinter.c; path = "../freetype-2.4.11/src/pshinter/pshinter.c"; sourceTree = "<group>"; };
-		49207A60169E1E0300E2D9FC /* psmodule.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = psmodule.c; path = "../freetype-2.4.11/src/psnames/psmodule.c"; sourceTree = "<group>"; };
-		49207A61169E1E0300E2D9FC /* psnames.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = psnames.c; path = "../freetype-2.4.11/src/psnames/psnames.c"; sourceTree = "<group>"; };
-		49207A64169E1E1000E2D9FC /* raster.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = raster.c; path = "../freetype-2.4.11/src/raster/raster.c"; sourceTree = "<group>"; };
-		49207A66169E1E2200E2D9FC /* sfnt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = sfnt.c; path = "../freetype-2.4.11/src/sfnt/sfnt.c"; sourceTree = "<group>"; };
-		49207A68169E1E2F00E2D9FC /* truetype.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = truetype.c; path = "../freetype-2.4.11/src/truetype/truetype.c"; sourceTree = "<group>"; };
-		49207A6A169E1E3C00E2D9FC /* type1.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = type1.c; path = "../freetype-2.4.11/src/type1/type1.c"; sourceTree = "<group>"; };
-		49207A6C169E1E5100E2D9FC /* type42.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = type42.c; path = "../freetype-2.4.11/src/type42/type42.c"; sourceTree = "<group>"; };
-		49207A6E169E1E5900E2D9FC /* type1cid.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = type1cid.c; path = "../freetype-2.4.11/src/cid/type1cid.c"; sourceTree = "<group>"; };
-		49207A70169E1E6700E2D9FC /* winfnt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = winfnt.c; path = "../freetype-2.4.11/src/winfonts/winfnt.c"; sourceTree = "<group>"; };
+		49207A0C169E1B5600E2D9FC /* ft2build.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ft2build.h; path = ../FreeType/include/ft2build.h; sourceTree = "<group>"; };
+		49207A0E169E1B7C00E2D9FC /* ftconfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ftconfig.h; path = ../FreeType/include/freetype/config/ftconfig.h; sourceTree = "<group>"; };
+		49207A0F169E1B7C00E2D9FC /* ftheader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ftheader.h; path = ../FreeType/include/freetype/config/ftheader.h; sourceTree = "<group>"; };
+		49207A10169E1B7C00E2D9FC /* ftmodule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ftmodule.h; path = ../FreeType/include/freetype/config/ftmodule.h; sourceTree = "<group>"; };
+		49207A11169E1B7C00E2D9FC /* ftoption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ftoption.h; path = ../FreeType/include/freetype/config/ftoption.h; sourceTree = "<group>"; };
+		49207A12169E1B7C00E2D9FC /* ftstdlib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ftstdlib.h; path = ../FreeType/include/freetype/config/ftstdlib.h; sourceTree = "<group>"; };
+		49207A19169E1BD200E2D9FC /* autofit.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = autofit.c; path = ../FreeType/src/autofit/autofit.c; sourceTree = "<group>"; };
+		49207A1B169E1BE200E2D9FC /* bdf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = bdf.c; path = ../FreeType/src/bdf/bdf.c; sourceTree = "<group>"; };
+		49207A1D169E1BEC00E2D9FC /* cff.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = cff.c; path = ../FreeType/src/cff/cff.c; sourceTree = "<group>"; };
+		49207A1F169E1C0300E2D9FC /* ftbase.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftbase.c; path = ../FreeType/src/base/ftbase.c; sourceTree = "<group>"; };
+		49207A20169E1C0300E2D9FC /* ftbitmap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftbitmap.c; path = ../FreeType/src/base/ftbitmap.c; sourceTree = "<group>"; };
+		49207A23169E1C1400E2D9FC /* ftcache.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftcache.c; path = ../FreeType/src/cache/ftcache.c; sourceTree = "<group>"; };
+		49207A25169E1C2D00E2D9FC /* ftcid.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftcid.c; path = ../FreeType/src/base/ftcid.c; sourceTree = "<group>"; };
+		49207A27169E1C8300E2D9FC /* ftdebug.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftdebug.c; path = ../FreeType/src/base/ftdebug.c; sourceTree = "<group>"; };
+		49207A28169E1C8300E2D9FC /* ftfstype.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftfstype.c; path = ../FreeType/src/base/ftfstype.c; sourceTree = "<group>"; };
+		49207A29169E1C8300E2D9FC /* ftgasp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftgasp.c; path = ../FreeType/src/base/ftgasp.c; sourceTree = "<group>"; };
+		49207A2A169E1C8300E2D9FC /* ftglyph.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftglyph.c; path = ../FreeType/src/base/ftglyph.c; sourceTree = "<group>"; };
+		49207A2B169E1C8300E2D9FC /* ftinit.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftinit.c; path = ../FreeType/src/base/ftinit.c; sourceTree = "<group>"; };
+		49207A33169E1CA300E2D9FC /* ftfstype.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftfstype.c; path = ../FreeType/src/base/ftfstype.c; sourceTree = "<group>"; };
+		49207A35169E1CBB00E2D9FC /* ftgzip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftgzip.c; path = ../FreeType/src/gzip/ftgzip.c; sourceTree = "<group>"; };
+		49207A37169E1CCD00E2D9FC /* ftlzw.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftlzw.c; path = ../FreeType/src/lzw/ftlzw.c; sourceTree = "<group>"; };
+		49207A39169E1CEB00E2D9FC /* ftstroke.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftstroke.c; path = ../FreeType/src/base/ftstroke.c; sourceTree = "<group>"; };
+		49207A3B169E1CFB00E2D9FC /* ftsystem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftsystem.c; path = ../FreeType/src/base/ftsystem.c; sourceTree = "<group>"; };
+		49207A3D169E1D1E00E2D9FC /* smooth.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = smooth.c; path = ../FreeType/src/smooth/smooth.c; sourceTree = "<group>"; };
+		49207A40169E1DB100E2D9FC /* ftbbox.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftbbox.c; path = ../FreeType/src/base/ftbbox.c; sourceTree = "<group>"; };
+		49207A41169E1DB100E2D9FC /* ftgxval.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftgxval.c; path = ../FreeType/src/base/ftgxval.c; sourceTree = "<group>"; };
+		49207A42169E1DB100E2D9FC /* ftlcdfil.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftlcdfil.c; path = ../FreeType/src/base/ftlcdfil.c; sourceTree = "<group>"; };
+		49207A43169E1DB100E2D9FC /* ftmm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftmm.c; path = ../FreeType/src/base/ftmm.c; sourceTree = "<group>"; };
+		49207A44169E1DB100E2D9FC /* ftotval.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftotval.c; path = ../FreeType/src/base/ftotval.c; sourceTree = "<group>"; };
+		49207A45169E1DB100E2D9FC /* ftpatent.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftpatent.c; path = ../FreeType/src/base/ftpatent.c; sourceTree = "<group>"; };
+		49207A46169E1DB100E2D9FC /* ftpfr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftpfr.c; path = ../FreeType/src/base/ftpfr.c; sourceTree = "<group>"; };
+		49207A47169E1DB100E2D9FC /* ftsynth.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftsynth.c; path = ../FreeType/src/base/ftsynth.c; sourceTree = "<group>"; };
+		49207A48169E1DB100E2D9FC /* fttype1.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = fttype1.c; path = ../FreeType/src/base/fttype1.c; sourceTree = "<group>"; };
+		49207A49169E1DB100E2D9FC /* ftwinfnt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftwinfnt.c; path = ../FreeType/src/base/ftwinfnt.c; sourceTree = "<group>"; };
+		49207A4A169E1DB100E2D9FC /* ftxf86.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftxf86.c; path = ../FreeType/src/base/ftxf86.c; sourceTree = "<group>"; };
+		49207A56169E1DC100E2D9FC /* otvalid.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = otvalid.c; path = ../FreeType/src/otvalid/otvalid.c; sourceTree = "<group>"; };
+		49207A58169E1DCD00E2D9FC /* pcf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pcf.c; path = ../FreeType/src/pcf/pcf.c; sourceTree = "<group>"; };
+		49207A5A169E1DD600E2D9FC /* pfr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pfr.c; path = ../FreeType/src/pfr/pfr.c; sourceTree = "<group>"; };
+		49207A5C169E1DEB00E2D9FC /* psaux.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = psaux.c; path = ../FreeType/src/psaux/psaux.c; sourceTree = "<group>"; };
+		49207A5E169E1DF200E2D9FC /* pshinter.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pshinter.c; path = ../FreeType/src/pshinter/pshinter.c; sourceTree = "<group>"; };
+		49207A60169E1E0300E2D9FC /* psmodule.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = psmodule.c; path = ../FreeType/src/psnames/psmodule.c; sourceTree = "<group>"; };
+		49207A61169E1E0300E2D9FC /* psnames.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = psnames.c; path = ../FreeType/src/psnames/psnames.c; sourceTree = "<group>"; };
+		49207A64169E1E1000E2D9FC /* raster.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = raster.c; path = ../FreeType/src/raster/raster.c; sourceTree = "<group>"; };
+		49207A66169E1E2200E2D9FC /* sfnt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = sfnt.c; path = ../FreeType/src/sfnt/sfnt.c; sourceTree = "<group>"; };
+		49207A68169E1E2F00E2D9FC /* truetype.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = truetype.c; path = ../FreeType/src/truetype/truetype.c; sourceTree = "<group>"; };
+		49207A6A169E1E3C00E2D9FC /* type1.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = type1.c; path = ../FreeType/src/type1/type1.c; sourceTree = "<group>"; };
+		49207A6C169E1E5100E2D9FC /* type42.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = type42.c; path = ../FreeType/src/type42/type42.c; sourceTree = "<group>"; };
+		49207A6E169E1E5900E2D9FC /* type1cid.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = type1cid.c; path = ../FreeType/src/cid/type1cid.c; sourceTree = "<group>"; };
+		49207A70169E1E6700E2D9FC /* winfnt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = winfnt.c; path = ../FreeType/src/winfonts/winfnt.c; sourceTree = "<group>"; };
 		49207A72169E1EAF00E2D9FC /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		49207A74169E1EB700E2D9FC /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		49207A81169E26AC00E2D9FC /* libFreetype-iphoneos.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libFreetype-iphoneos.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -698,7 +698,7 @@
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "../freetype-2.4.11/include/freetype/config/ftoption.h";
+				GCC_PREFIX_HEADER = ../FreeType/include/freetype/config/ftoption.h;
 				GCC_PREPROCESSOR_DEFINITIONS = "FT2_BUILD_LIBRARY=1";
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -706,13 +706,13 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"../freetype-2.4.11/include",
-					"../freetype-2.4.11/include/freetype",
-					"../freetype-2.4.11/include/freetype/config",
-					"../freetype-2.4.11/build/mac",
-					"../freetype-2.4.11/src",
-					"../freetype-2.4.11/include/freetype/internal",
-					"../freetype-2.4.11/include/freetype/internal/services",
+					../FreeType/include,
+					../FreeType/include/freetype,
+					../FreeType/include/freetype/config,
+					../FreeType/build/mac,
+					../FreeType/src,
+					../FreeType/include/freetype/internal,
+					../FreeType/include/freetype/internal/services,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				ONLY_ACTIVE_ARCH = YES;
@@ -736,20 +736,20 @@
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "../freetype-2.4.11/include/freetype/config/ftoption.h";
+				GCC_PREFIX_HEADER = ../FreeType/include/freetype/config/ftoption.h;
 				GCC_PREPROCESSOR_DEFINITIONS = "FT2_BUILD_LIBRARY=1";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"../freetype-2.4.11/include",
-					"../freetype-2.4.11/include/freetype",
-					"../freetype-2.4.11/include/freetype/config",
-					"../freetype-2.4.11/build/mac",
-					"../freetype-2.4.11/src",
-					"../freetype-2.4.11/include/freetype/internal",
-					"../freetype-2.4.11/include/freetype/internal/services",
+					../FreeType/include,
+					../FreeType/include/freetype,
+					../FreeType/include/freetype/config,
+					../FreeType/build/mac,
+					../FreeType/src,
+					../FreeType/include/freetype/internal,
+					../FreeType/include/freetype/internal/services,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = YES;
@@ -889,6 +889,7 @@
 				49207A8D169E26AC00E2D9FC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		49207AD8169E288A00E2D9FC /* Build configuration list for PBXNativeTarget "Freetype-iphonesimulator" */ = {
 			isa = XCConfigurationList;
@@ -897,6 +898,7 @@
 				49207ADA169E288A00E2D9FC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		49207B10169E296400E2D9FC /* Build configuration list for PBXAggregateTarget "FreetypeIOSUniversal" */ = {
 			isa = XCConfigurationList;
@@ -905,6 +907,7 @@
 				49207B12169E296400E2D9FC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
