@@ -68,7 +68,7 @@ void DocumentContext::SetObjectsContext(ObjectsContext* inObjectsContext)
 	mJPEGImageHandler.SetOperationsContexts(this,mObjectsContext);
 	mPDFDocumentHandler.SetOperationsContexts(this,mObjectsContext);
 	mUsedFontsRepository.SetObjectsContext(mObjectsContext);
-#ifndef NO_TIFF
+#ifndef PDFHUMMUS_NO_TIFF
 	mTIFFImageHandler.SetOperationsContexts(this,mObjectsContext);
 #endif
 }
@@ -1032,7 +1032,7 @@ JPEGImageHandler& DocumentContext::GetJPEGImageHandler()
 	return mJPEGImageHandler;
 }
 
-#ifndef NO_TIFF
+#ifndef PDFHUMMUS_NO_TIFF
 PDFFormXObject* DocumentContext::CreateFormXObjectFromTIFFFile(	const std::string& inTIFFFilePath,
 																const TIFFUsageParameters& inTIFFUsageParameters)
 {
@@ -1768,7 +1768,7 @@ void DocumentContext::Cleanup()
 	mTrailerInformation.Reset();
 	mCatalogInformation.Reset();
 	mJPEGImageHandler.Reset();
-#ifndef NO_TIFF
+#ifndef PDFHUMMUS_NO_TIFF
 	mTIFFImageHandler.Reset();
 #endif
 	mUsedFontsRepository.Reset();

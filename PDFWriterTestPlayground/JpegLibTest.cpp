@@ -18,7 +18,7 @@
  
  
  */
-#ifndef NO_DCT
+#ifndef PDFHUMMUS_NO_DCT
 
 #include "JpegLibTest.h"
 #include "TestsRunner.h"

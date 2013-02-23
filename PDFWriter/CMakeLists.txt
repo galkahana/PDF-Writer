@@ -1,17 +1,17 @@
 project(PDFWriter)
 include_directories (${Zlib_SOURCE_DIR})
 
-if(NOT NO_DCT)
+if(NOT PDFHUMMUS_NO_DCT)
 	include_directories (${LibJpeg_SOURCE_DIR})
-else(NOT NO_DCT)
-	add_definitions(-DNO_DCT=1)
-endif(NOT NO_DCT)
+else(NOT PDFHUMMUS_NO_DCT)
+	add_definitions(-DPDFHUMMUS_NO_DCT=1)
+endif(NOT PDFHUMMUS_NO_DCT)
 
-if(NOT NO_TIFF)
+if(NOT PDFHUMMUS_NO_TIFF)
 	include_directories (${LibTiff_SOURCE_DIR})  
-else(NOT NO_TIFF)
-	add_definitions(-DNO_TIFF=1)
-endif(NOT NO_TIFF)
+else(NOT PDFHUMMUS_NO_TIFF)
+	add_definitions(-DPDFHUMMUS_NO_TIFF=1)
+endif(NOT PDFHUMMUS_NO_TIFF)
 
 include_directories (${FreeType_SOURCE_DIR}/include) 
 add_library (PDFWriter 
@@ -315,4 +315,374 @@ WrittenFontRepresentation.h
 WrittenFontTrueType.h
 XObjectContentContext.h
 
+)
+
+# groups definitions
+source_group("Document Context Level" FILES
+AbstractContentContext.cpp
+AbstractContentContext.h
+CatalogInformation.cpp
+CatalogInformation.h
+DocumentContext.cpp
+DocumentContext.h
+DocumentContextExtenderAdapter.h
+GlyphUnicodeMapping.h
+GraphicState.cpp
+GraphicState.h
+GraphicStateStack.cpp
+GraphicStateStack.h
+IDocumentContextExtender.h
+IFormEndWritingTask.h
+InfoDictionary.cpp
+InfoDictionary.h
+IResourceWritingTask.h
+PageContentContext.cpp
+PageContentContext.h
+PageTree.cpp
+PageTree.h
+PDFFormXObject.cpp
+PDFFormXObject.h
+PDFImageXObject.cpp
+PDFImageXObject.h
+PDFPage.cpp
+PDFPage.h
+ProcsetResourcesConstants.h
+ResourcesDictionary.cpp
+ResourcesDictionary.h
+TrailerInformation.cpp
+TrailerInformation.h
+XObjectContentContext.cpp
+XObjectContentContext.h
+IContentContextListener.h
+)
+
+source_group(Images\\JPG FILES
+JPEGImageHandler.cpp
+JPEGImageHandler.h
+JPEGImageInformation.cpp
+JPEGImageInformation.h
+JPEGImageParser.cpp
+JPEGImageParser.h
+)
+
+
+source_group(Images\\TIFF FILES
+TIFFImageHandler.cpp
+TIFFImageHandler.h
+TiffUsageParameters.cpp
+TiffUsageParameters.h
+)
+
+source_group(Infrastructure\\Basics FILES
+BetweenIncluding.h
+CMYKRGBColor.cpp
+CMYKRGBColor.h
+EPDFVersion.h
+EStatusCode.h
+MyStringBuf.h
+SafeBufferMacrosDefs.h
+)
+
+source_group(Infrastructure\\Encoding FILES
+Ascii7Encoding.cpp
+Ascii7Encoding.h
+PDFDocEncoding.cpp
+PDFDocEncoding.h
+StandardEncoding.cpp
+StandardEncoding.h
+UnicodeString.cpp
+UnicodeString.h
+WinAnsiEncoding.cpp
+WinAnsiEncoding.h
+)
+
+source_group(Infrastructure\\Encryption FILES
+MD5Generator.cpp
+MD5Generator.h
+)
+
+source_group(Infrastructure\\IO FILES
+AdapterIByteReaderWithPositionToIReadPositionProvider.h
+IByteReader.h
+IByteReaderWithPosition.h
+IByteWriter.h
+IByteWriterWithPosition.h
+InputAscii85DecodeStream.cpp
+InputAscii85DecodeStream.h
+InputBufferedStream.cpp
+InputBufferedStream.h
+InputByteArrayStream.cpp
+InputByteArrayStream.h
+InputDCTDecodeStream.cpp
+InputDCTDecodeStream.h
+InputFile.cpp
+InputFile.h
+InputFileStream.cpp
+InputFileStream.h
+InputFlateDecodeStream.cpp
+InputFlateDecodeStream.h
+InputLimitedStream.cpp
+InputLimitedStream.h
+InputStreamSkipperStream.cpp
+InputStreamSkipperStream.h
+InputStringBufferStream.cpp
+InputStringBufferStream.h
+IOBasicTypes.h
+IReadPositionProvider.h
+OutputBufferedStream.cpp
+OutputBufferedStream.h
+OutputFile.cpp
+OutputFile.h
+OutputFileStream.cpp
+OutputFileStream.h
+OutputFlateDecodeStream.cpp
+OutputFlateDecodeStream.h
+OutputFlateEncodeStream.cpp
+OutputFlateEncodeStream.h
+OutputStreamTraits.cpp
+OutputStreamTraits.h
+OutputStringBufferStream.cpp
+OutputStringBufferStream.h
+)
+
+source_group(Infrastructure\\Patterns FILES
+BoxingBase.h
+ContainerIterator.h
+MapIterator.h
+RefCountObject.cpp
+RefCountObject.h
+RefCountPtr.h
+Singleton.h
+SingleValueContainerIterator.h
+)
+
+source_group(Infrastructure\\Timers FILES
+Timer.cpp
+Timer.h
+TimersRegistry.cpp
+TimersRegistry.h
+)
+
+source_group("Infrastructure\\Trace & Log" FILES
+Log.cpp
+Log.h
+Trace.cpp
+Trace.h
+)
+
+source_group("Objects Context Level" FILES
+DictionaryContext.cpp
+DictionaryContext.h
+ETokenSeparator.h
+IndirectObjectsReferenceRegistry.cpp
+IndirectObjectsReferenceRegistry.h
+IObjectsContextExtender.h
+ObjectsBasicTypes.h
+ObjectsContext.cpp
+ObjectsContext.h
+ObjectsContextExtenderAdapter.h
+PDFDate.cpp
+PDFDate.h
+PDFRectangle.cpp
+PDFRectangle.h
+PDFStream.cpp
+PDFStream.h
+PDFTextString.cpp
+PDFTextString.h
+PrimitiveObjectsWriter.cpp
+PrimitiveObjectsWriter.h
+UppercaseSequance.cpp
+UppercaseSequance.h
+)
+
+source_group("PDF Embedding\\Parsed Objects" FILES
+PDFArray.cpp
+PDFArray.h
+PDFBoolean.cpp
+PDFBoolean.h
+PDFDictionary.cpp
+PDFDictionary.h
+PDFHexString.cpp
+PDFHexString.h
+PDFIndirectObjectReference.cpp
+PDFIndirectObjectReference.h
+PDFInteger.cpp
+PDFInteger.h
+PDFLiteralString.cpp
+PDFLiteralString.h
+PDFName.cpp
+PDFName.h
+PDFNull.cpp
+PDFNull.h
+PDFObject.cpp
+PDFObject.h
+PDFObjectCast.h
+PDFReal.cpp
+PDFReal.h
+PDFStreamInput.cpp
+PDFStreamInput.h
+PDFSymbol.cpp
+PDFSymbol.h
+)
+
+source_group("PDF Embedding\\Parsed objects Helpers" FILES
+ParsedPrimitiveHelper.cpp
+ParsedPrimitiveHelper.h
+PDFPageInput.cpp
+PDFPageInput.h
+)
+
+source_group("PDF Embedding\\PredictionFilters" FILES
+InputPredictorPNGAverageStream.cpp
+InputPredictorPNGAverageStream.h
+InputPredictorPNGNoneStream.cpp
+InputPredictorPNGNoneStream.h
+InputPredictorPNGOptimumStream.cpp
+InputPredictorPNGOptimumStream.h
+InputPredictorPNGPaethStream.cpp
+InputPredictorPNGPaethStream.h
+InputPredictorPNGSubStream.cpp
+InputPredictorPNGSubStream.h
+InputPredictorPNGUpStream.cpp
+InputPredictorPNGUpStream.h
+InputPredictorTIFFSubStream.cpp
+InputPredictorTIFFSubStream.h
+)
+
+source_group("PDF Embedding" FILES
+IPDFParserExtender.h
+PDFDocumentCopyingContext.cpp
+PDFDocumentCopyingContext.h
+PDFDocumentHandler.cpp
+PDFDocumentHandler.h
+PDFEmbedParameterTypes.h
+PDFObjectParser.cpp
+PDFObjectParser.h
+PDFPageMergingHelper.cpp
+PDFPageMergingHelper.h
+PDFParser.cpp
+PDFParser.h
+PDFParserTokenizer.cpp
+PDFParserTokenizer.h
+)
+
+source_group("State Serialization" FILES
+StateReader.cpp
+StateReader.h
+StateWriter.cpp
+StateWriter.h
+)
+
+source_group(Text\\CFF FILES
+CFFEmbeddedFontWriter.cpp
+CFFEmbeddedFontWriter.h
+CFFFileInput.cpp
+CFFFileInput.h
+CFFPrimitiveReader.cpp
+CFFPrimitiveReader.h
+CFFPrimitiveWriter.cpp
+CFFPrimitiveWriter.h
+CharStringDefinitions.h
+CharStringType2Flattener.cpp
+CharStringType2Flattener.h
+CharStringType2Interpreter.cpp
+CharStringType2Interpreter.h
+CharStringType2Tracer.cpp
+CharStringType2Tracer.h
+DictOperand.h
+IType2InterpreterImplementation.h
+)
+
+source_group(Text\\FreeType FILES
+EFontStretch.h
+FreeTypeFaceWrapper.cpp
+FreeTypeFaceWrapper.h
+FreeTypeOpenTypeWrapper.cpp
+FreeTypeOpenTypeWrapper.h
+FreeTypeType1Wrapper.cpp
+FreeTypeType1Wrapper.h
+FreeTypeWrapper.cpp
+FreeTypeWrapper.h
+IFreeTypeFaceExtender.h
+PFMFileReader.cpp
+PFMFileReader.h
+)
+
+source_group(Text\\OpenType FILES
+OpenTypeFileInput.cpp
+OpenTypeFileInput.h
+OpenTypePrimitiveReader.cpp
+OpenTypePrimitiveReader.h
+)
+
+source_group("Text\\PDF Font Definitions" FILES
+AbstractWrittenFont.cpp
+AbstractWrittenFont.h
+ANSIFontWriter.cpp
+ANSIFontWriter.h
+CFFANSIFontWriter.cpp
+CFFANSIFontWriter.h
+CFFDescendentFontWriter.cpp
+CFFDescendentFontWriter.h
+CIDFontWriter.cpp
+CIDFontWriter.h
+DescendentFontWriter.cpp
+DescendentFontWriter.h
+FontDescriptorWriter.cpp
+FontDescriptorWriter.h
+FSType.h
+IANSIFontWriterHelper.h
+IDescendentFontWriter.h
+IFontDescriptorHelper.h
+IWrittenFont.h
+TrueTypeANSIFontWriter.cpp
+TrueTypeANSIFontWriter.h
+TrueTypeDescendentFontWriter.cpp
+TrueTypeDescendentFontWriter.h
+WrittenFontCFF.cpp
+WrittenFontCFF.h
+WrittenFontRepresentation.h
+WrittenFontTrueType.cpp
+WrittenFontTrueType.h
+)
+
+source_group(Text\\TrueType FILES
+TrueTypeEmbeddedFontWriter.cpp
+TrueTypeEmbeddedFontWriter.h
+TrueTypePrimitiveWriter.cpp
+TrueTypePrimitiveWriter.h
+)
+
+source_group(Text\\Type1 FILES
+CharStringType1Interpreter.cpp
+CharStringType1Interpreter.h
+CharStringType1Tracer.cpp
+CharStringType1Tracer.h
+InputCharStringDecodeStream.cpp
+InputCharStringDecodeStream.h
+InputPFBDecodeStream.cpp
+InputPFBDecodeStream.h
+IType1InterpreterImplementation.h
+PSBool.cpp
+PSBool.h
+Type1Input.cpp
+Type1Input.h
+Type1ToCFFEmbeddedFontWriter.cpp
+Type1ToCFFEmbeddedFontWriter.h
+Type1ToType2Converter.cpp
+Type1ToType2Converter.h
+Type2CharStringWriter.cpp
+Type2CharStringWriter.h
+)
+
+source_group(Text FILES
+PDFUsedFont.cpp
+PDFUsedFont.h
+UsedFontsRepository.cpp
+UsedFontsRepository.h
+)
+
+source_group(Main FILES
+PDFWriter.cpp
+PDFWriter.h
 )

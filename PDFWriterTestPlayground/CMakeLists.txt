@@ -110,40 +110,202 @@ Type1Test.h
 UppercaseSequanceTest.h
 )
 
-if(NO_DCT)
-	add_definitions(-DNO_DCT=1)
-endif(NO_DCT)
-if(NO_TIFF)
-	add_definitions(-DNO_TIFF=1)
-endif(NO_TIFF)
+source_group(Main FILES
+PDFWriterTestPlayground.cpp
+)
+
+source_group("TestingSystem\\Hummus Paths" FILES
+FileURL.cpp
+FileURL.h
+PosixPath.cpp
+PosixPath.h
+WindowsPath.cpp
+WindowsPath.h
+)
+
+source_group(TestingSystem FILES
+ITestUnit.h
+TestsRunner.cpp
+TestsRunner.h
+)
+
+source_group(Tests\\Basics FILES
+TimerTest.cpp
+TimerTest.h
+)
+
+source_group(Tests\\CFF FILES
+OpenTypeTest.cpp
+OpenTypeTest.h
+)
+
+source_group("Tests\\DCT Decode" FILES
+DCTDecodeFilterTest.cpp
+DCTDecodeFilterTest.h
+JpegLibTest.cpp
+JpegLibTest.h
+)
+
+source_group("Tests\\Font Packages" FILES
+DFontTest.cpp
+DFontTest.h
+TTCTest.cpp
+TTCTest.h
+)
+
+source_group("Tests\\Free Type" FILES
+FreeTypeInitializationTest.cpp
+FreeTypeInitializationTest.h
+)
+
+source_group(Tests\\IO FILES
+BufferedOutputStreamTest.cpp
+BufferedOutputStreamTest.h
+FlateEncryptionTest.cpp
+FlateEncryptionTest.h
+LogTest.cpp
+LogTest.h
+OutputFileStreamTest.cpp
+OutputFileStreamTest.h
+)
+
+source_group("Tests\\Modification\\Comments Infrastructure" FILES
+PDFComment.cpp
+PDFComment.h
+PDFCommentWriter.cpp
+PDFCommentWriter.h
+)
+
+source_group("Tests\\Modification" FILES
+AppendingAndReading.cpp
+AppendingAndReading.h
+BasicModification.cpp
+BasicModification.h
+ModifyingExistingFileContent.cpp
+ModifyingExistingFileContent.h
+)
+
+source_group("Tests\\Object Context Level" FILES
+PDFDateTest.cpp
+PDFDateTest.h
+PDFTextStringTest.cpp
+PDFTextStringTest.h
+UppercaseSequanceTest.cpp
+UppercaseSequanceTest.h
+)
+
+source_group(Tests\\Patterns FILES
+BoxingBaseTest.cpp
+BoxingBaseTest.h
+)
+
+source_group(Tests\\PDFEmbedding FILES
+AppendPagesTest.cpp
+AppendPagesTest.h
+AppendSpecialPagesTest.cpp
+AppendSpecialPagesTest.h
+InputFlateDecodeTester.cpp
+InputFlateDecodeTester.h
+MergePDFPages.cpp
+MergePDFPages.h
+MergeToPDFForm.cpp
+MergeToPDFForm.h
+PDFCopyingContextTest.cpp
+PDFCopyingContextTest.h
+PDFEmbedTest.cpp
+PDFEmbedTest.h
+PDFObjectCastTest.cpp
+PDFObjectCastTest.h
+PDFParserTest.cpp
+PDFParserTest.h
+RefCountTest.cpp
+RefCountTest.h
+)
+
+source_group(Tests\\PDFs\\CustomStreamsIO FILES
+CustomLogTest.cpp
+CustomLogTest.h
+InputImagesAsStreamsTest.cpp
+InputImagesAsStreamsTest.h
+)
+
+source_group(Tests\\PDFs\\Generic FILES
+EmptyFileTest.cpp
+EmptyFileTest.h
+EmptyPagesPDF.cpp
+EmptyPagesPDF.h
+FormXObjectTest.cpp
+FormXObjectTest.h
+LinksTest.cpp
+LinksTest.h
+ShutDownRestartTest.cpp
+ShutDownRestartTest.h
+SimpleContentPageTest.cpp
+SimpleContentPageTest.h
+)
+
+source_group("Tests\\PDFs\\Images in PDF" FILES
+ImagesAndFormsForwardReferenceTest.cpp
+ImagesAndFormsForwardReferenceTest.h
+JPGImageTest.cpp
+JPGImageTest.h
+TIFFImageTest.cpp
+TIFFImageTest.h
+TiffSpecialsTest.cpp
+TiffSpecialsTest.h
+)
+
+source_group(Tests\\Text FILES
+SimpleTextUsage.cpp
+SimpleTextUsage.h
+)
+
+source_group(Tests\\TrueType FILES
+TrueTypeTest.cpp
+TrueTypeTest.h
+)
+
+source_group(Tests\\Type1 FILES
+PFBStreamTest.cpp
+PFBStreamTest.h
+Type1Test.cpp
+Type1Test.h
+)
+
+if(PDFHUMMUS_NO_DCT)
+	add_definitions(-DPDFHUMMUS_NO_DCT=1)
+endif(PDFHUMMUS_NO_DCT)
+if(PDFHUMMUS_NO_TIFF)
+	add_definitions(-DPDFHUMMUS_NO_TIFF=1)
+endif(PDFHUMMUS_NO_TIFF)
 
 
 include_directories (${PDFWriter_SOURCE_DIR}) 
 include_directories (${Zlib_SOURCE_DIR})
-if(NOT NO_DCT)
+if(NOT PDFHUMMUS_NO_DCT)
 	include_directories (${LibJpeg_SOURCE_DIR})
-else(NOT NO_DCT)
-	add_definitions(-DNO_DCT=1)
-endif(NOT NO_DCT)
+else(NOT PDFHUMMUS_NO_DCT)
+	add_definitions(-DPDFHUMMUS_NO_DCT=1)
+endif(NOT PDFHUMMUS_NO_DCT)
 
-if(NOT NO_TIFF)
+if(NOT PDFHUMMUS_NO_TIFF)
 	include_directories (${LibTiff_SOURCE_DIR})  
-else(NOT NO_TIFF)
-	add_definitions(-DNO_TIFF=1)
-endif(NOT NO_TIFF)
+else(NOT PDFHUMMUS_NO_TIFF)
+	add_definitions(-DPDFHUMMUS_NO_TIFF=1)
+endif(NOT PDFHUMMUS_NO_TIFF)
 include_directories (${FreeType_SOURCE_DIR}/include) 
 
 add_dependencies(PDFWriterTestPlayground PDFWriter) #add_dependencies makes sure that dependencies are built before main target
 
 target_link_libraries (PDFWriterTestPlayground PDFWriter)
 target_link_libraries (PDFWriterTestPlayground FreeType)
-if(NOT NO_DCT)
+if(NOT PDFHUMMUS_NO_DCT)
 	target_link_libraries (PDFWriterTestPlayground LibJpeg)
-endif(NOT NO_DCT)
+endif(NOT PDFHUMMUS_NO_DCT)
 target_link_libraries (PDFWriterTestPlayground Zlib)
-if(NOT NO_TIFF)
+if(NOT PDFHUMMUS_NO_TIFF)
 	target_link_libraries (PDFWriterTestPlayground LibTiff)
-endif(NOT NO_TIFF)
+endif(NOT PDFHUMMUS_NO_TIFF)
 
 if(APPLE)
 	set(CMAKE_EXE_LINKER_FLAGS "-framework CoreFoundation")

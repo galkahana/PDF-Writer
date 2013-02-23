@@ -21,7 +21,7 @@
 #include "InputPredictorPNGOptimumStream.h"
 
 #include "Trace.h"
-
+#include <stdlib.h>
 
 using namespace IOBasicTypes;
 

@@ -91,7 +91,7 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run(const TestConfiguration& inT
 		pageContentContext->Do(page->GetResourcesDictionary().AddFormXObjectMapping(formXObjectID));
 		pageContentContext->Q();
 
-#ifndef NO_TIFF
+#ifndef PDFHUMMUS_NO_TIFF
 		pageContentContext->q();
 		ObjectIDType tiffFormXObjectID = pdfWriter.GetObjectsContext().GetInDirectObjectsRegistry().AllocateNewObjectID();
 		pageContentContext->Do(page->GetResourcesDictionary().AddFormXObjectMapping(tiffFormXObjectID));
@@ -138,7 +138,7 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run(const TestConfiguration& inT
 			break;
 		}
 
-#ifndef NO_TIFF
+#ifndef PDFHUMMUS_NO_TIFF
 		PDFFormXObject* tiffFormXObject = pdfWriter.CreateFormXObjectFromTIFFFile(
             RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/images/tiff/jim___ah.tif"),tiffFormXObjectID);
 		if(!tiffFormXObject)

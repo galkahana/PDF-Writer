@@ -21,7 +21,7 @@
 
 #include "DCTDecodeFilterTest.h"
 
-#ifndef NO_DCT
+#ifndef PDFHUMMUS_NO_DCT
 
 #include "TestsRunner.h"
 #include "Trace.h"

@@ -392,6 +392,11 @@ EStatusCode PDFDocumentHandler::WritePageContentToSingleStream(IByteWriter* inTa
 	EStatusCode status = PDFHummus::eSuccess;
 
 	RefCountPtr<PDFObject> pageContent(mParser->QueryDictionaryObject(inPageObject,"Contents"));
+    
+    // for empty page, simply return
+    if(!pageContent)
+        return status;
+    
 	if(pageContent->GetType() == PDFObject::ePDFObjectStream)
 	{
 		status = WritePDFStreamInputToStream(inTargetStream,(PDFStreamInput*)pageContent.GetPtr());
@@ -1035,10 +1040,14 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::CreatePDFPageForPage(unsigned lon
 EStatusCode PDFDocumentHandler::CopyPageContentToTargetPage(PDFPage* inPage,PDFDictionary* inPageObject)
 {
 	EStatusCode status = PDFHummus::eSuccess;
-
-	PageContentContext* pageContentContext = mDocumentContext->StartPageContentContext(inPage);
-
+    
 	RefCountPtr<PDFObject> pageContent(mParser->QueryDictionaryObject(inPageObject,"Contents"));
+    
+    // for empty page, do nothing
+    if(!pageContent)
+        return status;
+    
+	PageContentContext* pageContentContext = mDocumentContext->StartPageContentContext(inPage);
 	if(pageContent->GetType() == PDFObject::ePDFObjectStream)
 	{
 		status = WritePDFStreamInputToContentContext(pageContentContext,(PDFStreamInput*)pageContent.GetPtr());
@@ -1713,10 +1722,15 @@ EStatusCode PDFDocumentHandler::MergePageContentToTargetPage(PDFPage* inTargetPa
 {
 	EStatusCode status = PDFHummus::eSuccess;
 
+	RefCountPtr<PDFObject> pageContent(mParser->QueryDictionaryObject(inSourcePage,"Contents"));
+    
+    // for empty page, return now
+    if(!pageContent)
+        return status;
+
 	bool hasAlreadyAContentContext = mDocumentContext->HasContentContext(inTargetPage);
 	PageContentContext* pageContentContext = mDocumentContext->StartPageContentContext(inTargetPage);
 
-	RefCountPtr<PDFObject> pageContent(mParser->QueryDictionaryObject(inSourcePage,"Contents"));
 	if(pageContent->GetType() == PDFObject::ePDFObjectStream)
 	{
 		status = WritePDFStreamInputToContentContext(pageContentContext,(PDFStreamInput*)pageContent.GetPtr(),inMappedResourcesNames);
@@ -2464,11 +2478,15 @@ EStatusCode PDFDocumentHandler::MergePageContentToTargetXObject(PDFFormXObject* 
                                                        const StringToStringMap& inMappedResourcesNames)
 {
  	EStatusCode status = PDFHummus::eSuccess;
+	RefCountPtr<PDFObject> pageContent(mParser->QueryDictionaryObject(inSourcePage,"Contents"));
+    
+    // for empty page, do nothing
+    if(!pageContent)
+        return status;
 
     PrimitiveObjectsWriter primitivesWriter;
     primitivesWriter.SetStreamForWriting(inTargetFormXObject->GetContentStream()->GetWriteStream());
     
-	RefCountPtr<PDFObject> pageContent(mParser->QueryDictionaryObject(inSourcePage,"Contents"));
 	if(pageContent->GetType() == PDFObject::ePDFObjectStream)
 	{
 		status = WritePDFStreamInputToStream(inTargetFormXObject->GetContentStream()->GetWriteStream(),(PDFStreamInput*)pageContent.GetPtr(),inMappedResourcesNames);

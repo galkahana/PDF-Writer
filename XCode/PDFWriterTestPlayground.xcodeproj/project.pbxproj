@@ -10,6 +10,7 @@
 		490BBEA915657BE900C28250 /* WindowsPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 490BBEA815657BE900C28250 /* WindowsPath.cpp */; };
 		490BBEAB15657C5900C28250 /* FileURL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 490BBEAA15657C5900C28250 /* FileURL.cpp */; };
 		490BBEAF1566B80D00C28250 /* PosixPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 490BBEAE1566B80D00C28250 /* PosixPath.cpp */; };
+		490E2F6116D69E0000200604 /* CopyingAndMergingEmptyPages.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 490E2F5F16D69E0000200604 /* CopyingAndMergingEmptyPages.cpp */; };
 		495F847616B40B440047C11A /* TTCTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 495F847416B40B440047C11A /* TTCTest.cpp */; };
 		495F847916B434780047C11A /* DFontTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 495F847716B434780047C11A /* DFontTest.cpp */; };
 		497CD3C215A87136000B3C7C /* BasicModification.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 497CD3C115A87136000B3C7C /* BasicModification.cpp */; };
@@ -85,6 +86,8 @@
 		490BBEAC15657C6A00C28250 /* FileURL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileURL.h; sourceTree = "<group>"; };
 		490BBEAD1566B7FD00C28250 /* PosixPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PosixPath.h; sourceTree = "<group>"; };
 		490BBEAE1566B80D00C28250 /* PosixPath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PosixPath.cpp; sourceTree = "<group>"; };
+		490E2F5F16D69E0000200604 /* CopyingAndMergingEmptyPages.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CopyingAndMergingEmptyPages.cpp; sourceTree = "<group>"; };
+		490E2F6016D69E0000200604 /* CopyingAndMergingEmptyPages.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CopyingAndMergingEmptyPages.h; sourceTree = "<group>"; };
 		495F847416B40B440047C11A /* TTCTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TTCTest.cpp; sourceTree = "<group>"; };
 		495F847516B40B440047C11A /* TTCTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TTCTest.h; sourceTree = "<group>"; };
 		495F847716B434780047C11A /* DFontTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DFontTest.cpp; sourceTree = "<group>"; };
@@ -428,6 +431,8 @@
 				49B70DDB155C5F3500C0FD9F /* PDFParserTest.h */,
 				497EF61715C1E4F600286CAC /* MergeToPDFForm.h */,
 				497EF61915C1E50E00286CAC /* MergeToPDFForm.cpp */,
+				490E2F5F16D69E0000200604 /* CopyingAndMergingEmptyPages.cpp */,
+				490E2F6016D69E0000200604 /* CopyingAndMergingEmptyPages.h */,
 			);
 			name = PDFEmbedding;
 			sourceTree = "<group>";
@@ -624,6 +629,7 @@
 				498C3F1615CBF64E009EA9F8 /* DCTDecodeFilterTest.cpp in Sources */,
 				495F847616B40B440047C11A /* TTCTest.cpp in Sources */,
 				495F847916B434780047C11A /* DFontTest.cpp in Sources */,
+				490E2F6116D69E0000200604 /* CopyingAndMergingEmptyPages.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

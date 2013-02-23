@@ -440,14 +440,14 @@ static const char scZero = '0';
 static const char scDot = '.';
 bool PDFObjectParser::IsNumber(const std::string& inToken)
 {
-	// it's a number if the first char is either a sign or digit, and the rest is 
+	// it's a number if the first char is either a sign or digit, or an initial decimal dot, and the rest is 
 	// digits, with the exception of a dot which can appear just once.
 
-	if(inToken.at(0) != scPlus && inToken.at(0) != scMinus && (inToken.at(0) > scNine || inToken.at(0) < scZero))
+	if(inToken.at(0) != scPlus && inToken.at(0) != scMinus && inToken.at(0) != scDot && (inToken.at(0) > scNine || inToken.at(0) < scZero))
 		return false;
 
 	bool isNumber = true;
-	bool dotEncountered = false;
+	bool dotEncountered = (inToken.at(0) == scDot);
 	std::string::const_iterator it = inToken.begin();
 	++it; //verified the first char already
 

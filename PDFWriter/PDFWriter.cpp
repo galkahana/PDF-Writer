@@ -220,7 +220,7 @@ PDFFormXObject* PDFWriter::CreateFormXObjectFromJPGFile(const std::string& inJPG
 	return mDocumentContext.CreateFormXObjectFromJPGFile(inJPGFilePath); 
 }
 
-#ifndef NO_TIFF
+#ifndef PDFHUMMUS_NO_TIFF
 PDFFormXObject* PDFWriter::CreateFormXObjectFromTIFFFile(const std::string& inTIFFFilePath,const TIFFUsageParameters& inTIFFUsageParameters)
 {
 	return mDocumentContext.CreateFormXObjectFromTIFFFile(inTIFFFilePath,inTIFFUsageParameters); 

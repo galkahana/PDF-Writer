@@ -21,7 +21,7 @@
 
 #pragma once
 
-#ifndef NO_DCT
+#ifndef PDFHUMMUS_NO_DCT
 
 #include "ITestUnit.h"
 

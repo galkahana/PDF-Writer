@@ -21,7 +21,7 @@
 #pragma once
 
 
-#ifndef NO_TIFF
+#ifndef PDFHUMMUS_NO_TIFF
 
 #include "ITestUnit.h"
 

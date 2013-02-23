@@ -71,7 +71,7 @@
 
 */
 
-#ifndef NO_TIFF
+#ifndef PDFHUMMUS_NO_TIFF
 
 #include "TIFFImageHandler.h"
 #include "Trace.h"

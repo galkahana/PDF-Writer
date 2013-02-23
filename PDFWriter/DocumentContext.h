@@ -143,7 +143,7 @@ namespace PDFHummus
 		PDFFormXObject* CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inFormXObjectID);
 
 		// TIFF
-#ifndef NO_TIFF
+#ifndef PDFHUMMUS_NO_TIFF
 		PDFFormXObject* CreateFormXObjectFromTIFFFile(	const std::string& inTIFFFilePath,
 														const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 		PDFFormXObject* CreateFormXObjectFromTIFFStream(IByteReaderWithPosition* inTIFFStream,
@@ -263,7 +263,7 @@ namespace PDFHummus
 		std::string mOutputFilePath;
 		IDocumentContextExtenderSet mExtenders;
 		JPEGImageHandler mJPEGImageHandler;
-#ifndef NO_TIFF
+#ifndef PDFHUMMUS_NO_TIFF
 		TIFFImageHandler mTIFFImageHandler;
 #endif
 		PDFDocumentHandler mPDFDocumentHandler;

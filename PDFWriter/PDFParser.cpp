@@ -1829,7 +1829,7 @@ EStatusCodeAndIByteReader PDFParser::CreateFilterForStream(IByteReader* inStream
 		{
 			result = new InputAscii85DecodeStream(inStream);
 		}
-#ifndef NO_DCT
+#ifndef PDFHUMMUS_NO_DCT
         else if(inFilterName->GetValue() == "DCTDecode")
         {
             result = new InputDCTDecodeStream(inStream);

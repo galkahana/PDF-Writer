@@ -158,7 +158,7 @@ public:
 	PDFFormXObject* CreateFormXObjectFromJPGStream(IByteReaderWithPosition* inJPGStream,ObjectIDType inFormXObjectID);
 	
 	// tiff
-#ifndef NO_TIFF
+#ifndef PDFHUMMUS_NO_TIFF
 	PDFFormXObject* CreateFormXObjectFromTIFFFile(	const std::string& inTIFFFilePath,
 													const TIFFUsageParameters& inTIFFUsageParameters = TIFFUsageParameters::DefaultTIFFUsageParameters);
 	PDFFormXObject* CreateFormXObjectFromTIFFStream(IByteReaderWithPosition* inTIFFStream,

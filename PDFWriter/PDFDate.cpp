@@ -29,6 +29,7 @@
 
 #include <ctime>
 #include <math.h>
+#include <stdlib.h>
 
 PDFDate::PDFDate(void)
 {

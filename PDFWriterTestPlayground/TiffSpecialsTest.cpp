@@ -19,7 +19,7 @@
    
 */
 
-#ifndef NO_TIFF
+#ifndef PDFHUMMUS_NO_TIFF
 
 #include "TiffSpecialsTest.h"
 #include "TestsRunner.h"
