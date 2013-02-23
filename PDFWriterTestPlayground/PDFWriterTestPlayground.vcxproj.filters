@@ -222,6 +222,9 @@
     <ClCompile Include="TTCTest.cpp">
       <Filter>Tests\Font Packages</Filter>
     </ClCompile>
+    <ClCompile Include="CopyingAndMergingEmptyPages.cpp">
+      <Filter>Tests\PDFEmbedding</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ITestUnit.h">
@@ -376,6 +379,9 @@
     </ClInclude>
     <ClInclude Include="TTCTest.h">
       <Filter>Tests\Font Packages</Filter>
+    </ClInclude>
+    <ClInclude Include="CopyingAndMergingEmptyPages.h">
+      <Filter>Tests\PDFEmbedding</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

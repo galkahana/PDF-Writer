@@ -56,6 +56,7 @@ Type1Test.cpp
 UppercaseSequanceTest.cpp
 WindowsPath.cpp
 PDFWriterTestPlayground.cpp
+CopyingAndMergingEmptyPages.cpp
 
 #headers
 AppendingAndReading.h
@@ -108,6 +109,7 @@ TrueTypeTest.h
 TTCTest.h
 Type1Test.h
 UppercaseSequanceTest.h
+CopyingAndMergingEmptyPages.h
 )
 
 source_group(Main FILES
@@ -220,6 +222,8 @@ PDFParserTest.cpp
 PDFParserTest.h
 RefCountTest.cpp
 RefCountTest.h
+CopyingAndMergingEmptyPages.cpp
+CopyingAndMergingEmptyPages.h
 )
 
 source_group(Tests\\PDFs\\CustomStreamsIO FILES

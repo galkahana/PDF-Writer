@@ -178,6 +178,7 @@
   <ItemGroup>
     <ClCompile Include="AppendingAndReading.cpp" />
     <ClCompile Include="BasicModification.cpp" />
+    <ClCompile Include="CopyingAndMergingEmptyPages.cpp" />
     <ClCompile Include="CustomLogTest.cpp" />
     <ClCompile Include="DCTDecodeFilterTest.cpp" />
     <ClCompile Include="DFontTest.cpp" />
@@ -240,6 +241,7 @@
   <ItemGroup>
     <ClInclude Include="AppendingAndReading.h" />
     <ClInclude Include="BasicModification.h" />
+    <ClInclude Include="CopyingAndMergingEmptyPages.h" />
     <ClInclude Include="CustomLogTest.h" />
     <ClInclude Include="DCTDecodeFilterTest.h" />
     <ClInclude Include="DFontTest.h" />

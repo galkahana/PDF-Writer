@@ -463,7 +463,7 @@ TimersRegistry.cpp
 TimersRegistry.h
 )
 
-source_group("Infrastructure\\Trace & Log" FILES
+source_group("Infrastructure\\Trace and Log" FILES
 Log.cpp
 Log.h
 Trace.cpp
