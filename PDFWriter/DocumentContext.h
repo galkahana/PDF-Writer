@@ -27,7 +27,7 @@
 #include "CatalogInformation.h"
 #include "JPEGImageHandler.h"
 #include "TIFFImageHandler.h"
-#include "TIFFUsageParameters.h"
+#include "TiffUsageParameters.h"
 #include "UsedFontsRepository.h"
 #include "PDFEmbedParameterTypes.h"
 #include "PDFDocumentHandler.h"
