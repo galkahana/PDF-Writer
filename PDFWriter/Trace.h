@@ -19,7 +19,7 @@
    
 */
 #pragma once
-#include "singleton.h"
+#include "Singleton.h"
 
 #include <string>
 
