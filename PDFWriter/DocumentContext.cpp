@@ -849,6 +849,12 @@ EStatusCode DocumentContext::EndFormXObjectNoRelease(PDFFormXObject* inFormXObje
 	return status;
 }
 
+EStatusCode DocumentContext::EndFormXObject(PDFFormXObject* inFormXObject)
+{
+	return EndFormXObjectNoRelease(inFormXObject);
+}
+
+
 EStatusCode DocumentContext::EndFormXObjectAndRelease(PDFFormXObject* inFormXObject)
 {
 	EStatusCode status = EndFormXObjectNoRelease(inFormXObject);

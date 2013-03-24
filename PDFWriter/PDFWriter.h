@@ -133,6 +133,7 @@ public:
 	// Form XObject creating and writing
 	PDFFormXObject* StartFormXObject(const PDFRectangle& inBoundingBox,const double* inMatrix = NULL);
 	PDFFormXObject* StartFormXObject(const PDFRectangle& inBoundingBox,ObjectIDType inFormXObjectID,const double* inMatrix = NULL);
+    PDFHummus::EStatusCode EndFormXObject(PDFFormXObject* inFormXObject);
 	PDFHummus::EStatusCode EndFormXObjectAndRelease(PDFFormXObject* inFormXObject);
 
 	// Image XObject creating [for TIFF nad JPG files]. 

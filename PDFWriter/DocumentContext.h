@@ -119,6 +119,7 @@ namespace PDFHummus
 		// Form XObject creation and finalization
 		PDFFormXObject* StartFormXObject(const PDFRectangle& inBoundingBox,const double* inMatrix = NULL);
 		PDFFormXObject* StartFormXObject(const PDFRectangle& inBoundingBox,ObjectIDType inFormXObjectID,const double* inMatrix = NULL);
+		PDFHummus::EStatusCode EndFormXObject(PDFFormXObject* inFormXObject);
 		PDFHummus::EStatusCode EndFormXObjectAndRelease(PDFFormXObject* inFormXObject);
 
 		// no release version of ending a form XObject. owner should delete it (regular delete...nothin special)

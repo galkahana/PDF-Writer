@@ -204,6 +204,10 @@ PDFFormXObject* PDFWriter::StartFormXObject(const PDFRectangle& inBoundingBox,Ob
 	return mDocumentContext.StartFormXObject(inBoundingBox,inFormXObjectID,inMatrix);
 }
 
+EStatusCode PDFWriter::EndFormXObject(PDFFormXObject* inFormXObject)
+{
+	return mDocumentContext.EndFormXObject(inFormXObject);
+}
 
 EStatusCode PDFWriter::EndFormXObjectAndRelease(PDFFormXObject* inFormXObject)
 {
