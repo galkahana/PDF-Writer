@@ -265,13 +265,15 @@ Byte* InputDCTDecodeStream::CopySamplesArrayToBuffer(Byte* inBuffer, LongBufferS
     {
         if((inBufferSize - (indexInBuffer - inBuffer)) < (row_stride - mIndexInRow))
         {
-            memcpy(indexInBuffer,mSamplesBuffer[mCurrentSampleRow],inBufferSize - (indexInBuffer - inBuffer));
-            indexInBuffer =  inBuffer + inBufferSize;
+			// buffer is smaller than what's left in row, fill buffer
+            memcpy(indexInBuffer,mSamplesBuffer[mCurrentSampleRow] + mIndexInRow,inBufferSize - (indexInBuffer - inBuffer));
             mIndexInRow += inBufferSize - (indexInBuffer - inBuffer);
+            indexInBuffer =  inBuffer + inBufferSize;
         }
         else
         {
-            memcpy(indexInBuffer,mSamplesBuffer[mCurrentSampleRow],row_stride - mIndexInRow);
+			// buffer is larger than what's left in row, read into buffer whats left, mark row as finished
+            memcpy(indexInBuffer,mSamplesBuffer[mCurrentSampleRow] + mIndexInRow,row_stride - mIndexInRow);
             indexInBuffer += row_stride - mIndexInRow;
             ++mCurrentSampleRow;
             mIndexInRow = 0;
