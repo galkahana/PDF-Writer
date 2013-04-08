@@ -21,6 +21,8 @@
 #include "InputDCTDecodeStream.h"
 #include "Trace.h"
 
+#include <string.h>
+
 #ifndef PDFHUMMUS_NO_DCT
 
 using namespace IOBasicTypes;

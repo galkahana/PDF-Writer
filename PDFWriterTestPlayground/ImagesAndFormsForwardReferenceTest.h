@@ -20,6 +20,7 @@
 */
 #pragma once
 
+#include <string.h>
 #include "ITestUnit.h"
 
 class ImagesAndFormsForwardReferenceTest: public ITestUnit

@@ -49,7 +49,7 @@ src/base/ftgasp.c
 src/base/ftglyph.c
 src/gzip/ftgzip.c
 src/base/ftinit.c
-src/lzW/ftlzw.c
+src/lzw/ftlzw.c
 src/base/ftstroke.c
 src/base/ftsystem.c
 src/smooth/smooth.c

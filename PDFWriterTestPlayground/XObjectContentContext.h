@@ -1,5 +1,5 @@
 /*
-   Source File : FlateEncryptionTest.h
+   Source File : XObjectContentContext.h
 
 
    Copyright 2011 Gal Kahana PDFWriter
@@ -19,15 +19,20 @@
    
 */
 #pragma once
+#include "AbstractContentContext.h"
 
-#include <string.h>
-#include "TestsRunner.h"
+class PDFFormXObject;
 
-class FlateEncryptionTest : public ITestUnit
+class XObjectContentContext : public AbstractContentContext
 {
 public:
-	FlateEncryptionTest(void);
-	virtual ~FlateEncryptionTest(void);
+	XObjectContentContext(PDFFormXObject* inFormXObject);
+	virtual ~XObjectContentContext(void);
 
-	virtual PDFHummus::EStatusCode Run(const TestConfiguration& inTestConfiguration);
+private:
+
+	// AbstractContentContext implementation
+	virtual ResourcesDictionary* GetResourcesDictionary();
+
+	PDFFormXObject* mPDFFormXObjectOfContext;
 };
