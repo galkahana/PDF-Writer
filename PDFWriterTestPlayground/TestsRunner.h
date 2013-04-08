@@ -25,6 +25,8 @@
 #include "Singleton.h"
 #include "FileURL.h"
 
+#include <string.h>
+
 #include <string>
 #include <list>
 #include <utility>

@@ -20,7 +20,7 @@
 */
 #include "AbstractWrittenFont.h"
 #include "ObjectsContext.h"
-#include "InDirectObjectsReferenceRegistry.h"
+#include "IndirectObjectsReferenceRegistry.h"
 #include "Trace.h"
 #include "DictionaryContext.h"
 #include "PDFParser.h"
