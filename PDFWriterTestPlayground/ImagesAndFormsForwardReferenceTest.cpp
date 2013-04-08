@@ -28,7 +28,7 @@
 #include "ProcsetResourcesConstants.h"
 #include "ObjectsContext.h"
 #include "IndirectObjectsReferenceRegistry.h"
-#include "xobjectContentContext.h"
+#include "XObjectContentContext.h"
 
 #include <iostream>
 

@@ -67,6 +67,8 @@
 #include "OutputStringBufferStream.h"
 #include "SafeBufferMacrosDefs.h"
 
+#include <string.h>
+
 using namespace IOBasicTypes;
 using namespace PDFHummus;
 

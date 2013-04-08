@@ -20,6 +20,7 @@
 */
 #pragma once
 
+#include <string.h>
 #include "TestsRunner.h"
 
 class FlateEncryptionTest : public ITestUnit
