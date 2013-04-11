@@ -39,7 +39,6 @@
 		49207A2F169E1C8300E2D9FC /* ftgasp.c in Sources */ = {isa = PBXBuildFile; fileRef = 49207A29169E1C8300E2D9FC /* ftgasp.c */; };
 		49207A30169E1C8300E2D9FC /* ftglyph.c in Sources */ = {isa = PBXBuildFile; fileRef = 49207A2A169E1C8300E2D9FC /* ftglyph.c */; };
 		49207A31169E1C8300E2D9FC /* ftinit.c in Sources */ = {isa = PBXBuildFile; fileRef = 49207A2B169E1C8300E2D9FC /* ftinit.c */; };
-		49207A34169E1CA300E2D9FC /* ftfstype.c in Sources */ = {isa = PBXBuildFile; fileRef = 49207A33169E1CA300E2D9FC /* ftfstype.c */; };
 		49207A36169E1CBB00E2D9FC /* ftgzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 49207A35169E1CBB00E2D9FC /* ftgzip.c */; };
 		49207A38169E1CCD00E2D9FC /* ftlzw.c in Sources */ = {isa = PBXBuildFile; fileRef = 49207A37169E1CCD00E2D9FC /* ftlzw.c */; };
 		49207A3A169E1CEB00E2D9FC /* ftstroke.c in Sources */ = {isa = PBXBuildFile; fileRef = 49207A39169E1CEB00E2D9FC /* ftstroke.c */; };
@@ -115,7 +114,6 @@
 		49207AB6169E27B800E2D9FC /* ftlzw.c in Sources */ = {isa = PBXBuildFile; fileRef = 49207A37169E1CCD00E2D9FC /* ftlzw.c */; };
 		49207AB7169E27B800E2D9FC /* ftstroke.c in Sources */ = {isa = PBXBuildFile; fileRef = 49207A39169E1CEB00E2D9FC /* ftstroke.c */; };
 		49207AB8169E27B800E2D9FC /* ftsystem.c in Sources */ = {isa = PBXBuildFile; fileRef = 49207A3B169E1CFB00E2D9FC /* ftsystem.c */; };
-		49207AB9169E27B800E2D9FC /* ftfstype.c in Sources */ = {isa = PBXBuildFile; fileRef = 49207A33169E1CA300E2D9FC /* ftfstype.c */; };
 		49207ABA169E27B800E2D9FC /* smooth.c in Sources */ = {isa = PBXBuildFile; fileRef = 49207A3D169E1D1E00E2D9FC /* smooth.c */; };
 		49207AC4169E280E00E2D9FC /* ftconfig.h in Headers */ = {isa = PBXBuildFile; fileRef = 49207A0E169E1B7C00E2D9FC /* ftconfig.h */; };
 		49207AC5169E280E00E2D9FC /* ftheader.h in Headers */ = {isa = PBXBuildFile; fileRef = 49207A0F169E1B7C00E2D9FC /* ftheader.h */; };
@@ -166,7 +164,6 @@
 		49207B03169E28F500E2D9FC /* ftlzw.c in Sources */ = {isa = PBXBuildFile; fileRef = 49207A37169E1CCD00E2D9FC /* ftlzw.c */; };
 		49207B04169E28F500E2D9FC /* ftstroke.c in Sources */ = {isa = PBXBuildFile; fileRef = 49207A39169E1CEB00E2D9FC /* ftstroke.c */; };
 		49207B05169E28F500E2D9FC /* ftsystem.c in Sources */ = {isa = PBXBuildFile; fileRef = 49207A3B169E1CFB00E2D9FC /* ftsystem.c */; };
-		49207B06169E28F500E2D9FC /* ftfstype.c in Sources */ = {isa = PBXBuildFile; fileRef = 49207A33169E1CA300E2D9FC /* ftfstype.c */; };
 		49207B07169E28F500E2D9FC /* smooth.c in Sources */ = {isa = PBXBuildFile; fileRef = 49207A3D169E1D1E00E2D9FC /* smooth.c */; };
 		49207B09169E292400E2D9FC /* ftconfig.h in Headers */ = {isa = PBXBuildFile; fileRef = 49207A0E169E1B7C00E2D9FC /* ftconfig.h */; };
 		49207B0A169E292400E2D9FC /* ftheader.h in Headers */ = {isa = PBXBuildFile; fileRef = 49207A0F169E1B7C00E2D9FC /* ftheader.h */; };
@@ -489,7 +486,7 @@
 		492079F4169E1A2E00E2D9FC /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0450;
+				LastUpgradeCheck = 0460;
 				ORGANIZATIONNAME = "Gal Kahana";
 			};
 			buildConfigurationList = 492079F7169E1A2E00E2D9FC /* Build configuration list for PBXProject "Freetype" */;
@@ -545,7 +542,6 @@
 				49207A2F169E1C8300E2D9FC /* ftgasp.c in Sources */,
 				49207A30169E1C8300E2D9FC /* ftglyph.c in Sources */,
 				49207A31169E1C8300E2D9FC /* ftinit.c in Sources */,
-				49207A34169E1CA300E2D9FC /* ftfstype.c in Sources */,
 				49207A36169E1CBB00E2D9FC /* ftgzip.c in Sources */,
 				49207A38169E1CCD00E2D9FC /* ftlzw.c in Sources */,
 				49207A3A169E1CEB00E2D9FC /* ftstroke.c in Sources */,
@@ -624,7 +620,6 @@
 				49207AB6169E27B800E2D9FC /* ftlzw.c in Sources */,
 				49207AB7169E27B800E2D9FC /* ftstroke.c in Sources */,
 				49207AB8169E27B800E2D9FC /* ftsystem.c in Sources */,
-				49207AB9169E27B800E2D9FC /* ftfstype.c in Sources */,
 				49207ABA169E27B800E2D9FC /* smooth.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -674,7 +669,6 @@
 				49207B03169E28F500E2D9FC /* ftlzw.c in Sources */,
 				49207B04169E28F500E2D9FC /* ftstroke.c in Sources */,
 				49207B05169E28F500E2D9FC /* ftsystem.c in Sources */,
-				49207B06169E28F500E2D9FC /* ftfstype.c in Sources */,
 				49207B07169E28F500E2D9FC /* smooth.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -760,6 +754,7 @@
 		49207A02169E1A2E00E2D9FC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_PREFIX = lib;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -768,6 +763,7 @@
 		49207A03169E1A2E00E2D9FC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_PREFIX = lib;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -778,10 +774,6 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				DSTROOT = /tmp/Freetype_iphoneos.dst;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -811,10 +803,6 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				DSTROOT = /tmp/Freetype_iphonesimulator.dst;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";

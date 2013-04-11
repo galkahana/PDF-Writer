@@ -352,7 +352,7 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeSFNTFromDfont()
         mPrimitivesReader.ReadUSHORT(subcnt);
         mPrimitivesReader.ReadUSHORT(rpos);
         
-        if ( tag == GetTag("sfnt") ) {
+        if ( (unsigned long)tag == GetTag("sfnt") ) {
             
             mPrimitivesReader.SetOffset(map_offset + rpos);
 
@@ -400,8 +400,8 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeSFNTFromDfont()
     }
     return PDFHummus::eFailure;
 }
-
 unsigned long OpenTypeFileInput::GetTag(const char* inTagName)
+
 {
 	Byte buffer[4];
 	unsigned short i=0;

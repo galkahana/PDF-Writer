@@ -416,7 +416,7 @@ void AbstractWrittenFont::WriteGlyphEncodingInfoState(ObjectsContext* inStateWri
 	
 }
 
-EStatusCode AbstractWrittenFont::ReadState(PDFParser* inStateReader,PDFDictionary* inState)
+EStatusCode AbstractWrittenFont::ReadStateFromObject(PDFParser* inStateReader,PDFDictionary* inState)
 {
 	PDFObjectCastPtr<PDFDictionary> cidRepresentationState(inStateReader->QueryDictionaryObject(inState,"mCIDRepresentation"));
 	PDFObjectCastPtr<PDFDictionary> ansiRepresentationState(inStateReader->QueryDictionaryObject(inState,"mANSIRepresentation"));

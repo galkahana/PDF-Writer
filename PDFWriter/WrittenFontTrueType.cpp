@@ -221,5 +221,5 @@ EStatusCode WrittenFontTrueType::ReadState(PDFParser* inStateReader,ObjectIDType
 {
 	PDFObjectCastPtr<PDFDictionary> writtenFontState(inStateReader->ParseNewObject(inObjectID));
 
-	return AbstractWrittenFont::ReadState(inStateReader,writtenFontState.GetPtr());
+	return AbstractWrittenFont::ReadStateFromObject(inStateReader,writtenFontState.GetPtr());
 }

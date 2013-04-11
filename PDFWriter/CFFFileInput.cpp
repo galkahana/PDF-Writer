@@ -415,7 +415,7 @@ EStatusCode CFFFileInput::ReadDict(unsigned long inReadAmount,UShortToDictOperan
 	Byte aBuffer;
 
 	while(PDFHummus::eSuccess == status && 
-			(mPrimitivesReader.GetCurrentPosition() - dictStartPosition < inReadAmount))
+			(mPrimitivesReader.GetCurrentPosition() - dictStartPosition < (long long)inReadAmount))
 	{
 		status = mPrimitivesReader.ReadByte(aBuffer);
 		if(status != PDFHummus::eSuccess)

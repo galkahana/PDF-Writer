@@ -50,7 +50,7 @@ protected:
 
 	PDFHummus::EStatusCode WriteStateInDictionary(ObjectsContext* inStateWriter,DictionaryContext* inDerivedObjectDictionary);
 	PDFHummus::EStatusCode WriteStateAfterDictionary(ObjectsContext* inStateWriter);
-	PDFHummus::EStatusCode ReadState(PDFParser* inStateReader,PDFDictionary* inState);
+	PDFHummus::EStatusCode ReadStateFromObject(PDFParser* inStateReader,PDFDictionary* inState);
 
 private:
 	ObjectIDType mCidRepresentationObjectStateID;

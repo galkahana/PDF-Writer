@@ -671,7 +671,7 @@ PDFObject* PDFParser::ParseExistingInDirectObject(ObjectIDType inObjectID)
 			break;
 		}
 
-		if(idObject->GetValue() != inObjectID)
+		if((ObjectIDType)idObject->GetValue() != inObjectID)
 		{
 			TRACE_LOG2("PDFParser::ParseExistingInDirectObject, failed to read object declaration, exepected ID = %ld, found %ld",
 				inObjectID,idObject->GetValue());
@@ -690,7 +690,7 @@ PDFObject* PDFParser::ParseExistingInDirectObject(ObjectIDType inObjectID)
 		if(mParserExtender)
 			mParserExtender->OnObjectStart(inObjectID,versionObject->GetValue());
 
-		if(versionObject->GetValue() != mXrefTable[inObjectID].mRivision)
+		if((unsigned long)versionObject->GetValue() != mXrefTable[inObjectID].mRivision)
 		{
 			TRACE_LOG2("PDFParser::ParseExistingInDirectObject, failed to read object declaration, exepected version = %ld, found %ld",
 				mXrefTable[inObjectID].mRivision,versionObject->GetValue());

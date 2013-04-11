@@ -2655,11 +2655,10 @@ void TIFFImageHandler::TileCollapseLeft(tdata_t inBuffer, tsize_t inScanWidth,
 										uint32 inTileWidth, uint32 inEdgeTileWidth, 
 										uint32 inTileLength)
 {
-	uint32 i=0;
 	tsize_t edgescanwidth=0;
 	
 	edgescanwidth = (inScanWidth * inEdgeTileWidth + (inTileWidth - 1))/ inTileWidth;
-	for(i=i;i<inTileLength;i++)
+	for(uint32 i=0;i<inTileLength;i++)
 	{
 		_TIFFmemcpy( 
 			&(((char*)inBuffer)[edgescanwidth*i]), 

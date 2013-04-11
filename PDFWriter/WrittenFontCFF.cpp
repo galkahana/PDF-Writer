@@ -313,5 +313,5 @@ EStatusCode WrittenFontCFF::ReadState(PDFParser* inStateReader,ObjectIDType inOb
 
 	mIsCID = isCIDState->GetValue();
 
-	return AbstractWrittenFont::ReadState(inStateReader,writtenFontState.GetPtr());
+	return AbstractWrittenFont::ReadStateFromObject(inStateReader,writtenFontState.GetPtr());
 }
