@@ -21,6 +21,10 @@
 #pragma once
 #include "Singleton.h"
 
+#include <stdarg.h>
+
+#include <string.h>
+
 #include <string>
 
 

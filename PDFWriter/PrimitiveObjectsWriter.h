@@ -21,6 +21,7 @@
 #pragma once
 
 #include "ETokenSeparator.h"
+#include <string.h>
 #include <string>
 
 

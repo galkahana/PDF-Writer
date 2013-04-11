@@ -1810,7 +1810,7 @@ void TIFFImageHandler::WriteXObjectCS(DictionaryContext* inContainerDictionary)
 		return;
 	}
 
-	if(mT2p->pdf_colorspace & T2P_CS_BILEVEL && !mUserParameters.BWTreatment.AsImageMask)
+	if((mT2p->pdf_colorspace & T2P_CS_BILEVEL) && !mUserParameters.BWTreatment.AsImageMask)
 	{
 		if(inContainerDictionary)
 			inContainerDictionary->WriteNameValue(scDeviceGray);
@@ -2737,7 +2737,7 @@ void TIFFImageHandler::WriteCommonImageDictionaryProperties(DictionaryContext* i
 	inImageContext->WriteIntegerValue(mT2p->tiff_bitspersample);
 
 	// color space
-	if(!mT2p->pdf_colorspace & T2P_CS_BILEVEL || !mUserParameters.BWTreatment.AsImageMask)
+	if(!(mT2p->pdf_colorspace & T2P_CS_BILEVEL) || !mUserParameters.BWTreatment.AsImageMask)
 	{
 		inImageContext->WriteKey(scColorSpace);
 		WriteXObjectCS(inImageContext);
@@ -3215,7 +3215,7 @@ PDFFormXObject* TIFFImageHandler::WriteImagesFormXObject(const PDFImageXObjectLi
 		}
 
 		// BiLevel tiff image handling, set the color to the "1" color 
-		if(mT2p->pdf_colorspace & T2P_CS_BILEVEL && mUserParameters.BWTreatment.AsImageMask)
+		if((mT2p->pdf_colorspace & T2P_CS_BILEVEL) && mUserParameters.BWTreatment.AsImageMask)
 		{
 			xobjectContentContext->q();
 			if(mUserParameters.BWTreatment.OneColor.UseCMYK)
@@ -3261,7 +3261,7 @@ PDFFormXObject* TIFFImageHandler::WriteImagesFormXObject(const PDFImageXObjectLi
 			xobjectContentContext->Q();
 		}
 		if(mT2p->tiff_transferfunctioncount != 0 || 
-			(mT2p->pdf_colorspace & T2P_CS_BILEVEL && mUserParameters.BWTreatment.AsImageMask))
+			((mT2p->pdf_colorspace & T2P_CS_BILEVEL) && mUserParameters.BWTreatment.AsImageMask))
 			xobjectContentContext->Q();
 
 		status = mContainerDocumentContext->EndFormXObjectNoRelease(xobjectForm);

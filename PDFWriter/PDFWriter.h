@@ -30,7 +30,7 @@
 #include "DocumentContext.h"
 #include "ObjectsContext.h"
 #include "PDFRectangle.h"
-#include "TIFFUsageParameters.h"
+#include "TiffUsageParameters.h"
 #include "PDFEmbedParameterTypes.h"
 
 #include <string>

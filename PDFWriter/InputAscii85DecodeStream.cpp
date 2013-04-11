@@ -20,6 +20,8 @@
 */
 #include "InputAscii85DecodeStream.h"
 
+#include <string.h>
+
 #include <algorithm>
 
 using namespace IOBasicTypes;

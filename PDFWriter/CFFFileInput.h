@@ -25,6 +25,8 @@
 #include "CFFPrimitiveReader.h"
 #include "IType2InterpreterImplementation.h"
 
+#include <string.h>
+
 #include <string>
 #include <list>
 #include <map>

@@ -22,6 +22,8 @@
 #pragma once
 #include "ITestUnit.h"
 
+#include <string.h>
+
 class AppendingAndReading : public ITestUnit
 {
 public:
