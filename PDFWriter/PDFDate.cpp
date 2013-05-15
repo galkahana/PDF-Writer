@@ -196,10 +196,9 @@ void PDFDate::SetToCurrentTime()
 	// if unsuccesful or method unknown don't provide UTC info (currently only knows for WIN32 and OSX
 #if defined (__MWERKS__) || defined (__GNUC__) || defined(WIN32)
 	int status;
-#ifdef WIN32 // (using MS methods)
+#if defined(WIN32) // (using MS methods)
 	status = _get_timezone(&timeZoneSecondsDifference);
-#endif
-#ifdef __GNUC__
+#elif defined (__GNUC__)
 	struct tm *gmTime;
 
 	time_t localEpoch, gmEpoch;
@@ -215,8 +214,7 @@ void PDFDate::SetToCurrentTime()
 
 	timeZoneSecondsDifference =difftime(gmEpoch, localEpoch);
 	status = 0;
-
-#else // gnuc or mwerks (using OSX methods)
+#else // __MWERKS__ (using OSX methods)
 	CFTimeZoneRef tzRef = ::CFTimeZoneCopySystem();
 	if (tzRef)
 	{
@@ -244,6 +242,7 @@ void PDFDate::SetToCurrentTime()
 	}
 	else
 	{
+		UTC = eUndefined;
 		TRACE_LOG("PDFDate::SetToCurrentTime, Couldn't get UTC.");
 	}
 
