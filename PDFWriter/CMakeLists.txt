@@ -219,6 +219,7 @@ InputStreamSkipperStream.h
 InputStringBufferStream.h
 IOBasicTypes.h
 IObjectsContextExtender.h
+IPageEndWritingTask.h
 IPDFParserExtender.h
 IReadPositionProvider.h
 IResourceWritingTask.h
@@ -354,6 +355,7 @@ TrailerInformation.h
 XObjectContentContext.cpp
 XObjectContentContext.h
 IContentContextListener.h
+IPageEndWritingTask.h
 )
 
 source_group(Images\\JPG FILES

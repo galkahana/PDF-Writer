@@ -60,6 +60,7 @@ class PDFDictionary;
 class IResourceWritingTask;
 class IFormEndWritingTask;
 class PDFDocumentCopyingContext;
+class IPageEndWritingTask;
 
 typedef std::set<IDocumentContextExtender*> IDocumentContextExtenderSet;
 typedef std::pair<PDFHummus::EStatusCode,ObjectIDType> EStatusCodeAndObjectIDType;
@@ -72,6 +73,8 @@ typedef std::list<IResourceWritingTask*> IResourceWritingTaskList;
 typedef std::map<ResourcesDictionaryAndString,IResourceWritingTaskList> ResourcesDictionaryAndStringToIResourceWritingTaskListMap;
 typedef std::list<IFormEndWritingTask*> IFormEndWritingTaskList;
 typedef std::map<PDFFormXObject*,IFormEndWritingTaskList> PDFFormXObjectToIFormEndWritingTaskListMap;
+typedef std::list<IPageEndWritingTask*> IPageEndWritingTaskList;
+typedef std::map<PDFPage*,IPageEndWritingTaskList> PDFPageToIPageEndWritingTaskListMap;
 
 namespace PDFHummus
 {
@@ -240,6 +243,8 @@ namespace PDFHummus
         
         // Extensibility option. option of writing a single time task for when a particular form ends
         void RegisterFormEndWritingTask(PDFFormXObject* inFormXObject,IFormEndWritingTask* inWritingTask);
+        // Extensibility option. option of writing a single time task for when a particular page ends
+        void RegisterPageEndWritingTask(PDFPage* inPageObject,IPageEndWritingTask* inWritingTask);
 
 
 		// JPG images handler for retrieving JPG images information
@@ -277,6 +282,7 @@ namespace PDFHummus
 		ObjectIDType mCurrentPageTreeIDInState;
         ResourcesDictionaryAndStringToIResourceWritingTaskListMap mResourcesTasks;
         PDFFormXObjectToIFormEndWritingTaskListMap mFormEndTasks;
+        PDFPageToIPageEndWritingTaskListMap mPageEndTasks;
 		
 		void WriteHeaderComment(EPDFVersion inPDFVersion);
 		void Write4BinaryBytes();

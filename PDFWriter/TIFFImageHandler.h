@@ -80,6 +80,7 @@
 
 #include <string>
 #include <list>
+#include <utility>
 
 
 
@@ -105,6 +106,7 @@ using namespace PDFHummus;
 typedef std::list<ObjectIDType> ObjectIDTypeList;
 typedef std::list<PDFImageXObject*> PDFImageXObjectList;
 typedef std::list<std::string> StringList;
+typedef std::pair<double,double> DoubleAndDoublePair;
 
 //  tiff.h extracted defs [prefer to avoid including too much here]
 typedef	unsigned short uint16;	/* sizeof (uint16) must == 2 */
@@ -138,6 +140,10 @@ public:
 	void SetDocumentContextExtender(IDocumentContextExtender* inExtender);
 
 	void Reset();
+    
+    
+    // utility for tiffs, to get what tiff dimensions hummus will use
+    DoubleAndDoublePair ReadImageDimensions(IByteReaderWithPosition* inTIFFStream,unsigned long inImageIndex);
 private:
 	PDFHummus::DocumentContext* mContainerDocumentContext;
 	ObjectsContext* mObjectsContext;

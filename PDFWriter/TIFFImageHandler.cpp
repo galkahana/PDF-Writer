@@ -3509,4 +3509,69 @@ PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFStream(	IByteReaderWi
 	return imageFormXObject;
 }
 
+DoubleAndDoublePair TIFFImageHandler::ReadImageDimensions(IByteReaderWithPosition* inTIFFStream,unsigned long inImageIndex)
+{
+	TIFF* input = NULL;
+    DoubleAndDoublePair result(-1,-1);
+    EStatusCode status;
+    
+	do
+	{
+		TIFFSetErrorHandler(ReportError);
+		TIFFSetWarningHandler(ReportWarning);
+        
+		StreamWithPos streamInfo;
+		streamInfo.mStream = inTIFFStream;
+		streamInfo.mOriginalPosition = inTIFFStream->GetCurrentPosition();
+		
+		input = TIFFClientOpen("Stream","r",(thandle_t)&streamInfo,STATIC_streamRead,
+                               STATIC_streamWrite,
+                               STATIC_streamSeek,
+                               STATIC_streamClose,
+                               STATIC_tiffSize,
+                               STATIC_tiffMap,
+                               STATIC_tiffUnmap);
+		if(!input)
+		{
+			TRACE_LOG("TIFFImageHandler::ReadImageDimensions. cannot open stream for reading");
+			break;
+		}
+        
+        
+		InitializeConversionState();
+		mT2p->input = input;
+		mT2p->inputFilePath = "";
+		mT2p->pdf_page = inImageIndex;
+        
+        
+        status = ReadTopLevelTiffInformation();
+        if(status != PDFHummus::eSuccess)
+            break;
+            
+        if(mT2p->pdf_page >= mT2p->tiff_pagecount)
+        {
+            TRACE_LOG3(
+                           "TIFFImageHandler::ReadImageDimensions, Requested tiff page %u where the tiff only has %u pages. Tiff file name - %s",
+                           mT2p->pdf_page,
+                           mT2p->tiff_pagecount,
+                           mT2p->inputFilePath.c_str());
+            status = PDFHummus::eFailure;
+            break;
+        }
+        
+        status = ReadTIFFPageInformation();
+        if(status != PDFHummus::eSuccess)
+            break;
+        result.first = mT2p->pdf_mediabox.x2 - mT2p->pdf_mediabox.x1;
+        result.second = mT2p->pdf_mediabox.y2 - mT2p->pdf_mediabox.y1;
+		      
+	}while(false);
+    
+	DestroyConversionState();
+	if(input != NULL)
+		TIFFClose(input);
+    
+    return result;
+}
+
 #endif

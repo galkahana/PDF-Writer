@@ -933,6 +933,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		491C68F71743D19800E7EBE1 /* IPageEndWritingTask.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = IPageEndWritingTask.h; path = ../PDFWriter/IPageEndWritingTask.h; sourceTree = "<group>"; };
 		49456FBD15BC954A00272BC1 /* PDFPageMergingHelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PDFPageMergingHelper.cpp; path = ../PDFWriter/PDFPageMergingHelper.cpp; sourceTree = "<group>"; };
 		49456FBE15BC954A00272BC1 /* PDFPageMergingHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PDFPageMergingHelper.h; path = ../PDFWriter/PDFPageMergingHelper.h; sourceTree = "<group>"; };
 		4947D51216986BA5008971EF /* libPDFWriter-iphonesimulator.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPDFWriter-iphonesimulator.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1334,6 +1335,7 @@
 				4988223415C094DD007F9448 /* IResourceWritingTask.h */,
 				4988223215C094CE007F9448 /* IFormEndWritingTask.h */,
 				49EF594916BD372300531FD7 /* IContentContextListener.h */,
+				491C68F71743D19800E7EBE1 /* IPageEndWritingTask.h */,
 			);
 			name = "Document Context Level";
 			sourceTree = "<group>";

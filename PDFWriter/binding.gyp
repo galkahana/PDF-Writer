@@ -226,6 +226,7 @@
                'InputStringBufferStream.h',
                'IOBasicTypes.h',
                'IObjectsContextExtender.h',
+               'IPageEndWritingTask.h',
                'IPDFParserExtender.h',
                'IReadPositionProvider.h',
                'IResourceWritingTask.h',
