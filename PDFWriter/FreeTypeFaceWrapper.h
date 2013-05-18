@@ -105,6 +105,11 @@ public:
 	FT_UShort GetInPDFMeasurements(FT_UShort inFontMeasurement);
 	FT_Pos GetInPDFMeasurements(FT_Pos inFontMeasurement);
 
+    // translate to freetype glyph index. this may not always be the input, as in the case
+    // of type 3 fonts with private encoding. so what actually gets in is the glyph index
+    // according to hummus
+    unsigned int GetGlyphIndexInFreeTypeIndexes(unsigned int inGlyphIndex);
+
 private:
 
 	FT_Face mFace;

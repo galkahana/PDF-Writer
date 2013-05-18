@@ -79,6 +79,8 @@ public:
 
 	PDFHummus::EStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
 	PDFHummus::EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);
+    
+    FreeTypeFaceWrapper* GetFreeTypeFont();
 
 private:
 	FreeTypeFaceWrapper mFaceWrapper;

@@ -151,3 +151,8 @@ EStatusCode PDFUsedFont::ReadState(PDFParser* inStateReader,ObjectIDType inObjec
 
 	return mWrittenFont->ReadState(inStateReader,writtenFontReference->mObjectID);
 }
+
+FreeTypeFaceWrapper* PDFUsedFont::GetFreeTypeFont()
+{
+    return &mFaceWrapper;
+}

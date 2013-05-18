@@ -678,3 +678,12 @@ FT_Pos FreeTypeFaceWrapper::GetGlyphWidth(unsigned int inGlyphIndex)
         FT_Load_Glyph(mFace,inGlyphIndex,FT_LOAD_NO_SCALE);
     return GetInPDFMeasurements(mFace->glyph->metrics.horiAdvance);
 }
+
+unsigned int FreeTypeFaceWrapper::GetGlyphIndexInFreeTypeIndexes(unsigned int inGlyphIndex)
+{
+    if(mFormatParticularWrapper && mFormatParticularWrapper->HasPrivateEncoding())
+        return mFormatParticularWrapper->GetFreeTypeGlyphIndexFromEncodingGlyphIndex(inGlyphIndex);
+    else
+        return inGlyphIndex;
+    
+}
