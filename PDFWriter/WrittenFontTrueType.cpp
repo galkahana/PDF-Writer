@@ -164,6 +164,17 @@ bool WrittenFontTrueType::AddToANSIRepresentation(	const GlyphUnicodeMappingList
 			{
 				encodingResult.first = false;
 			}
+			else if(0x2022 == it->mUnicodeValues.front())
+			{
+				// From the reference:
+				// In WinAnsiEncoding, all unused codes greater than 40 map to the bullet character. 
+				// However, only code 225 is specifically assigned to the bullet character; other codes are subject to future reassignment.
+
+				// now i don't know if it's related or not...but acrobat isn't happy when i'm using winansi with bullet. and text coming after that bullet may be
+				// corrupted.
+				// so i'm forcing CID if i hit bullet till i know better.
+				encodingResult.first = false;
+			}
 			else
 			{
 				encodingResult = winAnsiEncoding.Encode(it->mUnicodeValues.front());
@@ -232,5 +243,5 @@ EStatusCode WrittenFontTrueType::ReadState(PDFParser* inStateReader,ObjectIDType
 {
 	PDFObjectCastPtr<PDFDictionary> writtenFontState(inStateReader->ParseNewObject(inObjectID));
 
-	return AbstractWrittenFont::ReadStateFromObject(inStateReader,writtenFontState.GetPtr());
+	return AbstractWrittenFont::ReadState(inStateReader,writtenFontState.GetPtr());
 }
