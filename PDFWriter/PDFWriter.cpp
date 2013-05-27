@@ -114,7 +114,7 @@ void PDFWriter::Cleanup()
 {
 	mObjectsContext.Cleanup();
 	mDocumentContext.Cleanup();
-	ReleaseLog();
+	//ReleaseLog();
 }
 
 void PDFWriter::Reset()
@@ -149,9 +149,9 @@ EStatusCode PDFWriter::WritePageAndRelease(PDFPage* inPage)
 void PDFWriter::SetupLog(const LogConfiguration& inLogConfiguration)
 {
 	if(inLogConfiguration.LogStream)
-		Singleton<Trace>::GetInstance()->SetLogSettings(inLogConfiguration.LogStream,inLogConfiguration.ShouldLog);
+		Trace::DefaultTrace.SetLogSettings(inLogConfiguration.LogStream,inLogConfiguration.ShouldLog);
 	else
-		Singleton<Trace>::GetInstance()->SetLogSettings(inLogConfiguration.LogFileLocation,inLogConfiguration.ShouldLog,inLogConfiguration.StartWithBOM);
+		Trace::DefaultTrace.SetLogSettings(inLogConfiguration.LogFileLocation,inLogConfiguration.ShouldLog,inLogConfiguration.StartWithBOM);
 }
 
 void PDFWriter::SetupObjectsContext(const PDFCreationSettings& inPDFCreationSettings)
@@ -161,7 +161,7 @@ void PDFWriter::SetupObjectsContext(const PDFCreationSettings& inPDFCreationSett
 
 void PDFWriter::ReleaseLog()
 {
-	Singleton<Trace>::Reset();
+	//Singleton<Trace>::Reset();
 }
 
 DocumentContext& PDFWriter::GetDocumentContext()
@@ -373,7 +373,7 @@ EStatusCode PDFWriter::Shutdown(const std::string& inStateFilePath)
 	}
 	else
 		status = mOutputFile.CloseFile();
-	ReleaseLog();
+	//ReleaseLog();
 	return status;
 }
 
