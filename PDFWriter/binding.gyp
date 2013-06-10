@@ -13,16 +13,16 @@
                 }]
             ],
             'dependencies': [
-		'<(module_root_dir)/deps/FreeType/binding.gyp:freetype',
-		'<(module_root_dir)/deps/LibJpeg/binding.gyp:libjpeg',
-               '<(module_root_dir)/deps/ZLib/binding.gyp:zlib',
-               '<(module_root_dir)/deps/LibTiff/binding.gyp:libtiff'
+		'<(module_root_dir)/src/deps/FreeType/binding.gyp:freetype',
+		'<(module_root_dir)/src/deps/LibJpeg/binding.gyp:libjpeg',
+               '<(module_root_dir)/src/deps/ZLib/binding.gyp:zlib',
+               '<(module_root_dir)/src/deps/LibTiff/binding.gyp:libtiff'
             ],
             'include_dirs': [
-                '<(module_root_dir)/deps/FreeType/include',
-                '<(module_root_dir)/deps/LibTiff',
-                '<(module_root_dir)/deps/ZLib',
-                '<(module_root_dir)/deps/LibJpeg'
+                '<(module_root_dir)/src/deps/FreeType/include',
+                '<(module_root_dir)/src/deps/LibTiff',
+                '<(module_root_dir)/src/deps/ZLib',
+                '<(module_root_dir)/src/deps/LibJpeg'
             ],
            'sources': [
                'AbstractContentContext.cpp',

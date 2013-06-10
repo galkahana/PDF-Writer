@@ -13,7 +13,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "1780"
          endingLineNumber = "1780"
-         landmarkName = "DocumentContext::Cleanup()"
+         landmarkName = "DocumentContext::CreatePDFCopyingContext(IByteReaderWithPosition* inPDFStream)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -27,19 +27,6 @@
          startingLineNumber = "617"
          endingLineNumber = "617"
          landmarkName = "PDFWriter::ModifyPDF(const std::string&amp; inModifiedFile, EPDFVersion inPDFVersion, const std::string&amp; inOptionalAlternativeOutputFile, const LogConfiguration&amp; inLogConfiguration, const PDFCreationSettings&amp; inPDFCreationSettings)"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "Yes"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "../PDFWriter/DocumentContext.cpp"
-         timestampString = "364079154.316264"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "1956"
-         endingLineNumber = "1956"
-         landmarkName = "DocumentContext::FinalizeModifiedPDF(PDFParser* inModifiedFileParser,EPDFVersion inModifiedPDFVersion)"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint

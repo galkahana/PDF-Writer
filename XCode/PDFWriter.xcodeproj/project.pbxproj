@@ -1376,6 +1376,7 @@
 		498709F9155D019600C9B080 /* Infrastracture */ = {
 			isa = PBXGroup;
 			children = (
+				498709FD155D01CA00C9B080 /* IO */,
 				498709FA155D01A000C9B080 /* Basics */,
 				498709FB155D01B600C9B080 /* Encoding */,
 				498709FC155D01C000C9B080 /* Encryption */,
@@ -1419,7 +1420,6 @@
 		498709FC155D01C000C9B080 /* Encryption */ = {
 			isa = PBXGroup;
 			children = (
-				498709FD155D01CA00C9B080 /* IO */,
 				499D5236155C59EF006F6E28 /* MD5Generator.cpp */,
 				499D5237155C59EF006F6E28 /* MD5Generator.h */,
 			);
