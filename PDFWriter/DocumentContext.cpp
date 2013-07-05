@@ -1326,7 +1326,7 @@ void DocumentContext::WriteDateState(ObjectsContext* inStateWriter,const PDFDate
 
 void DocumentContext::WriteCatalogInformationState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
 {
-	ObjectIDType rootNodeID;
+	ObjectIDType rootNodeID = 0;
 	if(mCatalogInformation.GetCurrentPageTreeNode())
 	{
 		rootNodeID = inStateWriter->GetInDirectObjectsRegistry().AllocateNewObjectID();
