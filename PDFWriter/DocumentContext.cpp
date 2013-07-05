@@ -1800,6 +1800,9 @@ void DocumentContext::Cleanup()
 	mOutputFilePath.clear();
 	mExtenders.clear();
 	mAnnotations.clear();
+    PDFDocumentCopyingContextSet::iterator it = mCopyingContexts.begin();
+	for(; it != mCopyingContexts.end(); ++it)
+		(*it)->ReleaseDocumentContextReference();
 	mCopyingContexts.clear();
     mModifiedDocumentIDExists = false;
     
