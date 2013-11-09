@@ -57,6 +57,7 @@ private:
 
 	unsigned char mAvailablePositionsCount;
 	UCharAndUCharList mFreeList;
+	bool mAssignedPositionsAvailable[256];
 	unsigned int mAssignedPositions[256];
 	bool mIsCID;
 };
