@@ -583,6 +583,9 @@
     <ClInclude Include="ParsedPrimitiveHelper.h">
       <Filter>PDF Embedding\Parsed objects Helpers</Filter>
     </ClInclude>
+    <ClInclude Include="PDFModifiedPage.h">
+      <Filter>Document Context Level</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="InputBufferedStream.cpp">
@@ -960,6 +963,9 @@
     </ClCompile>
     <ClCompile Include="ParsedPrimitiveHelper.cpp">
       <Filter>PDF Embedding\Parsed objects Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="PDFModifiedPage.cpp">
+      <Filter>Document Context Level</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

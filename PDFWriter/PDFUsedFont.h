@@ -36,6 +36,7 @@ typedef std::list<unsigned short> UShortList;
 typedef std::list<UShortList> UShortListList;
 typedef std::list<std::string> StringList;
 typedef std::list<GlyphUnicodeMappingList> GlyphUnicodeMappingListList;
+typedef std::list<unsigned int> UIntList;
 
 class IWrittenFont;
 class ObjectsContext;
@@ -44,6 +45,17 @@ class PDFParser;
 class PDFUsedFont
 {
 public:
+
+	struct TextMeasures
+	{
+		double xMin;
+		double yMin;
+		double xMax;
+		double yMax;
+		double width;
+		double height;
+	};
+
 	PDFUsedFont(FT_Face inInputFace,
 				const std::string& inFontFilePath,
 				const std::string& inAdditionalMetricsFontFilePath,
@@ -81,6 +93,10 @@ public:
 	PDFHummus::EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);
     
     FreeTypeFaceWrapper* GetFreeTypeFont();
+
+	// text measurements, either pass unicode text or glyphs list
+	PDFUsedFont::TextMeasures CalculateTextDimensions(const std::string& inText,long inFontSize=1);
+	PDFUsedFont::TextMeasures CalculateTextDimensions(const UIntList& inGlyphsList,long inFontSize=1);
 
 private:
 	FreeTypeFaceWrapper mFaceWrapper;

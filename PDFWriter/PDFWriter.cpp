@@ -33,6 +33,7 @@
 #include "OutputStreamTraits.h"
 #include "PDFBoolean.h"
 #include "PDFInteger.h"
+#include "PDFPageInput.h"
 
 using namespace PDFHummus;
 
@@ -700,4 +701,14 @@ InputFile& PDFWriter::GetModifiedInputFile()
 PDFDocumentCopyingContext* PDFWriter::CreatePDFCopyingContextForModifiedFile()
 {
 	return mDocumentContext.CreatePDFCopyingContext(&mModifiedFileParser);    
+}
+
+DoubleAndDoublePair PDFWriter::GetImageDimensions(const std::string& inImageFile,unsigned long inImageIndex)
+{
+	return mDocumentContext.GetImageDimensions(inImageFile,inImageIndex);
+}
+
+PDFHummus::EHummusImageType PDFWriter::GetImageType(const std::string& inImageFile,unsigned long inImageIndex)
+{
+	return mDocumentContext.GetImageType(inImageFile,inImageIndex);
 }

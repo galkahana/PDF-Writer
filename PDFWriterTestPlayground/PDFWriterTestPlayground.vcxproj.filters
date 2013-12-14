@@ -225,6 +225,18 @@
     <ClCompile Include="CopyingAndMergingEmptyPages.cpp">
       <Filter>Tests\PDFEmbedding</Filter>
     </ClCompile>
+    <ClCompile Include="PageModifierTest.cpp">
+      <Filter>Tests\Modification</Filter>
+    </ClCompile>
+    <ClCompile Include="TestMeasurementsTest.cpp">
+      <Filter>Tests\PDFs\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="HighLevelContentContext.cpp">
+      <Filter>Tests\PDFs\Generic</Filter>
+    </ClCompile>
+    <ClCompile Include="HighLevelImages.cpp">
+      <Filter>Tests\PDFs\Images in PDF</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ITestUnit.h">
@@ -382,6 +394,18 @@
     </ClInclude>
     <ClInclude Include="CopyingAndMergingEmptyPages.h">
       <Filter>Tests\PDFEmbedding</Filter>
+    </ClInclude>
+    <ClInclude Include="PageModifierTest.h">
+      <Filter>Tests\Modification</Filter>
+    </ClInclude>
+    <ClInclude Include="TestMeasurementsTest.h">
+      <Filter>Tests\PDFs\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="HighLevelContentContext.h">
+      <Filter>Tests\PDFs\Generic</Filter>
+    </ClInclude>
+    <ClInclude Include="HighLevelImages.h">
+      <Filter>Tests\PDFs\Images in PDF</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

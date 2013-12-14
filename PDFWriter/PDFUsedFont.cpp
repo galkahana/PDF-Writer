@@ -28,6 +28,9 @@
 #include "PDFDictionary.h"
 #include "PDFIndirectObjectReference.h"
 
+#include FT_GLYPH_H
+
+
 using namespace PDFHummus;
 
 PDFUsedFont::PDFUsedFont(FT_Face inInputFace,
@@ -155,4 +158,96 @@ EStatusCode PDFUsedFont::ReadState(PDFParser* inStateReader,ObjectIDType inObjec
 FreeTypeFaceWrapper* PDFUsedFont::GetFreeTypeFont()
 {
     return &mFaceWrapper;
+}
+
+PDFUsedFont::TextMeasures PDFUsedFont::CalculateTextDimensions(const std::string& inText,long inFontSize)
+{
+	UIntList glyphs;
+    UnicodeString unicode;
+        
+    unicode.FromUTF8(inText);
+	mFaceWrapper.GetGlyphsForUnicodeText(unicode.GetUnicodeList(),glyphs);
+	return CalculateTextDimensions(glyphs,inFontSize);
+}
+
+PDFUsedFont::TextMeasures PDFUsedFont::CalculateTextDimensions(const UIntList& inGlyphsList,long inFontSize)
+{
+    // now calculate the placement bounding box. using the algorithm described in the FreeType turtorial part 2, minus the kerning part, and with no scale
+
+    // first, calculate the pen advancements
+    int           pen_x, pen_y;
+    std::list<FT_Vector> pos;
+    pen_x = 0;   /* start at (0,0) */
+    pen_y = 0;
+    
+    UIntList::const_iterator it = inGlyphsList.begin();
+    for(; it != inGlyphsList.end();++it)
+    {
+        pos.push_back(FT_Vector());
+
+        pos.back().x = pen_x;
+        pos.back().y = pen_y;
+
+        pen_x += mFaceWrapper.GetGlyphWidth(*it);
+    }
+    
+    // now let's combine with the bbox, so we get the nice bbox for the whole string
+    
+    FT_BBox  bbox;
+    FT_BBox  glyph_bbox;
+    bbox.xMin = bbox.yMin =  32000;
+    bbox.xMax = bbox.yMax = -32000;
+    
+    it = inGlyphsList.begin();
+    std::list<FT_Vector>::iterator itPos = pos.begin();
+    
+    for(; it != inGlyphsList.end();++it,++itPos)
+    {
+        FT_Load_Glyph(mFaceWrapper,mFaceWrapper.GetGlyphIndexInFreeTypeIndexes(*it),FT_LOAD_NO_SCALE);
+        FT_Glyph aGlyph;
+        FT_Get_Glyph( mFaceWrapper->glyph,&aGlyph);
+        FT_Glyph_Get_CBox(aGlyph, FT_GLYPH_BBOX_UNSCALED,&glyph_bbox);
+        FT_Done_Glyph(aGlyph);
+        
+        glyph_bbox.xMin = mFaceWrapper.GetInPDFMeasurements(glyph_bbox.xMin);
+        glyph_bbox.xMax = mFaceWrapper.GetInPDFMeasurements(glyph_bbox.xMax);
+        glyph_bbox.yMin = mFaceWrapper.GetInPDFMeasurements(glyph_bbox.yMin);
+        glyph_bbox.yMax = mFaceWrapper.GetInPDFMeasurements(glyph_bbox.yMax);
+        
+        glyph_bbox.xMin += itPos->x;
+        glyph_bbox.xMax += itPos->x;
+        glyph_bbox.yMin += itPos->y;
+        glyph_bbox.yMax += itPos->y;
+    
+        
+        if ( glyph_bbox.xMin < bbox.xMin )
+            bbox.xMin = glyph_bbox.xMin;
+        
+        if ( glyph_bbox.yMin < bbox.yMin )
+            bbox.yMin = glyph_bbox.yMin;
+        
+        if ( glyph_bbox.xMax > bbox.xMax )
+            bbox.xMax = glyph_bbox.xMax;
+        
+        if ( glyph_bbox.yMax > bbox.yMax )
+            bbox.yMax = glyph_bbox.yMax;
+    }
+    if ( bbox.xMin > bbox.xMax )
+    {
+        bbox.xMin = 0;
+        bbox.yMin = 0;
+        bbox.xMax = 0;
+        bbox.yMax = 0;
+    }
+
+	PDFUsedFont::TextMeasures result;
+
+	result.xMin = bbox.xMin*inFontSize/1000;
+	result.yMin = bbox.yMin*inFontSize/1000;
+	result.xMax = bbox.xMax*inFontSize/1000;
+	result.yMax = bbox.yMax*inFontSize/1000;
+	result.width = (bbox.xMax-bbox.xMin)*inFontSize/1000;
+	result.height = (bbox.yMax-bbox.yMin)*inFontSize/1000;
+
+	return result;
 }

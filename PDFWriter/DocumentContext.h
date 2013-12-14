@@ -42,6 +42,8 @@
 
 using namespace IOBasicTypes;
 
+typedef std::pair<ObjectIDType,bool> ObjectIDTypeAndBool;
+
 class DictionaryContext;
 class ObjectsContext;
 class PDFPage;
@@ -75,9 +77,33 @@ typedef std::list<IFormEndWritingTask*> IFormEndWritingTaskList;
 typedef std::map<PDFFormXObject*,IFormEndWritingTaskList> PDFFormXObjectToIFormEndWritingTaskListMap;
 typedef std::list<IPageEndWritingTask*> IPageEndWritingTaskList;
 typedef std::map<PDFPage*,IPageEndWritingTaskList> PDFPageToIPageEndWritingTaskListMap;
+typedef std::pair<std::string,unsigned long> StringAndULongPair;
 
 namespace PDFHummus
 {
+	// image type enumeration, for images supported by hummus
+	enum EHummusImageType
+	{
+		eUndefined,
+		ePDF,
+		eJPG,
+		eTIFF
+	};
+
+	struct HummusImageInformation
+	{
+		HummusImageInformation(){writtenObjectID = 0;imageType=eUndefined;imageWidth=-1;imageHeight=-1;}
+    
+		ObjectIDType writtenObjectID;
+		EHummusImageType imageType;
+		double imageWidth;
+		double imageHeight;
+	};
+
+
+	typedef std::map<StringAndULongPair,HummusImageInformation> StringAndULongPairToHummusImageInformationMap;
+
+
 	class DocumentContext
 	{
 	public:
@@ -212,6 +238,11 @@ namespace PDFHummus
 		PDFDocumentCopyingContext* CreatePDFCopyingContext(IByteReaderWithPosition* inPDFStream);
         PDFDocumentCopyingContext* CreatePDFCopyingContext(PDFParser* inPDFParser);
 
+		// some public image info services, for users of hummus
+		DoubleAndDoublePair GetImageDimensions(const std::string& inImageFile,unsigned long inImageIndex = 0);
+		EHummusImageType GetImageType(const std::string& inImageFile,unsigned long inImageIndex);
+
+
 		// Font [Text] (font index is for multi-font files. for single file fonts, pass 0)
 		PDFUsedFont* GetFontForFile(const std::string& inFontFilePath,long inFontIndex);
 		// second overload is for type 1, when an additional metrics file is available
@@ -262,6 +293,11 @@ namespace PDFHummus
 		// internal methods for copying context listeners handling
 		void RegisterCopyingContext(PDFDocumentCopyingContext* inCopyingContext);
 		void UnRegisterCopyingContext(PDFDocumentCopyingContext* inCopyingContext);
+
+		// internal methods for easy image writing
+		EStatusCode WriteFormForImage(const std::string& inImagePath,unsigned long inImageIndex,ObjectIDType inObjectID);
+		ObjectIDTypeAndBool RegisterImageForDrawing(const std::string& inImageFile,unsigned long inImageIndex);
+
 	private:
 		ObjectsContext* mObjectsContext;
 		TrailerInformation mTrailerInformation;
@@ -283,6 +319,7 @@ namespace PDFHummus
         ResourcesDictionaryAndStringToIResourceWritingTaskListMap mResourcesTasks;
         PDFFormXObjectToIFormEndWritingTaskListMap mFormEndTasks;
         PDFPageToIPageEndWritingTaskListMap mPageEndTasks;
+	    StringAndULongPairToHummusImageInformationMap mImagesInformation;
 		
 		void WriteHeaderComment(EPDFVersion inPDFVersion);
 		void Write4BinaryBytes();
@@ -333,5 +370,6 @@ namespace PDFHummus
         bool DoExtendersRequireCatalogUpdate(PDFParser* inModifiedFileParser);
         bool RequiresXrefStream(PDFParser* inModifiedFileParser);
         PDFHummus::EStatusCode WriteXrefStream(LongFilePositionType& outXrefPosition);
+		HummusImageInformation& GetImageInformationStructFor(const std::string& inImageFile,unsigned long inImageIndex);
 	};
 }

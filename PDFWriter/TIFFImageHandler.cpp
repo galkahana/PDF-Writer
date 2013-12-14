@@ -3541,7 +3541,7 @@ DoubleAndDoublePair TIFFImageHandler::ReadImageDimensions(IByteReaderWithPositio
 		InitializeConversionState();
 		mT2p->input = input;
 		mT2p->inputFilePath = "";
-		mT2p->pdf_page = inImageIndex;
+		mT2p->pdf_page = (tdir_t)inImageIndex;
         
         
         status = ReadTopLevelTiffInformation();

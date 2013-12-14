@@ -96,6 +96,7 @@ PDFImageXObject.cpp
 PDFIndirectObjectReference.cpp
 PDFInteger.cpp
 PDFLiteralString.cpp
+PDFModifiedPage.cpp
 PDFName.cpp
 PDFNull.cpp
 PDFObject.cpp
@@ -262,6 +263,7 @@ PDFImageXObject.h
 PDFIndirectObjectReference.h
 PDFInteger.h
 PDFLiteralString.h
+PDFModifiedPage.h
 PDFName.h
 PDFNull.h
 PDFObject.h
@@ -345,6 +347,8 @@ PDFFormXObject.cpp
 PDFFormXObject.h
 PDFImageXObject.cpp
 PDFImageXObject.h
+PDFModifiedPage.cpp
+PDFModifiedPage.h
 PDFPage.cpp
 PDFPage.h
 ProcsetResourcesConstants.h

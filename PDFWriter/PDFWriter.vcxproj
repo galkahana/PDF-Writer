@@ -183,6 +183,7 @@
     <ClInclude Include="EPDFVersion.h" />
     <ClInclude Include="MyStringBuf.h" />
     <ClInclude Include="ParsedPrimitiveHelper.h" />
+    <ClInclude Include="PDFModifiedPage.h" />
     <ClInclude Include="PDFObjectParser.h" />
     <ClInclude Include="PDFPageInput.h" />
     <ClInclude Include="PDFPageMergingHelper.h" />
@@ -347,6 +348,7 @@
     <ClCompile Include="OutputStringBufferStream.cpp" />
     <ClCompile Include="CMYKRGBColor.cpp" />
     <ClCompile Include="ParsedPrimitiveHelper.cpp" />
+    <ClCompile Include="PDFModifiedPage.cpp" />
     <ClCompile Include="PDFObjectParser.cpp" />
     <ClCompile Include="PDFPageInput.cpp" />
     <ClCompile Include="PDFPageMergingHelper.cpp" />

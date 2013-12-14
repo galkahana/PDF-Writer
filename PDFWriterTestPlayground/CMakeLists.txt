@@ -19,6 +19,7 @@ EmptyPagesPDF.cpp
 FileURL.cpp
 FlateEncryptionTest.cpp
 FormXObjectTest.cpp
+HighLevelContentContext.cpp
 FreeTypeInitializationTest.cpp
 ImagesAndFormsForwardReferenceTest.cpp
 InputFlateDecodeTester.cpp
@@ -30,6 +31,7 @@ LogTest.cpp
 MergePDFPages.cpp
 MergeToPDFForm.cpp
 ModifyingExistingFileContent.cpp
+PageModifierTest.cpp
 OpenTypeTest.cpp
 OutputFileStreamTest.cpp
 PDFComment.cpp
@@ -46,7 +48,9 @@ RefCountTest.cpp
 ShutDownRestartTest.cpp
 SimpleContentPageTest.cpp
 SimpleTextUsage.cpp
+TestMeasurementsTest.cpp
 TestsRunner.cpp
+HighLevelImages.cpp
 TIFFImageTest.cpp
 TiffSpecialsTest.cpp
 TimerTest.cpp
@@ -72,6 +76,7 @@ EmptyFileTest.h
 EmptyPagesPDF.h
 FileURL.h
 FlateEncryptionTest.h
+HighLevelContentContext.h
 FormXObjectTest.h
 FreeTypeInitializationTest.h
 ImagesAndFormsForwardReferenceTest.h
@@ -85,6 +90,7 @@ LogTest.h
 MergePDFPages.h
 MergeToPDFForm.h
 ModifyingExistingFileContent.h
+PageModifierTest.h
 OpenTypeTest.h
 OutputFileStreamTest.h
 PDFComment.h
@@ -101,7 +107,9 @@ RefCountTest.h
 ShutDownRestartTest.h
 SimpleContentPageTest.h
 SimpleTextUsage.h
+TestMeasurementsTest.h
 TestsRunner.h
+HighLevelImages.h
 TIFFImageTest.h
 TiffSpecialsTest.h
 TimerTest.h
@@ -185,6 +193,8 @@ BasicModification.cpp
 BasicModification.h
 ModifyingExistingFileContent.cpp
 ModifyingExistingFileContent.h
+PageModifierTest.cpp
+PageModifierTest.h
 )
 
 source_group("Tests\\Object Context Level" FILES
@@ -238,6 +248,8 @@ EmptyFileTest.cpp
 EmptyFileTest.h
 EmptyPagesPDF.cpp
 EmptyPagesPDF.h
+HighLevelContentContext.cpp
+HighLevelContentContext.h
 FormXObjectTest.cpp
 FormXObjectTest.h
 LinksTest.cpp
@@ -253,6 +265,8 @@ ImagesAndFormsForwardReferenceTest.cpp
 ImagesAndFormsForwardReferenceTest.h
 JPGImageTest.cpp
 JPGImageTest.h
+HighLevelImages.cpp
+HighLevelImages.h
 TIFFImageTest.cpp
 TIFFImageTest.h
 TiffSpecialsTest.cpp
@@ -262,6 +276,8 @@ TiffSpecialsTest.h
 source_group(Tests\\Text FILES
 SimpleTextUsage.cpp
 SimpleTextUsage.h
+TestMeasurementsTest.cpp
+TestMeasurementsTest.h
 )
 
 source_group(Tests\\TrueType FILES
