@@ -1,3 +1,9 @@
+# cmake
+Makefile
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+
 #all the binaries
 BUILD
 # Compiled source #
@@ -14,6 +20,7 @@ BUILD
 BuildLog.htm
 *.obj
 *.idb
+*.a
 
 _.swp
 

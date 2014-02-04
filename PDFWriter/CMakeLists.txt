@@ -1,20 +1,8 @@
+# Set the name of the project.
 project(PDFWriter)
-include_directories (${Zlib_SOURCE_DIR})
 
-if(NOT PDFHUMMUS_NO_DCT)
-	include_directories (${LibJpeg_SOURCE_DIR})
-else(NOT PDFHUMMUS_NO_DCT)
-	add_definitions(-DPDFHUMMUS_NO_DCT=1)
-endif(NOT PDFHUMMUS_NO_DCT)
-
-if(NOT PDFHUMMUS_NO_TIFF)
-	include_directories (${LibTiff_SOURCE_DIR})  
-else(NOT PDFHUMMUS_NO_TIFF)
-	add_definitions(-DPDFHUMMUS_NO_TIFF=1)
-endif(NOT PDFHUMMUS_NO_TIFF)
-
-include_directories (${FreeType_SOURCE_DIR}/include) 
-add_library (PDFWriter 
+# Add library.
+add_library(PDFWriter
 #sources
 AbstractContentContext.cpp
 AbstractWrittenFont.cpp

@@ -2,7 +2,7 @@ project(PDFWriterTestPlayground)
 cmake_minimum_required (VERSION 2.6)
 
 
-add_executable(PDFWriterTestPlayground 
+add_executable(PDFWriterTestPlayground
 
 #sources
 AppendingAndReading.cpp
@@ -300,7 +300,7 @@ if(PDFHUMMUS_NO_TIFF)
 endif(PDFHUMMUS_NO_TIFF)
 
 
-include_directories (${PDFWriter_SOURCE_DIR}) 
+include_directories (${PDFWriter_SOURCE_DIR})
 include_directories (${Zlib_SOURCE_DIR})
 if(NOT PDFHUMMUS_NO_DCT)
 	include_directories (${LibJpeg_SOURCE_DIR})
@@ -309,22 +309,22 @@ else(NOT PDFHUMMUS_NO_DCT)
 endif(NOT PDFHUMMUS_NO_DCT)
 
 if(NOT PDFHUMMUS_NO_TIFF)
-	include_directories (${LibTiff_SOURCE_DIR})  
+	include_directories (${LibTiff_SOURCE_DIR})
 else(NOT PDFHUMMUS_NO_TIFF)
 	add_definitions(-DPDFHUMMUS_NO_TIFF=1)
 endif(NOT PDFHUMMUS_NO_TIFF)
-include_directories (${FreeType_SOURCE_DIR}/include) 
+include_directories (${FreeType_SOURCE_DIR}/include)
 
 add_dependencies(PDFWriterTestPlayground PDFWriter) #add_dependencies makes sure that dependencies are built before main target
 
 target_link_libraries (PDFWriterTestPlayground PDFWriter)
-target_link_libraries (PDFWriterTestPlayground FreeType)
+target_link_libraries (PDFWriterTestPlayground ${FREETYPE_LIBRARIES})
 if(NOT PDFHUMMUS_NO_DCT)
-	target_link_libraries (PDFWriterTestPlayground LibJpeg)
+	target_link_libraries (PDFWriterTestPlayground jpeg)
 endif(NOT PDFHUMMUS_NO_DCT)
-target_link_libraries (PDFWriterTestPlayground Zlib)
+target_link_libraries (PDFWriterTestPlayground ${Z_LIBRARIES})
 if(NOT PDFHUMMUS_NO_TIFF)
-	target_link_libraries (PDFWriterTestPlayground LibTiff)
+	target_link_libraries (PDFWriterTestPlayground ${TIFF_LIBRARIES})
 endif(NOT PDFHUMMUS_NO_TIFF)
 
 if(APPLE)
