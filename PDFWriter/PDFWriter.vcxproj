@@ -192,6 +192,7 @@
     <ClInclude Include="PDFPageInput.h" />
     <ClInclude Include="PDFPageMergingHelper.h" />
     <ClInclude Include="PDFParser.h" />
+    <ClInclude Include="PDFTiledPattern.h" />
     <ClInclude Include="PDFWriter.h" />
     <ClInclude Include="SafeBufferMacrosDefs.h" />
     <ClInclude Include="BoxingBase.h" />
@@ -357,6 +358,7 @@
     <ClCompile Include="PDFPageInput.cpp" />
     <ClCompile Include="PDFPageMergingHelper.cpp" />
     <ClCompile Include="PDFParser.cpp" />
+    <ClCompile Include="PDFTiledPattern.cpp" />
     <ClCompile Include="PDFWriter.cpp" />
     <ClCompile Include="RefCountObject.cpp" />
     <ClCompile Include="MD5Generator.cpp" />

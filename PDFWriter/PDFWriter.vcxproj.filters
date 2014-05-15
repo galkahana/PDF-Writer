@@ -586,6 +586,9 @@
     <ClInclude Include="PDFModifiedPage.h">
       <Filter>Document Context Level</Filter>
     </ClInclude>
+    <ClInclude Include="PDFTiledPattern.h">
+      <Filter>Document Context Level</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="InputBufferedStream.cpp">
@@ -965,6 +968,9 @@
       <Filter>PDF Embedding\Parsed objects Helpers</Filter>
     </ClCompile>
     <ClCompile Include="PDFModifiedPage.cpp">
+      <Filter>Document Context Level</Filter>
+    </ClCompile>
+    <ClCompile Include="PDFTiledPattern.cpp">
       <Filter>Document Context Level</Filter>
     </ClCompile>
   </ItemGroup>
