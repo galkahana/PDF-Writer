@@ -32,6 +32,7 @@
 #include "IDocumentContextExtender.h"
 #include "PageContentContext.h"
 #include "PDFFormXObject.h"
+#include "PDFTiledPattern.h"
 #include "PDFParser.h"
 #include "PDFObjectCast.h"
 #include "PDFDictionary.h"
@@ -47,6 +48,7 @@
 #include "IResourceWritingTask.h"
 #include "IFormEndWritingTask.h"
 #include "IPageEndWritingTask.h"
+#include "ITiledPatternEndWritingTask.h"
 #include "PDFPageInput.h"
 
 
@@ -766,6 +768,101 @@ EStatusCode DocumentContext::EndPageContentContext(PageContentContext* inPageCon
 	return status;
 }
 
+static const std::string scPattern = "Pattern";
+static const std::string scPatternType = "PatternType";
+static const std::string scPaintType = "PaintType";
+static const std::string scTilingType = "TilingType";
+static const std::string scXStep = "XStep";
+static const std::string scYStep = "YStep";
+
+
+PDFTiledPattern* DocumentContext::StartTiledPattern(
+	int inPaintType,
+	int inTilingType,
+	const PDFRectangle& inBoundingBox,
+	double inXStep,
+	double inYStep,
+	ObjectIDType inObjectID,
+	const double* inMatrix)
+{
+	PDFTiledPattern* aPatternObject = NULL;
+	do
+	{
+		mObjectsContext->StartNewIndirectObject(inObjectID);
+		DictionaryContext* context = mObjectsContext->StartDictionary();
+
+		// type
+		context->WriteKey(scType);
+		context->WriteNameValue(scPattern);
+
+		// pattern type
+		context->WriteKey(scPatternType);
+		context->WriteIntegerValue(1);
+
+		// paint type
+		context->WriteKey(scPaintType);
+		context->WriteIntegerValue(inPaintType);
+
+		// tiling type
+		context->WriteKey(scTilingType);
+		context->WriteIntegerValue(inTilingType);
+
+		// x step
+		context->WriteKey(scXStep);
+		context->WriteDoubleValue(inXStep);
+
+		// y step
+		context->WriteKey(scYStep);
+		context->WriteDoubleValue(inYStep);
+
+		// bbox
+		context->WriteKey(scBBox);
+		context->WriteRectangleValue(inBoundingBox);
+
+		// matrix
+		if (inMatrix && !IsIdentityMatrix(inMatrix))
+		{
+			context->WriteKey(scMatrix);
+			mObjectsContext->StartArray();
+			for (int i = 0; i<6; ++i)
+				mObjectsContext->WriteDouble(inMatrix[i]);
+			mObjectsContext->EndArray(eTokenSeparatorEndLine);
+		}
+
+		// Resource dict 
+		context->WriteKey(scResources);
+		// put a resources dictionary place holder
+		ObjectIDType resourcesDictionaryID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
+		context->WriteNewObjectReferenceValue(resourcesDictionaryID);
+
+		// Now start the stream and the form XObject state
+		aPatternObject = new PDFTiledPattern(this, inObjectID, mObjectsContext->StartPDFStream(context), resourcesDictionaryID);
+	} while (false);
+
+	return aPatternObject;
+
+
+}
+
+
+PDFTiledPattern* DocumentContext::StartTiledPattern(int inPaintType,
+	int inTilingType,
+	const PDFRectangle& inBoundingBox,
+	double inXStep,
+	double inYStep,
+	const double* inMatrix)
+{
+	ObjectIDType objectID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
+	return StartTiledPattern(inPaintType,
+							 inTilingType,
+							 inBoundingBox,
+							 inXStep,
+							 inYStep,
+							 objectID, 
+							 inMatrix);
+
+}
+
 static const std::string scXObject = "XObject";
 static const std::string scSubType = "Subtype";
 static const std::string scForm = "Form";
@@ -869,11 +966,49 @@ EStatusCode DocumentContext::EndFormXObjectNoRelease(PDFFormXObject* inFormXObje
 	return status;
 }
 
+EStatusCode DocumentContext::EndTiledPattern(PDFTiledPattern* inTiledPattern)
+{
+	mObjectsContext->EndPDFStream(inTiledPattern->GetContentStream());
+
+	// now write the resources dictionary, full of all the goodness that got accumulated over the stream write
+	mObjectsContext->StartNewIndirectObject(inTiledPattern->GetResourcesDictionaryObjectID());
+	WriteResourcesDictionary(inTiledPattern->GetResourcesDictionary());
+	mObjectsContext->EndIndirectObject();
+
+	// now write writing tasks
+	PDFTiledPatternToITiledPatternEndWritingTaskListMap::iterator it = mTiledPatternEndTasks.find(inTiledPattern);
+
+	EStatusCode status = eSuccess;
+	if (it != mTiledPatternEndTasks.end())
+	{
+		ITiledPatternEndWritingTaskList::iterator itTasks = it->second.begin();
+
+		for (; itTasks != it->second.end() && eSuccess == status; ++itTasks)
+			status = (*itTasks)->Write(inTiledPattern, mObjectsContext, this);
+
+		// one time, so delete
+		for (itTasks = it->second.begin(); itTasks != it->second.end(); ++itTasks)
+			delete (*itTasks);
+		mTiledPatternEndTasks.erase(it);
+	}
+
+	return status;
+}
+
+EStatusCode DocumentContext::EndTiledPatternAndRelease(PDFTiledPattern* inTiledPattern)
+{
+	EStatusCode status = EndTiledPattern(inTiledPattern);
+	delete inTiledPattern; 
+
+	return status;
+
+}
+
+
 EStatusCode DocumentContext::EndFormXObject(PDFFormXObject* inFormXObject)
 {
 	return EndFormXObjectNoRelease(inFormXObject);
 }
-
 
 EStatusCode DocumentContext::EndFormXObjectAndRelease(PDFFormXObject* inFormXObject)
 {
@@ -1840,6 +1975,17 @@ void DocumentContext::Cleanup()
     }
     mPageEndTasks.clear();
 
+
+	PDFTiledPatternToITiledPatternEndWritingTaskListMap::iterator itPatternEnd = mTiledPatternEndTasks.begin();
+
+	for (; itPatternEnd != mTiledPatternEndTasks.end(); ++itPatternEnd)
+	{
+		ITiledPatternEndWritingTaskList::iterator itTiledPatternEndWritingTasks = itPatternEnd->second.begin();
+		for (; itTiledPatternEndWritingTasks != itPatternEnd->second.end(); ++itTiledPatternEndWritingTasks)
+			delete *itTiledPatternEndWritingTasks;
+
+	}
+	mTiledPatternEndTasks.clear();
 }
 
 void DocumentContext::SetParserExtender(IPDFParserExtender* inParserExtender)
@@ -2270,6 +2416,13 @@ std::string DocumentContext::AddExtendedResourceMapping(PDFPage* inPage,
     return AddExtendedResourceMapping(&inPage->GetResourcesDictionary(),inResourceCategoryName,inWritingTask);
 }
 
+std::string DocumentContext::AddExtendedResourceMapping(PDFTiledPattern* inPattern,
+	const std::string& inResourceCategoryName,
+	IResourceWritingTask* inWritingTask)
+{
+	return AddExtendedResourceMapping(&inPattern->GetResourcesDictionary(), inResourceCategoryName, inWritingTask);
+}
+
 std::string DocumentContext::AddExtendedResourceMapping(ResourcesDictionary* inResourceDictionary,
                                   const std::string& inResourceCategoryName,
                                   IResourceWritingTask* inWritingTask)
@@ -2343,6 +2496,19 @@ void DocumentContext::RegisterPageEndWritingTask(PDFPage* inPage,IPageEndWriting
     }
     
     it->second.push_back(inWritingTask);
+}
+
+void DocumentContext::RegisterTiledPatternEndWritingTask(PDFTiledPattern* inPattern, ITiledPatternEndWritingTask* inWritingTask)
+{
+	PDFTiledPatternToITiledPatternEndWritingTaskListMap::iterator it =
+		mTiledPatternEndTasks.find(inPattern);
+
+	if (it == mTiledPatternEndTasks.end())
+	{
+		it = mTiledPatternEndTasks.insert(PDFTiledPatternToITiledPatternEndWritingTaskListMap::value_type(inPattern, ITiledPatternEndWritingTaskList())).first;
+	}
+
+	it->second.push_back(inWritingTask);
 }
 
 DoubleAndDoublePair DocumentContext::GetImageDimensions(const std::string& inImageFile,unsigned long inImageIndex)

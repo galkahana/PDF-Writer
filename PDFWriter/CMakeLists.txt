@@ -91,6 +91,8 @@ PDFDocEncoding.cpp
 PDFDocumentCopyingContext.cpp
 PDFDocumentHandler.cpp
 PDFFormXObject.cpp
+PDFTiledPattern.cpp
+TiledPatternContentContext.cpp
 PDFHexString.cpp
 PDFImageXObject.cpp
 PDFIndirectObjectReference.cpp
@@ -196,6 +198,7 @@ IDescendentFontWriter.h
 IDocumentContextExtender.h
 IFontDescriptorHelper.h
 IFormEndWritingTask.h
+ITiledPatternEndWritingTask.h
 IFreeTypeFaceExtender.h
 IndirectObjectsReferenceRegistry.h
 InfoDictionary.h
@@ -258,6 +261,8 @@ PDFDocumentCopyingContext.h
 PDFDocumentHandler.h
 PDFEmbedParameterTypes.h
 PDFFormXObject.h
+PDFTiledPattern.h
+TiledPatternContentContext.h
 PDFHexString.h
 PDFImageXObject.h
 PDFIndirectObjectReference.h
@@ -336,6 +341,7 @@ GraphicStateStack.cpp
 GraphicStateStack.h
 IDocumentContextExtender.h
 IFormEndWritingTask.h
+ITiledPatternEndWritingTask.h
 InfoDictionary.cpp
 InfoDictionary.h
 IResourceWritingTask.h
@@ -345,6 +351,10 @@ PageTree.cpp
 PageTree.h
 PDFFormXObject.cpp
 PDFFormXObject.h
+PDFTiledPattern.cpp
+PDFTiledPattern.h
+TiledPatternContentContext.cpp
+TiledPatternContentContext.h
 PDFImageXObject.cpp
 PDFImageXObject.h
 PDFModifiedPage.cpp

@@ -53,6 +53,7 @@ class IDocumentContextExtender;
 class PageContentContext;
 class ResourcesDictionary;
 class PDFFormXObject;
+class PDFTiledPattern;
 class PDFRectangle;
 class PDFImageXObject;
 class PDFUsedFont;
@@ -63,6 +64,7 @@ class IResourceWritingTask;
 class IFormEndWritingTask;
 class PDFDocumentCopyingContext;
 class IPageEndWritingTask;
+class ITiledPatternEndWritingTask;
 
 typedef std::set<IDocumentContextExtender*> IDocumentContextExtenderSet;
 typedef std::pair<PDFHummus::EStatusCode,ObjectIDType> EStatusCodeAndObjectIDType;
@@ -77,6 +79,8 @@ typedef std::list<IFormEndWritingTask*> IFormEndWritingTaskList;
 typedef std::map<PDFFormXObject*,IFormEndWritingTaskList> PDFFormXObjectToIFormEndWritingTaskListMap;
 typedef std::list<IPageEndWritingTask*> IPageEndWritingTaskList;
 typedef std::map<PDFPage*,IPageEndWritingTaskList> PDFPageToIPageEndWritingTaskListMap;
+typedef std::list<ITiledPatternEndWritingTask*> ITiledPatternEndWritingTaskList;
+typedef std::map<PDFTiledPattern*, ITiledPatternEndWritingTaskList> PDFTiledPatternToITiledPatternEndWritingTaskListMap;
 typedef std::pair<std::string,unsigned long> StringAndULongPair;
 
 namespace PDFHummus
@@ -153,7 +157,26 @@ namespace PDFHummus
 
 		// no release version of ending a form XObject. owner should delete it (regular delete...nothin special)
 		PDFHummus::EStatusCode EndFormXObjectNoRelease(PDFFormXObject* inFormXObject);
-        
+
+		// Tiled Pattern  creation and finalization
+		PDFTiledPattern* StartTiledPattern(
+											int inPaintType,
+											int inTilingType,
+											const PDFRectangle& inBoundingBox,
+											double inXStep,
+											double inYStep,
+											const double* inMatrix = NULL);
+		PDFTiledPattern* StartTiledPattern(int inPaintType,
+											int inTilingType,
+											const PDFRectangle& inBoundingBox,
+											double inXStep,
+											double inYStep,
+											ObjectIDType inObjectID,
+											const double* inMatrix = NULL);
+		PDFHummus::EStatusCode EndTiledPattern(PDFTiledPattern* inTiledPattern);
+		PDFHummus::EStatusCode EndTiledPatternAndRelease(PDFTiledPattern* inTiledPattern);
+
+
 		// Image XObject creating. 
 		// note that as oppose to other methods, create the image xobject also writes it, so there's no "WriteXXXXAndRelease" for image.
 		// So...release the object yourself [just delete it]
@@ -268,7 +291,10 @@ namespace PDFHummus
         std::string AddExtendedResourceMapping(PDFPage* inPage,
                                           const std::string& inResourceCategoryName,
                                           IResourceWritingTask* inWritingTask);
-        std::string AddExtendedResourceMapping(ResourcesDictionary* inResourceDictionary,
+		std::string AddExtendedResourceMapping(PDFTiledPattern* inTiledPattern,
+										const std::string& inResourceCategoryName,
+										IResourceWritingTask* inWritingTask);
+		std::string AddExtendedResourceMapping(ResourcesDictionary* inResourceDictionary,
                                           const std::string& inResourceCategoryName,
                                           IResourceWritingTask* inWritingTask);
         
@@ -276,6 +302,8 @@ namespace PDFHummus
         void RegisterFormEndWritingTask(PDFFormXObject* inFormXObject,IFormEndWritingTask* inWritingTask);
         // Extensibility option. option of writing a single time task for when a particular page ends
         void RegisterPageEndWritingTask(PDFPage* inPageObject,IPageEndWritingTask* inWritingTask);
+		// Extensibility option. option of writing a single time task for when a particular pattern ends
+		void RegisterTiledPatternEndWritingTask(PDFTiledPattern* inTiledPatternObject, ITiledPatternEndWritingTask* inWritingTask);
 
 
 		// JPG images handler for retrieving JPG images information
@@ -319,6 +347,7 @@ namespace PDFHummus
         ResourcesDictionaryAndStringToIResourceWritingTaskListMap mResourcesTasks;
         PDFFormXObjectToIFormEndWritingTaskListMap mFormEndTasks;
         PDFPageToIPageEndWritingTaskListMap mPageEndTasks;
+		PDFTiledPatternToITiledPatternEndWritingTaskListMap mTiledPatternEndTasks;
 	    StringAndULongPairToHummusImageInformationMap mImagesInformation;
 		
 		void WriteHeaderComment(EPDFVersion inPDFVersion);
