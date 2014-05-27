@@ -363,6 +363,7 @@
     <ClCompile Include="RefCountObject.cpp" />
     <ClCompile Include="MD5Generator.cpp" />
     <ClCompile Include="Log.cpp" />
+    <ClCompile Include="TiledPatternContentContext.cpp" />
     <ClCompile Include="Trace.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TimersRegistry.cpp" />
