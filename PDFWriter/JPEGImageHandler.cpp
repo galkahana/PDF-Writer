@@ -42,6 +42,7 @@ JPEGImageHandler::JPEGImageHandler(void)
 {
 	mObjectsContext = NULL;
 	mDocumentContext = NULL;
+    mComponentCount = 0;
 }
 
 JPEGImageHandler::~JPEGImageHandler(void)
@@ -193,6 +194,7 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 		imageContext->WriteKey(scFilter);
 		imageContext->WriteNameValue(scDCTDecode);
 
+        mComponentCount = inJPGImageInformation.ColorComponentsCount;
 		IDocumentContextExtenderSet::iterator it = mExtenders.begin();
 		EStatusCode status = PDFHummus::eSuccess;
 		for(; it != mExtenders.end() && PDFHummus::eSuccess == status; ++it)

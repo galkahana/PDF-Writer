@@ -388,6 +388,13 @@ TIFFImageHandler::~TIFFImageHandler(void)
 	DestroyConversionState();
 }
 
+int TIFFImageHandler::ComponentCount()
+{
+    if(mT2p)
+       return mT2p->tiff_samplesperpixel;
+    return 0;
+}
+
 void TIFFImageHandler::Reset()
 {
 	DestroyConversionState();
