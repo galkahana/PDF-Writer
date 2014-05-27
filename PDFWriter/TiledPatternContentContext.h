@@ -27,7 +27,7 @@ class TiledPatternContentContext : public AbstractContentContext
 {
 public:
 	TiledPatternContentContext(PDFHummus::DocumentContext* inDocumentContext, PDFTiledPattern* inObject);
-	virtual ~XObjectContentContext(void);
+	virtual ~TiledPatternContentContext(void);
 
 private:
 
