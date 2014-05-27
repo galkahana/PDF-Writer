@@ -326,6 +326,8 @@ namespace PDFHummus
 		EStatusCode WriteFormForImage(const std::string& inImagePath,unsigned long inImageIndex,ObjectIDType inObjectID);
 		ObjectIDTypeAndBool RegisterImageForDrawing(const std::string& inImageFile,unsigned long inImageIndex);
 
+        TIFFImageHandler&  GetTIFFImageHandler() {return mTIFFImageHandler;}
+
 	private:
 		ObjectsContext* mObjectsContext;
 		TrailerInformation mTrailerInformation;
