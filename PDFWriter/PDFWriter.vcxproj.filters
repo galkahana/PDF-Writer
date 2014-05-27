@@ -973,5 +973,11 @@
     <ClCompile Include="PDFTiledPattern.cpp">
       <Filter>Document Context Level</Filter>
     </ClCompile>
+    <ClCompile Include="PDFCosDict.cpp">
+      <Filter>Objects Context Level</Filter>
+    </ClCompile>
+    <ClCompile Include="PDFCosArray.cpp">
+      <Filter>Objects Context Level</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

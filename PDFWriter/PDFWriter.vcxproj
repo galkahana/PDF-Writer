@@ -349,6 +349,8 @@
     <ClCompile Include="OutputStringBufferStream.cpp" />
     <ClCompile Include="CMYKRGBColor.cpp" />
     <ClCompile Include="ParsedPrimitiveHelper.cpp" />
+    <ClCompile Include="PDFCosArray.cpp" />
+    <ClCompile Include="PDFCosDict.cpp" />
     <ClCompile Include="PDFModifiedPage.cpp" />
     <ClCompile Include="PDFObjectParser.cpp" />
     <ClCompile Include="PDFPageInput.cpp" />
