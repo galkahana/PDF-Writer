@@ -81,12 +81,15 @@ public:
     // that PDFHummus will use if asked to place "as is"
     DoubleAndDoublePair GetImageDimensions(const JPEGImageInformation& inJPGImageInformation);
 
+    int ComponentCount() {return mComponentCount;}
+
 private:
 	JPEGImageInformation mNullInformation;
 	StringToJPEGImageInformationMap mImagesInformationMap;
 	ObjectsContext* mObjectsContext;
 	PDFHummus::DocumentContext* mDocumentContext;
 	IDocumentContextExtenderSet mExtenders;
+    int mComponentCount; 
 
 	PDFImageXObject* CreateAndWriteImageXObjectFromJPGInformation(const std::string& inJPGFilePath,ObjectIDType inImageXObjectID, const JPEGImageInformation& inJPGImageInformation);
 	PDFImageXObject* CreateAndWriteImageXObjectFromJPGInformation(IByteReaderWithPosition* inJPGImageStream,ObjectIDType inImageXObjectID, const JPEGImageInformation& inJPGImageInformation);

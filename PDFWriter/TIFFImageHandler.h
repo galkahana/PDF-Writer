@@ -141,6 +141,7 @@ public:
 
 	void Reset();
     
+    int ComponentCount();
     
     // utility for tiffs, to get what tiff dimensions hummus will use
     DoubleAndDoublePair ReadImageDimensions(IByteReaderWithPosition* inTIFFStream,unsigned long inImageIndex);

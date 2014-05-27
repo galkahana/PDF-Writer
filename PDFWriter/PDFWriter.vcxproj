@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -28,23 +28,19 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -353,6 +349,10 @@
     <ClCompile Include="OutputStringBufferStream.cpp" />
     <ClCompile Include="CMYKRGBColor.cpp" />
     <ClCompile Include="ParsedPrimitiveHelper.cpp" />
+    <ClCompile Include="PDFArrayIterator.cpp" />
+    <ClCompile Include="PDFCosArray.cpp" />
+    <ClCompile Include="PDFCosDict.cpp" />
+    <ClCompile Include="PDFDictionaryIterator.cpp" />
     <ClCompile Include="PDFModifiedPage.cpp" />
     <ClCompile Include="PDFObjectParser.cpp" />
     <ClCompile Include="PDFPageInput.cpp" />
@@ -363,6 +363,7 @@
     <ClCompile Include="RefCountObject.cpp" />
     <ClCompile Include="MD5Generator.cpp" />
     <ClCompile Include="Log.cpp" />
+    <ClCompile Include="TiledPatternContentContext.cpp" />
     <ClCompile Include="Trace.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TimersRegistry.cpp" />

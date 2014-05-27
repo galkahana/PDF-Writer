@@ -767,6 +767,8 @@ EStatusCode DocumentContext::EndPageContentContext(PageContentContext* inPageCon
 	delete inPageContext;
 	return status;
 }
+static const std::string scBBox = "BBox";
+static const std::string scMatrix = "Matrix";
 
 static const std::string scPattern = "Pattern";
 static const std::string scPatternType = "PatternType";
@@ -866,9 +868,7 @@ PDFTiledPattern* DocumentContext::StartTiledPattern(int inPaintType,
 static const std::string scXObject = "XObject";
 static const std::string scSubType = "Subtype";
 static const std::string scForm = "Form";
-static const std::string scBBox = "BBox";
 static const std::string scFormType = "FormType";
-static const std::string scMatrix = "Matrix";
 PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBoundingBox,ObjectIDType inFormXObjectID,const double* inMatrix)
 {
 	PDFFormXObject* aFormXObject = NULL;
