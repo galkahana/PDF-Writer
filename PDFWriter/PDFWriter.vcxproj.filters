@@ -979,5 +979,11 @@
     <ClCompile Include="PDFCosArray.cpp">
       <Filter>Objects Context Level</Filter>
     </ClCompile>
+    <ClCompile Include="PDFArrayIterator.cpp">
+      <Filter>Objects Context Level</Filter>
+    </ClCompile>
+    <ClCompile Include="PDFDictionaryIterator.cpp">
+      <Filter>Objects Context Level</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
