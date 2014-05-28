@@ -672,10 +672,10 @@ FT_Pos FreeTypeFaceWrapper::GetInPDFMeasurements(FT_Pos inFontMeasurement)
 
 FT_Pos FreeTypeFaceWrapper::GetGlyphWidth(unsigned int inGlyphIndex)
 {
-    if(mFormatParticularWrapper && mFormatParticularWrapper->HasPrivateEncoding())
-        FT_Load_Glyph(mFace,mFormatParticularWrapper->GetFreeTypeGlyphIndexFromEncodingGlyphIndex(inGlyphIndex),FT_LOAD_NO_SCALE);
+	if (mFormatParticularWrapper && mFormatParticularWrapper->HasPrivateEncoding())
+		LoadGlyph(mFormatParticularWrapper->GetFreeTypeGlyphIndexFromEncodingGlyphIndex(inGlyphIndex));
     else
-        FT_Load_Glyph(mFace,inGlyphIndex,FT_LOAD_NO_SCALE);
+		LoadGlyph(inGlyphIndex);
     return GetInPDFMeasurements(mFace->glyph->metrics.horiAdvance);
 }
 
@@ -686,4 +686,9 @@ unsigned int FreeTypeFaceWrapper::GetGlyphIndexInFreeTypeIndexes(unsigned int in
     else
         return inGlyphIndex;
     
+}
+
+FT_Error FreeTypeFaceWrapper::LoadGlyph(FT_UInt inGlyphIndex, FT_Int32 inFlags)
+{
+	return FT_Load_Glyph(mFace, inGlyphIndex, inFlags | FT_LOAD_NO_HINTING | FT_LOAD_NO_AUTOHINT | FT_LOAD_NO_SCALE);
 }

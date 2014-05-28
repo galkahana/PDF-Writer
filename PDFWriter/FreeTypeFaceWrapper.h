@@ -110,6 +110,11 @@ public:
     // according to hummus
     unsigned int GetGlyphIndexInFreeTypeIndexes(unsigned int inGlyphIndex);
 
+	// load glyph, use the freetype load glyph, but add some extra flags that are common to 
+	// Hummus requirements, which is SPEED SPEED. as i don't normally need rendering
+	// hinting and scaling is always removed. inFlags are added on top of the default flags
+	FT_Error LoadGlyph(FT_UInt inGlyphIndex, FT_Int32 inFlags = 0);
+
 private:
 
 	FT_Face mFace;

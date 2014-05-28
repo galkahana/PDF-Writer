@@ -203,7 +203,7 @@ PDFUsedFont::TextMeasures PDFUsedFont::CalculateTextDimensions(const UIntList& i
     
     for(; it != inGlyphsList.end();++it,++itPos)
     {
-        FT_Load_Glyph(mFaceWrapper,mFaceWrapper.GetGlyphIndexInFreeTypeIndexes(*it),FT_LOAD_NO_SCALE);
+		mFaceWrapper.LoadGlyph(mFaceWrapper.GetGlyphIndexInFreeTypeIndexes(*it));
         FT_Glyph aGlyph;
         FT_Get_Glyph( mFaceWrapper->glyph,&aGlyph);
         FT_Glyph_Get_CBox(aGlyph, FT_GLYPH_BBOX_UNSCALED,&glyph_bbox);
