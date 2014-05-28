@@ -231,7 +231,7 @@ BoolAndFTShort FreeTypeFaceWrapper::GetYBearingForUnicodeChar(unsigned short uni
 {
 	if(mFace)
 	{
-		if(FT_Load_Char(mFace,unicodeCharCode, FT_LOAD_NO_SCALE) != 0)
+		if (FT_Load_Char(mFace, unicodeCharCode, FT_LOAD_NO_HINTING | FT_LOAD_NO_AUTOHINT | FT_LOAD_NO_SCALE) != 0)
 		{
 			TRACE_LOG1("FreeTypeFaceWrapper::XHeightFromLowerXHeight, unable to load glyph for char code = 0x%x",unicodeCharCode);
 			return BoolAndFTShort(false,0);
