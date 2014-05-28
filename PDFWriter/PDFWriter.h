@@ -55,8 +55,9 @@ struct LogConfiguration
 struct PDFCreationSettings
 {
 	bool CompressStreams;
+	bool EmbedFonts;
 
-	PDFCreationSettings(bool inCompressStreams){CompressStreams = inCompressStreams;}
+	PDFCreationSettings(bool inCompressStreams, bool inEmbedFonts){ CompressStreams = inCompressStreams; EmbedFonts = inEmbedFonts;}
 
 	static const PDFCreationSettings DefaultPDFCreationSettings;
 };
@@ -260,6 +261,9 @@ private:
 
 	ObjectsContext mObjectsContext;
 	PDFHummus::DocumentContext mDocumentContext;
+
+	// options
+	bool mEmbedFonts;
 
 	// for output file workflow, this will be the valid output [stream workflow does not have a file]
 	OutputFile mOutputFile;

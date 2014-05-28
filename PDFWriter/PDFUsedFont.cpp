@@ -100,13 +100,13 @@ EStatusCode PDFUsedFont::EncodeStringsForShowing(const GlyphUnicodeMappingListLi
 	return PDFHummus::eSuccess;
 }
 
-EStatusCode PDFUsedFont::WriteFontDefinition()
+EStatusCode PDFUsedFont::WriteFontDefinition(bool inEmbedFont)
 {
     // note that written font may be empty, in case no glyphs were used for this font! in the empty case, just dont write the def
     if(!mWrittenFont)
         return eSuccess;
     else
-        return mWrittenFont->WriteFontDefinition(mFaceWrapper);
+        return mWrittenFont->WriteFontDefinition(mFaceWrapper,inEmbedFont);
 }
 
 EStatusCode PDFUsedFont::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)

@@ -160,7 +160,7 @@ unsigned char WrittenFontCFF::AllocateFromFreeList(unsigned int inGlyph)
 	return result;
 }
 
-EStatusCode WrittenFontCFF::WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo)
+EStatusCode WrittenFontCFF::WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo,bool inEmbedFont)
 {
 	EStatusCode status = PDFHummus::eSuccess;
 	do
@@ -169,7 +169,7 @@ EStatusCode WrittenFontCFF::WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo)
 		{
 			CFFANSIFontWriter fontWriter;
 
-			status = fontWriter.WriteFont(inFontInfo,mANSIRepresentation,mObjectsContext);
+			status = fontWriter.WriteFont(inFontInfo, mANSIRepresentation, mObjectsContext, inEmbedFont);
 			if(status != PDFHummus::eSuccess)
 			{
 				TRACE_LOG("WrittenFontCFF::WriteFontDefinition, Failed to write Ansi font definition");
@@ -183,7 +183,7 @@ EStatusCode WrittenFontCFF::WriteFontDefinition(FreeTypeFaceWrapper& inFontInfo)
 			CIDFontWriter fontWriter;
 			CFFDescendentFontWriter descendentFontWriter;
 
-			status = fontWriter.WriteFont(inFontInfo,mCIDRepresentation,mObjectsContext,&descendentFontWriter);
+			status = fontWriter.WriteFont(inFontInfo, mCIDRepresentation, mObjectsContext, &descendentFontWriter, inEmbedFont);
 			if(status != PDFHummus::eSuccess)
 			{
 				TRACE_LOG("WrittenFontCFF::WriteFontDefinition, Failed to write CID font definition");

@@ -44,56 +44,91 @@ EStatusCode SimpleTextUsage::Run(const TestConfiguration& inTestConfiguration)
 {
 	EStatusCode status;
 
+	// running two versions of the tests, one with font embedding, one without
+
 	do
 	{
-		status = RunCFFTest(inTestConfiguration);
+		status = RunCFFTest(inTestConfiguration,true);
 		if(status != PDFHummus::eSuccess)
 		{
-			cout<<"Failed CFF Test\n";
+			cout<<"Failed CFF Test with font embedding\n";
 			status = PDFHummus::eFailure;
 			break;
 		}
 
-		status = RunTrueTypeTest(inTestConfiguration);
-		if(status != PDFHummus::eSuccess)
+		status = RunCFFTest(inTestConfiguration, false);
+		if (status != PDFHummus::eSuccess)
 		{
-			cout<<"Failed True Type Test\n";
+			cout << "Failed CFF Test without font embedding\n";
 			status = PDFHummus::eFailure;
 			break;
 		}
 
-		status = RunType1Test(inTestConfiguration);
+		status = RunTrueTypeTest(inTestConfiguration,true);
 		if(status != PDFHummus::eSuccess)
 		{
-			cout<<"Failed Type 1 Test\n";
+			cout<<"Failed True Type Test with font embedding\n";
 			status = PDFHummus::eFailure;
 			break;
 		}
 
-		status = RunNoTextTest(inTestConfiguration);
+		status = RunTrueTypeTest(inTestConfiguration,false);
+		if (status != PDFHummus::eSuccess)
+		{
+			cout << "Failed True Type Test, without font embedding\n";
+			status = PDFHummus::eFailure;
+			break;
+		}
+
+		status = RunType1Test(inTestConfiguration,true);
 		if(status != PDFHummus::eSuccess)
 		{
-			cout<<"Failed No Text Test\n";
+			cout<<"Failed Type 1 Test with font embedding\n";
+			status = PDFHummus::eFailure;
+			break;
+		}
+
+		status = RunType1Test(inTestConfiguration,false);
+		if (status != PDFHummus::eSuccess)
+		{
+			cout << "Failed Type 1 Test without font embedding\n";
+			status = PDFHummus::eFailure;
+			break;
+		}
+
+
+		status = RunNoTextTest(inTestConfiguration,true);
+		if(status != PDFHummus::eSuccess)
+		{
+			cout<<"Failed No Text Test with font embedding\n";
 			status = PDFHummus::eFailure;
 			break;
 		}
         
+		status = RunNoTextTest(inTestConfiguration,true);
+		if (status != PDFHummus::eSuccess)
+		{
+			cout << "Failed No Text Test without font embedding\n";
+			status = PDFHummus::eFailure;
+			break;
+		}
 	}while(false);
 
 	return status;
 }
 
-EStatusCode SimpleTextUsage::RunCFFTest(const TestConfiguration& inTestConfiguration)
+EStatusCode SimpleTextUsage::RunCFFTest(const TestConfiguration& inTestConfiguration,bool inEmbedFonts)
 {
 	PDFWriter pdfWriter;
 	EStatusCode status; 
 
 	do
 	{
-		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleTextUsageCFF.PDF"),
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, inEmbedFonts ? "SimpleTextUsageCFF.PDF" : "SimpleTextUsageCFFNoEmbed.PDF"),
                                     ePDFVersion13,
                                     LogConfiguration(true,true,
-                                                     RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleTextUsage.log")));
+                                                     RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleTextUsage.log")),
+													 PDFCreationSettings(true, inEmbedFonts));
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
@@ -188,7 +223,7 @@ EStatusCode SimpleTextUsage::RunCFFTest(const TestConfiguration& inTestConfigura
 
 }
 
-EStatusCode SimpleTextUsage::RunTrueTypeTest(const TestConfiguration& inTestConfiguration)
+EStatusCode SimpleTextUsage::RunTrueTypeTest(const TestConfiguration& inTestConfiguration,bool inEmbedFonts)
 {
 	PDFWriter pdfWriter;
 	EStatusCode status; 
@@ -196,9 +231,10 @@ EStatusCode SimpleTextUsage::RunTrueTypeTest(const TestConfiguration& inTestConf
 	do
 	{
 		status = pdfWriter.StartPDF(
-                                    RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleTextUsageTrueType.PDF"),
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, inEmbedFonts ? "SimpleTextUsageTrueType.PDF" : "SimpleTextUsageTrueTypeNoEmbed.PDF"),
                                     ePDFVersion13,
-                                    LogConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleTextUsage.log")));
+                                    LogConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleTextUsage.log")),
+									PDFCreationSettings(true,inEmbedFonts));
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
@@ -265,7 +301,7 @@ EStatusCode SimpleTextUsage::RunTrueTypeTest(const TestConfiguration& inTestConf
 	return status;	
 }
 
-EStatusCode SimpleTextUsage::RunType1Test(const TestConfiguration& inTestConfiguration)
+EStatusCode SimpleTextUsage::RunType1Test(const TestConfiguration& inTestConfiguration,bool inEmbedFonts)
 {
 	PDFWriter pdfWriter;
 	EStatusCode status; 
@@ -273,9 +309,10 @@ EStatusCode SimpleTextUsage::RunType1Test(const TestConfiguration& inTestConfigu
 	do
 	{
 		status = pdfWriter.StartPDF(
-                         RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleTextUsageType1.PDF"),
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, inEmbedFonts ? "SimpleTextUsageType1.PDF" : "SimpleTextUsageType1NoEmbed.PDF"),
                          ePDFVersion13,
-                         LogConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleTextUsage.log")));
+                         LogConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleTextUsage.log")),
+						 PDFCreationSettings(true,inEmbedFonts));
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
@@ -343,7 +380,7 @@ EStatusCode SimpleTextUsage::RunType1Test(const TestConfiguration& inTestConfigu
 	return status;		
 }
 
-EStatusCode SimpleTextUsage::RunNoTextTest(const TestConfiguration& inTestConfiguration)
+EStatusCode SimpleTextUsage::RunNoTextTest(const TestConfiguration& inTestConfiguration,bool inEmbedFonts)
 {
     // this one checks an edge case where a font object is created but no text written. should not fail.
 	PDFWriter pdfWriter;
@@ -352,9 +389,10 @@ EStatusCode SimpleTextUsage::RunNoTextTest(const TestConfiguration& inTestConfig
 	do
 	{
 		status = pdfWriter.StartPDF(
-                                    RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleNoTextUsage.PDF"),
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, inEmbedFonts ? "SimpleNoTextUsage.PDF" : "SimpleNoTextUsageNoEmbed.PDF"),
                                     ePDFVersion13,
-                                    LogConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleTextUsage.log")));
+                                    LogConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleTextUsage.log")),
+									PDFCreationSettings(true,inEmbedFonts));
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";

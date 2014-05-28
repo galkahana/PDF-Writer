@@ -33,9 +33,9 @@ public:
 
 private:
 
-	PDFHummus::EStatusCode RunCFFTest(const TestConfiguration& inTestConfiguration);
-	PDFHummus::EStatusCode RunTrueTypeTest(const TestConfiguration& inTestConfiguration);
-	PDFHummus::EStatusCode RunType1Test(const TestConfiguration& inTestConfiguration);
-    PDFHummus::EStatusCode RunNoTextTest(const TestConfiguration& inTestConfiguration);
+	PDFHummus::EStatusCode RunCFFTest(const TestConfiguration& inTestConfiguration,bool inEmbedFonts);
+	PDFHummus::EStatusCode RunTrueTypeTest(const TestConfiguration& inTestConfiguration, bool inEmbedFonts);
+	PDFHummus::EStatusCode RunType1Test(const TestConfiguration& inTestConfiguration, bool inEmbedFonts);
+	PDFHummus::EStatusCode RunNoTextTest(const TestConfiguration& inTestConfiguration, bool inEmbedFonts);
 
 };

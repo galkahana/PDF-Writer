@@ -32,7 +32,7 @@ namespace PDFHummus
 class ITiledPatternEndWritingTask
 {
 public:
-    virtual ~IFormEndWritingTask(){}
+	virtual ~ITiledPatternEndWritingTask(){}
     
     virtual PDFHummus::EStatusCode Write(PDFTiledPattern* inTiledPattern,
                                          ObjectsContext* inObjectsContext,

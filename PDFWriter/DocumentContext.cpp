@@ -172,7 +172,7 @@ void DocumentContext::Write4BinaryBytes()
 	mObjectsContext->EndFreeContext();
 }
 
-EStatusCode	DocumentContext::FinalizeNewPDF()
+EStatusCode	DocumentContext::FinalizeNewPDF(bool inEmbedFonts)
 {
 	EStatusCode status;
 	LongFilePositionType xrefTablePosition;
@@ -181,7 +181,7 @@ EStatusCode	DocumentContext::FinalizeNewPDF()
 	// this will finalize writing all renments of the file, like xref, trailer and whatever objects still accumulating
 	do
 	{
-		status = WriteUsedFontsDefinitions();
+		status = WriteUsedFontsDefinitions(inEmbedFonts);
 		if(status != 0)
 			break;
 
@@ -774,6 +774,8 @@ static const std::string scPaintType = "PaintType";
 static const std::string scTilingType = "TilingType";
 static const std::string scXStep = "XStep";
 static const std::string scYStep = "YStep";
+static const std::string scBBox = "BBox";
+static const std::string scMatrix = "Matrix";
 
 
 PDFTiledPattern* DocumentContext::StartTiledPattern(
@@ -866,9 +868,7 @@ PDFTiledPattern* DocumentContext::StartTiledPattern(int inPaintType,
 static const std::string scXObject = "XObject";
 static const std::string scSubType = "Subtype";
 static const std::string scForm = "Form";
-static const std::string scBBox = "BBox";
 static const std::string scFormType = "FormType";
-static const std::string scMatrix = "Matrix";
 PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBoundingBox,ObjectIDType inFormXObjectID,const double* inMatrix)
 {
 	PDFFormXObject* aFormXObject = NULL;
@@ -1242,9 +1242,9 @@ PDFUsedFont* DocumentContext::GetFontForFile(const std::string& inFontFilePath,l
 	return mUsedFontsRepository.GetFontForFile(inFontFilePath,inFontIndex);
 }
 
-EStatusCode DocumentContext::WriteUsedFontsDefinitions()
+EStatusCode DocumentContext::WriteUsedFontsDefinitions(bool inEmbedFonts)
 {
-	return mUsedFontsRepository.WriteUsedFontsDefinitions();
+	return mUsedFontsRepository.WriteUsedFontsDefinitions(inEmbedFonts);
 }
 
 PDFUsedFont* DocumentContext::GetFontForFile(const std::string& inFontFilePath,const std::string& inAdditionalMeticsFilePath,long inFontIndex)
@@ -2062,14 +2062,14 @@ private:
     EPDFVersion mPDFVersion;
 };
 
-EStatusCode	DocumentContext::FinalizeModifiedPDF(PDFParser* inModifiedFileParser,EPDFVersion inModifiedPDFVersion)
+EStatusCode	DocumentContext::FinalizeModifiedPDF(PDFParser* inModifiedFileParser, EPDFVersion inModifiedPDFVersion,bool inEmbedFonts)
 {
 	EStatusCode status;
 	LongFilePositionType xrefTablePosition;
     
 	do
 	{
-		status = WriteUsedFontsDefinitions();
+		status = WriteUsedFontsDefinitions(inEmbedFonts);
 		if(status != eSuccess)
 			break;
         

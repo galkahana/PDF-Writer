@@ -84,7 +84,7 @@ public:
 										UShortListList& outCharactersToUse,
 										bool& outTreatCharactersAsCID);
 
-	PDFHummus::EStatusCode WriteFontDefinition();
+	PDFHummus::EStatusCode WriteFontDefinition(bool inEmbedFont);
 
 	// use this method to translate text to glyphs and unicode mapping, to be later used for EncodeStringForShowing
 	PDFHummus::EStatusCode TranslateStringToGlyphs(const std::string& inText,GlyphUnicodeMappingList& outGlyphsUnicodeMapping);
