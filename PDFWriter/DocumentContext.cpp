@@ -1194,6 +1194,12 @@ JPEGImageHandler& DocumentContext::GetJPEGImageHandler()
 }
 
 #ifndef PDFHUMMUS_NO_TIFF
+TIFFImageHandler& DocumentContext::GetTIFFImageHandler()
+{
+	return mTIFFImageHandler;
+}
+
+
 PDFFormXObject* DocumentContext::CreateFormXObjectFromTIFFFile(	const std::string& inTIFFFilePath,
 																const TIFFUsageParameters& inTIFFUsageParameters)
 {

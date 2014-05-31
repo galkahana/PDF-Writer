@@ -105,6 +105,8 @@ PDFObject.cpp
 PDFObjectParser.cpp
 PDFPage.cpp
 PDFPageInput.cpp
+PDFDictionaryIterator.cpp
+PDFArrayIterator.cpp
 PDFPageMergingHelper.cpp
 PDFParser.cpp
 PDFParserTokenizer.cpp
@@ -276,6 +278,8 @@ PDFObjectCast.h
 PDFObjectParser.h
 PDFPage.h
 PDFPageInput.h
+PDFDictionaryIterator.h
+PDFArrayIterator.h
 PDFPageMergingHelper.h
 PDFParser.h
 PDFParserTokenizer.h
@@ -546,6 +550,10 @@ ParsedPrimitiveHelper.cpp
 ParsedPrimitiveHelper.h
 PDFPageInput.cpp
 PDFPageInput.h
+PDFDictionaryIterator.cpp
+PDFDictionaryIterator.h
+PDFArrayIterator.cpp
+PDFArrayIterator.h
 )
 
 source_group("PDF Embedding\\PredictionFilters" FILES

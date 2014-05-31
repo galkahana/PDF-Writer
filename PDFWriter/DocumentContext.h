@@ -306,10 +306,6 @@ namespace PDFHummus
 		void RegisterTiledPatternEndWritingTask(PDFTiledPattern* inTiledPatternObject, ITiledPatternEndWritingTask* inWritingTask);
 
 
-		// JPG images handler for retrieving JPG images information
-		JPEGImageHandler& GetJPEGImageHandler();
-
-
 		PDFHummus::EStatusCode WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID);
 		PDFHummus::EStatusCode ReadState(PDFParser* inStateReader,ObjectIDType inObjectID);
 
@@ -325,6 +321,13 @@ namespace PDFHummus
 		// internal methods for easy image writing
 		EStatusCode WriteFormForImage(const std::string& inImagePath,unsigned long inImageIndex,ObjectIDType inObjectID);
 		ObjectIDTypeAndBool RegisterImageForDrawing(const std::string& inImageFile,unsigned long inImageIndex);
+
+		// JPG images handler for retrieving JPG images information
+		JPEGImageHandler& GetJPEGImageHandler();
+		// tiff image handler accessor
+#ifndef PDFHUMMUS_NO_TIFF
+        TIFFImageHandler&  GetTIFFImageHandler();
+#endif
 
 	private:
 		ObjectsContext* mObjectsContext;

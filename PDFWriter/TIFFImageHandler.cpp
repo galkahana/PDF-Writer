@@ -3511,8 +3511,17 @@ PDFFormXObject* TIFFImageHandler::CreateFormXObjectFromTIFFStream(	IByteReaderWi
 
 DoubleAndDoublePair TIFFImageHandler::ReadImageDimensions(IByteReaderWithPosition* inTIFFStream,unsigned long inImageIndex)
 {
+    return ReadImageInfo(inTIFFStream,inImageIndex).dimensions;
+}
+
+TIFFImageHandler::TiffImageInfo TIFFImageHandler::ReadImageInfo(IByteReaderWithPosition* inTIFFStream,unsigned long inImageIndex)
+{
 	TIFF* input = NULL;
-    DoubleAndDoublePair result(-1,-1);
+    TiffImageInfo imageInfo;
+	
+	imageInfo.dimensions.first = -1;
+	imageInfo.dimensions.second = -1;
+	imageInfo.colorComponents = 0;
     EStatusCode status;
     
 	do
@@ -3562,8 +3571,9 @@ DoubleAndDoublePair TIFFImageHandler::ReadImageDimensions(IByteReaderWithPositio
         status = ReadTIFFPageInformation();
         if(status != PDFHummus::eSuccess)
             break;
-        result.first = mT2p->pdf_mediabox.x2 - mT2p->pdf_mediabox.x1;
-        result.second = mT2p->pdf_mediabox.y2 - mT2p->pdf_mediabox.y1;
+        imageInfo.dimensions.first = mT2p->pdf_mediabox.x2 - mT2p->pdf_mediabox.x1;
+        imageInfo.dimensions.second = mT2p->pdf_mediabox.y2 - mT2p->pdf_mediabox.y1;
+		imageInfo.colorComponents = mT2p->tiff_samplesperpixel;
 		      
 	}while(false);
     
@@ -3571,7 +3581,7 @@ DoubleAndDoublePair TIFFImageHandler::ReadImageDimensions(IByteReaderWithPositio
 	if(input != NULL)
 		TIFFClose(input);
     
-    return result;
+    return imageInfo;
 }
 
 #endif

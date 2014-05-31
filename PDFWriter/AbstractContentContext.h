@@ -339,7 +339,7 @@ public:
     void AddContentContextListener(IContentContextListener* inExtender);
     void RemoveContentContextListener(IContentContextListener* inExtender);
 
-    
+	PrimitiveObjectsWriter& GetPrimitiveWriter() {return mPrimitiveWriter;}
 protected:
 
 	PDFHummus::DocumentContext* mDocumentContext;
@@ -354,7 +354,6 @@ private:
 	virtual void RenewStreamConnection() {};
 	// Derived classes should implement this method for registering image writes
 	virtual void ScheduleImageWrite(const std::string& inImagePath,unsigned long inImageIndex,ObjectIDType inObjectID) = 0;
-
 	PrimitiveObjectsWriter mPrimitiveWriter;
 
 	// graphic stack to monitor high-level graphic usage (now - fonts)
