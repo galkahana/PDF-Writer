@@ -498,16 +498,16 @@ void AbstractContentContext::M(double inMiterLimit)
 	mPrimitiveWriter.WriteKeyword("M");
 }
 
-void AbstractContentContext::d(int* inDashArray, int inDashArrayLength,int inDashPhase)
+void AbstractContentContext::d(double* inDashArray, int inDashArrayLength, double inDashPhase)
 {
 	RenewStreamConnection();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.StartArray();
-	for(int i=0;i<inDashArrayLength;++i)
-		mPrimitiveWriter.WriteInteger(inDashArray[i]);
+	for (int i = 0; i<inDashArrayLength; ++i)
+		mPrimitiveWriter.WriteDouble(inDashArray[i]);
 	mPrimitiveWriter.EndArray(eTokenSeparatorSpace);
-	mPrimitiveWriter.WriteInteger(inDashPhase);
+	mPrimitiveWriter.WriteDouble(inDashPhase);
 	mPrimitiveWriter.WriteKeyword("d");
 }
 

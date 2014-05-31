@@ -589,6 +589,15 @@
     <ClInclude Include="PDFTiledPattern.h">
       <Filter>Document Context Level</Filter>
     </ClInclude>
+    <ClInclude Include="IContentContextListener.h">
+      <Filter>Document Context Level</Filter>
+    </ClInclude>
+    <ClInclude Include="IPageEndWritingTask.h">
+      <Filter>Document Context Level</Filter>
+    </ClInclude>
+    <ClInclude Include="TiledPatternContentContext.h">
+      <Filter>Document Context Level</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="InputBufferedStream.cpp">
@@ -971,6 +980,9 @@
       <Filter>Document Context Level</Filter>
     </ClCompile>
     <ClCompile Include="PDFTiledPattern.cpp">
+      <Filter>Document Context Level</Filter>
+    </ClCompile>
+    <ClCompile Include="TiledPatternContentContext.cpp">
       <Filter>Document Context Level</Filter>
     </ClCompile>
   </ItemGroup>

@@ -159,6 +159,7 @@
     <ClInclude Include="IByteReaderWithPosition.h" />
     <ClInclude Include="IByteWriter.h" />
     <ClInclude Include="IByteWriterWithPosition.h" />
+    <ClInclude Include="IContentContextListener.h" />
     <ClInclude Include="IDocumentContextExtender.h" />
     <ClInclude Include="IFormEndWritingTask.h" />
     <ClInclude Include="InputAscii85DecodeStream.h" />
@@ -172,6 +173,7 @@
     <ClInclude Include="InputStreamSkipperStream.h" />
     <ClInclude Include="InputStringBufferStream.h" />
     <ClInclude Include="IOBasicTypes.h" />
+    <ClInclude Include="IPageEndWritingTask.h" />
     <ClInclude Include="IPDFParserExtender.h" />
     <ClInclude Include="IReadPositionProvider.h" />
     <ClInclude Include="IResourceWritingTask.h" />
@@ -204,6 +206,7 @@
     <ClInclude Include="SingleValueContainerIterator.h" />
     <ClInclude Include="MD5Generator.h" />
     <ClInclude Include="Log.h" />
+    <ClInclude Include="TiledPatternContentContext.h" />
     <ClInclude Include="Trace.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TimersRegistry.h" />
@@ -363,6 +366,7 @@
     <ClCompile Include="RefCountObject.cpp" />
     <ClCompile Include="MD5Generator.cpp" />
     <ClCompile Include="Log.cpp" />
+    <ClCompile Include="TiledPatternContentContext.cpp" />
     <ClCompile Include="Trace.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TimersRegistry.cpp" />

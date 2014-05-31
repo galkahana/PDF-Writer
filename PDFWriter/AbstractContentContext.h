@@ -225,7 +225,7 @@ public:
 	void J(int inLineCapStyle);
 	void j(int inLineJoinStyle);
 	void M(double inMiterLimit);
-	void d(int* inDashArray, int inDashArrayLength,int inDashPhase);
+	void d(double* inDashArray, int inDashArrayLength, double inDashPhase);
 	void ri(const std::string& inRenderingIntentName);
 	void i(int inFlatness);
 	void gs(const std::string& inGraphicStateName);

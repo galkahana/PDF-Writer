@@ -160,6 +160,14 @@ FreeTypeFaceWrapper* PDFUsedFont::GetFreeTypeFont()
     return &mFaceWrapper;
 }
 
+void PDFUsedFont::GetUnicodeGlyphs(const std::string& inText, UIntList& glyphs)
+{
+	UnicodeString unicode;
+        
+    unicode.FromUTF8(inText);
+	mFaceWrapper.GetGlyphsForUnicodeText(unicode.GetUnicodeList(),glyphs);
+}
+
 PDFUsedFont::TextMeasures PDFUsedFont::CalculateTextDimensions(const std::string& inText,long inFontSize)
 {
 	UIntList glyphs;
@@ -250,4 +258,95 @@ PDFUsedFont::TextMeasures PDFUsedFont::CalculateTextDimensions(const UIntList& i
 	result.height = (bbox.yMax-bbox.yMin)*inFontSize/1000;
 
 	return result;
+}
+
+double PDFUsedFont::CalculateTextAdvance(const std::string& inText,double inFontSize)
+{
+	UIntList glyphs;
+	GetUnicodeGlyphs(inText, glyphs);
+	return CalculateTextAdvance(glyphs,inFontSize);
+}
+
+double PDFUsedFont::CalculateTextAdvance(const UIntList& inGlyphsList,double inFontSize)
+{
+    FT_Pos pen = 0;
+    UIntList::const_iterator it = inGlyphsList.begin();
+    for(; it != inGlyphsList.end();++it)
+    {
+		FT_Pos adv;
+		if (mAdvanceCache.count(*it) > 0) 
+			adv = mAdvanceCache[*it];
+		else {
+			adv = mFaceWrapper.GetGlyphWidth(*it); //potentially very expensive!
+			if (mAdvanceCache.size() <= AdvanceCacheLimit) //dumb limit should cover typical usage, implement LRU if it's a problem
+				mAdvanceCache[*it] = adv;
+		}
+		pen += adv;
+    }
+	return pen * inFontSize / 1000.0;
+}
+
+bool PDFUsedFont::EnumeratePaths(IOutlineEnumerator& target, const std::string& inText,double inFontSize)
+{
+	UIntList glyphs;
+	GetUnicodeGlyphs(inText, glyphs);
+	return EnumeratePaths(target, glyphs,inFontSize);
+}
+
+bool PDFUsedFont::EnumeratePaths(IOutlineEnumerator& target, const UIntList& inGlyphsList,double inFontSize)
+{
+	bool status = true;
+    target.BeginEnum(inFontSize);
+	for( UIntList::const_iterator it = inGlyphsList.begin(); it != inGlyphsList.end(); ++it )
+    {
+		status = mFaceWrapper.GetGlyphOutline(*it, target);
+		if (!status) break;
+
+		// Keep track of glyphs' advance
+		double adv = mFaceWrapper.GetGlyphWidth(*it);
+		target.MoveBasepoint(adv * inFontSize / 1000.0, 0);
+    }
+	return status;
+}
+
+void PDFUsedFont::IOutlineEnumerator::BeginEnum(double scale)
+{
+	mFontScale = scale;
+}
+
+PDFUsedFont::IOutlineEnumerator::IOutlineEnumerator(double base_x, double base_y)
+{
+	mBase_x = base_x;
+	mBase_y = base_y;
+}
+
+void PDFUsedFont::IOutlineEnumerator::MoveBasepoint(double dx, double dy)
+{
+	mBase_x += dx;
+	mBase_y += dy;
+}
+
+bool PDFUsedFont::IOutlineEnumerator::Moveto(FT_Short x, FT_Short y)
+{
+	double scale = mFontScale / UPM();
+	return Moveto(mBase_x + scale * x, mBase_y + scale * y);
+}
+
+bool PDFUsedFont::IOutlineEnumerator::Lineto(FT_Short x, FT_Short y)
+{
+	double scale = mFontScale / UPM();
+	return Lineto(mBase_x + scale * x, mBase_y + scale * y);
+}
+
+bool PDFUsedFont::IOutlineEnumerator::Curveto(FT_Short x1, FT_Short y1, FT_Short x2, FT_Short y2, FT_Short x3, FT_Short y3)
+{
+	double scale = mFontScale / UPM();
+	return Curveto(mBase_x + scale * x1, mBase_y + scale * y1,
+	               mBase_x + scale * x2, mBase_y + scale * y2,
+	               mBase_x + scale * x3, mBase_y + scale * y3);
+}
+
+bool PDFUsedFont::IOutlineEnumerator::Close()
+{
+	return Closepath();
 }
