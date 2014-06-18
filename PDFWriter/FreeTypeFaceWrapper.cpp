@@ -27,6 +27,8 @@
 #include "WrittenFontCFF.h"
 #include "WrittenFontTrueType.h"
 
+#include <math.h>
+
 #include FT_XFREE86_H 
 #include FT_CID_H 
 #include FT_OUTLINE_H

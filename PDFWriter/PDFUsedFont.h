@@ -58,7 +58,7 @@ public:
 	};
 
 	class IOutlineEnumerator : private FreeTypeFaceWrapper::IOutlineEnumerator {
-		friend PDFUsedFont;
+		friend class PDFUsedFont;
 	public:
 		IOutlineEnumerator(double base_x, double base_y);
 		virtual ~IOutlineEnumerator(){};
