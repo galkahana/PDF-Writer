@@ -40,19 +40,19 @@ class PDFArrayIterator;
 class PDFDictionaryIterator
 {
 public:
-    PDFDictionaryIterator(PDFParser &parser) : mParser(parser), mDictonary(NULL)
+    PDFDictionaryIterator(PDFParser &parser) :  mDictonary(NULL),mParser(parser)
     {
     }
 
     PDFDictionaryIterator(PDFParser &parser, PDFObjectCastPtr<PDFDictionary> &inDict) :
-                        mParser(parser),
                         mDictonary(inDict.GetPtr()),
-                        mDictonaryRefPtr(inDict)
+                        mDictonaryRefPtr(inDict),
+                        mParser(parser)
     {
     }
     PDFDictionaryIterator(PDFParser &parser, PDFDictionary *inDict) :
-                        mParser(parser),
-                        mDictonary(inDict)
+                        mDictonary(inDict),
+                        mParser(parser)
     {
     }
     std::string GetStrValue(std::string s);

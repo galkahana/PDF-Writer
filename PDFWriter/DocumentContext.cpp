@@ -2524,8 +2524,8 @@ DoubleAndDoublePair DocumentContext::GetImageDimensions(const std::string& inIma
 	if(imageInformation.imageHeight == -1 || imageInformation.imageWidth == -1)
 	{
 
-		double imageWidth;
-		double imageHeight;
+		double imageWidth = 0.0;
+		double imageHeight = 0.0;
     
 		EHummusImageType imageType = GetImageType(inImageFile,inImageIndex);
         
@@ -2567,7 +2567,9 @@ DoubleAndDoublePair DocumentContext::GetImageDimensions(const std::string& inIma
                 
 				InputFile file;
 				if(file.OpenFile(inImageFile) != eSuccess)
+				{
 					break;
+				}
                 
 				DoubleAndDoublePair dimensions = hummusTiffHandler.ReadImageDimensions(file.GetInputStream(),inImageIndex);
 
@@ -2635,6 +2637,8 @@ PDFHummus::EHummusImageType DocumentContext::GetImageType(const std::string& inI
 			else
 				imageType = PDFHummus::eUndefined;
 		}
+		else
+			imageType = PDFHummus::eUndefined;
 
 		imageInformation.imageType = imageType;
 	}

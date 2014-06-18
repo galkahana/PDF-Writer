@@ -60,7 +60,7 @@ bool PDFDictionaryIterator::WriteStreamToFile(InputFile &pdfFile, std::string s,
 
 
     std::ofstream myFile;
-    myFile.open(filePath, std::ios_base::trunc | std::ios_base::binary);
+    myFile.open(filePath.c_str(), std::ios_base::trunc | std::ios_base::binary);
     if(! myFile.is_open())
         return false;
         

@@ -19,8 +19,8 @@ public:
     {
     }
     PDFArrayIterator(PDFParser &parser, PDFObjectCastPtr<PDFArray> &inArray) :
-                        mParser(parser),
-                        mArray(inArray)
+                        mArray(inArray),
+                        mParser(parser)
     {
     }
 
