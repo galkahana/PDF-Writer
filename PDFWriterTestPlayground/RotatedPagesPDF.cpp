@@ -49,10 +49,13 @@ EStatusCode RotatedPagesPDF::Run(const TestConfiguration& inTestConfiguration)
 		// PDF Page rotation writing
 
 		PDFWriter pdfWriter;
-		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"RotatedPages.PDF"),ePDFVersion13,logConfiguration);
+		status = pdfWriter.StartPDF(
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"RotatedPages.PDF"),
+			ePDFVersion13,logConfiguration);
+
 		if(status != PDFHummus::eSuccess)
 		{
-			cout<<"failed to start PDF\n";
+			cout<<"failed to start RotatedPages.PDF\n";
 			break;
 		}	
 
@@ -100,20 +103,56 @@ EStatusCode RotatedPagesPDF::Run(const TestConfiguration& inTestConfiguration)
 		status = pdfWriter.EndPDF();
 		if(status != PDFHummus::eSuccess)
 		{
-			cout<<"failed in end PDF\n";
+			cout<<"failed in end RotatedPages.PDF\n";
 			break;
 		}
 
+
+		// PDF page rotation copy
+        
+		status = pdfWriter.StartPDF(
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"RotatedPagesCopy.PDF"),
+			ePDFVersion13);
+
+		if(status != PDFHummus::eSuccess)
+		{
+			cout<<"failed to start RotatedPagesCopy.PDF\n";
+			break;
+		}
+        
+		EStatusCodeAndObjectIDTypeList result;
+        
+        // append pages
+		result = pdfWriter.AppendPDFPagesFromPDF(
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"RotatedPages.PDF"),
+			PDFPageRange());
+
+		if(result.first != PDFHummus::eSuccess)
+		{
+			cout<<"failed to append pages from RotatedPages.PDF\n";
+			status = result.first;
+			break;
+		}
+        
+		status = pdfWriter.EndPDF();
+
+		if(status != PDFHummus::eSuccess)
+		{
+			cout<<"failed in end RotatedPagesCopy.PDF\n";
+			break;
+		}
 
 		// PDF Page rotation parsing
 
 		InputFile pdfFile;
 		PDFParser pdfParser;
 
-		status = pdfFile.OpenFile(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"RotatedPages.PDF"));
+		status = pdfFile.OpenFile(
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"RotatedPagesCopy.PDF"));
+
 		if(status != PDFHummus::eSuccess)
 		{
-			cout<<"unable to open file for reading. should be in TestMaterials/XObjectContent.PDF\n";
+			cout<<"unable to open file RotatedPagesCopy.PDF for reading.\n";
 			break;
 		}
 
@@ -149,7 +188,7 @@ EStatusCode RotatedPagesPDF::Run(const TestConfiguration& inTestConfiguration)
 				break;
 			}
 		}
-		
+
 	}while(false);
 	return status;
 }
