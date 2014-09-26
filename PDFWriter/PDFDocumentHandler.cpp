@@ -993,7 +993,9 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::CreatePDFPageForPage(unsigned lon
 		// Create a new form XObject
 		newPage = new PDFPage();
  
-		newPage->SetMediaBox(PDFPageInput(mParser,pageObject).GetMediaBox());
+		PDFPageInput pageInput(mParser,pageObject);
+		newPage->SetMediaBox(pageInput.GetMediaBox());
+		newPage->SetRotate(pageInput.GetRotate());
 
 		// copy the page content to the target page content
 		if(CopyPageContentToTargetPage(newPage,pageObject.GetPtr()) != PDFHummus::eSuccess)
