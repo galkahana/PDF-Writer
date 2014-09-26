@@ -23,6 +23,7 @@
 PDFPage::PDFPage(void)
 {
 	mContentContext = NULL;
+	mRotate.first = false;
     mTrimBox.first = false;
     mArtBox.first = false;
     mCropBox.first = false;
@@ -42,6 +43,17 @@ void PDFPage::SetMediaBox(const PDFRectangle& inMediaBox)
 const PDFRectangle& PDFPage::GetMediaBox() const
 {
 	return mMediaBox;
+}
+
+void PDFPage::SetRotate( unsigned int inRotate )
+{
+	mRotate.first = true;
+	mRotate.second = inRotate;
+}
+
+const BoolAndUnsignedInt& PDFPage::GetRotate() const
+{
+	return mRotate;
 }
 
 void PDFPage::AddContentStreamReference(ObjectIDType inStreamReference)
