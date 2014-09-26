@@ -16,6 +16,7 @@ DCTDecodeFilterTest.cpp
 DFontTest.cpp
 EmptyFileTest.cpp
 EmptyPagesPDF.cpp
+RotatedPagesPDF.cpp
 FileURL.cpp
 FlateEncryptionTest.cpp
 FormXObjectTest.cpp
