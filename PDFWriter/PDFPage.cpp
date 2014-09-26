@@ -19,6 +19,7 @@
    
 */
 #include "PDFPage.h"
+#include "Trace.h"
 
 PDFPage::PDFPage(void)
 {
@@ -47,6 +48,11 @@ const PDFRectangle& PDFPage::GetMediaBox() const
 
 void PDFPage::SetRotate( unsigned int inRotate )
 {
+	if ( inRotate % 90 )
+	{ 
+        TRACE_LOG("PDFPage::SetRotate, Exception, the value must be a multiple of 90. defaulting to 0");
+        inRotate = 0;
+	}
 	mRotate.first = true;
 	mRotate.second = inRotate;
 }
