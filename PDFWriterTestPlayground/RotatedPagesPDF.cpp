@@ -68,6 +68,15 @@ EStatusCode RotatedPagesPDF::Run(const TestConfiguration& inTestConfiguration)
 		{
 			PDFPage page;
 			page.SetMediaBox(PDFRectangle(0,0,595,842));
+
+			page.SetRotate(33);
+			if ( page.GetRotate().second != 0 )
+			{
+				status = PDFHummus::eFailure;
+				cout<<"Failed to reject invalid rotation\n";
+				break;
+			}
+			
 			page.SetRotate(i*90);
 		
 			std::ostringstream s;
