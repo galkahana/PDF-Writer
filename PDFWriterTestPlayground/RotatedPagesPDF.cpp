@@ -23,6 +23,7 @@
 #include "PDFWriter.h"
 #include "PDFPage.h"
 #include "PDFRectangle.h"
+#include "PDFPageInput.h"
 #include "TestsRunner.h"
 
 #include <iostream>
@@ -40,12 +41,14 @@ RotatedPagesPDF::~RotatedPagesPDF(void)
 
 EStatusCode RotatedPagesPDF::Run(const TestConfiguration& inTestConfiguration)
 {
-	PDFWriter pdfWriter;
 	LogConfiguration logConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"RotatedPagesLog.txt"));
 	EStatusCode status; 
 
 	do
 	{
+		// PDF Page rotation writing
+
+		PDFWriter pdfWriter;
 		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"RotatedPages.PDF"),ePDFVersion13,logConfiguration);
 		if(status != PDFHummus::eSuccess)
 		{
@@ -92,6 +95,52 @@ EStatusCode RotatedPagesPDF::Run(const TestConfiguration& inTestConfiguration)
 			break;
 		}
 
+
+		// PDF Page rotation parsing
+
+		InputFile pdfFile;
+		PDFParser pdfParser;
+
+		status = pdfFile.OpenFile(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"RotatedPages.PDF"));
+		if(status != PDFHummus::eSuccess)
+		{
+			cout<<"unable to open file for reading. should be in TestMaterials/XObjectContent.PDF\n";
+			break;
+		}
+
+		status = pdfParser.StartPDFParsing(pdfFile.GetInputStream());
+		if(status != PDFHummus::eSuccess)
+		{
+			cout<<"unable to parse input file";
+			break;
+		}
+
+		if(pdfParser.GetPagesCount() != 4)
+		{
+			cout<<"expecting 4 pages, got "<<pdfParser.GetPagesCount()<<"\n";
+			status = PDFHummus::eFailure;
+			break;
+		}
+
+		for(int i=0;i<4 && PDFHummus::eSuccess == status;++i)
+		{
+			RefCountPtr<PDFDictionary> page = pdfParser.ParsePage(i);
+			if (!page)
+			{
+				cout << i << ". page parsing failed\n";
+				status = PDFHummus::eFailure;
+				break;
+			}
+
+			PDFPageInput input( &pdfParser, page );
+			if ( input.GetRotate() != i*90 )
+			{
+				cout<< i << ". page has invalid rotation\n";
+				status = PDFHummus::eFailure;
+				break;
+			}
+		}
+		
 	}while(false);
 	return status;
 }
