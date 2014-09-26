@@ -64,7 +64,7 @@ EStatusCode RotatedPagesPDF::Run(const TestConfiguration& inTestConfiguration)
 																			AbstractContentContext::eGray,
 																			0);
 
-		for(int i=0;i<4 && PDFHummus::eSuccess == status;++i)
+		for(int i=0;i<6 && PDFHummus::eSuccess == status;++i)
 		{
 			PDFPage page;
 			page.SetMediaBox(PDFRectangle(0,0,595,842));
@@ -124,14 +124,14 @@ EStatusCode RotatedPagesPDF::Run(const TestConfiguration& inTestConfiguration)
 			break;
 		}
 
-		if(pdfParser.GetPagesCount() != 4)
+		if(pdfParser.GetPagesCount() != 6)
 		{
-			cout<<"expecting 4 pages, got "<<pdfParser.GetPagesCount()<<"\n";
+			cout<<"expecting 6 pages, got "<<pdfParser.GetPagesCount()<<"\n";
 			status = PDFHummus::eFailure;
 			break;
 		}
 
-		for(int i=0;i<4 && PDFHummus::eSuccess == status;++i)
+		for(int i=0;i<pdfParser.GetPagesCount() && PDFHummus::eSuccess == status;++i)
 		{
 			RefCountPtr<PDFDictionary> page = pdfParser.ParsePage(i);
 			if (!page)
