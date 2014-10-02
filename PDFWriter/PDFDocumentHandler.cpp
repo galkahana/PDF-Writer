@@ -1091,13 +1091,27 @@ EStatusCode PDFDocumentHandler::WritePDFStreamInputToContentContext(PageContentC
 	{
 		inContentContext->StartAStreamIfRequired();
 
-		status = WritePDFStreamInputToStream(inContentContext->GetCurrentPageContentStream()->GetWriteStream(),inContentSource);
-		if(status != PDFHummus::eSuccess)
+		if ( mParser->IsContentTransferSupported() )
 		{
-			TRACE_LOG("PDFDocumentHandler::WritePDFStreamInputToContentContext, failed to write content stream from page input to target page");
-			break;
-		}
+			status = mParser->TransferPageContent( 
+				inContentContext->GetCurrentPageContentStream(), 
+				inContentSource );
 
+			if(status != PDFHummus::eSuccess)
+			{
+				TRACE_LOG("PDFDocumentHandler::WritePDFStreamInputToContentContext, page content transfer failed");
+				break;
+			}
+		}
+		else
+		{
+			status = WritePDFStreamInputToStream(inContentContext->GetCurrentPageContentStream()->GetWriteStream(),inContentSource);
+			if(status != PDFHummus::eSuccess)
+			{
+				TRACE_LOG("PDFDocumentHandler::WritePDFStreamInputToContentContext, failed to write content stream from page input to target page");
+				break;
+			}
+		}
 		status = inContentContext->FinalizeCurrentStream();
 
 	}while(false);
