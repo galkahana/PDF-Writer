@@ -247,7 +247,12 @@ AbstractContentContext::~AbstractContentContext(void)
 
 void AbstractContentContext::SetPDFStreamForWrite(PDFStream* inStream)
 {
-	mPrimitiveWriter.SetStreamForWriting(inStream->GetWriteStream());	
+	SetStreamForWrite(inStream->GetWriteStream());	
+}
+
+void AbstractContentContext::SetStreamForWrite(IByteWriter* inStreamForWriting)
+{
+	mPrimitiveWriter.SetStreamForWriting(inStreamForWriting);	
 }
 
 void AbstractContentContext::AssertProcsetAvailable(const std::string& inProcsetName)

@@ -344,8 +344,9 @@ protected:
 
 	PDFHummus::DocumentContext* mDocumentContext;
 
-	// Derived classes should use this method to update the stream for writing
+	// Derived classes should use one of these methods to update the stream for writing
 	void SetPDFStreamForWrite(PDFStream* inStream);
+	void SetStreamForWrite(IByteWriter* inStreamForWriting);
 
 private:
 	// Derived classes should use this method to retrive the content resource dictionary, for updating procsets 'n such
