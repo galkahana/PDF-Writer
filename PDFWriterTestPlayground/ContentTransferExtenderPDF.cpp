@@ -24,6 +24,8 @@
 #include "PDFDocumentCopyingContext.h"
 #include "IPDFParserExtenderAdapter.h"
 #include "OutputStreamTraits.h"
+#include "ResourcesDictionary.h"
+#include "WriterContentContext.h"
 
 #include <iostream>
 
@@ -44,6 +46,13 @@ public:
  
 		do
 		{
+			ResourcesDictionary resources;
+			WriterContentContext ctx( inStreamWriter, &resources );
+			ctx.rg( 1.0, 1.0, 0.7 );
+			ctx.re( 20, 240, 560, 360 );
+			ctx.b();
+			ctx.cm( 0, 0.71, -0.71, 0, 600, 200 );
+
 			OutputStreamTraits traits(inStreamWriter);
 			status = traits.CopyToOutputStream(inStreamReader);
 			if(status != PDFHummus::eSuccess)
