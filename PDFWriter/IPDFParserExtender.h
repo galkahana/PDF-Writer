@@ -3,10 +3,9 @@
 #include <string>
 
 class IByteReader;
+class IByteWriter;
 class PDFName;
 class PDFDictionary;
-
-
 
 class IPDFParserExtender
 {
@@ -29,4 +28,11 @@ public:
 	virtual void OnObjectStart(long long inObjectID, long long inGenerationNumber) = 0;
 	// event for indirect object parsing end
 	virtual void OnObjectEnd(PDFObject* inObject) = 0;
+
+	// for custom content transfer
+
+	// should return true if page content transfer is supported
+	virtual bool DoesSupportContentTransfer() { return false; }
+	// transfers page content from given byte reader to given page content context
+	virtual bool TransferContent( IByteWriter* inStreamWriter, IByteReader* inStreamReader ) { return false; }
 };
