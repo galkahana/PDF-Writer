@@ -229,6 +229,7 @@
     <ClInclude Include="ResourcesDictionary.h" />
     <ClInclude Include="TrailerInformation.h" />
     <ClInclude Include="XObjectContentContext.h" />
+    <ClInclude Include="WriterContentContext.h" />
     <ClInclude Include="DictionaryContext.h" />
     <ClInclude Include="ETokenSeparator.h" />
     <ClInclude Include="IndirectObjectsReferenceRegistry.h" />
@@ -391,6 +392,7 @@
     <ClCompile Include="ResourcesDictionary.cpp" />
     <ClCompile Include="TrailerInformation.cpp" />
     <ClCompile Include="XObjectContentContext.cpp" />
+    <ClCompile Include="WriterContentContext.cpp" />
     <ClCompile Include="DictionaryContext.cpp" />
     <ClCompile Include="IndirectObjectsReferenceRegistry.cpp" />
     <ClCompile Include="ObjectsContext.cpp" />

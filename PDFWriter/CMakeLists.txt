@@ -147,6 +147,7 @@ WinAnsiEncoding.cpp
 WrittenFontCFF.cpp
 WrittenFontTrueType.cpp
 XObjectContentContext.cpp
+WriterContentContext.cpp
 
 #headers
 AbstractContentContext.h
@@ -326,6 +327,7 @@ WrittenFontCFF.h
 WrittenFontRepresentation.h
 WrittenFontTrueType.h
 XObjectContentContext.h
+WriterContentContext.h
 
 )
 
