@@ -145,6 +145,7 @@ PDFHummus::EStatusCode PDFModifiedPage::WritePage()
     // Write a new resource entry. copy all but the "XObject" entry, which needs to be modified. Just for kicks i'm keeping the original 
     // form (either direct dictionary, or indirect object)
 	ObjectIDType resourcesIndirect = 0;
+	ObjectIDType newResourcesIndirect = 0;
 	vector<string> formResourcesNames;
 
 	modifiedPageObject->WriteKey("Resources");
@@ -176,7 +177,18 @@ PDFHummus::EStatusCode PDFModifiedPage::WritePage()
 		else
 		{
             resourcesIndirect = resourceDictRef->mObjectID;
-            modifiedPageObject->WriteObjectReferenceValue(resourcesIndirect);
+			// later will write a modified version of the resources dictionary, with the new form.
+			// only modify the resources dict object if wasn't already modified (can happen when sharing resources dict between multiple pages).
+			// in the case where it was alrady modified, create a new resources dictionary that's a copy, and use it instead, to avoid overwriting
+			// the previous modification
+			GetObjectWriteInformationResult res =  objectContext.GetInDirectObjectsRegistry().GetObjectWriteInformation(resourcesIndirect);
+			if(res.first && res.second.mIsDirty)
+			{
+				newResourcesIndirect = objectContext.GetInDirectObjectsRegistry().AllocateNewObjectID();
+				modifiedPageObject->WriteObjectReferenceValue(newResourcesIndirect);
+			}
+			else
+				modifiedPageObject->WriteObjectReferenceValue(resourcesIndirect);
 		}
 	}
 
@@ -185,7 +197,10 @@ PDFHummus::EStatusCode PDFModifiedPage::WritePage()
 
 	if(resourcesIndirect!=0)
 	{
-		objectContext.StartModifiedIndirectObject(resourcesIndirect);
+		if(newResourcesIndirect != 0)
+			objectContext.StartNewIndirectObject(newResourcesIndirect);
+		else
+			objectContext.StartModifiedIndirectObject(resourcesIndirect);
 		PDFObjectCastPtr<PDFDictionary> resourceDict(copyingContext->GetSourceDocumentParser()->ParseNewObject(resourcesIndirect));
 		formResourcesNames =  WriteModifiedResourcesDict(resourceDict.GetPtr(),objectContext,copyingContext);
 		objectContext.EndIndirectObject();
