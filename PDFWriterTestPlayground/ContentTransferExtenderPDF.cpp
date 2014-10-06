@@ -26,6 +26,8 @@
 #include "OutputStreamTraits.h"
 #include "ResourcesDictionary.h"
 #include "WriterContentContext.h"
+#include "IPDFPageContentHandlerPass.h"
+#include "PDFPageContentParser.h"
 
 #include <iostream>
 
@@ -36,35 +38,48 @@ namespace {
 
 class ContentColorizer
 	: public IPDFParserExtenderAdapter
+	, public IPDFPageContentHandlerPass<AbstractContentContext>
 {
 public:
+	ContentColorizer()
+		: m_next( NULL )
+	{
+	}
+
+public:
+	AbstractContentContext& next() { return *m_next; }
+
+public: // IPDFPageContentHandler interface
+	void TfLow( const std::string& font, double size )
+	{
+		if ( size < 10 )
+			next().rg( 1, 0, 0 );
+		else if ( size < 20 ) 
+			next().rg( 0, 1, 0 );
+		else
+			next().rg( 0, 0, 1 );
+	 	next().TfLow( font, size );
+	}
+
+public: // IPDFParserExtender interface
 	bool DoesSupportContentTransfer() { return true; }
 
 	bool TransferContent( IByteWriter* inStreamWriter, IByteReader* inStreamReader ) 
 	{
 		EStatusCode status = PDFHummus::eSuccess;
  
-		do
-		{
-			ResourcesDictionary resources;
-			WriterContentContext ctx( inStreamWriter, &resources );
-			ctx.rg( 1.0, 1.0, 0.7 );
-			ctx.re( 20, 240, 560, 360 );
-			ctx.b();
-			ctx.cm( 0, 0.71, -0.71, 0, 600, 200 );
-
-			OutputStreamTraits traits(inStreamWriter);
-			status = traits.CopyToOutputStream(inStreamReader);
-			if(status != PDFHummus::eSuccess)
-			{
-				cout << "ContentColorizer::TransferContent, failed to copy content stream\n";
-				break;
-			}
-
-		}while(false);
-
-		return status == PDFHummus::eSuccess; 
+		ResourcesDictionary resources;
+		WriterContentContext ctx( inStreamWriter, &resources );
+		m_next = &ctx;
+		bool succeeded = ParsePDFPageContent( *inStreamReader, *this );
+		m_next = NULL;
+		if ( !succeeded )
+			cout << "ContentColorizer::TransferContent, failed to parse content stream\n";
+		return succeeded;
 	}
+
+private:
+	AbstractContentContext* m_next;
 };
 
 } // anonymous namespace
