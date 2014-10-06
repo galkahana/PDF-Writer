@@ -230,6 +230,11 @@
     <ClInclude Include="TrailerInformation.h" />
     <ClInclude Include="XObjectContentContext.h" />
     <ClInclude Include="WriterContentContext.h" />
+	<ClInclude Include="ContentBasicTypes.h" />
+	<ClInclude Include="PDFPageContentParser.h" />
+	<ClInclude Include="PDFPageContentHandler.h" />
+	<ClInclude Include="PDFPageContentHandlerPass.h" />
+	<ClInclude Include="PDFPageContentHandlerNoop.h" />
     <ClInclude Include="DictionaryContext.h" />
     <ClInclude Include="ETokenSeparator.h" />
     <ClInclude Include="IndirectObjectsReferenceRegistry.h" />
@@ -470,6 +475,7 @@
     <ClCompile Include="InputPredictorTIFFSubStream.cpp" />
     <ClCompile Include="StateReader.cpp" />
     <ClCompile Include="StateWriter.cpp" />
+	<ClCompile Include="PDFPageContentParser.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
