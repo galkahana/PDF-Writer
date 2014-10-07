@@ -100,13 +100,20 @@ namespace
 		return true;
 	}
 
+	bool get_resource( char const* str, std::string& result ) 
+	{
+		if ( !str || str[0] != '/' || !str[1] )
+			return false;
+		result.assign( str+1 );
+		return true;
+	}
+
 	bool pop_resource( StackType& stack, std::string& result )
 	{
 		if ( stack.empty() )
 			return false;
-		if ( stack.back().empty() || stack.back()[0] != '/' )
+		if ( !get_resource( stack.back().c_str(), result ) )
 			return false;
-		result = stack.back().substr(1);
 		stack.pop_back();
 		return true;
 	}
@@ -131,6 +138,30 @@ namespace
 		}
 		std::reverse( result.begin(), result.end() );
 		return true;
+	}
+
+	bool pop_double_components( StackType& stack, 
+								std::vector<double>& components, 
+								std::string* resource = NULL )
+	{
+		if ( stack.empty() )
+			return false;
+		if ( resource )
+		{
+			if ( get_resource( stack.back().c_str(), *resource ) )
+				stack.pop_back();
+			else
+				resource->clear();
+		}
+		while ( !stack.empty() )
+		{
+			double component = 0.0;
+			if ( !pop_double( stack, component ) )
+				return false;
+			components.push_back( component );
+		}
+		std::reverse( components.begin(), components.end() );
+		return !components.empty();
 	}
 
 	bool pop_string_or_double_list( StackType& stack, StringOrDoubleList& result, bool& hex )
@@ -436,7 +467,7 @@ namespace
 		bool CS() 
 		{ 
 			std::string csname;
-			if ( !pop_string( mStack, csname ) )
+			if ( !pop_resource( mStack, csname ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid argument");
 				return false;
@@ -447,7 +478,7 @@ namespace
 		bool cs() 
 		{ 
 			std::string csname;
-			if ( !pop_string( mStack, csname ) )
+			if ( !pop_resource( mStack, csname ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid argument");
 				return false;
@@ -456,24 +487,56 @@ namespace
 			return true;  
 		}
 		bool SC() 
-		{ 
-			TRACE_LOG("ContentParserImpl::parse, Not implemented");
-			return false; 
+		{
+			std::vector<double> components;
+			if ( !pop_double_components( mStack, components ) )
+			{
+				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
+				return false;
+			}
+			mHandler.SC( &components[0], components.size() );
+			return true; 
 		}
 		bool SCN() 
-		{ 
-			TRACE_LOG("ContentParserImpl::parse, Not implemented");
-			return false; 
+		{
+			std::string pattern;
+			std::vector<double> components;
+			if ( !pop_double_components( mStack, components, &pattern ) )
+			{
+				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
+				return false;
+			}
+			if ( pattern.empty() )
+				mHandler.SCN( &components[0], components.size() );
+			else
+				mHandler.SCN( &components[0], components.size(), pattern );
+			return true; 
 		}
 		bool sc() 
 		{ 
-			TRACE_LOG("ContentParserImpl::parse, Not implemented");
-			return false; 
+			std::vector<double> components;
+			if ( !pop_double_components( mStack, components ) )
+			{
+				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
+				return false;
+			}
+			mHandler.sc( &components[0], components.size() );
+			return true; 
 		}
 		bool scn()
 		{ 
-			TRACE_LOG("ContentParserImpl::parse, Not implemented");
-			return false; 
+			std::string pattern;
+			std::vector<double> components;
+			if ( !pop_double_components( mStack, components, &pattern ) )
+			{
+				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
+				return false;
+			}
+			if ( pattern.empty() )
+				mHandler.scn( &components[0], components.size() );
+			else
+				mHandler.scn( &components[0], components.size(), pattern );
+			return true; 
 		}
 		bool G() 
 		{ 
