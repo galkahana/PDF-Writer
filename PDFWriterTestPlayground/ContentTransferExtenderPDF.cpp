@@ -46,11 +46,11 @@ public:
 	{
 	}
 
-public:
+private:
 	AbstractContentContext& next() { return *m_next; }
 
 public: // IPDFPageContentHandler interface
-	void TfLow( const std::string& font, double size )
+	PDFHummus::EStatusCode TfLow( const std::string& font, double size )
 	{
 		if ( size < 10 )
 			next().rg( 1, 0, 0 );
@@ -59,6 +59,7 @@ public: // IPDFPageContentHandler interface
 		else
 			next().rg( 0, 0, 1 );
 	 	next().TfLow( font, size );
+		return PDFHummus::eSuccess;
 	}
 
 public: // IPDFParserExtender interface
@@ -66,16 +67,17 @@ public: // IPDFParserExtender interface
 
 	bool TransferContent( IByteWriter* inStreamWriter, IByteReader* inStreamReader ) 
 	{
-		EStatusCode status = PDFHummus::eSuccess;
- 
 		ResourcesDictionary resources;
 		WriterContentContext ctx( inStreamWriter, &resources );
 		m_next = &ctx;
-		bool succeeded = ParsePDFPageContent( *inStreamReader, *this );
+		EStatusCode status = ParsePDFPageContent( *inStreamReader, *this );
 		m_next = NULL;
-		if ( !succeeded )
+		if ( status != eSuccess )
+		{
 			cout << "ContentColorizer::TransferContent, failed to parse content stream\n";
-		return succeeded;
+			return false;
+		}
+		return true;
 	}
 
 private:

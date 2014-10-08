@@ -25,7 +25,9 @@
 
 */
 
+#include "EStatusCode.h"
+
 class IByteReader;
 class IPDFPageContentHandler;
 
-bool ParsePDFPageContent( IByteReader& inStreamReader, IPDFPageContentHandler& handler );
+PDFHummus::EStatusCode ParsePDFPageContent( IByteReader& inStreamReader, IPDFPageContentHandler& handler );

@@ -219,7 +219,7 @@ namespace
 		{
 		}
 
-		bool parse( IByteReader& reader )
+		PDFHummus::EStatusCode parse( IByteReader& reader )
 		{
 			PDFParserTokenizer tokenizer;
 			tokenizer.SetReadStream( &reader );
@@ -232,7 +232,7 @@ namespace
 					if ( !mStack.empty() )
 					{
 						TRACE_LOG("ContentParserImpl::parse, unknown/incomplete command or trailing arguments");
-						return false;
+						return PDFHummus::eFailure;
 					}
 					break;
 				}
@@ -241,73 +241,72 @@ namespace
 				if ( it != ContentParserImpl::sHandlerTable.end() )
 				{
 					HandlerType const fnHandler = it->second;
-					if ( !(this->*fnHandler)() )
+					PDFHummus::EStatusCode const result = (this->*fnHandler)();
+					if ( result != PDFHummus::eSuccess )
 					{
 						TRACE_LOG1("ContentParserImpl::parse, handler method '%s' call failed",it->first.c_str());
-						return false;
+						return PDFHummus::eFailure;
 					}
 					
 					if ( !mStack.empty() )
 					{
 						TRACE_LOG1("ContentParserImpl::parse, too much arguments for handler method '%s'",it->first.c_str());
-						return false;
+						return PDFHummus::eFailure;
 					}
 				}
 				else
 					mStack.push_back( token.second );
 			}
 			//std::cout << "EOS" << std::endl;
-			return true;
+			return PDFHummus::eSuccess;
 		}
 
 	private:
 		Handler& mHandler;
 		std::vector<std::string> mStack;
 
-		typedef bool (ContentParserImpl::*HandlerType)();
+		typedef PDFHummus::EStatusCode (ContentParserImpl::*HandlerType)();
 		typedef std::map<std::string, HandlerType> HandlerTableType;
 		typedef typename HandlerTableType::const_iterator HandlerTableIterator;
 		static HandlerTableType sHandlerTable;
 
 	private:
 		// path stroke/fill
-		bool b() { mHandler.b(); return true; }
-		bool B() { mHandler.B(); return true; }
-		bool bStar() { mHandler.bStar(); return true; }
-		bool BStar() { mHandler.BStar(); return true; }
-		bool s() { mHandler.s(); return true; }
-		bool S() { mHandler.S(); return true; }
-		bool f() { mHandler.f(); return true; }
-		bool F() { mHandler.F(); return true; }
-		bool fStar() { mHandler.fStar(); return true; }
-		bool n() { mHandler.n(); return true; }
+		PDFHummus::EStatusCode b() { return mHandler.b(); }
+		PDFHummus::EStatusCode B() { return mHandler.B(); }
+		PDFHummus::EStatusCode bStar() { return mHandler.bStar(); }
+		PDFHummus::EStatusCode BStar() { return mHandler.BStar(); }
+		PDFHummus::EStatusCode s() { return mHandler.s(); }
+		PDFHummus::EStatusCode S() { return mHandler.S(); }
+		PDFHummus::EStatusCode f() { return mHandler.f(); }
+		PDFHummus::EStatusCode F() { return mHandler.F(); }
+		PDFHummus::EStatusCode fStar() { return mHandler.fStar(); }
+		PDFHummus::EStatusCode n() { return mHandler.n(); }
 
 		// path construction
-		bool m()
+		PDFHummus::EStatusCode m()
 		{ 
 			double y = 0.0;
 			double x = 0.0;
 			if ( !( pop_double( mStack, y ) && pop_double( mStack, x ) ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.m( x, y );
-			return true;
+			return mHandler.m( x, y );
 		}
-		bool l()
+		PDFHummus::EStatusCode l()
 		{ 
 			double x = 0.0;
 			double y = 0.0;
 			if ( !( pop_double( mStack, y ) && pop_double( mStack, x ) ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.l( x, y );
-			return true;
+			return mHandler.l( x, y );
 		}
-		bool c()
+		PDFHummus::EStatusCode c()
 		{ 
 			double x1 = 0.0;
 			double y1 = 0.0;
@@ -320,12 +319,11 @@ namespace
 					&& pop_double( mStack, y1 ) && pop_double( mStack, x1 ) ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.c( x1, y1, x2, y2, x3, y3 );
-			return true;
+			return mHandler.c( x1, y1, x2, y2, x3, y3 );
 		}
-		bool v()
+		PDFHummus::EStatusCode v()
 		{ 
 			double x2 = 0.0;
 			double y2 = 0.0;
@@ -335,25 +333,16 @@ namespace
 					&& pop_double( mStack, y2 ) && pop_double( mStack, x2 ) ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.v( x2, y2, x3, y3 );
-			return true;
+			return mHandler.v( x2, y2, x3, y3 );
 		}
-		bool h() { mHandler.h(); return true; }
+		PDFHummus::EStatusCode h() { return mHandler.h(); }
 
 	// graphic state
-		bool q() { mHandler.q(); return true; }
-		bool Q()
-		{ 
-			if ( mHandler.Q() != PDFHummus::eSuccess )
-			{
-				TRACE_LOG("Handler's Q() method call failed");
-				return false;
-			}
-			return true;
-		}
-		bool cm()
+		PDFHummus::EStatusCode q() { return mHandler.q(); }
+		PDFHummus::EStatusCode Q() { return mHandler.Q();	}
+		PDFHummus::EStatusCode cm()
 		{ 
 			double a = 0.0;
 			double b = 0.0;
@@ -366,56 +355,51 @@ namespace
 					&& pop_double( mStack, b ) && pop_double( mStack, a ) ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.cm( a, b, c, d, e, f );
-			return true;
+			return mHandler.cm( a, b, c, d, e, f );
 		}
-		bool w() 
+		PDFHummus::EStatusCode w() 
 		{
 			double lw = 0.0;
 			if ( !pop_double( mStack, lw ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid argument");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.w( lw ); 
-			return true; 
+			return mHandler.w( lw ); 
 		} 
-		bool J() 
+		PDFHummus::EStatusCode J() 
 		{ 
 			double lcs = 0.0;
 			if ( !pop_double( mStack, lcs ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid argument");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.J( lcs ); 
-			return true; 
+			return mHandler.J( lcs ); 
 		} 
-		bool j() 
+		PDFHummus::EStatusCode j() 
 		{ 
 			double ljs = 0.0;
 			if ( !pop_double( mStack, ljs ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid argument");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.j( ljs ); 
-			return true; 
+			return mHandler.j( ljs ); 
 		} 
-		bool M() 
+		PDFHummus::EStatusCode M() 
 		{ 
 			double ml = 0.0;
 			if ( !pop_double( mStack, ml ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid argument");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.M( ml ); 
-			return true; 
+			return mHandler.M( ml ); 
 		} 
-		bool d()
+		PDFHummus::EStatusCode d()
 		{ 
 			double phase = 0.0;
 			std::vector<double> segments;
@@ -424,143 +408,130 @@ namespace
 					&& !segments.empty() ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.d( &segments[0], static_cast<int>( segments.size() ), phase );
-			return true;
+			return mHandler.d( &segments[0], static_cast<int>( segments.size() ), phase );
 		}
-		bool ri() 
+		PDFHummus::EStatusCode ri() 
 		{ 
 			std::string intent;
 			if ( !pop_string( mStack, intent ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid argument");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.ri( intent ); 
-			return true;
+			return mHandler.ri( intent ); 
 		}
-		bool i() 
+		PDFHummus::EStatusCode i() 
 		{
 			int flatness = 0;
 			if ( !pop_int( mStack, flatness ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid argument");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.i( flatness ); 
-			return true; 
+			return mHandler.i( flatness ); 
 		} 
-		bool gs() 
+		PDFHummus::EStatusCode gs() 
 		{		
 			std::string gsname;
 			if ( !pop_string( mStack, gsname ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid argument");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.gs( gsname );
-			return true;
+			return mHandler.gs( gsname );
 		}
 
 		// color operators
-		bool CS() 
+		PDFHummus::EStatusCode CS() 
 		{ 
 			std::string csname;
 			if ( !pop_resource( mStack, csname ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid argument");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.CS( csname );
-			return true;  
+			return mHandler.CS( csname );
 		}
-		bool cs() 
+		PDFHummus::EStatusCode cs() 
 		{ 
 			std::string csname;
 			if ( !pop_resource( mStack, csname ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid argument");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.cs( csname );
-			return true;  
+			return mHandler.cs( csname );
 		}
-		bool SC() 
+		PDFHummus::EStatusCode SC() 
 		{
 			std::vector<double> components;
 			if ( !pop_double_components( mStack, components ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.SC( &components[0], components.size() );
-			return true; 
+			return mHandler.SC( &components[0], components.size() );
 		}
-		bool SCN() 
+		PDFHummus::EStatusCode SCN() 
 		{
 			std::string pattern;
 			std::vector<double> components;
 			if ( !pop_double_components( mStack, components, &pattern ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			if ( pattern.empty() )
-				mHandler.SCN( &components[0], components.size() );
-			else
-				mHandler.SCN( &components[0], components.size(), pattern );
-			return true; 
+			return pattern.empty()
+				? mHandler.SCN( &components[0], components.size() )
+				: mHandler.SCN( &components[0], components.size(), pattern );
 		}
-		bool sc() 
+		PDFHummus::EStatusCode sc() 
 		{ 
 			std::vector<double> components;
 			if ( !pop_double_components( mStack, components ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.sc( &components[0], components.size() );
-			return true; 
+			return mHandler.sc( &components[0], components.size() );
 		}
-		bool scn()
+		PDFHummus::EStatusCode scn()
 		{ 
 			std::string pattern;
 			std::vector<double> components;
 			if ( !pop_double_components( mStack, components, &pattern ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			if ( pattern.empty() )
-				mHandler.scn( &components[0], components.size() );
-			else
-				mHandler.scn( &components[0], components.size(), pattern );
-			return true; 
+			return pattern.empty()
+				? mHandler.scn( &components[0], components.size() )
+				: mHandler.scn( &components[0], components.size(), pattern );
 		}
-		bool G() 
+		PDFHummus::EStatusCode G() 
 		{ 
 			double gray = 0.0;
 			if ( !pop_double( mStack, gray ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid argument");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.G( gray ); 
-			return true;  
+			return mHandler.G( gray ); 
 		}
-		bool g() 
+		PDFHummus::EStatusCode g() 
 		{ 
 			double gray = 0.0;
 			if ( !pop_double( mStack, gray ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid argument");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.g( gray ); 
-			return true; }
+			return mHandler.g( gray ); 
+		}
 		
-		bool RG()
+		PDFHummus::EStatusCode RG()
 		{ 
 			double r = 0.0;
 			double g = 0.0;
@@ -570,12 +541,11 @@ namespace
 					&& pop_double( mStack, r ) ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.RG( r, g, b );
-			return true;
+			return mHandler.RG( r, g, b );
 		}
-		bool rg()
+		PDFHummus::EStatusCode rg()
 		{ 
 			double r = 0.0;
 			double g = 0.0;
@@ -585,12 +555,11 @@ namespace
 					&& pop_double( mStack, r ) ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.rg( r, g, b );
-			return true;
+			return mHandler.rg( r, g, b );
 		}
-		bool K()
+		PDFHummus::EStatusCode K()
 		{ 
 			double c = 0.0;
 			double m = 0.0;
@@ -602,12 +571,11 @@ namespace
 					&& pop_double( mStack, c ) ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.K( c, m, y, k );
-			return true;
+			return mHandler.K( c, m, y, k );
 		}
-		bool k()
+		PDFHummus::EStatusCode k()
 		{ 
 			double c = 0.0;
 			double m = 0.0;
@@ -619,127 +587,117 @@ namespace
 					&& pop_double( mStack, c ) ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.k( c, m, y, k );
-			return true;
+			return mHandler.k( c, m, y, k );
 		}
 
 		// clip operators
-		bool W() { mHandler.W(); return true; } 
-		bool WStar() { mHandler.WStar(); return true; } 
+		PDFHummus::EStatusCode W() { return mHandler.W(); } 
+		PDFHummus::EStatusCode WStar() { return mHandler.WStar(); } 
 
 		// XObject usage
-		bool Do() 
+		PDFHummus::EStatusCode Do() 
 		{
 			std::string xobj;
 			if ( !pop_resource( mStack, xobj ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid argument");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.Do( xobj ); 
-			return true; 
+			return mHandler.Do( xobj ); 
 		} 
 
 		// Text state operators
-		bool Tc() 
+		PDFHummus::EStatusCode Tc() 
 		{ 
 			double charspace = 0.0;
 			if ( !pop_double( mStack, charspace ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid argument");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.Tc( charspace ); 
-			return true; 
+			return mHandler.Tc( charspace ); 
 		} 
-		bool Tw() 
+		PDFHummus::EStatusCode Tw() 
 		{ 
 			double wordspace = 0.0;
 			if ( !pop_double( mStack, wordspace ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid argument");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.Tw( wordspace ); 
-			return true; 
+			return mHandler.Tw( wordspace ); 
 		} 
-		bool Tz() 
+		PDFHummus::EStatusCode Tz() 
 		{ 
 			int hscaling = 0;
 			if ( !pop_int( mStack, hscaling ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid argument");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.Tz( hscaling ); 
-			return true; 
+			return mHandler.Tz( hscaling ); 
 		} 
-		bool TL() 
+		PDFHummus::EStatusCode TL() 
 		{ 
 			double leading = 0.0;
 			if ( !pop_double( mStack, leading ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid argument");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.TL( leading ); 
-			return true; 
+			return mHandler.TL( leading ); 
 		} 
-		bool Tr() 
+		PDFHummus::EStatusCode Tr() 
 		{ 
 			int mode = 0;
 			if ( !pop_int( mStack, mode ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid argument");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.Tr( mode ); 
-			return true; 
+			return mHandler.Tr( mode ); 
 		} 
-		bool Ts() 
+		PDFHummus::EStatusCode Ts() 
 		{ 
 			double rise = 0.0;
 			if ( !pop_double( mStack, rise ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid argument");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.Ts( rise ); 
-			return true; 
+			return mHandler.Ts( rise ); 
 		} 
 
 		// Text object operators
-		bool BT() { mHandler.BT(); return true; }
-		bool ET() { mHandler.ET(); return true; } 
+		PDFHummus::EStatusCode BT() { return mHandler.BT(); }
+		PDFHummus::EStatusCode ET() { return mHandler.ET(); } 
 
 		// Text positioning operators
-		bool Td()
+		PDFHummus::EStatusCode Td()
 		{ 
 			double x = 0.0;
 			double y = 0.0;
 			if ( !( pop_double( mStack, y ) && pop_double( mStack, x ) ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.Td( x, y );
-			return true;
+			return mHandler.Td( x, y );
 		}
-		bool TD()
+		PDFHummus::EStatusCode TD()
 		{ 
 			double x = 0.0;
 			double y = 0.0;
 			if ( !( pop_double( mStack, y ) && pop_double( mStack, x ) ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.TD( x, y );
-			return true;
+			return mHandler.TD( x, y );
 		}
-		bool Tm()
+		PDFHummus::EStatusCode Tm()
 		{ 
 			double a = 0.0;
 			double b = 0.0;
@@ -752,64 +710,53 @@ namespace
 					&& pop_double( mStack, b ) && pop_double( mStack, a ) ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.Tm( a, b, c, d, e, f );
-			return true;
+			return mHandler.Tm( a, b, c, d, e, f );
 		}
 
-		bool TStar() { mHandler.TStar(); return true; } 
+		PDFHummus::EStatusCode TStar() { return mHandler.TStar(); } 
 
 		// Text showing operators using the library handling of fonts with unicode text using UTF 16
-		bool Tf()
+		PDFHummus::EStatusCode Tf()
 		{ 
 			double size = 0.0;
 			std::string font;
 			if ( !( pop_double( mStack, size ) && pop_resource( mStack, font ) ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.TfLow( font, size );
-			return true;
+			return mHandler.TfLow( font, size );
 		}
-		bool Tj() 
+		PDFHummus::EStatusCode Tj() 
 		{ 
 			std::string token;
 			if ( !pop_string( mStack, token ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid argument");
-				return false;
+				return PDFHummus::eFailure;
 			}
 			if ( is_string_literal( token ) )
-			{
-				mHandler.TjLow( get_literal( token ) );
-			}
-			else if ( is_hex_literal( token ) )
-			{
-				mHandler.TjHexLow( get_literal( token ) );
-			}
-			else
-			{
-				TRACE_LOG("ContentParserImpl::parse, Invalid text format" );
-				return false;
-			}
-			return true;
+				return mHandler.TjLow( get_literal( token ) );
+			if ( is_hex_literal( token ) )
+				return mHandler.TjHexLow( get_literal( token ) );
+			TRACE_LOG("ContentParserImpl::parse, Invalid text format" );
+			return PDFHummus::eFailure;
 		}
 
 		// The rest of the text operators, handled by the library handing of font. text is in UTF8
-		bool Quote() 
+		PDFHummus::EStatusCode Quote() 
 		{ 
 			std::string txt;
 			if ( !pop_string( mStack, txt ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid argument");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			mHandler.QuoteLow( txt ); 
-			return true; 
+			return mHandler.QuoteLow( txt ); 
 		} 
-		bool DoubleQuote()
+		PDFHummus::EStatusCode DoubleQuote()
 		{ 
 			std::string token;
 			double c = 0.0;
@@ -817,33 +764,27 @@ namespace
 			if ( !( pop_string( mStack, token ) && pop_double( mStack, c ) && pop_double( mStack, w ) ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
-				return false;
+				return PDFHummus::eFailure;
 			}
 			if ( is_string_literal( token ) )
-				mHandler.DoubleQuoteLow( w, c, get_literal( token ) );
-			else if ( is_hex_literal( token ) )
-				mHandler.DoubleQuoteHexLow( w, c, get_literal( token ) );
-			else
-			{
-				TRACE_LOG("ContentParserImpl::parse, Invalid text format" );
-				return false;
-			}
-			return true;
+				return mHandler.DoubleQuoteLow( w, c, get_literal( token ) );
+			if ( is_hex_literal( token ) )
+				return mHandler.DoubleQuoteHexLow( w, c, get_literal( token ) );
+			TRACE_LOG("ContentParserImpl::parse, Invalid text format" );
+			return PDFHummus::eFailure;
 		} 
-		bool TJ()
+		PDFHummus::EStatusCode TJ()
 		{
 			StringOrDoubleList lst;
 			bool hex = true;
 			if ( !pop_string_or_double_list( mStack, lst, hex ) )
 			{
 				TRACE_LOG("ContentParserImpl::parse, Invalid array argument");
-				return false;
+				return PDFHummus::eFailure;
 			}
-			if ( hex )
-				mHandler.TJHexLow( lst );
-			else
-				mHandler.TJLow( lst );
-			return true;
+			return hex
+				? mHandler.TJHexLow( lst )
+				: mHandler.TJLow( lst );
 		} 
 
 	};
@@ -945,7 +886,7 @@ namespace
 } // anonymous namespace
 
 
-bool ParsePDFPageContent( IByteReader& inStreamReader, IPDFPageContentHandler& handler ) 
+PDFHummus::EStatusCode ParsePDFPageContent( IByteReader& inStreamReader, IPDFPageContentHandler& handler ) 
 {
 	ContentParserImpl<IPDFPageContentHandler> parser( handler );
 	return parser.parse( inStreamReader );

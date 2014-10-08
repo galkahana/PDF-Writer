@@ -33,96 +33,110 @@ class IPDFPageContentHandlerNoop
 {
 public:
 	// path stroke/fill
-	void b() {}
-	void B() {}
-	void bStar() {}
-	void BStar() {}
-	void s() {}
-	void S() {}
-	void f() {}
-	void F() {}
-	void fStar() {}
-	void n() {}
+	PDFHummus::EStatusCode b() {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode B() {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode bStar() {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode BStar() {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode s() {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode S() {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode f() {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode F() {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode fStar() {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode n() {return PDFHummus::eSuccess;}
 
 	// path construction
-	void m(double inX,double inY) {}
-	void l(double inX,double inY) {}
-	void c(	double inX1,double inY1, double inX2, double inY2, double inX3, double inY3) {}
-	void v(	double inX2,double inY2, double inX3, double inY3){}
-	void y(	double inX1,double inY1, double inX3, double inY3) {}
-	void h() {}
-	void re(double inLeft,double inBottom, double inWidth,double inHeight) {}
+	PDFHummus::EStatusCode m(double inX,double inY) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode l(double inX,double inY) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode c(double inX1,double inY1, 
+							 double inX2, double inY2, 
+							 double inX3, double inY3) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode v(double inX2,double inY2, 
+							 double inX3, double inY3){return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode y(double inX1,double inY1, 
+							 double inX3, double inY3) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode h() {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode re(double inLeft,double inBottom, 
+							  double inWidth,double inHeight) {return PDFHummus::eSuccess;}
 
 	// graphic state
-	void q() {}
+	PDFHummus::EStatusCode q() {return PDFHummus::eSuccess;}
 	PDFHummus::EStatusCode Q() {return PDFHummus::eSuccess;}
-	void cm(double inA, double inB, double inC, double inD, double inE, double inF) {}
-	void w(double inLineWidth) {}
-	void J(int inLineCapStyle) {}
-	void j(int inLineJoinStyle) {}
-	void M(double inMiterLimit) {}
-	void d(double* inDashArray, int inDashArrayLength, double inDashPhase) {}
-	void ri(const std::string& inRenderingIntentName) {}
-	void i(int inFlatness) {}
-	void gs(const std::string& inGraphicStateName) {}
+	PDFHummus::EStatusCode cm(double inA, double inB, 
+							  double inC, double inD, 
+							  double inE, double inF) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode w(double inLineWidth) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode J(int inLineCapStyle) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode j(int inLineJoinStyle) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode M(double inMiterLimit) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode d(double* inDashArray, int inDashArrayLength, 
+							 double inDashPhase) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode ri(const std::string& inRenderingIntentName) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode i(int inFlatness) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode gs(const std::string& inGraphicStateName) {return PDFHummus::eSuccess;}
 
 	// color operators
-	void CS(const std::string& inColorSpaceName) {}
-	void cs(const std::string& inColorSpaceName) {}
-	void SC(double* inColorComponents, int inColorComponentsLength) {}
-	void SCN(double* inColorComponents, int inColorComponentsLength) {}
-	void SCN(double* inColorComponents, int inColorComponentsLength,const std::string& inPatternName) {}
-	void sc(double* inColorComponents, int inColorComponentsLength) {}
-	void scn(double* inColorComponents, int inColorComponentsLength) {}
-	void scn(double* inColorComponents, int inColorComponentsLength,const std::string& inPatternName) {}
-	void G(double inGray) {}
-	void g(double inGray) {}
-	void RG(double inR,double inG,double inB) {}
-	void rg(double inR,double inG,double inB) {}
-	void K(double inC,double inM,double inY,double inK) {}
-	void k(double inC,double inM,double inY,double inK) {}
+	PDFHummus::EStatusCode CS(const std::string& inColorSpaceName) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode cs(const std::string& inColorSpaceName) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode SC(double* inColorComponents, int inColorComponentsLength) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode SCN(double* inColorComponents, int inColorComponentsLength) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode SCN(double* inColorComponents, int inColorComponentsLength,
+							   const std::string& inPatternName) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode sc(double* inColorComponents, int inColorComponentsLength) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode scn(double* inColorComponents, int inColorComponentsLength) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode scn(double* inColorComponents, int inColorComponentsLength,
+							   const std::string& inPatternName) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode G(double inGray) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode g(double inGray) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode RG(double inR,double inG,double inB) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode rg(double inR,double inG,double inB) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode K(double inC,double inM,double inY,double inK) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode k(double inC,double inM,double inY,double inK) {return PDFHummus::eSuccess;}
 
 	// clip operators
-	void W() {}
-	void WStar() {}
+	PDFHummus::EStatusCode W() {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode WStar() {return PDFHummus::eSuccess;}
 
 	// XObject usage
-	void Do(const std::string& inXObjectName) {}
+	PDFHummus::EStatusCode Do(const std::string& inXObjectName) {return PDFHummus::eSuccess;}
 
 	// Text state operators
-	void Tc(double inCharacterSpace) {}
-	void Tw(double inWordSpace) {}
-	void Tz(int inHorizontalScaling) {}
-	void TL(double inTextLeading) {}
-	void Tr(int inRenderingMode) {}
-	void Ts(double inFontRise) {}
+	PDFHummus::EStatusCode Tc(double inCharacterSpace) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode Tw(double inWordSpace) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode Tz(int inHorizontalScaling) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode TL(double inTextLeading) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode Tr(int inRenderingMode) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode Ts(double inFontRise) {return PDFHummus::eSuccess;}
 
 	// Text object operators
-	void BT() {}
-	void ET() {}
+	PDFHummus::EStatusCode BT() {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode ET() {return PDFHummus::eSuccess;}
 
 	// Text positioning operators
-	void Td(double inTx, double inTy) {}
-	void TD(double inTx, double inTy) {}
-	void Tm(double inA, double inB, double inC, double inD, double inE, double inF) {}
-	void TStar() {}
+	PDFHummus::EStatusCode Td(double inTx, double inTy) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode TD(double inTx, double inTy) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode Tm(double inA, double inB, 
+							  double inC, double inD, 
+							  double inE, double inF) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode TStar() {return PDFHummus::eSuccess;}
 
 	//
 	// Text showing operators overriding library behavior
 	//
 
-	void TfLow(const std::string& inFontName,double inFontSize) {}
+	PDFHummus::EStatusCode TfLow(const std::string& inFontName,double inFontSize) {return PDFHummus::eSuccess;}
 
-	void TjLow(const std::string& inText) {}
-	void TjHexLow(const std::string& inText) {}
+	PDFHummus::EStatusCode TjLow(const std::string& inText) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode TjHexLow(const std::string& inText) {return PDFHummus::eSuccess;}
 
-	void QuoteLow(const std::string& inText) {}
-	void QuoteHexLow(const std::string& inText) {}
+	PDFHummus::EStatusCode QuoteLow(const std::string& inText) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode QuoteHexLow(const std::string& inText) {return PDFHummus::eSuccess;}
 
-	void DoubleQuoteLow(double inWordSpacing, double inCharacterSpacing, const std::string& inText) {}
-	void DoubleQuoteHexLow(double inWordSpacing, double inCharacterSpacing, const std::string& inText) {}
+	PDFHummus::EStatusCode DoubleQuoteLow(double inWordSpacing, double inCharacterSpacing, 
+										  const std::string& inText) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode DoubleQuoteHexLow(double inWordSpacing, double inCharacterSpacing, 
+											 const std::string& inText) {return PDFHummus::eSuccess;}
 
-	void TJLow(const StringOrDoubleList& inStringsAndSpacing) {}
-	void TJHexLow(const StringOrDoubleList& inStringsAndSpacing) {}
+	PDFHummus::EStatusCode TJLow(const StringOrDoubleList& inStringsAndSpacing) {return PDFHummus::eSuccess;}
+	PDFHummus::EStatusCode TJHexLow(const StringOrDoubleList& inStringsAndSpacing) {return PDFHummus::eSuccess;}
 };
 

@@ -38,99 +38,108 @@ public:
 	// of the PDF Reference Manual (1.7)
 	
 	// path stroke/fill
-	virtual void b() = 0;
-	virtual void B() = 0;
-	virtual void bStar() = 0;
-	virtual void BStar() = 0;
-	virtual void s() = 0;
-	virtual void S() = 0;
-	virtual void f() = 0;
-	virtual void F() = 0;
-	virtual void fStar() = 0;
-	virtual void n() = 0;
+	virtual PDFHummus::EStatusCode b() = 0;
+	virtual PDFHummus::EStatusCode B() = 0;
+	virtual PDFHummus::EStatusCode bStar() = 0;
+	virtual PDFHummus::EStatusCode BStar() = 0;
+	virtual PDFHummus::EStatusCode s() = 0;
+	virtual PDFHummus::EStatusCode S() = 0;
+	virtual PDFHummus::EStatusCode f() = 0;
+	virtual PDFHummus::EStatusCode F() = 0;
+	virtual PDFHummus::EStatusCode fStar() = 0;
+	virtual PDFHummus::EStatusCode n() = 0;
 
 	// path construction
-	virtual void m(double inX,double inY) = 0;
-	virtual void l(double inX,double inY) = 0;
-	virtual void c(	double inX1,double inY1,
-					double inX2, double inY2, 
-					double inX3, double inY3) = 0;
-	virtual void v(	double inX2,double inY2, 
-					double inX3, double inY3) = 0;
-	virtual void y(	double inX1,double inY1, 
-					double inX3, double inY3) = 0;
-	virtual void h() = 0;
-	virtual void re(double inLeft,double inBottom, double inWidth,double inHeight) = 0;
+	virtual PDFHummus::EStatusCode m(double inX,double inY) = 0;
+	virtual PDFHummus::EStatusCode l(double inX,double inY) = 0;
+	virtual PDFHummus::EStatusCode c(double inX1,double inY1,
+									 double inX2, double inY2, 
+									 double inX3, double inY3) = 0;
+	virtual PDFHummus::EStatusCode v(double inX2,double inY2, 
+									 double inX3, double inY3) = 0;
+	virtual PDFHummus::EStatusCode y(double inX1,double inY1, 
+									 double inX3, double inY3) = 0;
+	virtual PDFHummus::EStatusCode h() = 0;
+	virtual PDFHummus::EStatusCode re(double inLeft,double inBottom, 
+									  double inWidth,double inHeight) = 0;
 
 	// graphic state
-	virtual void q() = 0;
+	virtual PDFHummus::EStatusCode q() = 0;
 	virtual PDFHummus::EStatusCode Q() = 0;
-	virtual void cm(double inA, double inB, double inC, double inD, double inE, double inF) = 0;
-	virtual void w(double inLineWidth) = 0;
-	virtual void J(int inLineCapStyle) = 0;
-	virtual void j(int inLineJoinStyle) = 0;
-	virtual void M(double inMiterLimit) = 0;
-	virtual void d(double* inDashArray, int inDashArrayLength, double inDashPhase) = 0;
-	virtual void ri(const std::string& inRenderingIntentName) = 0;
-	virtual void i(int inFlatness) = 0;
-	virtual void gs(const std::string& inGraphicStateName) = 0;
+	virtual PDFHummus::EStatusCode cm(double inA, double inB, 
+									  double inC, double inD, 
+									  double inE, double inF) = 0;
+	virtual PDFHummus::EStatusCode w(double inLineWidth) = 0;
+	virtual PDFHummus::EStatusCode J(int inLineCapStyle) = 0;
+	virtual PDFHummus::EStatusCode j(int inLineJoinStyle) = 0;
+	virtual PDFHummus::EStatusCode M(double inMiterLimit) = 0;
+	virtual PDFHummus::EStatusCode d(double* inDashArray, int inDashArrayLength, double inDashPhase) = 0;
+	virtual PDFHummus::EStatusCode ri(const std::string& inRenderingIntentName) = 0;
+	virtual PDFHummus::EStatusCode i(int inFlatness) = 0;
+	virtual PDFHummus::EStatusCode gs(const std::string& inGraphicStateName) = 0;
 
 	// color operators
-	virtual void CS(const std::string& inColorSpaceName) = 0;
-	virtual void cs(const std::string& inColorSpaceName) = 0;
-	virtual void SC(double* inColorComponents, int inColorComponentsLength) = 0;
-	virtual void SCN(double* inColorComponents, int inColorComponentsLength) = 0;
-	virtual void SCN(double* inColorComponents, int inColorComponentsLength,const std::string& inPatternName) = 0;
-	virtual void sc(double* inColorComponents, int inColorComponentsLength) = 0;
-	virtual void scn(double* inColorComponents, int inColorComponentsLength) = 0;
-	virtual void scn(double* inColorComponents, int inColorComponentsLength,const std::string& inPatternName) = 0;
-	virtual void G(double inGray) = 0;
-	virtual void g(double inGray) = 0;
-	virtual void RG(double inR,double inG,double inB) = 0;
-	virtual void rg(double inR,double inG,double inB) = 0;
-	virtual void K(double inC,double inM,double inY,double inK) = 0;
-	virtual void k(double inC,double inM,double inY,double inK) = 0;
+	virtual PDFHummus::EStatusCode CS(const std::string& inColorSpaceName) = 0;
+	virtual PDFHummus::EStatusCode cs(const std::string& inColorSpaceName) = 0;
+	virtual PDFHummus::EStatusCode SC(double* inColorComponents, int inColorComponentsLength) = 0;
+	virtual PDFHummus::EStatusCode SCN(double* inColorComponents, int inColorComponentsLength) = 0;
+	virtual PDFHummus::EStatusCode SCN(double* inColorComponents, int inColorComponentsLength,
+									   const std::string& inPatternName) = 0;
+	virtual PDFHummus::EStatusCode sc(double* inColorComponents, int inColorComponentsLength) = 0;
+	virtual PDFHummus::EStatusCode scn(double* inColorComponents, int inColorComponentsLength) = 0;
+	virtual PDFHummus::EStatusCode scn(double* inColorComponents, int inColorComponentsLength,
+									   const std::string& inPatternName) = 0;
+	virtual PDFHummus::EStatusCode G(double inGray) = 0;
+	virtual PDFHummus::EStatusCode g(double inGray) = 0;
+	virtual PDFHummus::EStatusCode RG(double inR,double inG,double inB) = 0;
+	virtual PDFHummus::EStatusCode rg(double inR,double inG,double inB) = 0;
+	virtual PDFHummus::EStatusCode K(double inC,double inM,double inY,double inK) = 0;
+	virtual PDFHummus::EStatusCode k(double inC,double inM,double inY,double inK) = 0;
 
 	// clip operators
-	virtual void W() = 0;
-	virtual void WStar() = 0;
+	virtual PDFHummus::EStatusCode W() = 0;
+	virtual PDFHummus::EStatusCode WStar() = 0;
 
 	// XObject usage
-	virtual void Do(const std::string& inXObjectName) = 0;
+	virtual PDFHummus::EStatusCode Do(const std::string& inXObjectName) = 0;
 
 	// Text state operators
-	virtual void Tc(double inCharacterSpace) = 0;
-	virtual void Tw(double inWordSpace) = 0;
-	virtual void Tz(int inHorizontalScaling) = 0;
-	virtual void TL(double inTextLeading) = 0;
-	virtual void Tr(int inRenderingMode) = 0;
-	virtual void Ts(double inFontRise) = 0;
+	virtual PDFHummus::EStatusCode Tc(double inCharacterSpace) = 0;
+	virtual PDFHummus::EStatusCode Tw(double inWordSpace) = 0;
+	virtual PDFHummus::EStatusCode Tz(int inHorizontalScaling) = 0;
+	virtual PDFHummus::EStatusCode TL(double inTextLeading) = 0;
+	virtual PDFHummus::EStatusCode Tr(int inRenderingMode) = 0;
+	virtual PDFHummus::EStatusCode Ts(double inFontRise) = 0;
 
 	// Text object operators
-	virtual void BT() = 0;
-	virtual void ET() = 0;
+	virtual PDFHummus::EStatusCode BT() = 0;
+	virtual PDFHummus::EStatusCode ET() = 0;
 
 	// Text positioning operators
-	virtual void Td(double inTx, double inTy) = 0;
-	virtual void TD(double inTx, double inTy) = 0;
-	virtual void Tm(double inA, double inB, double inC, double inD, double inE, double inF) = 0;
-	virtual void TStar() = 0;
+	virtual PDFHummus::EStatusCode Td(double inTx, double inTy) = 0;
+	virtual PDFHummus::EStatusCode TD(double inTx, double inTy) = 0;
+	virtual PDFHummus::EStatusCode Tm(double inA, double inB, 
+									  double inC, double inD, 
+									  double inE, double inF) = 0;
+	virtual PDFHummus::EStatusCode TStar() = 0;
 
 	//
 	// Text showing operators overriding library behavior
 	//
 
-	virtual void TfLow(const std::string& inFontName,double inFontSize) = 0; 
+	virtual PDFHummus::EStatusCode TfLow(const std::string& inFontName,double inFontSize) = 0; 
 
-	virtual void TjLow(const std::string& inText) = 0;
-	virtual void TjHexLow(const std::string& inText) = 0; 
+	virtual PDFHummus::EStatusCode TjLow(const std::string& inText) = 0;
+	virtual PDFHummus::EStatusCode TjHexLow(const std::string& inText) = 0; 
 
-	virtual void QuoteLow(const std::string& inText) = 0;
-	virtual void QuoteHexLow(const std::string& inText) = 0;
+	virtual PDFHummus::EStatusCode QuoteLow(const std::string& inText) = 0;
+	virtual PDFHummus::EStatusCode QuoteHexLow(const std::string& inText) = 0;
 
-	virtual void DoubleQuoteLow(double inWordSpacing, double inCharacterSpacing, const std::string& inText) = 0;
-	virtual void DoubleQuoteHexLow(double inWordSpacing, double inCharacterSpacing, const std::string& inText) = 0; 
+	virtual PDFHummus::EStatusCode DoubleQuoteLow(double inWordSpacing, double inCharacterSpacing, 
+												  const std::string& inText) = 0;
+	virtual PDFHummus::EStatusCode DoubleQuoteHexLow(double inWordSpacing, double inCharacterSpacing, 
+													 const std::string& inText) = 0; 
 
-	virtual void TJLow(const StringOrDoubleList& inStringsAndSpacing) = 0;
-	virtual void TJHexLow(const StringOrDoubleList& inStringsAndSpacing) = 0;
+	virtual PDFHummus::EStatusCode TJLow(const StringOrDoubleList& inStringsAndSpacing) = 0;
+	virtual PDFHummus::EStatusCode TJHexLow(const StringOrDoubleList& inStringsAndSpacing) = 0;
 };
