@@ -337,7 +337,35 @@ namespace
 			}
 			return mHandler.v( x2, y2, x3, y3 );
 		}
+		PDFHummus::EStatusCode y()
+		{ 
+			double x1 = 0.0;
+			double y1 = 0.0;
+			double x3 = 0.0;
+			double y3 = 0.0;
+			if ( !( pop_double( mStack, y3 ) && pop_double( mStack, x3 )
+					&& pop_double( mStack, y1 ) && pop_double( mStack, x1 ) ) )
+			{
+				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
+				return PDFHummus::eFailure;
+			}
+			return mHandler.y( x1, y1, x3, y3 );
+		}
 		PDFHummus::EStatusCode h() { return mHandler.h(); }
+		PDFHummus::EStatusCode re()
+		{
+			double l = 0.0;
+			double b = 0.0;
+			double w = 0.0;
+			double h = 0.0;
+			if ( !( pop_double( mStack, h ) && pop_double( mStack, w )
+					&& pop_double( mStack, b ) && pop_double( mStack, l ) ) )
+			{
+				TRACE_LOG("ContentParserImpl::parse, Invalid arguments");
+				return PDFHummus::eFailure;
+			}
+			return mHandler.re( l, b, w, h );
+		}
 
 	// graphic state
 		PDFHummus::EStatusCode q() { return mHandler.q(); }
@@ -814,7 +842,9 @@ namespace
 		DEFINE_HANDLER_FN( "l", l );
 		DEFINE_HANDLER_FN( "c", c );
 		DEFINE_HANDLER_FN( "v", v );
+		DEFINE_HANDLER_FN( "y", y );
 		DEFINE_HANDLER_FN( "h", h );
+		DEFINE_HANDLER_FN( "re", re );
 
 		// graphic state
 		DEFINE_HANDLER_FN( "q", q );
