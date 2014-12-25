@@ -172,7 +172,7 @@ PDFHummus::EStatusCode PDFModifiedPage::WritePage()
 		if(!resourceDictRef)
 		{
 			PDFObjectCastPtr<PDFDictionary> resourceDict(pageDictionaryObject->QueryDirectObject("Resources"));
-			formResourcesNames = WriteModifiedResourcesDict(resourceDict.GetPtr(),objectContext,copyingContext);
+			formResourcesNames = WriteModifiedResourcesDict(copyingContext->GetSourceDocumentParser(),resourceDict.GetPtr(),objectContext,copyingContext);
 		}
 		else
 		{
@@ -202,7 +202,7 @@ PDFHummus::EStatusCode PDFModifiedPage::WritePage()
 		else
 			objectContext.StartModifiedIndirectObject(resourcesIndirect);
 		PDFObjectCastPtr<PDFDictionary> resourceDict(copyingContext->GetSourceDocumentParser()->ParseNewObject(resourcesIndirect));
-		formResourcesNames =  WriteModifiedResourcesDict(resourceDict.GetPtr(),objectContext,copyingContext);
+		formResourcesNames =  WriteModifiedResourcesDict(copyingContext->GetSourceDocumentParser(),resourceDict.GetPtr(),objectContext,copyingContext);
 		objectContext.EndIndirectObject();
 	}
 
@@ -232,7 +232,7 @@ PDFHummus::EStatusCode PDFModifiedPage::WritePage()
 	return eSuccess;
 }
 
-vector<string> PDFModifiedPage::WriteModifiedResourcesDict(PDFDictionary* inResourcesDictionary,ObjectsContext& inObjectContext,PDFDocumentCopyingContext* inCopyingContext)
+vector<string> PDFModifiedPage::WriteModifiedResourcesDict(PDFParser* inParser,PDFDictionary* inResourcesDictionary,ObjectsContext& inObjectContext,PDFDocumentCopyingContext* inCopyingContext)
 {
 	vector<string> formResourcesNames;
 
@@ -255,7 +255,7 @@ vector<string> PDFModifiedPage::WriteModifiedResourcesDict(PDFDictionary* inReso
 	dict->WriteKey("XObject");
 	DictionaryContext* xobjectDict = inObjectContext.StartDictionary();
 
-	PDFObjectCastPtr<PDFDictionary> existingXObjectDict = inResourcesDictionary->QueryDirectObject("XObject");
+	PDFObjectCastPtr<PDFDictionary> existingXObjectDict(inParser->QueryDictionaryObject(inResourcesDictionary,"XObject"));
     string imageObjectName;
 	if(existingXObjectDict.GetPtr())
 	{
