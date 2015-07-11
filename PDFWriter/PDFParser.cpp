@@ -648,7 +648,7 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,
 			break;
 
 	}while(false);	
-	mObjectParser.ResetReadState(); // cause read without consulting with the tokenizer...so now there shouldn't be available tokens
+	mObjectParser.ResetReadState(tokenizer); // reset with tokenizer in case got extra token.s
 
 	return status;
 }
