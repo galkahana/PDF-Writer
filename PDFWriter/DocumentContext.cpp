@@ -2569,6 +2569,7 @@ DoubleAndDoublePair DocumentContext::GetImageDimensions(const std::string& inIma
 				imageHeight = dimensions.second;
 				break;
 			}
+#ifndef PDFHUMMUS_NO_TIFF
 			case eTIFF:
 			{
 				TIFFImageHandler hummusTiffHandler;
@@ -2585,6 +2586,7 @@ DoubleAndDoublePair DocumentContext::GetImageDimensions(const std::string& inIma
 				imageHeight = dimensions.second;
 				break;
 			}
+#endif
 			default:
 			{
 				// just avoding uninteresting compiler warnings. meaning...if you can't get the image type or unsupported, do nothing
@@ -2702,7 +2704,8 @@ EStatusCode DocumentContext::WriteFormForImage(const std::string& inImagePath,un
             delete form;
             break;
         }
-        case eTIFF:
+#ifndef PDFHUMMUS_NO_TIFF
+		case eTIFF:
         {
             TIFFUsageParameters params;
             params.PageIndex = (unsigned int)inImageIndex;
@@ -2712,7 +2715,8 @@ EStatusCode DocumentContext::WriteFormForImage(const std::string& inImagePath,un
             delete form;
             break;
         }
-        default:
+#endif
+		default:
         {
             status = eFailure;
         }
