@@ -248,7 +248,7 @@ EStatusCode JPEGImageParser::ReadJFIFData(JPEGImageInformation& outImageInformat
 	return status;
 }
 
-EStatusCode JPEGImageParser::ReadPhotoshopData(JPEGImageInformation& outImageInformation,bool outPhotoshopDataOK)
+EStatusCode JPEGImageParser::ReadPhotoshopData(JPEGImageInformation& outImageInformation, bool outPhotoshopDataOK)
 {
 	EStatusCode status;
 	unsigned int intSkip;
@@ -259,56 +259,68 @@ EStatusCode JPEGImageParser::ReadPhotoshopData(JPEGImageInformation& outImageInf
 
 	do {
 		status = ReadIntValue(intSkip);
-		if(status != PDFHummus::eSuccess)
+		if (status != PDFHummus::eSuccess)
 			break;
-		toSkip = intSkip-2;
-		status = SkipTillChar(scEOS,toSkip);
-		if(status != PDFHummus::eSuccess)
+		toSkip = intSkip - 2;
+		status = SkipTillChar(scEOS, toSkip);
+		if (status != PDFHummus::eSuccess)
 			break;
-		while(toSkip > 0 && resolutionBimNotFound)
+		while (toSkip > 0 && resolutionBimNotFound)
 		{
+			if (toSkip < 4)
+				break;
 			status = ReadStreamToBuffer(4);
-			if(status !=PDFHummus::eSuccess)
+			if (status != PDFHummus::eSuccess)
 				break;
-            toSkip-=4;
-            if(0 != memcmp(mReadBuffer,sc8Bim,4))
-                break; // k. corrupt header. stop here and just skip the next
+			toSkip -= 4;
+			if (0 != memcmp(mReadBuffer, sc8Bim, 4))
+				break; // k. corrupt header. stop here and just skip the next
+			if (toSkip < 3)
+				break;
 			status = ReadStreamToBuffer(3);
-			if(status !=PDFHummus::eSuccess)
+			if (status != PDFHummus::eSuccess)
 				break;
-			toSkip-=3;
+			toSkip -= 3;
 			nameSkip = (int)mReadBuffer[2];
-			if(nameSkip % 2 == 0)
+			if (nameSkip % 2 == 0)
 				++nameSkip;
-			SkipStream(nameSkip);
-			toSkip-=nameSkip;
-			resolutionBimNotFound = (0 != memcmp(mReadBuffer,scResolutionBIMID,2));
-			status = ReadLongValue(dataLength);
-			if(status != PDFHummus::eSuccess)
+			if (toSkip < nameSkip)
 				break;
-			toSkip-=4;
-			if(resolutionBimNotFound)
+			SkipStream(nameSkip);
+			toSkip -= nameSkip;
+			resolutionBimNotFound = (0 != memcmp(mReadBuffer, scResolutionBIMID, 2));
+			if (toSkip < 4)
+				break;
+			status = ReadLongValue(dataLength);
+			if (status != PDFHummus::eSuccess)
+				break;
+			toSkip -= 4;
+			if (resolutionBimNotFound)
 			{
-				if(dataLength % 2 == 1)
+				if (dataLength % 2 == 1)
 					++dataLength;
-				toSkip-=dataLength;
+				if (toSkip < dataLength)
+					break;
+				toSkip -= dataLength;
 				SkipStream(dataLength);
 			}
 			else
 			{
-				status = ReadStreamToBuffer(16);
-				if(status !=PDFHummus::eSuccess)
+				if (toSkip < 16)
 					break;
-				toSkip-=16;
+				status = ReadStreamToBuffer(16);
+				if (status != PDFHummus::eSuccess)
+					break;
+				toSkip -= 16;
 				outImageInformation.PhotoshopInformationExists = true;
 				outImageInformation.PhotoshopXDensity = GetIntValue(mReadBuffer) + GetFractValue(mReadBuffer + 2);
 				outImageInformation.PhotoshopYDensity = GetIntValue(mReadBuffer + 8) + GetFractValue(mReadBuffer + 10);
 			}
 		}
-		if(PDFHummus::eSuccess == status)
+		if (PDFHummus::eSuccess == status)
 			SkipStream(toSkip);
-	}while(false);
-    outPhotoshopDataOK = !resolutionBimNotFound;
+	} while (false);
+	outPhotoshopDataOK = !resolutionBimNotFound;
 	return status;
 }
 
