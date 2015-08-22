@@ -33,6 +33,7 @@ MergePDFPages.cpp
 MergeToPDFForm.cpp
 ModifyingExistingFileContent.cpp
 PageModifierTest.cpp
+PageOrderModification.cpp
 OpenTypeTest.cpp
 OutputFileStreamTest.cpp
 PDFComment.cpp
@@ -92,6 +93,7 @@ MergePDFPages.h
 MergeToPDFForm.h
 ModifyingExistingFileContent.h
 PageModifierTest.h
+PageOrderModification.cpp
 OpenTypeTest.h
 OutputFileStreamTest.h
 PDFComment.h
@@ -196,6 +198,8 @@ ModifyingExistingFileContent.cpp
 ModifyingExistingFileContent.h
 PageModifierTest.cpp
 PageModifierTest.h
+PageOrderModification.cpp
+PageOrderModification.h
 )
 
 source_group("Tests\\Object Context Level" FILES
