@@ -63,6 +63,7 @@ UppercaseSequanceTest.cpp
 WindowsPath.cpp
 PDFWriterTestPlayground.cpp
 CopyingAndMergingEmptyPages.cpp
+ContentTransferExtenderPDF.cpp
 
 #headers
 AppendingAndReading.h
@@ -121,6 +122,7 @@ TTCTest.h
 Type1Test.h
 UppercaseSequanceTest.h
 CopyingAndMergingEmptyPages.h
+ContentTransferExtenderPDF.h
 )
 
 source_group(Main FILES

@@ -222,6 +222,7 @@
     <ClCompile Include="EmptyFileTest.cpp" />
     <ClCompile Include="EmptyPagesPDF.cpp" />
     <ClCompile Include="RotatedPagesPDF.cpp" />
+	<ClCompile Include="ContentTransferExtenderPDF.cpp" />
     <ClCompile Include="FormXObjectTest.cpp" />
     <ClCompile Include="ShutDownRestartTest.cpp" />
     <ClCompile Include="SimpleContentPageTest.cpp" />
@@ -281,6 +282,7 @@
     <ClInclude Include="EmptyFileTest.h" />
     <ClInclude Include="EmptyPagesPDF.h" />
     <ClInclude Include="RotatedPagesPDF.h" />
+	<ClInclude Include="ContentTransferExtenderPDF.h" />
     <ClInclude Include="FormXObjectTest.h" />
     <ClInclude Include="ShutDownRestartTest.h" />
     <ClInclude Include="SimpleContentPageTest.h" />

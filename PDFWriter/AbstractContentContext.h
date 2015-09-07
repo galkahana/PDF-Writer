@@ -37,8 +37,7 @@
 #include "GraphicStateStack.h"
 #include "GlyphUnicodeMapping.h"
 #include "ObjectsBasicTypes.h"
-#include <string>
-#include <list>
+#include "ContentBasicTypes.h"
 #include <set>
 #include <utility>
 
@@ -46,7 +45,8 @@
 namespace PDFHummus
 {
     class DocumentContext;  
-};
+}
+
 class ObjectsContext;
 class PDFStream;
 class ResourcesDictionary;
@@ -55,22 +55,8 @@ class ITextCommand;
 class IByteReader;
 class IContentContextListener;
 
-template <typename T>
-struct SomethingOrDouble
-{
-	T SomeValue;
-	double DoubleValue;
-
-	bool IsDouble; // true - double, false - other
-
-	SomethingOrDouble(T inSome){SomeValue = inSome;IsDouble = false;}
-	SomethingOrDouble(double inDouble){DoubleValue = inDouble;IsDouble = true;}
-};
-
-typedef SomethingOrDouble<std::string> StringOrDouble;
 typedef SomethingOrDouble<GlyphUnicodeMappingList> GlyphUnicodeMappingListOrDouble;
 
-typedef std::list<StringOrDouble> StringOrDoubleList;
 typedef std::list<GlyphUnicodeMappingListOrDouble> GlyphUnicodeMappingListOrDoubleList;
 
 typedef std::set<IContentContextListener*> IContentContextListenerSet;
@@ -344,8 +330,9 @@ protected:
 
 	PDFHummus::DocumentContext* mDocumentContext;
 
-	// Derived classes should use this method to update the stream for writing
+	// Derived classes should use one of these methods to update the stream for writing
 	void SetPDFStreamForWrite(PDFStream* inStream);
+	void SetStreamForWrite(IByteWriter* inStreamForWriting);
 
 private:
 	// Derived classes should use this method to retrive the content resource dictionary, for updating procsets 'n such

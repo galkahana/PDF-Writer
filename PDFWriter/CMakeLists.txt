@@ -147,6 +147,8 @@ WinAnsiEncoding.cpp
 WrittenFontCFF.cpp
 WrittenFontTrueType.cpp
 XObjectContentContext.cpp
+WriterContentContext.cpp
+PDFPageContentParser.cpp
 
 #headers
 AbstractContentContext.h
@@ -327,6 +329,12 @@ WrittenFontCFF.h
 WrittenFontRepresentation.h
 WrittenFontTrueType.h
 XObjectContentContext.h
+WriterContentContext.h
+ContentBasicTypes.h
+PDFPageContentParser.h
+IPDFPageContentHandler.h
+IPDFPageContentHandlerPass.h
+IPDFPageContentHandlerNoop.h
 
 )
 
