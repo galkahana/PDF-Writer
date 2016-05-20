@@ -997,7 +997,7 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::CreatePDFPageForPage(unsigned lon
 		newPage.SetRotate(pageInput.GetRotate());
 
 		// copy the page content to the target page content
-		if(CopyPageContentToTargetPage(&newPage,pageObject.GetPtr()) != PDFHummus::eSuccess)
+		if(CopyPageContentToTargetPagePassthrough(&newPage,pageObject.GetPtr()) != PDFHummus::eSuccess)
 			break;
 
 		// resources dictionary is gonna be empty at this point...so we can use our own code to write the dictionary, by extending.
@@ -1028,7 +1028,55 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::CreatePDFPageForPage(unsigned lon
 	return result;	
 }
 
-EStatusCode PDFDocumentHandler::CopyPageContentToTargetPage(PDFPage* inPage,PDFDictionary* inPageObject)
+EStatusCode PDFDocumentHandler::CopyPageContentToTargetPagePassthrough(PDFPage* inPage, PDFDictionary* inPageObject) 
+{
+	EStatusCode status = PDFHummus::eSuccess;
+
+	RefCountPtr<PDFObject> pageContent(mParser->QueryDictionaryObject(inPageObject, "Contents"));
+
+	// for empty page, do nothing
+	if (!pageContent)
+		return status;
+
+	if (pageContent->GetType() == PDFObject::ePDFObjectStream)
+	{
+		PDFObjectCastPtr<PDFIndirectObjectReference> streamReference = inPageObject->QueryDirectObject("Contents");
+		EStatusCodeAndObjectIDType copyObjectStatus = CopyObject(streamReference->mObjectID);
+		status = copyObjectStatus.first;
+		if (PDFHummus::eSuccess == status) {
+			inPage->AddContentStreamReference(copyObjectStatus.second);
+		}
+	}
+	else if (pageContent->GetType() == PDFObject::ePDFObjectArray)
+	{
+		SingleValueContainerIterator<PDFObjectVector> it = ((PDFArray*)pageContent.GetPtr())->GetIterator();
+		PDFObjectCastPtr<PDFIndirectObjectReference> refItem;
+		while (it.MoveNext() && status == PDFHummus::eSuccess)
+		{
+			refItem = it.GetItem();
+			if (!refItem)
+			{
+				status = PDFHummus::eFailure;
+				TRACE_LOG("PDFDocumentHandler::CopyPageContentToTargetPagePassthrough, content stream array contains non-refs");
+				break;
+			}
+			EStatusCodeAndObjectIDType copyObjectStatus = CopyObject(refItem->mObjectID);
+			status = copyObjectStatus.first;
+			if (PDFHummus::eSuccess == status) {
+				inPage->AddContentStreamReference(copyObjectStatus.second);
+			}
+		}
+	}
+	else
+	{
+		TRACE_LOG1("PDFDocumentHandler::CopyPageContentToTargetPagePassthrough, error copying page content, expected either array or stream, getting %s", PDFObject::scPDFObjectTypeLabel[pageContent->GetType()]);
+		status = PDFHummus::eFailure;
+	}
+
+	return status;
+}
+
+EStatusCode PDFDocumentHandler::CopyPageContentToTargetPageRecoded(PDFPage* inPage,PDFDictionary* inPageObject)
 {
 	EStatusCode status = PDFHummus::eSuccess;
     
@@ -1053,14 +1101,14 @@ EStatusCode PDFDocumentHandler::CopyPageContentToTargetPage(PDFPage* inPage,PDFD
 			if(!refItem)
 			{
 				status = PDFHummus::eFailure;
-				TRACE_LOG("PDFDocumentHandler::CopyPageContentToTargetPage, content stream array contains non-refs");
+				TRACE_LOG("PDFDocumentHandler::CopyPageContentToTargetPageRecoded, content stream array contains non-refs");
 				break;
 			}
 			PDFObjectCastPtr<PDFStreamInput> contentStream(mParser->ParseNewObject(refItem->mObjectID));
 			if(!contentStream)
 			{
 				status = PDFHummus::eFailure;
-				TRACE_LOG("PDFDocumentHandler::CopyPageContentToTargetPage, content stream array contains references to non streams");
+				TRACE_LOG("PDFDocumentHandler::CopyPageContentToTargetPageRecoded, content stream array contains references to non streams");
 				break;
 			}
 			status = WritePDFStreamInputToContentContext(pageContentContext,contentStream.GetPtr());
@@ -1068,7 +1116,7 @@ EStatusCode PDFDocumentHandler::CopyPageContentToTargetPage(PDFPage* inPage,PDFD
 	}
 	else
 	{
-		TRACE_LOG1("PDFDocumentHandler::CopyPageContentToTargetPage, error copying page content, expected either array or stream, getting %s",PDFObject::scPDFObjectTypeLabel[pageContent->GetType()]);
+		TRACE_LOG1("PDFDocumentHandler::CopyPageContentToTargetPageRecoded, error copying page content, expected either array or stream, getting %s",PDFObject::scPDFObjectTypeLabel[pageContent->GetType()]);
 		status = PDFHummus::eFailure;
 	}
 	
