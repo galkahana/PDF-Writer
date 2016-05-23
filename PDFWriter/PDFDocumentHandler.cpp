@@ -994,6 +994,15 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::CreatePDFPageForPage(unsigned lon
  
 		PDFPageInput pageInput(mParser,pageObject);
 		newPage.SetMediaBox(pageInput.GetMediaBox());
+		PDFRectangle cropBox = pageInput.GetCropBox();
+		if(cropBox != pageInput.GetMediaBox())
+			newPage.SetCropBox(pageInput.GetCropBox());
+		if(cropBox != pageInput.GetBleedBox())
+			newPage.SetBleedBox(pageInput.GetBleedBox());
+		if(cropBox != pageInput.GetArtBox())
+			newPage.SetArtBox(pageInput.GetArtBox());
+		if(cropBox != pageInput.GetTrimBox())
+			newPage.SetTrimBox(pageInput.GetTrimBox());
 		newPage.SetRotate(pageInput.GetRotate());
 
 		// copy the page content to the target page content
