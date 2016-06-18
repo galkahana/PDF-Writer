@@ -746,7 +746,7 @@ std::string DocumentContext::GenerateMD5IDForFile()
 	while(it.MoveNext())
 		md5.Accumulate(it.GetValue().ToString());
 
-	return md5.ToString();
+	return md5.ToStringAsString();
 }
 
 bool DocumentContext::HasContentContext(PDFPage* inPage)
@@ -1267,29 +1267,32 @@ PDFUsedFont* DocumentContext::GetFontForFile(const std::string& inFontFilePath,c
 }
 
 EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(const std::string& inPDFFilePath,
+																			const PDFParsingOptions& inParsingOptions,
 																			const PDFPageRange& inPageRange,
 																			EPDFPageBox inPageBoxToUseAsFormBox,
 																			const double* inTransformationMatrix,
 																			const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	return mPDFDocumentHandler.CreateFormXObjectsFromPDF(inPDFFilePath,inPageRange,inPageBoxToUseAsFormBox,inTransformationMatrix,inCopyAdditionalObjects);	
+	return mPDFDocumentHandler.CreateFormXObjectsFromPDF(inPDFFilePath,inParsingOptions,inPageRange,inPageBoxToUseAsFormBox,inTransformationMatrix,inCopyAdditionalObjects);	
 
 }
 
 EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(const std::string& inPDFFilePath,
+																			const PDFParsingOptions& inParsingOptions,
 																			const PDFPageRange& inPageRange,
 																			const PDFRectangle& inCropBox,
 																			const double* inTransformationMatrix,
 																			const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	return mPDFDocumentHandler.CreateFormXObjectsFromPDF(inPDFFilePath,inPageRange,inCropBox,inTransformationMatrix,inCopyAdditionalObjects);	
+	return mPDFDocumentHandler.CreateFormXObjectsFromPDF(inPDFFilePath,inParsingOptions,inPageRange,inCropBox,inTransformationMatrix,inCopyAdditionalObjects);	
 
 }
 EStatusCodeAndObjectIDTypeList DocumentContext::AppendPDFPagesFromPDF(const std::string& inPDFFilePath,
+																	const PDFParsingOptions& inParsingOptions,
 																	  const PDFPageRange& inPageRange,
 																	  const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	return mPDFDocumentHandler.AppendPDFPagesFromPDF(inPDFFilePath,inPageRange,inCopyAdditionalObjects);	
+	return mPDFDocumentHandler.AppendPDFPagesFromPDF(inPDFFilePath,inParsingOptions,inPageRange,inCopyAdditionalObjects);	
 }
 
 EStatusCode DocumentContext::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
@@ -1751,11 +1754,11 @@ void DocumentContext::ReadPageTreeState(PDFParser* inStateReader,PDFDictionary* 
 	}
 }
 
-PDFDocumentCopyingContext* DocumentContext::CreatePDFCopyingContext(const std::string& inFilePath)
+PDFDocumentCopyingContext* DocumentContext::CreatePDFCopyingContext(const std::string& inFilePath, const PDFParsingOptions& inOptions)
 {
 	PDFDocumentCopyingContext* context = new PDFDocumentCopyingContext();
 
-	if(context->Start(inFilePath,this,mObjectsContext,mParserExtender) != PDFHummus::eSuccess)
+	if(context->Start(inFilePath,this,mObjectsContext,inOptions,mParserExtender) != PDFHummus::eSuccess)
 	{
 		delete context;
 		return NULL;
@@ -1860,12 +1863,14 @@ void DocumentContext::RegisterAnnotationReferenceForNextPageWrite(ObjectIDType i
 
 EStatusCode DocumentContext::MergePDFPagesToPage(PDFPage* inPage,
 								const std::string& inPDFFilePath,
+								const PDFParsingOptions& inParsingOptions,
 								const PDFPageRange& inPageRange,
 								const ObjectIDTypeList& inCopyAdditionalObjects)
 {
 	return mPDFDocumentHandler.MergePDFPagesToPage(inPage,
 												   inPDFFilePath,
-												   inPageRange,
+													inParsingOptions,
+													inPageRange,
 												   inCopyAdditionalObjects);
 }
 
@@ -1891,43 +1896,47 @@ PDFFormXObject* DocumentContext::CreateFormXObjectFromJPGStream(IByteReaderWithP
 }
 
 EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+																	const PDFParsingOptions& inParsingOptions,
 																	const PDFPageRange& inPageRange,
 																	EPDFPageBox inPageBoxToUseAsFormBox,
 																	const double* inTransformationMatrix,
 																	const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	return mPDFDocumentHandler.CreateFormXObjectsFromPDF(inPDFStream,inPageRange,inPageBoxToUseAsFormBox,inTransformationMatrix,inCopyAdditionalObjects);
+	return mPDFDocumentHandler.CreateFormXObjectsFromPDF(inPDFStream, inParsingOptions,inPageRange,inPageBoxToUseAsFormBox,inTransformationMatrix,inCopyAdditionalObjects);
 }
 
 EStatusCodeAndObjectIDTypeList DocumentContext::CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+																	const PDFParsingOptions& inParsingOptions,
 																	const PDFPageRange& inPageRange,
 																	const PDFRectangle& inCropBox,
 																	const double* inTransformationMatrix,
 																	const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	return mPDFDocumentHandler.CreateFormXObjectsFromPDF(inPDFStream,inPageRange,inCropBox,inTransformationMatrix,inCopyAdditionalObjects);
+	return mPDFDocumentHandler.CreateFormXObjectsFromPDF(inPDFStream,inParsingOptions,inPageRange,inCropBox,inTransformationMatrix,inCopyAdditionalObjects);
 }
 
 EStatusCodeAndObjectIDTypeList DocumentContext::AppendPDFPagesFromPDF(IByteReaderWithPosition* inPDFStream,
+																const PDFParsingOptions& inParsingOptions,
 																const PDFPageRange& inPageRange,
 																const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	return mPDFDocumentHandler.AppendPDFPagesFromPDF(inPDFStream,inPageRange,inCopyAdditionalObjects);
+	return mPDFDocumentHandler.AppendPDFPagesFromPDF(inPDFStream,inParsingOptions,inPageRange,inCopyAdditionalObjects);
 }
 
 EStatusCode DocumentContext::MergePDFPagesToPage(	PDFPage* inPage,
 											IByteReaderWithPosition* inPDFStream,
-											const PDFPageRange& inPageRange,
+										const PDFParsingOptions& inParsingOptions,
+										const PDFPageRange& inPageRange,
 											const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	return mPDFDocumentHandler.MergePDFPagesToPage(inPage,inPDFStream,inPageRange,inCopyAdditionalObjects);
+	return mPDFDocumentHandler.MergePDFPagesToPage(inPage,inPDFStream, inParsingOptions,inPageRange,inCopyAdditionalObjects);
 }
 
-PDFDocumentCopyingContext* DocumentContext::CreatePDFCopyingContext(IByteReaderWithPosition* inPDFStream)
+PDFDocumentCopyingContext* DocumentContext::CreatePDFCopyingContext(IByteReaderWithPosition* inPDFStream, const PDFParsingOptions& inOptions)
 {
 	PDFDocumentCopyingContext* context = new PDFDocumentCopyingContext();
 
-	if(context->Start(inPDFStream,this,mObjectsContext,mParserExtender) != PDFHummus::eSuccess)
+	if(context->Start(inPDFStream,this,mObjectsContext, inOptions,mParserExtender) != PDFHummus::eSuccess)
 	{
 		delete context;
 		return NULL;
@@ -2283,7 +2292,7 @@ ObjectIDType DocumentContext::WriteCombinedPageTree(PDFParser* inModifiedFilePar
     MapIterator<PDFNameToPDFObjectMap>  pageTreeIt = originalTreeRootObject->GetIterator();
     PDFDocumentCopyingContext aCopyingContext;
     
-    EStatusCode status = aCopyingContext.Start(inModifiedFileParser,this,mObjectsContext,NULL);
+    EStatusCode status = aCopyingContext.Start(inModifiedFileParser,this,mObjectsContext);
     
     do {
         
@@ -2419,7 +2428,7 @@ PDFDocumentCopyingContext* DocumentContext::CreatePDFCopyingContext(PDFParser* i
 {
 	PDFDocumentCopyingContext* context = new PDFDocumentCopyingContext();
     
-	if(context->Start(inPDFParser,this,mObjectsContext,mParserExtender) != PDFHummus::eSuccess)
+	if(context->Start(inPDFParser,this,mObjectsContext) != PDFHummus::eSuccess)
 	{
 		delete context;
 		return NULL;
@@ -2724,7 +2733,7 @@ EStatusCode DocumentContext::WriteFormForImage(const std::string& inImagePath,un
             PDFFormXObject* formXObject = NULL;
             do {
                 // hmm...pdf merging doesn't have an innate method to force an object id. so i'll create a form, and merge into it
-                copyingContext = CreatePDFCopyingContext(inImagePath);
+                copyingContext = CreatePDFCopyingContext(inImagePath,PDFParsingOptions::DefaultPDFParsingOptions);
                 if(!copyingContext)
                 {
                     status = eFailure;

@@ -278,9 +278,11 @@ EStatusCodeAndObjectIDTypeList PDFWriter::CreateFormXObjectsFromPDF(const std::s
 																	  const PDFPageRange& inPageRange,
 																	  EPDFPageBox inPageBoxToUseAsFormBox,
 																	  const double* inTransformationMatrix,
-																	  const ObjectIDTypeList& inCopyAdditionalObjects)
+																	  const ObjectIDTypeList& inCopyAdditionalObjects,
+																	  const PDFParsingOptions& inParsingOptions)
 {
 	return mDocumentContext.CreateFormXObjectsFromPDF(inPDFFilePath,
+														inParsingOptions,
 														inPageRange,
 														inPageBoxToUseAsFormBox,
 														inTransformationMatrix,
@@ -291,9 +293,11 @@ EStatusCodeAndObjectIDTypeList PDFWriter::CreateFormXObjectsFromPDF(const std::s
 																	 const PDFPageRange& inPageRange,
 																	 const PDFRectangle& inCropBox,
 																	 const double* inTransformationMatrix,
-																	 const ObjectIDTypeList& inCopyAdditionalObjects)
+																	 const ObjectIDTypeList& inCopyAdditionalObjects,
+																	const PDFParsingOptions& inParsingOptions)
 {
 	return mDocumentContext.CreateFormXObjectsFromPDF(inPDFFilePath,
+														inParsingOptions,
 														inPageRange,
 														inCropBox,
 														inTransformationMatrix,
@@ -302,9 +306,11 @@ EStatusCodeAndObjectIDTypeList PDFWriter::CreateFormXObjectsFromPDF(const std::s
 
 EStatusCodeAndObjectIDTypeList PDFWriter::AppendPDFPagesFromPDF(const std::string& inPDFFilePath,
 																const PDFPageRange& inPageRange,
-																const ObjectIDTypeList& inCopyAdditionalObjects)
+																const ObjectIDTypeList& inCopyAdditionalObjects,
+																const PDFParsingOptions& inParsingOptions)
 {
 	return mDocumentContext.AppendPDFPagesFromPDF(inPDFFilePath,
+														inParsingOptions,
 														inPageRange,
 														inCopyAdditionalObjects);
 }
@@ -481,9 +487,9 @@ EStatusCode PDFWriter::ContinuePDFForStream(IByteWriterWithPosition* inOutputStr
 }
 
 
-PDFDocumentCopyingContext* PDFWriter::CreatePDFCopyingContext(const std::string& inPDFFilePath)
+PDFDocumentCopyingContext* PDFWriter::CreatePDFCopyingContext(const std::string& inPDFFilePath, const PDFParsingOptions& inOptions)
 {
-	return mDocumentContext.CreatePDFCopyingContext(inPDFFilePath);
+	return mDocumentContext.CreatePDFCopyingContext(inPDFFilePath, inOptions);
 }
 
 EStatusCode PDFWriter::AttachURLLinktoCurrentPage(const std::string& inURL,const PDFRectangle& inLinkClickArea)
@@ -494,10 +500,12 @@ EStatusCode PDFWriter::AttachURLLinktoCurrentPage(const std::string& inURL,const
 EStatusCode PDFWriter::MergePDFPagesToPage(PDFPage* inPage,
 								const std::string& inPDFFilePath,
 								const PDFPageRange& inPageRange,
-								const ObjectIDTypeList& inCopyAdditionalObjects)
+								const ObjectIDTypeList& inCopyAdditionalObjects,
+								const PDFParsingOptions& inParsingOptions)
 {
 	return mDocumentContext.MergePDFPagesToPage(inPage,
 												inPDFFilePath,
+												inParsingOptions,
 												inPageRange,
 												inCopyAdditionalObjects);
 }
@@ -554,38 +562,42 @@ EStatusCodeAndObjectIDTypeList PDFWriter::CreateFormXObjectsFromPDF(IByteReaderW
 																	const PDFPageRange& inPageRange,
 																	EPDFPageBox inPageBoxToUseAsFormBox,
 																	const double* inTransformationMatrix,
-																	const ObjectIDTypeList& inCopyAdditionalObjects)
+																	const ObjectIDTypeList& inCopyAdditionalObjects,
+																	const PDFParsingOptions& inParsingOptions)
 {
-	return mDocumentContext.CreateFormXObjectsFromPDF(inPDFStream,inPageRange,inPageBoxToUseAsFormBox,inTransformationMatrix,inCopyAdditionalObjects);
+	return mDocumentContext.CreateFormXObjectsFromPDF(inPDFStream,inParsingOptions,inPageRange,inPageBoxToUseAsFormBox,inTransformationMatrix,inCopyAdditionalObjects);
 }
 
 EStatusCodeAndObjectIDTypeList PDFWriter::CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
 																	const PDFPageRange& inPageRange,
 																	const PDFRectangle& inCropBox,
 																	const double* inTransformationMatrix,
-																	const ObjectIDTypeList& inCopyAdditionalObjects)
+																	const ObjectIDTypeList& inCopyAdditionalObjects,
+																	const PDFParsingOptions& inParsingOptions)
 {
-	return mDocumentContext.CreateFormXObjectsFromPDF(inPDFStream,inPageRange,inCropBox,inTransformationMatrix,inCopyAdditionalObjects);
+	return mDocumentContext.CreateFormXObjectsFromPDF(inPDFStream,inParsingOptions,inPageRange,inCropBox,inTransformationMatrix,inCopyAdditionalObjects);
 }
 
 EStatusCodeAndObjectIDTypeList PDFWriter::AppendPDFPagesFromPDF(IByteReaderWithPosition* inPDFStream,
 																const PDFPageRange& inPageRange,
-																const ObjectIDTypeList& inCopyAdditionalObjects)
+																const ObjectIDTypeList& inCopyAdditionalObjects,
+																const PDFParsingOptions& inParsingOptions)
 {
-	return mDocumentContext.AppendPDFPagesFromPDF(inPDFStream,inPageRange,inCopyAdditionalObjects);
+	return mDocumentContext.AppendPDFPagesFromPDF(inPDFStream,inParsingOptions,inPageRange,inCopyAdditionalObjects);
 }
 
 EStatusCode PDFWriter::MergePDFPagesToPage(	PDFPage* inPage,
 											IByteReaderWithPosition* inPDFStream,
 											const PDFPageRange& inPageRange,
-											const ObjectIDTypeList& inCopyAdditionalObjects)
+											const ObjectIDTypeList& inCopyAdditionalObjects,
+											const PDFParsingOptions& inParsingOptions)
 {
-	return mDocumentContext.MergePDFPagesToPage(inPage,inPDFStream,inPageRange,inCopyAdditionalObjects);
+	return mDocumentContext.MergePDFPagesToPage(inPage,inPDFStream, inParsingOptions,inPageRange,inCopyAdditionalObjects);
 }
 
-PDFDocumentCopyingContext* PDFWriter::CreatePDFCopyingContext(IByteReaderWithPosition* inPDFStream)
+PDFDocumentCopyingContext* PDFWriter::CreatePDFCopyingContext(IByteReaderWithPosition* inPDFStream, const PDFParsingOptions& inOptions)
 {
-	return mDocumentContext.CreatePDFCopyingContext(inPDFStream);	
+	return mDocumentContext.CreatePDFCopyingContext(inPDFStream,inOptions);	
 }
 
 EStatusCode PDFWriter::ModifyPDF(const std::string& inModifiedFile,

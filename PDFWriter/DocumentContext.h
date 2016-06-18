@@ -33,6 +33,7 @@
 #include "PDFDocumentHandler.h"
 #include "ObjectsBasicTypes.h"
 #include "EHummusImageType.h"
+#include "PDFParsingOptions.h"
 
 #include <string>
 #include <set>
@@ -204,36 +205,42 @@ namespace PDFHummus
 		// CreateFormXObjectsFromPDF is for using input PDF pages as objects in one page or more. you can used the returned IDs to place the 
 		// created form xobjects
 		EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const std::string& inPDFFilePath,
+																 const PDFParsingOptions& inParsingOptions,
 																 const PDFPageRange& inPageRange,
 																 EPDFPageBox inPageBoxToUseAsFormBox,
 																 const double* inTransformationMatrix = NULL,
 																 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
 		EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
-																 const PDFPageRange& inPageRange,
+																const PDFParsingOptions& inParsingOptions,
+																const PDFPageRange& inPageRange,
 																 EPDFPageBox inPageBoxToUseAsFormBox,
 																 const double* inTransformationMatrix = NULL,
 																 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 		
 		// CreateFormXObjectsFromPDF is an override to allow you to determine a custom crop for the page embed
 		EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const std::string& inPDFFilePath,
-																 const PDFPageRange& inPageRange,
+																const PDFParsingOptions& inParsingOptions,
+																const PDFPageRange& inPageRange,
 																 const PDFRectangle& inCropBox,
 																 const double* inTransformationMatrix = NULL,
 																 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
 		EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
-																 const PDFPageRange& inPageRange,
+																const PDFParsingOptions& inParsingOptions,
+																const PDFPageRange& inPageRange,
 																 const PDFRectangle& inCropBox,
 																 const double* inTransformationMatrix = NULL,
 																 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
 		// AppendPDFPagesFromPDF is for simple appending of the input PDF pages
 		EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const std::string& inPDFFilePath,
+															const PDFParsingOptions& inParsingOptions,
 															const PDFPageRange& inPageRange,
 															const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 		
 		EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(IByteReaderWithPosition* inPDFStream,
+															const PDFParsingOptions& inParsingOptions,
 															const PDFPageRange& inPageRange,
 															const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
@@ -241,16 +248,18 @@ namespace PDFHummus
 		// and XObject and later placing, when the intention is to use this graphic just once.
 		PDFHummus::EStatusCode MergePDFPagesToPage(PDFPage* inPage,
 										const std::string& inPDFFilePath,
+										const PDFParsingOptions& inParsingOptions,
 										const PDFPageRange& inPageRange,
 										const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
 		PDFHummus::EStatusCode MergePDFPagesToPage(PDFPage* inPage,
 										IByteReaderWithPosition* inPDFStream,
+										const PDFParsingOptions& inParsingOptions,
 										const PDFPageRange& inPageRange,
 										const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
 
-		PDFDocumentCopyingContext* CreatePDFCopyingContext(const std::string& inPDFFilePath);
-		PDFDocumentCopyingContext* CreatePDFCopyingContext(IByteReaderWithPosition* inPDFStream);
+		PDFDocumentCopyingContext* CreatePDFCopyingContext(const std::string& inPDFFilePath, const PDFParsingOptions& inOptions);
+		PDFDocumentCopyingContext* CreatePDFCopyingContext(IByteReaderWithPosition* inPDFStream, const PDFParsingOptions& inOptions);
         PDFDocumentCopyingContext* CreatePDFCopyingContext(PDFParser* inPDFParser);
 
 		// some public image info services, for users of hummus
@@ -352,10 +361,6 @@ namespace PDFHummus
         PDFHummus::EStatusCode WriteCatalogObject(const ObjectReference& inPageTreeRootObjectReference);
 		PDFHummus::EStatusCode WriteTrailerDictionary();
         PDFHummus::EStatusCode WriteTrailerDictionaryValues(DictionaryContext* inDictionaryContext);
-        void WriteReferenceState(ObjectsContext* inStateWriter,
-                                 DictionaryContext* inDictionaryContext, 
-                                 const ObjectReference& inReference);
-
 		void WriteXrefReference(LongFilePositionType inXrefTablePosition);
 		void WriteFinalEOF();
 		void WriteInfoDictionary();
@@ -387,7 +392,6 @@ namespace PDFHummus
 		void WritePageTreeState(ObjectsContext* inStateWriter,ObjectIDType inObjectID,PageTree* inPageTree);
 		void ReadPageTreeState(PDFParser* inStateReader,PDFDictionary* inPageTreeState,PageTree* inPageTree);
         
-        PDFHummus::EStatusCode SetupTrailerFromModifiedFile(PDFParser* inModifiedFileParser);
         ObjectReference GetOriginalDocumentPageTreeRoot(PDFParser* inModifiedFileParser);
         bool DocumentHasNewPages();
         ObjectIDType WriteCombinedPageTree(PDFParser* inModifiedFileParser);

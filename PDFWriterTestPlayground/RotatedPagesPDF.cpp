@@ -170,7 +170,7 @@ EStatusCode RotatedPagesPDF::Run(const TestConfiguration& inTestConfiguration)
 			break;
 		}
 
-		for(int i=0;i<pdfParser.GetPagesCount() && PDFHummus::eSuccess == status;++i)
+		for(unsigned long i=0;i<pdfParser.GetPagesCount() && PDFHummus::eSuccess == status;++i)
 		{
 			RefCountPtr<PDFDictionary> page = pdfParser.ParsePage(i);
 			if (!page)

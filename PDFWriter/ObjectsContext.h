@@ -79,6 +79,7 @@ public:
 	void WriteInteger(long long inIntegerToken,ETokenSeparator inSeparate = eTokenSeparatorSpace);
 	void WriteLiteralString(const std::string& inString,ETokenSeparator inSeparate = eTokenSeparatorSpace);
 	void WriteHexString(const std::string& inString,ETokenSeparator inSeparate = eTokenSeparatorSpace);
+	void WriteEncodedHexString(const std::string& inString, ETokenSeparator inSeparate = eTokenSeparatorSpace);
 	void WriteIndirectObjectReference(ObjectIDType inIndirectObjectID,unsigned long inGenerationNumber,ETokenSeparator inSeparate = eTokenSeparatorSpace);
 	void WriteIndirectObjectReference(const ObjectReference& inObjectReference,ETokenSeparator inSeparate = eTokenSeparatorSpace);
     void WriteNewIndirectObjectReference(ObjectIDType indirectObjectID,ETokenSeparator inSeparate = eTokenSeparatorSpace);

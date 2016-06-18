@@ -63,6 +63,7 @@ UppercaseSequanceTest.cpp
 WindowsPath.cpp
 PDFWriterTestPlayground.cpp
 CopyingAndMergingEmptyPages.cpp
+EncryptedPDF.cpp
 
 #headers
 AppendingAndReading.h
@@ -76,6 +77,7 @@ DCTDecodeFilterTest.h
 DFontTest.h
 EmptyFileTest.h
 EmptyPagesPDF.h
+RotatedPagesPDF.h
 FileURL.h
 FlateEncryptionTest.h
 HighLevelContentContext.h
@@ -121,6 +123,7 @@ TTCTest.h
 Type1Test.h
 UppercaseSequanceTest.h
 CopyingAndMergingEmptyPages.h
+EncryptedPDF.h
 )
 
 source_group(Main FILES
@@ -239,6 +242,8 @@ RefCountTest.cpp
 RefCountTest.h
 CopyingAndMergingEmptyPages.cpp
 CopyingAndMergingEmptyPages.h
+EncryptedPDF.cpp
+EncryptedPDF.h
 )
 
 source_group(Tests\\PDFs\\CustomStreamsIO FILES
@@ -259,6 +264,8 @@ FormXObjectTest.cpp
 FormXObjectTest.h
 LinksTest.cpp
 LinksTest.h
+RotatedPagesPDF.cpp
+RotatedPagesPDF.h
 ShutDownRestartTest.cpp
 ShutDownRestartTest.h
 SimpleContentPageTest.cpp

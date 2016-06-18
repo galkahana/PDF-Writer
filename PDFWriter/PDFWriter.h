@@ -32,6 +32,7 @@
 #include "PDFRectangle.h"
 #include "TiffUsageParameters.h"
 #include "PDFEmbedParameterTypes.h"
+#include "PDFParsingOptions.h"
 
 #include <string>
 #include <utility>
@@ -185,52 +186,64 @@ public:
 															 const PDFPageRange& inPageRange,
 															 EPDFPageBox inPageBoxToUseAsFormBox,
 															 const double* inTransformationMatrix = NULL,
-															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
+															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList(),
+															 const PDFParsingOptions& inParsingOptions = PDFParsingOptions::DefaultPDFParsingOptions);
 
 	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
 															 const PDFPageRange& inPageRange,
 															 EPDFPageBox inPageBoxToUseAsFormBox,
 															 const double* inTransformationMatrix = NULL,
-															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
+															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList(),
+															 const PDFParsingOptions& inParsingOptions = PDFParsingOptions::DefaultPDFParsingOptions);
 	
 	// CreateFormXObjectsFromPDF is an override to allow you to determine a custom crop for the page embed
 	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const std::string& inPDFFilePath,
 															 const PDFPageRange& inPageRange,
 															 const PDFRectangle& inCropBox,
 															 const double* inTransformationMatrix = NULL,
-															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
+															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList(),
+															 const PDFParsingOptions& inParsingOptions = PDFParsingOptions::DefaultPDFParsingOptions);
 
 	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
 															 const PDFPageRange& inPageRange,
 															 const PDFRectangle& inCropBox,
 															 const double* inTransformationMatrix = NULL,
-															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
+															 const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList(),
+															 const PDFParsingOptions& inParsingOptions = PDFParsingOptions::DefaultPDFParsingOptions);
 
 	// AppendPDFPagesFromPDF is for simple appending of the input PDF pages
 	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(const std::string& inPDFFilePath,
 														const PDFPageRange& inPageRange,
-														const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
+														const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList(),
+														const PDFParsingOptions& inParsingOptions = PDFParsingOptions::DefaultPDFParsingOptions);
 	
 	EStatusCodeAndObjectIDTypeList AppendPDFPagesFromPDF(IByteReaderWithPosition* inPDFStream,
 														const PDFPageRange& inPageRange,
-														const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
+														const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList(),
+														const PDFParsingOptions& inParsingOptions = PDFParsingOptions::DefaultPDFParsingOptions);
 
 	// MergePDFPagesToPage, merge PDF pages content to an input page. good for single-placement of a page content, cheaper than creating
 	// and XObject and later placing, when the intention is to use this graphic just once.
 	PDFHummus::EStatusCode MergePDFPagesToPage(PDFPage* inPage,
 									const std::string& inPDFFilePath,
 									const PDFPageRange& inPageRange,
-									const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
+									const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList(),
+									const PDFParsingOptions& inParsingOptions = PDFParsingOptions::DefaultPDFParsingOptions);
 
 	PDFHummus::EStatusCode MergePDFPagesToPage(PDFPage* inPage,
 									IByteReaderWithPosition* inPDFStream,
 									const PDFPageRange& inPageRange,
-									const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList());
+									const ObjectIDTypeList& inCopyAdditionalObjects = ObjectIDTypeList(),
+									const PDFParsingOptions& inParsingOptions = PDFParsingOptions::DefaultPDFParsingOptions);
 
 
 	// Copying context, allowing for a continous flow of copying from multiple sources PDFs (create one per source) to target PDF
-	PDFDocumentCopyingContext* CreatePDFCopyingContext(const std::string& inPDFFilePath);
-	PDFDocumentCopyingContext* CreatePDFCopyingContext(IByteReaderWithPosition* inPDFStream);
+	PDFDocumentCopyingContext* CreatePDFCopyingContext(
+		const std::string& inPDFFilePath, 
+		const PDFParsingOptions& inOptions = PDFParsingOptions::DefaultPDFParsingOptions);
+	PDFDocumentCopyingContext* CreatePDFCopyingContext(
+		IByteReaderWithPosition* inPDFStream, 
+		const PDFParsingOptions& inOptions = PDFParsingOptions::DefaultPDFParsingOptions);
     
     // for modified file path, create a copying context for the modified file
     PDFDocumentCopyingContext* CreatePDFCopyingContextForModifiedFile();

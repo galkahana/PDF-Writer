@@ -118,12 +118,13 @@ private:
 
 
 EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const std::string& inPDFFilePath,
+																				const PDFParsingOptions& inParsingOptions,
 																				const PDFPageRange& inPageRange,
 																				IPageEmbedInFormCommand* inPageEmbedCommand,
 																				const double* inTransformationMatrix,
 																				const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	if(StartFileCopyingContext(inPDFFilePath) != PDFHummus::eSuccess)
+	if(StartFileCopyingContext(inPDFFilePath, inParsingOptions) != PDFHummus::eSuccess)
 	{
 		return EStatusCodeAndObjectIDTypeList(PDFHummus::eFailure,ObjectIDTypeList());
 	}
@@ -232,23 +233,25 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDFInCo
 }
 
 EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const std::string& inPDFFilePath,
+																				const PDFParsingOptions& inParsingOptions,
 																				const PDFPageRange& inPageRange,
 																				EPDFPageBox inPageBoxToUseAsFormBox,
 																				const double* inTransformationMatrix,
 																				const ObjectIDTypeList& inCopyAdditionalObjects)
 {
 	PageEmbedInFormWithPageBox embedCommand(inPageBoxToUseAsFormBox);
-	return CreateFormXObjectsFromPDF(inPDFFilePath,inPageRange,&embedCommand,inTransformationMatrix,inCopyAdditionalObjects);
+	return CreateFormXObjectsFromPDF(inPDFFilePath,inParsingOptions,inPageRange,&embedCommand,inTransformationMatrix,inCopyAdditionalObjects);
 }
 
 EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const std::string& inPDFFilePath,
+																				const PDFParsingOptions& inParsingOptions,
 																				const PDFPageRange& inPageRange,
 																				const PDFRectangle& inCropBox,
 																				const double* inTransformationMatrix,
 																				const ObjectIDTypeList& inCopyAdditionalObjects)
 {
 	PageEmbedInFormWithCropBox embedCommand(inCropBox);
-	return CreateFormXObjectsFromPDF(inPDFFilePath,inPageRange,&embedCommand,inTransformationMatrix,inCopyAdditionalObjects);
+	return CreateFormXObjectsFromPDF(inPDFFilePath, inParsingOptions,inPageRange,&embedCommand,inTransformationMatrix,inCopyAdditionalObjects);
 }
 
 PDFFormXObject* PDFDocumentHandler::CreatePDFFormXObjectForPage(unsigned long inPageIndex,
@@ -804,19 +807,8 @@ EStatusCode PDFDocumentHandler::WriteStreamObject(PDFStreamInput* inStream,Objec
 
 	mObjectsContext->WriteKeyword("stream");
 
-
-	PDFObjectCastPtr<PDFInteger> lengthObject(mParser->QueryDictionaryObject(streamDictionary.GetPtr(),"Length"));	
-
-	if(!lengthObject)
-	{
-		TRACE_LOG("PDFDocumentHandler::WriteStreamObject, stream does not have length, failing");
-		return PDFHummus::eFailure;
-	}
-
-	mPDFStream->SetPosition(inStream->GetStreamContentStart());
-
 	OutputStreamTraits traits(mObjectsContext->StartFreeContext());
-	EStatusCode status = traits.CopyToOutputStream(mPDFStream,(LongBufferSizeType)lengthObject->GetValue());	
+	EStatusCode status = traits.CopyToOutputStream(mParser->StartReadingFromStreamForPlainCopying(inStream));
 	if(PDFHummus::eSuccess == status)
 	{
 		mObjectsContext->EndFreeContext();
@@ -855,10 +847,11 @@ EStatusCode PDFDocumentHandler::OnResourcesWrite(
 }
 
 EStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDF(const std::string& inPDFFilePath,
+																		const PDFParsingOptions& inParsingOptions,
 																		const PDFPageRange& inPageRange,
 																		const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	if(StartFileCopyingContext(inPDFFilePath) != PDFHummus::eSuccess)
+	if(StartFileCopyingContext(inPDFFilePath, inParsingOptions) != PDFHummus::eSuccess)
 		return EStatusCodeAndObjectIDTypeList(PDFHummus::eFailure,ObjectIDTypeList());
 
 	return AppendPDFPagesFromPDFInContext(inPageRange,inCopyAdditionalObjects);
@@ -1163,7 +1156,7 @@ EStatusCode PDFDocumentHandler::WritePDFStreamInputToContentContext(PageContentC
 
 }
 
-EStatusCode PDFDocumentHandler::StartFileCopyingContext(const std::string& inPDFFilePath)
+EStatusCode PDFDocumentHandler::StartFileCopyingContext(const std::string& inPDFFilePath, const PDFParsingOptions& inOptions)
 {
 	if(mPDFFile.OpenFile(inPDFFilePath) != PDFHummus::eSuccess)
 	{
@@ -1171,7 +1164,7 @@ EStatusCode PDFDocumentHandler::StartFileCopyingContext(const std::string& inPDF
 		return PDFHummus::eFailure;
 	}
 
-	return StartCopyingContext(mPDFFile.GetInputStream());
+	return StartCopyingContext(mPDFFile.GetInputStream(), inOptions);
 }
 
 EStatusCode PDFDocumentHandler::StartCopyingContext(PDFParser* inPDFParser)
@@ -1198,7 +1191,7 @@ EStatusCode PDFDocumentHandler::StartCopyingContext(PDFParser* inPDFParser)
 	return status;    
 }
 
-EStatusCode PDFDocumentHandler::StartCopyingContext(IByteReaderWithPosition* inPDFStream)
+EStatusCode PDFDocumentHandler::StartCopyingContext(IByteReaderWithPosition* inPDFStream, const PDFParsingOptions& inOptions)
 {
 	EStatusCode status;
 
@@ -1209,7 +1202,7 @@ EStatusCode PDFDocumentHandler::StartCopyingContext(IByteReaderWithPosition* inP
 		mPDFStream = inPDFStream;
         mParserOwned = true;
 
-		status = mParser->StartPDFParsing(inPDFStream);
+		status = mParser->StartPDFParsing(inPDFStream, inOptions);
 		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("PDFDocumentHandler::StartCopyingContext, failure occured while parsing PDF file.");
@@ -1395,10 +1388,11 @@ void PDFDocumentHandler::RemoveDocumentContextExtender(IDocumentContextExtender*
 
 EStatusCode PDFDocumentHandler::MergePDFPagesToPage(PDFPage* inPage,
 													const std::string& inPDFFilePath,
+													const PDFParsingOptions& inParsingOptions,
 													const PDFPageRange& inPageRange,
 													const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	if(StartFileCopyingContext(inPDFFilePath) != PDFHummus::eSuccess)
+	if(StartFileCopyingContext(inPDFFilePath, inParsingOptions) != PDFHummus::eSuccess)
 		return PDFHummus::eFailure;
 
 	return MergePDFPagesToPageInContext(inPage,inPageRange,inCopyAdditionalObjects);
@@ -1961,43 +1955,47 @@ EStatusCode PDFDocumentHandler::MergePDFPageToPage(PDFPage* inTargetPage,unsigne
 }
 
 EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+																			const PDFParsingOptions& inParsingOptions,
 																			 const PDFPageRange& inPageRange,
 																			 EPDFPageBox inPageBoxToUseAsFormBox,
 																			 const double* inTransformationMatrix,
 																			 const ObjectIDTypeList& inCopyAdditionalObjects)
 {
 	PageEmbedInFormWithPageBox embedCommand(inPageBoxToUseAsFormBox);
-	return CreateFormXObjectsFromPDF(inPDFStream,inPageRange,&embedCommand,inTransformationMatrix,inCopyAdditionalObjects);
+	return CreateFormXObjectsFromPDF(inPDFStream,inParsingOptions,inPageRange,&embedCommand,inTransformationMatrix,inCopyAdditionalObjects);
 
 }
 
 EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(IByteReaderWithPosition* inPDFStream,
+																			const PDFParsingOptions& inParsingOptions,
 																			const PDFPageRange& inPageRange,
 																			const PDFRectangle& inCropBox,
 																			const double* inTransformationMatrix,
 																			const ObjectIDTypeList& inCopyAdditionalObjects)
 {
 	PageEmbedInFormWithCropBox embedCommand(inCropBox);
-	return CreateFormXObjectsFromPDF(inPDFStream,inPageRange,&embedCommand,inTransformationMatrix,inCopyAdditionalObjects);
+	return CreateFormXObjectsFromPDF(inPDFStream,inParsingOptions,inPageRange,&embedCommand,inTransformationMatrix,inCopyAdditionalObjects);
 }
 
 EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	IByteReaderWithPosition* inPDFStream,
-																				const PDFPageRange& inPageRange,
+																				const PDFParsingOptions& inParsingOptions,
+																					const PDFPageRange& inPageRange,
 																				IPageEmbedInFormCommand* inPageEmbedCommand,
 																				const double* inTransformationMatrix,
 																				const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	if(StartStreamCopyingContext(inPDFStream) != PDFHummus::eSuccess)
+	if(StartStreamCopyingContext(inPDFStream, inParsingOptions) != PDFHummus::eSuccess)
 		return EStatusCodeAndObjectIDTypeList(PDFHummus::eFailure,ObjectIDTypeList());
 
 	return CreateFormXObjectsFromPDFInContext(inPageRange,inPageEmbedCommand,inTransformationMatrix,inCopyAdditionalObjects);
 }
 
 EStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDF(IByteReaderWithPosition* inPDFStream,
+																		 const PDFParsingOptions& inParsingOptions,
 																		 const PDFPageRange& inPageRange,
 																		 const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	if(StartStreamCopyingContext(inPDFStream) != PDFHummus::eSuccess)
+	if(StartStreamCopyingContext(inPDFStream, inParsingOptions) != PDFHummus::eSuccess)
 		return EStatusCodeAndObjectIDTypeList(PDFHummus::eFailure,ObjectIDTypeList());
 
 	return AppendPDFPagesFromPDFInContext(inPageRange,inCopyAdditionalObjects);
@@ -2005,18 +2003,19 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDF(IByteRe
 
 EStatusCode PDFDocumentHandler::MergePDFPagesToPage(PDFPage* inPage,
 													IByteReaderWithPosition* inPDFStream,
+													const PDFParsingOptions& inParsingOptions,
 													const PDFPageRange& inPageRange,
 													const ObjectIDTypeList& inCopyAdditionalObjects)
 {
-	if(StartStreamCopyingContext(inPDFStream) != PDFHummus::eSuccess)
+	if(StartStreamCopyingContext(inPDFStream, inParsingOptions) != PDFHummus::eSuccess)
 		return PDFHummus::eFailure;
 
 	return MergePDFPagesToPageInContext(inPage,inPageRange,inCopyAdditionalObjects);
 }
 
-EStatusCode PDFDocumentHandler::StartStreamCopyingContext(IByteReaderWithPosition* inPDFStream)
+EStatusCode PDFDocumentHandler::StartStreamCopyingContext(IByteReaderWithPosition* inPDFStream, const PDFParsingOptions& inOptions)
 {
-	return StartCopyingContext(inPDFStream);
+	return StartCopyingContext(inPDFStream,inOptions);
 }
 
 PDFHummus::EStatusCode PDFDocumentHandler::StartParserCopyingContext(PDFParser* inPDFParser)
@@ -2189,19 +2188,8 @@ EStatusCode PDFDocumentHandler::WriteStreamObject(PDFStreamInput* inStream)
     
 	mObjectsContext->WriteKeyword("stream");
     
-    
-	PDFObjectCastPtr<PDFInteger> lengthObject(mParser->QueryDictionaryObject(streamDictionary.GetPtr(),"Length"));	
-    
-	if(!lengthObject)
-	{
-		TRACE_LOG("PDFDocumentHandler::WriteStreamObject, stream does not have length, failing");
-		return PDFHummus::eFailure;
-	}
-    
-	mPDFStream->SetPosition(inStream->GetStreamContentStart());
-    
 	OutputStreamTraits traits(mObjectsContext->StartFreeContext());
-	EStatusCode status = traits.CopyToOutputStream(mPDFStream,(LongBufferSizeType)lengthObject->GetValue());	
+	EStatusCode status = traits.CopyToOutputStream(mParser->StartReadingFromStreamForPlainCopying(inStream));
 	if(PDFHummus::eSuccess == status)
 	{
 		mObjectsContext->EndFreeContext();

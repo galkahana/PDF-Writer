@@ -78,6 +78,11 @@ void ObjectsContext::WriteHexString(const std::string& inString,ETokenSeparator 
 	mPrimitiveWriter.WriteHexString(inString,inSeparate);
 }
 
+void ObjectsContext::WriteEncodedHexString(const std::string& inString, ETokenSeparator inSeparate) 
+{
+	mPrimitiveWriter.WriteEncodedHexString(inString, inSeparate);
+}
+
 void ObjectsContext::WriteIndirectObjectReference(const ObjectReference& inObjectReference,ETokenSeparator inSeparate)
 {
     WriteIndirectObjectReference(inObjectReference.ObjectID,inObjectReference.GenerationNumber,inSeparate);
