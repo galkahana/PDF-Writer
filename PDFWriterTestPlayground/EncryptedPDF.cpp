@@ -30,9 +30,9 @@ EStatusCode EncryptedPDFTester::Run(const TestConfiguration& inTestConfiguration
 	do
 	{
 		status = pdfWriter.StartPDF(
-			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "031680580_2016_05Decrypted.PDF"), ePDFVersion13,
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "PDFWithPasswordDecrypted.PDF"), ePDFVersion13,
 			LogConfiguration(true, true,
-				RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "031680580_2016_05Decrypted.txt")));
+				RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "PDFWithPasswordDecrypted.txt")));
 		if (status != PDFHummus::eSuccess)
 		{
 			cout << "failed to start PDF\n";
@@ -40,11 +40,11 @@ EStatusCode EncryptedPDFTester::Run(const TestConfiguration& inTestConfiguration
 		}
 
 		copyingContext = pdfWriter.CreatePDFCopyingContext(
-			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/031680580_2016_05.PDF"),
-			PDFParsingOptions("G5MJ14"));
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/PDFWithPassword.PDF"),
+			PDFParsingOptions("user"));
 		if (!copyingContext)
 		{
-			cout << "failed to initialize copying context from 031680580_2016_05.pdf\n";
+			cout << "failed to initialize copying context from PDFWithPassword.pdf\n";
 			status = PDFHummus::eFailure;
 			break;
 		}
@@ -54,7 +54,7 @@ EStatusCode EncryptedPDFTester::Run(const TestConfiguration& inTestConfiguration
 			EStatusCodeAndObjectIDType result = copyingContext->AppendPDFPageFromPDF(i);
 			if (result.first != PDFHummus::eSuccess)
 			{
-				cout << "failed to append page "<<(i+1)<<" from 031680580_2016_05.pdf\n";
+				cout << "failed to append page "<<(i+1)<<" from PDFWithPassword.pdf\n";
 				status = result.first;
 				break;
 			}
@@ -77,4 +77,4 @@ EStatusCode EncryptedPDFTester::Run(const TestConfiguration& inTestConfiguration
 	return status;
 }
 
-ADD_CATEGORIZED_TEST(EncryptedPDFTester, "PDFEmbedding")
+ADD_CATEGORIZED_TEST(EncryptedPDFTester, "Xcryption")

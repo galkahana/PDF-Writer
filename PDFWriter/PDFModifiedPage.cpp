@@ -208,7 +208,7 @@ PDFHummus::EStatusCode PDFModifiedPage::WritePage()
 
     // last but not least, create the actual content stream object, placing the form
 	objectContext.StartNewIndirectObject(newContentObjectID);
-	PDFStream* newStream = objectContext.StartUnfilteredPDFStream();
+	PDFStream* newStream = objectContext.StartPDFStream();
 
 	vector<string>::iterator it = formResourcesNames.begin();
 	for(;it!=formResourcesNames.end();++it)

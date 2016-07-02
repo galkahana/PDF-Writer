@@ -61,6 +61,9 @@ public:
 	void SetDecryptionHelper(DecryptionHelper* inDecryptionHelper);
 	void SetParserExtender(IPDFParserExtender* inParserExtender);
 
+	// helper method for others who need to parse encoded pdf data
+	std::string DecodeHexString(const std::string inStringToDecode);
+
 private:
 	PDFParserTokenizer mTokenizer;
 	StringList mTokenBuffer;

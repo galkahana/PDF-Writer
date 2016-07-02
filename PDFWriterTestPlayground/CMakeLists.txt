@@ -29,6 +29,7 @@ JpegLibTest.cpp
 JPGImageTest.cpp
 LinksTest.cpp
 LogTest.cpp
+PDFWithPassword.cpp
 MergePDFPages.cpp
 MergeToPDFForm.cpp
 ModifyingExistingFileContent.cpp
@@ -91,6 +92,7 @@ JpegLibTest.h
 JPGImageTest.h
 LinksTest.h
 LogTest.h
+PDFWithPassword.h
 MergePDFPages.h
 MergeToPDFForm.h
 ModifyingExistingFileContent.h
@@ -264,6 +266,8 @@ FormXObjectTest.cpp
 FormXObjectTest.h
 LinksTest.cpp
 LinksTest.h
+PDFWithPassword.cpp
+PDFWithPassword.h
 RotatedPagesPDF.cpp
 RotatedPagesPDF.h
 ShutDownRestartTest.cpp

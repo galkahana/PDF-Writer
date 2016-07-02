@@ -33,6 +33,7 @@
 #include "TiffUsageParameters.h"
 #include "PDFEmbedParameterTypes.h"
 #include "PDFParsingOptions.h"
+#include "EncryptionOptions.h"
 
 #include <string>
 #include <utility>
@@ -57,8 +58,13 @@ struct PDFCreationSettings
 {
 	bool CompressStreams;
 	bool EmbedFonts;
+	EncryptionOptions DocumentEncryptionOptions;
 
-	PDFCreationSettings(bool inCompressStreams, bool inEmbedFonts){ CompressStreams = inCompressStreams; EmbedFonts = inEmbedFonts;}
+	PDFCreationSettings(bool inCompressStreams, bool inEmbedFonts,EncryptionOptions inDocumentEncryptionOptions = EncryptionOptions::DefaultEncryptionOptions){ 
+		CompressStreams = inCompressStreams; 
+		EmbedFonts = inEmbedFonts;
+		DocumentEncryptionOptions = inDocumentEncryptionOptions;
+	}
 
 	static const PDFCreationSettings DefaultPDFCreationSettings;
 };

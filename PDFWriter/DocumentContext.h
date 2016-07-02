@@ -34,6 +34,8 @@
 #include "ObjectsBasicTypes.h"
 #include "EHummusImageType.h"
 #include "PDFParsingOptions.h"
+#include "EncryptionOptions.h"
+#include "EncryptionHelper.h"
 
 #include <string>
 #include <set>
@@ -115,6 +117,11 @@ namespace PDFHummus
 
 		TrailerInformation& GetTrailerInformation();
 		CatalogInformation& GetCatalogInformation();
+
+		// Encryption related (will default to no encryption of not called)
+		void SetupEncryption(const EncryptionOptions& inEncryptionOptions, EPDFVersion inPDFVersion);
+		bool SupportsEncryption();
+
 
 		// Page and Page Content Writing
 
@@ -348,12 +355,14 @@ namespace PDFHummus
 		PDFDocumentCopyingContextSet mCopyingContexts;
         bool mModifiedDocumentIDExists;
         std::string mModifiedDocumentID;
+		std::string mNewPDFID;
 		ObjectIDType mCurrentPageTreeIDInState;
         ResourcesDictionaryAndStringToIResourceWritingTaskListMap mResourcesTasks;
         PDFFormXObjectToIFormEndWritingTaskListMap mFormEndTasks;
         PDFPageToIPageEndWritingTaskListMap mPageEndTasks;
 		PDFTiledPatternToITiledPatternEndWritingTaskListMap mTiledPatternEndTasks;
 	    StringAndULongPairToHummusImageInformationMap mImagesInformation;
+		EncryptionHelper mEncryptionHelper;
 		
 		void WriteHeaderComment(EPDFVersion inPDFVersion);
 		void Write4BinaryBytes();
@@ -364,6 +373,7 @@ namespace PDFHummus
 		void WriteXrefReference(LongFilePositionType inXrefTablePosition);
 		void WriteFinalEOF();
 		void WriteInfoDictionary();
+		void WriteEncryptionDictionary();
 		void WritePagesTree();
 		int WritePageTree(PageTree* inPageTreeToWrite);
 		std::string GenerateMD5IDForFile();

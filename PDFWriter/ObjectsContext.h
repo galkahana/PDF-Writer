@@ -36,6 +36,7 @@ class PDFStream;
 class IObjectsContextExtender;
 class ObjectsContext;
 class PDFParser;
+class EncryptionHelper;
 
 typedef std::list<DictionaryContext*> DictionaryContextList;
 
@@ -49,6 +50,7 @@ public:
 	void Cleanup();
 
 	void SetOutputStream(IByteWriterWithPosition* inOutputStream);
+	void SetEncryptionHelper(EncryptionHelper* inEncryptionHelper);
 	
 
 	// pre 1.5 xref writing
@@ -56,9 +58,12 @@ public:
     // post 1.5 xref writing (only used now for modified files)
     PDFHummus::EStatusCode WriteXrefStream(DictionaryContext* inDictionaryContext);
     
-	// Free Context, for direct stream writing
+	// Free Context, for direct writing to output stream
 	IByteWriterWithPosition* StartFreeContext();
 	void EndFreeContext();
+
+	// Get current output stream position
+	LongFilePositionType GetCurrentPosition();
 
 	// Get objects management object
 	IndirectObjectsReferenceRegistry& GetInDirectObjectsRegistry();
@@ -139,11 +144,15 @@ private:
 	PrimitiveObjectsWriter mPrimitiveWriter;
 	bool mCompressStreams;
 	UppercaseSequance mSubsetFontsNamesSequance;
+	EncryptionHelper* mEncryptionHelper;
 
 	DictionaryContextList mDictionaryStack;
 
 	void WritePDFStreamEndWithoutExtent();
 	void WritePDFStreamExtent(PDFStream* inStream);
     void WriteXrefNumber(IByteWriter* inStream,LongFilePositionType inElement, size_t inElementSize);
+	bool IsEncrypting();
+	std::string MaybeEncryptString(const std::string& inString);
+	std::string DecodeHexString(const std::string& inString);
 
 };

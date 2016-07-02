@@ -19,8 +19,6 @@
 
 #include "InputRC4XcodeStream.h"
 
-#include <algorithm>
-
 using namespace IOBasicTypes;
 
 InputRC4XcodeStream::InputRC4XcodeStream():mRC4()

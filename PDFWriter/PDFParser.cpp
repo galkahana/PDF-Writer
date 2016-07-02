@@ -51,8 +51,6 @@
 #include  <algorithm>
 using namespace PDFHummus;
 
-const PDFParsingOptions PDFParsingOptions::DefaultPDFParsingOptions("");
-
 PDFParser::PDFParser(void)
 {
 	mStream = NULL;

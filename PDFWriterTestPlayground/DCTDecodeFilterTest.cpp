@@ -337,6 +337,8 @@ EStatusCode DCTDecodeFilterTest::ModifyImageObject(PDFWriter* inWriter,ObjectIDT
         // finalize stream
         inWriter->GetObjectsContext().EndPDFStream(newImageStream);
         delete newImageStream;
+		delete sourceImage;
+
  
         // late check for status so stream is deleted
         if(status != eSuccess)

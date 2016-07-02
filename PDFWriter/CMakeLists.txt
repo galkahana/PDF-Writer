@@ -38,6 +38,8 @@ DecryptionHelper.cpp
 DescendentFontWriter.cpp
 DictionaryContext.cpp
 DocumentContext.cpp
+EncryptionHelper.cpp
+EncryptionOptions.cpp
 FontDescriptorWriter.cpp
 FreeTypeFaceWrapper.cpp
 FreeTypeOpenTypeWrapper.cpp
@@ -82,6 +84,7 @@ OutputFile.cpp
 OutputFileStream.cpp
 OutputFlateDecodeStream.cpp
 OutputFlateEncodeStream.cpp
+OutputRC4XcodeStream.cpp
 OutputStreamTraits.cpp
 OutputStringBufferStream.cpp
 PageContentContext.cpp
@@ -114,6 +117,7 @@ PDFArrayIterator.cpp
 PDFPageMergingHelper.cpp
 PDFParser.cpp
 PDFParserTokenizer.cpp
+PDFParsingOptions.cpp
 PDFReal.cpp
 PDFRectangle.cpp
 PDFStream.cpp
@@ -150,6 +154,7 @@ UsedFontsRepository.cpp
 WinAnsiEncoding.cpp
 WrittenFontCFF.cpp
 WrittenFontTrueType.cpp
+XCryptionCommon.cpp
 XObjectContentContext.cpp
 
 #headers
@@ -184,6 +189,8 @@ DocumentContext.h
 DocumentContextExtenderAdapter.h
 EFontStretch.h
 EHummusImageType.h
+EncryptionHelper.h
+EncryptionOptions.h
 EPDFVersion.h
 EStatusCode.h
 ETokenSeparator.h
@@ -258,6 +265,7 @@ OutputFile.h
 OutputFileStream.h
 OutputFlateDecodeStream.h
 OutputFlateEncodeStream.h
+OutputRC4XcodeStream.h
 OutputStreamTraits.h
 OutputStringBufferStream.h
 PageContentContext.h
@@ -335,6 +343,7 @@ WinAnsiEncoding.h
 WrittenFontCFF.h
 WrittenFontRepresentation.h
 WrittenFontTrueType.h
+XCryptionCommon.h
 XObjectContentContext.h
 
 )
@@ -476,6 +485,8 @@ OutputFlateDecodeStream.cpp
 OutputFlateDecodeStream.h
 OutputFlateEncodeStream.cpp
 OutputFlateEncodeStream.h
+OutputRC4XcodeStream.cpp
+OutputRC4XcodeStream.h
 OutputStreamTraits.cpp
 OutputStreamTraits.h
 OutputStringBufferStream.cpp
@@ -591,8 +602,6 @@ InputPredictorTIFFSubStream.h
 )
 
 source_group("PDF Embedding" FILES
-DecryptionHelper.cpp
-DecryptionHelper.h
 IPDFParserExtender.h
 PDFDocumentCopyingContext.cpp
 PDFDocumentCopyingContext.h
@@ -607,7 +616,19 @@ PDFParser.cpp
 PDFParser.h
 PDFParserTokenizer.cpp
 PDFParserTokenizer.h
+PDFParsingOptions.cpp
 PDFParsingOptions.h
+)
+
+source_group("XCryption" FILES
+DecryptionHelper.cpp
+DecryptionHelper.h
+EncryptionHelper.cpp
+EncryptionHelper.h
+EncryptionOptions.cpp
+EncryptionOptions.h
+XCryptionCommon.cpp
+XCryptionCommon.h
 )
 
 source_group("State Serialization" FILES

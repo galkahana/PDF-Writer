@@ -70,7 +70,16 @@ EStatusCode PDFWriter::StartPDF(
 
 	mObjectsContext.SetOutputStream(mOutputFile.GetOutputStream());
 	mDocumentContext.SetOutputFileInformation(&mOutputFile);    
-    mIsModified = false;
+
+	if (inPDFCreationSettings.DocumentEncryptionOptions.ShouldEncrypt) {
+		mDocumentContext.SetupEncryption(inPDFCreationSettings.DocumentEncryptionOptions, inPDFVersion);
+		if (!mDocumentContext.SupportsEncryption()) {
+			mOutputFile.CloseFile(); // close the file, to keep things clean
+			return eFailure;
+		}
+	}
+
+	mIsModified = false;
 	
 	return mDocumentContext.WriteHeader(inPDFVersion);
 }
@@ -518,6 +527,11 @@ EStatusCode PDFWriter::StartPDFForStream(IByteWriterWithPosition* inOutputStream
 {
 	SetupLog(inLogConfiguration);
 	SetupCreationSettings(inPDFCreationSettings);
+	if (inPDFCreationSettings.DocumentEncryptionOptions.ShouldEncrypt) {
+		mDocumentContext.SetupEncryption(inPDFCreationSettings.DocumentEncryptionOptions, inPDFVersion);
+		if (!mDocumentContext.SupportsEncryption())
+			return eFailure;
+	}
 
 	mObjectsContext.SetOutputStream(inOutputStream);
     mIsModified = false;

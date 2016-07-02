@@ -46,7 +46,7 @@ class IDocumentContextExtender;
 class IPageEmbedInFormCommand;
 class IPDFParserExtender;
 class ICategoryServicesCommand;
-
+class PDFIndirectObjectReference;
 
 
 namespace PDFHummus
@@ -72,10 +72,42 @@ struct ResourceTokenMarker
 	LongFilePositionType ResourceTokenPosition;
 };
 
+class IObjectWritePolicy
+{
+public:
+	virtual void WriteReference(PDFIndirectObjectReference* inReference, ETokenSeparator inSeparator) = 0;
+};
+
+class PDFDocumentHandler;
+
+class InWritingPolicy : public IObjectWritePolicy {
+public:
+	InWritingPolicy(PDFDocumentHandler* inDocumentHandler) {
+		mDocumentHandler = inDocumentHandler;
+	}
+	virtual void WriteReference(PDFIndirectObjectReference* inReference, ETokenSeparator inSeparator);
+private:
+	PDFDocumentHandler* mDocumentHandler;
+};
+
+class OutWritingPolicy : public IObjectWritePolicy {
+public:
+	OutWritingPolicy(PDFDocumentHandler* inDocumentHandler, ObjectIDTypeList& ioSourceObjectsToAdd):mSourceObjectsToAdd(ioSourceObjectsToAdd){
+		mDocumentHandler = inDocumentHandler;
+	}
+	virtual void WriteReference(PDFIndirectObjectReference* inReference, ETokenSeparator inSeparator);
+private:
+	PDFDocumentHandler* mDocumentHandler;
+	ObjectIDTypeList& mSourceObjectsToAdd;
+};
+
 typedef std::list<ResourceTokenMarker> ResourceTokenMarkerList;
 
 class PDFDocumentHandler : public DocumentContextExtenderAdapter
 {
+	friend InWritingPolicy;
+	friend OutWritingPolicy;
+
 public:
 	PDFDocumentHandler(void);
 	virtual ~PDFDocumentHandler(void);
@@ -210,9 +242,6 @@ private:
 	PDFHummus::EStatusCode WriteNewObjects(const ObjectIDTypeList& inSourceObjectIDs);
 	PDFHummus::EStatusCode WriteNewObjects(const ObjectIDTypeList& inSourceObjectIDs,ObjectIDTypeSet& ioCopiedObjects);
 	PDFHummus::EStatusCode CopyInDirectObject(ObjectIDType inSourceObjectID,ObjectIDType inTargetObjectID,ObjectIDTypeSet& ioCopiedObjects);
-	PDFHummus::EStatusCode WriteObjectByType(PDFObject* inObject,ETokenSeparator inSeparator,ObjectIDTypeList& outSourceObjectsToAdd);
-	PDFHummus::EStatusCode WriteArrayObject(PDFArray* inArray,ETokenSeparator inSeparator,ObjectIDTypeList& outSourceObjectsToAdd);
-	PDFHummus::EStatusCode WriteArrayObject(PDFArray* inArray,ETokenSeparator inSeparator);
 	EStatusCodeAndObjectIDTypeList CreateFormXObjectsFromPDF(const std::string& inPDFFilePath,
 															const PDFParsingOptions& inParsingOptions,
 															const PDFPageRange& inPageRange,
@@ -224,15 +253,12 @@ private:
 												const double* inTransformationMatrix);
 	PDFHummus::EStatusCode CopyInDirectObject(ObjectIDType inSourceObjectID,ObjectIDType inTargetObjectID);
 
+	PDFHummus::EStatusCode WriteObjectByType(PDFObject* inObject, ETokenSeparator inSeparator,IObjectWritePolicy* inWritePolicy);
+	PDFHummus::EStatusCode WriteArrayObject(PDFArray* inArray, ETokenSeparator inSeparator, IObjectWritePolicy* inWritePolicy);
+	PDFHummus::EStatusCode WriteDictionaryObject(PDFDictionary* inDictionary, IObjectWritePolicy* inWritePolicy);
+	PDFHummus::EStatusCode WriteStreamObject(PDFStreamInput* inStream, IObjectWritePolicy* inWritePolicy);
 
-	PDFHummus::EStatusCode WriteDictionaryObject(PDFDictionary* inDictionary,ObjectIDTypeList& outSourceObjectsToAdd);
-	PDFHummus::EStatusCode WriteDictionaryObject(PDFDictionary* inDictionary);
-	PDFHummus::EStatusCode WriteObjectByType(PDFObject* inObject,DictionaryContext* inDictionaryContext,ObjectIDTypeList& outSourceObjectsToAdd);
-    PDFHummus::EStatusCode WriteObjectByType(PDFObject* inObject,ETokenSeparator inSeparator);
 
-
-	PDFHummus::EStatusCode WriteStreamObject(PDFStreamInput* inStream,ObjectIDTypeList& outSourceObjectsToAdd);
-	PDFHummus::EStatusCode WriteStreamObject(PDFStreamInput* inStream);
 	EStatusCodeAndObjectIDType CreatePDFPageForPage(unsigned long inPageIndex);
 
 	PDFHummus::EStatusCode CopyPageContentToTargetPagePassthrough(PDFPage* inPage, PDFDictionary* inPageObject);

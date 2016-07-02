@@ -386,8 +386,12 @@ PDFObject* PDFObjectParser::ParseHexadecimalString(const std::string& inToken)
 		return NULL;
 	}
 
+	return new PDFHexString(MaybeDecryptString(DecodeHexString(inToken.substr(1, inToken.size() - 2))));
+}
+
+std::string PDFObjectParser::DecodeHexString(const std::string inStringToDecode) {
 	std::stringbuf stringBuffer;
-	std::string content = inToken.substr(1, inToken.size() - 2);
+	std::string content = inStringToDecode;
 	Byte buffer;
 
 	// pad with ending 0
@@ -398,13 +402,14 @@ PDFObject* PDFObjectParser::ParseHexadecimalString(const std::string& inToken)
 
 	for (; it != content.end(); ++it)
 	{
-		buffer = GetHexValue(*it).second*16;
+		buffer = GetHexValue(*it).second * 16;
 		++it;
 		buffer += GetHexValue(*it).second;
 		stringBuffer.sputn((const char*)&buffer, 1);
 	}
 
-	return new PDFHexString(MaybeDecryptString(stringBuffer.str()));
+	return stringBuffer.str();
+
 }
 
 static const std::string scNull = "null";

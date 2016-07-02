@@ -194,6 +194,8 @@ EStatusCode	DocumentContext::FinalizeNewPDF(bool inEmbedFonts)
 
 		// write the info dictionary of the trailer, if has any valid entries
 		WriteInfoDictionary();
+		// write encryption dictionary, if encrypting
+		WriteEncryptionDictionary();
 
 		status = mObjectsContext->WriteXrefTable(xrefTablePosition);
 		if(status != 0)
@@ -298,9 +300,11 @@ EStatusCode DocumentContext::WriteTrailerDictionaryValues(DictionaryContext* inD
 			inDictionaryContext->WriteObjectReferenceValue(objectIDResult.second);
 		}
 
-		// write ID
+		// write ID [must be unencrypted, in encrypted documents]
+		mEncryptionHelper.PauseEncryption();
 
-		std::string id = GenerateMD5IDForFile();
+		if(mNewPDFID.empty()) // new pdf id is created prior to end in case of encryption
+			mNewPDFID = GenerateMD5IDForFile();
 		inDictionaryContext->WriteKey(scID);
 		mObjectsContext->StartArray();
         
@@ -308,10 +312,12 @@ EStatusCode DocumentContext::WriteTrailerDictionaryValues(DictionaryContext* inD
         if(mModifiedDocumentIDExists)
             mObjectsContext->WriteHexString(mModifiedDocumentID);
         else
-            mObjectsContext->WriteHexString(id);
-		mObjectsContext->WriteHexString(id);
+            mObjectsContext->WriteHexString(mNewPDFID);
+		mObjectsContext->WriteHexString(mNewPDFID);
 		mObjectsContext->EndArray();
 		mObjectsContext->EndLine();
+
+		mEncryptionHelper.ReleaseEncryption();
 
 	}while(false);
 	
@@ -408,10 +414,45 @@ void DocumentContext::WriteInfoDictionary()
 	
 }
 
+void DocumentContext::WriteEncryptionDictionary() {
+	if (!mEncryptionHelper.IsDocumentEncrypted())
+		return;
+
+	ObjectIDType encryptionDictionaryID = mObjectsContext->StartNewIndirectObject();
+	mEncryptionHelper.WriteEncryptionDictionary(mObjectsContext);
+	mObjectsContext->EndIndirectObject();
+
+	mTrailerInformation.SetEncrypt(encryptionDictionaryID);
+}
+
 CatalogInformation& DocumentContext::GetCatalogInformation()
 {
 	return mCatalogInformation;
 }
+
+void DocumentContext::SetupEncryption(const EncryptionOptions& inEncryptionOptions,EPDFVersion inPDFVersion)
+{
+	mObjectsContext->SetEncryptionHelper(&mEncryptionHelper);
+	if (inEncryptionOptions.ShouldEncrypt) {
+		mNewPDFID = GenerateMD5IDForFile();
+
+		mEncryptionHelper.Setup(
+			inEncryptionOptions.ShouldEncrypt,
+			((double)inPDFVersion) / 10.0,
+			inEncryptionOptions.UserPassword,
+			inEncryptionOptions.OwnerPassword,
+			inEncryptionOptions.UserProtectionOptionsFlag,
+			inEncryptionOptions.EncryptMetadata,
+			mNewPDFID
+			);
+	}
+}
+
+bool DocumentContext::SupportsEncryption()
+{
+	return mEncryptionHelper.SupportsEncryption();
+}
+
 
 static const std::string scType = "Type";
 static const std::string scCatalog = "Catalog";
@@ -722,11 +763,7 @@ std::string DocumentContext::GenerateMD5IDForFile()
 	// file location
 	md5.Accumulate(mOutputFilePath);
 
-	// current writing position (will serve as "file size")
-	IByteWriterWithPosition *outputStream = mObjectsContext->StartFreeContext();
-	mObjectsContext->EndFreeContext();
-
-	md5.Accumulate(BoxingBaseWithRW<LongFilePositionType>(outputStream->GetCurrentPosition()).ToString());
+	md5.Accumulate(BoxingBaseWithRW<LongFilePositionType>(mObjectsContext->GetCurrentPosition()).ToString());
 
 	// document information dictionary
 	InfoDictionary& infoDictionary = mTrailerInformation.GetInfo();
@@ -1330,6 +1367,12 @@ EStatusCode DocumentContext::WriteState(ObjectsContext* inStateWriter,ObjectIDTy
             documentDictionary->WriteHexStringValue(mModifiedDocumentID);
         }
 
+		if (!mNewPDFID.empty())
+		{
+			documentDictionary->WriteKey("mNewPDFID");
+			documentDictionary->WriteHexStringValue(mNewPDFID);
+		}
+
 		inStateWriter->EndDictionary(documentDictionary);
 		inStateWriter->EndIndirectObject();
 
@@ -1574,6 +1617,11 @@ EStatusCode DocumentContext::ReadState(PDFParser* inStateReader,ObjectIDType inO
         mModifiedDocumentID = modifiedDocumentExists->GetValue();
     }    
     
+	PDFObjectCastPtr<PDFHexString> newPDFID(documentState->QueryDirectObject("mNewPDFID"));
+
+	if (!!newPDFID)
+		mNewPDFID = newPDFID->GetValue();
+
 	PDFObjectCastPtr<PDFDictionary> trailerInformationState(inStateReader->QueryDictionaryObject(documentState.GetPtr(),"mTrailerInformation"));
 	ReadTrailerState(inStateReader,trailerInformationState.GetPtr());
 
@@ -2159,6 +2207,9 @@ EStatusCode	DocumentContext::FinalizeModifiedPDF(PDFParser* inModifiedFileParser
                 
  		// write the info dictionary of the trailer, if has any valid entries
 		WriteInfoDictionary();
+
+		// write encryption dictionary, if encrypting
+		WriteEncryptionDictionary();
         
         if(RequiresXrefStream(inModifiedFileParser))
         {
@@ -2401,7 +2452,7 @@ EStatusCode DocumentContext::WriteXrefStream(LongFilePositionType& outXrefPositi
         // start the xref with a dictionary detailing the trailer information, then move to the
         // xref table aspects, with the lower level objects context.
         
-        outXrefPosition = mObjectsContext->StartFreeContext()->GetCurrentPosition();
+        outXrefPosition = mObjectsContext->GetCurrentPosition();
         mObjectsContext->StartNewIndirectObject();
  
         mObjectsContext->EndFreeContext();
