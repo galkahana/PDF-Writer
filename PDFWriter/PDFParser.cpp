@@ -597,36 +597,7 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,
                 *outExtendedTableSize = firstNonSectionObject;
             }
             
-
-			// first row...not sure where starts...so skip till passing all endlines
-			do
-			{
-				if(mStream->Read(entry,1) != 1)
-				{
-					TRACE_LOG("PDFParser::ParseXref, failed to read xref entry");
-					status = PDFHummus::eFailure;
-					break;
-				}
-			}while(IsPDFWhiteSpace(entry[0]));
-
-			// now read extra 19
-			if(mStream->Read(entry+1,19) != 19)
-			{
-				TRACE_LOG("PDFParser::ParseXref, failed to read xref entry");
-				status = PDFHummus::eFailure;
-				break;
-			}
-			if(currentObject < inXrefSize)
-			{
-				inXrefTable[currentObject].mObjectPosition = LongFilePositionTypeBox(std::string((const char*)entry, 10));
-				inXrefTable[currentObject].mRivision = ULong(std::string((const char*)(entry + 11), 5));
-				inXrefTable[currentObject].mType = entry[17] == 'n' ? eXrefEntryExisting:eXrefEntryDelete;
-			}
-			++currentObject;
-
-
-
-			// now parse the section. 
+			//start parsing from the first row and parse other sections
 			while(currentObject < firstNonSectionObject)
 			{
 				//if there is PDFWhiteSpace-s between sections
@@ -639,9 +610,9 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,
 						break;
 					}
 				} while (IsPDFWhiteSpace(entry[0]));
-				//Last read byte was not a PDFWhiteSpace. Set position to 1 byte back.
-				mStream->SetPosition(mStream->GetCurrentPosition() - 1);
-				if(mStream->Read(entry,20) != 20)
+				
+				//read extra 19
+				if(mStream->Read(entry+1,19) != 19)
 				{
 					TRACE_LOG("PDFParser::ParseXref, failed to read xref entry");
 					status = PDFHummus::eFailure;
