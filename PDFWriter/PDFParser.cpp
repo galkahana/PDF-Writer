@@ -629,6 +629,18 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,
 			// now parse the section. 
 			while(currentObject < firstNonSectionObject)
 			{
+				//if there is PDFWhiteSpace-s between sections
+				do
+				{
+					if (mStream->Read(entry, 1) != 1)
+					{
+						TRACE_LOG("PDFParser::ParseXref, failed to read xref entry");
+						status = PDFHummus::eFailure;
+						break;
+					}
+				} while (IsPDFWhiteSpace(entry[0]));
+				//Last read byte was not a PDFWhiteSpace. Set position to 1 byte back.
+				mStream->SetPosition(mStream->GetCurrentPosition() - 1);
 				if(mStream->Read(entry,20) != 20)
 				{
 					TRACE_LOG("PDFParser::ParseXref, failed to read xref entry");
