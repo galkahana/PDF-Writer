@@ -28,25 +28,21 @@ struct EncryptionOptions
 	std::string UserPassword;
 	long long UserProtectionOptionsFlag;
 	std::string OwnerPassword;
-	bool EncryptMetadata;
 
 	// for no encryption scenarios
 	EncryptionOptions() {
 		ShouldEncrypt = false;
-		EncryptMetadata = false;
 		UserProtectionOptionsFlag = 0;
 	}
 
 	// for encryption scenarios
 	EncryptionOptions(const std::string& inUserPassword,
 					long long inUserProtectionOptionsFlag,
-					const std::string& inOwnerPassword,
-					bool inEncryptMetadata) {
+					const std::string& inOwnerPassword) {
 		ShouldEncrypt = true;
 		UserPassword = inUserPassword;
 		UserProtectionOptionsFlag = inUserProtectionOptionsFlag;
 		OwnerPassword = inOwnerPassword;
-		EncryptMetadata = inEncryptMetadata;
 	}
 
 	static const EncryptionOptions DefaultEncryptionOptions;

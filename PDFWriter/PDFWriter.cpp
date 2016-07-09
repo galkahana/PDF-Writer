@@ -657,7 +657,7 @@ EStatusCode PDFWriter::ModifyPDF(const std::string& inModifiedFile,
         
         // do setup for modification 
         mIsModified = true;
-        status = SetupStateFromModifiedFile(inModifiedFile,inPDFVersion);
+        status = SetupStateFromModifiedFile(inModifiedFile,inPDFVersion, inPDFCreationSettings);
     } 
     while (false);
            
@@ -689,17 +689,26 @@ EStatusCode PDFWriter::ModifyPDFForStream(
         
     mIsModified = true;
         
-    return SetupStateFromModifiedStream(inModifiedSourceStream,inPDFVersion);  
+    return SetupStateFromModifiedStream(inModifiedSourceStream,inPDFVersion, inPDFCreationSettings);
 }
 
 EStatusCode PDFWriter::SetupStateFromModifiedStream(IByteReaderWithPosition* inModifiedSourceStream,
-                                                    EPDFVersion inPDFVersion)
+                                                    EPDFVersion inPDFVersion,
+													const PDFCreationSettings& inPDFCreationSettings)
 {
     EStatusCode status;
+	PDFParsingOptions parsingOptions;
     
+	// this bit here is actually interesting. in order to modify an already encrypted document
+	// and add more content to it, i just need the user password. not the owner one.
+	// in fact, passing the owner password here will create the wrong encryption key.
+	// interesting.
+	if (inPDFCreationSettings.DocumentEncryptionOptions.ShouldEncrypt)
+		parsingOptions.Password = inPDFCreationSettings.DocumentEncryptionOptions.UserPassword;
+
     do 
     {
-        status = mModifiedFileParser.StartPDFParsing(inModifiedSourceStream);
+        status = mModifiedFileParser.StartPDFParsing(inModifiedSourceStream, parsingOptions);
         if(status != eSuccess)
             break;    
         
@@ -709,15 +718,22 @@ EStatusCode PDFWriter::SetupStateFromModifiedStream(IByteReaderWithPosition* inM
         if(status != eSuccess)
             break;
         
+		if (mModifiedFileParser.IsEncrypted() && mModifiedFileParser.IsEncryptionSupported()) {
+			mDocumentContext.SetupEncryption(&mModifiedFileParser);
+			if (!mDocumentContext.SupportsEncryption()) {
+				status = eFailure;
+				break;
+			}
+		}
+
         mModifiedFileVersion = inPDFVersion;
-        
     } 
     while (false);
     
     return status;
 }
 
-EStatusCode PDFWriter::SetupStateFromModifiedFile(const std::string& inModifiedFile,EPDFVersion inPDFVersion)
+EStatusCode PDFWriter::SetupStateFromModifiedFile(const std::string& inModifiedFile,EPDFVersion inPDFVersion, const PDFCreationSettings& inPDFCreationSettings)
 {
     EStatusCode status;
     
@@ -727,7 +743,7 @@ EStatusCode PDFWriter::SetupStateFromModifiedFile(const std::string& inModifiedF
         if(status != eSuccess)
             break;
         
-        status = SetupStateFromModifiedStream(mModifiedFile.GetInputStream(),inPDFVersion);
+        status = SetupStateFromModifiedStream(mModifiedFile.GetInputStream(),inPDFVersion, inPDFCreationSettings);
     }
     while(false);
     

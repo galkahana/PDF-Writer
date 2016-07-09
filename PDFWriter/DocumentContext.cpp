@@ -442,10 +442,22 @@ void DocumentContext::SetupEncryption(const EncryptionOptions& inEncryptionOptio
 			inEncryptionOptions.UserPassword,
 			inEncryptionOptions.OwnerPassword,
 			inEncryptionOptions.UserProtectionOptionsFlag,
-			inEncryptionOptions.EncryptMetadata,
+			true,
 			mNewPDFID
 			);
 	}
+	else
+		mEncryptionHelper.SetupNoEncryption();
+}
+
+void DocumentContext::SetupEncryption(PDFParser* inModifiedFileParser) {
+	mObjectsContext->SetEncryptionHelper(&mEncryptionHelper);
+
+	if (inModifiedFileParser->IsEncrypted() && inModifiedFileParser->IsEncryptionSupported()) {
+		mEncryptionHelper.Setup(inModifiedFileParser->GetDecryptionHelper());
+	}
+	else
+		mEncryptionHelper.SetupNoEncryption();
 }
 
 bool DocumentContext::SupportsEncryption()

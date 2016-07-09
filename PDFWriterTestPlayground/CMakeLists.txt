@@ -32,6 +32,7 @@ LogTest.cpp
 PDFWithPassword.cpp
 MergePDFPages.cpp
 MergeToPDFForm.cpp
+ModifyingEncryptedFile.cpp
 ModifyingExistingFileContent.cpp
 PageModifierTest.cpp
 PageOrderModification.cpp
@@ -95,6 +96,7 @@ LogTest.h
 PDFWithPassword.h
 MergePDFPages.h
 MergeToPDFForm.h
+ModifyingEncryptedFile.h
 ModifyingExistingFileContent.h
 PageModifierTest.h
 PageOrderModification.cpp
@@ -199,6 +201,8 @@ AppendingAndReading.cpp
 AppendingAndReading.h
 BasicModification.cpp
 BasicModification.h
+ModifyingEncryptedFile.cpp
+ModifyingEncryptedFile.h
 ModifyingExistingFileContent.cpp
 ModifyingExistingFileContent.h
 PageModifierTest.cpp

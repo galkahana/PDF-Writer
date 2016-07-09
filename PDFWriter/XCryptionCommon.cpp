@@ -62,6 +62,16 @@ void XCryptionCommon::SetupInitialEncryptionKey(const std::string& inUserPasswor
 	mEncryptionKey = algorithm3_2(inRevision, inLength, password, inO, inP, inFileIDPart1, inEncryptMetaData);
 }
 
+void XCryptionCommon::SetupInitialEncryptionKey(const ByteList& inEncryptionKey) 
+{
+	mEncryptionKey = inEncryptionKey;
+}
+
+const ByteList& XCryptionCommon::GetInitialEncryptionKey() const
+{
+	return mEncryptionKey;
+}
+
 const ByteList& XCryptionCommon::OnObjectStart(long long inObjectID, long long inGenerationNumber) {
 	mEncryptionKeysStack.push_back(ComputeEncryptionKeyForObject((ObjectIDType)inObjectID, (unsigned long)inGenerationNumber));
 

@@ -27,6 +27,7 @@ limitations under the License.
 #include "OutputAESEncodeStream.h"
 #include "ObjectsContext.h"
 #include "DictionaryContext.h"
+#include "DecryptionHelper.h"
 
 #include <stdint.h>
 
@@ -210,8 +211,8 @@ EStatusCode EncryptionHelper::Setup(
 	) {
 
 	if (!inShouldEncrypt) {
-		mIsDocumentEncrypted = false;
-		mSupportsEncryption = true;
+		SetupNoEncryption();
+		return eSuccess;
 	}
 
 	mIsDocumentEncrypted = false;
@@ -272,3 +273,43 @@ EStatusCode EncryptionHelper::Setup(
 
 	return eSuccess;
 }
+
+void EncryptionHelper::SetupNoEncryption() 
+{
+	mIsDocumentEncrypted = false;
+	mSupportsEncryption = true;
+}
+
+EStatusCode EncryptionHelper::Setup(const DecryptionHelper& inDecryptionSource) 
+{
+	if (!inDecryptionSource.IsEncrypted() || !inDecryptionSource.CanDecryptDocument()) {
+		SetupNoEncryption();
+		return eSuccess;
+	}
+
+	mIsDocumentEncrypted = false;
+	mSupportsEncryption = false;
+
+	do {
+		mUsingAES = false;
+		mXcryption.Setup(mUsingAES);
+		if (!mXcryption.CanXCrypt())
+			break;
+
+		mLength = inDecryptionSource.GetLength();
+		mV = inDecryptionSource.GetV();
+		mRevision = inDecryptionSource.GetRevision();
+		mP = inDecryptionSource.GetP();
+		mEncryptMetaData = inDecryptionSource.GetEncryptMetaData();
+		mFileIDPart1 = inDecryptionSource.GetFileIDPart1();
+		mO = inDecryptionSource.GetO();
+		mU = inDecryptionSource.GetU();
+		mXcryption.SetupInitialEncryptionKey(inDecryptionSource.GetInitialEncryptionKey());
+
+		mIsDocumentEncrypted = true;
+		mSupportsEncryption = true;
+	} while (false);
+
+	return eSuccess;
+}
+

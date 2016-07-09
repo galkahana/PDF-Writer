@@ -51,11 +51,11 @@ public:
 		4. DidFailPasswordVerification meams that password verification didnt went through. either decryption not supported, or password no good
 		5. DidSucceedOwnerPasswordVerification means that password verification succeeded, and the user has owner priviliges
 	*/
-	bool IsEncrypted();
-	bool SupportsDecryption();
-	bool CanDecryptDocument();
-	bool DidFailPasswordVerification();
-	bool DidSucceedOwnerPasswordVerification();
+	bool IsEncrypted() const;
+	bool SupportsDecryption() const;
+	bool CanDecryptDocument() const;
+	bool DidFailPasswordVerification() const;
+	bool DidSucceedOwnerPasswordVerification() const;
 
 	std::string DecryptString(const std::string& inStringToDecrypt);
 
@@ -63,6 +63,15 @@ public:
 	void OnObjectEnd(PDFObject* inObject);
 	IByteReader* CreateDecryptionFilterForStream(PDFStreamInput* inStream, IByteReader* inToWrapStream);
 
+	unsigned int GetLength() const;
+	unsigned int GetV() const;
+	unsigned int GetRevision() const;
+	long long GetP() const;
+	bool GetEncryptMetaData() const;
+	const ByteList& GetFileIDPart1() const;
+	const ByteList& GetO() const;
+	const ByteList& GetU() const;
+	const ByteList& GetInitialEncryptionKey() const;
 
 private:
 	XCryptionCommon mXcryption;
@@ -72,7 +81,7 @@ private:
 
 	// Generic encryption
 	unsigned int mV;
-	unsigned int mLength;
+	unsigned int mLength; // mLength is in bytes!
 	
 	IByteReader* CreateDecryptionReader(IByteReader* inSourceStream,const ByteList& inEncryptionKey);
 

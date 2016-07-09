@@ -57,6 +57,8 @@ public:
 		const ByteList& inFileIDPart1,
 		bool inEncryptMetaData
 		);
+	// Setup key directly
+	void SetupInitialEncryptionKey(const ByteList& inEncryptionKey);
 
 	// Queries (same as initial setup)
 	bool CanXCrypt();
@@ -67,6 +69,9 @@ public:
 	// Call on object end, will pop the computed key for this object
 	void OnObjectEnd();
 	const ByteList& GetCurrentObjectKey(); // will return empty key if stack is empty
+
+	// get original encryption key (without particular object additions)
+	const ByteList& GetInitialEncryptionKey() const;
 
 	// bytelist operations
 	ByteList stringToByteList(const std::string& inString);

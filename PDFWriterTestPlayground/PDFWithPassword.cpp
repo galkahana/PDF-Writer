@@ -51,7 +51,7 @@ EStatusCode PDFWithPassword::Run(const TestConfiguration& inTestConfiguration)
 			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"PDFWithPassword.PDF"),
 			ePDFVersion16,
 			logConfiguration,
-			PDFCreationSettings(true,true,EncryptionOptions("user",4,"owner",true))); // 4 should translate to -3900 in actual PDF
+			PDFCreationSettings(true,true,EncryptionOptions("user",4,"owner"))); // 4 should translate to -3900 in actual PDF
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";

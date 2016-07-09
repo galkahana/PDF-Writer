@@ -32,6 +32,7 @@
 #include "PDFIndirectObjectReference.h"
 #include "PDFArray.h"
 #include "BoxingBase.h"
+#include "PDFStream.h"
 
 #include <string>
 
@@ -209,25 +210,27 @@ PDFHummus::EStatusCode PDFModifiedPage::WritePage()
     // last but not least, create the actual content stream object, placing the form
 	objectContext.StartNewIndirectObject(newContentObjectID);
 	PDFStream* newStream = objectContext.StartPDFStream();
+	PrimitiveObjectsWriter primitivesWriter;
+
+	primitivesWriter.SetStreamForWriting(newStream->GetWriteStream());
 
 	vector<string>::iterator it = formResourcesNames.begin();
 	for(;it!=formResourcesNames.end();++it)
 	{
-		objectContext.WriteKeyword("q");
-		objectContext.WriteInteger(1);
-		objectContext.WriteInteger(0);
-		objectContext.WriteInteger(0);
-		objectContext.WriteInteger(1);
-		objectContext.WriteInteger(0);
-		objectContext.WriteInteger(0);
-		objectContext.WriteKeyword("cm");
-		objectContext.WriteName(*it);
-		objectContext.WriteKeyword("Do");
-		objectContext.WriteKeyword("Q");
+		primitivesWriter.WriteKeyword("q");
+		primitivesWriter.WriteInteger(1);
+		primitivesWriter.WriteInteger(0);
+		primitivesWriter.WriteInteger(0);
+		primitivesWriter.WriteInteger(1);
+		primitivesWriter.WriteInteger(0);
+		primitivesWriter.WriteInteger(0);
+		primitivesWriter.WriteKeyword("cm");
+		primitivesWriter.WriteName(*it);
+		primitivesWriter.WriteKeyword("Do");
+		primitivesWriter.WriteKeyword("Q");
 	}
 
 	objectContext.EndPDFStream(newStream);
-	objectContext.EndIndirectObject();
 
 	return eSuccess;
 }

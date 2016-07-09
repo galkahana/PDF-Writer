@@ -120,6 +120,7 @@ namespace PDFHummus
 
 		// Encryption related (will default to no encryption of not called)
 		void SetupEncryption(const EncryptionOptions& inEncryptionOptions, EPDFVersion inPDFVersion);
+		void SetupEncryption(PDFParser* inModifiedFileParser);
 		bool SupportsEncryption();
 
 

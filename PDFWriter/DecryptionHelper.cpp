@@ -34,6 +34,7 @@ limitations under the License.
 #include "RefCountPtr.h"
 #include "OutputStringBufferStream.h"
 #include "InputRC4XcodeStream.h"
+#include "Trace.h"
 
 using namespace std;
 using namespace PDFHummus;
@@ -62,9 +63,14 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const std::string& inPa
 			break;
 
 		PDFObjectCastPtr<PDFName> filter(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "Filter"));
-		if (!filter || filter->GetValue() != "Standard") 
+		if (!filter || filter->GetValue() != "Standard") {
 			// Supporting only standard filter
+			if(!filter)
+				TRACE_LOG("DecryptionHelper::Setup, no filter defined");
+			else
+				TRACE_LOG1("DecryptionHelper::Setup, Only Standard encryption filter is supported. Unsupported filter encountered - %s",filter->GetValue().c_str());
 			break;
+		}
 
 		RefCountPtr<PDFObject> v(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "V"));
 		if (!v) {
@@ -76,9 +82,11 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const std::string& inPa
 			mV = (unsigned int)vHelper.GetAsInteger();
 		}
 
-		// supporting only up to 3 (4 uses CF, StmF and StrF)
-		if (mV > 3)
+		// supporting only  versions 1 and 2 (no crypt filters and nothing unpublished)
+		if (mV != 1 && mV != 2) {
+			TRACE_LOG1("DecryptionHelper::Setup, Only 1 and 2 are supported values for V. Unsupported filter encountered - %d", mV);
 			break;
+		}
 
 		RefCountPtr<PDFObject> length(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "Length"));
 		if (!length) {
@@ -176,23 +184,23 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const std::string& inPa
 	return EStatusCode::eSuccess;
 }
 
-bool DecryptionHelper::IsEncrypted() {
+bool DecryptionHelper::IsEncrypted() const{
 	return mIsEncrypted;
 }
 
-bool DecryptionHelper::SupportsDecryption() {
+bool DecryptionHelper::SupportsDecryption() const {
 	return mSupportsDecryption;
 }
 
-bool DecryptionHelper::CanDecryptDocument() {
+bool DecryptionHelper::CanDecryptDocument() const {
 	return mSupportsDecryption && !mFailedPasswordVerification;
 }
 
-bool DecryptionHelper::DidFailPasswordVerification() {
+bool DecryptionHelper::DidFailPasswordVerification() const {
 	return mFailedPasswordVerification;
 }
 
-bool DecryptionHelper::DidSucceedOwnerPasswordVerification() {
+bool DecryptionHelper::DidSucceedOwnerPasswordVerification() const {
 	return mDidSucceedOwnerPasswordVerification;
 }
 
@@ -269,4 +277,49 @@ bool DecryptionHelper::AuthenticateOwnerPassword(const ByteList& inPassword) {
 						mFileIDPart1,
 						mEncryptMetaData,
 						mU);
+}
+
+unsigned int DecryptionHelper::GetLength() const
+{
+	return mLength;
+}
+
+unsigned int DecryptionHelper::GetV() const
+{
+	return mV;
+}
+
+unsigned int DecryptionHelper::GetRevision() const
+{
+	return mRevision;
+}
+
+long long DecryptionHelper::GetP() const
+{
+	return mP;
+}
+
+bool DecryptionHelper::GetEncryptMetaData() const
+{
+	return mEncryptMetaData;
+}
+
+const ByteList& DecryptionHelper::GetFileIDPart1() const
+{
+	return mFileIDPart1;
+}
+
+const ByteList& DecryptionHelper::GetO() const
+{
+	return mO;
+}
+
+const ByteList& DecryptionHelper::GetU() const
+{
+	return mU;
+}
+
+const ByteList& DecryptionHelper::GetInitialEncryptionKey() const
+{
+	return mXcryption.GetInitialEncryptionKey();
 }

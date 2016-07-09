@@ -959,7 +959,7 @@ EStatusCode PDFDocumentHandler::StartCopyingContext(PDFParser* inPDFParser)
         
 		if(mParser->IsEncrypted() && !mParser->IsEncryptionSupported())
 		{
-			TRACE_LOG("PDFDocumentHandler::StartCopyingContext, Document contains an encryption dictionary. Library does not support embedding of encrypted PDF");
+			TRACE_LOG("PDFDocumentHandler::StartCopyingContext, Document contains an unsupported encryption. Library does not support embedding of encrypted PDF that cant be decrypted");
 			status = PDFHummus::eFailure;
 			break;
 		}

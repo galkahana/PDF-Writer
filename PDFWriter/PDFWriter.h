@@ -300,7 +300,7 @@ private:
 	void ReleaseLog();
 	PDFHummus::EStatusCode SetupState(const std::string& inStateFilePath);
 	void Cleanup();
-    PDFHummus::EStatusCode SetupStateFromModifiedFile(const std::string& inModifiedFile,EPDFVersion inPDFVersion);
-    PDFHummus::EStatusCode SetupStateFromModifiedStream(IByteReaderWithPosition* inModifiedSourceStream,EPDFVersion inPDFVersion);
+    PDFHummus::EStatusCode SetupStateFromModifiedFile(const std::string& inModifiedFile,EPDFVersion inPDFVersion, const PDFCreationSettings& inPDFCreationSettings);
+    PDFHummus::EStatusCode SetupStateFromModifiedStream(IByteReaderWithPosition* inModifiedSourceStream,EPDFVersion inPDFVersion, const PDFCreationSettings& inPDFCreationSettings);
 
 };

@@ -27,6 +27,7 @@ limitations under the License.
 
 class IByteWriterWithPosition;
 class ObjectsContext;
+class DecryptionHelper;
 
 class EncryptionHelper {
 
@@ -49,6 +50,10 @@ public:
 		bool inEncryptMetadata,
 		const std::string inFileIDPart1
 	);
+	// short one for setting up no ecnryption
+	void SetupNoEncryption();
+	// Setup with existing decryption helper. This can be used to setup encryption with another PDF existing setup, or in modified PDF scenarios
+	PDFHummus::EStatusCode Setup(const DecryptionHelper& inDecryptionSource);
 
 	/*
 		SupportsEncryption will respond true, if the encryption requested is supported. this includes true on the case that encryption was not requested
