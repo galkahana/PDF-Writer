@@ -125,7 +125,8 @@ void PDFStream::FinalizeStreamWrite()
 		mFlateEncodingStream.Assign(NULL);  // this both finished encoding any left buffers and releases ownership from mFlateEncodingStream
 
 	if (mEncryptionStream) {
-		// safe to delete. encryption stream is not supposed to own the underlying stream in any case.
+		// safe to delete. encryption stream is not supposed to own the underlying stream in any case. make sure
+		// to delete before measuring output, as flushing may occur at this point
 		delete mEncryptionStream;
 		mEncryptionStream = NULL;
 	}

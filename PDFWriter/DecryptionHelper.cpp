@@ -150,7 +150,7 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const std::string& inPa
 			}
 		}
 
-		mXcryption.Setup(inParser->GetPDFLevel());
+		mXcryption.Setup(false);
 		if (!mXcryption.CanXCrypt()) 
 			break;
 

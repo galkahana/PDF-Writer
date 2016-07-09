@@ -607,27 +607,24 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,
                 *outExtendedTableSize = firstNonSectionObject;
             }
             
-			//start parsing from the first row and parse other sections
+
+			status = ReadNextXrefEntry(entry);
+			if (status != eSuccess)
+				break;
+			if(currentObject < inXrefSize)
+			{
+				inXrefTable[currentObject].mObjectPosition = LongFilePositionTypeBox(std::string((const char*)entry, 10));
+				inXrefTable[currentObject].mRivision = ULong(std::string((const char*)(entry + 11), 5));
+				inXrefTable[currentObject].mType = entry[17] == 'n' ? eXrefEntryExisting:eXrefEntryDelete;
+			}
+			++currentObject;
+
+			// now parse the section. 
 			while(currentObject < firstNonSectionObject)
 			{
-				//if there is PDFWhiteSpace-s between sections
-				do
-				{
-					if (mStream->Read(entry, 1) != 1)
-					{
-						TRACE_LOG("PDFParser::ParseXref, failed to read xref entry");
-						status = PDFHummus::eFailure;
-						break;
-					}
-				} while (IsPDFWhiteSpace(entry[0]));
-				
-				//read extra 19
-				if(mStream->Read(entry+1,19) != 19)
-				{
-					TRACE_LOG("PDFParser::ParseXref, failed to read xref entry");
-					status = PDFHummus::eFailure;
+				status = ReadNextXrefEntry(entry);
+				if (status != eSuccess)
 					break;
-				}
 				if(currentObject < inXrefSize)
 				{
 					inXrefTable[currentObject].mObjectPosition = LongFilePositionTypeBox(std::string((const char*)entry, 10));
@@ -642,6 +639,31 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,
 
 	}while(false);	
 	mObjectParser.ResetReadState(tokenizer); // reset with tokenizer in case got extra token.s
+
+	return status;
+}
+
+EStatusCode PDFParser::ReadNextXrefEntry(Byte inBuffer[20]) {
+	EStatusCode status = eSuccess;
+
+	do
+	{
+		if (mStream->Read(inBuffer, 1) != 1)
+		{
+			TRACE_LOG("PDFParser::ReadNextXrefEntry, failed to read xref entry");
+			status = PDFHummus::eFailure;
+			break;
+		}
+	} while (IsPDFWhiteSpace(inBuffer[0]));
+	if (status != eSuccess)
+		return status;
+
+	// now read extra 19
+	if (mStream->Read(inBuffer + 1, 19) != 19)
+	{
+		TRACE_LOG("PDFParser::ReadNextXrefEntry, failed to read xref entry");
+		status = PDFHummus::eFailure;
+	}
 
 	return status;
 }

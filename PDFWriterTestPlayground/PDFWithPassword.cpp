@@ -49,7 +49,7 @@ EStatusCode PDFWithPassword::Run(const TestConfiguration& inTestConfiguration)
 	{
 		status = pdfWriter.StartPDF(
 			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"PDFWithPassword.PDF"),
-			ePDFVersion13,
+			ePDFVersion16,
 			logConfiguration,
 			PDFCreationSettings(true,true,EncryptionOptions("user",4,"owner",true))); // 4 should translate to -3900 in actual PDF
 		if(status != PDFHummus::eSuccess)

@@ -79,6 +79,7 @@ RC4.cpp
 ObjectsContext.cpp
 OpenTypeFileInput.cpp
 OpenTypePrimitiveReader.cpp
+OutputAESEncodeStream.cpp
 OutputBufferedStream.cpp
 OutputFile.cpp
 OutputFileStream.cpp
@@ -156,6 +157,11 @@ WrittenFontCFF.cpp
 WrittenFontTrueType.cpp
 XCryptionCommon.cpp
 XObjectContentContext.cpp
+aes_modes.c
+aes_ni.c
+aescrypt.c
+aeskey.c
+aestab.c
 
 #headers
 AbstractContentContext.h
@@ -260,6 +266,7 @@ ObjectsContext.h
 ObjectsContextExtenderAdapter.h
 OpenTypeFileInput.h
 OpenTypePrimitiveReader.h
+OutputAESEncodeStream.h
 OutputBufferedStream.h
 OutputFile.h
 OutputFileStream.h
@@ -345,7 +352,14 @@ WrittenFontRepresentation.h
 WrittenFontTrueType.h
 XCryptionCommon.h
 XObjectContentContext.h
-
+aes.h
+aes_ni.h
+aes_via_ace.h
+aescpp.h
+aesopt.h
+aestab.h
+brg_endian.h
+brg_types.h
 )
 
 # groups definitions
@@ -443,6 +457,22 @@ RC4.cpp
 RC4.h
 )
 
+source_group(Infrastructure\\Encryption\\AES FILES
+aes_modes.c
+aes_ni.c
+aescrypt.c
+aeskey.c
+aestab.c
+aes.h
+aes_ni.h
+aes_via_ace.h
+aescpp.h
+aesopt.h
+aestab.h
+brg_endian.h
+brg_types.h
+)
+
 source_group(Infrastructure\\IO FILES
 AdapterIByteReaderWithPositionToIReadPositionProvider.h
 IByteReader.h
@@ -475,6 +505,8 @@ InputStringStream.cpp
 InputStringStream.h
 IOBasicTypes.h
 IReadPositionProvider.h
+OutputAESEncodeStream.cpp
+OutputAESEncodeStream.h
 OutputBufferedStream.cpp
 OutputBufferedStream.h
 OutputFile.cpp

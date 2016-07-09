@@ -40,12 +40,9 @@ XCryptionCommon::~XCryptionCommon(void)
 {
 }
 
-bool XCryptionCommon::Setup(double inPDFLevel) {
-
-	// determing if using AES (PDF >= 1.6)
-	mUsingAES = inPDFLevel >= 1.6;
-	mCanXCrypt = !mUsingAES; // unsupported at this point
-
+bool XCryptionCommon::Setup(bool inUsingAES) {
+	mUsingAES = inUsingAES;
+	mCanXCrypt = true;
 	return CanXCrypt();
 }
 

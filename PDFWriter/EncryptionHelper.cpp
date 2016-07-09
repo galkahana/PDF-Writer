@@ -24,6 +24,7 @@ limitations under the License.
 #include "InputStringStream.h"
 #include "OutputStreamTraits.h"
 #include "OutputRC4XcodeStream.h"
+#include "OutputAESEncodeStream.h"
 #include "ObjectsContext.h"
 #include "DictionaryContext.h"
 
@@ -89,7 +90,7 @@ std::string EncryptionHelper::EncryptString(const std::string& inStringToEncrypt
 		InputStringStream inputStream(inStringToEncrypt);
 		OutputStreamTraits traits(encryptStream);
 		traits.CopyToOutputStream(&inputStream);
-		delete encryptStream; // free encryption stream
+		delete encryptStream; // free encryption stream (sometimes it will also mean flushing the output stream)
 
 		return buffer.ToString();
 	}
@@ -102,7 +103,12 @@ IByteWriterWithPosition* EncryptionHelper::CreateEncryptionStream(IByteWriterWit
 }
 
 IByteWriterWithPosition* EncryptionHelper::CreateEncryptionWriter(IByteWriterWithPosition* inToWrapStream, const ByteList& inEncryptionKey) {
-	return new OutputRC4XcodeStream(inToWrapStream, inEncryptionKey,false);
+	if (mUsingAES) {
+		return new OutputAESEncodeStream(inToWrapStream, inEncryptionKey, false);
+	}
+	else {
+		return new OutputRC4XcodeStream(inToWrapStream, inEncryptionKey, false);
+	}
 }
 
 
@@ -157,6 +163,37 @@ EStatusCode EncryptionHelper::WriteEncryptionDictionary(ObjectsContext* inObject
 	encryptContext->WriteKey(scEncryptMetadata);
 	encryptContext->WriteBooleanValue(mEncryptMetaData);
 
+	// Now. if using AES to encrypt it requires to add default crypt filter definitions. so do that now
+	if (mUsingAES) {
+		encryptContext->WriteKey("CF");
+		DictionaryContext* cf = inObjectsContext->StartDictionary();
+		cf->WriteKey("StdCF");
+
+		DictionaryContext* aes = inObjectsContext->StartDictionary();
+		aes->WriteKey("Type");
+		aes->WriteNameValue("CryptFilter");
+
+
+		aes->WriteKey("CFM");
+		aes->WriteNameValue("AESV2");
+
+		aes->WriteKey("AuthEvent");
+		aes->WriteNameValue("DocOpen");
+
+		aes->WriteKey("Length");
+		aes->WriteIntegerValue(16);
+
+		inObjectsContext->EndDictionary(aes);
+		inObjectsContext->EndDictionary(cf);
+
+		encryptContext->WriteKey("StmF");
+		encryptContext->WriteNameValue("StdCF");
+
+		encryptContext->WriteKey("StrF");
+		encryptContext->WriteNameValue("StdCF");
+
+	}
+
 	ReleaseEncryption();
 
 	return inObjectsContext->EndDictionary(encryptContext);
@@ -181,20 +218,34 @@ EStatusCode EncryptionHelper::Setup(
 	mSupportsEncryption = false;
 
 	do {
-		mXcryption.Setup(inPDFLevel);
+		mUsingAES = inPDFLevel >= 1.6;
+
+		mUsingAES = false; // GAL, forcing this to false. something doesn't work well with the encryption now and i really got other things i want to attend to.
+
+		mXcryption.Setup(mUsingAES);
 		if (!mXcryption.CanXCrypt())
 			break;
 
 		if (inPDFLevel >= 1.4) {
 			mLength = 16;
-			mV = 2;
-			mRevision = 3;
+
+			if (mUsingAES) {
+				mV = 4;
+				mRevision = 4;
+			}
+			else 
+			{
+				mV = 2;
+				mRevision = 3;
+			}
 		}
 		else {
 			mLength = 5;
 			mV = 1;
 			mRevision = (inUserProtectionOptionsFlag & 0xF00) ? 3 : 2;
+			mUsingAES = false;
 		}
+
 
 
 		// compute P out of inUserProtectionOptionsFlag. inUserProtectionOptionsFlag can be a more relaxed number setting as 1s only the enabled access. mP will restrict to PDF Expected bits

@@ -47,7 +47,7 @@ public:
 	*/
 
 	// call this whenever you first can. this sets some internal behavior based on the input elements
-	bool Setup(double inPDFLevel);
+	bool Setup(bool inUsingAES);
 
 	void SetupInitialEncryptionKey(const std::string& inUserPassword,
 		unsigned int inRevision,

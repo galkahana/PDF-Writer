@@ -108,4 +108,5 @@ private:
 	long long mP;
 	bool mEncryptMetaData;
 	ByteList mFileIDPart1;
+	bool mUsingAES;
 };
