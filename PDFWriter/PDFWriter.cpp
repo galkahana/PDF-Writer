@@ -34,6 +34,7 @@
 #include "PDFBoolean.h"
 #include "PDFInteger.h"
 #include "PDFPageInput.h"
+#include "PDFDocumentCopyingContext.h"
 
 using namespace PDFHummus;
 
@@ -765,9 +766,9 @@ PDFDocumentCopyingContext* PDFWriter::CreatePDFCopyingContextForModifiedFile()
 	return mDocumentContext.CreatePDFCopyingContext(&mModifiedFileParser);    
 }
 
-DoubleAndDoublePair PDFWriter::GetImageDimensions(const std::string& inImageFile,unsigned long inImageIndex)
+DoubleAndDoublePair PDFWriter::GetImageDimensions(const std::string& inImageFile,unsigned long inImageIndex, const PDFParsingOptions& inParsingOptions)
 {
-	return mDocumentContext.GetImageDimensions(inImageFile,inImageIndex);
+	return mDocumentContext.GetImageDimensions(inImageFile,inImageIndex,inParsingOptions);
 }
 
 PDFHummus::EHummusImageType PDFWriter::GetImageType(const std::string& inImageFile,unsigned long inImageIndex)
@@ -775,9 +776,104 @@ PDFHummus::EHummusImageType PDFWriter::GetImageType(const std::string& inImageFi
 	return mDocumentContext.GetImageType(inImageFile,inImageIndex);
 }
 
-unsigned long PDFWriter::GetImagePagesCount(const std::string& inImageFile)
+unsigned long PDFWriter::GetImagePagesCount(const std::string& inImageFile, const PDFParsingOptions& inOptions)
 {
-	return mDocumentContext.GetImagePagesCount(inImageFile);
+	return mDocumentContext.GetImagePagesCount(inImageFile,inOptions);
 }
 
+PDFHummus::EStatusCode PDFWriter::RecryptPDF(
+	const std::string& inOriginalPDFPath,
+	const std::string& inOriginalPDFPassword,
+	const std::string& inNewPDFPath,
+	const LogConfiguration& inLogConfiguration,
+	const PDFCreationSettings& inPDFCreationSettings) {
+	
+	InputFile originalPDF;
+	OutputFile newPDF;
 
+	EStatusCode status = originalPDF.OpenFile(inOriginalPDFPath);
+	if (status != eSuccess)
+		return status;
+
+	status = newPDF.OpenFile(inNewPDFPath);
+	if (status != eSuccess)
+		return status;
+
+	return PDFWriter::RecryptPDF(
+		originalPDF.GetInputStream(),
+		inOriginalPDFPassword,
+		newPDF.GetOutputStream(),
+		inLogConfiguration,
+		inPDFCreationSettings
+		);
+}
+
+PDFHummus::EStatusCode PDFWriter::RecryptPDF(
+	IByteReaderWithPosition* inOriginalPDFStream,
+	const std::string& inOriginalPDFPassword,
+	IByteWriterWithPosition* inNewPDFStream,
+	const LogConfiguration& inLogConfiguration,
+	const PDFCreationSettings& inPDFCreationSettings) {
+	PDFWriter pdfWriter;
+	EStatusCode status;
+	PDFDocumentCopyingContext* copyingContext = NULL;
+
+	/*
+	How to recrypt an encrypted or plain PDF. In other words. create a new version that's decrypted, or encrypted with new passwords.
+	*/
+
+	do
+	{
+		// open PDF copying context for the source document (before starting a new one, so i can get the origina level and set the same)
+		copyingContext = pdfWriter.CreatePDFCopyingContext(inOriginalPDFStream, PDFParsingOptions(inOriginalPDFPassword));
+		if (!copyingContext)
+		{
+			status = PDFHummus::eFailure;
+			break;
+		}
+
+
+		// open new PDF for writing
+		status = pdfWriter.StartPDFForStream(
+			inNewPDFStream,
+			EPDFVersion((int)(copyingContext->GetSourceDocumentParser()->GetPDFLevel() * 10)),
+			inLogConfiguration,
+			inPDFCreationSettings
+			);
+		if (status != PDFHummus::eSuccess)
+		{
+			break;
+		}
+
+
+		// get its root object ID
+		PDFObjectCastPtr<PDFIndirectObjectReference> catalogRef(copyingContext->GetSourceDocumentParser()->GetTrailer()->QueryDirectObject("Root"));
+		if (!catalogRef)
+		{
+			status = PDFHummus::eFailure;
+			break;
+		}
+
+		// deep-copy the whole pdf through its root - return root object ID copy at new PDF
+		EStatusCodeAndObjectIDType copyCatalogResult = copyingContext->CopyObject(catalogRef->mObjectID);
+		if (copyCatalogResult.first != eSuccess)
+		{
+			status = PDFHummus::eFailure;
+			break;
+
+		}
+
+		delete copyingContext;
+		copyingContext = NULL;
+
+		// set new root object ID as this document root
+		pdfWriter.GetDocumentContext().GetTrailerInformation().SetRoot(copyCatalogResult.second);
+
+		// now just end the PDF
+		pdfWriter.EndPDF();
+	} while (false);
+
+	delete copyingContext;
+
+	return status;
+}

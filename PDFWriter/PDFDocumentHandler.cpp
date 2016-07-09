@@ -588,7 +588,8 @@ EStatusCode PDFDocumentHandler::CopyInDirectObject(ObjectIDType inSourceObjectID
 	status = WriteObjectByType(sourceObject.GetPtr(),eTokenSeparatorEndLine, &writingPolicy);
 	if(PDFHummus::eSuccess == status)
 	{
-		mObjectsContext->EndIndirectObject();
+		if (sourceObject->GetType() != PDFObject::ePDFObjectStream) // write indirect object end for non streams only...cause they take care of writing their own
+			mObjectsContext->EndIndirectObject();
 		return WriteNewObjects(newObjectsToWrite,ioCopiedObjects);
 	}
 	else
@@ -1533,7 +1534,8 @@ EStatusCode PDFDocumentHandler::CopyDirectObjectToIndirectObject(PDFObject* inOb
 	status = WriteObjectByType(inObject,eTokenSeparatorEndLine, &writingPolicy);
 	if(PDFHummus::eSuccess == status)
 	{
-		mObjectsContext->EndIndirectObject();
+		if(inObject->GetType() != PDFObject::ePDFObjectStream) // write indirect object end for non streams only...cause they take care of writing their own
+			mObjectsContext->EndIndirectObject();
 		return WriteNewObjects(newObjectsToWrite);
 	}
 	else

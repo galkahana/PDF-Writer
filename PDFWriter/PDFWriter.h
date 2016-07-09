@@ -255,9 +255,9 @@ public:
     PDFDocumentCopyingContext* CreatePDFCopyingContextForModifiedFile();
 
 	// some public image info services, for users of hummus
-	DoubleAndDoublePair GetImageDimensions(const std::string& inImageFile,unsigned long inImageIndex = 0);
+	DoubleAndDoublePair GetImageDimensions(const std::string& inImageFile,unsigned long inImageIndex = 0, const PDFParsingOptions& inParsingOptions = PDFParsingOptions::DefaultPDFParsingOptions);
 	EHummusImageType GetImageType(const std::string& inImageFile,unsigned long inImageIndex);
-	unsigned long GetImagePagesCount(const std::string& inImageFile);
+	unsigned long GetImagePagesCount(const std::string& inImageFile, const PDFParsingOptions& inOptions = PDFParsingOptions::DefaultPDFParsingOptions);
 
 
 	// fonts [text], font index is provided for multi-font file packages (such as dfont and ttc), 0 the default is
@@ -278,6 +278,24 @@ public:
     // Extensibiility, for modified files workflow
     PDFParser& GetModifiedFileParser();
     InputFile& GetModifiedInputFile();
+
+
+	// Recryption statics. create new version of an existing document encrypted with new password or decrypted
+	static PDFHummus::EStatusCode RecryptPDF(
+		const std::string& inOriginalPDFPath,
+		const std::string& inOriginalPDFPassword,
+		const std::string& inNewPDFPath,
+		const LogConfiguration& inLogConfiguration,
+		const PDFCreationSettings& inPDFCreationSettings);
+
+	static PDFHummus::EStatusCode RecryptPDF(
+		IByteReaderWithPosition* inOriginalPDFStream,
+		const std::string& inOriginalPDFPassword,
+		IByteWriterWithPosition* inNewPDFStream,
+		const LogConfiguration& inLogConfiguration,
+		const PDFCreationSettings& inPDFCreationSettings);
+
+
 private:
 
 	ObjectsContext mObjectsContext;

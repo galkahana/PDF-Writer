@@ -48,6 +48,7 @@ PDFParserTest.cpp
 PDFTextStringTest.cpp
 PFBStreamTest.cpp
 PosixPath.cpp
+RecryptPDF.cpp
 RefCountTest.cpp
 ShutDownRestartTest.cpp
 SimpleContentPageTest.cpp
@@ -112,6 +113,7 @@ PDFParserTest.h
 PDFTextStringTest.h
 PFBStreamTest.h
 PosixPath.h
+RecryptPDF.h
 RefCountTest.h
 ShutDownRestartTest.h
 SimpleContentPageTest.h
@@ -272,6 +274,8 @@ LinksTest.cpp
 LinksTest.h
 PDFWithPassword.cpp
 PDFWithPassword.h
+RecryptPDF.cpp
+RecryptPDF.h
 RotatedPagesPDF.cpp
 RotatedPagesPDF.h
 ShutDownRestartTest.cpp

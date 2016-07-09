@@ -28,6 +28,12 @@ limitations under the License.
 #include "ObjectsContext.h"
 #include "DictionaryContext.h"
 #include "DecryptionHelper.h"
+#include "PDFParser.h"
+#include "PDFDictionary.h"
+#include "PDFObjectCast.h"
+#include "PDFLiteralString.h"
+#include "PDFInteger.h"
+#include "PDFBoolean.h"
 
 #include <stdint.h>
 
@@ -313,3 +319,96 @@ EStatusCode EncryptionHelper::Setup(const DecryptionHelper& inDecryptionSource)
 	return eSuccess;
 }
 
+
+PDFHummus::EStatusCode EncryptionHelper::WriteState(ObjectsContext* inStateWriter, ObjectIDType inObjectID)
+{
+	inStateWriter->StartNewIndirectObject(inObjectID);
+	DictionaryContext* encryptionObject = inStateWriter->StartDictionary();
+
+	encryptionObject->WriteKey("Type");
+	encryptionObject->WriteNameValue("EncryptionHelper");
+
+	encryptionObject->WriteKey("mIsDocumentEncrypted");
+	encryptionObject->WriteBooleanValue(mIsDocumentEncrypted);
+
+	encryptionObject->WriteKey("mSupportsEncryption");
+	encryptionObject->WriteBooleanValue(mSupportsEncryption);
+
+	encryptionObject->WriteKey("mUsingAES");
+	encryptionObject->WriteBooleanValue(mUsingAES);
+
+	encryptionObject->WriteKey("mLength");
+	encryptionObject->WriteIntegerValue(mLength);
+
+	encryptionObject->WriteKey("mV");
+	encryptionObject->WriteIntegerValue(mV);
+
+	encryptionObject->WriteKey("mRevision");
+	encryptionObject->WriteIntegerValue(mRevision);
+
+	encryptionObject->WriteKey("mP");
+	encryptionObject->WriteIntegerValue(mP);
+
+	encryptionObject->WriteKey("mEncryptMetaData");
+	encryptionObject->WriteBooleanValue(mEncryptMetaData);
+
+	encryptionObject->WriteKey("mFileIDPart1");
+	encryptionObject->WriteLiteralStringValue(mXcryption.ByteListToString(mFileIDPart1));
+
+	encryptionObject->WriteKey("mO");
+	encryptionObject->WriteLiteralStringValue(mXcryption.ByteListToString(mO));
+
+	encryptionObject->WriteKey("mU");
+	encryptionObject->WriteLiteralStringValue(mXcryption.ByteListToString(mU));
+
+	encryptionObject->WriteKey("InitialEncryptionKey");
+	encryptionObject->WriteLiteralStringValue(mXcryption.ByteListToString(mXcryption.GetInitialEncryptionKey()));
+
+	inStateWriter->EndDictionary(encryptionObject);
+	inStateWriter->EndIndirectObject();
+
+	return eSuccess;
+}
+
+PDFHummus::EStatusCode EncryptionHelper::ReadState(PDFParser* inStateReader, ObjectIDType inObjectID)
+{
+	PDFObjectCastPtr<PDFDictionary> encryptionObjectState(inStateReader->ParseNewObject(inObjectID));
+
+	PDFObjectCastPtr<PDFBoolean> isDocumentEncrypted = encryptionObjectState->QueryDirectObject("mIsDocumentEncrypted");
+	mIsDocumentEncrypted = isDocumentEncrypted->GetValue();
+
+	PDFObjectCastPtr<PDFBoolean> supportsEncryption = encryptionObjectState->QueryDirectObject("mSupportsEncryption");
+	mSupportsEncryption = supportsEncryption->GetValue();
+
+	PDFObjectCastPtr<PDFBoolean> usingAES = encryptionObjectState->QueryDirectObject("mUsingAES");
+	mUsingAES = usingAES->GetValue();
+
+	PDFObjectCastPtr<PDFInteger> length = encryptionObjectState->QueryDirectObject("mLength");
+	mLength = (unsigned int)length->GetValue();
+
+	PDFObjectCastPtr<PDFInteger> v = encryptionObjectState->QueryDirectObject("mV");
+	mV = (unsigned int)v->GetValue();
+
+	PDFObjectCastPtr<PDFInteger> revision = encryptionObjectState->QueryDirectObject("mRevision");
+	mRevision = (unsigned int)revision->GetValue();
+
+	PDFObjectCastPtr<PDFInteger> p = encryptionObjectState->QueryDirectObject("mP");
+	mP = p->GetValue();
+
+	PDFObjectCastPtr<PDFBoolean> encryptMetaData = encryptionObjectState->QueryDirectObject("mEncryptMetaData");
+	mEncryptMetaData = encryptMetaData->GetValue();
+
+	PDFObjectCastPtr<PDFLiteralString> fileIDPart1 = encryptionObjectState->QueryDirectObject("mFileIDPart1");
+	mFileIDPart1 = mXcryption.stringToByteList(fileIDPart1->GetValue());
+
+	PDFObjectCastPtr<PDFLiteralString> o = encryptionObjectState->QueryDirectObject("mO");
+	mO = mXcryption.stringToByteList(o->GetValue());
+
+	PDFObjectCastPtr<PDFLiteralString> u = encryptionObjectState->QueryDirectObject("mU");
+	mU = mXcryption.stringToByteList(u->GetValue());
+
+	PDFObjectCastPtr<PDFLiteralString> InitialEncryptionKey = encryptionObjectState->QueryDirectObject("InitialEncryptionKey");
+	mXcryption.SetupInitialEncryptionKey(mXcryption.stringToByteList(InitialEncryptionKey->GetValue()));
+
+	return eSuccess;
+}

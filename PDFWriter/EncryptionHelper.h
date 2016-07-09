@@ -28,6 +28,7 @@ limitations under the License.
 class IByteWriterWithPosition;
 class ObjectsContext;
 class DecryptionHelper;
+class PDFParser;
 
 class EncryptionHelper {
 
@@ -91,6 +92,11 @@ public:
 	// it as an indirect object make sure to start and end one before and after calling this method
 	// [remember to pause encryption internally]
 	PDFHummus::EStatusCode WriteEncryptionDictionary(ObjectsContext* inObjectsContext);
+
+
+	// state read/write support
+	PDFHummus::EStatusCode WriteState(ObjectsContext* inStateWriter, ObjectIDType inObjectID);
+	PDFHummus::EStatusCode ReadState(PDFParser* inStateReader, ObjectIDType inObjectID);
 
 private:
 	XCryptionCommon mXcryption;

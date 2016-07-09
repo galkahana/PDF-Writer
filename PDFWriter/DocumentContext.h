@@ -271,9 +271,9 @@ namespace PDFHummus
         PDFDocumentCopyingContext* CreatePDFCopyingContext(PDFParser* inPDFParser);
 
 		// some public image info services, for users of hummus
-		DoubleAndDoublePair GetImageDimensions(const std::string& inImageFile,unsigned long inImageIndex = 0);
+		DoubleAndDoublePair GetImageDimensions(const std::string& inImageFile,unsigned long inImageIndex = 0, const PDFParsingOptions& inOptions = PDFParsingOptions::DefaultPDFParsingOptions);
 		EHummusImageType GetImageType(const std::string& inImageFile,unsigned long inImageIndex);
-		unsigned long GetImagePagesCount(const std::string& inImageFile);
+		unsigned long GetImagePagesCount(const std::string& inImageFile, const PDFParsingOptions& inOptions = PDFParsingOptions::DefaultPDFParsingOptions);
 
 
 		// Font [Text] (font index is for multi-font files. for single file fonts, pass 0)
@@ -329,7 +329,12 @@ namespace PDFHummus
 		void UnRegisterCopyingContext(PDFDocumentCopyingContext* inCopyingContext);
 
 		// internal methods for easy image writing
-		EStatusCode WriteFormForImage(const std::string& inImagePath,unsigned long inImageIndex,ObjectIDType inObjectID);
+		EStatusCode WriteFormForImage(
+			const std::string& inImagePath,
+			unsigned long inImageIndex,
+			ObjectIDType inObjectID,
+			const PDFParsingOptions& inParsingOptions = PDFParsingOptions::DefaultPDFParsingOptions
+		);
 		ObjectIDTypeAndBool RegisterImageForDrawing(const std::string& inImageFile,unsigned long inImageIndex);
 
 		// JPG images handler for retrieving JPG images information
