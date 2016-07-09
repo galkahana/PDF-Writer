@@ -29,8 +29,10 @@ JpegLibTest.cpp
 JPGImageTest.cpp
 LinksTest.cpp
 LogTest.cpp
+PDFWithPassword.cpp
 MergePDFPages.cpp
 MergeToPDFForm.cpp
+ModifyingEncryptedFile.cpp
 ModifyingExistingFileContent.cpp
 PageModifierTest.cpp
 PageOrderModification.cpp
@@ -46,6 +48,7 @@ PDFParserTest.cpp
 PDFTextStringTest.cpp
 PFBStreamTest.cpp
 PosixPath.cpp
+RecryptPDF.cpp
 RefCountTest.cpp
 ShutDownRestartTest.cpp
 SimpleContentPageTest.cpp
@@ -63,6 +66,7 @@ UppercaseSequanceTest.cpp
 WindowsPath.cpp
 PDFWriterTestPlayground.cpp
 CopyingAndMergingEmptyPages.cpp
+EncryptedPDF.cpp
 
 #headers
 AppendingAndReading.h
@@ -76,6 +80,7 @@ DCTDecodeFilterTest.h
 DFontTest.h
 EmptyFileTest.h
 EmptyPagesPDF.h
+RotatedPagesPDF.h
 FileURL.h
 FlateEncryptionTest.h
 HighLevelContentContext.h
@@ -89,8 +94,10 @@ JpegLibTest.h
 JPGImageTest.h
 LinksTest.h
 LogTest.h
+PDFWithPassword.h
 MergePDFPages.h
 MergeToPDFForm.h
+ModifyingEncryptedFile.h
 ModifyingExistingFileContent.h
 PageModifierTest.h
 PageOrderModification.cpp
@@ -106,6 +113,7 @@ PDFParserTest.h
 PDFTextStringTest.h
 PFBStreamTest.h
 PosixPath.h
+RecryptPDF.h
 RefCountTest.h
 ShutDownRestartTest.h
 SimpleContentPageTest.h
@@ -121,6 +129,7 @@ TTCTest.h
 Type1Test.h
 UppercaseSequanceTest.h
 CopyingAndMergingEmptyPages.h
+EncryptedPDF.h
 )
 
 source_group(Main FILES
@@ -194,6 +203,8 @@ AppendingAndReading.cpp
 AppendingAndReading.h
 BasicModification.cpp
 BasicModification.h
+ModifyingEncryptedFile.cpp
+ModifyingEncryptedFile.h
 ModifyingExistingFileContent.cpp
 ModifyingExistingFileContent.h
 PageModifierTest.cpp
@@ -239,6 +250,8 @@ RefCountTest.cpp
 RefCountTest.h
 CopyingAndMergingEmptyPages.cpp
 CopyingAndMergingEmptyPages.h
+EncryptedPDF.cpp
+EncryptedPDF.h
 )
 
 source_group(Tests\\PDFs\\CustomStreamsIO FILES
@@ -259,6 +272,12 @@ FormXObjectTest.cpp
 FormXObjectTest.h
 LinksTest.cpp
 LinksTest.h
+PDFWithPassword.cpp
+PDFWithPassword.h
+RecryptPDF.cpp
+RecryptPDF.h
+RotatedPagesPDF.cpp
+RotatedPagesPDF.h
 ShutDownRestartTest.cpp
 ShutDownRestartTest.h
 SimpleContentPageTest.cpp
