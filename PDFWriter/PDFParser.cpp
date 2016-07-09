@@ -607,18 +607,6 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,
                 *outExtendedTableSize = firstNonSectionObject;
             }
             
-
-			status = ReadNextXrefEntry(entry);
-			if (status != eSuccess)
-				break;
-			if(currentObject < inXrefSize)
-			{
-				inXrefTable[currentObject].mObjectPosition = LongFilePositionTypeBox(std::string((const char*)entry, 10));
-				inXrefTable[currentObject].mRivision = ULong(std::string((const char*)(entry + 11), 5));
-				inXrefTable[currentObject].mType = entry[17] == 'n' ? eXrefEntryExisting:eXrefEntryDelete;
-			}
-			++currentObject;
-
 			// now parse the section. 
 			while(currentObject < firstNonSectionObject)
 			{
