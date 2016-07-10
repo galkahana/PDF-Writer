@@ -73,6 +73,8 @@ public:
 	const ByteList& GetU() const;
 	const ByteList& GetInitialEncryptionKey() const;
 
+	// Reset after or before usage
+	void Reset();
 private:
 	XCryptionCommon mXcryption;
 

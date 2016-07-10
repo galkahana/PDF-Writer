@@ -83,6 +83,7 @@ void PDFParser::ResetParser()
 	for(; it != mObjectStreamsCache.end();++it)
 		delete[] it->second;
 	mObjectStreamsCache.clear();
+	mDecryptionHelper.Reset();
 
 }
 
@@ -1194,6 +1195,7 @@ EStatusCode PDFParser::ParseFileDirectory()
 
 	do
 	{
+
 		// take the object, so that we can check whether this is an Xref or an Xref stream
 		RefCountPtr<PDFObject> anObject(mObjectParser.ParseNewObject());
 		if(!anObject)
@@ -1201,6 +1203,7 @@ EStatusCode PDFParser::ParseFileDirectory()
 			status = PDFHummus::eFailure;
 			break;
 		}
+
 
 		if(anObject->GetType() == PDFObject::ePDFObjectSymbol && ((PDFSymbol*)anObject.GetPtr())->GetValue() == scXref)
 		{

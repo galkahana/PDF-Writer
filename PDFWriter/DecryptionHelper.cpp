@@ -42,12 +42,19 @@ using namespace IOBasicTypes;
 
 DecryptionHelper::DecryptionHelper(void)
 {
+	Reset();
 }
 
 DecryptionHelper::~DecryptionHelper(void)
 {
 }
 
+void DecryptionHelper::Reset() {
+	mSupportsDecryption = false;
+	mFailedPasswordVerification = false;
+	mDidSucceedOwnerPasswordVerification = false;
+	mIsEncrypted = false;
+}
 
 EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const std::string& inPassword) {
 	mSupportsDecryption = false;
