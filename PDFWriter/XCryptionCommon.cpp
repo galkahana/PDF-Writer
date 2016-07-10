@@ -151,7 +151,7 @@ ByteList XCryptionCommon::algorithm3_1(ObjectIDType inObjectNumber,
 	MD5Generator md5;
 	ByteList result = inEncryptionKey;
 	Byte buffer;
-	LongBufferSizeType outputKeyLength = std::min(inEncryptionKey.size() + 5, 16U);
+	LongBufferSizeType outputKeyLength = std::min<size_t>(inEncryptionKey.size() + 5, 16U);
 
 	buffer = inObjectNumber & 0xff;
 	result.push_back(buffer);

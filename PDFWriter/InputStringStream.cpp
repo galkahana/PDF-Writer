@@ -67,12 +67,12 @@ void InputStringStream::Skip(LongBufferSizeType inSkipSize)
 
 void InputStringStream::SetPosition(LongFilePositionType inOffsetFromStart)
 {
-	mCurrentPosition = inOffsetFromStart > (LongBufferSizeType)(mEndPosition - mStartPosition) ? mEndPosition : (mStartPosition + (string::size_type)inOffsetFromStart);
+	mCurrentPosition = inOffsetFromStart > (LongFilePositionType)(mEndPosition - mStartPosition) ? mEndPosition : (mStartPosition + (string::size_type)inOffsetFromStart);
 }
 
 void InputStringStream::SetPositionFromEnd(LongFilePositionType inOffsetFromEnd)
 {
-	mCurrentPosition = inOffsetFromEnd > (LongBufferSizeType)(mEndPosition - mStartPosition) ? mStartPosition : (mStartPosition + (mEndPosition - mStartPosition - (string::size_type)inOffsetFromEnd));
+	mCurrentPosition = inOffsetFromEnd > (LongFilePositionType)(mEndPosition - mStartPosition) ? mStartPosition : (mStartPosition + (mEndPosition - mStartPosition - (string::size_type)inOffsetFromEnd));
 }
 
 LongFilePositionType InputStringStream::GetCurrentPosition()
