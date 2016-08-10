@@ -46,7 +46,7 @@ EStatusCode RecryptPDF::Run(const TestConfiguration& inTestConfiguration)
 			"user",
 			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "RecryptPDFWithPasswordToNothing.PDF"),
 			LogConfiguration::DefaultLogConfiguration,
-			PDFCreationSettings::DefaultPDFCreationSettings);
+			PDFCreationSettings(true,true));
 		if (status != PDFHummus::eSuccess)
 		{
 			cout << "failed to decrypt PDF\n";
