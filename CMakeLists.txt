@@ -1,3 +1,7 @@
+include(ExternalProject)
+
+#add_definitions(-DPDFHUMMUS_NO_BIDI)
+
 project(PDFHUMMUS)
 cmake_minimum_required (VERSION 2.6)
 
@@ -8,6 +12,19 @@ endif(NOT PDFHUMMUS_NO_DCT)
 if(NOT PDFHUMMUS_NO_TIFF)
 	ADD_SUBDIRECTORY(LibTiff)
 endif(NOT PDFHUMMUS_NO_TIFF)
+if(NOT PDFHUMMUS_NO_BIDI)
+  ExternalProject_Add(
+  libFribidi
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libFribidi
+  CONFIGURE_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/libFribidi/bootstrap && ${CMAKE_CURRENT_SOURCE_DIR}/libFribidi/configure --prefix=<INSTALL_DIR>/build  --enable-static=yes --enable-shared=no
+  PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/libFribidi
+  BUILD_COMMAND make
+  BUILD_IN_SOURCE 0
+  
+)
+
+endif(NOT PDFHUMMUS_NO_BIDI)
+
 ADD_SUBDIRECTORY(FreeType)
 ADD_SUBDIRECTORY(PDFWriter)
 ADD_SUBDIRECTORY(PDFWriterTestPlayground)
