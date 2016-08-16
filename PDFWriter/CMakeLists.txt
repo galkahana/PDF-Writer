@@ -13,18 +13,9 @@ else(NOT PDFHUMMUS_NO_TIFF)
 	add_definitions(-DPDFHUMMUS_NO_TIFF=1)
 endif(NOT PDFHUMMUS_NO_TIFF)
 
-if(NOT PDFHUMMUS_NO_BIDI)
-	include_directories (${LibFribidi_SOURCE_DIR})  
-    ExternalProject_Get_Property(libFribidi install_dir)
-    include_directories(${install_dir}/build/include/fribidi)
-else(NOT PDFHUMMUS_NO_BIDI)
-	add_definitions(-DPDFHUMMUS_NO_BIDI=1)
-endif(NOT PDFHUMMUS_NO_BIDI)
-
 include_directories (${FreeType_SOURCE_DIR}/include) 
 add_library (PDFWriter 
 #sources
-UnicodeTextUtils.cpp
 AbstractContentContext.cpp
 AbstractWrittenFont.cpp
 ANSIFontWriter.cpp
@@ -173,7 +164,6 @@ aeskey.c
 aestab.c
 
 #headers
-UnicodeTextUtils.h
 AbstractContentContext.h
 AbstractWrittenFont.h
 AdapterIByteReaderWithPositionToIReadPositionProvider.h
@@ -793,7 +783,3 @@ source_group(Main FILES
 PDFWriter.cpp
 PDFWriter.h
 )
-
-if(NOT PDFHUMMUS_NO_BIDI)
-target_link_libraries(PDFWriter ${install_dir}/build/lib/libfribidi.a)
-endif(NOT PDFHUMMUS_NO_BIDI)
