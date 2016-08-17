@@ -18,7 +18,7 @@ class UnicodeTextUtils {
 public:
 	UnicodeTextUtils();
 	virtual ~UnicodeTextUtils();
-#ifndef PDFHUMMUS_NO_BIDI
+#ifdef PDFHUMMUS_BIDI
 	EStatusCode getVisualString(const std::string& logicalString, /*OUT*/ std::string& outVisualString, const std::string& charset="UTF-8");
-#endif //PDFHUMMUS_NO_BIDI
+#endif //PDFHUMMUS_BIDI
 };

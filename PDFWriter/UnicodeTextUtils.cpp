@@ -4,9 +4,10 @@
  *  Created on: Aug 16, 2016
  *      Author: amr
  */
+#ifdef PDFHUMMUS_BIDI
 #include <fribidi-char-sets.h>
 #include <fribidi.h>
-#include<fribidi-common.h>
+#include <fribidi-common.h>
 #include "UnicodeTextUtils.h"
 #include "EStatusCode.h"
 #include <cstdlib>
@@ -22,7 +23,6 @@ UnicodeTextUtils::~UnicodeTextUtils() {
 	// TODO Auto-generated destructor stub
 }
 
-#ifndef PDFHUMMUS_NO_BIDI
 //Please note that this code uses malloc and free as they're compatible with the way fribidi works
 EStatusCode UnicodeTextUtils::getVisualString(const std::string& logicalString, /*OUT*/ std::string& outVisualString, const std::string& inCharset) {
 	std::string visualString;
@@ -66,4 +66,4 @@ EStatusCode UnicodeTextUtils::getVisualString(const std::string& logicalString, 
 	return eSuccess;
 
 }
-#endif //PDFHUMMUS_NO_BIDI
+#endif //PDFHUMMUS_BIDI

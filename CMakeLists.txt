@@ -1,7 +1,5 @@
 include(ExternalProject)
 
-#add_definitions(-DPDFHUMMUS_NO_BIDI)
-
 project(PDFHUMMUS)
 cmake_minimum_required (VERSION 2.6)
 
@@ -12,7 +10,7 @@ endif(NOT PDFHUMMUS_NO_DCT)
 if(NOT PDFHUMMUS_NO_TIFF)
 	ADD_SUBDIRECTORY(LibTiff)
 endif(NOT PDFHUMMUS_NO_TIFF)
-if(NOT PDFHUMMUS_NO_BIDI)
+if(PDFHUMMUS_BIDI)
   ExternalProject_Add(
   libFribidi
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libFribidi
@@ -23,7 +21,7 @@ if(NOT PDFHUMMUS_NO_BIDI)
   
 )
 
-endif(NOT PDFHUMMUS_NO_BIDI)
+endif(PDFHUMMUS_BIDI)
 
 ADD_SUBDIRECTORY(FreeType)
 ADD_SUBDIRECTORY(PDFWriter)

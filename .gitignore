@@ -51,3 +51,5 @@ jpegsr8d
 jpeg-8d
 *.gz
 Downloads
+libFribidi/src
+libFribidi/tmp
