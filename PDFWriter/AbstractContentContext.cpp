@@ -32,9 +32,10 @@
 #include "DocumentContext.h"
 #include <ctype.h>
 #include <algorithm>
-#ifndef PDFHUMMUS_NO_BIDI
-#include "UnicodeTextUtils.h"
-#endif //PDFHUMMUS_NO_BIDI
+//#ifndef PDFHUMMUS_NO_BIDI
+#include "AbstractUnicodeTextUtils.h"
+#include "UnicodeTextUtilsFactory.h"
+//#endif //PDFHUMMUS_NO_BIDI
 
 using namespace PDFHummus;
 
@@ -1415,16 +1416,19 @@ void AbstractContentContext::FinishPath(const GraphicOptions& inOptions)
 	}
 }
 
-#ifndef PDFHUMMUS_NO_BIDI
+//#ifndef PDFHUMMUS_NO_BIDI
 std::string AbstractContentContext::fixTextDirection(const std::string& inText, const std::string& charset) {
-	UnicodeTextUtils unicodeUtils;
+	AbstractUnicodeTextUtils* unicodeUtils = UnicodeTextUtilsFactory::getUnicodeTextUtils();
 	std::string visualString;
-	if( unicodeUtils.getVisualString(inText, visualString, charset) == eSuccess )
-		return visualString;
-	else
-		return inText;
+
+	if( unicodeUtils->getVisualString(inText, visualString, charset) != eSuccess )
+		visualString = inText;
+
+	delete unicodeUtils;
+	return visualString;
+
 }
-#endif //PDFHUMMUS_NO_BIDI
+//#endif //PDFHUMMUS_NO_BIDI
 
 void AbstractContentContext::WriteText(double inX,double inY,const std::string& inText,const TextOptions& inOptions)
 {

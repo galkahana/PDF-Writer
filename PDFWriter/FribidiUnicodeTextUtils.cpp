@@ -1,30 +1,22 @@
 /*
- * UnicodeTextUtils.cpp
+ * FribidiUnicodeTextUtils.cpp
  *
- *  Created on: Aug 16, 2016
+ *  Created on: Aug 19, 2016
  *      Author: amr
  */
+
+#include "FribidiUnicodeTextUtils.h"
 #include <fribidi-char-sets.h>
 #include <fribidi.h>
 #include<fribidi-common.h>
-#include "UnicodeTextUtils.h"
 #include "EStatusCode.h"
 #include <cstdlib>
+#include "AbstractUnicodeTextUtils.h"
 
-using namespace PDFHummus;
-
-UnicodeTextUtils::UnicodeTextUtils() {
-	// TODO Auto-generated constructor stub
-
-}
-
-UnicodeTextUtils::~UnicodeTextUtils() {
-	// TODO Auto-generated destructor stub
-}
 
 #ifndef PDFHUMMUS_NO_BIDI
 //Please note that this code uses malloc and free as they're compatible with the way fribidi works
-EStatusCode UnicodeTextUtils::getVisualString(const std::string& logicalString, /*OUT*/ std::string& outVisualString, const std::string& inCharset) {
+EStatusCode FribidiUnicodeTextUtils::getVisualString(const std::string& logicalString, /*OUT*/ std::string& outVisualString, const std::string& inCharset) {
 	std::string visualString;
 	int logical_str_len = logicalString.length();
 	int  visual_str_len, ustr_len;
@@ -66,4 +58,4 @@ EStatusCode UnicodeTextUtils::getVisualString(const std::string& logicalString, 
 	return eSuccess;
 
 }
-#endif //PDFHUMMUS_NO_BIDI
+#endif

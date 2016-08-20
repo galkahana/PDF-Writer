@@ -1,6 +1,8 @@
 project(PDFWriter)
 include_directories (${Zlib_SOURCE_DIR})
 
+add_definitions(-DPDFHUMMUS_NO_BIDI=1)
+
 if(NOT PDFHUMMUS_NO_DCT)
 	include_directories (${LibJpeg_SOURCE_DIR})
 else(NOT PDFHUMMUS_NO_DCT)
@@ -24,7 +26,11 @@ endif(NOT PDFHUMMUS_NO_BIDI)
 include_directories (${FreeType_SOURCE_DIR}/include) 
 add_library (PDFWriter 
 #sources
-UnicodeTextUtils.cpp
+AbstractUnicodeTextUtils.cpp
+ICUUnicodeTextUtils.cpp
+FribidiUnicodeTextUtils.cpp
+UnicodeTextUtilsNOOP.cpp
+UnicodeTextUtilsFactory.cpp
 AbstractContentContext.cpp
 AbstractWrittenFont.cpp
 ANSIFontWriter.cpp
@@ -173,7 +179,11 @@ aeskey.c
 aestab.c
 
 #headers
-UnicodeTextUtils.h
+AbstractUnicodeTextUtils.h
+FribidiUnicodeTextUtils.h
+ICUUnicodeTextUtils.h
+UnicodeTextUtilsNOOP.h
+UnicodeTextUtilsFactory.h
 AbstractContentContext.h
 AbstractWrittenFont.h
 AdapterIByteReaderWithPositionToIReadPositionProvider.h

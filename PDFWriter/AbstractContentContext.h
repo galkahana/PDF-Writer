@@ -364,10 +364,10 @@ private:
 	virtual void ScheduleImageWrite(const std::string& inImagePath,unsigned long inImageIndex,ObjectIDType inObjectID,const PDFParsingOptions& inParsingOptions) = 0;
 	PrimitiveObjectsWriter mPrimitiveWriter;
 
-#ifndef PDFHUMMUS_NO_BIDI
+//#ifndef PDFHUMMUS_NO_BIDI
 	//Will attempt to get the visual representation of the string, in case of failure it'll return the passed string as-is
 	virtual std::string fixTextDirection(const std::string& inText, const std::string& code="UTF-8");
-#endif //PDFHUMMUS_NO_BIDI
+//#endif //PDFHUMMUS_NO_BIDI
 
 	// graphic stack to monitor high-level graphic usage (now - fonts)
 	GraphicStateStack mGraphicStack;
