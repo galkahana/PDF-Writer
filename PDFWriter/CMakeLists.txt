@@ -1,8 +1,6 @@
 project(PDFWriter)
 include_directories (${Zlib_SOURCE_DIR})
 
-add_definitions(-DPDFHUMMUS_NO_BIDI=1)
-
 if(NOT PDFHUMMUS_NO_DCT)
 	include_directories (${LibJpeg_SOURCE_DIR})
 else(NOT PDFHUMMUS_NO_DCT)
@@ -15,13 +13,22 @@ else(NOT PDFHUMMUS_NO_TIFF)
 	add_definitions(-DPDFHUMMUS_NO_TIFF=1)
 endif(NOT PDFHUMMUS_NO_TIFF)
 
-if(NOT PDFHUMMUS_NO_BIDI)
+if(NOT PDFHUMMUS_NO_FRIBIDI)
 	include_directories (${LibFribidi_SOURCE_DIR})  
     ExternalProject_Get_Property(libFribidi install_dir)
     include_directories(${install_dir}/build/include/fribidi)
-else(NOT PDFHUMMUS_NO_BIDI)
-	add_definitions(-DPDFHUMMUS_NO_BIDI=1)
-endif(NOT PDFHUMMUS_NO_BIDI)
+else(NOT PDFHUMMUS_NO_FRIBIDI)
+	add_definitions(-DPDFHUMMUS_NO_FRIBIDI=1)
+endif(NOT PDFHUMMUS_NO_FRIBIDI)
+
+if(NOT PDFHUMMUS_NO_ICUBIDI)
+	include_directories (${libIcu_SOURCE_DIR})  
+    ExternalProject_Get_Property(libIcu install_dir)
+    include_directories(${install_dir}/build/include)
+else(NOT PDFHUMMUS_NO_ICUBIDI)
+	add_definitions(-DPDFHUMMUS_NO_ICUBIDI=1)
+endif(NOT PDFHUMMUS_NO_ICUBIDI)
+
 
 include_directories (${FreeType_SOURCE_DIR}/include) 
 add_library (PDFWriter 
@@ -804,6 +811,18 @@ PDFWriter.cpp
 PDFWriter.h
 )
 
-if(NOT PDFHUMMUS_NO_BIDI)
-target_link_libraries(PDFWriter ${install_dir}/build/lib/libfribidi.a)
-endif(NOT PDFHUMMUS_NO_BIDI)
+#if(NOT PDFHUMMUS_NO_FRIBIDI)
+#    target_link_libraries(PDFWriter ${install_dir}/build/lib/libfribidi.a)
+#endif(NOT PDFHUMMUS_NO_FRIBIDI)
+#
+#if(NOT PDFHUMMUS_NO_ICUBIDI)
+#target_link_libraries(PDFWriter ${install_dir}/build/lib/libicuuc.a)
+#target_link_libraries(PDFWriter ${install_dir}build/lib/libicui18n.a)
+#target_link_libraries(PDFWriter ${install_dir}/build/lib/libicule.a)
+#target_link_libraries(PDFWriter ${install_dir}/build/lib/libiculx.a)
+#target_link_libraries(PDFWriter ${install_dir}/build/lib/libicuio.a)
+#target_link_libraries(PDFWriter ${install_dir}/build/lib/libicudata.a)
+#endif(NOT PDFHUMMUS_NO_ICUBIDI)
+
+
+target_link_libraries(PDFWriter dl.so)

@@ -17,6 +17,7 @@ class UnicodeTextUtilsFactory {
 
 	public:
 	static AbstractUnicodeTextUtils* getUnicodeTextUtils();
+	static void deleteInstance(AbstractUnicodeTextUtils* instance);
 };
 
 #endif /* PDFWRITER_UNICODETEXTUTILSFACTORY_H_ */

@@ -1,0 +1,1 @@
+cmd='/home/amr/work/c++/hummus-fork/PDF-Writer/scripts/build_icu_for_hummus.sh;/home/amr/work/c++/hummus-fork/PDF-Writer/libIcu'

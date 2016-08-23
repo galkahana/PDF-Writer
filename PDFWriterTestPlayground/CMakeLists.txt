@@ -2,6 +2,23 @@ project(PDFWriterTestPlayground)
 cmake_minimum_required (VERSION 2.6)
 
 
+if(NOT PDFHUMMUS_NO_FRIBIDI)
+	include_directories (${LibFribidi_SOURCE_DIR})  
+    ExternalProject_Get_Property(libFribidi install_dir)
+    include_directories(${install_dir}/build/include/fribidi)
+else(NOT PDFHUMMUS_NO_FRIBIDI)
+	add_definitions(-DPDFHUMMUS_NO_FRIBIDI=1)
+endif(NOT PDFHUMMUS_NO_FRIBIDI)
+
+if(NOT PDFHUMMUS_NO_ICUBIDI)
+	include_directories (${libIcu_SOURCE_DIR})  
+    ExternalProject_Get_Property(libIcu install_dir)
+    include_directories(${install_dir}/build/include)
+else(NOT PDFHUMMUS_NO_ICUBIDI)
+	add_definitions(-DPDFHUMMUS_NO_ICUBIDI=1)
+endif(NOT PDFHUMMUS_NO_ICUBIDI)
+
+
 add_executable(PDFWriterTestPlayground 
 
 #sources
@@ -324,6 +341,14 @@ if(PDFHUMMUS_NO_TIFF)
 endif(PDFHUMMUS_NO_TIFF)
 
 
+if(NOT PDFHUMMUS_NO_FRIBIDI)
+    add_definitions(-DPDF_HUMMUS_NO_FRIBIDI=1)
+endif(NOT PDFHUMMUS_NO_FRIBIDI)
+
+if(NOT PDFHUMMUS_NO_ICUBIDI)
+    add_definitions(-DPDFHUMMUS_NO_ICUBIDI=1)
+endif(NOT PDFHUMMUS_NO_ICUBIDI)
+
 include_directories (${PDFWriter_SOURCE_DIR}) 
 include_directories (${Zlib_SOURCE_DIR})
 if(NOT PDFHUMMUS_NO_DCT)
@@ -337,6 +362,14 @@ if(NOT PDFHUMMUS_NO_TIFF)
 else(NOT PDFHUMMUS_NO_TIFF)
 	add_definitions(-DPDFHUMMUS_NO_TIFF=1)
 endif(NOT PDFHUMMUS_NO_TIFF)
+
+if(NOT PDFHUMMUS_NO_ICUBIDI)
+	include_directories (${libIcubidi_SOURCE_DIR})  
+else(NOT PDFHUMMUS_NO_ICUBIDI)
+	add_definitions(-DPDFHUMMUS_NO_ICUBIDI=1)
+endif(NOT PDFHUMMUS_NO_ICUBIDI)
+
+
 include_directories (${FreeType_SOURCE_DIR}/include) 
 
 add_dependencies(PDFWriterTestPlayground PDFWriter) #add_dependencies makes sure that dependencies are built before main target
@@ -351,6 +384,22 @@ if(NOT PDFHUMMUS_NO_TIFF)
 	target_link_libraries (PDFWriterTestPlayground LibTiff)
 endif(NOT PDFHUMMUS_NO_TIFF)
 
+if(NOT PDFHUMMUS_NO_ICUBIDI)
+target_link_libraries(PDFWriterTestPlayground ${install_dir}/build/lib/libicuuc.a)
+target_link_libraries(PDFWriterTestPlayground ${install_dir}/build/lib/libicui18n.a)
+target_link_libraries(PDFWriterTestPlayground ${install_dir}/build/lib/libicule.a)
+target_link_libraries(PDFWriterTestPlayground ${install_dir}/build/lib/libiculx.a)
+target_link_libraries(PDFWriterTestPlayground ${install_dir}/build/lib/libicuio.a)
+target_link_libraries(PDFWriterTestPlayground ${install_dir}/build/lib/libicudata.a)
+endif(NOT PDFHUMMUS_NO_ICUBIDI)
+
+if(NOT PDFHUMMUS_NO_FRIBIDI)
+    target_link_libraries(PDFWriterTestPlayground ${install_dir}/build/lib/libfribidi.a)
+endif(NOT PDFHUMMUS_NO_FRIBIDI)
+
+
 if(APPLE)
 	set(CMAKE_EXE_LINKER_FLAGS "-framework CoreFoundation")
 endif(APPLE)
+
+target_link_libraries(PDFWriterTestPlayground dl.so)

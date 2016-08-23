@@ -5,8 +5,8 @@
  *      Author: amr
  */
 
-#ifndef PDFWRITER_ICUUNICODETEXTUTILS_H_
-#define PDFWRITER_ICUUNICODETEXTUTILS_H_
+#ifndef PDFHUMMUS_NO_ICUBIDI
+#pragma once
 
 #include "AbstractUnicodeTextUtils.h"
 #include "ICUUnicodeTextUtils.h"
@@ -15,4 +15,4 @@ class ICUUnicodeTextUtils: public AbstractUnicodeTextUtils {
 	virtual EStatusCode getVisualString(const std::string& logicalString, /*OUT*/ std::string& outVisualString, const std::string& charset="UTF-8");
 };
 
-#endif /* PDFWRITER_ICUUNICODETEXTUTILS_H_ */
+#endif /* #ifndef PDFHUMMUS_NO_ICUBIDI */

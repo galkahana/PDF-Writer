@@ -15,7 +15,7 @@ class UnicodeTextUtilsNOOP: public AbstractUnicodeTextUtils {
 
 	private:
 	static UnicodeTextUtilsNOOP* instance;
-	UnicodeTextUtilsNOOP();
+	UnicodeTextUtilsNOOP() {}
 
 	public:
 	static AbstractUnicodeTextUtils* getInstance();

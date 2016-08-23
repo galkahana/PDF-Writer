@@ -5,6 +5,8 @@
  *      Author: amr
  */
 
+#ifndef PDFHUMMUS_NO_FRIBIDI
+
 #include "FribidiUnicodeTextUtils.h"
 #include <fribidi-char-sets.h>
 #include <fribidi.h>
@@ -13,10 +15,9 @@
 #include <cstdlib>
 #include "AbstractUnicodeTextUtils.h"
 
-
-#ifndef PDFHUMMUS_NO_BIDI
 //Please note that this code uses malloc and free as they're compatible with the way fribidi works
 EStatusCode FribidiUnicodeTextUtils::getVisualString(const std::string& logicalString, /*OUT*/ std::string& outVisualString, const std::string& inCharset) {
+
 	std::string visualString;
 	int logical_str_len = logicalString.length();
 	int  visual_str_len, ustr_len;
@@ -58,4 +59,4 @@ EStatusCode FribidiUnicodeTextUtils::getVisualString(const std::string& logicalS
 	return eSuccess;
 
 }
-#endif
+#endif /* PDFHUMMUS_NO_FRIBIDI */
