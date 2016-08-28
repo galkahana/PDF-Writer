@@ -67,6 +67,7 @@ WindowsPath.cpp
 PDFWriterTestPlayground.cpp
 CopyingAndMergingEmptyPages.cpp
 EncryptedPDF.cpp
+UnicodeTextUsage.cpp
 
 #headers
 AppendingAndReading.h
@@ -130,6 +131,7 @@ Type1Test.h
 UppercaseSequanceTest.h
 CopyingAndMergingEmptyPages.h
 EncryptedPDF.h
+UnicodeTextUsage.h
 )
 
 source_group(Main FILES
@@ -302,6 +304,8 @@ SimpleTextUsage.cpp
 SimpleTextUsage.h
 TestMeasurementsTest.cpp
 TestMeasurementsTest.h
+UnicodeTextUsage.cpp
+UnicodeTextUsage.h
 )
 
 source_group(Tests\\TrueType FILES
