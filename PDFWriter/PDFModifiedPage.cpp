@@ -129,12 +129,9 @@ PDFHummus::EStatusCode PDFModifiedPage::WritePage()
 		// write old annots, if any exist
 		PDFObjectCastPtr<PDFArray> anArray(copyingContext->GetSourceDocumentParser()->QueryDictionaryObject(pageDictionaryObject.GetPtr(),"Annots"));
 		SingleValueContainerIterator<PDFObjectVector> refs = anArray->GetIterator();
-		PDFObjectCastPtr<PDFIndirectObjectReference> ref;
+		//PDFObjectCastPtr<PDFIndirectObjectReference> ref;
 		while (refs.MoveNext())
-		{
-			ref = refs.GetItem();
-			objectContext.WriteIndirectObjectReference(ref->mObjectID, ref->mVersion);
-		}
+			copyingContext->CopyDirectObjectAsIs(refs.GetItem());
 
 		// write new annots from links
 		ObjectIDTypeSet& annotations = mWriter->GetDocumentContext().GetAnnotations();
