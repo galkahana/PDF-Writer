@@ -146,7 +146,7 @@ EStatusCode PDFParserTest::IterateObjectTypes(PDFObject* inObject,PDFParser& inP
 	}
 	else if(inObject->GetType() == PDFObject::ePDFObjectArray)
 	{
-		primitivesWriter.WriteKeyword(PDFObject::scPDFObjectTypeLabel[inObject->GetType()]);
+		primitivesWriter.WriteKeyword(PDFObject::scPDFObjectTypeLabel(inObject->GetType()));
 		++mTabLevel;
 		PDFObjectCastPtr<PDFArray> anArray;
 		anArray = inObject;  // do assignment here, otherwise it's considered constructor...which won't addref
@@ -159,7 +159,7 @@ EStatusCode PDFParserTest::IterateObjectTypes(PDFObject* inObject,PDFParser& inP
 	}
 	else if(inObject->GetType() == PDFObject::ePDFObjectDictionary)
 	{
-		primitivesWriter.WriteKeyword(PDFObject::scPDFObjectTypeLabel[inObject->GetType()]);
+		primitivesWriter.WriteKeyword(PDFObject::scPDFObjectTypeLabel(inObject->GetType()));
 		++mTabLevel;
 		PDFObjectCastPtr<PDFDictionary> aDictionary;
 		aDictionary = inObject; // do assignment here, otherwise it's considered constructor...which won't addref
@@ -184,7 +184,7 @@ EStatusCode PDFParserTest::IterateObjectTypes(PDFObject* inObject,PDFParser& inP
 	}
 	else 
 	{
-		primitivesWriter.WriteKeyword(PDFObject::scPDFObjectTypeLabel[inObject->GetType()]);
+		primitivesWriter.WriteKeyword(PDFObject::scPDFObjectTypeLabel(inObject->GetType()));
 		return PDFHummus::eSuccess;
 	}
 	
