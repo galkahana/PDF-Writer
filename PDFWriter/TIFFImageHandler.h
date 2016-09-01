@@ -112,8 +112,29 @@ typedef std::pair<double,double> DoubleAndDoublePair;
 typedef	unsigned short uint16;	/* sizeof (uint16) must == 2 */
 typedef	unsigned int uint32;	/* sizeof (uint32) must == 4 */
 typedef	int int32;
+#ifdef _INCLUDE_TIFF_HEADER
+/*
+Since libtiff 4.0.0 tsize_t is changed from int32 to machine dependant.
+'tiffconf.h' which contains the declarations for it is generated for platform.
+Altough we might be able to guess tsize_t size depending on architecture,
+it's not guaranteed that it will match the actual tiff headers...
+*/
+
+#include <tiffio.h>
+
+#else
+/*
+	if you still don't want to include tiff headers, but it's not int32,
+	you can set the required definition with this macro.
+*/
+#ifndef _USE_TIFF_TSIZE_AS_FOLLOWS
 typedef int32 tsize_t;          /* i/o size in bytes */
+#else
+typedef _USE_TIFF_TSIZE_AS_FOLLOWS tsize_t;          /* i/o size in bytes */
+#endif // #ifndef _USE_TIFF_TSIZE_AS_FOLLOWS
 typedef void* tdata_t;          /* image data ref */
+
+#endif // #ifdef _INCLUDE_TIFF_HEADER
 
 typedef	tsize_t (*ImageSizeProc)(T2P* inT2p);
 
