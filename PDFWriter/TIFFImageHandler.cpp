@@ -2865,7 +2865,7 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 					break;
 				}
 				bufferoffset+=read;
-				stripsize = (stripsize > mT2p->tiff_datasize - bufferoffset) ? mT2p->tiff_datasize - bufferoffset : stripsize;
+				stripsize = (stripsize > mT2p->tiff_datasize - bufferoffset) ? (mT2p->tiff_datasize - bufferoffset) : stripsize;
 			}
 			if(status != PDFHummus::eSuccess)
 				break;
@@ -2980,7 +2980,7 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 					break;
 				}
 				bufferoffset+=read;
-				stripsize = (stripsize > mT2p->tiff_datasize - bufferoffset) ? mT2p->tiff_datasize - bufferoffset : stripsize;
+				stripsize = (stripsize > mT2p->tiff_datasize - bufferoffset) ? (mT2p->tiff_datasize - bufferoffset) : stripsize;
 			}
 			if(status != PDFHummus::eSuccess)
 				break;
