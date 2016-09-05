@@ -65,7 +65,7 @@ EStatusCode PDFWithPassword::Run(const TestConfiguration& inTestConfiguration)
 		PageContentContext* cxt = pdfWriter.StartPageContentContext(page);
 
 		// draw an image
-		cxt->DrawImage(10, 100, RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/Images/soundcloud_logo.jpg"));
+		cxt->DrawImage(10, 100, RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/images/soundcloud_logo.jpg"));
 
 		// place some text
 		AbstractContentContext::TextOptions textOptions(pdfWriter.GetFontForFile(

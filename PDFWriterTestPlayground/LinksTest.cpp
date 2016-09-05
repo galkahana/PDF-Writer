@@ -55,7 +55,7 @@ EStatusCode LinksTest::Run(const TestConfiguration& inTestConfiguration)
 		page->SetMediaBox(PDFRectangle(0,0,595,842));
 
 		PDFFormXObject* soundCloudLogo = pdfWriter.CreateFormXObjectFromJPGFile(
-                                                RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/Images/soundcloud_logo.jpg"));
+                                                RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/images/soundcloud_logo.jpg"));
 
 
 		PageContentContext* contentContext = pdfWriter.StartPageContentContext(page);

@@ -64,8 +64,8 @@ EStatusCode HighLevelImages::Run(const TestConfiguration& inTestConfiguration)
 		PageContentContext* cxt = pdfWriter.StartPageContentContext(page);
 
 		// simple image placement
-		cxt->DrawImage(10,10,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/Images/soundcloud_logo.jpg"));
-		cxt->DrawImage(10,500,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/Images/tiff/cramps.tif"));
+		cxt->DrawImage(10,10,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/images/soundcloud_logo.jpg"));
+		cxt->DrawImage(10,500,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/images/tiff/cramps.tif"));
 		cxt->DrawImage(0,0,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/XObjectContent.PDF"));
 
 		status = pdfWriter.EndPageContentContext(cxt);
@@ -90,11 +90,11 @@ EStatusCode HighLevelImages::Run(const TestConfiguration& inTestConfiguration)
 
 		AbstractContentContext::ImageOptions opt1;
 		opt1.imageIndex = 2;
-		cxt->DrawImage(10,10,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/Images/tiff/multipage.tif"),opt1);
+		cxt->DrawImage(10,10,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/images/tiff/multipage.tif"),opt1);
 		AbstractContentContext::ImageOptions opt2;
 		opt2.transformationMethod = AbstractContentContext::eMatrix;
 		opt2.matrix[0] = opt2.matrix[3] = 0.25;
-		cxt->DrawImage(10,10,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/Images/soundcloud_logo.jpg"),opt2);
+		cxt->DrawImage(10,10,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/images/soundcloud_logo.jpg"),opt2);
 		AbstractContentContext::ImageOptions opt3;
 		opt3.transformationMethod = AbstractContentContext::eFit;
 		opt3.boundingBoxHeight = 100;
@@ -111,7 +111,7 @@ EStatusCode HighLevelImages::Run(const TestConfiguration& inTestConfiguration)
 		cxt->DrawRectangle(0,0,100,100,pathStrokeOptions);
 		cxt->DrawRectangle(100,100,100,100,pathStrokeOptions);
 
-		DoubleAndDoublePair jpgDimensions = pdfWriter.GetImageDimensions(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/Images/soundcloud_logo.jpg"));
+		DoubleAndDoublePair jpgDimensions = pdfWriter.GetImageDimensions(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/images/soundcloud_logo.jpg"));
 		cxt->DrawRectangle(10,10,jpgDimensions.first/4,jpgDimensions.second/4,pathStrokeOptions);
 
 
