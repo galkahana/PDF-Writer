@@ -45,7 +45,7 @@ EStatusCode RecryptPDF::Run(const TestConfiguration& inTestConfiguration)
 			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/PDFWithPassword.PDF"),
 			"user",
 			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "RecryptPDFWithPasswordToNothing.PDF"),
-			LogConfiguration::DefaultLogConfiguration,
+			LogConfiguration::DefaultLogConfiguration(),
 			PDFCreationSettings(true,true));
 		if (status != PDFHummus::eSuccess)
 		{
@@ -58,7 +58,7 @@ EStatusCode RecryptPDF::Run(const TestConfiguration& inTestConfiguration)
 			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/PDFWithPassword.PDF"),
 			"user",
 			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "RecryptPDFWithPasswordToNewPassword.PDF"),
-			LogConfiguration::DefaultLogConfiguration,
+			LogConfiguration::DefaultLogConfiguration(),
 			PDFCreationSettings(true,true,EncryptionOptions("user1",4,"owner1")));
 		if (status != PDFHummus::eSuccess)
 		{
@@ -71,7 +71,7 @@ EStatusCode RecryptPDF::Run(const TestConfiguration& inTestConfiguration)
 			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/Original.PDF"),
 			"",
 			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "RecryptPDFOriginalToPasswordProtected.PDF"),
-			LogConfiguration::DefaultLogConfiguration,
+			LogConfiguration::DefaultLogConfiguration(),
 			PDFCreationSettings(true, true, EncryptionOptions("user1", 4, "owner1")));
 		if (status != PDFHummus::eSuccess)
 		{

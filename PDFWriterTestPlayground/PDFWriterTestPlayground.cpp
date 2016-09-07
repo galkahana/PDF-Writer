@@ -48,6 +48,7 @@ static void PrintUsage()
 
 int main(int argc, char* argv[])
 {
+	PDFHummus::EStatusCode return_status = PDFHummus::eSuccess;
 	if(5 <= argc)
 	{
 		if(strcmp(argv[1],"-b") == 0)
@@ -79,10 +80,10 @@ int main(int argc, char* argv[])
 					StringSet excludedTests;
 					for(;i<argc;++i)
 						excludedTests.insert(argv[i]);
-					Singleton<TestsRunner>::GetInstance()->RunCategories(config,categories,excludedTests);
+					return_status = Singleton<TestsRunner>::GetInstance()->RunCategories(config, categories, excludedTests);
 				}
 				else
-					Singleton<TestsRunner>::GetInstance()->RunCategories(config,categories);
+					return_status = Singleton<TestsRunner>::GetInstance()->RunCategories(config, categories);
 				Singleton<TestsRunner>::Reset();
 			}
 			else if(strcmp(argv[3],"-t") == 0) // per test label testing
@@ -90,7 +91,7 @@ int main(int argc, char* argv[])
 				StringList tests;
 				for(int i=4;i<argc;++i)
 					tests.push_back(argv[i]);
-				Singleton<TestsRunner>::GetInstance()->RunTests(config,tests);
+				return_status = Singleton<TestsRunner>::GetInstance()->RunTests(config, tests);
 				Singleton<TestsRunner>::Reset();
 			}
 			else if(strcmp(argv[3],"-xc") == 0) // all tests with categories exclusion
@@ -98,7 +99,7 @@ int main(int argc, char* argv[])
 				StringSet categories;
 				for(int i=4;i<argc;++i)
 					categories.insert(argv[i]);
-				Singleton<TestsRunner>::GetInstance()->RunExcludeCategories(config,categories);
+				return_status = Singleton<TestsRunner>::GetInstance()->RunExcludeCategories(config, categories);
 				Singleton<TestsRunner>::Reset();
 			}
 			else if(strcmp(argv[3],"-xt") == 0) // all tests with categories exclusion
@@ -106,7 +107,7 @@ int main(int argc, char* argv[])
 				StringSet tests;
 				for(int i=4;i<argc;++i)
 					tests.insert(argv[i]);
-				Singleton<TestsRunner>::GetInstance()->RunExcludeTests(config,tests);
+				return_status = Singleton<TestsRunner>::GetInstance()->RunExcludeTests(config, tests);
 				Singleton<TestsRunner>::Reset();
 			}
 			else
@@ -124,7 +125,7 @@ int main(int argc, char* argv[])
 	        TestConfiguration config;
 			config.mSampleFileBase = LocalPathToFileURL(argv[2]);
 		
-			Singleton<TestsRunner>::GetInstance()->RunAll(config);
+			return_status = Singleton<TestsRunner>::GetInstance()->RunAll(config);
 			Singleton<TestsRunner>::Reset();
 		}
 		else
@@ -132,9 +133,9 @@ int main(int argc, char* argv[])
 	}
 	else
 		PrintUsage();
-
+#ifndef _DONT_STOP_AFTER_TESTS
 	std::cin.get();
-
-	return 0;
+#endif // _DONT_STOP_AFTER_TESTS
+	return return_status == PDFHummus::eSuccess ? 0 : 1;
 }
 

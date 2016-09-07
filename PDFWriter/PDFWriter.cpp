@@ -38,7 +38,10 @@
 
 using namespace PDFHummus;
 
-const LogConfiguration LogConfiguration::DefaultLogConfiguration(false,false,"PDFWriterLog.txt");
+const LogConfiguration& LogConfiguration::DefaultLogConfiguration(){
+	static LogConfiguration default_log_configuration(false, false, "PDFWriterLog.txt");
+	return default_log_configuration;
+}
 
 PDFWriter::PDFWriter(void)
 {
@@ -159,9 +162,9 @@ EStatusCode PDFWriter::WritePageAndRelease(PDFPage* inPage)
 void PDFWriter::SetupLog(const LogConfiguration& inLogConfiguration)
 {
 	if(inLogConfiguration.LogStream)
-		Trace::DefaultTrace.SetLogSettings(inLogConfiguration.LogStream,inLogConfiguration.ShouldLog);
+		Trace::DefaultTrace().SetLogSettings(inLogConfiguration.LogStream,inLogConfiguration.ShouldLog);
 	else
-		Trace::DefaultTrace.SetLogSettings(inLogConfiguration.LogFileLocation,inLogConfiguration.ShouldLog,inLogConfiguration.StartWithBOM);
+		Trace::DefaultTrace().SetLogSettings(inLogConfiguration.LogFileLocation,inLogConfiguration.ShouldLog,inLogConfiguration.StartWithBOM);
 }
 
 void PDFWriter::SetupCreationSettings(const PDFCreationSettings& inPDFCreationSettings)

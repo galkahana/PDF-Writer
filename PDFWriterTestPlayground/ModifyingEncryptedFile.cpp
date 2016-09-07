@@ -97,7 +97,7 @@ EStatusCode ModifyingEncryptedFile::Run(const TestConfiguration& inTestConfigura
 				break;
 			}
 
-			contentContext->DrawImage(10, 300, RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/Images/soundcloud_logo.jpg"));
+			contentContext->DrawImage(10, 300, RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/images/soundcloud_logo.jpg"));
 
 			status = pdfWriter.EndPageContentContext(contentContext);
 			if (status != PDFHummus::eSuccess)
