@@ -44,6 +44,7 @@ PDFCopyingContextTest.cpp
 PDFDateTest.cpp
 PDFEmbedTest.cpp
 PDFObjectCastTest.cpp
+PDFObjectParserTest.cpp
 PDFParserTest.cpp
 PDFTextStringTest.cpp
 PFBStreamTest.cpp
@@ -110,6 +111,7 @@ PDFCopyingContextTest.h
 PDFDateTest.h
 PDFEmbedTest.h
 PDFObjectCastTest.h
+PDFObjectParserTest.h
 PDFParserTest.h
 PDFTextStringTest.h
 PFBStreamTest.h
@@ -136,6 +138,10 @@ UnicodeTextUsage.h
 
 source_group(Main FILES
 PDFWriterTestPlayground.cpp
+)
+
+source_group("Tests\\Parse" FILES
+PDFObjectParserTest.cpp
 )
 
 source_group("TestingSystem\\Hummus Paths" FILES

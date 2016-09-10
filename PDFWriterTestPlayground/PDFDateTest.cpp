@@ -19,7 +19,7 @@
    
 */
 #include "PDFDateTest.h"
-
+#include <ctime>
 
 #include <iostream>
 
@@ -99,6 +99,57 @@ EStatusCode PDFDateTest::Run(const TestConfiguration& inTestConfiguration)
 	PDFDate currentDate;
 	currentDate.SetToCurrentTime();
 	cout<<"Current time as represented in PDFDate - "<<currentDate.ToString().c_str()<<"\n";
+
+	{
+		// time structs
+		time_t  time_local			= time(NULL);
+		tm * my_utc_time			= gmtime(&time_local);
+		my_utc_time->tm_isdst = -1; // automatic dst
+		time_t time_utc				= mktime(my_utc_time);
+		tm *my_local_time			= std::localtime(&time_local);
+		int timezone_difference		= (long)(time_local - time_utc);
+		
+		// buffers/text
+		const int strtime_buffsize = 1024;
+		char strtime_buff[strtime_buffsize];
+		string mytime;
+
+		std::strftime(strtime_buff
+			, strtime_buffsize
+			, "D:%Y%m%d%H%M%S"
+			, my_local_time);
+		
+		// PDF-style time representation. (It's just information)
+		mytime = strtime_buff;
+		mytime.append(timezone_difference >= 0 ? "+" : "-");
+		sprintf(strtime_buff, "%02d'%02d'"
+			, (int)(timezone_difference / 3600)
+			, timezone_difference % 3600);
+		mytime.append(strtime_buff);
+		// padd "Current time as represented in PDFDate - "
+		cout << "Current system time using time_t is    - " << mytime << "\n";
+
+		// we can't test if it's UTC+0
+		if (timezone_difference == 0){
+			cout << " --> timezone test skipped as it's utc, you should change your timezone and try again. \n";
+		}
+		else{
+			// calc timezone offset according to PDFHummus
+			int PDFTimezone_diff = (currentDate.UTC == PDFDate::eEarlier ? -1 : 1)
+				* ((currentDate.HourFromUTC * 3600) + currentDate.MinuteFromUTC * 60);
+			
+			// compare.
+			if (PDFTimezone_diff != timezone_difference){
+				status = PDFHummus::eFailure;
+				cout << "timezone does not match!\n" <<
+					" -> time_t    calculated: " << timezone_difference << " (secs from UTC)\n" <<
+					" -> PDFHummus calculated: " << PDFTimezone_diff << "  (secs from UTC)\n";
+			}
+
+		}
+	}
+
+
 
 	return status;
 }
