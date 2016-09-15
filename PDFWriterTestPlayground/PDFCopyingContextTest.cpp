@@ -56,7 +56,7 @@ EStatusCode PDFCopyingContextTest::Run(const TestConfiguration& inTestConfigurat
 
 
 		copyingContext = pdfWriter.CreatePDFCopyingContext(
-                        RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/BasicTIFFImagesTest.PDF"));
+                        RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/BasicTIFFImagesTest.pdf"));
 		if(!copyingContext)
 		{
 			cout<<"failed to initialize copying context from BasicTIFFImagesTest\n";
@@ -67,7 +67,7 @@ EStatusCode PDFCopyingContextTest::Run(const TestConfiguration& inTestConfigurat
 		EStatusCodeAndObjectIDType result = copyingContext->AppendPDFPageFromPDF(1);
 		if(result.first != PDFHummus::eSuccess)
 		{
-			cout<<"failed to append page 1 from BasicTIFFImagesTest.PDF\n";
+			cout<<"failed to append page 1 from BasicTIFFImagesTest.pdf\n";
 			status = result.first;
 			break;
 		}
@@ -75,7 +75,7 @@ EStatusCode PDFCopyingContextTest::Run(const TestConfiguration& inTestConfigurat
 		result = copyingContext->AppendPDFPageFromPDF(18);
 		if(result.first != PDFHummus::eSuccess)
 		{
-			cout<<"failed to append page 18 from BasicTIFFImagesTest.PDF\n";
+			cout<<"failed to append page 18 from BasicTIFFImagesTest.pdf\n";
 			status = result.first;
 			break;
 		}
@@ -83,7 +83,7 @@ EStatusCode PDFCopyingContextTest::Run(const TestConfiguration& inTestConfigurat
 		result = copyingContext->AppendPDFPageFromPDF(4);
 		if(result.first != PDFHummus::eSuccess)
 		{
-			cout<<"failed to append page 4 from BasicTIFFImagesTest.PDF\n";
+			cout<<"failed to append page 4 from BasicTIFFImagesTest.pdf\n";
 			status = result.first;
 			break;
 		}

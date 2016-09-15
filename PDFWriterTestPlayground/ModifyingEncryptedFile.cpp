@@ -54,7 +54,7 @@ EStatusCode ModifyingEncryptedFile::Run(const TestConfiguration& inTestConfigura
 
  		// open file for modification
         status = pdfWriter.ModifyPDF(
-                                     RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,string("TestMaterials/PDFWithPassword.PDF")),
+                                     RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,string("TestMaterials/PDFWithPassword.pdf")),
                                      ePDFVersion13,
                                      RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,string("PDFWithPasswordModified.pdf")),
                                      LogConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,string("PDFWithPasswordModified.log"))),

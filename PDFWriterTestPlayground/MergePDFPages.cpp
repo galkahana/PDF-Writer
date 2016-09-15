@@ -123,7 +123,7 @@ EStatusCode MergePDFPages::TestOnlyMerge(const TestConfiguration& inTestConfigur
 		singePageRange.mSpecificRanges.push_back(ULongAndULong(0,0));
 
 		status = pdfWriter.MergePDFPagesToPage(page,
-                                               RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/BasicTIFFImagesTest.PDF"),singePageRange);
+                                               RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/BasicTIFFImagesTest.pdf"),singePageRange);
 		if(status != PDFHummus::eSuccess)
 			break;
 
@@ -179,7 +179,7 @@ EStatusCode MergePDFPages::TestPrefixGraphicsMerge(const TestConfiguration& inTe
 		singePageRange.mType = PDFPageRange::eRangeTypeSpecific;
 		singePageRange.mSpecificRanges.push_back(ULongAndULong(0,0));
 
-		status = pdfWriter.MergePDFPagesToPage(page,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/BasicTIFFImagesTest.PDF"),singePageRange);
+		status = pdfWriter.MergePDFPagesToPage(page,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/BasicTIFFImagesTest.pdf"),singePageRange);
 		if(status != PDFHummus::eSuccess)
 			break;
 
@@ -218,7 +218,7 @@ EStatusCode MergePDFPages::TestSuffixGraphicsMerge(const TestConfiguration& inTe
 		singePageRange.mType = PDFPageRange::eRangeTypeSpecific;
 		singePageRange.mSpecificRanges.push_back(ULongAndULong(0,0));
 
-		status = pdfWriter.MergePDFPagesToPage(page,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/BasicTIFFImagesTest.PDF"),singePageRange);
+		status = pdfWriter.MergePDFPagesToPage(page,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/BasicTIFFImagesTest.pdf"),singePageRange);
 		if(status != PDFHummus::eSuccess)
 			break;
 
@@ -296,7 +296,7 @@ EStatusCode MergePDFPages::TestBothGraphicsMerge(const TestConfiguration& inTest
 		singePageRange.mType = PDFPageRange::eRangeTypeSpecific;
 		singePageRange.mSpecificRanges.push_back(ULongAndULong(0,0));
 
-		status = pdfWriter.MergePDFPagesToPage(page,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/BasicTIFFImagesTest.PDF"),singePageRange);
+		status = pdfWriter.MergePDFPagesToPage(page,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/BasicTIFFImagesTest.pdf"),singePageRange);
 		if(status != PDFHummus::eSuccess)
 			break;
 
@@ -349,7 +349,7 @@ EStatusCode MergePDFPages::MergeTwoPageInSeparatePhases(const TestConfiguration&
 		firstPageRange.mType = PDFPageRange::eRangeTypeSpecific;
 		firstPageRange.mSpecificRanges.push_back(ULongAndULong(0,0));
 
-		status = pdfWriter.MergePDFPagesToPage(page,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/BasicTIFFImagesTest.PDF"),firstPageRange);
+		status = pdfWriter.MergePDFPagesToPage(page,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/BasicTIFFImagesTest.pdf"),firstPageRange);
 		if(status != PDFHummus::eSuccess)
 			break;
 
@@ -363,7 +363,7 @@ EStatusCode MergePDFPages::MergeTwoPageInSeparatePhases(const TestConfiguration&
 		secondPageRange.mType = PDFPageRange::eRangeTypeSpecific;
 		secondPageRange.mSpecificRanges.push_back(ULongAndULong(1,1));
 
-		status = pdfWriter.MergePDFPagesToPage(page,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/BasicTIFFImagesTest.PDF"),secondPageRange);
+		status = pdfWriter.MergePDFPagesToPage(page,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/BasicTIFFImagesTest.pdf"),secondPageRange);
 		if(status != PDFHummus::eSuccess)
 			break;
 
@@ -446,7 +446,7 @@ EStatusCode MergePDFPages::MergeTwoPageWithEvents(const TestConfiguration& inTes
 		// i'm using events to write the interim code, as oppose to using two merges as TestBothGraphicsMerge shows. this is more efficient, considering the embedded PDF. 
 		// but still, the easiest would be to use the copying context
 		pdfWriter.GetDocumentContext().AddDocumentContextExtender(&mergingHandler);
-		status = pdfWriter.MergePDFPagesToPage(page,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/BasicTIFFImagesTest.PDF"),twoPageRange);
+		status = pdfWriter.MergePDFPagesToPage(page,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/BasicTIFFImagesTest.pdf"),twoPageRange);
 		if(status != PDFHummus::eSuccess)
 			break;
 		pdfWriter.GetDocumentContext().RemoveDocumentContextExtender(&mergingHandler);
@@ -485,7 +485,7 @@ EStatusCode MergePDFPages::MergePagesUsingCopyingContext(const TestConfiguration
 		if(status != PDFHummus::eSuccess)
 			break;
 
-		PDFDocumentCopyingContext* copyingContext = pdfWriter.CreatePDFCopyingContext(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/BasicTIFFImagesTest.PDF"));
+		PDFDocumentCopyingContext* copyingContext = pdfWriter.CreatePDFCopyingContext(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/BasicTIFFImagesTest.pdf"));
 		if(!copyingContext)
 		{
 			status = PDFHummus::eFailure;

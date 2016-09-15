@@ -42,7 +42,7 @@ EStatusCode RecryptPDF::Run(const TestConfiguration& inTestConfiguration)
 	{
 		// recrypt an encrypted document with no password
 		status = PDFWriter::RecryptPDF(
-			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/PDFWithPassword.PDF"),
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/PDFWithPassword.pdf"),
 			"user",
 			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "RecryptPDFWithPasswordToNothing.PDF"),
 			LogConfiguration::DefaultLogConfiguration(),
@@ -55,7 +55,7 @@ EStatusCode RecryptPDF::Run(const TestConfiguration& inTestConfiguration)
 
 		// recrypt an encrypted document with new password
 		status = PDFWriter::RecryptPDF(
-			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/PDFWithPassword.PDF"),
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/PDFWithPassword.pdf"),
 			"user",
 			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "RecryptPDFWithPasswordToNewPassword.PDF"),
 			LogConfiguration::DefaultLogConfiguration(),
