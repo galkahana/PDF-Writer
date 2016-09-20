@@ -425,6 +425,7 @@ std::string PDFObjectParser::DecodeHexString(const std::string inStringToDecode)
 	}
 
 	// decode utf16 here?
+	// Gal: absolutely not! this is plain hex decode. doesn't necesserily mean text. in fact most of the times it doesn't. keep this low level
 
 	return stringBuffer.str();
 
