@@ -54,7 +54,7 @@ EStatusCode PDFEmbedTest::Run(const TestConfiguration& inTestConfiguration)
 
 		// Create XObjects from PDF to embed
 		EStatusCodeAndObjectIDTypeList result = pdfWriter.CreateFormXObjectsFromPDF(
-                                                        RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/XObjectContent.PDF"),PDFPageRange(),ePDFPageBoxMediaBox);
+                                                        RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/XObjectContent.pdf"),PDFPageRange(),ePDFPageBoxMediaBox);
 		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to create PDF XObjects from PDF file\n";

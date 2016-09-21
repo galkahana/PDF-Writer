@@ -40,7 +40,7 @@ EStatusCode EncryptedPDFTester::Run(const TestConfiguration& inTestConfiguration
 		}
 
 		copyingContext = pdfWriter.CreatePDFCopyingContext(
-			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/PDFWithPassword.PDF"),
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/PDFWithPassword.pdf"),
 			PDFParsingOptions("user"));
 		if (!copyingContext)
 		{
