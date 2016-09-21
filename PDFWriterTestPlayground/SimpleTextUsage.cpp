@@ -124,7 +124,7 @@ EStatusCode SimpleTextUsage::RunCFFTest(const TestConfiguration& inTestConfigura
 
 	do
 	{
-		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, inEmbedFonts ? "SimpleTextUsageCFF.PDF" : "SimpleTextUsageCFFNoEmbed.PDF"),
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, inEmbedFonts ? "SimpleTextUsageCFF.pdf" : "SimpleTextUsageCFFNoEmbed.pdf"),
                                     ePDFVersion13,
                                     LogConfiguration(true,true,
                                                      RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleTextUsage.log")),
@@ -231,7 +231,7 @@ EStatusCode SimpleTextUsage::RunTrueTypeTest(const TestConfiguration& inTestConf
 	do
 	{
 		status = pdfWriter.StartPDF(
-			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, inEmbedFonts ? "SimpleTextUsageTrueType.PDF" : "SimpleTextUsageTrueTypeNoEmbed.PDF"),
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, inEmbedFonts ? "SimpleTextUsageTrueType.pdf" : "SimpleTextUsageTrueTypeNoEmbed.pdf"),
                                     ePDFVersion13,
                                     LogConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleTextUsage.log")),
 									PDFCreationSettings(true,inEmbedFonts));
@@ -309,7 +309,7 @@ EStatusCode SimpleTextUsage::RunType1Test(const TestConfiguration& inTestConfigu
 	do
 	{
 		status = pdfWriter.StartPDF(
-			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, inEmbedFonts ? "SimpleTextUsageType1.PDF" : "SimpleTextUsageType1NoEmbed.PDF"),
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, inEmbedFonts ? "SimpleTextUsageType1.pdf" : "SimpleTextUsageType1NoEmbed.pdf"),
                          ePDFVersion13,
                          LogConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleTextUsage.log")),
 						 PDFCreationSettings(true,inEmbedFonts));
@@ -389,7 +389,7 @@ EStatusCode SimpleTextUsage::RunNoTextTest(const TestConfiguration& inTestConfig
 	do
 	{
 		status = pdfWriter.StartPDF(
-			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, inEmbedFonts ? "SimpleNoTextUsage.PDF" : "SimpleNoTextUsageNoEmbed.PDF"),
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, inEmbedFonts ? "SimpleNoTextUsage.pdf" : "SimpleNoTextUsageNoEmbed.pdf"),
                                     ePDFVersion13,
                                     LogConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleTextUsage.log")),
 									PDFCreationSettings(true,inEmbedFonts));

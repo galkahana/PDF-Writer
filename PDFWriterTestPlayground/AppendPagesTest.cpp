@@ -43,7 +43,7 @@ EStatusCode AppendPagesTest::Run(const TestConfiguration& inTestConfiguration)
 	{
 	 	PDFWriter pdfWriter;
 
-		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"AppendPagesTest.PDF"),ePDFVersion13,LogConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"AppendPagesTestLog.txt")));
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"AppendPagesTest.pdf"),ePDFVersion13,LogConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"AppendPagesTestLog.txt")));
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
@@ -55,7 +55,7 @@ EStatusCode AppendPagesTest::Run(const TestConfiguration& inTestConfiguration)
 		result = pdfWriter.AppendPDFPagesFromPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/Original.pdf"),PDFPageRange());
 		if(result.first != PDFHummus::eSuccess)
 		{
-			cout<<"failed to append pages from Original.PDF\n";
+			cout<<"failed to append pages from Original.pdf\n";
 			status = result.first;
 			break;
 		}

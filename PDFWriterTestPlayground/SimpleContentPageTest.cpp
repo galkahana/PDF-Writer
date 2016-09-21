@@ -49,7 +49,7 @@ EStatusCode SimpleContentPageTest::Run(const TestConfiguration& inTestConfigurat
 
 	do
 	{
-		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleContent.PDF"),ePDFVersion13);
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleContent.pdf"),ePDFVersion13);
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";

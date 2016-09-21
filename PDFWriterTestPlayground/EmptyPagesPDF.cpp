@@ -45,7 +45,7 @@ EStatusCode EmptyPagesPDF::Run(const TestConfiguration& inTestConfiguration)
 
 	do
 	{
-		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"EmptyPages.PDF"),ePDFVersion13,logConfiguration);
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"EmptyPages.pdf"),ePDFVersion13,logConfiguration);
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";

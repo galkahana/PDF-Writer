@@ -46,7 +46,7 @@ EStatusCode HighLevelContentContext::Run(const TestConfiguration& inTestConfigur
 
 	do
 	{
-		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"HighLevelContentContext.PDF"),
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"HighLevelContentContext.pdf"),
                                     ePDFVersion13,
                                     LogConfiguration(true,true,
                                                      RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"HighLevelContentContext.log")));

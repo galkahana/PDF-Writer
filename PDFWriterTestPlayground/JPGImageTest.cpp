@@ -46,7 +46,7 @@ EStatusCode JPGImageTest::Run(const TestConfiguration& inTestConfiguration)
 
 	do
 	{
-		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"BasicJPGImagesTest.PDF"),ePDFVersion13);
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"BasicJPGImagesTest.pdf"),ePDFVersion13);
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";

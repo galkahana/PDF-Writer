@@ -45,7 +45,7 @@ EStatusCode TestMeasurementsTest::Run(const TestConfiguration& inTestConfigurati
 
 	do
 	{
-		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TextMeasurementsTest.PDF"),
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TextMeasurementsTest.pdf"),
                                     ePDFVersion13,
                                     LogConfiguration(true,true,
                                                      RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TextMeasurementsTest.log")));

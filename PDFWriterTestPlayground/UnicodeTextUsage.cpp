@@ -47,7 +47,7 @@ EStatusCode UnicodeTextUsage::Run(const TestConfiguration& inTestConfiguration)
 	do
 	{
 		status = pdfWriter.StartPDF(
-			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"UnicodeTextUsage.PDF"),
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"UnicodeTextUsage.pdf"),
 			ePDFVersion13,
 			LogConfiguration(true, true, RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "UnicodeTextUsage.log")));
 		if (status != PDFHummus::eSuccess)

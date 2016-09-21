@@ -49,7 +49,7 @@ EStatusCode ShutDownRestartTest::Run(const TestConfiguration& inTestConfiguratio
 	{
 		{
 			PDFWriter pdfWriterA;
-			status = pdfWriterA.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleContentShutdownRestart.PDF"),ePDFVersion13);
+			status = pdfWriterA.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleContentShutdownRestart.pdf"),ePDFVersion13);
 			if(status != PDFHummus::eSuccess)
 			{
 				cout<<"failed to start PDF\n";
@@ -145,7 +145,7 @@ EStatusCode ShutDownRestartTest::Run(const TestConfiguration& inTestConfiguratio
 		{
 			PDFWriter pdfWriterB;
 			status = pdfWriterB.ContinuePDF(
-                            RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleContentShutdownRestart.PDF"),
+                            RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"SimpleContentShutdownRestart.pdf"),
                             RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"ShutDownRestartState.txt")
                     );
 			if(status != PDFHummus::eSuccess)

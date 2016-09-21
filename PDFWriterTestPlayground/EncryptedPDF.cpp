@@ -30,7 +30,7 @@ EStatusCode EncryptedPDFTester::Run(const TestConfiguration& inTestConfiguration
 	do
 	{
 		status = pdfWriter.StartPDF(
-			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "PDFWithPasswordDecrypted.PDF"), ePDFVersion13,
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "PDFWithPasswordDecrypted.pdf"), ePDFVersion13,
 			LogConfiguration(true, true,
 				RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "PDFWithPasswordDecrypted.txt")));
 		if (status != PDFHummus::eSuccess)
