@@ -59,7 +59,7 @@ EStatusCode AppendPagesTest::Run(const TestConfiguration& inTestConfiguration)
 			status = result.first;
 			break;
 		}
-		result = pdfWriter.AppendPDFPagesFromPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/XObjectContent.PDF"),PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/XObjectContent.pdf"),PDFPageRange());
 		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from XObjectContent.pdf\n";
@@ -67,10 +67,10 @@ EStatusCode AppendPagesTest::Run(const TestConfiguration& inTestConfiguration)
 			break;
 		}
 
-		result = pdfWriter.AppendPDFPagesFromPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/BasicTIFFImagesTest.PDF"),PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/BasicTIFFImagesTest.pdf"),PDFPageRange());
 		if(result.first != PDFHummus::eSuccess)
 		{
-			cout<<"failed to append pages from BasicTIFFImagesTest.PDF\n";
+			cout<<"failed to append pages from BasicTIFFImagesTest.pdf\n";
 			status = result.first;
 			break;
 		}

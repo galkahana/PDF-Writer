@@ -221,7 +221,7 @@ PDFHummus::EStatusCode CopyingAndMergingEmptyPages::CreatePageFromEmptyPage(cons
 		}
         
         // append other pages
-		result = pdfWriter.AppendPDFPagesFromPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/XObjectContent.PDF"),PDFPageRange());
+		result = pdfWriter.AppendPDFPagesFromPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/XObjectContent.pdf"),PDFPageRange());
 		if(result.first != PDFHummus::eSuccess)
 		{
 			cout<<"failed to append pages from XObjectContent.pdf\n";

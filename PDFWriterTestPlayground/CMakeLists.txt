@@ -334,33 +334,43 @@ if(PDFHUMMUS_NO_TIFF)
 endif(PDFHUMMUS_NO_TIFF)
 
 
-include_directories (${PDFWriter_SOURCE_DIR}) 
-include_directories (${Zlib_SOURCE_DIR})
+include_directories (${PDFWriter_SOURCE_DIR})
+include_directories (${LIBAESGM_INCLUDE_DIRS})
+include_directories (${ZLIB_INCLUDE_DIRS})
 if(NOT PDFHUMMUS_NO_DCT)
-	include_directories (${LibJpeg_SOURCE_DIR})
+	include_directories (${LIBJPEG_INCLUDE_DIRS})
 else(NOT PDFHUMMUS_NO_DCT)
 	add_definitions(-DPDFHUMMUS_NO_DCT=1)
 endif(NOT PDFHUMMUS_NO_DCT)
 
 if(NOT PDFHUMMUS_NO_TIFF)
-	include_directories (${LibTiff_SOURCE_DIR})  
+	include_directories (${LIBTIFF_INCLUDE_DIRS})
 else(NOT PDFHUMMUS_NO_TIFF)
 	add_definitions(-DPDFHUMMUS_NO_TIFF=1)
 endif(NOT PDFHUMMUS_NO_TIFF)
-include_directories (${FreeType_SOURCE_DIR}/include) 
+include_directories (${FREETYPE_INCLUDE_DIRS})
 
 add_dependencies(PDFWriterTestPlayground PDFWriter) #add_dependencies makes sure that dependencies are built before main target
 
 target_link_libraries (PDFWriterTestPlayground PDFWriter)
-target_link_libraries (PDFWriterTestPlayground FreeType)
+target_link_libraries (PDFWriterTestPlayground ${LIBAESGM_LDFLAGS})
+target_link_libraries (PDFWriterTestPlayground ${FREETYPE_LDFLAGS})
 if(NOT PDFHUMMUS_NO_DCT)
-	target_link_libraries (PDFWriterTestPlayground LibJpeg)
+	target_link_libraries (PDFWriterTestPlayground ${LIBJPEG_LDFLAGS})
 endif(NOT PDFHUMMUS_NO_DCT)
-target_link_libraries (PDFWriterTestPlayground Zlib)
+target_link_libraries (PDFWriterTestPlayground ${ZLIB_LDFLAGS})
 if(NOT PDFHUMMUS_NO_TIFF)
-	target_link_libraries (PDFWriterTestPlayground LibTiff)
+	target_link_libraries (PDFWriterTestPlayground ${LIBTIFF_LDFLAGS})
 endif(NOT PDFHUMMUS_NO_TIFF)
 
 if(APPLE)
 	set(CMAKE_EXE_LINKER_FLAGS "-framework CoreFoundation")
 endif(APPLE)
+
+
+add_custom_target(check
+    ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/TestMaterials ${CMAKE_BINARY_DIR}/Testing/TestMaterials
+    COMMAND $<TARGET_FILE:PDFWriterTestPlayground> -b ${CMAKE_BINARY_DIR}/Testing
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    DEPENDS PDFWriterTestPlayground
+)
