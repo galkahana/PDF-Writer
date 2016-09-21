@@ -133,9 +133,6 @@ int main(int argc, char* argv[])
 	}
 	else
 		PrintUsage();
-#ifndef _DONT_STOP_AFTER_TESTS
-	std::cin.get();
-#endif // _DONT_STOP_AFTER_TESTS
 	return return_status == PDFHummus::eSuccess ? 0 : 1;
 }
 
