@@ -349,7 +349,7 @@ EStatusCode SimpleTextUsage::RunType1Test(const TestConfiguration& inTestConfigu
 
 		contentContext->Tm(30,0,0,30,78.4252,662.8997);
 
-		EStatusCode encodingStatus = contentContext->Tj("abcd");
+		EStatusCode encodingStatus = contentContext->Tj("abcd \xC3\xA1"); // ending char is LATIN SMALL LETTER A WITH ACUTE
 		if(encodingStatus != PDFHummus::eSuccess)
 			cout<<"Could not find some of the glyphs for this font";
 
