@@ -148,7 +148,7 @@ typedef _USE_TIFF_TSIZE_AS_FOLLOWS tsize_t;          /* i/o size in bytes */
 #ifndef _USE_TIFF_TSIZE_COMPAT_AS_FOLLOWS
 typedef unsigned _USE_TIFF_TSIZE_AS_FOLLOWS tsize_t_compat;
 #else
-typedef unsigned _USE_TIFF_TSIZE_COMPAT_AS_FOLLOWS tsize_t_compat;
+typedef _USE_TIFF_TSIZE_COMPAT_AS_FOLLOWS tsize_t_compat;
 #endif // #ifndef _USE_TIFF_TSIZE_COMPAT_AS_FOLLOWS
 #endif // #ifndef _USE_TIFF_TSIZE_AS_FOLLOWS
 typedef void* tdata_t;          /* image data ref */
