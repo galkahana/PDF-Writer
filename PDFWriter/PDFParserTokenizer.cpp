@@ -264,7 +264,8 @@ BoolAndString PDFParserTokenizer::GetNextToken()
 				{
 					if(GetNextByteForToken(buffer) != PDFHummus::eSuccess)
 					{	
-						result.first = false;
+						if(mStream->NotEnded())
+							result.first = false;
 						break;
 					}
 					if(IsPDFWhiteSpace(buffer))
