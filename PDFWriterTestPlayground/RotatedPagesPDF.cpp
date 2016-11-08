@@ -50,12 +50,12 @@ EStatusCode RotatedPagesPDF::Run(const TestConfiguration& inTestConfiguration)
 
 		PDFWriter pdfWriter;
 		status = pdfWriter.StartPDF(
-			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"RotatedPages.PDF"),
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"RotatedPages.pdf"),
 			ePDFVersion13,logConfiguration);
 
 		if(status != PDFHummus::eSuccess)
 		{
-			cout<<"failed to start RotatedPages.PDF\n";
+			cout<<"failed to start RotatedPages.pdf\n";
 			break;
 		}	
 
@@ -103,7 +103,7 @@ EStatusCode RotatedPagesPDF::Run(const TestConfiguration& inTestConfiguration)
 		status = pdfWriter.EndPDF();
 		if(status != PDFHummus::eSuccess)
 		{
-			cout<<"failed in end RotatedPages.PDF\n";
+			cout<<"failed in end RotatedPages.pdf\n";
 			break;
 		}
 
@@ -111,12 +111,12 @@ EStatusCode RotatedPagesPDF::Run(const TestConfiguration& inTestConfiguration)
 		// PDF page rotation copy
         
 		status = pdfWriter.StartPDF(
-			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"RotatedPagesCopy.PDF"),
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"RotatedPagesCopy.pdf"),
 			ePDFVersion13);
 
 		if(status != PDFHummus::eSuccess)
 		{
-			cout<<"failed to start RotatedPagesCopy.PDF\n";
+			cout<<"failed to start RotatedPagesCopy.pdf\n";
 			break;
 		}
         
@@ -124,12 +124,12 @@ EStatusCode RotatedPagesPDF::Run(const TestConfiguration& inTestConfiguration)
         
         // append pages
 		result = pdfWriter.AppendPDFPagesFromPDF(
-			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"RotatedPages.PDF"),
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"RotatedPages.pdf"),
 			PDFPageRange());
 
 		if(result.first != PDFHummus::eSuccess)
 		{
-			cout<<"failed to append pages from RotatedPages.PDF\n";
+			cout<<"failed to append pages from RotatedPages.pdf\n";
 			status = result.first;
 			break;
 		}
@@ -138,7 +138,7 @@ EStatusCode RotatedPagesPDF::Run(const TestConfiguration& inTestConfiguration)
 
 		if(status != PDFHummus::eSuccess)
 		{
-			cout<<"failed in end RotatedPagesCopy.PDF\n";
+			cout<<"failed in end RotatedPagesCopy.pdf\n";
 			break;
 		}
 
@@ -148,11 +148,11 @@ EStatusCode RotatedPagesPDF::Run(const TestConfiguration& inTestConfiguration)
 		PDFParser pdfParser;
 
 		status = pdfFile.OpenFile(
-			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"RotatedPagesCopy.PDF"));
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"RotatedPagesCopy.pdf"));
 
 		if(status != PDFHummus::eSuccess)
 		{
-			cout<<"unable to open file RotatedPagesCopy.PDF for reading.\n";
+			cout<<"unable to open file RotatedPagesCopy.pdf for reading.\n";
 			break;
 		}
 

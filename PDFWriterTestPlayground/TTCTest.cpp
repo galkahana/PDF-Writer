@@ -48,7 +48,7 @@ PDFHummus::EStatusCode TTCTest::Run(const TestConfiguration& inTestConfiguration
 	do
 	{
 		status = pdfWriter.StartPDF(
-                                    RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TTCTestLucidaGrande.PDF"),
+                                    RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TTCTestLucidaGrande.pdf"),
                                     ePDFVersion13,
                                     LogConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TTCTestLucidaGrande.log")));
 		if(status != PDFHummus::eSuccess)

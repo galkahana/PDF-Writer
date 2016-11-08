@@ -43,7 +43,7 @@ EStatusCode AppendSpecialPagesTest::Run(const TestConfiguration& inTestConfigura
 	do
 	{
 
-		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"AppendSpecialPagesTest.PDF"),ePDFVersion13,LogConfiguration(true,true,
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"AppendSpecialPagesTest.pdf"),ePDFVersion13,LogConfiguration(true,true,
             RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"AppendSpecialPagesTestLog.txt")));
 		if(status != PDFHummus::eSuccess)
 		{

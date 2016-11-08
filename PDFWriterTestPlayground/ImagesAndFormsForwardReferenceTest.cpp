@@ -51,7 +51,7 @@ EStatusCode ImagesAndFormsForwardReferenceTest::Run(const TestConfiguration& inT
 	do
 	{
 
-		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"ImagesAndFormsForwardReferenceTest.PDF"),ePDFVersion13);
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"ImagesAndFormsForwardReferenceTest.pdf"),ePDFVersion13);
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";

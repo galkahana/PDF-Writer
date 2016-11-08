@@ -45,7 +45,7 @@ EStatusCode PDFCopyingContextTest::Run(const TestConfiguration& inTestConfigurat
 	do
 	{
 		status = pdfWriter.StartPDF(
-                        RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"PDFCopyingContextTest.PDF"),ePDFVersion13,
+                        RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"PDFCopyingContextTest.pdf"),ePDFVersion13,
                         LogConfiguration(true,true,
                         RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"PDFCopyingContextTest.txt")));
 		if(status != PDFHummus::eSuccess)

@@ -48,7 +48,7 @@ EStatusCode HighLevelImages::Run(const TestConfiguration& inTestConfiguration)
 
 	do
 	{
-		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"HighLevelImages.PDF"),
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"HighLevelImages.pdf"),
                                     ePDFVersion13,
                                     LogConfiguration(true,true,
                                                      RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"HighLevelImages.log")));

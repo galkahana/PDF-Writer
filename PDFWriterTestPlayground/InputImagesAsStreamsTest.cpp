@@ -31,7 +31,7 @@ EStatusCode InputImagesAsStreamsTest::Run(const TestConfiguration& inTestConfigu
 
 	do
 	{
-		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"ImagesInStreams.PDF"),ePDFVersion13);
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"ImagesInStreams.pdf"),ePDFVersion13);
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to start PDF\n";
@@ -157,7 +157,7 @@ EStatusCode InputImagesAsStreamsTest::Run(const TestConfiguration& inTestConfigu
 		status = pdfWriter.AppendPDFPagesFromPDF(pdfFile.GetInputStream(),PDFPageRange()).first;
 		if(status != PDFHummus::eSuccess)
 		{
-			cout<<"failed to append pages from Original.PDF\n";
+			cout<<"failed to append pages from Original.pdf\n";
 			break;
 		}
 

@@ -48,7 +48,7 @@ EStatusCode DFontTest::Run(const TestConfiguration& inTestConfiguration)
 	do
 	{
 		status = pdfWriter.StartPDF(
-                                    RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"DFontTest.PDF"),
+                                    RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"DFontTest.pdf"),
                                     ePDFVersion13,
                                     LogConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"DFontTest.log")));
 		if(status != eSuccess)
