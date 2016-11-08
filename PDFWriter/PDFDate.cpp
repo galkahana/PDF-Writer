@@ -197,7 +197,7 @@ void PDFDate::SetToCurrentTime()
 	// if unsuccesful or method unknown don't provide UTC info (currently only knows for WIN32 and OSX
 #if defined (__MWERKS__) || defined (__GNUC__)  || defined(_AIX32) || defined(WIN32)
 	int status;
-#if !defined(__MWERKS__) && !defined(__MINGW32__) // (using MS methods)
+#if !defined(__MWERKS__) // (using c methods)
 	struct tm *gmTime;
 
 	time_t localEpoch, gmEpoch;
