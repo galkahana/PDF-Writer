@@ -19,6 +19,7 @@
    
 */
 #include "PDFDateTest.h"
+#include <stdio.h>
 #include <ctime>
 
 #include <iostream>
