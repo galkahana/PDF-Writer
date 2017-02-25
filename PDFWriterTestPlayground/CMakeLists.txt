@@ -19,6 +19,7 @@ EmptyPagesPDF.cpp
 RotatedPagesPDF.cpp
 FileURL.cpp
 FlateEncryptionTest.cpp
+FlateObjectDecodeTest.cpp
 FormXObjectTest.cpp
 HighLevelContentContext.cpp
 FreeTypeInitializationTest.cpp
@@ -85,6 +86,7 @@ EmptyPagesPDF.h
 RotatedPagesPDF.h
 FileURL.h
 FlateEncryptionTest.h
+FlateObjectDecodeTest.h
 HighLevelContentContext.h
 FormXObjectTest.h
 FreeTypeInitializationTest.h
@@ -142,6 +144,9 @@ PDFWriterTestPlayground.cpp
 
 source_group("Tests\\Parse" FILES
 PDFObjectParserTest.cpp
+PDFObjectParserTest.h
+FlateObjectDecodeTest.cpp
+FlateObjectDecodeTest.h
 )
 
 source_group("TestingSystem\\Hummus Paths" FILES
