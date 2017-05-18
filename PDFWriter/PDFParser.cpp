@@ -47,6 +47,7 @@
 #include "InputAscii85DecodeStream.h"
 #include "IPDFParserExtender.h"
 #include "InputDCTDecodeStream.h"
+#include "ArrayOfInputStreamsStream.h"
 
 #include  <algorithm>
 using namespace PDFHummus;
@@ -2034,6 +2035,18 @@ PDFObjectParser* PDFParser::StartReadingObjectsFromStream(PDFStreamInput* inStre
 	PDFObjectParser* objectsParser = new PDFObjectParser();
 	InputStreamSkipperStream* source = new InputStreamSkipperStream(readStream);
 	objectsParser->SetReadStream(source,source,true);
+	objectsParser->SetDecryptionHelper(&mDecryptionHelper);
+	objectsParser->SetParserExtender(mParserExtender);
+
+	return objectsParser;
+}
+
+PDFObjectParser* PDFParser::StartReadingObjectsFromStreams(PDFArray* inArrayOfStreams) {
+	IByteReader* readStream = new ArrayOfInputStreamsStream(inArrayOfStreams,this);
+
+	PDFObjectParser* objectsParser = new PDFObjectParser();
+	InputStreamSkipperStream* source = new InputStreamSkipperStream(readStream);
+	objectsParser->SetReadStream(source, source, true);
 	objectsParser->SetDecryptionHelper(&mDecryptionHelper);
 	objectsParser->SetParserExtender(mParserExtender);
 
