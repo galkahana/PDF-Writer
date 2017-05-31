@@ -660,7 +660,11 @@ EStatusCode PDFParser::ReadNextXrefEntry(Byte inBuffer[20]) {
 		TRACE_LOG("PDFParser::ReadNextXrefEntry, failed to read xref entry");
 		status = PDFHummus::eFailure;
 	}
-
+	// set position if the EOL is 1 char instead of 2 (some documents may not follow the standard!)
+	if ((inBuffer[19] != scLN && inBuffer[19] != scCR) && (inBuffer[18] == scLN || inBuffer[18] == scCR))
+	{
+		mStream->SetPosition(mStream->GetCurrentPosition() - 1);
+	}
 	return status;
 }
 
