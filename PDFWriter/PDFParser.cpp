@@ -887,7 +887,10 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 		else if(scPages == objectType->GetValue())
 		{
 			// a Page tree node
-			PDFObjectCastPtr<PDFArray> kidsObject(inPageNode->QueryDirectObject("Kids"));
+			PDFObject* pKids= inPageNode->QueryDirectObject("Kids");
+			if (pKids->GetType() == PDFObject::ePDFObjectIndirectObjectReference)
+				pKids= ParseExistingInDirectObject(((PDFIndirectObjectReference*)pKids)->mObjectID);
+			PDFObjectCastPtr<PDFArray> kidsObject(pKids);
 			if(!kidsObject)
 			{
 				TRACE_LOG("PDFParser::ParsePagesIDs, unable to find page kids array");
