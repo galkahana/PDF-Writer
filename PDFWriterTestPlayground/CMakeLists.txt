@@ -39,6 +39,7 @@ PageModifierTest.cpp
 PageOrderModification.cpp
 OpenTypeTest.cpp
 OutputFileStreamTest.cpp
+ParsingBadXref.cpp
 ParsingFaulty.cpp
 PDFComment.cpp
 PDFCommentWriter.cpp
@@ -105,9 +106,10 @@ MergeToPDFForm.h
 ModifyingEncryptedFile.h
 ModifyingExistingFileContent.h
 PageModifierTest.h
-PageOrderModification.cpp
+PageOrderModification.h
 OpenTypeTest.h
 OutputFileStreamTest.h
+ParsingBadXref.h
 ParsingFaulty.h
 PDFComment.h
 PDFCommentWriter.h
@@ -151,6 +153,8 @@ FlateObjectDecodeTest.cpp
 FlateObjectDecodeTest.h
 ParsingFaulty.cpp
 ParsingFaulty.h
+ParsingBadXref.cpp
+ParsingBadXref.h
 )
 
 source_group("TestingSystem\\Hummus Paths" FILES

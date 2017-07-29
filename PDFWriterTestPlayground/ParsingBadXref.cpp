@@ -18,7 +18,7 @@ limitations under the License.
 
 
 */
-#include "ParsingFaulty.h"
+#include "ParsingBadXref.h"
 #include "PDFParser.h"
 #include "InputFile.h"
 #include "EStatusCode.h"
@@ -31,11 +31,11 @@ using namespace std;
 using namespace PDFHummus;
 
 
-ParsingFaulty::ParsingFaulty() {
+ParsingBadXref::ParsingBadXref() {
 
 }
 
-ParsingFaulty::~ParsingFaulty() {
+ParsingBadXref::~ParsingBadXref() {
 
 }
 
@@ -57,20 +57,13 @@ EStatusCode openPDF(const string& path) {
 	return status;
 }
 
-EStatusCode ParsingFaulty::Run(const TestConfiguration& inTestConfiguration) {
-	EStatusCode status = openPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/test3.pdf"));
+EStatusCode ParsingBadXref::Run(const TestConfiguration& inTestConfiguration) {
+	EStatusCode status = openPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/test_bad_xref.pdf"));
 	if (status != eSuccess) {
-		std::cout << "Failed at start parsing test3.pdf" << std::endl;
+		std::cout << "Failed at start parsing test_bad_xref.pdf" << std::endl;
 		return status;
 	}
-
-	status = openPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/test4.pdf"));
-	if (status != eSuccess) {
-		std::cout << "Failed at start parsing test4.pdf" << std::endl;
-		return status;
-	}
-
 	return status;
 }
 
-ADD_CATEGORIZED_TEST(ParsingFaulty, "Parsing")
+ADD_CATEGORIZED_TEST(ParsingBadXref, "Parsing")
