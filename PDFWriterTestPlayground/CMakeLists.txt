@@ -39,7 +39,6 @@ PageModifierTest.cpp
 PageOrderModification.cpp
 OpenTypeTest.cpp
 OutputFileStreamTest.cpp
-ParsingBadXref.cpp
 ParsingFaulty.cpp
 PDFComment.cpp
 PDFCommentWriter.cpp
@@ -109,7 +108,6 @@ PageModifierTest.h
 PageOrderModification.h
 OpenTypeTest.h
 OutputFileStreamTest.h
-ParsingBadXref.h
 ParsingFaulty.h
 PDFComment.h
 PDFCommentWriter.h
