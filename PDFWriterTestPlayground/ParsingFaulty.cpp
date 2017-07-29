@@ -58,6 +58,28 @@ EStatusCode openPDF(const string& path) {
 	return status;
 }
 
+EStatusCode openPDFForNullPageTest(const string& path) {
+	PDFParser parser;
+	InputFile pdfFile;
+	EStatusCode status = pdfFile.OpenFile(path);
+	if (status != eSuccess) {
+		std::cout << "Invalid path: " << path.c_str() << std::endl;
+		return status;
+	}
+
+	status = parser.StartPDFParsing(pdfFile.GetInputStream());
+	if (status != eSuccess) {
+		std::cout << "Failed at start parsing" << std::endl;
+	}
+
+	RefCountPtr<PDFDictionary> page = parser.ParsePage(33);
+	if(page != NULL) {
+		status = eFailure;
+		std::cout << "Page should be null at 33"<< std::endl;
+	}
+	return status;
+}
+
 EStatusCode openPDFForRotationTest(const string& path) {
 	PDFParser parser;
 	InputFile pdfFile;
@@ -102,7 +124,7 @@ EStatusCode ParsingFaulty::Run(const TestConfiguration& inTestConfiguration) {
 	}
 
 
-	status = openPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/unexpected.kids.array.pdf"));
+	status = openPDFForNullPageTest(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/unexpected.kids.array.pdf"));
 	if (status != eSuccess) {
 		std::cout << "Failed at start parsing unexpected.kids.array.pdf" << std::endl;
 		return status;
