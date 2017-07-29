@@ -113,6 +113,20 @@ EStatusCode ParsingFaulty::Run(const TestConfiguration& inTestConfiguration) {
 		std::cout << "Failed at start parsing wrong.rotation.pdf" << std::endl;
 		return status;
 	}
+	
+	status = openPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/1.unfamiliar.entry.type.pdf"));
+	if (status != eSuccess) {
+		std::cout << "Failed at start parsing 1.unfamiliar.entry.type.pdf" << std::endl;
+		return status;
+	}
+
+	status = openPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/2.unfamiliar.entry.type.pdf"));
+	if (status != eSuccess) {
+		std::cout << "Failed at start parsing 1.unfamiliar.entry.type.pdf" << std::endl;
+		return status;
+	}
+
+
 	return status;
 }
 

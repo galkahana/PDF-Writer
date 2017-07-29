@@ -37,11 +37,6 @@
 #include "InputLimitedStream.h"
 #include "InputFlateDecodeStream.h"
 #include "InputStreamSkipperStream.h"
-#include "InputPredictorPNGUpStream.h"
-#include "InputPredictorPNGNoneStream.h"
-#include "InputPredictorPNGSubStream.h"
-#include "InputPredictorPNGAverageStream.h"
-#include "InputPredictorPNGPaethStream.h"
 #include "InputPredictorPNGOptimumStream.h"
 #include "InputPredictorTIFFSubStream.h"
 #include "InputAscii85DecodeStream.h"
@@ -1963,34 +1958,14 @@ EStatusCodeAndIByteReader PDFParser::CreateFilterForStream(IByteReader* inStream
 					break;
 				}
 				case 10:
-				{
-					result = new InputPredictorPNGNoneStream(result,columnsValue);
-					break;
-				}
 				case 11:
-				{
-					result = new InputPredictorPNGSubStream(result,columnsValue);
-					break;
-				}
 				case 12:
-				{
-
-					result =  new InputPredictorPNGUpStream(result,columnsValue);
-					break;
-				}
 				case 13:
-				{
-
-					result =  new InputPredictorPNGAverageStream(result,columnsValue);
-					break;
-				}
 				case 14:
-				{
-					result =  new InputPredictorPNGPaethStream(result,columnsValue);
-					break;
-				}
 				case 15:
 				{
+					// Gal: optimum can handle all presets, because non-optimum presets still require a function sign flag
+					// at line start...so optimum can handle them.
 					result =  new InputPredictorPNGOptimumStream(result,
 																 colorsValue,
 																 bitsPerComponentValue,
