@@ -902,6 +902,13 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 
 			while(it.MoveNext() && PDFHummus::eSuccess == status)
 			{
+				if (it.GetItem()->GetType() == PDFObject::ePDFObjectNull) {
+					// null pointer. mark as empty page
+					mPagesObjectIDs[ioCurrentPageIndex] = 0;
+					++ioCurrentPageIndex;
+					continue;
+				}
+
 				if(it.GetItem()->GetType() != PDFObject::ePDFObjectIndirectObjectReference)
 				{
 					TRACE_LOG1("PDFParser::ParsePagesIDs, unexpected type for a Kids array object, type = %s",PDFObject::scPDFObjectTypeLabel(it.GetItem()->GetType()));
@@ -949,6 +956,11 @@ PDFDictionary* PDFParser::ParsePage(unsigned long inPageIndex)
 {
 	if(mPagesCount <= inPageIndex)
 		return NULL;
+
+	if (mPagesObjectIDs[inPageIndex] == 0) {
+		TRACE_LOG1("PDFParser::ParsePage, page marked as null at index %ld", inPageIndex);
+		return NULL;
+	}
 
 	PDFObjectCastPtr<PDFDictionary> pageObject(ParseNewObject(mPagesObjectIDs[inPageIndex]));
 
