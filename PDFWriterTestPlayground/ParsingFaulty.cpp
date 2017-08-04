@@ -144,10 +144,15 @@ EStatusCode ParsingFaulty::Run(const TestConfiguration& inTestConfiguration) {
 
 	status = openPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/2.unfamiliar.entry.type.pdf"));
 	if (status != eSuccess) {
-		std::cout << "Failed at start parsing 1.unfamiliar.entry.type.pdf" << std::endl;
+		std::cout << "Failed at start parsing 2.unfamiliar.entry.type.pdf" << std::endl;
 		return status;
 	}
 
+	status = openPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/test5.pdf"));
+	if (status != eSuccess) {
+		std::cout << "Failed at start parsing test5.pdf" << std::endl;
+		return status;
+	}
 
 	return status;
 }
