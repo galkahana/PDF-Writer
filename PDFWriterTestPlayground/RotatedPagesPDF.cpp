@@ -72,6 +72,7 @@ EStatusCode RotatedPagesPDF::Run(const TestConfiguration& inTestConfiguration)
 			PDFPage page;
 			page.SetMediaBox(PDFRectangle(0,0,595,842));
 
+			cout << "Setting invalid rotation to 33\n";
 			page.SetRotate(33);
 			if ( page.GetRotate().second != 0 )
 			{
@@ -79,7 +80,8 @@ EStatusCode RotatedPagesPDF::Run(const TestConfiguration& inTestConfiguration)
 				cout<<"Failed to reject invalid rotation\n";
 				break;
 			}
-			
+			cout << "success in failing to apply invalid rotation\n";
+
 			page.SetRotate(i*90);
 		
 			std::ostringstream s;

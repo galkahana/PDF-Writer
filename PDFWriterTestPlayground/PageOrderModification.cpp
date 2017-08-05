@@ -25,7 +25,8 @@ limitations under the License.
 #include "CatalogInformation.h"
 #include "PDFObjectCast.h"
 #include "PDFIndirectObjectReference.h"
-
+#include "PDFDocumentCopyingContext.h"
+#include "DictionaryContext.h"
 
 #include <iostream>
 
@@ -42,6 +43,43 @@ PageOrderModification::~PageOrderModification(void)
 {
 }
 
+void addPageToNewTree(unsigned long inPageIndex, PDFWriter& inWriter, PDFDocumentCopyingContext* inCopyingContext) {
+	CatalogInformation& catalogInformation = inWriter.GetDocumentContext().GetCatalogInformation();
+	IndirectObjectsReferenceRegistry& objectsRegistry = inWriter.GetObjectsContext().GetInDirectObjectsRegistry();
+	PDFParser& modifiedFileParser = inWriter.GetModifiedFileParser();
+
+	ObjectIDType pageObjectId = modifiedFileParser.GetPageObjectID(inPageIndex);
+
+	// re-add the page to the new page tree
+	ObjectIDType newParent =  catalogInformation.AddPageToPageTree(pageObjectId, objectsRegistry);
+
+	// now modify the page object to refer to the new parent
+	PDFObjectCastPtr<PDFDictionary> pageDictionaryObject = modifiedFileParser.ParsePage(inPageIndex);
+	MapIterator<PDFNameToPDFObjectMap>  pageDictionaryObjectIt = pageDictionaryObject->GetIterator();
+	ObjectsContext& objectContext = inWriter.GetObjectsContext();
+
+
+	objectContext.StartModifiedIndirectObject(pageObjectId);
+	DictionaryContext* modifiedPageObject = objectContext.StartDictionary();
+
+	// copy all elements of the page to the new page object, but the "Parent" element
+	while (pageDictionaryObjectIt.MoveNext())
+	{
+		if (pageDictionaryObjectIt.GetKey()->GetValue() != "Parent")
+		{
+			modifiedPageObject->WriteKey(pageDictionaryObjectIt.GetKey()->GetValue());
+			inCopyingContext->CopyDirectObjectAsIs(pageDictionaryObjectIt.GetValue());
+		}
+	}
+
+	// now add parent entry
+	modifiedPageObject->WriteKey("Parent");
+	modifiedPageObject->WriteNewObjectReferenceValue(newParent);
+
+	objectContext.EndDictionary(modifiedPageObject);
+	objectContext.EndIndirectObject();
+
+}
 
 EStatusCode PageOrderModification::Run(const TestConfiguration& inTestConfiguration)
 {
@@ -71,20 +109,22 @@ EStatusCode PageOrderModification::Run(const TestConfiguration& inTestConfigurat
 		for (unsigned long i = 0; i < modifiedFileParser.GetPagesCount(); ++i)
 			cout << (i + 1) << ": is object id " << modifiedFileParser.GetPageObjectID(i) << "\n";
 		
+		// create a shared copying context to be used when re-addig the pages, to share elements
+		PDFDocumentCopyingContext* copyingContext = pdfWriter.CreatePDFCopyingContextForModifiedFile();
 
 		// let's re-add the second page and then the first page, in this way changing their order. for this we'll need
 		// direct access to the document context catalog information, which holds the page tree
-		CatalogInformation& catalogInformation = pdfWriter.GetDocumentContext().GetCatalogInformation();
-		IndirectObjectsReferenceRegistry& objectsRegistry = pdfWriter.GetObjectsContext().GetInDirectObjectsRegistry();
 		
 		// add pages in any order that you want
-		catalogInformation.AddPageToPageTree(modifiedFileParser.GetPageObjectID(1), objectsRegistry);
-		catalogInformation.AddPageToPageTree(modifiedFileParser.GetPageObjectID(0), objectsRegistry);
+		addPageToNewTree(1, pdfWriter, copyingContext);
+		addPageToNewTree(0, pdfWriter, copyingContext);
 
 		// delete previous page tree to allow override
 		PDFObjectCastPtr<PDFIndirectObjectReference> catalogReference(modifiedFileParser.GetTrailer()->QueryDirectObject("Root"));
 		PDFObjectCastPtr<PDFDictionary> catalog(modifiedFileParser.ParseNewObject(catalogReference->mObjectID));
 		PDFObjectCastPtr<PDFIndirectObjectReference> pagesReference(catalog->QueryDirectObject("Pages"));
+		IndirectObjectsReferenceRegistry& objectsRegistry = pdfWriter.GetObjectsContext().GetInDirectObjectsRegistry();
+
 		objectsRegistry.DeleteObject(pagesReference->mObjectID);
 
 		status = pdfWriter.EndPDF();
