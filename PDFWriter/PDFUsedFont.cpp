@@ -262,12 +262,12 @@ PDFUsedFont::TextMeasures PDFUsedFont::CalculateTextDimensions(const UIntList& i
 
 	PDFUsedFont::TextMeasures result;
 
-	result.xMin = bbox.xMin*inFontSize/1000;
-	result.yMin = bbox.yMin*inFontSize/1000;
-	result.xMax = bbox.xMax*inFontSize/1000;
-	result.yMax = bbox.yMax*inFontSize/1000;
-	result.width = (bbox.xMax-bbox.xMin)*inFontSize/1000;
-	result.height = (bbox.yMax-bbox.yMin)*inFontSize/1000;
+	result.xMin = bbox.xMin * static_cast<double>(inFontSize) / 1000.0;
+	result.yMin = bbox.yMin * static_cast<double>(inFontSize) / 1000.0;
+	result.xMax = bbox.xMax * static_cast<double>(inFontSize) / 1000.0;
+	result.yMax = bbox.yMax * static_cast<double>(inFontSize) / 1000.0;
+	result.width = (bbox.xMax - bbox.xMin) * static_cast<double>(inFontSize) / 1000.0;
+	result.height = (bbox.yMax - bbox.yMin) * static_cast<double>(inFontSize) / 1000.0;
 
 	return result;
 }
