@@ -944,7 +944,7 @@ static const std::string scXObject = "XObject";
 static const std::string scSubType = "Subtype";
 static const std::string scForm = "Form";
 static const std::string scFormType = "FormType";
-PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBoundingBox,ObjectIDType inFormXObjectID,const double* inMatrix,const bool inUseTransparencyGroup = false)
+PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBoundingBox,ObjectIDType inFormXObjectID,const double* inMatrix,const bool inUseTransparencyGroup)
 {
 	PDFFormXObject* aFormXObject = NULL;
 	do
@@ -1010,7 +1010,7 @@ PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBounding
 }
 
 
-PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBoundingBox,const double* inMatrix,const bool inUseTransparencyGroup = false)
+PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBoundingBox,const double* inMatrix,const bool inUseTransparencyGroup)
 {
 	ObjectIDType formXObjectID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
 	return StartFormXObject(inBoundingBox,formXObjectID,inMatrix,inUseTransparencyGroup);

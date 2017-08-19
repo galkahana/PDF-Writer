@@ -2138,7 +2138,7 @@ void PDFParser::SetParserExtender(IPDFParserExtender* inParserExtender)
 
 bool PDFParser::IsEncryptionSupported()
 {
-    return ((mDecryptionHelper.CanDecryptDocument()) || mParserExtender) && mParserExtender->DoesSupportEncryption();
+    return mDecryptionHelper.CanDecryptDocument() || mParserExtender && mParserExtender->DoesSupportEncryption();
 }
 
 ObjectIDType PDFParser::GetXrefSize()
