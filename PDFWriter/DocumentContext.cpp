@@ -944,7 +944,7 @@ static const std::string scXObject = "XObject";
 static const std::string scSubType = "Subtype";
 static const std::string scForm = "Form";
 static const std::string scFormType = "FormType";
-PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBoundingBox,ObjectIDType inFormXObjectID,const double* inMatrix)
+PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBoundingBox,ObjectIDType inFormXObjectID,const double* inMatrix,const bool inUseTransparencyGroup = false)
 {
 	PDFFormXObject* aFormXObject = NULL;
 	do
@@ -977,6 +977,10 @@ PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBounding
 				mObjectsContext->WriteDouble(inMatrix[i]);
 			mObjectsContext->EndArray(eTokenSeparatorEndLine);
 		}
+        if (inUseTransparencyGroup) {
+          xobjectContext->WriteKey("Group");
+          xobjectContext->WriteHexStringValue("</S /Transparency>");
+        }
 
 		// Resource dict 
 		xobjectContext->WriteKey(scResources);	
@@ -1006,10 +1010,10 @@ PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBounding
 }
 
 
-PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBoundingBox,const double* inMatrix)
+PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBoundingBox,const double* inMatrix,const bool inUseTransparencyGroup = false)
 {
 	ObjectIDType formXObjectID = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
-	return StartFormXObject(inBoundingBox,formXObjectID,inMatrix);
+	return StartFormXObject(inBoundingBox,formXObjectID,inMatrix,inUseTransparencyGroup);
 }
 
 EStatusCode DocumentContext::EndFormXObjectNoRelease(PDFFormXObject* inFormXObject)
