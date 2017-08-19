@@ -81,7 +81,7 @@ public:
 	// these would be flags for the font as a whole. if subsetting, match to the character set
 	unsigned int GetFontFlags();
 	const char* GetTypeString();
-    std::string GetGlyphName(unsigned int inGlyphIndex);
+	std::string GetGlyphName(unsigned int inGlyphIndex, bool safe= false);
     FT_Pos GetGlyphWidth(unsigned int inGlyphIndex);
 	bool GetGlyphOutline(unsigned int inGlyphIndex, IOutlineEnumerator& inEnumerator);
 
@@ -184,4 +184,5 @@ public:
 		FT_Vector mToLast;
 	};
 };
+
 
