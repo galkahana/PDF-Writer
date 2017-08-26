@@ -86,7 +86,7 @@ public:
 	bool GetGlyphOutline(unsigned int inGlyphIndex, IOutlineEnumerator& inEnumerator);
 
 	// Create the written font object, matching to write this font in the best way.
-	IWrittenFont* CreateWrittenFontObject(ObjectsContext* inObjectsContext);
+	IWrittenFont* CreateWrittenFontObject(ObjectsContext* inObjectsContext, bool inFontIsToBeEmbedded);
 
 
 	// flags determining values

@@ -632,7 +632,7 @@ EStatusCode FreeTypeFaceWrapper::GetGlyphsForUnicodeText(const ULongListList& in
 	return status;	
 }
 
-IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObjectsContext)
+IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObjectsContext, bool inFontIsToBeEmbedded)
 {
 	if(mFace)
 	{
@@ -647,7 +647,7 @@ IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObj
 			if(FT_Get_CID_Is_Internally_CID_Keyed(mFace,&isCID) != 0)
 				isCID = false;	
 
-			result = new WrittenFontCFF(inObjectsContext,isCID != 0);
+			result = new WrittenFontCFF(inObjectsContext,isCID != 0, inFontIsToBeEmbedded); // CFF fonts should know if font is to be embedded, as the embedding code involves re-encoding of glyphs
 		}
 		else if(strcmp(fontFormat,scTrueType) == 0)
 		{

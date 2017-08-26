@@ -77,6 +77,10 @@ void DocumentContext::SetObjectsContext(ObjectsContext* inObjectsContext)
 #endif
 }
 
+void DocumentContext::SetEmbedFonts(bool inEmbedFonts) {
+	mUsedFontsRepository.SetEmbedFonts(inEmbedFonts);
+}
+
 void DocumentContext::SetOutputFileInformation(OutputFile* inOutputFile)
 {
 	// just save the output file path for the ID generation in the end
@@ -172,7 +176,7 @@ void DocumentContext::Write4BinaryBytes()
 	mObjectsContext->EndFreeContext();
 }
 
-EStatusCode	DocumentContext::FinalizeNewPDF(bool inEmbedFonts)
+EStatusCode	DocumentContext::FinalizeNewPDF()
 {
 	EStatusCode status;
 	LongFilePositionType xrefTablePosition;
@@ -181,7 +185,7 @@ EStatusCode	DocumentContext::FinalizeNewPDF(bool inEmbedFonts)
 	// this will finalize writing all renments of the file, like xref, trailer and whatever objects still accumulating
 	do
 	{
-		status = WriteUsedFontsDefinitions(inEmbedFonts);
+		status = WriteUsedFontsDefinitions();
 		if(status != 0)
 			break;
 
@@ -1326,9 +1330,9 @@ PDFUsedFont* DocumentContext::GetFontForFile(const std::string& inFontFilePath,l
 	return mUsedFontsRepository.GetFontForFile(inFontFilePath,inFontIndex);
 }
 
-EStatusCode DocumentContext::WriteUsedFontsDefinitions(bool inEmbedFonts)
+EStatusCode DocumentContext::WriteUsedFontsDefinitions()
 {
-	return mUsedFontsRepository.WriteUsedFontsDefinitions(inEmbedFonts);
+	return mUsedFontsRepository.WriteUsedFontsDefinitions();
 }
 
 PDFUsedFont* DocumentContext::GetFontForFile(const std::string& inFontFilePath,const std::string& inAdditionalMeticsFilePath,long inFontIndex)
@@ -2217,14 +2221,14 @@ private:
     EPDFVersion mPDFVersion;
 };
 
-EStatusCode	DocumentContext::FinalizeModifiedPDF(PDFParser* inModifiedFileParser, EPDFVersion inModifiedPDFVersion,bool inEmbedFonts)
+EStatusCode	DocumentContext::FinalizeModifiedPDF(PDFParser* inModifiedFileParser, EPDFVersion inModifiedPDFVersion)
 {
 	EStatusCode status;
 	LongFilePositionType xrefTablePosition;
     
 	do
 	{
-		status = WriteUsedFontsDefinitions(inEmbedFonts);
+		status = WriteUsedFontsDefinitions();
 		if(status != eSuccess)
 			break;
         
