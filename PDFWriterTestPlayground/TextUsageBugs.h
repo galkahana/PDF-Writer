@@ -32,5 +32,7 @@ public:
 private:
 
 	PDFHummus::EStatusCode RunCNRSTest(const TestConfiguration& inTestConfiguration);
+	PDFHummus::EStatusCode RunCNRS2SampleTest(const TestConfiguration& inTestConfiguration);
+	PDFHummus::EStatusCode RunCNRS2Test(const TestConfiguration& inTestConfiguration);
 
 };
