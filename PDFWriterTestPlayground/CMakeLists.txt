@@ -58,6 +58,7 @@ SimpleContentPageTest.cpp
 SimpleTextUsage.cpp
 TestMeasurementsTest.cpp
 TestsRunner.cpp
+TextUsageBugs.cpp
 HighLevelImages.cpp
 TIFFImageTest.cpp
 TiffSpecialsTest.cpp
@@ -127,6 +128,7 @@ SimpleContentPageTest.h
 SimpleTextUsage.h
 TestMeasurementsTest.h
 TestsRunner.h
+TextUsageBugs.h
 HighLevelImages.h
 TIFFImageTest.h
 TiffSpecialsTest.h
@@ -321,6 +323,8 @@ SimpleTextUsage.cpp
 SimpleTextUsage.h
 TestMeasurementsTest.cpp
 TestMeasurementsTest.h
+TextUsageBugs.cpp
+TextUsageBugs.h
 UnicodeTextUsage.cpp
 UnicodeTextUsage.h
 )
