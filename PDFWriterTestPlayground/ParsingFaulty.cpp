@@ -23,6 +23,7 @@ limitations under the License.
 #include "PDFPageInput.h"
 #include "InputFile.h"
 #include "EStatusCode.h"
+#include "Trace.h"
 
 #include <iostream>
 #include <fstream>
@@ -105,6 +106,9 @@ EStatusCode openPDFForRotationTest(const string& path) {
 }
 
 EStatusCode ParsingFaulty::Run(const TestConfiguration& inTestConfiguration) {
+	Trace::DefaultTrace().SetLogSettings(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "parsingFaultyLog.txt"), true, true);
+
+
 	EStatusCode status = openPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/test3.pdf"));
 	if (status != eSuccess) {
 		std::cout << "Failed at start parsing test3.pdf" << std::endl;
