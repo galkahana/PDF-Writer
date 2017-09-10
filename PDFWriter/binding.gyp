@@ -18,6 +18,7 @@
                '<(module_root_dir)/src/deps/LibJpeg/binding.gyp:libjpeg',
                '<(module_root_dir)/src/deps/ZLib/binding.gyp:zlib',
                '<(module_root_dir)/src/deps/LibTiff/binding.gyp:libtiff'
+               '<(module_root_dir)/src/deps/LibPng/binding.gyp:libpng'
             ],
             'include_dirs': [
                 '<(module_root_dir)/src/deps/LibAesgm',
@@ -25,6 +26,7 @@
                 '<(module_root_dir)/src/deps/LibTiff',
                 '<(module_root_dir)/src/deps/ZLib',
                 '<(module_root_dir)/src/deps/LibJpeg'
+                '<(module_root_dir)/src/deps/LibPng'
             ],
            'sources': [
                'AbstractContentContext.cpp',
