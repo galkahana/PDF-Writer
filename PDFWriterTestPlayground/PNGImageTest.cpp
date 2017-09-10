@@ -128,6 +128,10 @@ EStatusCode PNGImageTest::Run(const TestConfiguration& inTestConfiguration)
 			cout << "failed in original.png test" << "\n";
 		}
 
+		status = RunImageTest(inTestConfiguration, "pnglogo-grr");
+		if (status != eSuccess) {
+			cout << "failed in original.png test" << "\n";
+		}
 
 	} while (false);
 	return status;

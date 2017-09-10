@@ -37,7 +37,12 @@
 #include "SafeBufferMacrosDefs.h"
 #include "png.h"
 
+#include <list>
+
 using namespace PDFHummus;
+using namespace std;
+
+typedef list<PDFImageXObject*> PDFImageXObjectList;
 
 
 PNGImageHandler::PNGImageHandler(void)
@@ -68,6 +73,7 @@ static const std::string scDeviceRGB = "DeviceRGB";
 static const std::string scBitsPerComponent = "BitsPerComponent";
 static const std::string scSMask = "SMask";
 PDFImageXObject* CreateImageXObjectForData(png_structp png_ptr, png_infop info_ptr, png_bytep row, ObjectsContext* inObjectsContext) {
+	PDFImageXObjectList listOfImages;
 	PDFImageXObject* imageXObject = NULL;
 	PDFStream* imageStream = NULL;
 	EStatusCode status = eSuccess;
@@ -139,8 +145,8 @@ PDFImageXObject* CreateImageXObjectForData(png_structp png_ptr, png_infop info_p
 			OutputStringBufferStream alphaWriteStream(&alphaComponentsData);
 
 			while (y-- > 0) {
-				// read
-				png_read_row(png_ptr, row, NULL);
+				// read (using "rectangle" method)
+				png_read_row(png_ptr, NULL, row);
 				// write. iterate per sample, splitting color components and alpha
 				for (png_uint_32 i = 0; i < transformed_width; ++i) {
 					
@@ -217,7 +223,7 @@ PDFImageXObject* CreateImageXObjectForData(png_structp png_ptr, png_infop info_p
 }
 
 PDFFormXObject* CreateImageFormXObjectFromImageXObject(
-	PDFImageXObject* inImageXObject, 
+	const PDFImageXObjectList& inImageXObject, 
 	ObjectIDType inFormXObjectID, 
 	png_uint_32 transformed_width, 
 	png_uint_32 transformed_height, 
@@ -229,10 +235,14 @@ PDFFormXObject* CreateImageFormXObjectFromImageXObject(
 		formXObject = inDocumentContext->StartFormXObject(PDFRectangle(0, 0, transformed_width, transformed_height), inFormXObjectID);
 		XObjectContentContext* xobjectContentContext = formXObject->GetContentContext();
 
-		xobjectContentContext->q();
-		xobjectContentContext->cm(transformed_width, 0, 0, transformed_height, 0, 0);
-		xobjectContentContext->Do(formXObject->GetResourcesDictionary().AddImageXObjectMapping(inImageXObject));
-		xobjectContentContext->Q();
+		// iterate the images in the list and place one on top of each other
+		PDFImageXObjectList::const_iterator it = inImageXObject.begin();
+		for (; it != inImageXObject.end(); ++it) {
+			xobjectContentContext->q();
+			xobjectContentContext->cm(transformed_width, 0, 0, transformed_height, 0, 0);
+			xobjectContentContext->Do(formXObject->GetResourcesDictionary().AddImageXObjectMapping(*it));
+			xobjectContentContext->Q();
+		}
 
 		EStatusCode status = inDocumentContext->EndFormXObjectNoRelease(formXObject);
 		if (status != PDFHummus::eSuccess)
@@ -278,6 +288,7 @@ PDFFormXObject* CreateFormXObjectForPNGStream(IByteReaderWithPosition* inPNGStre
 	// Start reading image to get dimension. we'll then create the form, and then the image
 	PDFFormXObject* formXObject = NULL;
 	PDFImageXObject* imageXObject = NULL;
+	PDFImageXObjectList listOfImages;
 	EStatusCode status = eSuccess;
 	png_structp png_ptr = NULL;
 	png_infop info_ptr = NULL;
@@ -333,6 +344,9 @@ PDFFormXObject* CreateFormXObjectForPNGStream(IByteReaderWithPosition* inPNGStre
 		if (bit_depth < 8)
 			png_set_packing(png_ptr);
 
+		// setup for potential interlace
+		int passes = png_set_interlace_handling(png_ptr);
+
 		// let's update info so now it fits the post transform data
 		png_read_update_info(png_ptr, info_ptr);
 
@@ -347,10 +361,33 @@ PDFFormXObject* CreateFormXObjectForPNGStream(IByteReaderWithPosition* inPNGStre
 		if (row == NULL)
 			png_error(png_ptr, "OOM allocating row buffers");
 
-		// K. time to start outputting something.
-		imageXObject =  CreateImageXObjectForData(png_ptr,info_ptr,row,inObjectsContext);
-		if (!imageXObject) {
-			status = eFailure;
+		// K. time to start outputting something. do 1 for each pass, just in case we get
+
+
+		// for each pass, create an image xobject.
+		while (passes > 1) {
+			// Gal: actually no.i jist need the last image.so skip the rest [till i find out otherwise...so i'm keeping the rest of the code intact]
+			png_uint_32 y = transformed_height;
+
+			while (y-- > 0) {
+				// read (using "rectangle" method)
+				png_read_row(png_ptr, NULL, row);
+			}
+
+			--passes;
+		}
+
+		while (passes-- > 0) {
+			imageXObject = CreateImageXObjectForData(png_ptr, info_ptr, row, inObjectsContext);
+			if (!imageXObject) {
+				status = eFailure;
+				break;
+			}
+
+			listOfImages.push_back(imageXObject);
+		}
+
+		if (eFailure == status) {
 			break;
 		}
 
@@ -358,7 +395,7 @@ PDFFormXObject* CreateFormXObjectForPNGStream(IByteReaderWithPosition* inPNGStre
 		png_read_end(png_ptr, NULL);
 
 		// now let's get to the form, which should just place the image and be done
-		formXObject = CreateImageFormXObjectFromImageXObject(imageXObject, inFormXObjectID, transformed_width, transformed_height, inDocumentContext);
+		formXObject = CreateImageFormXObjectFromImageXObject(listOfImages, inFormXObjectID, transformed_width, transformed_height, inDocumentContext);
 		if (!formXObject) {
 			status = eFailure;
 		}
@@ -366,7 +403,10 @@ PDFFormXObject* CreateFormXObjectForPNGStream(IByteReaderWithPosition* inPNGStre
 
 	png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 	if (row != NULL) free(row);
-	delete imageXObject;
+	PDFImageXObjectList::iterator it = listOfImages.begin();
+	for (; it != listOfImages.end(); ++it)
+		delete *it;
+	listOfImages.clear();
 	if (status != eSuccess) {
 		delete formXObject;
 		formXObject = NULL;
