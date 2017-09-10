@@ -8,7 +8,7 @@
                 'compress.c',
                 'crc32.c',
                 'deflate.c',
-				'gzclose.c,'
+				'gzclose.c',
 				'gzlib.c',
 				'gzread.c',
 				'gzwrite.c',
@@ -19,7 +19,6 @@
                 'trees.c',
                 'uncompr.c',
                 'zutil.c',
-
                 'crc32.h',
                 'deflate.h',
                 'gzguts.h',
