@@ -50,6 +50,7 @@ PDFObjectParserTest.cpp
 PDFParserTest.cpp
 PDFTextStringTest.cpp
 PFBStreamTest.cpp
+PNGImageTest.cpp
 PosixPath.cpp
 RecryptPDF.cpp
 RefCountTest.cpp
@@ -120,6 +121,7 @@ PDFObjectParserTest.h
 PDFParserTest.h
 PDFTextStringTest.h
 PFBStreamTest.h
+PNGImageTest.h
 PosixPath.h
 RecryptPDF.h
 RefCountTest.h
@@ -316,6 +318,8 @@ TIFFImageTest.cpp
 TIFFImageTest.h
 TiffSpecialsTest.cpp
 TiffSpecialsTest.h
+PNGImageTest.cpp
+PNGImageTest.h
 )
 
 source_group(Tests\\Text FILES
@@ -344,10 +348,14 @@ Type1Test.h
 if(PDFHUMMUS_NO_DCT)
 	add_definitions(-DPDFHUMMUS_NO_DCT=1)
 endif(PDFHUMMUS_NO_DCT)
+
 if(PDFHUMMUS_NO_TIFF)
 	add_definitions(-DPDFHUMMUS_NO_TIFF=1)
 endif(PDFHUMMUS_NO_TIFF)
 
+if(PDFHUMMUS_NO_PNG)
+	add_definitions(-DPDFHUMMUS_NO_PNG=1)
+endif(PDFHUMMUS_NO_PNG)
 
 include_directories (${PDFWriter_SOURCE_DIR})
 include_directories (${LIBAESGM_INCLUDE_DIRS})
@@ -365,6 +373,12 @@ else(NOT PDFHUMMUS_NO_TIFF)
 endif(NOT PDFHUMMUS_NO_TIFF)
 include_directories (${FREETYPE_INCLUDE_DIRS})
 
+if(NOT PDFHUMMUS_NO_PNG)
+	include_directories (${LIBPNG_INCLUDE_DIRS})
+else(NOT PDFHUMMUS_NO_PNG)
+	add_definitions(-DPDFHUMMUS_NO_PNG=1)
+endif(NOT PDFHUMMUS_NO_PNG)
+
 add_dependencies(PDFWriterTestPlayground PDFWriter) #add_dependencies makes sure that dependencies are built before main target
 
 target_link_libraries (PDFWriterTestPlayground PDFWriter)
@@ -377,6 +391,9 @@ target_link_libraries (PDFWriterTestPlayground ${ZLIB_LDFLAGS})
 if(NOT PDFHUMMUS_NO_TIFF)
 	target_link_libraries (PDFWriterTestPlayground ${LIBTIFF_LDFLAGS})
 endif(NOT PDFHUMMUS_NO_TIFF)
+if(NOT PDFHUMMUS_NO_PNG)
+	target_link_libraries (PDFWriterTestPlayground ${LIBPNG_LDFLAGS})
+endif(NOT PDFHUMMUS_NO_PNG)
 
 if(APPLE)
 	set(CMAKE_EXE_LINKER_FLAGS "-framework CoreFoundation")
