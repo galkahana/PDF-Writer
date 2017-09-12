@@ -18,6 +18,9 @@
 
    
 */
+
+#ifndef PDFHUMMUS_NO_PNG
+
 #include "PNGImageTest.h"
 #include "TestsRunner.h"
 #include "PDFWriter.h"
@@ -138,3 +141,5 @@ EStatusCode PNGImageTest::Run(const TestConfiguration& inTestConfiguration)
 }
 
 ADD_CATEGORIZED_TEST(PNGImageTest,"PDF Images")
+
+#endif

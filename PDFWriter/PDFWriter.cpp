@@ -263,6 +263,7 @@ PDFFormXObject* PDFWriter::CreateFormXObjectFromTIFFStream(IByteReaderWithPositi
 
 #endif
 
+#ifndef PDFHUMMUS_NO_PNG
 PDFFormXObject* PDFWriter::CreateFormXObjectFromPNGFile(const std::string& inPNGFilePath) {
 	return CreateFormXObjectFromPNGFile(inPNGFilePath, mObjectsContext.GetInDirectObjectsRegistry().AllocateNewObjectID());
 }
@@ -285,7 +286,7 @@ PDFFormXObject* PDFWriter::CreateFormXObjectFromPNGStream(IByteReaderWithPositio
 	return mDocumentContext.CreateFormXObjectFromPNGStream(inPNGStream, inFormXObjectId);
 }
 
-
+#endif
 
 PDFImageXObject* PDFWriter::CreateImageXObjectFromJPGFile(const std::string& inJPGFilePath,ObjectIDType inImageXObjectID)
 {
