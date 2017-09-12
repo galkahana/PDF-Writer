@@ -2973,8 +2973,8 @@ EStatusCode DocumentContext::WriteFormForImage(
         {
             status = eFailure;
         }
-    }
 #endif
+	}
     return status;
 }
 
