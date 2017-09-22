@@ -64,7 +64,12 @@ public:
 
 	void OnObjectStart(long long inObjectID, long long inGenerationNumber);
 	void OnObjectEnd(PDFObject* inObject);
-	IByteReader* CreateDecryptionFilterForStream(PDFStreamInput* inStream, IByteReader* inToWrapStream);
+	// this should be used by parser to grab a default filter for stream. will return null if a stream-specific filter is to be used, or that there's no encryption expected
+	// for this stream
+	IByteReader* CreateDefaultDecryptionFilterForStream(PDFStreamInput* inStream, IByteReader* inToWrapStream);
+
+	// use this for creating a decryption filter for a stream that uses a stream-specific crypt filter
+	IByteReader* CreateDecryptionFilterForStream(PDFStreamInput* inStream, IByteReader* inToWrapStream, const std::string& inCryptName);
 
 	unsigned int GetLength() const;
 	unsigned int GetV() const;
@@ -79,6 +84,8 @@ public:
 	// Reset after or before usage
 	void Reset();
 private:
+	PDFParser* mParser;
+
 	// named xcrypts, for V4
 	StringToXCryptionCommonMap mXcrypts; 
 	// xcrypt to use for streams
@@ -95,7 +102,8 @@ private:
 	unsigned int mV;
 	unsigned int mLength; // mLength is in bytes!
 	
-	IByteReader* CreateDecryptionReader(IByteReader* inSourceStream,const ByteList& inEncryptionKey);
+	IByteReader* CreateDecryptionReader(IByteReader* inSourceStream,const ByteList& inEncryptionKey, bool inUsingAES);
+	XCryptionCommon* GetCryptForStream(PDFStreamInput* inStream);
 
 	// Standard filter specific
 	bool mFailedPasswordVerification;

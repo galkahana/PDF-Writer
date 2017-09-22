@@ -124,6 +124,7 @@ public:
 		bool inEncryptMetaData,
 		const ByteList inU);
 
+	bool IsUsingAES();
 
 private:
 	ByteList mPaddingFiller;

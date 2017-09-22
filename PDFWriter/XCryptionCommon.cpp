@@ -371,3 +371,7 @@ bool XCryptionCommon::algorithm3_7(unsigned int inRevision,
 		inEncryptMetaData,
 		inU);
 }
+
+bool XCryptionCommon::IsUsingAES() {
+	return mUsingAES;
+}

@@ -34,6 +34,7 @@ limitations under the License.
 #include "RefCountPtr.h"
 #include "OutputStringBufferStream.h"
 #include "InputRC4XcodeStream.h"
+#include "InputAESDecodeStream.h"
 #include "Trace.h"
 
 using namespace std;
@@ -65,6 +66,7 @@ void DecryptionHelper::Reset() {
 	mXcryptStreams = NULL;
 	mXcryptStrings = NULL;
 	mXcryptAuthentication = NULL;
+	mParser = NULL;
 	Release();
 }
 
@@ -88,6 +90,7 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 	mSupportsDecryption = false;
 	mFailedPasswordVerification = false;
 	mDidSucceedOwnerPasswordVerification = false;
+	mParser = inParser;
 
 	// setup encrypted flag through the existance of encryption dict
 	PDFObjectCastPtr<PDFDictionary> encryptionDictionary(inParser->QueryDictionaryObject(inParser->GetTrailer(), "Encrypt"));
@@ -283,23 +286,76 @@ bool DecryptionHelper::DidSucceedOwnerPasswordVerification() const {
 
 static const string scEcnryptionKeyMetadataKey = "DecryptionHelper.EncryptionKey";
 
-IByteReader* DecryptionHelper::CreateDecryptionFilterForStream(PDFStreamInput* inStream, IByteReader* inToWrapStream) {
-	if (!IsEncrypted() || !CanDecryptDocument())
+bool HasCryptFilterDefinition(PDFParser* inParser, PDFStreamInput* inStream) {
+	RefCountPtr<PDFDictionary> streamDictionary(inStream->QueryStreamDictionary());
+
+	// check if stream has a crypt filter
+	RefCountPtr<PDFObject> filterObject(inParser->QueryDictionaryObject(streamDictionary.GetPtr(), "Filter"));
+	if (!filterObject)
+	{
+		// no filter, so stop here
+		return false;
+	}
+
+	if (filterObject->GetType() == PDFObject::ePDFObjectArray)
+	{
+		PDFArray* filterObjectArray = (PDFArray*)filterObject.GetPtr();
+		bool foundCrypt = false;
+		for (unsigned long i = 0; i < filterObjectArray->GetLength() && !foundCrypt; ++i)
+		{
+			PDFObjectCastPtr<PDFName> filterObjectItem(filterObjectArray->QueryObject(i));
+			if (!filterObjectItem)
+			{
+				// error
+				break;
+			}
+			foundCrypt = filterObjectItem->GetValue() == "Crypt";
+		}
+		return foundCrypt;
+	}
+	else if (filterObject->GetType() == PDFObject::ePDFObjectName)
+	{
+		return ((PDFName*)(filterObject.GetPtr()))->GetValue() == "Crypt";
+	}
+	else
+		return false; //???
+}
+
+
+IByteReader* DecryptionHelper::CreateDefaultDecryptionFilterForStream(PDFStreamInput* inStream, IByteReader* inToWrapStream) {
+	// This will create a decryption filter for streams that dont have their own defined crypt filters. null for no decryption filter
+	if (!IsEncrypted() || !CanDecryptDocument() || HasCryptFilterDefinition(mParser, inStream) || !mXcryptStreams)
 		return NULL;
 	
 	void* savedEcnryptionKey = inStream->GetMetadata(scEcnryptionKeyMetadataKey);
 	if (savedEcnryptionKey) {
-		return CreateDecryptionReader(inToWrapStream, *((ByteList*)savedEcnryptionKey));
+		return CreateDecryptionReader(inToWrapStream, *((ByteList*)savedEcnryptionKey), mXcryptStreams->IsUsingAES());
 	}
 	else 
 		return NULL;
+}
+
+IByteReader*  DecryptionHelper::CreateDecryptionFilterForStream(PDFStreamInput* inStream, IByteReader* inToWrapStream, const std::string& inCryptName) {
+	// note that here the original stream is returned instead of null
+	if (!IsEncrypted() || !CanDecryptDocument())
+		return inToWrapStream;
+
+	void* savedEcnryptionKey = inStream->GetMetadata(scEcnryptionKeyMetadataKey);
+	XCryptionCommon* xcryption = GetFilterForName(mXcrypts, inCryptName);
+
+	if (xcryption && savedEcnryptionKey) {
+		return CreateDecryptionReader(inToWrapStream, *((ByteList*)savedEcnryptionKey), xcryption->IsUsingAES());
+	}
+	else
+		return inToWrapStream;
+
 }
 
 std::string DecryptionHelper::DecryptString(const std::string& inStringToDecrypt) {
 	if (!IsEncrypted() || !CanDecryptDocument() || !mXcryptStrings)
 		return inStringToDecrypt;
 
-	IByteReader* decryptStream = CreateDecryptionReader(new InputStringStream(inStringToDecrypt), mXcryptStrings->GetCurrentObjectKey());
+	IByteReader* decryptStream = CreateDecryptionReader(new InputStringStream(inStringToDecrypt), mXcryptStrings->GetCurrentObjectKey(), mXcryptStrings->IsUsingAES());
 	if (decryptStream) {
 		OutputStringBufferStream outputStream;
 		OutputStreamTraits traits(&outputStream);
@@ -320,15 +376,74 @@ void DecryptionHelper::OnObjectStart(long long inObjectID, long long inGeneratio
 		it->second->OnObjectStart(inObjectID, inGenerationNumber);
 	}
 }
+
+
+XCryptionCommon* DecryptionHelper::GetCryptForStream(PDFStreamInput* inStream) {
+	// Get crypt for stream will return the right crypt filter thats supposed to be used for stream
+	// whether its the default stream encryption or a specific filter defined in the stream
+	// not the assumption (well, one that's all over) that if the name is not found in the CF dict, it
+	// will be "identity" which is the same as providing NULL as the xcryptioncommon return value
+
+	if (HasCryptFilterDefinition(mParser, inStream)) {
+		// find position of crypt filter, and get the name of the crypt filter from the decodeParams
+		RefCountPtr<PDFDictionary> streamDictionary(inStream->QueryStreamDictionary());
+
+		RefCountPtr<PDFObject> filterObject(mParser->QueryDictionaryObject(streamDictionary.GetPtr(), "Filter"));
+		if (filterObject->GetType() == PDFObject::ePDFObjectArray)
+		{
+			PDFArray* filterObjectArray = (PDFArray*)filterObject.GetPtr();
+			unsigned long i = 0;
+			for (; i < filterObjectArray->GetLength(); ++i)
+			{
+				PDFObjectCastPtr<PDFName> filterObjectItem(filterObjectArray->QueryObject(i));
+				if (filterObjectItem->GetValue() == "Crypt")
+					break;
+			}
+			if (i < filterObjectArray->GetLength()) {
+				PDFObjectCastPtr<PDFArray> decodeParams(mParser->QueryDictionaryObject(streamDictionary.GetPtr(), "DecodeParms"));
+				if (!decodeParams)
+					return mXcryptStreams;
+				// got index, look for the name in the decode params array
+				PDFObjectCastPtr<PDFDictionary> decodeParamsItem((mParser->QueryArrayObject(decodeParams.GetPtr(), i)));
+				if (!decodeParamsItem)
+					return mXcryptStreams;
+
+				PDFObjectCastPtr<PDFName> cryptFilterName(mParser->QueryDictionaryObject(decodeParamsItem.GetPtr(), "Name"));
+				return GetFilterForName(mXcrypts, cryptFilterName->GetValue());
+
+			}
+			else
+				return mXcryptStreams; // this shouldn't realy happen
+		}
+		else if (filterObject->GetType() == PDFObject::ePDFObjectName)
+		{
+			// has to be crypt filter, look for the name in decode params
+			PDFObjectCastPtr<PDFDictionary> decodeParamsItem((mParser->QueryDictionaryObject(streamDictionary.GetPtr(), "DecodeParms")));
+			if (!decodeParamsItem)
+				return mXcryptStreams;
+
+			PDFObjectCastPtr<PDFName> cryptFilterName(mParser->QueryDictionaryObject(decodeParamsItem.GetPtr(), "Name"));
+			return GetFilterForName(mXcrypts, cryptFilterName->GetValue());
+		}
+		else
+			return mXcryptStreams; // ???
+	}
+	else {
+		return mXcryptStreams;
+	}
+}
+
 void DecryptionHelper::OnObjectEnd(PDFObject* inObject) {
 	if (!IsEncrypted() || !CanDecryptDocument())
 		return;
 
 	// for streams, retain the encryption key with them, so i can later decrypt them when needed
-	// Gal: TBD here is to see if the stream has a crypt filter, and use that instead!!!
-	if ((inObject->GetType() == PDFObject::ePDFObjectStream) && mXcryptStreams) {
-		ByteList* savedKey = new ByteList(mXcryptStreams->GetCurrentObjectKey());
-		inObject->SetMetadata(scEcnryptionKeyMetadataKey, savedKey);
+	if ((inObject->GetType() == PDFObject::ePDFObjectStream)) {
+		XCryptionCommon* streamCryptFilter = GetCryptForStream((PDFStreamInput*)inObject);
+		if (streamCryptFilter) {
+			ByteList* savedKey = new ByteList(streamCryptFilter->GetCurrentObjectKey());
+			inObject->SetMetadata(scEcnryptionKeyMetadataKey, savedKey);
+		}
 	}
 
 	StringToXCryptionCommonMap::iterator it = mXcrypts.begin();
@@ -337,8 +452,11 @@ void DecryptionHelper::OnObjectEnd(PDFObject* inObject) {
 	}
 }
 
-IByteReader* DecryptionHelper::CreateDecryptionReader(IByteReader* inSourceStream, const ByteList& inEncryptionKey) {
-	return new InputRC4XcodeStream(inSourceStream, inEncryptionKey);
+IByteReader* DecryptionHelper::CreateDecryptionReader(IByteReader* inSourceStream, const ByteList& inEncryptionKey, bool inIsUsingAES) {
+	if (inIsUsingAES)
+		return new InputAESDecodeStream(inSourceStream, inEncryptionKey);
+	else
+		return new InputRC4XcodeStream(inSourceStream, inEncryptionKey);
 }
 
 
