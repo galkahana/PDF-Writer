@@ -67,6 +67,7 @@ void DecryptionHelper::Reset() {
 	mXcryptStrings = NULL;
 	mXcryptAuthentication = NULL;
 	mParser = NULL;
+	mHaltDecryption = false;
 	Release();
 }
 
@@ -341,6 +342,10 @@ IByteReader*  DecryptionHelper::CreateDecryptionFilterForStream(PDFStreamInput* 
 		return inToWrapStream;
 
 	void* savedEcnryptionKey = inStream->GetMetadata(scEcnryptionKeyMetadataKey);
+	if (!savedEcnryptionKey) {
+		// sign for no encryption here
+		return inToWrapStream;
+	}
 	XCryptionCommon* xcryption = GetFilterForName(mXcrypts, inCryptName);
 
 	if (xcryption && savedEcnryptionKey) {
@@ -352,7 +357,7 @@ IByteReader*  DecryptionHelper::CreateDecryptionFilterForStream(PDFStreamInput* 
 }
 
 std::string DecryptionHelper::DecryptString(const std::string& inStringToDecrypt) {
-	if (!IsEncrypted() || !CanDecryptDocument() || !mXcryptStrings)
+	if (!IsEncrypted() || !CanDecryptDocument()  || mHaltDecryption || !mXcryptStrings)
 		return inStringToDecrypt;
 
 	IByteReader* decryptStream = CreateDecryptionReader(new InputStringStream(inStringToDecrypt), mXcryptStrings->GetCurrentObjectKey(), mXcryptStrings->IsUsingAES());
@@ -438,7 +443,7 @@ void DecryptionHelper::OnObjectEnd(PDFObject* inObject) {
 		return;
 
 	// for streams, retain the encryption key with them, so i can later decrypt them when needed
-	if ((inObject->GetType() == PDFObject::ePDFObjectStream)) {
+	if ((inObject->GetType() == PDFObject::ePDFObjectStream) && !mHaltDecryption) {
 		XCryptionCommon* streamCryptFilter = GetCryptForStream((PDFStreamInput*)inObject);
 		if (streamCryptFilter) {
 			ByteList* savedKey = new ByteList(streamCryptFilter->GetCurrentObjectKey());
@@ -530,4 +535,12 @@ const ByteList& DecryptionHelper::GetU() const
 const ByteList& DecryptionHelper::GetInitialEncryptionKey() const
 {
 	return mXcryptAuthentication->GetInitialEncryptionKey();
+}
+
+void DecryptionHelper::HaltDecryption() {
+	mHaltDecryption = true;
+}
+
+void DecryptionHelper::ContinueDecryption() {
+	mHaltDecryption = false;
 }

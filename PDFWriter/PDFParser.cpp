@@ -1729,9 +1729,11 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 			mObjectParser.ResetReadState();
 		}
 
+		mDecryptionHelper.HaltDecryption(); // objects within objects stream already enjoy the object stream protection, and so are no longer encrypted
 		NotifyIndirectObjectStart(inObjectId,0);
 		anObject = mObjectParser.ParseNewObject();
 		NotifyIndirectObjectEnd(anObject);
+		mDecryptionHelper.ContinueDecryption();
 
 	}while(false);
 

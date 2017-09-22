@@ -83,6 +83,10 @@ public:
 
 	// Reset after or before usage
 	void Reset();
+
+	// client can tell at times to halt encryption, when knowing that parsing content that's not encrypted (in encrypted object stream, for instances)
+	void HaltDecryption();
+	void ContinueDecryption();
 private:
 	PDFParser* mParser;
 
@@ -97,6 +101,7 @@ private:
 
 	bool mIsEncrypted;
 	bool mSupportsDecryption;
+	bool mHaltDecryption;
 
 	// Generic encryption
 	unsigned int mV;

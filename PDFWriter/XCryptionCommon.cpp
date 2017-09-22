@@ -137,7 +137,7 @@ std::string XCryptionCommon::ByteListToString(const ByteList& inByteList) {
 	return buffer;
 }
 
-const Byte scAESSuffix[] = { 0x73, 0x41, 0x63, 0x54 };
+const Byte scAESSuffix[] = { 0x73, 0x41, 0x6C, 0x54 };
 ByteList XCryptionCommon::algorithm3_1(ObjectIDType inObjectNumber,
 	unsigned long inGenerationNumber,
 	const ByteList& inEncryptionKey,

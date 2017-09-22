@@ -20,6 +20,7 @@ limitations under the License.
 #include "InputAESDecodeStream.h"
 
 using namespace IOBasicTypes;
+#include <algorithm>
 
 InputAESDecodeStream::InputAESDecodeStream()
 {
@@ -58,12 +59,11 @@ void InputAESDecodeStream::Assign(IByteReader* inSourceReader, const ByteList& i
 	mReadBlockSize = AES_BLOCK_SIZE;
 	mOutIndex = mOut + mReadBlockSize;
 	mHitEnd = false;
-	mReadEndBlock = false;
 }
 
 bool InputAESDecodeStream::NotEnded()
 {
-	return mSourceStream && mSourceStream->NotEnded() || (mOutIndex - mOut) < mReadBlockSize;
+	return mSourceStream && mSourceStream->NotEnded() || !mHitEnd || ((mOutIndex - mOut) < mReadBlockSize);
 }
 
 LongBufferSizeType InputAESDecodeStream::Read(IOBasicTypes::Byte* inBuffer, LongBufferSizeType inSize)
@@ -93,7 +93,6 @@ LongBufferSizeType InputAESDecodeStream::Read(IOBasicTypes::Byte* inBuffer, Long
 		LongBufferSizeType secondBlockLength = mSourceStream->Read(mInNext, AES_BLOCK_SIZE);
 		if (secondBlockLength < AES_BLOCK_SIZE) {
 			mHitEnd = true;
-			mReadEndBlock = true;
 			 // secondBlockLength should be 0. this is the case that first buffer already contains padding
 			mReadBlockSize = AES_BLOCK_SIZE - mOut[AES_BLOCK_SIZE - 1];
 		}
@@ -108,16 +107,16 @@ LongBufferSizeType InputAESDecodeStream::Read(IOBasicTypes::Byte* inBuffer, Long
 
 
 	while (left > 0) {
-		remainderRead = left < (mReadBlockSize - (mOutIndex - mOut)) ? mReadBlockSize - (mOutIndex - mOut) : left;
+		remainderRead = std::min<size_t>(left,(mReadBlockSize - (mOutIndex - mOut)));
 		if (remainderRead > 0) {
 			// fill block with remainder from latest decryption
-			memcpy(inBuffer + inSize - left, mOutIndex, left);
+			memcpy(inBuffer + inSize - left, mOutIndex, remainderRead);
 			mOutIndex += remainderRead;
 			left -= remainderRead;
 		}
 
 		if (left > 0) {
-			if (mReadEndBlock) {
+			if (mHitEnd) {
 				// that's true EOF...so finish
 				break;
 			}
@@ -128,18 +127,13 @@ LongBufferSizeType InputAESDecodeStream::Read(IOBasicTypes::Byte* inBuffer, Long
 					break;
 				mOutIndex = mOut;
 
-				if (!mHitEnd) {
-					// read next buffer from input stream
-					LongBufferSizeType totalRead = mSourceStream->Read(mInNext, AES_BLOCK_SIZE);
-					if (totalRead < AES_BLOCK_SIZE) // this means that we got to final block, with padding
-						mHitEnd = true; // should be 0. now we know that next block is the final one, and can consider padding
+				// read next buffer from input stream
+				LongBufferSizeType totalRead = mSourceStream->Read(mInNext, AES_BLOCK_SIZE);
+				if (totalRead < AES_BLOCK_SIZE) { // this means that we got to final block, with padding
+					mHitEnd = true; // should be 0. 
+					// now we know that next block is the final one, and can consider padding
+					mReadBlockSize = AES_BLOCK_SIZE - mOut[AES_BLOCK_SIZE - 1];
 				}
-				else {
-					mReadEndBlock = true;
-					// now using last block, figure out padding
-					mReadBlockSize = AES_BLOCK_SIZE -  mOut[AES_BLOCK_SIZE - 1];
-				}
-
 			}
 		}
 	}

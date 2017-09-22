@@ -40,6 +40,19 @@ EStatusCode RecryptPDF::Run(const TestConfiguration& inTestConfiguration)
 
 	do
 	{
+		// recrypt a document with AES encryption, and remove it
+		status = PDFWriter::RecryptPDF(
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/china.pdf"),
+			"",
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "chinaWithoutEncryption.pdf"),
+			LogConfiguration::DefaultLogConfiguration(),
+			PDFCreationSettings(true, true));
+		if (status != PDFHummus::eSuccess)
+		{
+			cout << "failed to decrypt PDF\n";
+			break;
+		}
+
 		// recrypt an encrypted document with no password
 		status = PDFWriter::RecryptPDF(
 			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/PDFWithPassword.pdf"),

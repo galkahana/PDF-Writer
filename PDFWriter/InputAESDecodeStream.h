@@ -61,7 +61,6 @@ private:
 	unsigned char mReadBlockSize;
 	bool mIsIvInit;
 	bool mHitEnd;
-	bool mReadEndBlock;
 
 
 	IByteReader *mSourceStream;
