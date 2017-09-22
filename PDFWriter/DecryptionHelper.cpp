@@ -443,7 +443,7 @@ void DecryptionHelper::OnObjectEnd(PDFObject* inObject) {
 		return;
 
 	// for streams, retain the encryption key with them, so i can later decrypt them when needed
-	if ((inObject->GetType() == PDFObject::ePDFObjectStream) && !mHaltDecryption) {
+	if ((inObject->GetType() == PDFObject::ePDFObjectStream) && (!mHaltDecryption || HasCryptFilterDefinition(mParser, (PDFStreamInput*)inObject))) {
 		XCryptionCommon* streamCryptFilter = GetCryptForStream((PDFStreamInput*)inObject);
 		if (streamCryptFilter) {
 			ByteList* savedKey = new ByteList(streamCryptFilter->GetCurrentObjectKey());
