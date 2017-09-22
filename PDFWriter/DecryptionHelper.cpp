@@ -45,8 +45,16 @@ DecryptionHelper::DecryptionHelper(void)
 	Reset();
 }
 
+void DecryptionHelper::Release() {
+	StringToXCryptionCommonMap::iterator it = mXcrypts.begin();
+	for (; it != mXcrypts.end(); ++it)
+		delete it->second;
+	mXcrypts.clear();
+}
+
 DecryptionHelper::~DecryptionHelper(void)
 {
+	Release();
 }
 
 void DecryptionHelper::Reset() {
@@ -54,14 +62,34 @@ void DecryptionHelper::Reset() {
 	mFailedPasswordVerification = false;
 	mDidSucceedOwnerPasswordVerification = false;
 	mIsEncrypted = false;
+	mXcryptStreams = NULL;
+	mXcryptStrings = NULL;
+	mXcryptAuthentication = NULL;
+	Release();
 }
 
-EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const std::string& inPassword) {
+unsigned int ComputeLength(PDFObject* inLengthObject) {
+	ParsedPrimitiveHelper lengthHelper(inLengthObject);
+	unsigned int value = lengthHelper.IsNumber() ? (unsigned int)lengthHelper.GetAsInteger() : 40;
+	return value < 40 ? value : (value / 8); // this small check here is based on some errors i saw, where the length was given in bytes instead of bits
+}
+
+XCryptionCommon* GetFilterForName(const StringToXCryptionCommonMap& inXcryptions, const string& inName) {
+	StringToXCryptionCommonMap::const_iterator it = inXcryptions.find(inName);
+
+	if (it == inXcryptions.end())
+		return NULL;
+	else
+		return it->second;
+}
+
+static const string scStdCF = "StdCF";
+EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPassword) {
 	mSupportsDecryption = false;
 	mFailedPasswordVerification = false;
 	mDidSucceedOwnerPasswordVerification = false;
 
-	// setup encrypted flag
+	// setup encrypted flag through the existance of encryption dict
 	PDFObjectCastPtr<PDFDictionary> encryptionDictionary(inParser->QueryDictionaryObject(inParser->GetTrailer(), "Encrypt"));
 	mIsEncrypted = encryptionDictionary.GetPtr() != NULL;
 
@@ -89,21 +117,10 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const std::string& inPa
 			mV = (unsigned int)vHelper.GetAsInteger();
 		}
 
-		// supporting only  versions 1 and 2 (no crypt filters and nothing unpublished)
-		if (mV != 1 && mV != 2) {
+		// supporting versions 1,2 and 4
+		if (mV != 1 && mV != 2 && mV != 4) {
 			TRACE_LOG1("DecryptionHelper::Setup, Only 1 and 2 are supported values for V. Unsupported filter encountered - %d", mV);
 			break;
-		}
-
-		RefCountPtr<PDFObject> length(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "Length"));
-		if (!length) {
-			mLength = 40/8;
-		}
-		else {
-			ParsedPrimitiveHelper lengthHelper(length.GetPtr());
-			if (!lengthHelper.IsNumber())
-				break;
-			mLength = (unsigned int)lengthHelper.GetAsInteger()/8;
 		}
 
 		RefCountPtr<PDFObject> revision(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "R"));
@@ -123,7 +140,7 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const std::string& inPa
 		}
 		else {
 			ParsedPrimitiveHelper oHelper(o.GetPtr());
-			mO = mXcryption.stringToByteList(oHelper.ToString());
+			mO = XCryptionCommon::stringToByteList(oHelper.ToString());
 		}
 
 		RefCountPtr<PDFObject> u(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "U"));
@@ -132,7 +149,7 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const std::string& inPa
 		}
 		else {
 			ParsedPrimitiveHelper uHelper(u.GetPtr());
-			mU = mXcryption.stringToByteList(uHelper.ToString());
+			mU = XCryptionCommon::stringToByteList(uHelper.ToString());
 		}
 
 		RefCountPtr<PDFObject> p(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "P"));
@@ -161,26 +178,79 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const std::string& inPa
 			RefCountPtr<PDFObject> idPart1Object(inParser->QueryArrayObject(idArray.GetPtr(), 0));
 			if (!!idPart1Object) {
 				ParsedPrimitiveHelper idPart1ObjectHelper(idPart1Object.GetPtr());
-				mFileIDPart1 = mXcryption.stringToByteList(idPart1ObjectHelper.ToString());
+				mFileIDPart1 = XCryptionCommon::stringToByteList(idPart1ObjectHelper.ToString());
 			}
 		}
 
-		mXcryption.Setup(false);
-		if (!mXcryption.CanXCrypt()) 
-			break;
 
-		mXcryption.SetupInitialEncryptionKey(
-			inPassword,
-			mRevision,
-			mLength,
-			mO,
-			mP,
-			mFileIDPart1,
-			mEncryptMetaData);
+		RefCountPtr<PDFObject> length(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "Length"));
+		if (!length) {
+			mLength = 40 / 8;
+		}
+		else {
+			mLength = ComputeLength(length.GetPtr());
+		}
+
+		// Setup crypt filters, or a default filter
+		if (mV == 4) {
+			// multiple xcryptions. read crypt filters, determine which does what
+			PDFObjectCastPtr<PDFDictionary> cryptFilters(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "CF"));
+			if (!!cryptFilters) {
+				MapIterator<PDFNameToPDFObjectMap>  cryptFiltersIt = cryptFilters->GetIterator();
+
+				// read crypt filters
+				while (cryptFiltersIt.MoveNext())
+				{
+					PDFObjectCastPtr<PDFDictionary> cryptFilter(cryptFiltersIt.GetValue());
+					if (!!cryptFilter) {
+						PDFObjectCastPtr<PDFName> cfmName(inParser->QueryDictionaryObject(cryptFilter.GetPtr(), "CFM"));
+						RefCountPtr<PDFObject> lengthObject(inParser->QueryDictionaryObject(cryptFilter.GetPtr(), "Length"));
+						unsigned int length = !lengthObject ? mLength : ComputeLength(lengthObject.GetPtr());
+
+						XCryptionCommon* encryption = new XCryptionCommon();
+						encryption->Setup(cfmName->GetValue() == "AESV2"); // singe xcryptions are always RC4
+						encryption->SetupInitialEncryptionKey(
+							inPassword,
+							mRevision,
+							length,
+							mO,
+							mP,
+							mFileIDPart1,
+							mEncryptMetaData);
+						mXcrypts.insert(StringToXCryptionCommonMap::value_type(cryptFiltersIt.GetKey()->GetValue(), encryption));
+					}
+				}
+				
+
+				PDFObjectCastPtr<PDFName> streamsFilterName(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "StmF"));
+				PDFObjectCastPtr<PDFName> stringsFilterName(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "StrF"));
+				mXcryptStreams = GetFilterForName(mXcrypts, !streamsFilterName ? "Identity": streamsFilterName->GetValue());
+				mXcryptStrings = GetFilterForName(mXcrypts, !stringsFilterName ? "Identity" : stringsFilterName->GetValue());
+				mXcryptAuthentication = GetFilterForName(mXcrypts, scStdCF);
+			}
+
+		}
+		else {
+			// single xcryption, use as the single encryption source
+			XCryptionCommon* defaultEncryption = new XCryptionCommon();
+			defaultEncryption->Setup(false); // single xcryptions are always RC4
+			defaultEncryption->SetupInitialEncryptionKey(
+				inPassword,
+				mRevision,
+				mLength,
+				mO,
+				mP,
+				mFileIDPart1,
+				mEncryptMetaData);
+
+			mXcrypts.insert(StringToXCryptionCommonMap::value_type(scStdCF, defaultEncryption));
+			mXcryptStreams = defaultEncryption;
+			mXcryptStrings = defaultEncryption;
+			mXcryptAuthentication = defaultEncryption;
+		}
 
 		// authenticate password, try to determine if user or owner
-		ByteList password = mXcryption.stringToByteList(inPassword);
-
+		ByteList password = XCryptionCommon::stringToByteList(inPassword);
 		mDidSucceedOwnerPasswordVerification = AuthenticateOwnerPassword(password);
 		mFailedPasswordVerification = !mDidSucceedOwnerPasswordVerification && !AuthenticateUserPassword(password);
 
@@ -226,10 +296,10 @@ IByteReader* DecryptionHelper::CreateDecryptionFilterForStream(PDFStreamInput* i
 }
 
 std::string DecryptionHelper::DecryptString(const std::string& inStringToDecrypt) {
-	if (!IsEncrypted() || !CanDecryptDocument())
+	if (!IsEncrypted() || !CanDecryptDocument() || !mXcryptStrings)
 		return inStringToDecrypt;
 
-	IByteReader* decryptStream = CreateDecryptionReader(new InputStringStream(inStringToDecrypt), mXcryption.GetCurrentObjectKey());
+	IByteReader* decryptStream = CreateDecryptionReader(new InputStringStream(inStringToDecrypt), mXcryptStrings->GetCurrentObjectKey());
 	if (decryptStream) {
 		OutputStringBufferStream outputStream;
 		OutputStreamTraits traits(&outputStream);
@@ -245,18 +315,26 @@ void DecryptionHelper::OnObjectStart(long long inObjectID, long long inGeneratio
 	if (!IsEncrypted() || !CanDecryptDocument())
 		return;
 
-	mXcryption.OnObjectStart(inObjectID,inGenerationNumber);
+	StringToXCryptionCommonMap::iterator it = mXcrypts.begin();
+	for (; it != mXcrypts.end(); ++it) {
+		it->second->OnObjectStart(inObjectID, inGenerationNumber);
+	}
 }
 void DecryptionHelper::OnObjectEnd(PDFObject* inObject) {
 	if (!IsEncrypted() || !CanDecryptDocument())
 		return;
 
 	// for streams, retain the encryption key with them, so i can later decrypt them when needed
-	if (inObject->GetType() == PDFObject::ePDFObjectStream) {
-		ByteList* savedKey = new ByteList(mXcryption.GetCurrentObjectKey());
+	// Gal: TBD here is to see if the stream has a crypt filter, and use that instead!!!
+	if ((inObject->GetType() == PDFObject::ePDFObjectStream) && mXcryptStreams) {
+		ByteList* savedKey = new ByteList(mXcryptStreams->GetCurrentObjectKey());
 		inObject->SetMetadata(scEcnryptionKeyMetadataKey, savedKey);
 	}
-	mXcryption.OnObjectEnd();
+
+	StringToXCryptionCommonMap::iterator it = mXcrypts.begin();
+	for (; it != mXcrypts.end(); ++it) {
+		it->second->OnObjectEnd();
+	}
 }
 
 IByteReader* DecryptionHelper::CreateDecryptionReader(IByteReader* inSourceStream, const ByteList& inEncryptionKey) {
@@ -265,7 +343,9 @@ IByteReader* DecryptionHelper::CreateDecryptionReader(IByteReader* inSourceStrea
 
 
 bool DecryptionHelper::AuthenticateUserPassword(const ByteList& inPassword) {
-	return mXcryption.algorithm3_6(mRevision,
+	if (!mXcryptAuthentication)
+		return true;
+	return mXcryptAuthentication->algorithm3_6(mRevision,
 						mLength,
 						inPassword,
 						mO,
@@ -276,7 +356,10 @@ bool DecryptionHelper::AuthenticateUserPassword(const ByteList& inPassword) {
 }
 
 bool DecryptionHelper::AuthenticateOwnerPassword(const ByteList& inPassword) {
-	return mXcryption.algorithm3_7(mRevision,
+	if (!mXcryptAuthentication)
+		return true;
+
+	return mXcryptAuthentication->algorithm3_7(mRevision,
 						mLength,
 						inPassword,
 						mO,
@@ -328,5 +411,5 @@ const ByteList& DecryptionHelper::GetU() const
 
 const ByteList& DecryptionHelper::GetInitialEncryptionKey() const
 {
-	return mXcryption.GetInitialEncryptionKey();
+	return mXcryptAuthentication->GetInitialEncryptionKey();
 }

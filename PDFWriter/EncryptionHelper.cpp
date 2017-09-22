@@ -230,8 +230,6 @@ EStatusCode EncryptionHelper::Setup(
 		mUsingAES = false; // GAL, forcing this to false. something doesn't work well with the encryption now and i really got other things i want to attend to.
 
 		mXcryption.Setup(mUsingAES);
-		if (!mXcryption.CanXCrypt())
-			break;
 
 		if (inPDFLevel >= 1.4) {
 			mLength = 16;
@@ -299,8 +297,6 @@ EStatusCode EncryptionHelper::Setup(const DecryptionHelper& inDecryptionSource)
 	do {
 		mUsingAES = false;
 		mXcryption.Setup(mUsingAES);
-		if (!mXcryption.CanXCrypt())
-			break;
 
 		mLength = inDecryptionSource.GetLength();
 		mV = inDecryptionSource.GetV();

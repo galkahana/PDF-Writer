@@ -40,14 +40,8 @@ XCryptionCommon::~XCryptionCommon(void)
 {
 }
 
-bool XCryptionCommon::Setup(bool inUsingAES) {
+void XCryptionCommon::Setup(bool inUsingAES) {
 	mUsingAES = inUsingAES;
-	mCanXCrypt = true;
-	return CanXCrypt();
-}
-
-bool XCryptionCommon::CanXCrypt() {
-	return mCanXCrypt;
 }
 
 void XCryptionCommon::SetupInitialEncryptionKey(const std::string& inUserPassword,

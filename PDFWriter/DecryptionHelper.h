@@ -24,11 +24,14 @@ limitations under the License.
 #include "XCryptionCommon.h"
 
 #include <string>
+#include <map>
 
 class PDFParser;
 class IByteReader;
 class PDFStreamInput;
 class PDFObject;
+
+typedef std::map<std::string, XCryptionCommon*> StringToXCryptionCommonMap;
 
 class DecryptionHelper {
 
@@ -76,7 +79,14 @@ public:
 	// Reset after or before usage
 	void Reset();
 private:
-	XCryptionCommon mXcryption;
+	// named xcrypts, for V4
+	StringToXCryptionCommonMap mXcrypts; 
+	// xcrypt to use for streams
+	XCryptionCommon* mXcryptStreams;
+	// xcrypt to use for strings
+	XCryptionCommon* mXcryptStrings;
+	// xcrypt to use for password authentication
+	XCryptionCommon* mXcryptAuthentication;
 
 	bool mIsEncrypted;
 	bool mSupportsDecryption;
@@ -100,4 +110,6 @@ private:
 
 	bool AuthenticateUserPassword(const ByteList& inPassword);
 	bool AuthenticateOwnerPassword(const ByteList& inPassword);
+
+	void Release();
 };
