@@ -38,29 +38,29 @@ PDFWithPassword::~PDFWithPassword(void)
 {
 }
 
-EStatusCode PDFWithPassword::Run(const TestConfiguration& inTestConfiguration)
+EStatusCode RunTest(const TestConfiguration& inTestConfiguration, bool inUseAES)
 {
 	PDFWriter pdfWriter;
-	LogConfiguration logConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"PDFWithPasswordLog.txt"));
+	LogConfiguration logConfiguration(true, true, RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, inUseAES ? "PDFWithPasswordAESLog.txt":"PDFWithPasswordRC4Log.txt"));
 	EStatusCode status;
 	PDFPage* page = NULL;
 
 	do
 	{
 		status = pdfWriter.StartPDF(
-			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"PDFWithPassword.pdf"),
-			ePDFVersion16,
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, inUseAES ?  "PDFWithPasswordAES.pdf" : "PDFWithPasswordRC4.pdf"),
+			inUseAES ? ePDFVersion16 : ePDFVersion14,
 			logConfiguration,
-			PDFCreationSettings(true,true,EncryptionOptions("user",4,"owner"))); // 4 should translate to -3900 in actual PDF
-		if(status != PDFHummus::eSuccess)
+			PDFCreationSettings(true, true, EncryptionOptions("user", 4, "owner"))); // 4 should translate to -3900 in actual PDF
+		if (status != PDFHummus::eSuccess)
 		{
-			cout<<"failed to start PDF\n";
+			cout << "failed to start PDF\n";
 			break;
-		}	
+		}
 
 		// create simple page
 		PDFPage* page = new PDFPage();
-		page->SetMediaBox(PDFRectangle(0,0,595,842));
+		page->SetMediaBox(PDFRectangle(0, 0, 595, 842));
 
 		PageContentContext* cxt = pdfWriter.StartPageContentContext(page);
 
@@ -88,21 +88,44 @@ EStatusCode PDFWithPassword::Run(const TestConfiguration& inTestConfiguration)
 		status = pdfWriter.WritePageAndRelease(page);
 		page = NULL;
 
-		if(status != PDFHummus::eSuccess) {
-			cout<<"failed to write page\n";
+		if (status != PDFHummus::eSuccess) {
+			cout << "failed to write page\n";
 			break;
 		}
 
 		status = pdfWriter.EndPDF();
-		if(status != PDFHummus::eSuccess)
+		if (status != PDFHummus::eSuccess)
 		{
-			cout<<"failed in end PDF\n";
+			cout << "failed in end PDF\n";
 			break;
 		}
-	}while(false);
+	} while (false);
 
 	// failure cleanups
 	delete page;
+
+	return status;
+}
+
+EStatusCode PDFWithPassword::Run(const TestConfiguration& inTestConfiguration)
+{
+	EStatusCode status;
+
+	do
+	{
+		status = RunTest(inTestConfiguration, false);
+		if (status != eSuccess) {
+			cout << "failed to run RC4 test\n";
+			break;
+		}
+
+		status = RunTest(inTestConfiguration, true);
+		if (status != eSuccess) {
+			cout << "failed to run AES test\n";
+			break;
+		}
+
+	}while(false);
 
 	return status;
 }

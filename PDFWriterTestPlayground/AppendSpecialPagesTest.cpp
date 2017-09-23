@@ -56,7 +56,7 @@ EStatusCode AppendSpecialPagesTest::Run(const TestConfiguration& inTestConfigura
 		result = pdfWriter.AppendPDFPagesFromPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,"TestMaterials/Protected.pdf"),PDFPageRange());
 		if(result.first == PDFHummus::eSuccess)
 		{
-			cout<<"failted to NOT ALLOW embedding of protected documents\n";
+			cout<<"failted to NOT ALLOW embedding of protected documents without providing pasword\n";
 			status = PDFHummus::eFailure;
 			break;
 		}
