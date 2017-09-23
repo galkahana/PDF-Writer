@@ -1729,11 +1729,11 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 			mObjectParser.ResetReadState();
 		}
 
-		mDecryptionHelper.HaltDecryption(); // objects within objects stream already enjoy the object stream protection, and so are no longer encrypted
+		mDecryptionHelper.PauseDecryption(); // objects within objects stream already enjoy the object stream protection, and so are no longer encrypted
 		NotifyIndirectObjectStart(inObjectId,0);
 		anObject = mObjectParser.ParseNewObject();
 		NotifyIndirectObjectEnd(anObject);
-		mDecryptionHelper.ContinueDecryption();
+		mDecryptionHelper.ReleaseDecryption();
 
 	}while(false);
 
@@ -2042,7 +2042,7 @@ PDFObjectParser* PDFParser::StartReadingObjectsFromStream(PDFStreamInput* inStre
 	PDFObjectParser* objectsParser = new PDFObjectParser();
 	InputStreamSkipperStream* source = new InputStreamSkipperStream(readStream);
 	objectsParser->SetReadStream(source,source,true);
-	objectsParser->SetDecryptionHelper(&mDecryptionHelper);
+	// Not setting decryption filter cause shuoldnt decrypt at lower level. if at all - the stream is encrypted already
 	objectsParser->SetParserExtender(mParserExtender);
 
 	return objectsParser;
@@ -2054,7 +2054,7 @@ PDFObjectParser* PDFParser::StartReadingObjectsFromStreams(PDFArray* inArrayOfSt
 	PDFObjectParser* objectsParser = new PDFObjectParser();
 	InputStreamSkipperStream* source = new InputStreamSkipperStream(readStream);
 	objectsParser->SetReadStream(source, source, true);
-	objectsParser->SetDecryptionHelper(&mDecryptionHelper);
+	// Not setting decryption filter cause shuoldnt decrypt at lower level. if at all - the stream is encrypted already
 	objectsParser->SetParserExtender(mParserExtender);
 
 	return objectsParser;

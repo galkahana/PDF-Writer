@@ -67,7 +67,7 @@ void DecryptionHelper::Reset() {
 	mXcryptStrings = NULL;
 	mXcryptAuthentication = NULL;
 	mParser = NULL;
-	mHaltDecryption = false;
+	mDecryptionPauseLevel = 0;
 	Release();
 }
 
@@ -356,8 +356,12 @@ IByteReader*  DecryptionHelper::CreateDecryptionFilterForStream(PDFStreamInput* 
 
 }
 
+bool DecryptionHelper::IsDecrypting() {
+	return IsEncrypted() && CanDecryptDocument() && mDecryptionPauseLevel == 0;
+}
+
 std::string DecryptionHelper::DecryptString(const std::string& inStringToDecrypt) {
-	if (!IsEncrypted() || !CanDecryptDocument()  || mHaltDecryption || !mXcryptStrings)
+	if (!IsDecrypting() || !mXcryptStrings)
 		return inStringToDecrypt;
 
 	IByteReader* decryptStream = CreateDecryptionReader(new InputStringStream(inStringToDecrypt), mXcryptStrings->GetCurrentObjectKey(), mXcryptStrings->IsUsingAES());
@@ -373,9 +377,6 @@ std::string DecryptionHelper::DecryptString(const std::string& inStringToDecrypt
 }
 
 void DecryptionHelper::OnObjectStart(long long inObjectID, long long inGenerationNumber) {
-	if (!IsEncrypted() || !CanDecryptDocument())
-		return;
-
 	StringToXCryptionCommonMap::iterator it = mXcrypts.begin();
 	for (; it != mXcrypts.end(); ++it) {
 		it->second->OnObjectStart(inObjectID, inGenerationNumber);
@@ -439,11 +440,8 @@ XCryptionCommon* DecryptionHelper::GetCryptForStream(PDFStreamInput* inStream) {
 }
 
 void DecryptionHelper::OnObjectEnd(PDFObject* inObject) {
-	if (!IsEncrypted() || !CanDecryptDocument())
-		return;
-
 	// for streams, retain the encryption key with them, so i can later decrypt them when needed
-	if ((inObject->GetType() == PDFObject::ePDFObjectStream) && (!mHaltDecryption || HasCryptFilterDefinition(mParser, (PDFStreamInput*)inObject))) {
+	if ((inObject->GetType() == PDFObject::ePDFObjectStream) && IsDecrypting()) {
 		XCryptionCommon* streamCryptFilter = GetCryptForStream((PDFStreamInput*)inObject);
 		if (streamCryptFilter) {
 			ByteList* savedKey = new ByteList(streamCryptFilter->GetCurrentObjectKey());
@@ -537,12 +535,12 @@ const ByteList& DecryptionHelper::GetInitialEncryptionKey() const
 	return mXcryptAuthentication->GetInitialEncryptionKey();
 }
 
-void DecryptionHelper::HaltDecryption() {
-	mHaltDecryption = true;
+void DecryptionHelper::PauseDecryption() {
+	++mDecryptionPauseLevel;
 }
 
-void DecryptionHelper::ContinueDecryption() {
-	mHaltDecryption = false;
+void DecryptionHelper::ReleaseDecryption() {
+	--mDecryptionPauseLevel;
 }
 
 const StringToXCryptionCommonMap& DecryptionHelper::GetXcrypts() const {

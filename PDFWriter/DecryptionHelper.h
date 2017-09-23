@@ -86,8 +86,18 @@ public:
 	void Reset();
 
 	// client can tell at times to halt encryption, when knowing that parsing content that's not encrypted (in encrypted object stream, for instances)
-	void HaltDecryption();
-	void ContinueDecryption();
+	void PauseDecryption();
+	// use this to flag that a previous pause of encryption may now be released. encryption can continue
+	void ReleaseDecryption();
+
+	/*
+	IsEncrypting will return true if actually encrypting now. it may be false if encryption was not requested, not supported or that the encrytion
+	mechanism is not currently in a state that encrypts (say when writing an encryption dictionary).
+	*/
+	bool IsDecrypting();
+
+//	void HaltDecryption();
+//	void ContinueDecryption();
 private:
 	PDFParser* mParser;
 
@@ -102,7 +112,7 @@ private:
 
 	bool mIsEncrypted;
 	bool mSupportsDecryption;
-	bool mHaltDecryption;
+	int mDecryptionPauseLevel;
 
 	// Generic encryption
 	unsigned int mV;

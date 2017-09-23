@@ -81,7 +81,6 @@ void EncryptionHelper::PauseEncryption() {
 
 void EncryptionHelper::ReleaseEncryption() {
 	--mEncryptionPauseLevel;
-
 }
 
 void EncryptionHelper::OnObjectStart(long long inObjectID, long long inGenerationNumber) {
