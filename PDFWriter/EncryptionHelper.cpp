@@ -188,7 +188,7 @@ EStatusCode EncryptionHelper::WriteEncryptionDictionary(ObjectsContext* inObject
 		aes->WriteNameValue("DocOpen");
 
 		aes->WriteKey("Length");
-		aes->WriteIntegerValue(16);
+		aes->WriteIntegerValue(128);
 
 		inObjectsContext->EndDictionary(aes);
 		inObjectsContext->EndDictionary(cf);
@@ -226,8 +226,6 @@ EStatusCode EncryptionHelper::Setup(
 
 	do {
 		mUsingAES = inPDFLevel >= 1.6;
-
-		mUsingAES = false; // GAL, forcing this to false. something doesn't work well with the encryption now and i really got other things i want to attend to.
 
 		mXcryption.Setup(mUsingAES);
 

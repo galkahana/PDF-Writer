@@ -91,6 +91,21 @@ EStatusCode RecryptPDF::Run(const TestConfiguration& inTestConfiguration)
 			cout << "failed to encrypt PDF with new password PDF\n";
 			break;
 		}
+
+		// same, but forcing AES
+		status = PDFWriter::RecryptPDF(
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/Original.pdf"),
+			"",
+			RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "RecryptPDFOriginalToPasswordProtectedAES.pdf"),
+			LogConfiguration::DefaultLogConfiguration(),
+			PDFCreationSettings(true, true, EncryptionOptions("user1", 4, "owner1")),
+			ePDFVersion16);
+		if (status != PDFHummus::eSuccess)
+		{
+			cout << "failed to encrypt PDF with new password PDF\n";
+			break;
+		}
+
 	}while(false);
 
 	return status;	
