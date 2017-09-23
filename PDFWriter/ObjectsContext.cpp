@@ -421,7 +421,8 @@ PDFStream* ObjectsContext::StartPDFStream(DictionaryContext* inStreamDictionary,
 		result = new PDFStream(mCompressStreams,mOutputStream, mEncryptionHelper,streamDictionaryContext,mExtender);
 
 	// break encryption, if any, when writing a stream, cause if encryption is desired, only top level elements should be encrypted. hence - the stream itself is, but its contents do not re-encrypt
-	mEncryptionHelper->PauseEncryption();
+	if (mEncryptionHelper)
+		mEncryptionHelper->PauseEncryption();
 
 	return result;
 }

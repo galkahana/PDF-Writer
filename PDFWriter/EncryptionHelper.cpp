@@ -45,6 +45,9 @@ EncryptionHelper::EncryptionHelper(void)
 	mIsDocumentEncrypted = false;
 	mEncryptionPauseLevel = 0;
 	mSupportsEncryption = true;
+	mXcryptAuthentication = NULL;
+	mXcryptStreams = NULL;
+	mXcryptStrings = NULL;
 }
 
 EncryptionHelper::~EncryptionHelper(void)
@@ -375,7 +378,7 @@ PDFHummus::EStatusCode EncryptionHelper::WriteState(ObjectsContext* inStateWrite
 	encryptionObject->WriteBooleanValue(mSupportsEncryption);
 
 	encryptionObject->WriteKey("mUsingAES");
-	encryptionObject->WriteBooleanValue(mXcryptAuthentication->IsUsingAES());
+	encryptionObject->WriteBooleanValue(mXcryptAuthentication ? mXcryptAuthentication->IsUsingAES():false);
 
 	encryptionObject->WriteKey("mLength");
 	encryptionObject->WriteIntegerValue(mLength);
@@ -402,7 +405,7 @@ PDFHummus::EStatusCode EncryptionHelper::WriteState(ObjectsContext* inStateWrite
 	encryptionObject->WriteLiteralStringValue(XCryptionCommon::ByteListToString(mU));
 
 	encryptionObject->WriteKey("InitialEncryptionKey");
-	encryptionObject->WriteLiteralStringValue(XCryptionCommon::ByteListToString(mXcryptAuthentication->GetInitialEncryptionKey()));
+	encryptionObject->WriteLiteralStringValue(mXcryptAuthentication ? XCryptionCommon::ByteListToString(mXcryptAuthentication->GetInitialEncryptionKey()) : "");
 
 	inStateWriter->EndDictionary(encryptionObject);
 	inStateWriter->EndIndirectObject();

@@ -93,8 +93,8 @@ LongBufferSizeType InputAESDecodeStream::Read(IOBasicTypes::Byte* inBuffer, Long
 		LongBufferSizeType secondBlockLength = mSourceStream->Read(mInNext, AES_BLOCK_SIZE);
 		if (secondBlockLength < AES_BLOCK_SIZE) {
 			mHitEnd = true;
-			 // secondBlockLength should be 0. this is the case that first buffer already contains padding
-			mReadBlockSize = AES_BLOCK_SIZE - mOut[AES_BLOCK_SIZE - 1];
+			 // secondBlockLength should be 0. this is the case that first buffer already contains padding (using min for safety)
+			mReadBlockSize = AES_BLOCK_SIZE - std::min<size_t>(mOut[AES_BLOCK_SIZE - 1], AES_BLOCK_SIZE);
 		}
 		else
 			mReadBlockSize = AES_BLOCK_SIZE;
@@ -131,8 +131,8 @@ LongBufferSizeType InputAESDecodeStream::Read(IOBasicTypes::Byte* inBuffer, Long
 				LongBufferSizeType totalRead = mSourceStream->Read(mInNext, AES_BLOCK_SIZE);
 				if (totalRead < AES_BLOCK_SIZE) { // this means that we got to final block, with padding
 					mHitEnd = true; // should be 0. 
-					// now we know that next block is the final one, and can consider padding
-					mReadBlockSize = AES_BLOCK_SIZE - mOut[AES_BLOCK_SIZE - 1];
+					// now we know that next block is the final one, and can consider padding (using min for safety)
+					mReadBlockSize = AES_BLOCK_SIZE - std::min<size_t>(mOut[AES_BLOCK_SIZE - 1], AES_BLOCK_SIZE);
 				}
 			}
 		}
