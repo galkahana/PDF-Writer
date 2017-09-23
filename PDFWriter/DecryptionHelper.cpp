@@ -544,3 +544,19 @@ void DecryptionHelper::HaltDecryption() {
 void DecryptionHelper::ContinueDecryption() {
 	mHaltDecryption = false;
 }
+
+const StringToXCryptionCommonMap& DecryptionHelper::GetXcrypts() const {
+	return mXcrypts;
+}
+
+XCryptionCommon* DecryptionHelper::GetStreamXcrypt() const {
+	return mXcryptStreams;
+}
+
+XCryptionCommon* DecryptionHelper::GetStringXcrypt() const {
+	return mXcryptStrings;
+}
+
+XCryptionCommon* DecryptionHelper::GetAuthenticationXcrypt() const {
+	return mXcryptAuthentication;
+}

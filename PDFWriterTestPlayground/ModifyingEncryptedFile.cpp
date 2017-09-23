@@ -39,32 +39,25 @@ ModifyingEncryptedFile::~ModifyingEncryptedFile()
     
 }
 
-EStatusCode ModifyingEncryptedFile::Run(const TestConfiguration& inTestConfiguration)
+EStatusCode RunTest(const TestConfiguration& inTestConfiguration,PDFWriter& pdfWriter)
 {
-    
-    EStatusCode status = eSuccess;
-    PDFWriter pdfWriter;
-    
-    do 
-    {
-        
-       /*
-		modify a password protected file. retain the same protection, just add some content
-	   */
 
- 		// open file for modification
-        status = pdfWriter.ModifyPDF(
-                                     RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,string("TestMaterials/PDFWithPassword.pdf")),
-                                     ePDFVersion13,
-                                     RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,string("PDFWithPasswordModified.pdf")),
-                                     LogConfiguration(true,true,RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase,string("PDFWithPasswordModified.log"))),
-									 PDFCreationSettings(true,true,EncryptionOptions("user",0,"")));  
-		if(status != eSuccess)
+	EStatusCode status = eSuccess;
+
+	do
+	{
+
+		/*
+		modify a password protected file. retain the same protection, just add some content
+		*/
+
+		// open file for modification
+		if (status != eSuccess)
 		{
-			cout<<"failed to start PDF\n";
+			cout << "failed to start PDF\n";
 			break;
-		}	        
-        
+		}
+
 		// modify first page to include text
 		{
 			PDFModifiedPage modifiedPage(&pdfWriter, 0);
@@ -83,7 +76,7 @@ EStatusCode ModifyingEncryptedFile::Run(const TestConfiguration& inTestConfigura
 			modifiedPage.EndContentContext();
 			modifiedPage.WritePage();
 		}
-       
+
 		// add new page with an image
 		{
 			PDFPage* page = new PDFPage();
@@ -117,15 +110,53 @@ EStatusCode ModifyingEncryptedFile::Run(const TestConfiguration& inTestConfigura
 		}
 
 		status = pdfWriter.EndPDF();
-		if(status != eSuccess)
+		if (status != eSuccess)
 		{
-			cout<<"failed in end PDF\n";
+			cout << "failed in end PDF\n";
 			break;
 		}
-    }
-    while(false);
-    
-    return status;
+	} while (false);
+
+	return status;
+}
+
+EStatusCode ModifyingEncryptedFile::Run(const TestConfiguration& inTestConfiguration)
+{
+	EStatusCode status = eSuccess;
+
+	do {
+		{
+			PDFWriter pdfWriter;
+			status = pdfWriter.ModifyPDF(
+				RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, string("TestMaterials/PDFWithPassword.pdf")),
+				ePDFVersion13,
+				RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, string("PDFWithPasswordEcnryptedModified.pdf")),
+				LogConfiguration(true, true, RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, string("PDFWithPasswordEcnryptedModified.log"))),
+				PDFCreationSettings(true, true, EncryptionOptions("user", 0, "")));
+
+			status = RunTest(inTestConfiguration, pdfWriter);
+			if (status != eSuccess) {
+				break;
+			}
+		}
+
+		{
+			PDFWriter pdfWriter;
+			status = pdfWriter.ModifyPDF(
+				RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, string("TestMaterials/china.pdf")),
+				ePDFVersion13,
+				RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, string("chinaEcnryptedModified.pdf")),
+				LogConfiguration(true, true, RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, string("chinaEcnryptedModified.log"))),
+				PDFCreationSettings(true, true));
+
+			status = RunTest(inTestConfiguration, pdfWriter);
+			if (status != eSuccess) {
+				break;
+			}
+		}
+	} while (false);
+
+	return status;
 }
 
 ADD_CATEGORIZED_TEST(ModifyingEncryptedFile,"Modification")

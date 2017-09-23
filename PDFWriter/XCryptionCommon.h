@@ -25,9 +25,13 @@ limitations under the License.
 
 #include <list>
 #include <string>
+#include <map>
+
+class XCryptionCommon;
 
 typedef std::list<IOBasicTypes::Byte> ByteList;
 typedef std::list<ByteList> ByteListList;
+typedef std::map<std::string, XCryptionCommon*> StringToXCryptionCommonMap;
 
 
 class XCryptionCommon {

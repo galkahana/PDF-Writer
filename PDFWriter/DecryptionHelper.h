@@ -24,14 +24,11 @@ limitations under the License.
 #include "XCryptionCommon.h"
 
 #include <string>
-#include <map>
 
 class PDFParser;
 class IByteReader;
 class PDFStreamInput;
 class PDFObject;
-
-typedef std::map<std::string, XCryptionCommon*> StringToXCryptionCommonMap;
 
 class DecryptionHelper {
 
@@ -80,6 +77,10 @@ public:
 	const ByteList& GetO() const;
 	const ByteList& GetU() const;
 	const ByteList& GetInitialEncryptionKey() const;
+	const StringToXCryptionCommonMap& GetXcrypts() const;
+	XCryptionCommon* GetStreamXcrypt() const;
+	XCryptionCommon* GetStringXcrypt() const;
+	XCryptionCommon* GetAuthenticationXcrypt() const;
 
 	// Reset after or before usage
 	void Reset();
