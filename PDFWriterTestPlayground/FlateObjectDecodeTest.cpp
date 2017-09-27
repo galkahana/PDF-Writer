@@ -54,7 +54,7 @@ EStatusCode decodeStream(const string sourcePath, const string targetPath) {
 					cout << "Couldn't create reader\n";
 				}
 
-				ofstream os(targetPath, ofstream::binary);
+				ofstream os(targetPath.c_str(), ofstream::binary);
 				Byte buffer[1024];
 				LongBufferSizeType total = 0;
 				while (reader->NotEnded()) {
