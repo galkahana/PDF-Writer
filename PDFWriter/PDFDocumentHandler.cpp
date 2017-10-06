@@ -172,7 +172,8 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDFInCo
 			for(unsigned long i=0; i < mParser->GetPagesCount() && PDFHummus::eSuccess == result.first; ++i)
 			{
 				newObject = inPageEmbedCommand->CreatePDFFormXObjectForPage(this,i,inTransformationMatrix, itFormIDs == inPredefinedFormIDs.end() ? 0 : *itFormIDs);
-				++itFormIDs;
+				if(itFormIDs != inPredefinedFormIDs.end())
+					++itFormIDs;
 				if(newObject)
 				{
 					result.second.push_back(newObject->GetObjectID());
@@ -197,7 +198,8 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDFInCo
 					for(unsigned long i=it->first; i <= it->second && PDFHummus::eSuccess == result.first; ++i)
 					{
 						newObject = inPageEmbedCommand->CreatePDFFormXObjectForPage(this,i,inTransformationMatrix, itFormIDs == inPredefinedFormIDs.end() ? 0 : *itFormIDs);
-						++itFormIDs;
+						if (itFormIDs != inPredefinedFormIDs.end())
+							++itFormIDs;
 						if(newObject)
 						{
 							result.second.push_back(newObject->GetObjectID());
