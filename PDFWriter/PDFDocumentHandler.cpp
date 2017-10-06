@@ -78,7 +78,7 @@ class IPageEmbedInFormCommand
 {
 public:
 
-	virtual PDFFormXObject* CreatePDFFormXObjectForPage(PDFDocumentHandler* inDocumentHandler,unsigned long i,const double* inTransformationMatrix) = 0;
+	virtual PDFFormXObject* CreatePDFFormXObjectForPage(PDFDocumentHandler* inDocumentHandler,unsigned long i,const double* inTransformationMatrix, ObjectIDType inPredefinedFormId) = 0;
 };
 
 class PageEmbedInFormWithCropBox: public IPageEmbedInFormCommand
@@ -89,9 +89,9 @@ public:
 		mCropBox = inCropBox;
 	}
 
-	PDFFormXObject* CreatePDFFormXObjectForPage(PDFDocumentHandler* inDocumentHandler,unsigned long i,const double* inTransformationMatrix)
+	PDFFormXObject* CreatePDFFormXObjectForPage(PDFDocumentHandler* inDocumentHandler,unsigned long i,const double* inTransformationMatrix, ObjectIDType inPredefinedFormId)
 	{
-		return inDocumentHandler->CreatePDFFormXObjectForPage(i,mCropBox,inTransformationMatrix);
+		return inDocumentHandler->CreatePDFFormXObjectForPage(i,mCropBox,inTransformationMatrix,inPredefinedFormId);
 	}
 
 private:
@@ -107,9 +107,9 @@ public:
 		mPageBoxToUseAsFormBox = inPageBoxToUseAsFormBox;
 	}
 
-	PDFFormXObject* CreatePDFFormXObjectForPage(PDFDocumentHandler* inDocumentHandler,unsigned long i,const double* inTransformationMatrix)
+	PDFFormXObject* CreatePDFFormXObjectForPage(PDFDocumentHandler* inDocumentHandler,unsigned long i,const double* inTransformationMatrix, ObjectIDType inPredefinedFormId)
 	{
-		return inDocumentHandler->CreatePDFFormXObjectForPage(i,mPageBoxToUseAsFormBox,inTransformationMatrix);
+		return inDocumentHandler->CreatePDFFormXObjectForPage(i,mPageBoxToUseAsFormBox,inTransformationMatrix,inPredefinedFormId);
 	}
 
 private:
@@ -123,21 +123,23 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	co
 																				const PDFPageRange& inPageRange,
 																				IPageEmbedInFormCommand* inPageEmbedCommand,
 																				const double* inTransformationMatrix,
-																				const ObjectIDTypeList& inCopyAdditionalObjects)
+																				const ObjectIDTypeList& inCopyAdditionalObjects,
+																				const ObjectIDTypeList& inPredefinedFormIDs)
 {
 	if(StartFileCopyingContext(inPDFFilePath, inParsingOptions) != PDFHummus::eSuccess)
 	{
 		return EStatusCodeAndObjectIDTypeList(PDFHummus::eFailure,ObjectIDTypeList());
 	}
 
-	return CreateFormXObjectsFromPDFInContext(inPageRange,inPageEmbedCommand,inTransformationMatrix,inCopyAdditionalObjects);
+	return CreateFormXObjectsFromPDFInContext(inPageRange,inPageEmbedCommand,inTransformationMatrix,inCopyAdditionalObjects, inPredefinedFormIDs);
 }
 
 EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDFInContext(
 																						const PDFPageRange& inPageRange,
 																						IPageEmbedInFormCommand* inPageEmbedCommand,
 																						const double* inTransformationMatrix,
-																						const ObjectIDTypeList& inCopyAdditionalObjects)
+																						const ObjectIDTypeList& inCopyAdditionalObjects,
+																						const ObjectIDTypeList& inPredefinedFormIDs)
 {
 	EStatusCodeAndObjectIDTypeList result;
 
@@ -166,9 +168,11 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDFInCo
 
 		if(PDFPageRange::eRangeTypeAll == inPageRange.mType)
 		{
+			ObjectIDTypeList::const_iterator itFormIDs = inPredefinedFormIDs.begin();
 			for(unsigned long i=0; i < mParser->GetPagesCount() && PDFHummus::eSuccess == result.first; ++i)
 			{
-				newObject = inPageEmbedCommand->CreatePDFFormXObjectForPage(this,i,inTransformationMatrix);
+				newObject = inPageEmbedCommand->CreatePDFFormXObjectForPage(this,i,inTransformationMatrix, itFormIDs == inPredefinedFormIDs.end() ? 0 : *itFormIDs);
+				++itFormIDs;
 				if(newObject)
 				{
 					result.second.push_back(newObject->GetObjectID());
@@ -185,13 +189,15 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDFInCo
 		{
 			// eRangeTypeSpecific
 			ULongAndULongList::const_iterator it = inPageRange.mSpecificRanges.begin();
+			ObjectIDTypeList::const_iterator itFormIDs = inPredefinedFormIDs.begin();
 			for(; it != inPageRange.mSpecificRanges.end() && PDFHummus::eSuccess == result.first;++it)
 			{
 				if(it->first <= it->second && it->second < mParser->GetPagesCount())
 				{
 					for(unsigned long i=it->first; i <= it->second && PDFHummus::eSuccess == result.first; ++i)
 					{
-						newObject = inPageEmbedCommand->CreatePDFFormXObjectForPage(this,i,inTransformationMatrix);
+						newObject = inPageEmbedCommand->CreatePDFFormXObjectForPage(this,i,inTransformationMatrix, itFormIDs == inPredefinedFormIDs.end() ? 0 : *itFormIDs);
+						++itFormIDs;
 						if(newObject)
 						{
 							result.second.push_back(newObject->GetObjectID());
@@ -238,10 +244,11 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	co
 																				const PDFPageRange& inPageRange,
 																				EPDFPageBox inPageBoxToUseAsFormBox,
 																				const double* inTransformationMatrix,
-																				const ObjectIDTypeList& inCopyAdditionalObjects)
+																				const ObjectIDTypeList& inCopyAdditionalObjects,
+																				const ObjectIDTypeList& inPredefinedFormIDs)
 {
 	PageEmbedInFormWithPageBox embedCommand(inPageBoxToUseAsFormBox);
-	return CreateFormXObjectsFromPDF(inPDFFilePath,inParsingOptions,inPageRange,&embedCommand,inTransformationMatrix,inCopyAdditionalObjects);
+	return CreateFormXObjectsFromPDF(inPDFFilePath,inParsingOptions,inPageRange,&embedCommand,inTransformationMatrix,inCopyAdditionalObjects,inPredefinedFormIDs);
 }
 
 EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	const std::string& inPDFFilePath,
@@ -249,15 +256,17 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	co
 																				const PDFPageRange& inPageRange,
 																				const PDFRectangle& inCropBox,
 																				const double* inTransformationMatrix,
-																				const ObjectIDTypeList& inCopyAdditionalObjects)
+																				const ObjectIDTypeList& inCopyAdditionalObjects,
+																				const ObjectIDTypeList& inPredefinedFormIDs)
 {
 	PageEmbedInFormWithCropBox embedCommand(inCropBox);
-	return CreateFormXObjectsFromPDF(inPDFFilePath, inParsingOptions,inPageRange,&embedCommand,inTransformationMatrix,inCopyAdditionalObjects);
+	return CreateFormXObjectsFromPDF(inPDFFilePath, inParsingOptions,inPageRange,&embedCommand,inTransformationMatrix,inCopyAdditionalObjects, inPredefinedFormIDs);
 }
 
 PDFFormXObject* PDFDocumentHandler::CreatePDFFormXObjectForPage(unsigned long inPageIndex,
 																EPDFPageBox inPageBoxToUseAsFormBox,
-																const double* inTransformationMatrix)
+																const double* inTransformationMatrix,
+																ObjectIDType inPredefinedFormId)
 {
 	RefCountPtr<PDFDictionary> pageObject = mParser->ParsePage(inPageIndex);
 
@@ -267,12 +276,13 @@ PDFFormXObject* PDFDocumentHandler::CreatePDFFormXObjectForPage(unsigned long in
 		return NULL;
 	}
 	else
-		return CreatePDFFormXObjectForPage(pageObject.GetPtr(),DeterminePageBox(pageObject.GetPtr(),inPageBoxToUseAsFormBox),inTransformationMatrix);
+		return CreatePDFFormXObjectForPage(pageObject.GetPtr(),DeterminePageBox(pageObject.GetPtr(),inPageBoxToUseAsFormBox),inTransformationMatrix, inPredefinedFormId);
 }
 
 PDFFormXObject* PDFDocumentHandler::CreatePDFFormXObjectForPage(PDFDictionary* inPageObject,
 																const PDFRectangle& inFormBox,
-																const double* inTransformationMatrix)
+																const double* inTransformationMatrix,
+																ObjectIDType inPredefinedFormId)
 {
 	PDFFormXObject* result = NULL;
 	EStatusCode status = PDFHummus::eSuccess;
@@ -293,7 +303,7 @@ PDFFormXObject* PDFDocumentHandler::CreatePDFFormXObjectForPage(PDFDictionary* i
 			break;
 
 		// Create a new form XObject
-		result = mDocumentContext->StartFormXObject(inFormBox,inTransformationMatrix);
+		result = inPredefinedFormId == 0 ? mDocumentContext->StartFormXObject(inFormBox,inTransformationMatrix): mDocumentContext->StartFormXObject(inFormBox,inPredefinedFormId,inTransformationMatrix);
 
 		// copy the page content to the target XObject stream
 		if(WritePageContentToSingleStream(result->GetContentStream()->GetWriteStream(),inPageObject) != PDFHummus::eSuccess)
@@ -378,7 +388,8 @@ PDFRectangle PDFDocumentHandler::DeterminePageBox(PDFDictionary* inDictionary,EP
 
 PDFFormXObject* PDFDocumentHandler::CreatePDFFormXObjectForPage(unsigned long inPageIndex,
 																const PDFRectangle& inCropBox,
-																const double* inTransformationMatrix)
+																const double* inTransformationMatrix,
+																ObjectIDType inPredefinedFormId)
 {
 	RefCountPtr<PDFDictionary> pageObject = mParser->ParsePage(inPageIndex);
 
@@ -388,7 +399,7 @@ PDFFormXObject* PDFDocumentHandler::CreatePDFFormXObjectForPage(unsigned long in
 		return NULL;
 	}
 	else
-		return CreatePDFFormXObjectForPage(pageObject.GetPtr(),inCropBox,inTransformationMatrix);
+		return CreatePDFFormXObjectForPage(pageObject.GetPtr(),inCropBox,inTransformationMatrix, inPredefinedFormId);
 }
 
 EStatusCode PDFDocumentHandler::WritePageContentToSingleStream(IByteWriter* inTargetStream,PDFDictionary* inPageObject)
@@ -1012,14 +1023,15 @@ EStatusCode PDFDocumentHandler::StartCopyingContext(IByteReaderWithPosition* inP
 
 EStatusCodeAndObjectIDType PDFDocumentHandler::CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
 																			EPDFPageBox inPageBoxToUseAsFormBox,
-																			const double* inTransformationMatrix)
+																			const double* inTransformationMatrix,
+																			ObjectIDType inPredefinedFormId)
 {
 	EStatusCodeAndObjectIDType result;
 	PDFFormXObject* newObject;
 
 	if(inPageIndex < mParser->GetPagesCount())
 	{
-		newObject = CreatePDFFormXObjectForPage(inPageIndex,inPageBoxToUseAsFormBox,inTransformationMatrix);
+		newObject = CreatePDFFormXObjectForPage(inPageIndex,inPageBoxToUseAsFormBox,inTransformationMatrix, inPredefinedFormId);
 		if(newObject)
 		{
 			result.first = PDFHummus::eSuccess;
@@ -1045,14 +1057,15 @@ EStatusCodeAndObjectIDType PDFDocumentHandler::CreateFormXObjectFromPDFPage(unsi
 
 EStatusCodeAndObjectIDType PDFDocumentHandler::CreateFormXObjectFromPDFPage(unsigned long inPageIndex,
 																			 const PDFRectangle& inCropBox,
-																			 const double* inTransformationMatrix)
+																			 const double* inTransformationMatrix,
+																			 ObjectIDType inPredefinedFormId)
 {
 	EStatusCodeAndObjectIDType result;
 	PDFFormXObject* newObject;
 
 	if(inPageIndex < mParser->GetPagesCount())
 	{
-		newObject = CreatePDFFormXObjectForPage(inPageIndex,inCropBox,inTransformationMatrix);
+		newObject = CreatePDFFormXObjectForPage(inPageIndex,inCropBox,inTransformationMatrix, inPredefinedFormId);
 		if(newObject)
 		{
 			result.first = PDFHummus::eSuccess;
@@ -1750,10 +1763,11 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(IBy
 																			 const PDFPageRange& inPageRange,
 																			 EPDFPageBox inPageBoxToUseAsFormBox,
 																			 const double* inTransformationMatrix,
-																			 const ObjectIDTypeList& inCopyAdditionalObjects)
+																			 const ObjectIDTypeList& inCopyAdditionalObjects,
+																			 const ObjectIDTypeList& inPredefinedFormIDs)
 {
 	PageEmbedInFormWithPageBox embedCommand(inPageBoxToUseAsFormBox);
-	return CreateFormXObjectsFromPDF(inPDFStream,inParsingOptions,inPageRange,&embedCommand,inTransformationMatrix,inCopyAdditionalObjects);
+	return CreateFormXObjectsFromPDF(inPDFStream,inParsingOptions,inPageRange,&embedCommand,inTransformationMatrix,inCopyAdditionalObjects, inPredefinedFormIDs);
 
 }
 
@@ -1762,10 +1776,11 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(IBy
 																			const PDFPageRange& inPageRange,
 																			const PDFRectangle& inCropBox,
 																			const double* inTransformationMatrix,
-																			const ObjectIDTypeList& inCopyAdditionalObjects)
+																			const ObjectIDTypeList& inCopyAdditionalObjects,
+																			const ObjectIDTypeList& inPredefinedFormIDs)
 {
 	PageEmbedInFormWithCropBox embedCommand(inCropBox);
-	return CreateFormXObjectsFromPDF(inPDFStream,inParsingOptions,inPageRange,&embedCommand,inTransformationMatrix,inCopyAdditionalObjects);
+	return CreateFormXObjectsFromPDF(inPDFStream,inParsingOptions,inPageRange,&embedCommand,inTransformationMatrix,inCopyAdditionalObjects, inPredefinedFormIDs);
 }
 
 EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	IByteReaderWithPosition* inPDFStream,
@@ -1773,12 +1788,13 @@ EStatusCodeAndObjectIDTypeList PDFDocumentHandler::CreateFormXObjectsFromPDF(	IB
 																					const PDFPageRange& inPageRange,
 																				IPageEmbedInFormCommand* inPageEmbedCommand,
 																				const double* inTransformationMatrix,
-																				const ObjectIDTypeList& inCopyAdditionalObjects)
+																				const ObjectIDTypeList& inCopyAdditionalObjects,
+																				const ObjectIDTypeList& inPredefinedFormIDs)
 {
 	if(StartStreamCopyingContext(inPDFStream, inParsingOptions) != PDFHummus::eSuccess)
 		return EStatusCodeAndObjectIDTypeList(PDFHummus::eFailure,ObjectIDTypeList());
 
-	return CreateFormXObjectsFromPDFInContext(inPageRange,inPageEmbedCommand,inTransformationMatrix,inCopyAdditionalObjects);
+	return CreateFormXObjectsFromPDFInContext(inPageRange,inPageEmbedCommand,inTransformationMatrix,inCopyAdditionalObjects, inPredefinedFormIDs);
 }
 
 EStatusCodeAndObjectIDTypeList PDFDocumentHandler::AppendPDFPagesFromPDF(IByteReaderWithPosition* inPDFStream,
