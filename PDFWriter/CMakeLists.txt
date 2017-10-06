@@ -151,6 +151,7 @@ PrimitiveObjectsWriter.cpp
 PSBool.cpp
 RefCountObject.cpp
 ResourcesDictionary.cpp
+SimpleStringTokenizer.cpp
 StandardEncoding.cpp
 StateReader.cpp
 StateWriter.cpp
@@ -337,6 +338,7 @@ RefCountObject.h
 RefCountPtr.h
 ResourcesDictionary.h
 SafeBufferMacrosDefs.h
+SimpleStringTokenizer.h
 Singleton.h
 SingleValueContainerIterator.h
 StandardEncoding.h
@@ -669,6 +671,8 @@ PDFParserTokenizer.cpp
 PDFParserTokenizer.h
 PDFParsingOptions.cpp
 PDFParsingOptions.h
+SimpleStringTokenizer.cpp
+SimpleStringTokenizer.h
 )
 
 source_group("XCryption" FILES

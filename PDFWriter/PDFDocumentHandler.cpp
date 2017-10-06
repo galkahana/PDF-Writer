@@ -48,6 +48,7 @@
 #include "IFormEndWritingTask.h"
 #include "PDFPageInput.h"
 #include "IndirectObjectsReferenceRegistry.h"
+#include "SimpleStringTokenizer.h"
 
 using namespace PDFHummus;
 
@@ -1674,7 +1675,12 @@ EStatusCode PDFDocumentHandler::ScanStreamForResourcesTokens(PDFStreamInput* inS
 
 	mPDFStream->SetPosition(inSourceStream->GetStreamContentStart());
 
-	PDFParserTokenizer tokenizer;
+	// using simplestringtokenizer instead of regular pdfparsertokenizer, as content stream may contain
+	// streams, which may have tokens that will be interpreted as pdf tokens (like string start), and so will cause
+	// a wrong inclusion of content and so will skip content that should be replaced.
+	// There's still risk here, in that there will be a string that like a resource name with forward slash which will be mistaken
+	// for a resource usage. this is something to tackle still.
+	SimpleStringTokenizer tokenizer;
 	tokenizer.SetReadStream(streamReader);
 
 	BoolAndString tokenizerResult;
