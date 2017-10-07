@@ -34,5 +34,6 @@ private:
 	PDFHummus::EStatusCode RunCNRSTest(const TestConfiguration& inTestConfiguration);
 	PDFHummus::EStatusCode RunCNRS2SampleTest(const TestConfiguration& inTestConfiguration);
 	PDFHummus::EStatusCode RunCNRS2Test(const TestConfiguration& inTestConfiguration);
+	PDFHummus::EStatusCode RunKoreanFontTest(const TestConfiguration& inTestConfiguration);
 
 };

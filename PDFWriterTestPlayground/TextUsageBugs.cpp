@@ -40,6 +40,9 @@ TextUsageBugs::~TextUsageBugs(void)
 
 
 
+
+
+
 EStatusCode TextUsageBugs::Run(const TestConfiguration& inTestConfiguration)
 {
 	EStatusCode status;
@@ -48,6 +51,15 @@ EStatusCode TextUsageBugs::Run(const TestConfiguration& inTestConfiguration)
 
 	do
 	{
+
+		status = RunKoreanFontTest(inTestConfiguration);
+		if (status != PDFHummus::eSuccess)
+		{
+			cout << "Error in RunKoreanFontTest\n";
+			status = PDFHummus::eFailure;
+			break;
+		}
+
 		status = RunCNRSTest(inTestConfiguration);
 		if(status != PDFHummus::eSuccess)
 		{
@@ -73,6 +85,69 @@ EStatusCode TextUsageBugs::Run(const TestConfiguration& inTestConfiguration)
 		}
 
 	} while(false);
+	return status;
+}
+
+EStatusCode TextUsageBugs::RunKoreanFontTest(const TestConfiguration& inTestConfiguration) {
+	EStatusCode status = eSuccess;
+	PDFWriter pdfWriter;
+
+	do
+	{
+		status = pdfWriter.StartPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "KoreanFontTest.pdf"),
+			ePDFVersion13,
+			LogConfiguration(true, true,
+				RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "KoreanFontTest.log")));
+		if (status != eSuccess)
+		{
+			cout << "Failed to start file\n";
+			break;
+		}
+
+		PDFPage* page = new PDFPage();
+		page->SetMediaBox(PDFRectangle(0, 0, 595, 842));
+
+		PageContentContext* cxt = pdfWriter.StartPageContentContext(page);
+
+		AbstractContentContext::TextOptions textOptions(pdfWriter.GetFontForFile(
+			RelativeURLToLocalPath(
+				inTestConfiguration.mSampleFileBase,
+				"TestMaterials/fonts/NotoSerifCJKkr-Regular.otf")),
+			14,
+			AbstractContentContext::eGray,
+			0);
+
+		cxt->WriteText(10, 200, "hello", textOptions);
+		cxt->WriteText(10, 400, "\x48\x65\x6C\x6C\x6F\x20\x57\x6F\x72\x6C\x64\x20\xED\x95\x9C\xEA\xB8\x80\x20\x61\x62\x63\x21", textOptions);
+
+		status = pdfWriter.EndPageContentContext(cxt);
+		if (status != eSuccess)
+		{
+			status = PDFHummus::eFailure;
+			cout << "Failed to end content context\n";
+			break;
+		}
+
+		status = pdfWriter.WritePageAndRelease(page);
+		if (status != eSuccess)
+		{
+			status = PDFHummus::eFailure;
+			cout << "Failed to write page\n";
+			break;
+		}
+
+
+		status = pdfWriter.EndPDF();
+		if (status != eSuccess)
+		{
+			status = PDFHummus::eFailure;
+			cout << "Failed to end pdf\n";
+			break;
+		}
+
+	} while (false);
+
+
 	return status;
 }
 
