@@ -600,18 +600,8 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,
 				continue; // probably will never happen
 			firstNonSectionObject = currentObject + ObjectIDTypeBox(token.second);
 
-            // if the segment declared objects above the xref size, consult policy on what to do
-            if(firstNonSectionObject > inXrefSize && mAllowExtendingSegments)
-            {
-                inXrefTable = ExtendXrefTableToSize(inXrefTable,inXrefSize,firstNonSectionObject);
-                inXrefSize = firstNonSectionObject;
-                if(*outExtendedTable)
-                    delete[] *outExtendedTable;
-                *outExtendedTable = inXrefTable;
-                *outExtendedTableSize = firstNonSectionObject;
-            }
-
 			// now parse the section.
+			bool firstLine = true;
 			while(currentObject < firstNonSectionObject)
 			{
 				status = ReadNextXrefEntry(entry);
@@ -619,9 +609,30 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,
 					break;
 				if(currentObject < inXrefSize)
 				{
+					EXrefEntryType entryType = (entry[17] == 'n') ? eXrefEntryExisting:eXrefEntryDelete;
+					if(firstLine)
+					{
+						firstLine = false;
+						if(entryType == eXrefEntryDelete && currentObject == 1)
+						{
+							// malformed xref bug (e.g. documents from hp scanner)
+							--currentObject;
+							--firstNonSectionObject;
+						}
+						else if(firstNonSectionObject > inXrefSize && mAllowExtendingSegments)
+						{
+							// if the segment declared objects above the xref size, consult policy on what to do
+							inXrefTable = ExtendXrefTableToSize(inXrefTable,inXrefSize,firstNonSectionObject);
+							inXrefSize = firstNonSectionObject;
+							if(*outExtendedTable)
+								delete[] *outExtendedTable;
+							*outExtendedTable = inXrefTable;
+							*outExtendedTableSize = firstNonSectionObject;
+						}
+					}
 					inXrefTable[currentObject].mObjectPosition = LongFilePositionTypeBox(std::string((const char*)entry, 10));
 					inXrefTable[currentObject].mRivision = ULong(std::string((const char*)(entry + 11), 5));
-					inXrefTable[currentObject].mType = entry[17] == 'n' ? eXrefEntryExisting:eXrefEntryDelete;
+					inXrefTable[currentObject].mType = entryType;
 				}
 				++currentObject;
 			}
