@@ -25,10 +25,10 @@ if(NOT USE_BUNDLED)
     FIND_PATH(LIBAESGM_INCLUDE_DIRS aescpp.h /usr/local/include/aes /usr/include/aes)
     FIND_LIBRARY(LIBAESGM_LDFLAGS NAMES aesgm PATHS /usr/local/lib${LIB_SUFFIX} /usr/lib${LIB_SUFFIX})
 
-    PKG_CHECK_MODULES(LINPNG libpng)
-    if(NOT LINPNG_FOUND)
+    PKG_CHECK_MODULES(LIBPNG libpng)
+    if(NOT LIBPNG_FOUND)
         SET(PDFHUMMUS_NO_PNG TRUE)
-    endif(NOT LINPNG_FOUND)
+    endif(NOT LIBPNG_FOUND)
 
 else(NOT USE_BUNDLED)
     ADD_SUBDIRECTORY(LibAesgm)
