@@ -6,10 +6,10 @@ set(USE_BUNDLED TRUE CACHE BOOL "Whether to use bundled libraries")
 if(NOT USE_BUNDLED)
     FIND_PACKAGE(PkgConfig)
 
-    PKG_CHECK_MODULES(LIBJPEG libjpeg)
-    if(NOT LIBJPEG_FOUND)
-        SET(PDFHUMMUS_NO_DCT TRUE)
-    endif(NOT LIBJPEG_FOUND)
+    find_package (JPEG)
+    if (NOT JPEG_FOUND)
+        set (PDFHUMMUS_NO_DCT TRUE)
+    endif (NOT JPEG_FOUND)
 
     PKG_CHECK_MODULES(ZLIB zlib REQUIRED)
 
