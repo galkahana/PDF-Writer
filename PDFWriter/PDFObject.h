@@ -24,8 +24,10 @@
 
 #include <string>
 #include <map>
-
-typedef std::map<std::string, void*> StringToVoidP;
+#include <list>
+typedef unsigned char Byte;
+typedef std::list<Byte> ByteList;
+typedef std::map<std::string, ByteList*> StringToVoidP;
 
 class PDFObject : public RefCountObject
 {
@@ -58,10 +60,10 @@ public:
 	/*
 		metadata will automatically be deleted when object is released
 	*/
-	void SetMetadata(const std::string& inKey,void* inValue); // will automatically delete old data in the same key
-	void* GetMetadata(const std::string& inKey);
+	void SetMetadata(const std::string& inKey,ByteList* inValue); // will automatically delete old data in the same key
+	ByteList* GetMetadata(const std::string& inKey);
 	// Detach will only remove the pointer from metadata map, Delete will also delete the inValue pointer
-	void* DetachMetadata(const std::string& inKey);
+	ByteList* DetachMetadata(const std::string& inKey);
 	void DeleteMetadata(const std::string& inKey);
 
 
