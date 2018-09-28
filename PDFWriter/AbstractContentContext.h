@@ -39,7 +39,7 @@
 #include "ObjectsBasicTypes.h"
 #include "PDFParsingOptions.h"
 #include <string>
-#include <list>
+#include <vector>
 #include <set>
 #include <utility>
 
@@ -71,12 +71,12 @@ struct SomethingOrDouble
 typedef SomethingOrDouble<std::string> StringOrDouble;
 typedef SomethingOrDouble<GlyphUnicodeMappingList> GlyphUnicodeMappingListOrDouble;
 
-typedef std::list<StringOrDouble> StringOrDoubleList;
-typedef std::list<GlyphUnicodeMappingListOrDouble> GlyphUnicodeMappingListOrDoubleList;
+typedef std::vector<StringOrDouble> StringOrDoubleList;
+typedef std::vector<GlyphUnicodeMappingListOrDouble> GlyphUnicodeMappingListOrDoubleList;
 
 typedef std::set<IContentContextListener*> IContentContextListenerSet;
 typedef std::pair<double,double> DoubleAndDoublePair;
-typedef std::list<DoubleAndDoublePair> DoubleAndDoublePairList;
+typedef std::vector<DoubleAndDoublePair> DoubleAndDoublePairList;
 
 class AbstractContentContext
 {

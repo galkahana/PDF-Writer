@@ -31,7 +31,7 @@
 #include "PDFParsingOptions.h"
 
 #include <map>
-#include <list>
+#include <vector>
 #include <set>
 
 class ObjectsContext;
@@ -102,7 +102,7 @@ private:
 	ObjectIDTypeList& mSourceObjectsToAdd;
 };
 
-typedef std::list<ResourceTokenMarker> ResourceTokenMarkerList;
+typedef std::vector<ResourceTokenMarker> ResourceTokenMarkerList;
 
 class PDFDocumentHandler : public DocumentContextExtenderAdapter
 {

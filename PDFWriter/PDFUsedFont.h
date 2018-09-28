@@ -25,7 +25,7 @@
 #include "EStatusCode.h"
 #include "GlyphUnicodeMapping.h"
 #include <string>
-#include <list>
+#include <vector>
 #include <map>
 
 #include <ft2build.h>
@@ -33,11 +33,11 @@
 
 
 
-typedef std::list<unsigned short> UShortList;
-typedef std::list<UShortList> UShortListList;
-typedef std::list<std::string> StringList;
-typedef std::list<GlyphUnicodeMappingList> GlyphUnicodeMappingListList;
-typedef std::list<unsigned int> UIntList;
+typedef std::vector<unsigned short> UShortList;
+typedef std::vector<UShortList> UShortListList;
+typedef std::vector<std::string> StringList;
+typedef std::vector<GlyphUnicodeMappingList> GlyphUnicodeMappingListList;
+typedef std::vector<unsigned int> UIntList;
 
 class IWrittenFont;
 class ObjectsContext;

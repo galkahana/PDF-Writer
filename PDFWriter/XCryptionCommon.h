@@ -23,14 +23,14 @@ limitations under the License.
 #include "IOBasicTypes.h"
 #include "ObjectsBasicTypes.h"
 
-#include <list>
+#include <vector>
 #include <string>
 #include <map>
 
 class XCryptionCommon;
 
-typedef std::list<IOBasicTypes::Byte> ByteList;
-typedef std::list<ByteList> ByteListList;
+typedef std::vector<IOBasicTypes::Byte> ByteList;
+typedef std::vector<ByteList> ByteListList;
 typedef std::map<std::string, XCryptionCommon*> StringToXCryptionCommonMap;
 
 

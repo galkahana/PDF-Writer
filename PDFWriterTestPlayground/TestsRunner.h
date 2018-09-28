@@ -28,7 +28,7 @@
 #include <string.h>
 
 #include <string>
-#include <list>
+#include <vector>
 #include <utility>
 #include <map>
 #include <set>
@@ -39,11 +39,11 @@ class ITestUnit;
 
 typedef pair<string,ITestUnit*> StringAndTestUnit;
 typedef map<string,ITestUnit*> StringToTestUnitMap;
-typedef list<StringAndTestUnit> StringAndTestUnitList;
+typedef std::vector<StringAndTestUnit> StringAndTestUnitList;
 typedef map<string,StringAndTestUnitList> StringToStringAndTestUnitListMap;
 typedef set<string> StringSet;
 
-typedef list<string> StringList;
+typedef std::vector<string> StringList;
 
 class TestsRunner
 {

@@ -198,7 +198,7 @@ PDFUsedFont::TextMeasures PDFUsedFont::CalculateTextDimensions(const UIntList& i
 
     // first, calculate the pen advancements
     int           pen_x, pen_y;
-    std::list<FT_Vector> pos;
+    std::vector<FT_Vector> pos;
     pen_x = 0;   /* start at (0,0) */
     pen_y = 0;
     
@@ -221,7 +221,7 @@ PDFUsedFont::TextMeasures PDFUsedFont::CalculateTextDimensions(const UIntList& i
     bbox.xMax = bbox.yMax = -32000;
     
     it = inGlyphsList.begin();
-    std::list<FT_Vector>::iterator itPos = pos.begin();
+    auto itPos = pos.begin();
     
     for(; it != inGlyphsList.end();++it,++itPos)
     {

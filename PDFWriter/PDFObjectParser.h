@@ -25,7 +25,7 @@
 #include "IOBasicTypes.h"
 #include "IReadPositionProvider.h"
 
-#include <list>
+#include <vector>
 #include <string>
 #include <utility>
 
@@ -37,7 +37,7 @@ class DecryptionHelper;
 
 
 typedef std::pair<bool,IOBasicTypes::Byte> BoolAndByte;
-typedef std::list<std::string> StringList;
+typedef std::vector<std::string> StringList;
 
 class PDFObjectParser
 {

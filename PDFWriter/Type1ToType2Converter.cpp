@@ -919,7 +919,7 @@ void Type1ToType2Converter::AddInitialWidthParameter()
 			22 == it->mMarkerType || // hmoveto
 			14 == it->mMarkerType) // endchar
 		{
-			it->mOperands.push_front(mWidth[0]);
+			it->mOperands.insert(it->mOperands.begin(),mWidth[0]);
 			break;
 		}
 	}

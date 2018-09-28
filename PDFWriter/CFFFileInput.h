@@ -28,7 +28,7 @@
 #include <string.h>
 
 #include <string>
-#include <list>
+#include <vector>
 #include <map>
 #include <set>
 #include <utility>
@@ -44,11 +44,11 @@ struct CFFHeader
 	Byte offSize;
 };
 
-typedef std::list<std::string> StringList;
+typedef std::vector<std::string> StringList;
 typedef std::map<std::string,unsigned short> StringToUShort;
 typedef std::pair<bool,unsigned short> BoolAndUShort;
 
-typedef std::list<CharString*> CharStringList;
+typedef std::vector<CharString*> CharStringList;
 
 typedef CharString* CharStringsIndex;
 
@@ -91,7 +91,7 @@ enum EEncodingType
 	eEncodingCustom
 };
 
-typedef std::list<Byte> ByteList;
+typedef std::vector<Byte> ByteList;
 typedef std::map<unsigned short,ByteList> UShortToByteList;
 
 typedef std::pair<Byte,unsigned short> ByteAndUShort;

@@ -24,14 +24,14 @@
 #include "ObjectsBasicTypes.h"
 #include "GlyphUnicodeMapping.h"
 
-#include <list>
+#include <vector>
 #include <vector>
 
 
 
-typedef std::list<unsigned short> UShortList;
-typedef std::list<UShortList> UShortListList;
-typedef std::list<GlyphUnicodeMappingList> GlyphUnicodeMappingListList;
+typedef std::vector<unsigned short> UShortList;
+typedef std::vector<UShortList> UShortListList;
+typedef std::vector<GlyphUnicodeMappingList> GlyphUnicodeMappingListList;
 
 class FreeTypeFaceWrapper;
 class ObjectsContext;

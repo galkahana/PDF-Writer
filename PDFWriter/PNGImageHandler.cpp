@@ -43,7 +43,7 @@
 using namespace PDFHummus;
 using namespace std;
 
-typedef list<PDFImageXObject*> PDFImageXObjectList;
+typedef vector<PDFImageXObject*> PDFImageXObjectList;
 
 
 PNGImageHandler::PNGImageHandler(void)

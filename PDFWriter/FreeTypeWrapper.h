@@ -24,14 +24,14 @@
 
 #include <string>
 #include <map>
-#include <list>
+#include <vector>
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
 
 
-typedef std::list<FT_Stream> FTStreamList;
+typedef std::vector<FT_Stream> FTStreamList;
 typedef std::map<FT_Face,FTStreamList> FTFaceToFTStreamListMap;
 
 class FreeTypeWrapper

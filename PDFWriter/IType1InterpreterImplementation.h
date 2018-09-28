@@ -23,7 +23,7 @@
 #include "EStatusCode.h"
 #include "IOBasicTypes.h"
 
-#include <list>
+#include <vector>
 
 
 using namespace IOBasicTypes;
@@ -34,7 +34,7 @@ struct Type1CharString
 	int CodeLength;
 };
 
-typedef std::list<long> LongList;
+typedef std::vector<long> LongList;
 
 class IType1InterpreterImplementation
 {

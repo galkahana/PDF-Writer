@@ -22,9 +22,9 @@
 
 #include "GraphicState.h"
 #include "EStatusCode.h"
-#include <list>
+#include <vector>
 
-typedef std::list<GraphicState> GraphicStateList;
+typedef std::vector<GraphicState> GraphicStateList;
 
 class GraphicStateStack
 {
