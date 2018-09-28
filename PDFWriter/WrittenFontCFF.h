@@ -22,12 +22,12 @@
 #include "AbstractWrittenFont.h"
 
 #include <utility>
-#include <list>
+#include <vector>
 
 
 
 typedef std::pair<unsigned char,unsigned char> UCharAndUChar;
-typedef std::list<UCharAndUChar> UCharAndUCharList;
+typedef std::vector<UCharAndUChar> UCharAndUCharList;
 
 
 class WrittenFontCFF : public AbstractWrittenFont

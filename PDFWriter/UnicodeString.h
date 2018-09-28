@@ -23,13 +23,13 @@
 #include "EStatusCode.h"
 
 #include <string>
-#include <list>
+#include <vector>
 
 
 
 typedef std::pair<PDFHummus::EStatusCode,std::string> EStatusCodeAndString;
-typedef std::list<unsigned long> ULongList;
-typedef std::list<unsigned short> UShortList;
+typedef std::vector<unsigned long> ULongList;
+typedef std::vector<unsigned short> UShortList;
 typedef std::pair<PDFHummus::EStatusCode,UShortList> EStatusCodeAndUShortList;
 
 class UnicodeString

@@ -79,7 +79,7 @@
 #include "TiffUsageParameters.h"
 
 #include <string>
-#include <list>
+#include <vector>
 #include <utility>
 
 
@@ -103,9 +103,9 @@ namespace PDFHummus
 using namespace PDFHummus;
 
 
-typedef std::list<ObjectIDType> ObjectIDTypeList;
-typedef std::list<PDFImageXObject*> PDFImageXObjectList;
-typedef std::list<std::string> StringList;
+typedef std::vector<ObjectIDType> ObjectIDTypeList;
+typedef std::vector<PDFImageXObject*> PDFImageXObjectList;
+typedef std::vector<std::string> StringList;
 typedef std::pair<double,double> DoubleAndDoublePair;
 
 //  tiff.h extracted defs [prefer to avoid including too much here]

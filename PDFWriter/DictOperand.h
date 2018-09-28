@@ -21,7 +21,7 @@
 #pragma once
 
 
-#include <list>
+#include <vector>
 #include <map>
 
 
@@ -37,7 +37,7 @@ struct DictOperand
 	long RealValueFractalEnd; // this fellow is here for writing, due to double being terribly inexact.
 };
 
-typedef std::list<DictOperand> DictOperandList;
+typedef std::vector<DictOperand> DictOperandList;
 
 // that would actually be a dictionary
 typedef std::map<unsigned short,DictOperandList> UShortToDictOperandListMap;

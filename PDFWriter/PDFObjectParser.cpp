@@ -238,8 +238,8 @@ bool PDFObjectParser::GetNextToken(std::string& outToken)
 {
 	if(mTokenBuffer.size() > 0)
 	{
-		outToken = mTokenBuffer.front();
-		mTokenBuffer.pop_front();
+		outToken = std::move(mTokenBuffer.front());
+		mTokenBuffer.erase( mTokenBuffer.begin());
 		return true;
 	}
 	else
@@ -614,7 +614,7 @@ void PDFObjectParser::SaveTokenToBuffer(std::string& inToken)
 
 void PDFObjectParser::ReturnTokenToBuffer(std::string& inToken)
 {
-	mTokenBuffer.push_front(inToken);
+	mTokenBuffer.insert(mTokenBuffer.begin(),inToken);
 }
 
 static const std::string scDoubleLeftAngle = "<<";

@@ -25,7 +25,7 @@
 #include "SingleValueContainerIterator.h"
 #include "ResourcesDictionary.h"
 
-#include <list>
+#include <vector>
 #include <utility>
 
 typedef std::pair<bool,PDFRectangle> BoolAndPDFRectangle;
@@ -33,7 +33,7 @@ typedef std::pair<bool,int> BoolAndInt;
 
 class PageContentContext;
 
-typedef std::list<ObjectIDType> ObjectIDTypeList;
+typedef std::vector<ObjectIDType> ObjectIDTypeList;
 
 class PDFPage
 {

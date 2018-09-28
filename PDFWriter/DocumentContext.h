@@ -41,7 +41,7 @@
 #include <string>
 #include <set>
 #include <utility>
-#include <list>
+#include <vector>
 #include <map>
 
 
@@ -73,18 +73,18 @@ class ITiledPatternEndWritingTask;
 
 typedef std::set<IDocumentContextExtender*> IDocumentContextExtenderSet;
 typedef std::pair<PDFHummus::EStatusCode,ObjectIDType> EStatusCodeAndObjectIDType;
-typedef std::list<ObjectIDType> ObjectIDTypeList;
+typedef std::vector<ObjectIDType> ObjectIDTypeList;
 typedef std::set<ObjectIDType> ObjectIDTypeSet;
 typedef std::map<ObjectIDType,std::string> ObjectIDTypeToStringMap;
 typedef std::set<PDFDocumentCopyingContext*> PDFDocumentCopyingContextSet;
 typedef std::pair<ResourcesDictionary*,std::string> ResourcesDictionaryAndString;
-typedef std::list<IResourceWritingTask*> IResourceWritingTaskList;
+typedef std::vector<IResourceWritingTask*> IResourceWritingTaskList;
 typedef std::map<ResourcesDictionaryAndString,IResourceWritingTaskList> ResourcesDictionaryAndStringToIResourceWritingTaskListMap;
-typedef std::list<IFormEndWritingTask*> IFormEndWritingTaskList;
+typedef std::vector<IFormEndWritingTask*> IFormEndWritingTaskList;
 typedef std::map<PDFFormXObject*,IFormEndWritingTaskList> PDFFormXObjectToIFormEndWritingTaskListMap;
-typedef std::list<IPageEndWritingTask*> IPageEndWritingTaskList;
+typedef std::vector<IPageEndWritingTask*> IPageEndWritingTaskList;
 typedef std::map<PDFPage*,IPageEndWritingTaskList> PDFPageToIPageEndWritingTaskListMap;
-typedef std::list<ITiledPatternEndWritingTask*> ITiledPatternEndWritingTaskList;
+typedef std::vector<ITiledPatternEndWritingTask*> ITiledPatternEndWritingTaskList;
 typedef std::map<PDFTiledPattern*, ITiledPatternEndWritingTaskList> PDFTiledPatternToITiledPatternEndWritingTaskListMap;
 typedef std::pair<std::string,unsigned long> StringAndULongPair;
 

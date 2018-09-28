@@ -3,11 +3,11 @@
 #include "FileURL.h"
 
 #include <string>
-#include <list>
+#include <vector>
 
 using namespace std;
 
-typedef list<string> StringList;
+typedef std::vector<string> StringList;
 
 class WindowsPath
 {

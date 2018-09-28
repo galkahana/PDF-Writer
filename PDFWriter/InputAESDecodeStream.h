@@ -24,9 +24,9 @@
 #include "IByteReader.h"
 #include "aescpp.h"
 
-#include <list>
+#include <vector>
 
-typedef std::list<IOBasicTypes::Byte> ByteList;
+typedef std::vector<IOBasicTypes::Byte> ByteList;
 
 class InputAESDecodeStream : public IByteReader
 {

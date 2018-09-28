@@ -24,9 +24,9 @@
 
 #include <string>
 #include <map>
-#include <list>
+#include <vector>
 typedef unsigned char Byte;
-typedef std::list<Byte> ByteList;
+typedef std::vector<Byte> ByteList;
 typedef std::map<std::string, ByteList*> StringToVoidP;
 
 class PDFObject : public RefCountObject

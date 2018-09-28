@@ -23,9 +23,9 @@
 #include "JPEGImageInformation.h"
 
 #include <string>
-#include <list>
+#include <vector>
 
-typedef std::list<std::string> StringList;
+typedef std::vector<std::string> StringList;
 
 class PDFImageXObject
 {

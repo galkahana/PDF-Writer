@@ -28,7 +28,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#include <list>
+#include <vector>
 #include <string>
 
 class FreeTypeFaceWrapper;
@@ -38,7 +38,7 @@ class DictionaryContext;
 
 
 
-typedef std::list<FT_Pos> FTPosList;
+typedef std::vector<FT_Pos> FTPosList;
 
 class DescendentFontWriter : public IFontDescriptorHelper
 {

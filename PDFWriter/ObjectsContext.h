@@ -26,7 +26,7 @@
 #include "PrimitiveObjectsWriter.h"
 #include "UppercaseSequance.h"
 #include <string>
-#include <list>
+#include <vector>
 
 
 
@@ -38,7 +38,7 @@ class ObjectsContext;
 class PDFParser;
 class EncryptionHelper;
 
-typedef std::list<DictionaryContext*> DictionaryContextList;
+typedef std::vector<DictionaryContext*> DictionaryContextList;
 
 class ObjectsContext
 {

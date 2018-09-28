@@ -27,7 +27,7 @@
 
 #include <string>
 #include <map>
-#include <list>
+#include <vector>
 
 
 
@@ -166,8 +166,8 @@ struct NameTable
 };
 
 typedef unsigned long* LocaTable;
-typedef std::list<unsigned long> ULongList;
-typedef std::list<unsigned int> UIntList;
+typedef std::vector<unsigned long> ULongList;
+typedef std::vector<unsigned int> UIntList;
 
 /* this time it's gonna be just what's intersting for my subsetting purposes - which is the 
    dependencies ('n some other stuff) */

@@ -21,7 +21,7 @@
 #pragma once
 
 #include <vector>
-#include <list>
+#include <vector>
 
 
 
@@ -50,4 +50,4 @@ struct GlyphUnicodeMapping
 	unsigned short mGlyphCode;	
 };
 
-typedef std::list<GlyphUnicodeMapping> GlyphUnicodeMappingList;
+typedef std::vector<GlyphUnicodeMapping> GlyphUnicodeMappingList;

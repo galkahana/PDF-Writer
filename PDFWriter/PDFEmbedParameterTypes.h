@@ -22,7 +22,7 @@
 #include "EStatusCode.h"
 #include "ObjectsBasicTypes.h"
 
-#include <list>
+#include <vector>
 #include <utility>
 
 class PDFFormXObject;
@@ -31,11 +31,11 @@ class PDFPage;
 
 
 typedef std::pair<unsigned long,unsigned long> ULongAndULong;
-typedef std::list<ULongAndULong> ULongAndULongList;
-typedef std::list<PDFFormXObject*> PDFFormXObjectList;
+typedef std::vector<ULongAndULong> ULongAndULongList;
+typedef std::vector<PDFFormXObject*> PDFFormXObjectList;
 typedef std::pair<PDFHummus::EStatusCode,PDFFormXObjectList> EStatusCodeAndPDFFormXObjectList;
 
-typedef std::list<ObjectIDType> ObjectIDTypeList;
+typedef std::vector<ObjectIDType> ObjectIDTypeList;
 typedef std::pair<PDFHummus::EStatusCode,ObjectIDTypeList> EStatusCodeAndObjectIDTypeList;
 typedef std::pair<PDFHummus::EStatusCode,ObjectIDType> EStatusCodeAndObjectIDType;
 

@@ -1,13 +1,13 @@
 #pragma once
 
 #include <string>
-#include <list>
+#include <vector>
 
 #include "SingleValueContainerIterator.h"
 
 using namespace std;
 
-typedef list<string> StringList;
+typedef std::vector<string> StringList;
 
 class FileURL
 {

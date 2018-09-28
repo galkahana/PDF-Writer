@@ -22,9 +22,9 @@
 #include "IByteReader.h"
 #include "RC4.h"
 
-#include <list>
+#include <vector>
 
-typedef std::list<IOBasicTypes::Byte> ByteList;
+typedef std::vector<IOBasicTypes::Byte> ByteList;
 
 class InputRC4XcodeStream : public IByteReader
 {

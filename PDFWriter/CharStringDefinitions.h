@@ -21,7 +21,7 @@
 #pragma once
 
 #include "IOBasicTypes.h"
-#include <list>
+#include <vector>
 
 using namespace IOBasicTypes;
 
@@ -47,4 +47,4 @@ struct CharStringOperand
 	};
 };
 
-typedef std::list<CharStringOperand> CharStringOperandList;
+typedef std::vector<CharStringOperand> CharStringOperandList;

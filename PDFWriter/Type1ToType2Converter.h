@@ -39,7 +39,7 @@ struct ConversionNode
 	LongList mOperands;
 };
 
-typedef std::list<ConversionNode> ConversionNodeList;
+typedef std::vector<ConversionNode> ConversionNodeList;
 
 struct Stem
 {

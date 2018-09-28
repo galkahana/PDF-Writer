@@ -22,7 +22,7 @@
 #include "Trace.h"
 #include <math.h>
 #include <stdlib.h>
- 
+#include <algorithm> 
 using namespace PDFHummus;
 
 
@@ -348,7 +348,7 @@ void CharStringType2Interpreter::CheckWidth()
 	if(!mCheckedWidth)
 	{
 		if(mOperandStack.size() % 2 != 0) // has width
-			mOperandStack.pop_front();
+			mOperandStack.erase(mOperandStack.begin());
 		mCheckedWidth = true;
 	}
 }
@@ -1108,7 +1108,7 @@ Byte* CharStringType2Interpreter::InterpretRoll(Byte* inProgramCounter)
 
 	long shiftAmount = (valueB.IsInteger ? valueB.IntegerValue : (long)valueB.RealValue);
 	long itemsCount = (valueA.IsInteger ? valueA.IntegerValue : (long)valueA.RealValue);
-
+/*
 	CharStringOperandList groupToShift;
 
 	for(long i=0; i < itemsCount;++i)
@@ -1134,13 +1134,13 @@ Byte* CharStringType2Interpreter::InterpretRoll(Byte* inProgramCounter)
 		}
 
 	}
-	
 	for(long i=0; i < itemsCount;++i)
 	{
 		mOperandStack.push_back(mOperandStack.front());
 		mOperandStack.pop_front();
 	}
-
+*/
+  std::rotate(mOperandStack.begin(),mOperandStack.begin()+itemsCount, mOperandStack.end() );
 	return inProgramCounter;
 }
 

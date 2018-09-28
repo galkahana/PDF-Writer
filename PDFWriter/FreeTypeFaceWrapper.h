@@ -27,7 +27,7 @@
 #include FT_FREETYPE_H
 
 #include <utility>
-#include <list>
+#include <vector>
 #include <string>
 #include <vector>
 
@@ -38,11 +38,11 @@ class ObjectsContext;
 
 
 typedef std::pair<bool,FT_Short> BoolAndFTShort;
-typedef std::list<unsigned int> UIntList;
-typedef std::list<UIntList> UIntListList;
-typedef std::list<std::string> StringList;
-typedef std::list<unsigned long> ULongList;
-typedef std::list<ULongList> ULongListList;
+typedef std::vector<unsigned int> UIntList;
+typedef std::vector<UIntList> UIntListList;
+typedef std::vector<std::string> StringList;
+typedef std::vector<unsigned long> ULongList;
+typedef std::vector<ULongList> ULongListList;
 
 class FreeTypeFaceWrapper
 {

@@ -27,7 +27,7 @@
 #include <utility>
 #include <vector>
 #include <string>
-#include <list>
+#include <vector>
 
 class FreeTypeFaceWrapper;
 class ObjectsContext;
@@ -38,7 +38,7 @@ class IByteWriter;
 
 
 typedef std::pair<unsigned short,std::string>  UShortAndString;
-typedef std::list<UShortAndString> UShortAndStringList;
+typedef std::vector<UShortAndString> UShortAndStringList;
 
 typedef std::pair<unsigned int, GlyphEncodingInfo> UIntAndGlyphEncodingInfo;
 typedef std::vector<UIntAndGlyphEncodingInfo> UIntAndGlyphEncodingInfoVector;
