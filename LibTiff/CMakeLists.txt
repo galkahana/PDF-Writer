@@ -83,3 +83,5 @@ uvcode.h
 
 
 )
+
+target_link_libraries(LibTiff ${ZLIB_LDFLAGS})

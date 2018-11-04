@@ -6,6 +6,7 @@ set(LIBPNG_LDFLAGS LibPng PARENT_SCOPE)
 
 include_directories (${ZLIB_INCLUDE_DIRS})
 
+
 add_library (LibPng 
 #sources
 png.c
@@ -33,3 +34,5 @@ pnglibconf.h
 pngpriv.h
 pngstruct.h
 )
+
+target_link_libraries(LibPng ${ZLIB_LDFLAGS})
