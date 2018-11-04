@@ -36,3 +36,14 @@ pngstruct.h
 )
 
 target_link_libraries(LibPng ${ZLIB_LDFLAGS})
+
+install(TARGETS LibPng
+    RUNTIME DESTINATION bin COMPONENT dependencies
+    ARCHIVE DESTINATION lib${LIB_SUFFIX} COMPONENT dependencies
+    LIBRARY DESTINATION lib${LIB_SUFFIX} COMPONENT dependencies
+)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    DESTINATION include
+    FILES_MATCHING
+    PATTERN "*.h"
+)

@@ -65,3 +65,14 @@ include/freetype/config/ftoption.h
 include/freetype/config/ftstdlib.h
 include/ft2build.h
 )
+
+install(TARGETS FreeType
+    RUNTIME DESTINATION bin COMPONENT dependencies
+    ARCHIVE DESTINATION lib${LIB_SUFFIX} COMPONENT dependencies
+    LIBRARY DESTINATION lib${LIB_SUFFIX} COMPONENT dependencies
+)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include
+    DESTINATION include/FreeType
+    FILES_MATCHING
+    PATTERN "*.h"
+)

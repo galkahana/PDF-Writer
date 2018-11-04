@@ -85,3 +85,14 @@ uvcode.h
 )
 
 target_link_libraries(LibTiff ${ZLIB_LDFLAGS})
+
+install(TARGETS LibTiff
+    RUNTIME DESTINATION bin COMPONENT dependencies
+    ARCHIVE DESTINATION lib${LIB_SUFFIX} COMPONENT dependencies
+    LIBRARY DESTINATION lib${LIB_SUFFIX} COMPONENT dependencies
+)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    DESTINATION include
+    FILES_MATCHING
+    PATTERN "*.h"
+)
