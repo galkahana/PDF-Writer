@@ -12,7 +12,7 @@ include_directories (${FreeType_SOURCE_DIR}/include/src)
 include_directories (${FreeType_SOURCE_DIR}/include/freetype/internal)
 include_directories (${FreeType_SOURCE_DIR}/include/freetype/internal/services)
 
-add_library (FreeType
+add_library (FreeType_OBJLIB OBJECT
 #sources
 src/base/ftbbox.c
 src/base/ftgxval.c
@@ -65,6 +65,11 @@ include/freetype/config/ftoption.h
 include/freetype/config/ftstdlib.h
 include/ft2build.h
 )
+
+set(FreeType_OBJECTS $<TARGET_OBJECTS:FreeType_OBJLIB>)
+set(FreeType_OBJECTS $<TARGET_OBJECTS:FreeType_OBJLIB> PARENT_SCOPE)
+
+add_library(FreeType ${FreeType_OBJECTS})
 
 install(TARGETS FreeType
     RUNTIME DESTINATION bin COMPONENT dependencies

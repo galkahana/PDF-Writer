@@ -4,7 +4,7 @@ project(LibJpeg)
 set(LIBJPEG_INCLUDE_DIRS ${LibJpeg_SOURCE_DIR} PARENT_SCOPE)
 set(LIBJPEG_LDFLAGS LibJpeg PARENT_SCOPE)
 
-add_library (LibJpeg 
+add_library (LibJpeg_OBJLIB OBJECT 
 #sources
 jaricom.c
 jcapimin.c
@@ -66,6 +66,9 @@ jversion.h
 
 )
 
+set(LibJpeg_OBJECTS $<TARGET_OBJECTS:LibJpeg_OBJLIB>)
+set(LibJpeg_OBJECTS $<TARGET_OBJECTS:LibJpeg_OBJLIB> PARENT_SCOPE)
+add_library(LibJpeg ${LibJpeg_OBJECTS})
 
 install(TARGETS LibJpeg
     RUNTIME DESTINATION bin COMPONENT dependencies

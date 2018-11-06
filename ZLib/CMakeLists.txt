@@ -4,7 +4,7 @@ project (Zlib)
 set(ZLIB_INCLUDE_DIRS ${Zlib_SOURCE_DIR} PARENT_SCOPE)
 set(ZLIB_LDFLAGS Zlib PARENT_SCOPE)
 
-add_library (Zlib 
+add_library (Zlib_OBJLIB OBJECT 
 #sources
 adler32.c
 compress.c
@@ -35,6 +35,10 @@ zconf.h
 zlib.h
 zutil.h
 )
+
+set(Zlib_OBJECTS $<TARGET_OBJECTS:Zlib_OBJLIB>)
+set(Zlib_OBJECTS $<TARGET_OBJECTS:Zlib_OBJLIB> PARENT_SCOPE)
+add_library(Zlib ${Zlib_OBJECTS})
 
 
 install(TARGETS Zlib

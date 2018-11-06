@@ -7,7 +7,7 @@ set(LIBPNG_LDFLAGS LibPng PARENT_SCOPE)
 include_directories (${ZLIB_INCLUDE_DIRS})
 
 
-add_library (LibPng 
+add_library (LibPng_OBJLIB OBJECT 
 #sources
 png.c
 pngerror.c
@@ -34,6 +34,11 @@ pnglibconf.h
 pngpriv.h
 pngstruct.h
 )
+
+set(LibPng_OBJECTS $<TARGET_OBJECTS:LibPng_OBJLIB>)
+set(LibPng_OBJECTS $<TARGET_OBJECTS:LibPng_OBJLIB> PARENT_SCOPE)
+add_library(LibPng ${LibPng_OBJECTS})
+
 
 target_link_libraries(LibPng ${ZLIB_LDFLAGS})
 
