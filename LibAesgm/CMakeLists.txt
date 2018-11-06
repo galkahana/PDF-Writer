@@ -4,7 +4,7 @@ project(LibAesgm)
 set(LIBAESGM_INCLUDE_DIRS ${LibAesgm_SOURCE_DIR} PARENT_SCOPE)
 set(LIBAESGM_LDFLAGS LibAesgm PARENT_SCOPE)
 
-add_library (LibAesgm
+add_library (LibAesgm_OBJLIB OBJECT
 #sources
 aescrypt.c
 aeskey.c
@@ -24,6 +24,10 @@ brg_endian.h
 brg_types.h
 
 )
+
+set(LibAesgm_OBJECTS $<TARGET_OBJECTS:LibAesgm_OBJLIB>)
+set(LibAesgm_OBJECTS $<TARGET_OBJECTS:LibAesgm_OBJLIB> PARENT_SCOPE)
+add_library(LibAesgm ${LibAesgm_OBJECTS})
 
 install(TARGETS LibAesgm
     RUNTIME DESTINATION bin COMPONENT dependencies

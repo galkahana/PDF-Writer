@@ -40,6 +40,10 @@ _.swp
 xcode/Build
 xcode/DerivedData
 
+#VSCode unswated#
+#################
+.vscode
+
 #unwanted other sources #
 ########################
 zlib-1.2.3
