@@ -372,7 +372,11 @@ XObjectContentContext.h
 
 set(PDFWriter_OBJECTS $<TARGET_OBJECTS:PDFWriter_OBJLIB>)
 set(PDFWriter_OBJECTS $<TARGET_OBJECTS:PDFWriter_OBJLIB> PARENT_SCOPE)
-add_library(PDFWriter ${PDFWriter_OBJECTS})
+if(IS_XCODE)
+    add_library(PDFWriter ${PDFWriter_OBJECTS} XObjectContentContext.cpp)
+else(IS_XCODE)
+    add_library(PDFWriter ${PDFWriter_OBJECTS})
+endif(IS_XCODE)
 
 target_link_libraries(PDFWriter ${LIBAESGM_LDFLAGS} ${LIBJPEG_LDFLAGS} ${ZLIB_LDFLAGS} ${LIBTIFF_LDFLAGS} ${FREETYPE_LDFLAGS} ${LIBPNG_LDFLAGS})
 set_target_properties(PDFWriter PROPERTIES VERSION ${PDFWRITER_LIB_VERSION} SOVERSION ${PDFWRITER_SO_VERSION})
@@ -391,7 +395,13 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 
 if(CREATE_PDFWRITER_ALL)
     set(ALL_OBJECTS ${PDFWriter_OBJECTS} ${FreeType_OBJECTS} ${LibAesgm_OBJECTS} ${LibJpeg_OBJECTS} ${LibTiff_OBJECTS} ${Zlib_OBJECTS} ${LibPng_OBJECTS})
-    add_library(PDFWriterAll ${ALL_OBJECTS})
+
+    if(IS_XCODE)
+        add_library(PDFWriterAll ${ALL_OBJECTS} XObjectContentContext.cpp)
+    else(IS_XCODE)
+        add_library(PDFWriterAll ${ALL_OBJECTS})
+    endif(IS_XCODE)
+    
     install(TARGETS PDFWriterAll
         RUNTIME DESTINATION bin COMPONENT libraries
         ARCHIVE DESTINATION lib${LIB_SUFFIX} COMPONENT libraries

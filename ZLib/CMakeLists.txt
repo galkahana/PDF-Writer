@@ -38,8 +38,11 @@ zutil.h
 
 set(Zlib_OBJECTS $<TARGET_OBJECTS:Zlib_OBJLIB>)
 set(Zlib_OBJECTS $<TARGET_OBJECTS:Zlib_OBJLIB> PARENT_SCOPE)
-add_library(Zlib ${Zlib_OBJECTS})
-
+if(IS_XCODE)
+    add_library(Zlib ${Zlib_OBJECTS} zutil.c)
+else(IS_XCODE)
+    add_library(Zlib ${Zlib_OBJECTS})
+endif(IS_XCODE)
 
 install(TARGETS Zlib
     RUNTIME DESTINATION bin COMPONENT dependencies

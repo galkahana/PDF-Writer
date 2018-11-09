@@ -69,7 +69,12 @@ include/ft2build.h
 set(FreeType_OBJECTS $<TARGET_OBJECTS:FreeType_OBJLIB>)
 set(FreeType_OBJECTS $<TARGET_OBJECTS:FreeType_OBJLIB> PARENT_SCOPE)
 
-add_library(FreeType ${FreeType_OBJECTS})
+if(IS_XCODE)
+    add_library(FreeType ${FreeType_OBJECTS} src/smooth/smooth.c)
+else(IS_XCODE)
+    add_library(FreeType ${FreeType_OBJECTS})
+endif(IS_XCODE)
+
 
 install(TARGETS FreeType
     RUNTIME DESTINATION bin COMPONENT dependencies

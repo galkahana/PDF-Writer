@@ -37,7 +37,12 @@ pngstruct.h
 
 set(LibPng_OBJECTS $<TARGET_OBJECTS:LibPng_OBJLIB>)
 set(LibPng_OBJECTS $<TARGET_OBJECTS:LibPng_OBJLIB> PARENT_SCOPE)
-add_library(LibPng ${LibPng_OBJECTS})
+
+if(IS_XCODE)
+    add_library(LibPng ${LibPng_OBJECTS} pngwutil.c)
+else(IS_XCODE)
+    add_library(LibPng ${LibPng_OBJECTS})
+endif(IS_XCODE)
 
 
 target_link_libraries(LibPng ${ZLIB_LDFLAGS})

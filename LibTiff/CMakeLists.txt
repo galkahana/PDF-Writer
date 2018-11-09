@@ -86,8 +86,12 @@ uvcode.h
 
 set(LibTiff_OBJECTS $<TARGET_OBJECTS:LibTiff_OBJLIB>)
 set(LibTiff_OBJECTS $<TARGET_OBJECTS:LibTiff_OBJLIB> PARENT_SCOPE)
-add_library(LibTiff ${LibTiff_OBJECTS})
 
+if(IS_XCODE)
+    add_library(LibTiff ${LibTiff_OBJECTS} tif_zip.c)
+else(IS_XCODE)
+    add_library(LibTiff ${LibTiff_OBJECTS})
+endif(IS_XCODE)
 
 target_link_libraries(LibTiff ${ZLIB_LDFLAGS})
 

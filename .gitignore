@@ -35,10 +35,11 @@ _.swp
 *.opensdf
 *.cache
 
-#XCode unwanted#
+#XCode/OSX unwanted#
 ################
 xcode/Build
 xcode/DerivedData
+.DS_Store
 
 #VSCode unswated#
 #################
