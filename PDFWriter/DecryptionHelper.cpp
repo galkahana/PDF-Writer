@@ -206,7 +206,11 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 				// read crypt filters
 				while (cryptFiltersIt.MoveNext())
 				{
-					PDFObjectCastPtr<PDFDictionary> cryptFilter(cryptFiltersIt.GetValue());
+					PDFObjectCastPtr<PDFDictionary> cryptFilter;
+					// A little caveat of those smart ptrs need to be handled here
+					// make sure to pass the pointer after init...otherwise cast wont do addref
+					// and object will be released
+					cryptFilter = cryptFiltersIt.GetValue();
 					if (!!cryptFilter) {
 						PDFObjectCastPtr<PDFName> cfmName(inParser->QueryDictionaryObject(cryptFilter.GetPtr(), "CFM"));
 						RefCountPtr<PDFObject> lengthObject(inParser->QueryDictionaryObject(cryptFilter.GetPtr(), "Length"));
