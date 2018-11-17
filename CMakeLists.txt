@@ -3,7 +3,9 @@ cmake_minimum_required (VERSION 2.6)
 
 set(USE_BUNDLED TRUE CACHE BOOL "Whether to use bundled libraries")
 
-set(IS_XCODE CMAKE_GENERATOR STREQUAL Xcode)
+if(CMAKE_GENERATOR STREQUAL "Xcode")
+    set(IS_XCODE TRUE)
+endif(CMAKE_GENERATOR STREQUAL "Xcode")
 
 if(NOT USE_BUNDLED)
     FIND_PACKAGE(PkgConfig)
