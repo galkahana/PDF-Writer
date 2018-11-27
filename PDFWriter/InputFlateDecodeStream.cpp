@@ -83,10 +83,15 @@ void InputFlateDecodeStream::StartEncoding()
 
 static bool isError(int inflateResult)
 {
-	return (Z_STREAM_ERROR == inflateResult ||
-		Z_NEED_DICT == inflateResult ||
-		Z_DATA_ERROR == inflateResult ||
-		Z_MEM_ERROR == inflateResult);
+	switch(inflateResult) {
+		case Z_STREAM_ERROR:
+		case Z_NEED_DICT:
+		case Z_DATA_ERROR:
+		case Z_MEM_ERROR:
+			return true;
+		default:
+			return false;
+	}
 }
 
 IOBasicTypes::LongBufferSizeType InputFlateDecodeStream::Read(IOBasicTypes::Byte* inBuffer,IOBasicTypes::LongBufferSizeType inBufferSize)
