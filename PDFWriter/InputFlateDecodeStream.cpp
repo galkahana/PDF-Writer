@@ -81,6 +81,14 @@ void InputFlateDecodeStream::StartEncoding()
 		mCurrentlyEncoding = true;
 }
 
+static bool isError(int inflateResult)
+{
+	return (Z_STREAM_ERROR == inflateResult ||
+		Z_NEED_DICT == inflateResult ||
+		Z_DATA_ERROR == inflateResult ||
+		Z_MEM_ERROR == inflateResult);
+}
+
 IOBasicTypes::LongBufferSizeType InputFlateDecodeStream::Read(IOBasicTypes::Byte* inBuffer,IOBasicTypes::LongBufferSizeType inBufferSize)
 {
 	if(mCurrentlyEncoding)
@@ -107,10 +115,7 @@ IOBasicTypes::LongBufferSizeType InputFlateDecodeStream::DecodeBufferAndRead(con
 		while(mZLibState->avail_in != 0 && mZLibState->avail_out != 0)
 		{
 			inflateResult = inflate(mZLibState,Z_NO_FLUSH);
-			if(Z_STREAM_ERROR == inflateResult ||
-			   Z_NEED_DICT == inflateResult ||
-			   Z_DATA_ERROR == inflateResult ||
-			   Z_MEM_ERROR == inflateResult)
+			if(isError(inflateResult))
 			{
 				TRACE_LOG1("InputFlateDecodeStream::DecodeBufferAndRead, failed to read zlib information. returned error code = %d",inflateResult);
 				inflateEnd(mZLibState);
@@ -138,10 +143,7 @@ IOBasicTypes::LongBufferSizeType InputFlateDecodeStream::DecodeBufferAndRead(con
 			while(mZLibState->avail_in != 0 && mZLibState->avail_out != 0 && inflateResult != Z_STREAM_END)
 			{
 				inflateResult = inflate(mZLibState,Z_NO_FLUSH);
-				if(Z_STREAM_ERROR == inflateResult ||
-				   Z_NEED_DICT == inflateResult ||
-				   Z_DATA_ERROR == inflateResult ||
-				   Z_MEM_ERROR == inflateResult)
+				if(isError(inflateResult))
 				{
 					TRACE_LOG1("InputFlateDecodeStream::DecodeBufferAndRead, failed to read zlib information. returned error code = %d",inflateResult);
 					inflateEnd(mZLibState);
@@ -154,8 +156,8 @@ IOBasicTypes::LongBufferSizeType InputFlateDecodeStream::DecodeBufferAndRead(con
 	} while(false);
 
 	// should be that at the last buffer we'll get here a nice Z_STREAM_END
-	mEndOfCompressionEoncountered = (Z_STREAM_END == inflateResult);
-	if(Z_OK == inflateResult || mEndOfCompressionEoncountered)
+	mEndOfCompressionEoncountered = (Z_STREAM_END == inflateResult) || isError(inflateResult);
+	if(Z_OK == inflateResult || Z_STREAM_END == inflateResult)
 		return inSize - mZLibState->avail_out;
 	else
 		return 0;
