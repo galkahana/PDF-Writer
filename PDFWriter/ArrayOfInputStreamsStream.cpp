@@ -83,7 +83,14 @@ LongBufferSizeType ArrayOfInputStreamsStream::Read(Byte* inBuffer,LongBufferSize
 		// read from current stream
 		IByteReader* reader = GetActiveStream();
 		if (reader && reader->NotEnded()) {
-			readAmount+= reader->Read(inBuffer + readAmount, inBufferSize - readAmount);
+			LongBufferSizeType readThisTime = reader->Read(inBuffer + readAmount, inBufferSize - readAmount);
+			if (readThisTime) {
+				readAmount += readThisTime;
+			}
+			else {
+				// otherwise infinite loop
+				break;
+			}
 		}
 	}
 	return readAmount;
