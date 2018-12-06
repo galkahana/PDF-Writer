@@ -95,17 +95,17 @@ public:
         m_DocumentContext.WriteLiteralString(value);
         return *this;
     }
-    PDFCosArray& WriteDouble(float f)
+    PDFCosArray& AddDouble(float f)
     {
         m_DocumentContext.WriteDouble(f);
         return *this;
     }
-    PDFCosArray& WriteInteger(int i)
+    PDFCosArray& AddInteger(int i)
     {
         m_DocumentContext.WriteInteger(i);
         return *this;
     }
-    PDFCosArray& WriteBool(bool i)
+    PDFCosArray& AddBool(bool i)
     {
         m_DocumentContext.WriteBoolean(i);
         return *this;
