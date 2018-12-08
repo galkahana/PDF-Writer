@@ -152,6 +152,14 @@ EStatusCode ParsingFaulty::Run(const TestConfiguration& inTestConfiguration) {
 		return status;
 	}
 
+	status = openPDF(RelativeURLToLocalPath(inTestConfiguration.mSampleFileBase, "TestMaterials/nonZeroXref.pdf"));
+	if (status != eSuccess) {
+		std::cout << "Failed at start parsing nonZeroXref.pdf" << std::endl;
+		return status;
+	}
+
+
+
 	return status;
 }
 
