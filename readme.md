@@ -3,15 +3,12 @@ A Fast and Free C++ Library for Creating, Parsing an Manipulating PDF Files and 
 Documentation is available [here](https://github.com/galkahana/PDF-Writer/wiki).   
 Project site is [here](http://www.pdfhummus.com).   
 
-If you are looking for a NodeJS module go [here](https://github.com/galkahana/HummusJS).   
+If you are looking for a NodeJS module go [here](https://github.com/galkahana/HummusJS).  
 
 
-Note for contributors:
+**Update 9/11/2019 Ending Support:**  
+Hi All, after almost 9 years I decided to finish supporting PDFWriter. You may still use the code as is, with the provided license, however I will not be providing answers, solutions, responses etc.   
+I'd like to thank everyone who used PDFWrtier and wish you all the best going forward with your projects.   
+Gal.
+ 
 
-1. Your contributions are very welcome. 
-2. Contributions must adhare to:
-    1. Has to be cross platform. and that means PC, OSX, Linux. and please be in charge of verifying that.
-    2. if you would like to introduce a new lib to go with PDF-Writer, keep in mind:
-      1. License has to be kept at the same level. if you are introducing something that will break Apache2.0 or MIT (in other words - gpl, lgpl or such), it's not allowed.
-      2. A derivative work of PDF-Writer is HummusJS, a NodeJS module. So note that any lib that you add, It should be relatively easy to add it not only to the Cmake files, but also to binding.gyp. help me with that and you earned an extra star.
-    3. Everything goes through moderation, so be patient, please, sorry i'm just one guy. 
