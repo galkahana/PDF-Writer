@@ -1925,8 +1925,9 @@ EStatusCodeAndIByteReader PDFParser::CreateFilterForStream(IByteReader* inStream
 	do
 	{
 
-		if(inFilterName->GetValue() == "FlateDecode")
+		if(inFilterName->GetValue() == "FlateDecode" || inFilterName->GetValue() == "Fl")
 		{
+			// Fl is an alias for FlateDecode in rare cases like HP Exstream software
 			InputFlateDecodeStream* flateStream;
 			flateStream = new InputFlateDecodeStream(NULL); // assigning null, so later delete, if failure occurs won't delete the input stream
 			result = flateStream;
