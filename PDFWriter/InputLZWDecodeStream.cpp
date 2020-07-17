@@ -111,6 +111,9 @@ bool InputLZWDecodeStream::ProcessNextCode()
 			}
 		} while (code == 256);
 
+		if(!mCurrentlyEncoding)
+			break;		
+
 		if (nextCode >= 4097) 
 		{
 			//error(getPos(), "Bad LZW stream - expected clear-table code");
