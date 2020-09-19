@@ -1926,11 +1926,16 @@ EStatusCodeAndIByteReader PDFParser::CreateFilterForStream(IByteReader* inStream
 	do
 	{
 
-		if(inFilterName->GetValue() == "FlateDecode" || inFilterName->GetValue() == "Fl" || inFilterName->GetValue() == "LZWDecode")
+		if(inFilterName->GetValue() == "FlateDecode" || inFilterName->GetValue() == "LZWDecode")
 		{
-			// Fl is an alias for FlateDecode in rare cases like HP Exstream software
-			
-			if (inFilterName->GetValue() == "LZWDecode")
+			if (inFilterName->GetValue() == "FlateDecode")
+			{
+				InputFlateDecodeStream* flateStream;
+				flateStream = new InputFlateDecodeStream(NULL); // assigning null, so later delete, if failure occurs won't delete the input stream
+				flateStream->Assign(inStream);
+				result = flateStream;
+			}
+			else if (inFilterName->GetValue() == "LZWDecode")
 			{
 				InputLZWDecodeStream* lzwStream;
 				int early = 1;
@@ -1942,17 +1947,12 @@ EStatusCodeAndIByteReader PDFParser::CreateFilterForStream(IByteReader* inStream
 				lzwStream = new InputLZWDecodeStream(early);
 				lzwStream->Assign(inStream);
 				result = lzwStream;
-			} else {
-				InputFlateDecodeStream* flateStream;
-				flateStream = new InputFlateDecodeStream(NULL); // assigning null, so later delete, if failure occurs won't delete the input stream
-				flateStream->Assign(inStream);
-				result = flateStream;
 			}
 
 			// check for predictor n' such
 			if (!inDecodeParams)
 				// no predictor, stop here
-				break;	
+				break;			
 
 			// read predictor, and apply the relevant predictor function
 			PDFObjectCastPtr<PDFInteger> predictor(QueryDictionaryObject(inDecodeParams,"Predictor"));
