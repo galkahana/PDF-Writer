@@ -2723,6 +2723,83 @@ void DocumentContext::RegisterTiledPatternEndWritingTask(PDFTiledPattern* inPatt
 }
 
 DoubleAndDoublePair DocumentContext::GetImageDimensions(
+	IByteReaderWithPosition* inImageStream,
+	unsigned long inImageIndex,
+	const PDFParsingOptions& inOptions)
+{
+  double imageWidth = 0.0;
+	double imageHeight = 0.0;
+
+  LongFilePositionType recordedPosition = inImageStream->GetCurrentPosition();
+
+	EHummusImageType imageType = GetImageType(inImageStream,inImageIndex);
+
+  switch(imageType)
+  {
+    case ePDF:
+    {
+      // get the dimensions via the PDF parser. will use the media rectangle to draw image
+      PDFParser pdfParser;
+
+      if(pdfParser.StartPDFParsing(inImageStream, inOptions) != eSuccess)
+        break;
+
+      PDFPageInput helper(&pdfParser,pdfParser.ParsePage(inImageIndex));
+
+      imageWidth = helper.GetMediaBox().UpperRightX - helper.GetMediaBox().LowerLeftX;
+      imageHeight = helper.GetMediaBox().UpperRightY - helper.GetMediaBox().LowerLeftY;
+
+      break;
+    }
+    case eJPG:
+    {
+      BoolAndJPEGImageInformation jpgImageInformation = GetJPEGImageHandler().RetrieveImageInformation(inImageStream);
+      if(!jpgImageInformation.first)
+        break;
+
+      DoubleAndDoublePair dimensions = GetJPEGImageHandler().GetImageDimensions(jpgImageInformation.second);
+
+      imageWidth = dimensions.first;
+      imageHeight = dimensions.second;
+      break;
+    }
+#ifndef PDFHUMMUS_NO_TIFF
+    case eTIFF:
+    {
+      TIFFImageHandler hummusTiffHandler;
+
+      DoubleAndDoublePair dimensions = hummusTiffHandler.ReadImageDimensions(inImageStream,inImageIndex);
+
+      imageWidth = dimensions.first;
+      imageHeight = dimensions.second;
+      break;
+    }
+#endif
+#ifndef PDFHUMMUS_NO_PNG
+    case ePNG:
+    {
+      PNGImageHandler hummusPngHandler;
+
+      DoubleAndDoublePair dimensions = hummusPngHandler.ReadImageDimensions(inImageStream);
+
+      imageWidth = dimensions.first;
+      imageHeight = dimensions.second;
+      break;
+    }
+#endif
+    default:
+    {
+      // just avoding uninteresting compiler warnings. meaning...if you can't get the image type or unsupported, do nothing
+    }
+  }
+
+  // restore stream position to initial state
+  inImageStream->SetPosition(recordedPosition);
+
+  return DoubleAndDoublePair(imageWidth,imageHeight);
+}
+
+DoubleAndDoublePair DocumentContext::GetImageDimensions(
 	const std::string& inImageFile,
 	unsigned long inImageIndex,
 	const PDFParsingOptions& inOptions)
@@ -2826,6 +2903,46 @@ static const Byte scMagicTIFFLittleEndianTiff[] = {0x49,0x49,0x2A,0x00};
 static const Byte scMagicTIFFLittleEndianBigTiff[] = {0x49,0x49,0x2B,0x00};
 static const Byte scMagicPng[] = { 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a };
 
+PDFHummus::EHummusImageType DocumentContext::GetImageType(IByteReaderWithPosition* inImageStream,unsigned long inImageIndex)
+{
+	// The types of images that are discovered here are those familiar to Hummus - JPG, TIFF and PDF.
+	// PDF is recognized by starting with "%PDF"
+	// JPG will start with "0xff,0xd8"
+	// TIFF will start with "0x49,0x49" (little endian) or "0x4D,0x4D" (big endian)
+	// then either 42 or 43 (tiff or big tiff respectively) written in 2 bytes, as either big or little endian
+	// PNG will start with 89 50 4e 47 0d 0a 1a 0a
+
+	// so just read the first 8 bytes and it should be enough to recognize a known format
+
+	Byte magic[8];
+	unsigned long readLength = 8;
+	PDFHummus::EHummusImageType imageType;
+
+  LongFilePositionType recordedPosition = inImageStream->GetCurrentPosition();
+
+  inImageStream->Read(magic,readLength);
+
+	if(readLength >= 4 && memcmp(scPDFMagic,magic,4) == 0)
+		imageType =  PDFHummus::ePDF;
+	else if(readLength >= 2 && memcmp(scMagicJPG,magic,2) == 0)
+		imageType = PDFHummus::eJPG;
+	else if(readLength >= 4 && memcmp(scMagicTIFFBigEndianTiff,magic,4) == 0)
+		imageType = PDFHummus::eTIFF;
+	else if(readLength >= 4 && memcmp(scMagicTIFFBigEndianBigTiff,magic,4) == 0)
+		imageType = PDFHummus::eTIFF;
+	else if(readLength >= 4 && memcmp(scMagicTIFFLittleEndianTiff,magic,4) == 0)
+		imageType = PDFHummus::eTIFF;
+	else if(readLength >= 4 && memcmp(scMagicTIFFLittleEndianBigTiff,magic,4) == 0)
+		imageType = PDFHummus::eTIFF;
+	else if (readLength >= 8 && memcmp(scMagicPng, magic, 8) == 0)
+		imageType = PDFHummus::ePNG;
+	else
+		imageType = PDFHummus::eUndefined;
+
+  inImageStream->SetPosition(recordedPosition);
+
+  return imageType;
+}
 
 PDFHummus::EHummusImageType DocumentContext::GetImageType(const std::string& inImageFile,unsigned long inImageIndex)
 {

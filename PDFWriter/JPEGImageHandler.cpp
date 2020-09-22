@@ -229,6 +229,28 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 	return imageXObject;
 }
 
+BoolAndJPEGImageInformation JPEGImageHandler::RetrieveImageInformation(IByteReaderWithPosition* inJPGStream)
+{
+	BoolAndJPEGImageInformation imageInformationResult(false,mNullInformation);
+
+	do
+	{
+		JPEGImageParser jpgImageParser;
+		JPEGImageInformation imageInformation;
+
+		EStatusCode status = jpgImageParser.Parse(inJPGStream,imageInformation);
+		if(status != PDFHummus::eSuccess)
+		{
+			TRACE_LOG("JPEGImageHandler::JPEGImageHandler. Failed to parse JPG stream");
+			break;
+		}
+
+		imageInformationResult.first = true;
+		imageInformationResult.second = imageInformation;
+	} while(false);
+
+	return imageInformationResult;
+}
 
 BoolAndJPEGImageInformation JPEGImageHandler::RetrieveImageInformation(const std::string& inJPGFilePath)
 {

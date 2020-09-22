@@ -263,6 +263,7 @@ public:
 
 	// some public image info services, for users of hummus
 	DoubleAndDoublePair GetImageDimensions(const std::string& inImageFile,unsigned long inImageIndex = 0, const PDFParsingOptions& inParsingOptions = PDFParsingOptions::DefaultPDFParsingOptions());
+	DoubleAndDoublePair GetImageDimensions(IByteReaderWithPosition* inImageStream,unsigned long inImageIndex = 0, const PDFParsingOptions& inParsingOptions = PDFParsingOptions::DefaultPDFParsingOptions());
 	EHummusImageType GetImageType(const std::string& inImageFile,unsigned long inImageIndex);
 	unsigned long GetImagePagesCount(const std::string& inImageFile, const PDFParsingOptions& inOptions = PDFParsingOptions::DefaultPDFParsingOptions());
 

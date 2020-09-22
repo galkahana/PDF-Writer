@@ -798,6 +798,11 @@ DoubleAndDoublePair PDFWriter::GetImageDimensions(const std::string& inImageFile
 	return mDocumentContext.GetImageDimensions(inImageFile,inImageIndex,inParsingOptions);
 }
 
+DoubleAndDoublePair PDFWriter::GetImageDimensions(IByteReaderWithPosition* inImageStream,unsigned long inImageIndex, const PDFParsingOptions& inParsingOptions)
+{
+	return mDocumentContext.GetImageDimensions(inImageStream,inImageIndex,inParsingOptions);
+}
+
 PDFHummus::EHummusImageType PDFWriter::GetImageType(const std::string& inImageFile,unsigned long inImageIndex)
 {
 	return mDocumentContext.GetImageType(inImageFile,inImageIndex);
