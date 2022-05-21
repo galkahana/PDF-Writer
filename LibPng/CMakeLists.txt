@@ -1,8 +1,8 @@
-cmake_minimum_required (VERSION 2.6) 
+cmake_minimum_required (VERSION 2.8.12)
 project(LibPng)
 
 # https://github.com/julienr/libpng-android/issues/6
-if (${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "aarch64")
+if (${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "aarch64" OR ${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "arm64")
     set(CMAKE_C_FLAGS -DPNG_ARM_NEON_OPT=0 ${CMAKE_C_FLAGS})
     message (STATUS "libPng Arm64 - disable fpu Neon optimization")
 endif()
