@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6) 
+cmake_minimum_required (VERSION 2.8.12) 
 project(LibJpeg)
 
 set(LIBJPEG_INCLUDE_DIRS ${LibJpeg_SOURCE_DIR} PARENT_SCOPE)
