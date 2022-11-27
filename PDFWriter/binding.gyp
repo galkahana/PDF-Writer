@@ -12,6 +12,16 @@
                    }
                 }]
             ],
+           'msvs_settings':
+			{
+				'VCCLCompilerTool':
+				{
+					'AdditionalOptions':
+						[
+						'/std:c++17',
+						]
+				}
+			},
             'dependencies': [
                '<(module_root_dir)/src/deps/LibAesgm/binding.gyp:libaesgm',
                '<(module_root_dir)/src/deps/FreeType/binding.gyp:freetype',

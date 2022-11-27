@@ -32,6 +32,7 @@ InputStringStream::InputStringStream(const string& inString)
 	mStartPosition = inString.begin();
 	mEndPosition = inString.end();
 	mCurrentPosition = mStartPosition;
+	mString = inString;
 }
 
 InputStringStream::~InputStringStream(void)
@@ -43,6 +44,7 @@ void InputStringStream::Assign(const string& inString)
 	mStartPosition = inString.begin();
 	mEndPosition = inString.end();
 	mCurrentPosition = mStartPosition;
+	mString = inString;
 }
 
 LongBufferSizeType InputStringStream::Read(Byte* inBuffer, LongBufferSizeType inBufferSize)
@@ -78,4 +80,9 @@ void InputStringStream::SetPositionFromEnd(LongFilePositionType inOffsetFromEnd)
 LongFilePositionType InputStringStream::GetCurrentPosition()
 {
 	return mCurrentPosition - mStartPosition;
+}
+
+void InputStringStream::MoveStartPosition(LongFilePositionType inStartPosition)
+{
+	mStartPosition = mString.begin() + (string::size_type)inStartPosition;
 }

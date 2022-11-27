@@ -181,7 +181,13 @@ void PDFPageInput::SetPDFRectangleFromPDFArray(PDFArray* inPDFArray,PDFRectangle
 	RefCountPtr<PDFObject> lowerLeftY(inPDFArray->QueryObject(1));
 	RefCountPtr<PDFObject> upperRightX(inPDFArray->QueryObject(2));
 	RefCountPtr<PDFObject> upperRightY(inPDFArray->QueryObject(3));
-	
+	if (!lowerLeftX || !lowerLeftY || !upperRightX || !upperRightY)
+	{
+		// not sure if just a return is a good idea here.
+		// Things wont jus work and might go unnoticed
+		TRACE_LOG("Could not apply pdf rectangle as values are NULL");
+		return;
+	}
 	outPDFRectangle.LowerLeftX = ParsedPrimitiveHelper(lowerLeftX.GetPtr()).GetAsDouble();
 	outPDFRectangle.LowerLeftY = ParsedPrimitiveHelper(lowerLeftY.GetPtr()).GetAsDouble();
 	outPDFRectangle.UpperRightX = ParsedPrimitiveHelper(upperRightX.GetPtr()).GetAsDouble();

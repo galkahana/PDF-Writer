@@ -26,6 +26,7 @@ using namespace PDFHummus;
 InputFileStream::InputFileStream(void)
 {
 	mStream = NULL;
+	mStartPosition = 0;
 }
 
 InputFileStream::~InputFileStream(void)
@@ -39,6 +40,7 @@ InputFileStream::InputFileStream(const std::string& inFilePath)
 {
 	mStream = NULL;
 	Open(inFilePath);
+	mStartPosition = 0;
 }
 
 EStatusCode InputFileStream::Open(const std::string& inFilePath)
@@ -78,13 +80,13 @@ void InputFileStream::Skip(LongBufferSizeType inSkipSize)
 void InputFileStream::SetPosition(LongFilePositionType inOffsetFromStart)
 {
 	if(mStream)
-		SAFE_FSEEK64(mStream,inOffsetFromStart,SEEK_SET);
+		SAFE_FSEEK64(mStream,mStartPosition + inOffsetFromStart,SEEK_SET);
 }
 
 LongFilePositionType InputFileStream::GetCurrentPosition()
 {
 	if(mStream)
-		return SAFE_FTELL64(mStream);
+		return SAFE_FTELL64(mStream) - mStartPosition;
 	else
 		return 0;
 }
@@ -114,4 +116,9 @@ void InputFileStream::SetPositionFromEnd(LongFilePositionType inOffsetFromEnd)
 		if(SAFE_FSEEK64(mStream,-inOffsetFromEnd,SEEK_END) != 0)
 			SAFE_FSEEK64(mStream,0,SEEK_SET);
 	}
+}
+
+void InputFileStream::MoveStartPosition(LongFilePositionType inStartPosition)
+{
+	mStartPosition = inStartPosition;
 }
