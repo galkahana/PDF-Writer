@@ -24,11 +24,13 @@
 InputStringBufferStream::InputStringBufferStream(MyStringBuf* inBufferToReadFrom)
 {
 	mBufferToReadFrom = inBufferToReadFrom;
+	mStartPosition = 0;
 }
 
 void InputStringBufferStream::Assign(MyStringBuf* inBufferToReadFrom)
 {
 	mBufferToReadFrom = inBufferToReadFrom;
+	mStartPosition = 0;
 }
 
 InputStringBufferStream::~InputStringBufferStream(void)
@@ -52,7 +54,7 @@ void InputStringBufferStream::Skip(LongBufferSizeType inSkipSize)
 
 void InputStringBufferStream::SetPosition(LongFilePositionType inOffsetFromStart)
 {
-	mBufferToReadFrom->pubseekoff((long)inOffsetFromStart,std::ios_base::beg);
+	mBufferToReadFrom->pubseekoff((long)mStartPosition + (long)inOffsetFromStart,std::ios_base::beg);
 }
 
 void InputStringBufferStream::SetPositionFromEnd(LongFilePositionType inOffsetFromEnd)
@@ -63,5 +65,10 @@ void InputStringBufferStream::SetPositionFromEnd(LongFilePositionType inOffsetFr
 
 LongFilePositionType InputStringBufferStream::GetCurrentPosition()
 {
-	return mBufferToReadFrom->GetCurrentReadPosition();
+	return mBufferToReadFrom->GetCurrentReadPosition() - mStartPosition;
+}
+
+void InputStringBufferStream::MoveStartPosition(LongFilePositionType inStartPosition)
+{
+	mStartPosition = inStartPosition;
 }

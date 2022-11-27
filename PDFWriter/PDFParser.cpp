@@ -166,14 +166,20 @@ EStatusCode PDFParser::ParseHeaderLine()
 		return PDFHummus::eFailure;
 	}
 
-	if(tokenizerResult.second.compare(0,scPDFMagic.size(),scPDFMagic) != 0)
+	do
 	{
-		TRACE_LOG1("PDFParser::ParseHeaderLine, file does not begin as a PDF file. a PDF file should start with \"%%PDF-\". file header = %s",tokenizerResult.second.substr(0, MAX_TRACE_SIZE - 200).c_str());
-		return PDFHummus::eFailure;
-	}
+		if(tokenizerResult.second.compare(0,scPDFMagic.size(),scPDFMagic) == 0)
+		{
+			mPDFLevel = Double(tokenizerResult.second.substr(scPDFMagic.size()));
+			mStream->MoveStartPosition(mStream->GetCurrentPosition() - tokenizerResult.second.size() - 1);
+			return PDFHummus::eSuccess;
+		}
 
-	mPDFLevel = Double(tokenizerResult.second.substr(scPDFMagic.size()));
-	return PDFHummus::eSuccess;
+		tokenizerResult = tokenizer.GetNextToken();
+	} while (tokenizerResult.first && mStream->GetCurrentPosition() < 1024);
+
+	TRACE_LOG("PDFParser::ParseHeaderLine, file does not begin as a PDF file. a PDF file should contain \"%%PDF-\" within the first 1024 bytes.");
+	return PDFHummus::eFailure;
 }
 
 static const std::string scEOF = "%%EOF";
@@ -390,6 +396,12 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 			while(!foundStartXref && mStream->NotEnded())
 			{
 				PDFObjectCastPtr<PDFSymbol> startxRef(mObjectParser.ParseNewObject());
+				if(!startxRef)
+				{
+					status = PDFHummus::eFailure;
+				    TRACE_LOG("PDFParser::ParseXrefPosition, syntax error in reading xref position");
+				    break;
+				}
 				foundStartXref = startxRef.GetPtr() && (startxRef->GetValue() == scStartxref);
 			}
 

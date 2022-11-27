@@ -98,7 +98,7 @@ PDFObject* PDFObjectParser::ParseNewObject()
 		if(!GetNextToken(token))
 			break;
 
-		// based on the parsed token, and parhaps some more, determine the type of object
+		// based on the parsed token, and perhaps some more, determine the type of object
 		// and how to parse it.
 
 		// Boolean
