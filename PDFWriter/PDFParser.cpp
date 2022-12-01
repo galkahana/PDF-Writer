@@ -53,7 +53,6 @@ using namespace PDFHummus;
 
 PDFParser::PDFParser(void)
 {
-	mStream = NULL;
 	mTrailer = NULL;
 	mXrefTable = NULL;
 	mPagesObjectIDs = NULL;
@@ -76,7 +75,7 @@ void PDFParser::ResetParser()
 	mXrefTable = NULL;
 	delete[] mPagesObjectIDs;
 	mPagesObjectIDs = NULL;
-	mStream = NULL;
+	mStream.Assign(NULL);
 	mCurrentPositionProvider.Assign(NULL);
 
 	ObjectIDTypeToObjectStreamHeaderEntryMap::iterator it = mObjectStreamsCache.begin();
@@ -93,8 +92,8 @@ EStatusCode PDFParser::StartPDFParsing(IByteReaderWithPosition* inSourceStream, 
 
 	ResetParser();
 
-	mStream = inSourceStream;
-	mCurrentPositionProvider.Assign(mStream);
+	mStream.Assign(inSourceStream);
+	mCurrentPositionProvider.Assign(&mStream);
 	mObjectParser.SetReadStream(inSourceStream,&mCurrentPositionProvider);
 
 	do
@@ -159,7 +158,7 @@ EStatusCode PDFParser::ParseHeaderLine()
 {
 	PDFParserTokenizer tokenizer;
 
-	tokenizer.SetReadStream(mStream);
+	tokenizer.SetReadStream(&mStream);
 	BoolAndString tokenizerResult = tokenizer.GetNextToken();
 
 	if(!tokenizerResult.first)
@@ -173,12 +172,12 @@ EStatusCode PDFParser::ParseHeaderLine()
 		if(tokenizerResult.second.compare(0,scPDFMagic.size(),scPDFMagic) == 0)
 		{
 			mPDFLevel = Double(tokenizerResult.second.substr(scPDFMagic.size()));
-			mStream->MoveStartPosition(mStream->GetCurrentPosition() - tokenizerResult.second.size() - 1);
+			mStream.SetOffset(mStream.GetCurrentPosition() - tokenizerResult.second.size() - 1);
 			return PDFHummus::eSuccess;
 		}
 
 		tokenizerResult = tokenizer.GetNextToken();
-	} while (tokenizerResult.first && mStream->GetCurrentPosition() < 1024);
+	} while (tokenizerResult.first && mStream.GetCurrentPosition() < 1024);
 
 	TRACE_LOG("PDFParser::ParseHeaderLine, file does not begin as a PDF file. a PDF file should contain \"%%PDF-\" within the first 1024 bytes.");
 	return PDFHummus::eFailure;
@@ -198,10 +197,10 @@ EStatusCode PDFParser::ParseEOFLine()
 		if (GoBackTillToken())
 		{
 			GoBackTillLineStart();
-			mStream->SetPositionFromEnd(GetCurrentPositionFromEnd());
+			mStream.SetPositionFromEnd(GetCurrentPositionFromEnd());
 
 			PDFParserTokenizer aTokenizer;
-			aTokenizer.SetReadStream(mStream);
+			aTokenizer.SetReadStream(&mStream);
 			BoolAndString token = aTokenizer.GetNextToken();
 
 			if (token.first && (token.second.substr(0, scEOF.length()) == scEOF))
@@ -312,13 +311,13 @@ bool PDFParser::ReadNextBufferFromEnd()
 	}
 	else
 	{
-		mStream->SetPositionFromEnd(mLastReadPositionFromEnd); // last known position that worked.
-		LongFilePositionType positionBefore = mStream->GetCurrentPosition();
-		mStream->SetPositionFromEnd(mLastReadPositionFromEnd + LINE_BUFFER_SIZE); // try earlier one
-		LongFilePositionType positionAfter = mStream->GetCurrentPosition();
+		mStream.SetPositionFromEnd(mLastReadPositionFromEnd); // last known position that worked.
+		LongFilePositionType positionBefore = mStream.GetCurrentPosition();
+		mStream.SetPositionFromEnd(mLastReadPositionFromEnd + LINE_BUFFER_SIZE); // try earlier one
+		LongFilePositionType positionAfter = mStream.GetCurrentPosition();
 		LongBufferSizeType readAmount = positionBefore - positionAfter; // check if got to start by testing position
 		if(readAmount != 0)
-			readAmount = mStream->Read(mLinesBuffer,readAmount);
+			readAmount = mStream.Read(mLinesBuffer,readAmount);
 		mEncounteredFileStart = readAmount < LINE_BUFFER_SIZE;
 		if(0 == readAmount)
 			return false;
@@ -355,7 +354,7 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 		GoBackTillLineStart();
 
 		// now go forward, and here i'm guessing a bit, till you get to either and integer, or the startxref keyword
-		mStream->SetPositionFromEnd(GetCurrentPositionFromEnd());
+		mStream.SetPositionFromEnd(GetCurrentPositionFromEnd());
 
 		mObjectParser.ResetReadState();
 		RefCountPtr<PDFObject> anObject(mObjectParser.ParseNewObject());
@@ -379,7 +378,7 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 			}
 
 			GoBackTillLineStart();
-			mStream->SetPositionFromEnd(GetCurrentPositionFromEnd());
+			mStream.SetPositionFromEnd(GetCurrentPositionFromEnd());
 
 			mObjectParser.ResetReadState();
 			PDFObjectCastPtr<PDFSymbol> startxRef(mObjectParser.ParseNewObject());
@@ -395,7 +394,7 @@ EStatusCode PDFParser::ParseLastXrefPosition()
 		{
 			bool foundStartXref = (anObject->GetType() == PDFObject::ePDFObjectSymbol) && (((PDFSymbol*)anObject.GetPtr())->GetValue() == scStartxref);
 
-			while(!foundStartXref && mStream->NotEnded())
+			while(!foundStartXref && mStream.NotEnded())
 			{
 				PDFObjectCastPtr<PDFSymbol> startxRef(mObjectParser.ParseNewObject());
 				if(!startxRef)
@@ -441,7 +440,7 @@ EStatusCode PDFParser::ParseTrailerDictionary(PDFDictionary** outTrailer)
 	do
 	{
 		PDFParserTokenizer aTokenizer;
-		aTokenizer.SetReadStream(mStream);
+		aTokenizer.SetReadStream(&mStream);
 
 		do
 		{
@@ -582,7 +581,7 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,
 
     *outExtendedTable = NULL;
 
-	tokenizer.SetReadStream(mStream);
+	tokenizer.SetReadStream(&mStream);
 	MovePositionInStream(inXrefPosition);
 
 	// Note that at times, the xref is being read "on empty". meaning - entries will be read but they will not affect the actual xref.
@@ -681,7 +680,7 @@ EStatusCode PDFParser::ReadNextXrefEntry(Byte inBuffer[20]) {
 
 	do
 	{
-		if (mStream->Read(inBuffer, 1) != 1)
+		if (mStream.Read(inBuffer, 1) != 1)
 		{
 			TRACE_LOG("PDFParser::ReadNextXrefEntry, failed to read xref entry");
 			status = PDFHummus::eFailure;
@@ -692,7 +691,7 @@ EStatusCode PDFParser::ReadNextXrefEntry(Byte inBuffer[20]) {
 		return status;
 
 	// now read extra 19
-	if (mStream->Read(inBuffer + 1, 19) != 19)
+	if (mStream.Read(inBuffer + 1, 19) != 19)
 	{
 		TRACE_LOG("PDFParser::ReadNextXrefEntry, failed to read xref entry");
 		status = PDFHummus::eFailure;
@@ -700,7 +699,7 @@ EStatusCode PDFParser::ReadNextXrefEntry(Byte inBuffer[20]) {
 	// set position if the EOL is 1 char instead of 2 (some documents may not follow the standard!)
 	if ((inBuffer[19] != scLN && inBuffer[19] != scCR) && (inBuffer[18] == scLN || inBuffer[18] == scCR))
 	{
-		mStream->SetPosition(mStream->GetCurrentPosition() - 1);
+		mStream.SetPosition(mStream.GetCurrentPosition() - 1);
 	}
 	return status;
 }
@@ -1609,7 +1608,7 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,
 
 void PDFParser::MovePositionInStream(LongFilePositionType inPosition)
 {
-	mStream->SetPosition(inPosition);
+	mStream.SetPosition(inPosition);
 	mObjectParser.ResetReadState();
 }
 
@@ -1793,7 +1792,7 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 
 	}while(false);
 
-	mObjectParser.SetReadStream(mStream,&mCurrentPositionProvider);
+	mObjectParser.SetReadStream(&mStream,&mCurrentPositionProvider);
 
 	return anObject;
 }
@@ -1882,7 +1881,7 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 			break;
 		}
 
-		result = new InputLimitedStream(mStream,lengthObject->GetValue(),false);
+		result = new InputLimitedStream(&mStream,lengthObject->GetValue(),false);
 
 		result = WrapWithDecryptionFilter(inStream,result);
 
@@ -2148,7 +2147,7 @@ IByteReader* PDFParser::CreateInputStreamReaderForPlainCopying(PDFStreamInput* i
 			break;
 		}
 
-		result = new InputLimitedStream(mStream, lengthObject->GetValue(), false);
+		result = new InputLimitedStream(&mStream, lengthObject->GetValue(), false);
 
 		result = WrapWithDecryptionFilter(inStream, result);
 
@@ -2176,8 +2175,8 @@ EStatusCode PDFParser::StartStateFileParsing(IByteReaderWithPosition* inSourceSt
 
 	ResetParser();
 
-	mStream = inSourceStream;
-	mCurrentPositionProvider.Assign(mStream);
+	mStream.Assign(inSourceStream);
+	mCurrentPositionProvider.Assign(&mStream);
 	mObjectParser.SetReadStream(inSourceStream,&mCurrentPositionProvider);
 
 	do
@@ -2237,7 +2236,7 @@ LongFilePositionType PDFParser::GetXrefPosition()
 
 IByteReaderWithPosition* PDFParser::GetParserStream()
 {
-    return mStream;
+    return &mStream;
 }
 
 

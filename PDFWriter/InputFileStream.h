@@ -50,12 +50,10 @@ public:
 	virtual void SetPosition(LongFilePositionType inOffsetFromStart);
 	virtual void SetPositionFromEnd(LongFilePositionType inOffsetFromEnd);
 	virtual LongFilePositionType GetCurrentPosition();
-	virtual void MoveStartPosition(LongFilePositionType inStartPosition);
 
 	LongFilePositionType GetFileSize();
 
 private:
 
 	FILE* mStream;
-	LongFilePositionType mStartPosition;
 };
