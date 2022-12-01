@@ -49,6 +49,8 @@
 #include  <algorithm>
 using namespace PDFHummus;
 
+#define MAX_XREF_SIZE 9999999999LL
+
 PDFParser::PDFParser(void)
 {
 	mStream = NULL;
@@ -543,6 +545,10 @@ EStatusCode PDFParser::DetermineXrefSize()
 	else
 	{
 		mXrefSize = (ObjectIDType)aSize->GetValue();
+		if(mXrefSize > MAX_XREF_SIZE) {
+			TRACE_LOG("PDFParser::DetermineXrefSize, invalid value for xref size");
+			return PDFHummus::eFailure;
+		}		
 		return PDFHummus::eSuccess;
 	}
 }
@@ -629,6 +635,11 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,
 			if(ObjectIDTypeBox(token.second) == 0)
 				continue; // probably will never happen
 			firstNonSectionObject = currentObject + ObjectIDTypeBox(token.second);
+			if(firstNonSectionObject > MAX_XREF_SIZE) {
+				TRACE_LOG("PDFParser::ParseXref, invalid value for section length");
+				status = PDFHummus::eFailure;
+				break;				
+			}
 
             // if the segment declared objects above the xref size, consult policy on what to do
             if(firstNonSectionObject > inXrefSize && mAllowExtendingSegments)
@@ -1513,6 +1524,12 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,
 
             // if reading objects past expected range interesting consult policy
             ObjectIDType readXrefSize = (ObjectIDType)xrefSize->GetValue();
+			if(readXrefSize > MAX_XREF_SIZE) {
+				TRACE_LOG("PDFParser::ParseXrefFromXrefStream, invalid value for section length");
+				status = PDFHummus::eFailure;
+				break;				
+			}
+
             if(readXrefSize > inXrefSize)
             {
                 if(mAllowExtendingSegments)
@@ -1558,17 +1575,24 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,
 					break;
 				}
 				ObjectIDType objectsCount = (ObjectIDType)segmentValue->GetValue();
+				ObjectIDType readXrefSize = startObject +  objectsCount;
+				if(readXrefSize > MAX_XREF_SIZE) {
+					TRACE_LOG("PDFParser::ParseXrefFromXrefStream, invalid value for section length");
+					status = PDFHummus::eFailure;
+					break;				
+				}
+
 				// if reading objects past expected range interesting consult policy
-				if(startObject +  objectsCount > inXrefSize)
+				if(readXrefSize > inXrefSize)
                 {
                     if(mAllowExtendingSegments)
                     {
-                        inXrefTable = ExtendXrefTableToSize(inXrefTable,inXrefSize,startObject +  objectsCount);
-                        inXrefSize = startObject +  objectsCount;
+                        inXrefTable = ExtendXrefTableToSize(inXrefTable,inXrefSize,readXrefSize);
+                        inXrefSize = readXrefSize;
                         if(*outExtendedTable)
                             delete[] *outExtendedTable;
                         *outExtendedTable = inXrefTable;
-                        *outExtendedTableSize = startObject +  objectsCount;
+                        *outExtendedTableSize = readXrefSize;
                     }
                     else
                         break;
