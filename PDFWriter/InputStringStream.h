@@ -40,13 +40,11 @@ public:
 	virtual void SetPosition(LongFilePositionType inOffsetFromStart);
 	virtual void SetPositionFromEnd(LongFilePositionType inOffsetFromEnd);
 	virtual LongFilePositionType GetCurrentPosition();
-	virtual void MoveStartPosition(LongFilePositionType inStartPosition);
 
 private:
 
 	std::string::const_iterator mStartPosition;
 	std::string::const_iterator mEndPosition;
 	std::string::const_iterator mCurrentPosition;
-	std::string mString;
 
 };

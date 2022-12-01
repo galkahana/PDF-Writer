@@ -30,6 +30,7 @@
 #include "AdapterIByteReaderWithPositionToIReadPositionProvider.h"
 #include "DecryptionHelper.h"
 #include "PDFParsingOptions.h"
+#include "InputOffsetStream.h"
 
 #include <map>
 #include <utility>
@@ -168,7 +169,7 @@ public:
 private:
 	PDFObjectParser mObjectParser;
 	DecryptionHelper mDecryptionHelper;
-	IByteReaderWithPosition* mStream;
+	InputOffsetStream mStream;
 	AdapterIByteReaderWithPositionToIReadPositionProvider mCurrentPositionProvider;
 	
 	// we'll use this items for bacwkards reading. might turns this into a proper stream object
