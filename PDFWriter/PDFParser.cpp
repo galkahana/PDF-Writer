@@ -545,6 +545,10 @@ EStatusCode PDFParser::DetermineXrefSize()
 	else
 	{
 		mXrefSize = (ObjectIDType)aSize->GetValue();
+		if(mXrefSize > MAX_XREF_SIZE) {
+			TRACE_LOG("PDFParser::DetermineXrefSize, invalid value for xref size");
+			return PDFHummus::eFailure;
+		}		
 		return PDFHummus::eSuccess;
 	}
 }
