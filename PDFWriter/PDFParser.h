@@ -33,6 +33,7 @@
 #include "InputOffsetStream.h"
 
 #include <map>
+#include <set>
 #include <vector>
 #include <utility>
 
@@ -66,6 +67,8 @@ struct XrefEntryInput
 };
 
 typedef std::vector<XrefEntryInput> XrefEntryInputVector;
+
+typedef std::set<LongFilePositionType> LongFilePositionTypeSet;
 
 struct ObjectStreamHeaderEntry
 {
@@ -182,6 +185,7 @@ private:
 	LongBufferSizeType mLastReadPositionFromEnd;
 	bool mEncounteredFileStart;
 	ObjectIDTypeToObjectStreamHeaderEntryMap mObjectStreamsCache;
+	LongFilePositionTypeSet mParsedXrefs;
 
 	double mPDFLevel;
 	LongFilePositionType mLastXrefPosition;
@@ -211,7 +215,7 @@ private:
 	PDFHummus::EStatusCode ParsePagesObjectIDs();
 	PDFHummus::EStatusCode ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID);
 	PDFHummus::EStatusCode ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID,unsigned long& ioCurrentPageIndex);
-	PDFHummus::EStatusCode ParsePreviousXrefs(PDFDictionary* inTrailer,LongFilePositionType inCurrentXrefPosition);
+	PDFHummus::EStatusCode ParsePreviousXrefs(PDFDictionary* inTrailer);
 	void MergeXrefWithMainXref(XrefEntryInputVector& inTableToMerge,ObjectIDType inMergedTableSize);
 	PDFHummus::EStatusCode ParseFileDirectory();
 	PDFHummus::EStatusCode BuildXrefTableAndTrailerFromXrefStream(long long inXrefStreamObjectID);

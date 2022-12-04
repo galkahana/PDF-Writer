@@ -82,6 +82,7 @@ void PDFParser::ResetParser()
 		delete[] it->second;
 	mObjectStreamsCache.clear();
 	mDecryptionHelper.Reset();
+	mParsedXrefs.clear();
 
 }
 
@@ -488,10 +489,13 @@ EStatusCode PDFParser::BuildXrefTableFromTable()
 		if(status != PDFHummus::eSuccess)
 			break;
 
+		// introduce mLastXrefPosition to parsed xref to avoid attempted reparses in prev
+		mParsedXrefs.insert(mLastXrefPosition);
+
 		bool hasPrev = mTrailer->Exists("Prev");
 		if(hasPrev)
 		{
-			status = ParsePreviousXrefs(mTrailer.GetPtr(), mLastXrefPosition);
+			status = ParsePreviousXrefs(mTrailer.GetPtr());
 			if(status != PDFHummus::eSuccess)
 				break;
 		}
@@ -1044,7 +1048,7 @@ PDFObject* PDFParser::QueryArrayObject(PDFArray* inArray,unsigned long inIndex)
 
 }
 
-EStatusCode PDFParser::ParsePreviousXrefs(PDFDictionary* inTrailer,LongFilePositionType inCurrentXrefPosition)
+EStatusCode PDFParser::ParsePreviousXrefs(PDFDictionary* inTrailer)
 {
 	PDFObjectCastPtr<PDFInteger> previousPositionObject(inTrailer->QueryDirectObject("Prev"));
 	if(!previousPositionObject)
@@ -1055,11 +1059,15 @@ EStatusCode PDFParser::ParsePreviousXrefs(PDFDictionary* inTrailer,LongFilePosit
 
 	LongFilePositionType previousPosition = previousPositionObject->GetValue();
 
-	if(previousPosition >= inCurrentXrefPosition) {
-		// safeguard against orcish mischief, especially trying to get the parser to endlessly loop between prevs
-		TRACE_LOG("PDFParser::ParsePreviousXrefs, unexpected, previous table position is actually higher than current xref position.");
+	if(mParsedXrefs.find(previousPosition) != mParsedXrefs.end()) {
+		// safeguard against orcish mischief, trying to get the parser to endlessly loop between prevs
+		TRACE_LOG("PDFParser::ParsePreviousXrefs, unexpected, previous table position has already been parsed. possible malicious read loop attempt");
 		return PDFHummus::eFailure;
 	}
+
+	// introduce previousPosition to parsed xref to avoid attempted reparses in prevs of prev
+	mParsedXrefs.insert(previousPosition);
+
 
 	EStatusCode status;
 
@@ -1077,7 +1085,7 @@ EStatusCode PDFParser::ParsePreviousXrefs(PDFDictionary* inTrailer,LongFilePosit
 
 		if(trailer->Exists("Prev"))
 		{
-			status = ParsePreviousXrefs(trailer.GetPtr(), previousPosition);
+			status = ParsePreviousXrefs(trailer.GetPtr());
 			if(status != PDFHummus::eSuccess)
 				break;
 		}
@@ -1338,9 +1346,12 @@ EStatusCode PDFParser::BuildXrefTableAndTrailerFromXrefStream(long long inXrefSt
 		if(status != PDFHummus::eSuccess)
 			break;
 
+		// introduce mLastXrefPosition to parsed xref to avoid attempted reparses in prev
+		mParsedXrefs.insert(mLastXrefPosition);
+
 		if(mTrailer->Exists("Prev"))
 		{
-			status = ParsePreviousXrefs(mTrailer.GetPtr(), mLastXrefPosition);
+			status = ParsePreviousXrefs(mTrailer.GetPtr());
 			if(status != PDFHummus::eSuccess)
 				break;
 		}
