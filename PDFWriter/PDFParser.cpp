@@ -50,11 +50,11 @@
 using namespace PDFHummus;
 
 #define MAX_XREF_SIZE 9999999999LL
+#define MAX_HEADER_SCAN_POSITION 1024
 
 PDFParser::PDFParser(void)
 {
 	mTrailer = NULL;
-	mXrefTable = NULL;
 	mPagesObjectIDs = NULL;
 	mParserExtender = NULL;
     mAllowExtendingSegments = true; // Gal 19.9.2013: here's some policy changer. basically i'm supposed to ignore all segments that declare objects past the trailer
@@ -71,8 +71,7 @@ PDFParser::~PDFParser(void)
 void PDFParser::ResetParser()
 {
 	mTrailer = NULL;
-	delete[] mXrefTable;
-	mXrefTable = NULL;
+	mXrefTable.clear();
 	delete[] mPagesObjectIDs;
 	mPagesObjectIDs = NULL;
 	mStream.Assign(NULL);
@@ -177,7 +176,7 @@ EStatusCode PDFParser::ParseHeaderLine()
 		}
 
 		tokenizerResult = tokenizer.GetNextToken();
-	} while (tokenizerResult.first && mStream.GetCurrentPosition() < 1024);
+	} while (tokenizerResult.first && mStream.GetCurrentPosition() < MAX_HEADER_SCAN_POSITION);
 
 	TRACE_LOG("PDFParser::ParseHeaderLine, file does not begin as a PDF file. a PDF file should contain \"%%PDF-\" within the first 1024 bytes.");
 	return PDFHummus::eFailure;
@@ -492,42 +491,32 @@ EStatusCode PDFParser::BuildXrefTableFromTable()
 		bool hasPrev = mTrailer->Exists("Prev");
 		if(hasPrev)
 		{
-			status = ParsePreviousXrefs(mTrailer.GetPtr());
+			status = ParsePreviousXrefs(mTrailer.GetPtr(), mLastXrefPosition);
 			if(status != PDFHummus::eSuccess)
 				break;
 		}
 
-        XrefEntryInput* extendedTable = NULL;
-        ObjectIDType extendedTableSize;
-		status = ParseXrefFromXrefTable(mXrefTable,mXrefSize,mLastXrefPosition,!hasPrev, &extendedTable,&extendedTableSize);
+        ObjectIDType maybeExtendedTableSize;
+		status = ParseXrefFromXrefTable(mXrefTable,mXrefSize,mLastXrefPosition,!hasPrev,&maybeExtendedTableSize);
 		if(status != PDFHummus::eSuccess)
 			break;
 
-        // Table may have been extended, in which case replace the pointer and current size
-        if(extendedTable)
-        {
-            mXrefSize = extendedTableSize;
-            delete[] mXrefTable;
-            mXrefTable = extendedTable;
-        }
+        // Table may have been extended, in which case replace the current size
+		mXrefSize = maybeExtendedTableSize;
 
 		// For hybrids, check also XRefStm entry
 		PDFObjectCastPtr<PDFInteger> xrefStmReference(mTrailer->QueryDirectObject("XRefStm"));
 		if(!xrefStmReference)
 			break;
+
 		// if exists, merge update xref
-		status = ParseXrefFromXrefStream(mXrefTable,mXrefSize,xrefStmReference->GetValue(),&extendedTable,&extendedTableSize);
+		status = ParseXrefFromXrefStream(mXrefTable,mXrefSize,xrefStmReference->GetValue(),&maybeExtendedTableSize);
 		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("PDFParser::ParseDirectory, failure to parse xref in hybrid mode");
 			break;
 		}
-        if(extendedTable)
-        {
-            mXrefSize = extendedTableSize;
-            delete[] mXrefTable;
-            mXrefTable = extendedTable;
-        }
+		mXrefSize = maybeExtendedTableSize;
 	}while(false);
 
 	return status;
@@ -554,7 +543,7 @@ EStatusCode PDFParser::DetermineXrefSize()
 
 EStatusCode PDFParser::InitializeXref()
 {
-	mXrefTable = new XrefEntryInput[mXrefSize];
+	mXrefTable.clear(); // probably not required...used to be spot for allocation when wasn't dynamic
 	return PDFHummus::eSuccess;
 }
 
@@ -562,13 +551,19 @@ typedef BoxingBaseWithRW<ObjectIDType> ObjectIDTypeBox;
 typedef BoxingBaseWithRW<unsigned long> ULong;
 typedef BoxingBaseWithRW<LongFilePositionType> LongFilePositionTypeBox;
 
+
+void PDFParser::ExtendXrefToSize(XrefEntryInputVector& inXrefTable, ObjectIDType inXrefSize) {
+	while(inXrefTable.size() < inXrefSize) {
+		inXrefTable.push_back(XrefEntryInput());
+	}
+}
+
 static const std::string scXref = "xref";
-EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,
+EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInputVector& inXrefTable,
                                               ObjectIDType inXrefSize,
                                               LongFilePositionType inXrefPosition,
 											  bool inIsFirstXref,
-                                              XrefEntryInput** outExtendedTable,
-                                              ObjectIDType* outExtendedTableSize)
+                                              ObjectIDType* outReadTableSize)
 {
 	// K. cross ref starts at  xref position
 	// and ends with trailer (or when exahausted the number of objects...whichever first)
@@ -579,7 +574,7 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,
 	ObjectIDType firstNonSectionObject;
 	Byte entry[20];
 
-    *outExtendedTable = NULL;
+    *outReadTableSize = inXrefSize;
 
 	tokenizer.SetReadStream(&mStream);
 	MovePositionInStream(inXrefPosition);
@@ -643,13 +638,12 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInput* inXrefTable,
             // if the segment declared objects above the xref size, consult policy on what to do
             if(firstNonSectionObject > inXrefSize && mAllowExtendingSegments)
             {
-                inXrefTable = ExtendXrefTableToSize(inXrefTable,inXrefSize,firstNonSectionObject);
                 inXrefSize = firstNonSectionObject;
-                if(*outExtendedTable)
-                    delete[] *outExtendedTable;
-                *outExtendedTable = inXrefTable;
-                *outExtendedTableSize = firstNonSectionObject;
+                *outReadTableSize = firstNonSectionObject;
             }
+
+			// make sure we have enough room
+			ExtendXrefToSize(inXrefTable, std::min(firstNonSectionObject,inXrefSize));
 
 			// now parse the section.
 			while(currentObject < firstNonSectionObject)
@@ -704,15 +698,6 @@ EStatusCode PDFParser::ReadNextXrefEntry(Byte inBuffer[20]) {
 	return status;
 }
 
-XrefEntryInput* PDFParser::ExtendXrefTableToSize(XrefEntryInput* inXrefTable,ObjectIDType inOldSize,ObjectIDType inNewSize)
-{
-    XrefEntryInput* newTable = new XrefEntryInput[inNewSize];
-
-	for(ObjectIDType i = 0; i < inOldSize; ++i)
-        newTable[i] =	inXrefTable[i];
-    return newTable;
-}
-
 PDFDictionary* PDFParser::GetTrailer()
 {
 	return mTrailer.GetPtr();
@@ -725,7 +710,7 @@ double PDFParser::GetPDFLevel()
 
 PDFObject* PDFParser::ParseNewObject(ObjectIDType inObjectId)
 {
-	if(inObjectId >= mXrefSize)
+	if(inObjectId >= GetXrefSize())
 	{
 		return NULL;
 	}
@@ -1059,63 +1044,59 @@ PDFObject* PDFParser::QueryArrayObject(PDFArray* inArray,unsigned long inIndex)
 
 }
 
-EStatusCode PDFParser::ParsePreviousXrefs(PDFDictionary* inTrailer)
+EStatusCode PDFParser::ParsePreviousXrefs(PDFDictionary* inTrailer,LongFilePositionType inCurrentXrefPosition)
 {
-	PDFObjectCastPtr<PDFInteger> previousPosition(inTrailer->QueryDirectObject("Prev"));
-	if(!previousPosition)
+	PDFObjectCastPtr<PDFInteger> previousPositionObject(inTrailer->QueryDirectObject("Prev"));
+	if(!previousPositionObject)
 	{
 		TRACE_LOG("PDFParser::ParsePreviousXrefs, unexpected, prev is not integer");
 		return PDFHummus::eFailure;
 	}
 
+	LongFilePositionType previousPosition = previousPositionObject->GetValue();
+
+	if(previousPosition >= inCurrentXrefPosition) {
+		// safeguard against orcish mischief, especially trying to get the parser to endlessly loop between prevs
+		TRACE_LOG("PDFParser::ParsePreviousXrefs, unexpected, previous table position is actually higher than current xref position.");
+		return PDFHummus::eFailure;
+	}
+
 	EStatusCode status;
 
-	XrefEntryInput* aTable = new XrefEntryInput[mXrefSize];
+	XrefEntryInputVector aTable;
 	do
 	{
 		PDFDictionary* trailerP = NULL;
 
         XrefEntryInput* extendedTable = NULL;
-        ObjectIDType extendedTableSize;
-		status = ParsePreviousFileDirectory(previousPosition->GetValue(),aTable,mXrefSize,&trailerP,&extendedTable,&extendedTableSize);
+        ObjectIDType readTableSize;
+		status = ParsePreviousFileDirectory(previousPosition,aTable,mXrefSize,&trailerP,&readTableSize);
 		if(status != PDFHummus::eSuccess)
 			break;
 		RefCountPtr<PDFDictionary> trailer(trailerP);
 
 		if(trailer->Exists("Prev"))
 		{
-			status = ParsePreviousXrefs(trailer.GetPtr());
+			status = ParsePreviousXrefs(trailer.GetPtr(), previousPosition);
 			if(status != PDFHummus::eSuccess)
 				break;
 		}
 
-
-        // Table may have been extended, in which case replace the pointer and current size
-        ObjectIDType newTableSize;
-        if(extendedTable)
-        {
-            newTableSize = extendedTableSize;
-            delete[] aTable;
-            aTable = extendedTable;
-        }
-        else
-            newTableSize = mXrefSize;
-        MergeXrefWithMainXref(aTable,newTableSize);
+        MergeXrefWithMainXref(aTable,readTableSize);
 	}
 	while(false);
-
-	delete[] aTable;
 	return status;
 }
 
 EStatusCode PDFParser::ParsePreviousFileDirectory(LongFilePositionType inXrefPosition,
-									  XrefEntryInput* inXrefTable,
-									  ObjectIDType inXrefSize,
-									  PDFDictionary** outTrailer,
-                                      XrefEntryInput** outExtendedTable,
-                                      ObjectIDType* outExtendedTableSize)
+                                          XrefEntryInputVector& inXrefTable,
+                                          ObjectIDType inXrefSize,
+                                          PDFDictionary** outTrailer,
+                                          ObjectIDType* outReadTableSize)
 {
 	EStatusCode status = PDFHummus::eSuccess;
+
+	*outReadTableSize = inXrefSize;
 
 	MovePositionInStream(inXrefPosition);
 
@@ -1142,18 +1123,14 @@ EStatusCode PDFParser::ParsePreviousFileDirectory(LongFilePositionType inXrefPos
 
 			bool hasPrev = trailerDictionary->Exists("Prev");
 
-			status = ParseXrefFromXrefTable(inXrefTable,inXrefSize,inXrefPosition,!hasPrev,outExtendedTable,outExtendedTableSize);
+			status = ParseXrefFromXrefTable(inXrefTable,inXrefSize,inXrefPosition,!hasPrev,outReadTableSize);
 			if(status != PDFHummus::eSuccess)
 			{
 				TRACE_LOG1("PDFParser::ParseDirectory, failed to parse xref table in %ld",inXrefPosition);
 				break;
 			}
 
-            if(*outExtendedTable)
-            {
-                inXrefTable = *outExtendedTable;
-                inXrefSize = *outExtendedTableSize;
-            }
+			inXrefSize = *outReadTableSize;
 
 
 			// For hybrids, check also XRefStm entry
@@ -1161,7 +1138,7 @@ EStatusCode PDFParser::ParsePreviousFileDirectory(LongFilePositionType inXrefPos
 			if(xrefStmReference.GetPtr())
 			{
 				// if exists, merge update xref
-				status = ParseXrefFromXrefStream(inXrefTable,inXrefSize,xrefStmReference->GetValue(),outExtendedTable,outExtendedTableSize);
+				status = ParseXrefFromXrefStream(inXrefTable,inXrefSize,xrefStmReference->GetValue(),outReadTableSize);
 				if(status != PDFHummus::eSuccess)
 				{
 					TRACE_LOG("PDFParser::ParseDirectory, failure to parse xref in hybrid mode");
@@ -1215,7 +1192,7 @@ EStatusCode PDFParser::ParsePreviousFileDirectory(LongFilePositionType inXrefPos
 
 			*outTrailer = xrefStream->QueryStreamDictionary();
 
-			status = ParseXrefFromXrefStream(inXrefTable,inXrefSize,xrefStream.GetPtr(),outExtendedTable,outExtendedTableSize);
+			status = ParseXrefFromXrefStream(inXrefTable,inXrefSize,xrefStream.GetPtr(),outReadTableSize);
 			if(status != PDFHummus::eSuccess)
 				break;
 		}
@@ -1228,17 +1205,15 @@ EStatusCode PDFParser::ParsePreviousFileDirectory(LongFilePositionType inXrefPos
 	return status;
 }
 
-void PDFParser::MergeXrefWithMainXref(XrefEntryInput* inTableToMerge,ObjectIDType inMergedTableSize)
+void PDFParser::MergeXrefWithMainXref(XrefEntryInputVector& inTableToMerge, ObjectIDType inMergedTableSize)
 {
     if(inMergedTableSize > mXrefSize)
-    {
-        XrefEntryInput* newTable = ExtendXrefTableToSize(mXrefTable, mXrefSize, inMergedTableSize);
         mXrefSize = inMergedTableSize;
-        delete[] mXrefTable;
-        mXrefTable = newTable;
-    }
 
-	for(ObjectIDType i = 0; i < mXrefSize; ++i)
+	// make sure we have enough room
+	ExtendXrefToSize(mXrefTable, inTableToMerge.size());
+
+	for(ObjectIDType i = 0; i < inTableToMerge.size(); ++i) // iterate by input table size which is what we actually want to read from (and not the logical size)
 	{
 		if(inTableToMerge[i].mType != eXrefEntryUndefined)
 			mXrefTable[i] =	inTableToMerge[i];
@@ -1365,24 +1340,19 @@ EStatusCode PDFParser::BuildXrefTableAndTrailerFromXrefStream(long long inXrefSt
 
 		if(mTrailer->Exists("Prev"))
 		{
-			status = ParsePreviousXrefs(mTrailer.GetPtr());
+			status = ParsePreviousXrefs(mTrailer.GetPtr(), mLastXrefPosition);
 			if(status != PDFHummus::eSuccess)
 				break;
 		}
 
         XrefEntryInput* extendedTable = NULL;
-        ObjectIDType extendedTableSize;
-		status = ParseXrefFromXrefStream(mXrefTable,mXrefSize,xrefStream.GetPtr(),&extendedTable,&extendedTableSize);
+        ObjectIDType readTableSize;
+		status = ParseXrefFromXrefStream(mXrefTable,mXrefSize,xrefStream.GetPtr(),&readTableSize);
 		if(status != PDFHummus::eSuccess)
 			break;
 
-        // Table may have been extended, in which case replace the pointer and current size
-        if(extendedTable)
-        {
-            mXrefSize = extendedTableSize;
-            delete[] mXrefTable;
-            mXrefTable = extendedTable;
-        }
+        // Table may have been extended, in which case replace the current size
+		mXrefSize = readTableSize;
 
 	}while(false);
 
@@ -1390,13 +1360,14 @@ EStatusCode PDFParser::BuildXrefTableAndTrailerFromXrefStream(long long inXrefSt
 
 }
 
-EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,
+EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInputVector& inXrefTable,
                                                ObjectIDType inXrefSize,
                                                LongFilePositionType inXrefPosition,
-                                               XrefEntryInput** outExtendedTable,
-                                               ObjectIDType* outExtendedTableSize)
+                                               ObjectIDType* outReadTableSize)
 {
 	EStatusCode status = PDFHummus::eSuccess;
+
+	*outReadTableSize = inXrefSize;
 
 	MovePositionInStream(inXrefPosition);
 
@@ -1449,16 +1420,15 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,
 
 		NotifyIndirectObjectEnd(xrefStream.GetPtr());
 
-		status = ParseXrefFromXrefStream(inXrefTable,inXrefSize,xrefStream.GetPtr(),outExtendedTable,outExtendedTableSize);
+		status = ParseXrefFromXrefStream(inXrefTable,inXrefSize,xrefStream.GetPtr(),outReadTableSize);
 	}while(false);
 	return status;
 }
 
-EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,
-                                               ObjectIDType inXrefSize,
-                                               PDFStreamInput* inXrefStream,
-                                               XrefEntryInput** outExtendedTable,
-                                               ObjectIDType* outExtendedTableSize)
+EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInputVector& inXrefTable,
+                                                   ObjectIDType inXrefSize,
+                                                   PDFStreamInput* inXrefStream,
+                                                   ObjectIDType* outReadTableSize)
 {
 	// 1. Setup the stream to read from the stream start location
 	// 2. Set it up with an input stream to decode if required
@@ -1468,7 +1438,7 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,
 
 	EStatusCode status = PDFHummus::eSuccess;
 
-    outExtendedTable = NULL;
+    *outReadTableSize = inXrefSize;
 
 	IByteReader* xrefStreamSource = CreateInputStreamReader(inXrefStream);
 	int* widthsArray = NULL;
@@ -1533,12 +1503,8 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,
             {
                 if(mAllowExtendingSegments)
                 {
-                    inXrefTable = ExtendXrefTableToSize(inXrefTable,inXrefSize,readXrefSize);
                     inXrefSize = readXrefSize;
-                    if(*outExtendedTable)
-                        delete[] *outExtendedTable;
-                    *outExtendedTable = inXrefTable;
-                    *outExtendedTableSize = readXrefSize;
+                    *outReadTableSize = readXrefSize;
                 }
                 else
                     break;
@@ -1586,12 +1552,8 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInput* inXrefTable,
                 {
                     if(mAllowExtendingSegments)
                     {
-                        inXrefTable = ExtendXrefTableToSize(inXrefTable,inXrefSize,readXrefSize);
                         inXrefSize = readXrefSize;
-                        if(*outExtendedTable)
-                            delete[] *outExtendedTable;
-                        *outExtendedTable = inXrefTable;
-                        *outExtendedTableSize = readXrefSize;
+                        *outReadTableSize = readXrefSize;
                     }
                     else
                         break;
@@ -1612,7 +1574,7 @@ void PDFParser::MovePositionInStream(LongFilePositionType inPosition)
 	mObjectParser.ResetReadState();
 }
 
-EStatusCode PDFParser::ReadXrefStreamSegment(XrefEntryInput* inXrefTable,
+EStatusCode PDFParser::ReadXrefStreamSegment(XrefEntryInputVector& inXrefTable,
 											 ObjectIDType inSegmentStartObject,
 											 ObjectIDType inSegmentCount,
 											 IByteReader* inReadFrom,
@@ -1626,6 +1588,9 @@ EStatusCode PDFParser::ReadXrefStreamSegment(XrefEntryInput* inXrefTable,
 		TRACE_LOG("PDFParser::ReadXrefStreamSegment, can handle only 3 length entries");
 		return PDFHummus::eFailure;
 	}
+
+	// make sure we have enough room
+	ExtendXrefToSize(inXrefTable, inSegmentStartObject + inSegmentCount);
 
 	// Note - i'm also checking that the stream is not ended. in non-finite segments, it could be that the particular
 	// stream does no define all objects...just the "updated" ones
@@ -2221,12 +2186,12 @@ bool PDFParser::IsEncryptionSupported()
 
 ObjectIDType PDFParser::GetXrefSize()
 {
-    return mXrefSize;
+    return std::min(mXrefSize,mXrefTable.size()); // combine logical and actual...to avoid unnecessary trouble
 }
 
 XrefEntryInput* PDFParser::GetXrefEntry(ObjectIDType inObjectID)
 {
-    return (inObjectID < mXrefSize) ? mXrefTable+inObjectID : NULL;
+    return (inObjectID < GetXrefSize()) ? &(mXrefTable[inObjectID]) : NULL;
 }
 
 LongFilePositionType PDFParser::GetXrefPosition()

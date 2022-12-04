@@ -596,7 +596,7 @@ EStatusCode PDFDocumentHandler::CopyInDirectObject(ObjectIDType inSourceObjectID
 	if(!sourceObject)
 	{
 		XrefEntryInput* xrefEntry = mParser->GetXrefEntry(inSourceObjectID);
-		if (xrefEntry->mType == eXrefEntryDelete) {
+		if ((xrefEntry != NULL) && (xrefEntry->mType == eXrefEntryDelete)) {
 			// if the object is deleted, replace with a deleted object
 			mObjectsContext->GetInDirectObjectsRegistry().DeleteObject(inTargetObjectID);
 			return PDFHummus::eSuccess;
