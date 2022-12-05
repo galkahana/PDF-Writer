@@ -52,6 +52,8 @@ using namespace PDFHummus;
 #define MAX_XREF_SIZE 9999999999LL
 #define MAX_HEADER_SCAN_POSITION 1024
 
+static const XrefEntryInput scEmptyEntry;
+
 PDFParser::PDFParser(void)
 {
 	mTrailer = NULL;
@@ -557,8 +559,8 @@ typedef BoxingBaseWithRW<LongFilePositionType> LongFilePositionTypeBox;
 
 
 void PDFParser::ExtendXrefToSize(XrefEntryInputVector& inXrefTable, ObjectIDType inXrefSize) {
-	while(inXrefTable.size() < inXrefSize) {
-		inXrefTable.push_back(XrefEntryInput());
+	if(inXrefTable.size() < inXrefSize) {
+		inXrefTable.insert(inXrefTable.end(), inXrefSize-inXrefTable.size(), scEmptyEntry);
 	}
 }
 
@@ -646,8 +648,6 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInputVector& inXrefTable,
                 *outReadTableSize = firstNonSectionObject;
             }
 
-			// make sure we have enough room
-			ExtendXrefToSize(inXrefTable, std::min(firstNonSectionObject,inXrefSize));
 
 			// now parse the section.
 			while(currentObject < firstNonSectionObject)
@@ -657,6 +657,9 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInputVector& inXrefTable,
 					break;
 				if(currentObject < inXrefSize)
 				{
+					// make sure we have enough room
+					ExtendXrefToSize(inXrefTable, currentObject+1);
+
 					inXrefTable[currentObject].mObjectPosition = LongFilePositionTypeBox(std::string((const char*)entry, 10));
 					inXrefTable[currentObject].mRivision = ULong(std::string((const char*)(entry + 11), 5));
 					inXrefTable[currentObject].mType = entry[17] == 'n' ? eXrefEntryExisting:eXrefEntryDelete;
@@ -1600,14 +1603,15 @@ EStatusCode PDFParser::ReadXrefStreamSegment(XrefEntryInputVector& inXrefTable,
 		return PDFHummus::eFailure;
 	}
 
-	// make sure we have enough room
-	ExtendXrefToSize(inXrefTable, inSegmentStartObject + inSegmentCount);
-
 	// Note - i'm also checking that the stream is not ended. in non-finite segments, it could be that the particular
 	// stream does no define all objects...just the "updated" ones
 	for(; (objectToRead < inSegmentStartObject + inSegmentCount) && PDFHummus::eSuccess == status && inReadFrom->NotEnded();++objectToRead)
 	{
 		long long entryType;
+
+		// make sure we have enough room
+		ExtendXrefToSize(inXrefTable, objectToRead+1);
+
 		status = ReadXrefSegmentValue(inReadFrom,inEntryWidths[0],entryType);
 		if(status != PDFHummus::eSuccess)
 			break;
