@@ -216,7 +216,7 @@ private:
 	PDFHummus::EStatusCode ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID);
 	PDFHummus::EStatusCode ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID,unsigned long& ioCurrentPageIndex);
 	PDFHummus::EStatusCode ParsePreviousXrefs(PDFDictionary* inTrailer);
-	void MergeXrefWithMainXref(XrefEntryInputVector& inTableToMerge,ObjectIDType inMergedTableSize);
+	PDFHummus::EStatusCode MergeXrefWithMainXref(XrefEntryInputVector& inTableToMerge,ObjectIDType inMergedTableSize);
 	PDFHummus::EStatusCode ParseFileDirectory();
 	PDFHummus::EStatusCode BuildXrefTableAndTrailerFromXrefStream(long long inXrefStreamObjectID);
 	// an overload for cases where the xref stream object is already parsed
@@ -263,5 +263,5 @@ private:
 	void GoBackTillLineStart();
 	bool IsPDFWhiteSpace(IOBasicTypes::Byte inCharacter);
 
-	void ExtendXrefToSize(XrefEntryInputVector& inXrefTable, ObjectIDType inXrefSize);
+	PDFHummus::EStatusCode ExtendXrefToSize(XrefEntryInputVector& inXrefTable, ObjectIDType inXrefSize);
 };
