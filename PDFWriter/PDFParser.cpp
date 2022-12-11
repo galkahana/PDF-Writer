@@ -539,10 +539,6 @@ EStatusCode PDFParser::DetermineXrefSize()
 	else
 	{
 		mXrefSize = (ObjectIDType)aSize->GetValue();
-		if(mXrefSize > MAX_XREF_SIZE) {
-			TRACE_LOG("PDFParser::DetermineXrefSize, invalid value for xref size");
-			return PDFHummus::eFailure;
-		}		
 		return PDFHummus::eSuccess;
 	}
 }
@@ -558,10 +554,17 @@ typedef BoxingBaseWithRW<unsigned long> ULong;
 typedef BoxingBaseWithRW<LongFilePositionType> LongFilePositionTypeBox;
 
 
-void PDFParser::ExtendXrefToSize(XrefEntryInputVector& inXrefTable, ObjectIDType inXrefSize) {
-	if(inXrefTable.size() < inXrefSize) {
-		inXrefTable.insert(inXrefTable.end(), inXrefSize-inXrefTable.size(), scEmptyEntry);
+EStatusCode PDFParser::ExtendXrefToSize(XrefEntryInputVector& inXrefTable, ObjectIDType inXrefSize) {
+	if (inXrefTable.size() >= inXrefSize)
+		return eSuccess;
+	
+	if(inXrefSize > MAX_XREF_SIZE) {
+		TRACE_LOG("PDFParser::ExtendXrefToSize, invalid value for section length");
+		return eFailure;
 	}
+
+	inXrefTable.insert(inXrefTable.end(), inXrefSize-inXrefTable.size(), scEmptyEntry);
+	return eSuccess;
 }
 
 static const std::string scXref = "xref";
@@ -635,11 +638,6 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInputVector& inXrefTable,
 			if(ObjectIDTypeBox(token.second) == 0)
 				continue; // probably will never happen
 			firstNonSectionObject = currentObject + ObjectIDTypeBox(token.second);
-			if(firstNonSectionObject > MAX_XREF_SIZE) {
-				TRACE_LOG("PDFParser::ParseXref, invalid value for section length");
-				status = PDFHummus::eFailure;
-				break;				
-			}
 
             // if the segment declared objects above the xref size, consult policy on what to do
             if(firstNonSectionObject > inXrefSize && mAllowExtendingSegments)
@@ -658,7 +656,9 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInputVector& inXrefTable,
 				if(currentObject < inXrefSize)
 				{
 					// make sure we have enough room
-					ExtendXrefToSize(inXrefTable, currentObject+1);
+					status = ExtendXrefToSize(inXrefTable, currentObject+1);
+					if (status != eSuccess)
+						break;
 
 					inXrefTable[currentObject].mObjectPosition = LongFilePositionTypeBox(std::string((const char*)entry, 10));
 					inXrefTable[currentObject].mRivision = ULong(std::string((const char*)(entry + 11), 5));
@@ -1093,7 +1093,7 @@ EStatusCode PDFParser::ParsePreviousXrefs(PDFDictionary* inTrailer)
 				break;
 		}
 
-        MergeXrefWithMainXref(aTable,readTableSize);
+        status = MergeXrefWithMainXref(aTable,readTableSize);
 	}
 	while(false);
 	return status;
@@ -1216,19 +1216,23 @@ EStatusCode PDFParser::ParsePreviousFileDirectory(LongFilePositionType inXrefPos
 	return status;
 }
 
-void PDFParser::MergeXrefWithMainXref(XrefEntryInputVector& inTableToMerge, ObjectIDType inMergedTableSize)
+EStatusCode PDFParser::MergeXrefWithMainXref(XrefEntryInputVector& inTableToMerge, ObjectIDType inMergedTableSize)
 {
     if(inMergedTableSize > mXrefSize)
         mXrefSize = inMergedTableSize;
 
 	// make sure we have enough room
-	ExtendXrefToSize(mXrefTable, inTableToMerge.size());
+	EStatusCode status = ExtendXrefToSize(mXrefTable, inTableToMerge.size());
+	if(status != eSuccess)
+		return status;
 
 	for(ObjectIDType i = 0; i < inTableToMerge.size(); ++i) // iterate by input table size which is what we actually want to read from (and not the logical size)
 	{
 		if(inTableToMerge[i].mType != eXrefEntryUndefined)
 			mXrefTable[i] =	inTableToMerge[i];
 	}
+
+	return eSuccess;
 }
 
 
@@ -1507,11 +1511,6 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInputVector& inXrefTable
 
             // if reading objects past expected range interesting consult policy
             ObjectIDType readXrefSize = (ObjectIDType)xrefSize->GetValue();
-			if(readXrefSize > MAX_XREF_SIZE) {
-				TRACE_LOG("PDFParser::ParseXrefFromXrefStream, invalid value for section length");
-				status = PDFHummus::eFailure;
-				break;				
-			}
 
             if(readXrefSize > inXrefSize)
             {
@@ -1555,11 +1554,6 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInputVector& inXrefTable
 				}
 				ObjectIDType objectsCount = (ObjectIDType)segmentValue->GetValue();
 				ObjectIDType readXrefSize = startObject +  objectsCount;
-				if(readXrefSize > MAX_XREF_SIZE) {
-					TRACE_LOG("PDFParser::ParseXrefFromXrefStream, invalid value for section length");
-					status = PDFHummus::eFailure;
-					break;				
-				}
 
 				// if reading objects past expected range interesting consult policy
 				if(readXrefSize > inXrefSize)
@@ -1610,8 +1604,9 @@ EStatusCode PDFParser::ReadXrefStreamSegment(XrefEntryInputVector& inXrefTable,
 		long long entryType;
 
 		// make sure we have enough room
-		ExtendXrefToSize(inXrefTable, objectToRead+1);
-
+		status = ExtendXrefToSize(inXrefTable, objectToRead+1);
+		if(status != PDFHummus::eSuccess)
+			break;
 		status = ReadXrefSegmentValue(inReadFrom,inEntryWidths[0],entryType);
 		if(status != PDFHummus::eSuccess)
 			break;
