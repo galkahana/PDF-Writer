@@ -55,4 +55,6 @@ else(NOT USE_BUNDLED)
     endif(NOT PDFHUMMUS_NO_PNG)
 endif(NOT USE_BUNDLED)
 ADD_SUBDIRECTORY(PDFWriter)
-ADD_SUBDIRECTORY(PDFWriterTestPlayground)
+
+enable_testing()
+ADD_SUBDIRECTORY(PDFWriterTesting)
