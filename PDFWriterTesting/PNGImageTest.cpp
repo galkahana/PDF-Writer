@@ -131,7 +131,7 @@ int PNGImageTest(int argc, char* argv[])
 	return status == eSuccess ? 0:1;
 }
 
-#else PDFHUMMUS_NO_PNG
+#else //PDFHUMMUS_NO_PNG
 
 int PNGImageTest(int argc, char* argv[])
 {
