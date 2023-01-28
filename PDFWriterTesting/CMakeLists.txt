@@ -120,8 +120,6 @@ else(NOT PDFHUMMUS_NO_PNG)
 	add_definitions(-DPDFHUMMUS_NO_PNG=1)
 endif(NOT PDFHUMMUS_NO_PNG)
 
-add_dependencies(PDFWriterTesting PDFWriter) #add_dependencies makes sure that dependencies are built before main target
-
 target_link_libraries (PDFWriterTesting PDFWriter)
 target_link_libraries (PDFWriterTesting ${LIBAESGM_LDFLAGS})
 target_link_libraries (PDFWriterTesting ${FREETYPE_LDFLAGS})
@@ -140,18 +138,29 @@ if(APPLE)
 	set(CMAKE_EXE_LINKER_FLAGS "-framework CoreFoundation")
 endif(APPLE)
 
-### done with the stuff fo PDFWriter
+### done with the stuff for PDFWriter
 
-# remove the test driver source file
+
+
+# Add all the ADD_TEST for each test (reusing the create_test_sourcelist list minus the generated executable)
 set (TestsToRun ${Tests})
 remove (TestsToRun PDFWriterTesting.cpp)
-
-# Add all the ADD_TEST for each test
 foreach (test ${TestsToRun})
   get_filename_component (TName ${test} NAME_WE)
   add_test (NAME ${TName} COMMAND PDFWriterTesting ${TName} ${CMAKE_CURRENT_SOURCE_DIR}/Materials ${CMAKE_BINARY_DIR}/Testing/Output)
 endforeach ()
 
 # create temp dir for output files
-file(MAKE_DIRECTORY  ${CMAKE_BINARY_DIR}/Testing/Output)
+set (TmpOutputDir ${CMAKE_BINARY_DIR}/Testing/Output)
 
+file(MAKE_DIRECTORY  ${TmpOutputDir})
+
+# check: target for running the tests via ctest. using depends to make sure project+deps are build, and also that the tmp output folder is clear of
+# materials from previous runs by recreating it. [note that the two CMAKE_COMMAND steps are ran using COMMAND. this is done to make sure they run 
+# sequentially]
+add_custom_target(check
+  COMMAND ${CMAKE_COMMAND} -E rm -r -f ${TmpOutputDir}
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${TmpOutputDir}
+  COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
+  DEPENDS PDFWriterTesting
+)
