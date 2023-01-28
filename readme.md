@@ -73,7 +73,7 @@ cd ..
 cmake --build build --config release --target install
 ```
 
-_There are more configuration options with the cmake setup for this project_. Specifically you can build with system libraries instead of with the bundled libraries, you can read about those options [here](https://github.com/galkahana/PDF-Writer/pull/70).
+_There are more configuration options with the cmake setup for this project_. Specifically you can build with system libraries instead of with the bundled libraries, you can read about those options [here](https://github.com/galkahana/PDF-Writer/pull/70) and [here](https://github.com/galkahana/PDF-Writer/wiki/Building-and-running-samples#special-options-with-cmake).
 
 ## Testing
 
