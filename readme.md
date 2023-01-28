@@ -73,12 +73,12 @@ cd ..
 cmake --build build --config release --target install
 ```
 
-_There are more configuration options with the cmake setup for this project_. Specifically you can build with system libraries instead of with the bundled libraries, you can read about those options [here](https://github.com/galkahana/PDF-Writer/pull/70) and [here](https://github.com/galkahana/PDF-Writer/wiki/Building-and-running-samples#special-options-with-cmake).
+_There are more configuration options with the cmake setup for this project_. Specifically you can build with system libraries instead of with the bundled libraries. You can read about those options [here](https://github.com/galkahana/PDF-Writer/pull/70) and [here](https://github.com/galkahana/PDF-Writer/wiki/Building-and-running-samples#special-options-with-cmake).
 
 ## Testing
 
-This project uses ctest for running tests. ctest is part of cmake and should be installed as part of cmake installation.
-The tests run various checks on PDFHummus...and I admit quite a lot of them are not great as unitests as they may just create PDF files without verifying they are good...one uses ones eyes to inspect the test files to do that...or revert to being OK with simple on exceptions being thrown, which is also good. They are decent as sample code to learn how to do things though 😬.
+This project uses `ctest` for running tests. `ctest` is part of cmake and should be installed as part of cmake installation.
+The tests run various checks on PDFHummus...and I admit quite a lot of them are not great as unitests as they may just create PDF files without verifying they are good...one uses ones eyes to inspect the test files to do that...or revert to being OK with no exceptions being thrown, which is also good. They are decent as sample code to learn how to do things though 😬.
 
 To run the project tests (after having created the project files in ./build) go:
 
@@ -87,10 +87,10 @@ ctest --test-dir build -C release
 ```
 
 This should scan the folders for tests and run them.
-Consider adding `-j22` to the command in order to run tests in parallel to speed things up.
+Consider appending ` -j22` to the command in order to run tests in parallel to speed things up.
 
 
-You should be able to see result output files from the test under `./build/Testing/Output`.
+You should be able to see result output files from the tests under `./build/Testing/Output`.
 
 
 Note that `ctest` does NOT build the project. It may fail if there's no previous build, or will not pick up on your changes if you made them
@@ -113,4 +113,3 @@ If you are developing this project using vscode here's some suggestions to help 
     - CMake Test Explorder
 
 This should help you enable testing and debugging the tests in vscode.
-(as this is a library there's no executable to run)
