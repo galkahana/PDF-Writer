@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 3.10)
 # Soname
 # MAJOR is incremented when symbols are removed or changed in an incompatible way
 # MINOR is incremented when new symbols are added
-project(PDFHUMMUS VERSION 1.0)
+project(PDFHummus VERSION 1.0)
 
 
 set(USE_BUNDLED TRUE CACHE BOOL "Whether to use bundled libraries")
@@ -67,8 +67,8 @@ ADD_SUBDIRECTORY(PDFWriterTesting)
 
 include(InstallRequiredSystemLibraries)
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-set(CPACK_PACKAGE_VERSION_MAJOR "${PDFHUMMUS_VERSION_MAJOR}")
-set(CPACK_PACKAGE_VERSION_MINOR "${PDFHUMMUS_VERSION_MINOR}")
+set(CPACK_PACKAGE_VERSION_MAJOR "${PDFHummus_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${PDFHummus_VERSION_MINOR}")
 set(CPACK_SOURCE_GENERATOR "ZIP")
 set(CPACK_GENERATOR "ZIP")
 include(CPack)
@@ -83,13 +83,11 @@ include(CMakePackageConfigHelpers)
 configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
   "${CMAKE_CURRENT_BINARY_DIR}/PDFHummusConfig.cmake"
   INSTALL_DESTINATION "lib/cmake/PDFHummus"
-  NO_SET_AND_CHECK_MACRO
-  NO_CHECK_REQUIRED_COMPONENTS_MACRO
   )
 
 write_basic_package_version_file(
     "${CMAKE_CURRENT_BINARY_DIR}/PDFHummusConfigVersion.cmake"
-    VERSION "${PDFHUMMUS_VERSION_MAJOR}.${PDFHUMMUS_VERSION_MINOR}"
+    VERSION "${PDFHummus_VERSION_MAJOR}.${PDFHummus_VERSION_MINOR}"
     COMPATIBILITY AnyNewerVersion
 )
 
