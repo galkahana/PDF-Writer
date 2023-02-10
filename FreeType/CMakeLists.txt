@@ -1,16 +1,12 @@
-cmake_minimum_required (VERSION 2.8.12) 
-project(FreeType)
 
-set(FREETYPE_INCLUDE_DIRS ${FreeType_SOURCE_DIR}/include PARENT_SCOPE)
-set(FREETYPE_LDFLAGS FreeType PARENT_SCOPE)
 
 add_definitions(-DFT2_BUILD_LIBRARY=1)
-include_directories (${FreeType_SOURCE_DIR}/include)
-include_directories (${FreeType_SOURCE_DIR}/include/freetype)
-include_directories (${FreeType_SOURCE_DIR}/include/freetype/config)
-include_directories (${FreeType_SOURCE_DIR}/include/src)
-include_directories (${FreeType_SOURCE_DIR}/include/freetype/internal)
-include_directories (${FreeType_SOURCE_DIR}/include/freetype/internal/services)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/freetype)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/freetype/config)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/src)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/freetype/internal)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/freetype/internal/services)
 
 add_library (FreeType_OBJLIB OBJECT
 #sources
@@ -75,8 +71,11 @@ else(IS_XCODE)
     add_library(FreeType ${FreeType_OBJECTS})
 endif(IS_XCODE)
 
+set(FREETYPE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include PARENT_SCOPE)
+set(FREETYPE_LDFLAGS FreeType PARENT_SCOPE)
 
 install(TARGETS FreeType
+    EXPORT PDFHummusTargets
     RUNTIME DESTINATION bin COMPONENT dependencies
     ARCHIVE DESTINATION lib${LIB_SUFFIX} COMPONENT dependencies
     LIBRARY DESTINATION lib${LIB_SUFFIX} COMPONENT dependencies

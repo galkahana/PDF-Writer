@@ -1,7 +1,3 @@
-project(PDFHUMMUS)
-cmake_minimum_required (VERSION 2.8.12)
-
-
 ## testing
 enable_testing()
 
@@ -98,7 +94,7 @@ if(PDFHUMMUS_NO_PNG)
 	add_definitions(-DPDFHUMMUS_NO_PNG=1)
 endif(PDFHUMMUS_NO_PNG)
 
-include_directories (${PDFWriter_SOURCE_DIR})
+include_directories (${PDFWriter_INCLUDE_DIRS})
 include_directories (${LIBAESGM_INCLUDE_DIRS})
 include_directories (${ZLIB_INCLUDE_DIRS})
 if(NOT PDFHUMMUS_NO_DCT)

@@ -1,8 +1,4 @@
-cmake_minimum_required (VERSION 2.8.12) 
-project(LibJpeg)
 
-set(LIBJPEG_INCLUDE_DIRS ${LibJpeg_SOURCE_DIR} PARENT_SCOPE)
-set(LIBJPEG_LDFLAGS LibJpeg PARENT_SCOPE)
 
 add_library (LibJpeg_OBJLIB OBJECT 
 #sources
@@ -74,8 +70,11 @@ else(IS_XCODE)
     add_library(LibJpeg ${LibJpeg_OBJECTS})
 endif(IS_XCODE)
 
+set(LIBJPEG_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+set(LIBJPEG_LDFLAGS LibJpeg PARENT_SCOPE)
 
 install(TARGETS LibJpeg
+    EXPORT PDFHummusTargets
     RUNTIME DESTINATION bin COMPONENT dependencies
     ARCHIVE DESTINATION lib${LIB_SUFFIX} COMPONENT dependencies
     LIBRARY DESTINATION lib${LIB_SUFFIX} COMPONENT dependencies

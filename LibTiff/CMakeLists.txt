@@ -1,10 +1,5 @@
-cmake_minimum_required (VERSION 2.8.12) 
-project(LibTiff)
 
-set(LIBTIFF_INCLUDE_DIRS ${LibTiff_SOURCE_DIR} PARENT_SCOPE)
-set(LIBTIFF_LDFLAGS LibTiff PARENT_SCOPE)
-
-include_directories (${Zlib_SOURCE_DIR})
+include_directories (${ZLIB_INCLUDE_DIRS})
 
 add_definitions(
 -D_CRT_SECURE_NO_DEPRECATE=1
@@ -93,9 +88,14 @@ else(IS_XCODE)
     add_library(LibTiff ${LibTiff_OBJECTS})
 endif(IS_XCODE)
 
+set(LIBTIFF_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+set(LIBTIFF_LDFLAGS LibTiff PARENT_SCOPE)
+
+
 target_link_libraries(LibTiff ${ZLIB_LDFLAGS})
 
 install(TARGETS LibTiff
+    EXPORT PDFHummusTargets
     RUNTIME DESTINATION bin COMPONENT dependencies
     ARCHIVE DESTINATION lib${LIB_SUFFIX} COMPONENT dependencies
     LIBRARY DESTINATION lib${LIB_SUFFIX} COMPONENT dependencies

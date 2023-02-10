@@ -1,6 +1,3 @@
-cmake_minimum_required (VERSION 2.8.12) 
-project (Zlib)
-
 include(CheckIncludeFile)
 
 #
@@ -11,8 +8,7 @@ if(Z_HAVE_UNISTD_H)
 ADD_DEFINITIONS(-DHAVE_UNISTD_H=1)
 endif(Z_HAVE_UNISTD_H)
 
-set(ZLIB_INCLUDE_DIRS ${Zlib_SOURCE_DIR} PARENT_SCOPE)
-set(ZLIB_LDFLAGS Zlib PARENT_SCOPE)
+
 
 add_library (Zlib_OBJLIB OBJECT 
 #sources
@@ -54,7 +50,11 @@ else(IS_XCODE)
     add_library(Zlib ${Zlib_OBJECTS})
 endif(IS_XCODE)
 
+set(ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+set(ZLIB_LDFLAGS Zlib PARENT_SCOPE)
+
 install(TARGETS Zlib
+    EXPORT PDFHummusTargets
     RUNTIME DESTINATION bin COMPONENT dependencies
     ARCHIVE DESTINATION lib${LIB_SUFFIX} COMPONENT dependencies
     LIBRARY DESTINATION lib${LIB_SUFFIX} COMPONENT dependencies
