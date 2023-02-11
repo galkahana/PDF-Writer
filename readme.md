@@ -55,7 +55,6 @@ The project defines some optional flags to allow you to control some aspects of 
 You can set any of those options when calling the `cmake` command. For example to use system libraries replaced the earlier sequence with:
 
 ```bash
-mkdir build
 cd build
 cmake .. -DUSE_BUNDLED=FALSE
 ```
@@ -102,22 +101,10 @@ cmake --build build --target pdfWriterCheck [--config release]
 If you want, you can use the `install` verb of cmake to install a built product (the library files and includes). Use the prefix param to specify where you want the result to be installed to
 
 ```bash
-cmake --install ./build/. --prefix ./etc/install [--config release]
+cmake --install build --prefix ./etc/install [--config release]
 ```
 
 This will install all the library files in `./etc/install`. You should see an "include" folder and a "lib" folder with include files and library files respectively.
-
-if you do not have `cmake --install` as option, you can use a regular build with install target instead, and specify the install target in configuration stage, like this:
-
-```bash
-cd build
-cmake .. -DCMAKE_INSTALL_PREFIX="..\etc\install"
-cd ..
-
-cmake --build build --target install  [--config release]
-```
-
-_There are more configuration options with the cmake setup for this project_. Specifically you can build with system libraries instead of with the bundled libraries. You can read about those options [here](https://github.com/galkahana/PDF-Writer/pull/70) and [here](https://github.com/galkahana/PDF-Writer/wiki/Building-and-running-samples#special-options-with-cmake).
 
 # Using PDFHummus in your own project
 
@@ -154,6 +141,7 @@ The project contains definitions for `cpack`, cmake packaging mechanism. It migh
 
 The following will create a zip file with all libs and includes:
 ```
+cd build
 cpack .
 ```
 
