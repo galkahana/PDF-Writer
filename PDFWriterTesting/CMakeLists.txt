@@ -151,10 +151,10 @@ set (TmpOutputDir ${CMAKE_BINARY_DIR}/Testing/Output)
 
 file(MAKE_DIRECTORY  ${TmpOutputDir})
 
-# check: target for running the tests via ctest. using depends to make sure project+deps are build, and also that the tmp output folder is clear of
+# pdfWriterCheck: target for running the tests via ctest. using depends to make sure project+deps are build, and also that the tmp output folder is clear of
 # materials from previous runs by recreating it. [note that the two CMAKE_COMMAND steps are ran using COMMAND. this is done to make sure they run 
 # sequentially]
-add_custom_target(check
+add_custom_target(pdfWriterCheck
   COMMAND ${CMAKE_COMMAND} -E rm -r -f ${TmpOutputDir}
   COMMAND ${CMAKE_COMMAND} -E make_directory ${TmpOutputDir}
   COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIG>

@@ -97,7 +97,7 @@ Note that `ctest` does NOT build the project. It may fail if there's no previous
 since the last build. For This purpose there's an extra target created in the project to make sure the project and test code is built (as well as recreating the output folder to clear previous runs output):
 
 ```bash
-cmake --build build --target check --config release
+cmake --build build --target pdfWriterCheck --config release
 ```
 
 ## VSCode usage
