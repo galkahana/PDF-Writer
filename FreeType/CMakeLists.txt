@@ -1,14 +1,4 @@
-
-
-add_definitions(-DFT2_BUILD_LIBRARY=1)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/freetype)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/freetype/config)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/src)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/freetype/internal)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/freetype/internal/services)
-
-add_library(FreeType_OBJLIB OBJECT
+add_library(FreeType
 #sources
 src/base/ftbbox.c
 src/base/ftgxval.c
@@ -61,19 +51,17 @@ include/freetype/config/ftoption.h
 include/freetype/config/ftstdlib.h
 include/ft2build.h
 )
-
-set(FreeType_OBJECTS $<TARGET_OBJECTS:FreeType_OBJLIB>)
-set(FreeType_OBJECTS $<TARGET_OBJECTS:FreeType_OBJLIB> PARENT_SCOPE)
-
-if(IS_XCODE)
-    add_library(FreeType ${FreeType_OBJECTS} src/smooth/smooth.c)
-else(IS_XCODE)
-    add_library(FreeType ${FreeType_OBJECTS})
-endif(IS_XCODE)
 add_library(PDFHummus::FreeType ALIAS FreeType)
 
 set(FREETYPE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include PARENT_SCOPE)
 set(FREETYPE_LDFLAGS FreeType PARENT_SCOPE)
+add_definitions(-DFT2_BUILD_LIBRARY=1)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/freetype)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/freetype/config)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/src)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/freetype/internal)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/freetype/internal/services)
 
 install(TARGETS FreeType
     EXPORT PDFHummusTargets
