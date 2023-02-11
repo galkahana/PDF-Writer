@@ -136,7 +136,7 @@ include(FetchContent)
 FetchContent_Declare(
   PDFHummus
   GIT_REPOSITORY https://github.com/galkahana/PDF-Writer.git
-  GIT_TAG        master
+  GIT_TAG        4.4
   FIND_PACKAGE_ARGS
 )
 FetchContent_MakeAvailable(PDFHummus)
@@ -144,7 +144,9 @@ FetchContent_MakeAvailable(PDFHummus)
 target_link_libraries (TextExtraction PDFHummus::PDFWriter)
 ```
 
-This will either download the project and build it or use and installed version. Includes are included haha.
+This will either download the project and build it or use and installed version. 
+Change the `GIT_TAG` value to what version you'd like to install. You can use tags, branches, commit hashs. everything goes.
+Includes are included haha.
 
 # Packaging PDFHummus for installing someplace else
 
