@@ -380,6 +380,7 @@ if(IS_XCODE)
 else(IS_XCODE)
     add_library(PDFWriter ${PDFWriter_OBJECTS})
 endif(IS_XCODE)
+add_library(PDFHummus::PDFWriter ALIAS PDFWriter)
 
 set(PDFWriter_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 
@@ -407,7 +408,8 @@ if(CREATE_PDFWRITER_ALL)
     else(IS_XCODE)
         add_library(PDFWriterAll ${ALL_OBJECTS})
     endif(IS_XCODE)
-    
+    add_library(PDFHummus::PDFWriterAll ALIAS PDFWriterAll)
+
     install(TARGETS PDFWriterAll
         EXPORT PDFHummusTargets
         RUNTIME DESTINATION bin COMPONENT libraries

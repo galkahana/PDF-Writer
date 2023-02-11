@@ -8,7 +8,7 @@ endif()
 include_directories (${ZLIB_INCLUDE_DIRS})
 
 
-add_library (LibPng_OBJLIB OBJECT 
+add_library(LibPng_OBJLIB OBJECT 
 #sources
 png.c
 pngerror.c
@@ -44,6 +44,7 @@ if(IS_XCODE)
 else(IS_XCODE)
     add_library(LibPng ${LibPng_OBJECTS})
 endif(IS_XCODE)
+add_library(PDFHummus::LibPng ALIAS LibPng)
 
 set(LIBPNG_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 set(LIBPNG_LDFLAGS LibPng PARENT_SCOPE)

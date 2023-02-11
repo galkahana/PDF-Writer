@@ -1,6 +1,6 @@
 
 
-add_library (LibAesgm_OBJLIB OBJECT
+add_library(LibAesgm_OBJLIB OBJECT
 #sources
 aescrypt.c
 aeskey.c
@@ -28,6 +28,7 @@ if(IS_XCODE)
 else(IS_XCODE)
     add_library(LibAesgm ${LibAesgm_OBJECTS})
 endif(IS_XCODE)
+add_library(PDFHummus::LibAesgm ALIAS LibAesgm)
 
 set(LIBAESGM_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 set(LIBAESGM_LDFLAGS LibAesgm PARENT_SCOPE)

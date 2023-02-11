@@ -10,7 +10,7 @@ endif(Z_HAVE_UNISTD_H)
 
 
 
-add_library (Zlib_OBJLIB OBJECT 
+add_library(Zlib_OBJLIB OBJECT 
 #sources
 adler32.c
 compress.c
@@ -49,6 +49,7 @@ if(IS_XCODE)
 else(IS_XCODE)
     add_library(Zlib ${Zlib_OBJECTS})
 endif(IS_XCODE)
+add_library(PDFHummus::Zlib ALIAS Zlib)
 
 set(ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 set(ZLIB_LDFLAGS Zlib PARENT_SCOPE)

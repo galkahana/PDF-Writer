@@ -8,7 +8,7 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/src)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/freetype/internal)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/freetype/internal/services)
 
-add_library (FreeType_OBJLIB OBJECT
+add_library(FreeType_OBJLIB OBJECT
 #sources
 src/base/ftbbox.c
 src/base/ftgxval.c
@@ -70,6 +70,7 @@ if(IS_XCODE)
 else(IS_XCODE)
     add_library(FreeType ${FreeType_OBJECTS})
 endif(IS_XCODE)
+add_library(PDFHummus::FreeType ALIAS FreeType)
 
 set(FREETYPE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include PARENT_SCOPE)
 set(FREETYPE_LDFLAGS FreeType PARENT_SCOPE)

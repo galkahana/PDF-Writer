@@ -1,6 +1,6 @@
 
 
-add_library (LibJpeg_OBJLIB OBJECT 
+add_library(LibJpeg_OBJLIB OBJECT 
 #sources
 jaricom.c
 jcapimin.c
@@ -69,6 +69,7 @@ if(IS_XCODE)
 else(IS_XCODE)
     add_library(LibJpeg ${LibJpeg_OBJECTS})
 endif(IS_XCODE)
+add_library(PDFHummus::LibJpeg ALIAS LibJpeg)
 
 set(LIBJPEG_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 set(LIBJPEG_LDFLAGS LibJpeg PARENT_SCOPE)

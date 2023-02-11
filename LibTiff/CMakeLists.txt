@@ -19,7 +19,7 @@ add_definitions(
 -DTIF_PLATFORM_CONSOLE=1
 -DFILLODER_LSB2MSB=1)
 
-add_library (LibTiff_OBJLIB OBJECT 
+add_library(LibTiff_OBJLIB OBJECT 
 #sources
 tif_aux.c
 tif_close.c
@@ -87,6 +87,7 @@ if(IS_XCODE)
 else(IS_XCODE)
     add_library(LibTiff ${LibTiff_OBJECTS})
 endif(IS_XCODE)
+add_library(PDFHummus::LibTiff ALIAS LibTiff)
 
 set(LIBTIFF_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 set(LIBTIFF_LDFLAGS LibTiff PARENT_SCOPE)
