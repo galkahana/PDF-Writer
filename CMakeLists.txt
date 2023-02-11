@@ -1,5 +1,10 @@
-project(PDFHUMMUS)
-cmake_minimum_required (VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.15)
+
+# Soname
+# MAJOR is incremented when symbols are removed or changed in an incompatible way
+# MINOR is incremented when new symbols are added
+project(PDFHummus VERSION 1.0)
+
 
 set(USE_BUNDLED TRUE CACHE BOOL "Whether to use bundled libraries")
 
@@ -58,3 +63,41 @@ ADD_SUBDIRECTORY(PDFWriter)
 
 enable_testing()
 ADD_SUBDIRECTORY(PDFWriterTesting)
+
+
+include(InstallRequiredSystemLibraries)
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+set(CPACK_PACKAGE_VERSION_MAJOR "${PDFHummus_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${PDFHummus_VERSION_MINOR}")
+set(CPACK_SOURCE_GENERATOR "ZIP")
+set(CPACK_GENERATOR "ZIP")
+include(CPack)
+
+install(EXPORT PDFHummusTargets
+  FILE PDFHummusTargets.cmake
+  DESTINATION lib/cmake/PDFHummus
+  NAMESPACE PDFHummus::
+)
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
+  "${CMAKE_CURRENT_BINARY_DIR}/PDFHummusConfig.cmake"
+  INSTALL_DESTINATION "lib/cmake/PDFHummus"
+  )
+
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/PDFHummusConfigVersion.cmake"
+    VERSION "${PDFHummus_VERSION_MAJOR}.${PDFHummus_VERSION_MINOR}"
+    COMPATIBILITY AnyNewerVersion
+)
+
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/PDFHummusConfig.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/PDFHummusConfigVersion.cmake
+  DESTINATION lib/cmake/PDFHummus
+  )
+
+export(EXPORT PDFHummusTargets
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/PDFHummusTargets.cmake"
+  NAMESPACE PDFHummus::
+)

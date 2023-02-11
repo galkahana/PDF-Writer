@@ -1,10 +1,6 @@
-cmake_minimum_required (VERSION 2.8.12) 
-project(LibJpeg)
 
-set(LIBJPEG_INCLUDE_DIRS ${LibJpeg_SOURCE_DIR} PARENT_SCOPE)
-set(LIBJPEG_LDFLAGS LibJpeg PARENT_SCOPE)
 
-add_library (LibJpeg_OBJLIB OBJECT 
+add_library(LibJpeg
 #sources
 jaricom.c
 jcapimin.c
@@ -66,16 +62,12 @@ jversion.h
 
 )
 
-set(LibJpeg_OBJECTS $<TARGET_OBJECTS:LibJpeg_OBJLIB>)
-set(LibJpeg_OBJECTS $<TARGET_OBJECTS:LibJpeg_OBJLIB> PARENT_SCOPE)
-if(IS_XCODE)
-    add_library(LibJpeg ${LibJpeg_OBJECTS} jutils.c)
-else(IS_XCODE)
-    add_library(LibJpeg ${LibJpeg_OBJECTS})
-endif(IS_XCODE)
-
+add_library(PDFHummus::LibJpeg ALIAS LibJpeg)
+set(LIBJPEG_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+set(LIBJPEG_LDFLAGS LibJpeg PARENT_SCOPE)
 
 install(TARGETS LibJpeg
+    EXPORT PDFHummusTargets
     RUNTIME DESTINATION bin COMPONENT dependencies
     ARCHIVE DESTINATION lib${LIB_SUFFIX} COMPONENT dependencies
     LIBRARY DESTINATION lib${LIB_SUFFIX} COMPONENT dependencies

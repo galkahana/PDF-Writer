@@ -1,7 +1,3 @@
-project(PDFHUMMUS)
-cmake_minimum_required (VERSION 2.8.12)
-
-
 ## testing
 enable_testing()
 
@@ -72,7 +68,7 @@ create_test_sourcelist (Tests
 )
 
 # add the testing executable
-add_executable (PDFWriterTesting 
+add_executable (PDFWriterTesting     
     ${Tests}
 
     # and some utilities
@@ -83,6 +79,13 @@ add_executable (PDFWriterTesting
     # and test specific additionals
     PDFComment.cpp
     PDFCommentWriter.cpp
+)
+
+# (adding to all target only if project is built independently, so that FetchContent imports that build from source 
+# wont build this unnecessary step unless asked for explicitly)
+
+set_target_properties(PDFWriterTesting
+  PROPERTIES EXCLUDE_FROM_ALL $<NOT:$<BOOL:${PROJECT_IS_TOP_LEVEL}>>
 )
 
 ### now all the stuff required to compile and link with the rest of pdfwriter
@@ -98,7 +101,7 @@ if(PDFHUMMUS_NO_PNG)
 	add_definitions(-DPDFHUMMUS_NO_PNG=1)
 endif(PDFHUMMUS_NO_PNG)
 
-include_directories (${PDFWriter_SOURCE_DIR})
+include_directories (${PDFWriter_INCLUDE_DIRS})
 include_directories (${LIBAESGM_INCLUDE_DIRS})
 include_directories (${ZLIB_INCLUDE_DIRS})
 if(NOT PDFHUMMUS_NO_DCT)
@@ -155,10 +158,10 @@ set (TmpOutputDir ${CMAKE_BINARY_DIR}/Testing/Output)
 
 file(MAKE_DIRECTORY  ${TmpOutputDir})
 
-# check: target for running the tests via ctest. using depends to make sure project+deps are build, and also that the tmp output folder is clear of
+# pdfWriterCheck: target for running the tests via ctest. using depends to make sure project+deps are build, and also that the tmp output folder is clear of
 # materials from previous runs by recreating it. [note that the two CMAKE_COMMAND steps are ran using COMMAND. this is done to make sure they run 
 # sequentially]
-add_custom_target(check
+add_custom_target(pdfWriterCheck
   COMMAND ${CMAKE_COMMAND} -E rm -r -f ${TmpOutputDir}
   COMMAND ${CMAKE_COMMAND} -E make_directory ${TmpOutputDir}
   COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIG>

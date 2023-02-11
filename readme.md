@@ -18,7 +18,7 @@ To build/develop You will need:
 1. a compiler. for win you can use vs studio. choose community version - https://visualstudio.microsoft.com/
 2. cmake - download from here - https://cmake.org/
 
-Given that this is a Library and _not_ an executable, you can ignore this cmake setup and just use the code as is by copying the folders into your own project. You may, however, find the cmake setup, as well as the rest of the instructions in the readme file useful for building the library files, testing the library and developing/debugging it. 
+Given that this is a Library and _not_ an executable, you can ignore this cmake setup and just use the code as is by copying the folders into your own project. There are, however, better ways to include the code in your own project. The project cmake setup defines PDFHummus as a package and allows you to import the project directly from this repo (remotely) or by pre-installing the package. The instructions below contains information about building the project locally, testing and installing it, as well as explaining how to use CMake `FetchContent` functionality in order to import the project automatically from this repo
 
 For documentation about how to use the library API you should head for the Wiki pages [here](https://github.com/galkahana/PDF-Writer/wiki).
 
@@ -29,7 +29,7 @@ There are 8 folders to this project:
 - **PDFWriter**: main folder, includes the library implementation
 - **PDFWriterTesting**: test folder, includes test source code that's used with cmake testing application - ctest.
 
-# Building, Installing and testing the project
+# Building, Installing and testing the project with CMake
 
 Once you installed pre-reqs, you can now build the project.
 
@@ -43,37 +43,34 @@ cd build
 cmake ..
 ```
 
-## Build and install
+### options for generating Cmake project files
+
+The project defines some optional flags to allow you to control some aspects of building PDFHummus.
+
+- `PDFHUMMUS_NO_DCT` - defines whether to exclude DCT functionality (essentially - not include LibJpeg) from the library. defaults to `FALSE`. when setting `TRUE` the library will not require the existance of LibJpeg however will not be able to decode DCT streams from PDF files. (note that this has no baring on the ability to include JPEG images. That ability does not require LibJpeg given the innate ability of PDF files to include DCT encoded streams).
+- `PDFHUMMUS_NO_TIFF` - defines whether to exclude TIFF functionality (essentially - not include LibTiff) from the library. defaults to `FALSE`. when setting `TRUE` the library will not require the existance of LibTiff however will not be able to embed TIFF images.
+- `PDFHuMMUS_NO_PNG` -  defines whether to exclude PNG functionality (essentially - not include LibPng) from the library. defaults to `FALSE`. when setting `TRUE` the library will not require the existance of LibPng however will not be able to embed PNG images.
+- `USE_BUNDLED` - defines whether to use bundled dependencies when building the project or use system libraries. defaults to `TRUE`. when defined as `FALSE`, the project configuration will look for installed versions of	LibJpeg, ZLib, LibTiff, FreeType, LibAesgm, LibPng and use them instead of the bundled ones (i.e. those contained in the project). Note that for optional dependencies - LibJpeg, LibTiff, LibPng - if not installed the coniguration will succeed but will automatically set the optional building flags (the 3 just described) according to the libraries avialability. As for required dependencies - FreeType, LibAesgm, Zlib - the configuration will fail if those dependencies are not found.
+
+You can set any of those options when calling the `cmake` command. For example to use system libraries replaced the earlier sequence with:
+
+```bash
+mkdir build
+cd build
+cmake .. -DUSE_BUNDLED=FALSE
+```
+
+## Build
 
 Once you got the project file, you can now build the project. If you created an IDE file, you can use the IDE file to build the project.
 Alternatively you can do so from the command line, again using cmake. 
 
 The following builds the project from its root folder:
 ```bash
-cmake --build build --config release
+cmake --build build [--config release]
 ```
 
-This will build the project inside the build folder. You will be able to look up the result library files per how you normally do when building with the relevant build environment. For example, for windows, the `build/PDFWriter/Release` folder will have the result PDFWriter file.
-
-If you want, you can use the `install` verb of cmake to install a built product (the library files and includes). Use the prefix param to specify where you want the result to be installed to
-
-```bash
-cmake --install ./build/. --prefix ./etc/install --config release
-```
-
-This will install all the library files in `./etc/install`. You should see an "include" folder and a "lib" folder with include files and library files respectively.
-
-if you do not have `cmake --install` as option, you can use a regular build with install target instead, and specify the install target in configuration stage, like this:
-
-```bash
-cd build
-cmake .. -DCMAKE_INSTALL_PREFIX="..\etc\install"
-cd ..
-
-cmake --build build --config release --target install
-```
-
-_There are more configuration options with the cmake setup for this project_. Specifically you can build with system libraries instead of with the bundled libraries. You can read about those options [here](https://github.com/galkahana/PDF-Writer/pull/70) and [here](https://github.com/galkahana/PDF-Writer/wiki/Building-and-running-samples#special-options-with-cmake).
+This will build the project inside the build folder. what's in brackets is optional and will specify a release onfiguration build. You will be able to look up the result library files per how you normally do when building with the relevant build environment. For example, for windows, the `build/PDFWriter/Release` folder will have the result PDFWriter file.
 
 ## Testing
 
@@ -83,7 +80,7 @@ The tests run various checks on PDFHummus...and I admit quite a lot of them are 
 To run the project tests (after having created the project files in ./build) go:
 
 ```bash
-ctest --test-dir build -C release
+ctest --test-dir build [-C release]
 ```
 
 This should scan the folders for tests and run them.
@@ -97,10 +94,68 @@ Note that `ctest` does NOT build the project. It may fail if there's no previous
 since the last build. For This purpose there's an extra target created in the project to make sure the project and test code is built (as well as recreating the output folder to clear previous runs output):
 
 ```bash
-cmake --build build --target check --config release
+cmake --build build --target pdfWriterCheck [--config release]
 ```
 
-## VSCode usage
+## Installing
+
+If you want, you can use the `install` verb of cmake to install a built product (the library files and includes). Use the prefix param to specify where you want the result to be installed to
+
+```bash
+cmake --install ./build/. --prefix ./etc/install [--config release]
+```
+
+This will install all the library files in `./etc/install`. You should see an "include" folder and a "lib" folder with include files and library files respectively.
+
+if you do not have `cmake --install` as option, you can use a regular build with install target instead, and specify the install target in configuration stage, like this:
+
+```bash
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX="..\etc\install"
+cd ..
+
+cmake --build build --target install  [--config release]
+```
+
+_There are more configuration options with the cmake setup for this project_. Specifically you can build with system libraries instead of with the bundled libraries. You can read about those options [here](https://github.com/galkahana/PDF-Writer/pull/70) and [here](https://github.com/galkahana/PDF-Writer/wiki/Building-and-running-samples#special-options-with-cmake).
+
+# Using PDFHummus in your own project
+
+If you want to use PDFHummus there are several methods:
+- copying the sources to your project
+- installing the project and including the result in your project
+- using PDFHummus package in your cmake project
+
+Not much to say about the first option. 2nd option just means to follow the installation instructions and then pointing to the resultant lib and include folders to build your project.
+
+3rd option is probably the best, especially if you already have cmake in your project. This project has package definition for `PDFHummus` package, which means you can have cmake look for this package and include it in your project with `find_package`. Then link to the `PDFHummus::PDFWriter` target and you are done. Another optin is to do this + allow for fetching the project content from the repo with `FetchContent`. Here's an example from the [PDF TextExtraction project](https://github.com/galkahana/pdf-text-extraction/blob/master/TextExtraction/CMakeLists.txt) of mine:
+
+```cmake
+include(FetchContent)
+
+FetchContent_Declare(
+  PDFHummus
+  GIT_REPOSITORY https://github.com/galkahana/PDF-Writer.git
+  GIT_TAG        master
+  FIND_PACKAGE_ARGS
+)
+FetchContent_MakeAvailable(PDFHummus)
+
+target_link_libraries (TextExtraction PDFHummus::PDFWriter)
+```
+
+This will either download the project and build it or use and installed version. Includes are included haha.
+
+# Packaging PDFHummus for installing someplace else
+
+The project contains definitions for `cpack`, cmake packaging mechanism. It might be useful for when you want to build PDFHummus and then install it someplace else.
+
+The following will create a zip file with all libs and includes:
+```
+cpack .
+```
+
+# VSCode usage
 
 If you are developing this project using vscode here's some suggestions to help you:  
 - install vscode C++ extensions:
@@ -113,3 +168,19 @@ If you are developing this project using vscode here's some suggestions to help 
     - CMake Test Explorder
 
 This should help you enable testing and debugging the tests in vscode.
+
+
+# More building instructions for when you cant use cmake
+
+
+## iOS
+
+I wrote a post about how to compile and use the library for the iPhone and iPad environments. you can read it [here](http://pdfhummus.com/post/45501609236/how-to-build-iphone-apps-that-use-pdfhummus).
+ 
+
+## Build insturctions for other scenraios
+
+It should be quite simple to construct project files in the various building environments (say VS and Xcode) if you want them. Here are some pointers:
+- All the PDFWriter sources are in PDFWriter folder (you can get it by downloading the git project or from the Downloads section).
+- The library is dependent on the dlls/shared libraries of Zlib, LibTiff, LibJpeg, LibPng and FreeType. When linking - make sure they are available.
+- The library should support well both 32 bit and 64 bit environments. It's using standard C++ libraries.
