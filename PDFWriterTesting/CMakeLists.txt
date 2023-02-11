@@ -67,8 +67,11 @@ create_test_sourcelist (Tests
   UppercaseSequanceTest.cpp
 )
 
-# add the testing executable
+# add the testing executable (only if project is built independently, so that FetchContent imports that build from source
+# wont build this unnecessary step unless asked for explicitly)
 add_executable (PDFWriterTesting 
+    $<$<NOT:$<BOOL:${PROJECT_IS_TOP_LEVEL}>>:EXCLUDE_FROM_ALL>
+
     ${Tests}
 
     # and some utilities
