@@ -67,11 +67,8 @@ create_test_sourcelist (Tests
   UppercaseSequanceTest.cpp
 )
 
-# add the testing executable (only if project is built independently, so that FetchContent imports that build from source
-# wont build this unnecessary step unless asked for explicitly)
-add_executable (PDFWriterTesting 
-    $<$<NOT:$<BOOL:${PROJECT_IS_TOP_LEVEL}>>:EXCLUDE_FROM_ALL>
-
+# add the testing executable
+add_executable (PDFWriterTesting     
     ${Tests}
 
     # and some utilities
@@ -82,6 +79,13 @@ add_executable (PDFWriterTesting
     # and test specific additionals
     PDFComment.cpp
     PDFCommentWriter.cpp
+)
+
+# (adding to all target only if project is built independently, so that FetchContent imports that build from source 
+# wont build this unnecessary step unless asked for explicitly)
+
+set_target_properties(PDFWriterTesting
+  PROPERTIES EXCLUDE_FROM_ALL $<NOT:$<BOOL:${PROJECT_IS_TOP_LEVEL}>>
 )
 
 ### now all the stuff required to compile and link with the rest of pdfwriter
