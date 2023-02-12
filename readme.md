@@ -115,7 +115,7 @@ If you want to use PDFHummus there are several methods:
 
 Not much to say about the first option. 2nd option just means to follow the installation instructions and then pointing to the resultant lib and include folders to build your project.
 
-3rd option is probably the best, especially if you already have cmake in your project. This project has package definition for `PDFHummus` package, which means you can have cmake look for this package and include it in your project with `find_package`. Then link to the `PDFHummus::PDFWriter` target and you are done. Another optin is to do this + allow for fetching the project content from the repo with `FetchContent`. Here's an example from the [PDF TextExtraction project](https://github.com/galkahana/pdf-text-extraction/blob/master/TextExtraction/CMakeLists.txt) of mine:
+3rd option is probably the best, especially if you already have cmake in your project. This project has package definition for `PDFHummus` package, which means you can have cmake look for this package and include it in your project with `find_package`. Then link to the `PDFHummus::PDFWriter` target and you are done. Another option is to do this + allow for fetching the project content from the repo with `FetchContent`. Here's an example from the [PDF TextExtraction project](https://github.com/galkahana/pdf-text-extraction/blob/master/TextExtraction/CMakeLists.txt) of mine:
 
 ```cmake
 include(FetchContent)
@@ -131,8 +131,8 @@ FetchContent_MakeAvailable(PDFHummus)
 target_link_libraries (TextExtraction PDFHummus::PDFWriter)
 ```
 
-This will either download the project and build it or use and installed version. 
-Change the `GIT_TAG` value to what version you'd like to install. You can use tags, branches, commit hashs. everything goes.
+This will either download the project and build it or use an installed version (provided that one exists and has a matching version). 
+Change the `GIT_TAG` value to what version you'd like to install. You can use tags, branches, commit hashs. anything goes.
 Includes are included haha.
 
 # Packaging PDFHummus for installing someplace else
