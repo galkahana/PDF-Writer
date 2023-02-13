@@ -363,7 +363,7 @@ target_include_directories(PDFWriter
 if(NOT PDFHUMMUS_NO_DCT)
     target_include_directories(PDFWriter
         PUBLIC
-        $<BUILD_INTERFACE:${LIBJPEG_INCLUDE_DIRS}>
+        $<BUILD_INTERFACE:${JPEG_INCLUDE_DIRS}>
         $<INSTALL_INTERFACE:include/LibJpeg> 
     )   
 else(NOT PDFHUMMUS_NO_DCT)
@@ -407,7 +407,7 @@ target_include_directories(PDFWriter
     $<INSTALL_INTERFACE:include/PDFWriter> 
 )  
 
-target_link_libraries(PDFWriter ${LIBAESGM_LDFLAGS} ${LIBJPEG_LDFLAGS} ${ZLIB_LDFLAGS} ${LIBTIFF_LDFLAGS} ${FREETYPE_LDFLAGS} ${LIBPNG_LDFLAGS})
+target_link_libraries(PDFWriter ${LIBAESGM_LDFLAGS} ${JPEG_LIBRARIES} ${ZLIB_LDFLAGS} ${LIBTIFF_LDFLAGS} ${FREETYPE_LDFLAGS} ${LIBPNG_LDFLAGS})
 set_target_properties(PDFWriter PROPERTIES VERSION ${PDFWRITER_LIB_VERSION} SOVERSION ${PDFWRITER_SO_VERSION})
 
 install(TARGETS PDFWriter
