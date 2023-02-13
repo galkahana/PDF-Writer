@@ -144,7 +144,7 @@ int JPGImageTest(int argc, char* argv[])
 
 #else // PDFHUMMUS_NO_PNG
 
-int JPGImageTest(int argv, char* argv[])
+int JPGImageTest(int argc, char* argv[])
 {
 	return 0;
 }

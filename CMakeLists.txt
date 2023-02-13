@@ -6,11 +6,10 @@ cmake_minimum_required(VERSION 3.15)
 project(PDFHummus VERSION 1.0)
 
 
-set(USE_BUNDLED TRUE CACHE BOOL "Whether to use bundled libraries")
-
-if(CMAKE_GENERATOR STREQUAL "Xcode")
-    set(IS_XCODE TRUE)
-endif(CMAKE_GENERATOR STREQUAL "Xcode")
+option(USE_BUNDLED  "Whether to use bundled libraries" TRUE)
+option(PDFHUMMUS_NO_DCT  "Whether to drop support for DCT streams parsing (will not use LibJpeg)")
+option(PDFHUMMUS_NO_TIFF "Whether to drop TIFF Images support (will not use LibTiff)" )
+option(PDFHUMMUS_NO_PNG "Whether to drop PNG Images support (will not use LibPng)" )
 
 if(NOT USE_BUNDLED)
     FIND_PACKAGE(PkgConfig)

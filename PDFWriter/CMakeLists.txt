@@ -349,42 +349,37 @@ XObjectContentContext.h
 
 add_library(PDFHummus::PDFWriter ALIAS PDFWriter)
 
-#include_directories (${LIBAESGM_INCLUDE_DIRS})
 target_include_directories(PDFWriter
                             PUBLIC
                             $<BUILD_INTERFACE:${LIBAESGM_INCLUDE_DIRS}>
                             $<INSTALL_INTERFACE:include/LibAesgm>
                            )
 
-                           #include_directories (${ZLIB_INCLUDE_DIRS})
 target_include_directories(PDFWriter
                             PUBLIC
                             $<BUILD_INTERFACE:${ZLIB_INCLUDE_DIRS}>
                             $<INSTALL_INTERFACE:include/ZLib>
                            )
 if(NOT PDFHUMMUS_NO_DCT)
-	#include_directories (${LIBJPEG_INCLUDE_DIRS})
     target_include_directories(PDFWriter
         PUBLIC
         $<BUILD_INTERFACE:${LIBJPEG_INCLUDE_DIRS}>
         $<INSTALL_INTERFACE:include/LibJpeg> 
     )   
 else(NOT PDFHUMMUS_NO_DCT)
-	add_definitions(-DPDFHUMMUS_NO_DCT=1)
+    target_compile_definitions(PDFWriter PUBLIC PDFHUMMUS_NO_DCT=1)    
 endif(NOT PDFHUMMUS_NO_DCT)
 
 if(NOT PDFHUMMUS_NO_TIFF)
-	#include_directories (${LIBTIFF_INCLUDE_DIRS})
     target_include_directories(PDFWriter
         PUBLIC
         $<BUILD_INTERFACE:${LIBTIFF_INCLUDE_DIRS}>
         $<INSTALL_INTERFACE:include/LibTiff> 
     )   
 else(NOT PDFHUMMUS_NO_TIFF)
-	add_definitions(-DPDFHUMMUS_NO_TIFF=1)
+    target_compile_definitions(PDFWriter PUBLIC PDFHUMMUS_NO_TIFF=1)    
 endif(NOT PDFHUMMUS_NO_TIFF)
 
-#include_directories (${FREETYPE_INCLUDE_DIRS})
 target_include_directories(PDFWriter
     PUBLIC
     $<BUILD_INTERFACE:${FREETYPE_INCLUDE_DIRS}>
@@ -399,7 +394,7 @@ if(NOT PDFHUMMUS_NO_PNG)
         $<INSTALL_INTERFACE:include/LibPng> 
     )  
 else(NOT PDFHUMMUS_NO_PNG)
-	add_definitions(-DPDFHUMMUS_NO_PNG=1)
+    target_compile_definitions(PDFWriter PUBLIC PDFHUMMUS_NO_PNG=1)    
 endif(NOT PDFHUMMUS_NO_PNG)
 
 set(PDFWriter_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
