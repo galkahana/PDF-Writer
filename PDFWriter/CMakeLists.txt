@@ -376,6 +376,9 @@ if(NOT PDFHUMMUS_NO_TIFF)
         $<BUILD_INTERFACE:${LIBTIFF_INCLUDE_DIRS}>
         $<INSTALL_INTERFACE:include/LibTiff> 
     )   
+    if(INCLUDE_TIFF_HEADER)
+        target_compile_definitions(PDFWriter PUBLIC _INCLUDE_TIFF_HEADER)
+    endif(INCLUDE_TIFF_HEADER)
 else(NOT PDFHUMMUS_NO_TIFF)
     target_compile_definitions(PDFWriter PUBLIC PDFHUMMUS_NO_TIFF=1)    
 endif(NOT PDFHUMMUS_NO_TIFF)
