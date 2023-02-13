@@ -347,7 +347,7 @@ int DCTDecodeFilterTest(int argc, char* argv[])
 
 #else PDFHUMMUS_NO_DCT
 
-int DCTDecoderFilterTest(int argc, char* argv[]) {
+int DCTDecodeFilterTest(int argc, char* argv[]) {
     return 0;
 }
 

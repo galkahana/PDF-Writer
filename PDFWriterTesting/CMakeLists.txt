@@ -83,67 +83,15 @@ add_executable (PDFWriterTesting
 
 # (adding to all target only if project is built independently, so that FetchContent imports that build from source 
 # wont build this unnecessary step unless asked for explicitly)
-
 set_target_properties(PDFWriterTesting
   PROPERTIES EXCLUDE_FROM_ALL $<NOT:$<BOOL:${PROJECT_IS_TOP_LEVEL}>>
 )
 
-### now all the stuff required to compile and link with the rest of pdfwriter
-if(PDFHUMMUS_NO_DCT)
-	add_definitions(-DPDFHUMMUS_NO_DCT=1)
-endif(PDFHUMMUS_NO_DCT)
-
-if(PDFHUMMUS_NO_TIFF)
-	add_definitions(-DPDFHUMMUS_NO_TIFF=1)
-endif(PDFHUMMUS_NO_TIFF)
-
-if(PDFHUMMUS_NO_PNG)
-	add_definitions(-DPDFHUMMUS_NO_PNG=1)
-endif(PDFHUMMUS_NO_PNG)
-
-include_directories (${PDFWriter_INCLUDE_DIRS})
-include_directories (${LIBAESGM_INCLUDE_DIRS})
-include_directories (${ZLIB_INCLUDE_DIRS})
-if(NOT PDFHUMMUS_NO_DCT)
-	include_directories (${LIBJPEG_INCLUDE_DIRS})
-else(NOT PDFHUMMUS_NO_DCT)
-	add_definitions(-DPDFHUMMUS_NO_DCT=1)
-endif(NOT PDFHUMMUS_NO_DCT)
-
-if(NOT PDFHUMMUS_NO_TIFF)
-	include_directories (${LIBTIFF_INCLUDE_DIRS})
-else(NOT PDFHUMMUS_NO_TIFF)
-	add_definitions(-DPDFHUMMUS_NO_TIFF=1)
-endif(NOT PDFHUMMUS_NO_TIFF)
-include_directories (${FREETYPE_INCLUDE_DIRS})
-
-if(NOT PDFHUMMUS_NO_PNG)
-	include_directories (${LIBPNG_INCLUDE_DIRS})
-else(NOT PDFHUMMUS_NO_PNG)
-	add_definitions(-DPDFHUMMUS_NO_PNG=1)
-endif(NOT PDFHUMMUS_NO_PNG)
-
 target_link_libraries (PDFWriterTesting PDFWriter)
-target_link_libraries (PDFWriterTesting ${LIBAESGM_LDFLAGS})
-target_link_libraries (PDFWriterTesting ${FREETYPE_LDFLAGS})
-if(NOT PDFHUMMUS_NO_DCT)
-	target_link_libraries (PDFWriterTesting ${LIBJPEG_LDFLAGS})
-endif(NOT PDFHUMMUS_NO_DCT)
-target_link_libraries (PDFWriterTesting ${ZLIB_LDFLAGS})
-if(NOT PDFHUMMUS_NO_TIFF)
-	target_link_libraries (PDFWriterTesting ${LIBTIFF_LDFLAGS})
-endif(NOT PDFHUMMUS_NO_TIFF)
-if(NOT PDFHUMMUS_NO_PNG)
-	target_link_libraries (PDFWriterTesting ${LIBPNG_LDFLAGS})
-endif(NOT PDFHUMMUS_NO_PNG)
 
 if(APPLE)
 	set(CMAKE_EXE_LINKER_FLAGS "-framework CoreFoundation")
 endif(APPLE)
-
-### done with the stuff for PDFWriter
-
-
 
 # Add all the ADD_TEST for each test (reusing the create_test_sourcelist list minus the generated executable)
 set (TestsToRun ${Tests})
