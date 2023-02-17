@@ -26,6 +26,7 @@
 #include "testing/TestIO.h"
 
 #include <iostream>
+#include <memory.h>
 
 using namespace PDFHummus;
 using namespace std;

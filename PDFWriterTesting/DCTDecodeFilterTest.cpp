@@ -345,7 +345,7 @@ int DCTDecodeFilterTest(int argc, char* argv[])
     return status == eSuccess ? 0:1;
 }
 
-#else PDFHUMMUS_NO_DCT
+#else // PDFHUMMUS_NO_DCT
 
 int DCTDecodeFilterTest(int argc, char* argv[]) {
     return 0;
