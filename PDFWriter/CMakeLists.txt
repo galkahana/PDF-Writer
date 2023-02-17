@@ -349,92 +349,60 @@ XObjectContentContext.h
 
 add_library(PDFHummus::PDFWriter ALIAS PDFWriter)
 
-if(USE_BUNDLED)
-    target_include_directories(PDFWriter
-        PUBLIC
-        $<BUILD_INTERFACE:${LIBAESGM_INCLUDE_DIRS}>
-        $<INSTALL_INTERFACE:include/LibAesgm>
-    )
-    target_include_directories(PDFWriter
-        PUBLIC
-        $<BUILD_INTERFACE:${ZLIB_INCLUDE_DIRS}>
-        $<INSTALL_INTERFACE:include/ZLib>
-    )
-    target_include_directories(PDFWriter
-        PUBLIC
-        $<BUILD_INTERFACE:${FREETYPE_INCLUDE_DIRS}>
-        $<INSTALL_INTERFACE:include/FreeType/include> 
-    )  
-else(USE_BUNDLED)
-    target_include_directories(PDFWriter
-        PUBLIC
-        ${LIBAESGM_INCLUDE_DIRS}
-    )
-    target_include_directories(PDFWriter
-        PUBLIC
-        ${ZLIB_INCLUDE_DIRS}
-    )
-    target_include_directories(PDFWriter
-        PUBLIC
-        ${FREETYPE_INCLUDE_DIRS}
-    )  
-endif(USE_BUNDLED)
-                       
-if(NOT PDFHUMMUS_NO_DCT)
-    if(USE_BUNDLED)
-        target_include_directories(PDFWriter
-            PUBLIC
-            $<BUILD_INTERFACE:${JPEG_INCLUDE_DIRS}>
-            $<INSTALL_INTERFACE:include/LibJpeg> 
-        )   
-    else(USE_BUNDLED)
-        target_include_directories(PDFWriter
-            PUBLIC
-            ${JPEG_INCLUDE_DIRS}
-        )   
-    endif(USE_BUNDLED)
-else(NOT PDFHUMMUS_NO_DCT)
+# zlib
+if(USING_UNBUNDLED_ZLIB)
+    target_link_libraries(PDFWriter ZLIB::ZLIB)
+else(USING_UNBUNDLED_ZLIB)
+    target_link_libraries(PDFWriter PDFHummus::Zlib)
+endif(USING_UNBUNDLED_ZLIB)
+
+# freetype
+if(USING_UNBUNDLED_Freetype)
+    target_link_libraries(PDFWriter Freetype::Freetype)
+else(USING_UNBUNDLED_Freetype)
+    target_link_libraries(PDFWriter PDFHummus::FreeType)
+endif(USING_UNBUNDLED_Freetype)
+
+# libaesgm
+if(USING_UNBUNDLED_aesgm)
+    target_link_libraries(PDFWriter Aesgm::Aesgm)
+else(USING_UNBUNDLED_aesgm)
+    target_link_libraries(PDFWriter PDFHummus::LibAesgm)
+endif(USING_UNBUNDLED_aesgm)
+
+# libjpeg
+if(PDFHUMMUS_NO_DCT)
     target_compile_definitions(PDFWriter PUBLIC PDFHUMMUS_NO_DCT=1)    
-endif(NOT PDFHUMMUS_NO_DCT)
+else(PDFHUMMUS_NO_DCT)
+    if(USING_UNBUNDLED_JPEG)
+        target_link_libraries(PDFWriter JPEG::JPEG)
+    else(USING_UNBUNDLED_JPEG)
+        target_link_libraries(PDFWriter PDFHummus::LibJpeg)
+    endif(USING_UNBUNDLED_JPEG)
+endif(PDFHUMMUS_NO_DCT)
 
-if(NOT PDFHUMMUS_NO_TIFF)
-    if(USE_BUNDLED)
-        target_include_directories(PDFWriter
-            PUBLIC
-            $<BUILD_INTERFACE:${LIBTIFF_INCLUDE_DIRS}>
-            $<INSTALL_INTERFACE:include/LibTiff> 
-        )   
-    else(USE_BUNDLED)
-        target_include_directories(PDFWriter
-            PUBLIC
-            ${LIBTIFF_INCLUDE_DIRS}
-        )   
-    endif(USE_BUNDLED)
-    if(INCLUDE_TIFF_HEADER)
-        target_compile_definitions(PDFWriter PUBLIC _INCLUDE_TIFF_HEADER)
-    endif(INCLUDE_TIFF_HEADER)
-else(NOT PDFHUMMUS_NO_TIFF)
+# libtiff
+if(PDFHUMMUS_NO_TIFF)
     target_compile_definitions(PDFWriter PUBLIC PDFHUMMUS_NO_TIFF=1)    
-endif(NOT PDFHUMMUS_NO_TIFF)
+else(PDFHUMMUS_NO_TIFF)
+    if(USING_UNBUNDLED_TIFF)
+        target_link_libraries(PDFWriter TIFF::TIFF)
+        target_compile_definitions(PDFWriter PUBLIC _INCLUDE_TIFF_HEADER)
+    else(USING_UNBUNDLED_TIFF)
+        target_link_libraries(PDFWriter PDFHummus::LibTiff)
+    endif(USING_UNBUNDLED_TIFF)
+endif(PDFHUMMUS_NO_TIFF)
 
-if(NOT PDFHUMMUS_NO_PNG)
-    if(USE_BUNDLED)
-        target_include_directories(PDFWriter
-            PUBLIC
-            $<BUILD_INTERFACE:${LIBPNG_INCLUDE_DIRS}>
-            $<INSTALL_INTERFACE:include/LibPng> 
-        )   
-    else(USE_BUNDLED)
-        target_include_directories(PDFWriter
-            PUBLIC
-            ${LIBPNG_INCLUDE_DIRS}
-        )   
-    endif(USE_BUNDLED)
-else(NOT PDFHUMMUS_NO_PNG)
+# libpng
+if(PDFHUMMUS_NO_PNG)
     target_compile_definitions(PDFWriter PUBLIC PDFHUMMUS_NO_PNG=1)    
-endif(NOT PDFHUMMUS_NO_PNG)
-
-set(PDFWriter_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+else(PDFHUMMUS_NO_PNG)
+    if(USING_UNBUNDLED_PNG)
+        target_link_libraries(PDFWriter PNG::PNG)
+    else(USING_UNBUNDLED_PNG)
+        target_link_libraries(PDFWriter PDFHummus::LibPng)
+    endif(USING_UNBUNDLED_PNG)
+endif(PDFHUMMUS_NO_PNG)
 
 target_include_directories(PDFWriter
     INTERFACE
@@ -442,7 +410,6 @@ target_include_directories(PDFWriter
     $<INSTALL_INTERFACE:include/PDFWriter> 
 )  
 
-target_link_libraries(PDFWriter ${LIBAESGM_LDFLAGS} ${JPEG_LIBRARIES} ${ZLIB_LDFLAGS} ${LIBTIFF_LDFLAGS} ${FREETYPE_LDFLAGS} ${LIBPNG_LDFLAGS})
 set_target_properties(PDFWriter PROPERTIES VERSION ${PDFWRITER_LIB_VERSION} SOVERSION ${PDFWRITER_SO_VERSION})
 
 install(TARGETS PDFWriter

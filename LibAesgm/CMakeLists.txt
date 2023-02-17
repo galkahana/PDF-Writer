@@ -22,8 +22,12 @@ brg_types.h
 )
 
 add_library(PDFHummus::LibAesgm ALIAS LibAesgm)
-set(LIBAESGM_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
-set(LIBAESGM_LDFLAGS LibAesgm PARENT_SCOPE)
+
+target_include_directories(LibAesgm
+    INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include/LibAesgm> 
+)
 
 install(TARGETS LibAesgm
     EXPORT PDFHummusTargets

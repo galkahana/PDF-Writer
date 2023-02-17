@@ -28,17 +28,21 @@ pngstruct.h
 
 add_library(PDFHummus::LibPng ALIAS LibPng)
 
-set(LIBPNG_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
-set(LIBPNG_LDFLAGS LibPng PARENT_SCOPE)
+target_include_directories(LibPng
+    INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include/LibPng> 
+)
+
 # https://github.com/julienr/libpng-android/issues/6
 if (${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "aarch64" OR ${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "arm64")
-    set(CMAKE_C_FLAGS -DPNG_ARM_NEON_OPT=0 ${CMAKE_C_FLAGS})
-    message (STATUS "libPng Arm64 - disable fpu Neon optimization")
+    target_compile_definitions(LibPng PRIVATE 
+        PNG_ARM_NEON_OPT=0
+    )
 endif()
 
-include_directories (${ZLIB_INCLUDE_DIRS})
+target_link_libraries(LibPng PDFHummus::Zlib)
 
-target_link_libraries(LibPng ${ZLIB_LDFLAGS})
 
 install(TARGETS LibPng
     EXPORT PDFHummusTargets

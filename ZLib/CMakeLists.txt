@@ -32,16 +32,19 @@ zutil.h
 
 add_library(PDFHummus::Zlib ALIAS Zlib)
 
-set(ZLIB_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
-set(ZLIB_LDFLAGS Zlib PARENT_SCOPE)
-include(CheckIncludeFile)
+target_include_directories(Zlib
+    INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include/Zlib> 
+)
 
 #
 # Check for unistd.h
 #
+include(CheckIncludeFile)
 check_include_file(unistd.h Z_HAVE_UNISTD_H)
 if(Z_HAVE_UNISTD_H)
-ADD_DEFINITIONS(-DHAVE_UNISTD_H=1)
+    target_compile_definitions(Zlib PUBLIC HAVE_UNISTD_H=1)
 endif(Z_HAVE_UNISTD_H)
 
 
