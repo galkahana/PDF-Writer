@@ -53,15 +53,21 @@ include/ft2build.h
 )
 add_library(PDFHummus::FreeType ALIAS FreeType)
 
-set(FREETYPE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include PARENT_SCOPE)
-set(FREETYPE_LDFLAGS FreeType PARENT_SCOPE)
-add_definitions(-DFT2_BUILD_LIBRARY=1)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/freetype)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/freetype/config)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/src)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/freetype/internal)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/include/freetype/internal/services)
+target_include_directories(FreeType
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include/FreeType/include> 
+)
+target_compile_definitions(FreeType PUBLIC FT2_BUILD_LIBRARY=1)   
+
+target_include_directories(FreeType
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/freetype
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/freetype/config
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/freetype/internal
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/freetype/internal/services
+)
 
 install(TARGETS FreeType
     EXPORT PDFHummusTargets

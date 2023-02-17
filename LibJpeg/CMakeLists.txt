@@ -63,8 +63,12 @@ jversion.h
 )
 
 add_library(PDFHummus::LibJpeg ALIAS LibJpeg)
-set(JPEG_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
-set(JPEG_LIBRARIES LibJpeg PARENT_SCOPE)
+
+target_include_directories(LibJpeg
+    INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:include/LibJpeg> 
+)  
 
 install(TARGETS LibJpeg
     EXPORT PDFHummusTargets

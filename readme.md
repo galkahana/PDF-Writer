@@ -6,10 +6,6 @@ Project site is [here](http://www.pdfhummus.com).
 
 There is also a NodeJS module named [MuhammaraJS](https://github.com/julianhille/MuhammaraJS) wrapping PDFHummus PDF library and making it available for that language. It is the current and still supported version of a now deprecated [HummusJS](https://github.com/galkahana/HummusJS) project of mine, which [julianhille](https://github.com/julianhille) maintains.
 
-**Note and clarification on earlier notes:** Since 9/11/2019 I ended support for this project. You may still use the code as is, with the provided license, however I will not be providing answers, solutions, responses etc. I may still develop the library further, making sure not to break API or change it in any other way to harm your existing implementations, however those developments are based solely on my own personal projects needs.
-
-And now that we got that out of the way, let's move on for some basic instructions.
-
 # First time around
 
 This is a C++ Project using CMake as project builder.
@@ -50,7 +46,8 @@ The project defines some optional flags to allow you to control some aspects of 
 - `PDFHUMMUS_NO_DCT` - defines whether to exclude DCT functionality (essentially - not include LibJpeg) from the library. defaults to `FALSE`. when setting `TRUE` the library will not require the existance of LibJpeg however will not be able to decode DCT streams from PDF files. (note that this has no baring on the ability to include JPEG images. That ability does not require LibJpeg given the innate ability of PDF files to include DCT encoded streams).
 - `PDFHUMMUS_NO_TIFF` - defines whether to exclude TIFF functionality (essentially - not include LibTiff) from the library. defaults to `FALSE`. when setting `TRUE` the library will not require the existance of LibTiff however will not be able to embed TIFF images.
 - `PDFHuMMUS_NO_PNG` -  defines whether to exclude PNG functionality (essentially - not include LibPng) from the library. defaults to `FALSE`. when setting `TRUE` the library will not require the existance of LibPng however will not be able to embed PNG images.
-- `USE_BUNDLED` - defines whether to use bundled dependencies when building the project or use system libraries. defaults to `TRUE`. when defined as `FALSE`, the project configuration will look for installed versions of	LibJpeg, ZLib, LibTiff, FreeType, LibAesgm, LibPng and use them instead of the bundled ones (i.e. those contained in the project). Note that for optional dependencies - LibJpeg, LibTiff, LibPng - if not installed the coniguration will succeed but will automatically set the optional building flags (the 3 just described) according to the libraries avialability. As for required dependencies - FreeType, LibAesgm, Zlib - the configuration will fail if those dependencies are not found.
+- `USE_BUNDLED` - defines whether to use bundled dependencies when building the project or use system libraries. defaults to `TRUE`. when defined as `FALSE`, the project configuration will look for installed versions of	LibJpeg, ZLib, LibTiff, FreeType, LibAesgm, LibPng and use them instead of the bundled ones (i.e. those contained in the project). Note that for optional dependencies - LibJpeg, LibTiff, LibPng - if not installed the coniguration will succeed but will automatically set the optional building flags (the 3 just described) according to the libraries avialability. As for required dependencies - FreeType, LibAesgm, Zlib - the configuration will fail if those dependencies are not found. see `USE_UNBUNDLED_FALLBACK_BUNDLED` for an alternative method to deal with dependencies not being found.
+- `USE_UNBUNDLED_FALLBACK_BUNDLED` - Defines an alternative behavior when using `USE_BUNDLED=OFF` and a certain dependency is not installed on the system. If set to `TRUE` then for a dependency that's not found it will fallback on the bundled version of this dependency. This is essentially attempting to find installed library and if not avialable use a bundled one to ensure that the build will succeed.
 
 You can set any of those options when calling the `cmake` command. For example to use system libraries replaced the earlier sequence with:
 
@@ -123,7 +120,7 @@ include(FetchContent)
 FetchContent_Declare(
   PDFHummus
   GIT_REPOSITORY https://github.com/galkahana/PDF-Writer.git
-  GIT_TAG        4.4
+  GIT_TAG        4.5
   FIND_PACKAGE_ARGS
 )
 FetchContent_MakeAvailable(PDFHummus)
@@ -134,6 +131,16 @@ target_link_libraries (TextExtraction PDFHummus::PDFWriter)
 This will either download the project and build it or use an installed version (provided that one exists and has a matching version). 
 Change the `GIT_TAG` value to what version you'd like to install. You can use tags, branches, commit hashs. anything goes.
 Includes are included haha.
+
+Note that when installing PDFHummus with the bundled libraries built (this is the default behvaior which can be changed by setting `USE_BUNDLED` variable to `FALSE`) there are additional targets that PDFHummus includes:
+- PDFHummus::FreeType - bundled freetype library
+- PDFHummus::LibAesgm - bundled aesgm library
+- PDFHummus::LibJpeg - bundled libjpeg library
+- PDFHummus::LibPng - bundled libpng library
+- PDFHummus::LibTiff - bundled libtiff library
+- PDFHummus:::Zlib - bundled zlib library
+
+You can use those targets in additon or instead of using PDFWriter if this makes sense to your project (like if you are extracting images, having LibJpeg or LibPng around can be useful).
 
 # Packaging PDFHummus for installing someplace else
 
