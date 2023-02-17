@@ -31,6 +31,7 @@ limitations under the License.
 
 #include <iostream>
 #include <sstream>
+#include <memory.h>
 
 #include "testing/TestIO.h"
 
