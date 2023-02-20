@@ -153,9 +153,10 @@ endif(NOT USE_BUNDLED)
 
 ADD_SUBDIRECTORY(PDFWriter)
 
-enable_testing()
-ADD_SUBDIRECTORY(PDFWriterTesting)
-
+if(PROJECT_IS_TOP_LEVEL)
+    enable_testing()
+    ADD_SUBDIRECTORY(PDFWriterTesting)
+endif(PROJECT_IS_TOP_LEVEL)
 
 include(InstallRequiredSystemLibraries)
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")

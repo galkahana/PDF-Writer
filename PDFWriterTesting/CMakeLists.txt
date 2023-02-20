@@ -81,12 +81,6 @@ add_executable (PDFWriterTesting
     PDFCommentWriter.cpp
 )
 
-# (adding to all target only if project is built independently, so that FetchContent imports that build from source 
-# wont build this unnecessary step unless asked for explicitly)
-set_target_properties(PDFWriterTesting
-  PROPERTIES EXCLUDE_FROM_ALL $<NOT:$<BOOL:${PROJECT_IS_TOP_LEVEL}>>
-)
-
 target_link_libraries (PDFWriterTesting PDFWriter)
 
 if(APPLE)
