@@ -77,6 +77,7 @@ install(TARGETS FreeType
 )
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include
     DESTINATION include/FreeType
+    COMPONENT dependencies
     FILES_MATCHING
     PATTERN "*.h"
 )

@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.15)
 # Soname
 # MAJOR is incremented when symbols are removed or changed in an incompatible way
 # MINOR is incremented when new symbols are added
-project(PDFHummus VERSION 4.5.2)
+project(PDFHummus VERSION 4.5.3)
 
 
 option(USE_BUNDLED  "Whether to use bundled libraries" TRUE)
@@ -153,9 +153,13 @@ endif(NOT USE_BUNDLED)
 
 ADD_SUBDIRECTORY(PDFWriter)
 
-enable_testing()
-ADD_SUBDIRECTORY(PDFWriterTesting)
-
+if(PROJECT_IS_TOP_LEVEL)
+    # avoid installing the testing lib altogether when included in another project.
+    # it's annoying when in parent all, and more annoying to then get the tests added
+    # to the parent project ctest.
+    enable_testing()
+    ADD_SUBDIRECTORY(PDFWriterTesting)
+endif(PROJECT_IS_TOP_LEVEL)
 
 include(InstallRequiredSystemLibraries)
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
