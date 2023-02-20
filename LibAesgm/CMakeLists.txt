@@ -37,6 +37,7 @@ install(TARGETS LibAesgm
 )
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DESTINATION include
+    COMPONENT dependencies
     FILES_MATCHING
     PATTERN "*.h"
 )

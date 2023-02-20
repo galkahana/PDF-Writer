@@ -154,6 +154,9 @@ endif(NOT USE_BUNDLED)
 ADD_SUBDIRECTORY(PDFWriter)
 
 if(PROJECT_IS_TOP_LEVEL)
+    # avoid installing the testing lib altogether when included in another project.
+    # it's annoying when in parent all, and more annoying to then get the tests added
+    # to the parent project ctest.
     enable_testing()
     ADD_SUBDIRECTORY(PDFWriterTesting)
 endif(PROJECT_IS_TOP_LEVEL)

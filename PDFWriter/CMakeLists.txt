@@ -421,6 +421,7 @@ install(TARGETS PDFWriter
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DESTINATION include
+    COMPONENT libraries
     FILES_MATCHING
     PATTERN "*.h"
 )
