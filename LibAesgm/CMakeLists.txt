@@ -29,6 +29,11 @@ target_include_directories(LibAesgm
     $<INSTALL_INTERFACE:include/LibAesgm> 
 )
 
+if(WIN32 AND BUILD_SHARED_LIBS)
+    target_compile_definitions(LibAesgm INTERFACE DLL_IMPORT)
+    target_compile_definitions(LibAesgm PRIVATE DLL_EXPORT)
+endif()
+
 install(TARGETS LibAesgm
     EXPORT PDFHummusTargets
     RUNTIME DESTINATION bin COMPONENT dependencies

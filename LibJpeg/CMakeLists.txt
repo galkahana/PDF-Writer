@@ -64,6 +64,11 @@ jversion.h
 
 add_library(PDFHummus::LibJpeg ALIAS LibJpeg)
 
+if(WIN32 AND BUILD_SHARED_LIBS)
+    target_compile_definitions(LibJpeg PUBLIC LIBJPEG_SHARED)
+    target_compile_definitions(LibJpeg PRIVATE LIBJPEG_EXPORTS)
+endif ()
+
 target_include_directories(LibJpeg
     INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>

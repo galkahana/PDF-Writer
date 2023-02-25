@@ -48,6 +48,10 @@ if(Z_HAVE_UNISTD_H)
 endif(Z_HAVE_UNISTD_H)
 
 
+if(WIN32 AND BUILD_SHARED_LIBS)
+    target_compile_definitions(Zlib PUBLIC ZLIB_DLL)
+endif()
+
 install(TARGETS Zlib
     EXPORT PDFHummusTargets
     RUNTIME DESTINATION bin COMPONENT dependencies

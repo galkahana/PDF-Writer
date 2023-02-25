@@ -411,6 +411,9 @@ target_include_directories(PDFWriter
 )  
 
 set_target_properties(PDFWriter PROPERTIES VERSION ${PDFWRITER_LIB_VERSION} SOVERSION ${PDFWRITER_SO_VERSION})
+if(WIN32 AND BUILD_SHARED_LIBS)
+    set_target_properties(PDFWriter PROPERTIES  WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
 
 install(TARGETS PDFWriter
     EXPORT PDFHummusTargets

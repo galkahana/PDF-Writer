@@ -41,6 +41,10 @@ if (${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "aarch64" OR ${CMAKE_HOST_SYSTEM_PRO
     )
 endif()
 
+if(WIN32 AND BUILD_SHARED_LIBS)
+    target_compile_definitions(LibPng PUBLIC PNG_USE_DLL)
+endif()
+
 target_link_libraries(LibPng PDFHummus::Zlib)
 
 
