@@ -87,6 +87,10 @@ target_compile_definitions(LibTiff PUBLIC
 
 target_link_libraries(LibTiff PDFHummus::Zlib)
 
+if(WIN32 AND BUILD_SHARED_LIBS)
+    set_target_properties(LibTiff PROPERTIES  WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
+
 install(TARGETS LibTiff
     EXPORT PDFHummusTargets
     RUNTIME DESTINATION bin COMPONENT dependencies
