@@ -85,7 +85,12 @@ target_compile_definitions(LibTiff PUBLIC
     FILLODER_LSB2MSB=1
 )
 
-target_link_libraries(LibTiff PDFHummus::Zlib)
+if(USING_UNBUNDLED_ZLIB)
+    target_link_libraries(LibTiff ZLIB::ZLIB)
+else(USING_UNBUNDLED_ZLIB)
+    target_link_libraries(LibTiff PDFHummus::Zlib)
+endif(USING_UNBUNDLED_ZLIB)
+
 
 if(WIN32 AND BUILD_SHARED_LIBS)
     set_target_properties(LibTiff PROPERTIES  WINDOWS_EXPORT_ALL_SYMBOLS ON)

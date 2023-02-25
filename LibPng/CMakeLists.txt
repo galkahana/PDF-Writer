@@ -45,8 +45,11 @@ if(WIN32 AND BUILD_SHARED_LIBS)
     target_compile_definitions(LibPng PUBLIC PNG_USE_DLL)
 endif()
 
-target_link_libraries(LibPng PDFHummus::Zlib)
-
+if(USING_UNBUNDLED_ZLIB)
+    target_link_libraries(LibPng ZLIB::ZLIB)
+else(USING_UNBUNDLED_ZLIB)
+    target_link_libraries(LibPng PDFHummus::Zlib)
+endif(USING_UNBUNDLED_ZLIB)
 
 install(TARGETS LibPng
     EXPORT PDFHummusTargets
