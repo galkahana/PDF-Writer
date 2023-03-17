@@ -30,7 +30,7 @@ target_include_directories(LibAesgm
 )
 
 if(WIN32 AND BUILD_SHARED_LIBS)
-    target_compile_definitions(LibAesgm INTERFACE DLL_IMPORT)
+    # target_compile_definitions(LibAesgm INTERFACE DLL_IMPORT) # Not sure i understand completely why, but with this PDFWriter cant link
     target_compile_definitions(LibAesgm PRIVATE DLL_EXPORT)
 endif()
 
