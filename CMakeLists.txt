@@ -23,7 +23,7 @@ if(NOT USE_BUNDLED)
         if(ZLIB_FOUND)
             set (USING_UNBUNDLED_ZLIB TRUE)
         else(ZLIB_FOUND)
-            ADD_SUBDIRECTORY(ZLib)
+            ADD_SUBDIRECTORY(Zlib)
         endif(ZLIB_FOUND)
     else(USE_UNBUNDLED_FALLBACK_BUNDLED)
         find_package (ZLIB REQUIRED)
@@ -126,7 +126,7 @@ if(NOT USE_BUNDLED)
 
 else(NOT USE_BUNDLED)
     # zlib
-    ADD_SUBDIRECTORY(ZLib)
+    ADD_SUBDIRECTORY(Zlib)
 
     # freetype
     ADD_SUBDIRECTORY(FreeType)
