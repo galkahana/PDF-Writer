@@ -65,6 +65,7 @@ create_test_sourcelist (Tests
   Type1Test.cpp
   UnicodeTextUsage.cpp
   UppercaseSequanceTest.cpp
+  WatermarkTest.cpp
 )
 
 # add the testing executable
