@@ -171,12 +171,12 @@ void DocumentContext::WriteHeaderComment(EPDFVersion inPDFVersion)
 	}
 }
 
-static const IOBasicTypes::Byte scBinaryBytesArray[] = {'%',0xBD,0xBE,0xBC,'\r','\n'}; // might imply that i need a newline writer here....an underlying primitives-token context
+static const IOBasicTypes::Byte scBinaryBytesArray[] = {'%',0xBD,0xBE,0xBC,0xB5,'\r','\n'}; // might imply that i need a newline writer here....an underlying primitives-token context
 
 void DocumentContext::Write4BinaryBytes()
 {
 	IByteWriterWithPosition *freeContextOutput = mObjectsContext->StartFreeContext();
-	freeContextOutput->Write(scBinaryBytesArray,6);
+	freeContextOutput->Write(scBinaryBytesArray,7);
 	mObjectsContext->EndFreeContext();
 }
 
