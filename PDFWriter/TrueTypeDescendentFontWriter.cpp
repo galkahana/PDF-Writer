@@ -66,7 +66,16 @@ EStatusCode TrueTypeDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObj
 	}
 
 	DescendentFontWriter descendentFontWriter;
-	return descendentFontWriter.WriteFont(inDecendentObjectID,inFontName,inFontInfo,inEncodedGlyphs,inObjectsContext,this);
+
+	return descendentFontWriter.WriteFont(
+		inDecendentObjectID,
+		inFontName,
+		inFontInfo,
+		inEncodedGlyphs,
+		inObjectsContext,
+		this,
+		inEncodedGlyphs.back().first + 1 // the font program includes the glyphs 0...lastGlyphCode + 1 filling the intermediate missing glyphs with empties. so cidset should be the same. 0..lastGlyphCode + 1.
+	);	
 }
 
 static const std::string scCIDFontType2 = "CIDFontType2";
