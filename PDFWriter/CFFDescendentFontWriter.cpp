@@ -100,7 +100,15 @@ EStatusCode CFFDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID
 
 	DescendentFontWriter descendentFontWriter;
 
-	return descendentFontWriter.WriteFont(inDecendentObjectID,inFontName,inFontInfo,inEncodedGlyphs,inObjectsContext,this);
+	return descendentFontWriter.WriteFont(
+		inDecendentObjectID,
+		inFontName,
+		inFontInfo,
+		inEncodedGlyphs,
+		inObjectsContext,
+		this,
+		inEncodedGlyphs.size() // the font program includes the glyphs 0...glyps.size using cid=sid. so cidset should be the same. 0..size.
+	);
 }
 
 static const std::string scCIDFontType0 = "CIDFontType0";
