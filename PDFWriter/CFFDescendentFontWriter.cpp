@@ -66,6 +66,8 @@ EStatusCode CFFDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID
 		return PDFHummus::eFailure;
 	}
 
+	unsigned int subsetFontSize = inEncodedGlyphs.size();
+
 	if (inEmbedFont)
 	{
 		CFFEmbeddedFontWriter embeddedFontWriter;
@@ -96,6 +98,8 @@ EStatusCode CFFDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID
 			mEmbeddedFontFileObjectID);
 		if (status != PDFHummus::eSuccess)
 			return status;
+
+		subsetFontSize = embeddedFontWriter.GetSubsetFontGlyphsCount();
 	}
 
 	DescendentFontWriter descendentFontWriter;
@@ -107,7 +111,7 @@ EStatusCode CFFDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID
 		inEncodedGlyphs,
 		inObjectsContext,
 		this,
-		inEncodedGlyphs.size() // the font program includes the glyphs 0...glyps.size using cid=sid. so cidset should be the same. 0..size.
+		subsetFontSize // the font program includes the glyphs 0...glyps.size using cid=sid. so cidset should be the same. 0..size.
 	);
 }
 

@@ -55,6 +55,7 @@ EStatusCode TrueTypeDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObj
 	// reset embedded font object ID (and flag...to whether it was actually embedded or not, which may 
 	// happen due to font embedding restrictions)
 	mEmbeddedFontFileObjectID = 0;
+	unsigned int subsetFontSize = inEncodedGlyphs.back().first + 1;
 
 	if (inEmbedFont)
 	{
@@ -63,6 +64,9 @@ EStatusCode TrueTypeDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObj
 
 		if (PDFHummus::eFailure == status)
 			return status;
+
+		// subset font size may have changed due to the inclusion of dependent glyphs
+		subsetFontSize = embeddedFontWriter.GetSubsetFontGlyphsCount();
 	}
 
 	DescendentFontWriter descendentFontWriter;
@@ -74,7 +78,7 @@ EStatusCode TrueTypeDescendentFontWriter::WriteFont(	ObjectIDType inDecendentObj
 		inEncodedGlyphs,
 		inObjectsContext,
 		this,
-		inEncodedGlyphs.back().first + 1 // the font program includes the glyphs 0...lastGlyphCode + 1 filling the intermediate missing glyphs with empties. so cidset should be the same. 0..lastGlyphCode + 1.
+		subsetFontSize // the font program includes the glyphs 0...lastGlyphCode + 1 filling the intermediate missing glyphs with empties. so cidset should be the same. 0..lastGlyphCode + 1.
 	);	
 }
 

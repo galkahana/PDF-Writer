@@ -742,3 +742,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTableCopy(const char* inTableName,
 	return mPrimitivesWriter.GetInternalState();
 
 }
+
+unsigned short TrueTypeEmbeddedFontWriter::GetSubsetFontGlyphsCount() {
+	return mSubsetFontGlyphsCount;
+}

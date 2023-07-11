@@ -10,8 +10,9 @@ create_test_sourcelist (Tests
   BasicModification.cpp
   BoxingBaseTest.cpp
   BufferedOutputStreamTest.cpp
-  CIDSetWritingTrueType.cpp
   CIDSetWritingCFF.cpp
+  CIDSetWritingTrueType.cpp
+  CIDSetWritingTrueType2.cpp
   CopyingAndMergingEmptyPages.cpp
   CustomLogTest.cpp
   DCTDecodeFilterTest.cpp
