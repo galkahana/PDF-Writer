@@ -1934,37 +1934,13 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 	return result;
 }
 
-EStatusCodeAndIByteReader PDFParser::CreateFilterForStream(IByteReader* inStream,PDFName* inFilterName,PDFDictionary* inDecodeParams, PDFStreamInput* inPDFStream)
-{
+
+EStatusCodeAndIByteReader PDFParser::WrapWithPredictorStream(IByteReader* inputStream, PDFDictionary* inDecodeParams) {
 	EStatusCode status = eSuccess;
 	IByteReader* result = NULL;
 
-	do
+	do 
 	{
-
-		if(inFilterName->GetValue() == "FlateDecode" || inFilterName->GetValue() == "LZWDecode")
-		{
-			if (inFilterName->GetValue() == "FlateDecode")
-			{
-				InputFlateDecodeStream* flateStream;
-				flateStream = new InputFlateDecodeStream(NULL); // assigning null, so later delete, if failure occurs won't delete the input stream
-				flateStream->Assign(inStream);
-				result = flateStream;
-			}
-			else if (inFilterName->GetValue() == "LZWDecode")
-			{
-				InputLZWDecodeStream* lzwStream;
-				int early = 1;
-				if (inDecodeParams)
-				{
-					PDFObjectCastPtr<PDFInteger> earlyObj(QueryDictionaryObject(inDecodeParams, "EarlyChange"));
-					early = earlyObj->GetValue();
-				}
-				lzwStream = new InputLZWDecodeStream(early);
-				lzwStream->Assign(inStream);
-				result = lzwStream;
-			}
-
 			// check for predictor n' such
 			if (!inDecodeParams)
 				// no predictor, stop here
@@ -1995,7 +1971,7 @@ EStatusCodeAndIByteReader PDFParser::CreateFilterForStream(IByteReader* inStream
 			{
 				case 2:
 				{
-					result = new InputPredictorTIFFSubStream(result,
+					result = new InputPredictorTIFFSubStream(inputStream,
 															 colorsValue,
 															 bitsPerComponentValue,
 															 columnsValue);
@@ -2010,7 +1986,7 @@ EStatusCodeAndIByteReader PDFParser::CreateFilterForStream(IByteReader* inStream
 				{
 					// Gal: optimum can handle all presets, because non-optimum presets still require a function sign flag
 					// at line start...so optimum can handle them.
-					result =  new InputPredictorPNGOptimumStream(result,
+					result =  new InputPredictorPNGOptimumStream(inputStream,
 																 colorsValue,
 																 bitsPerComponentValue,
 																 columnsValue);
@@ -2023,6 +1999,62 @@ EStatusCodeAndIByteReader PDFParser::CreateFilterForStream(IByteReader* inStream
 					break;
 				}
 			}
+	} while(false);
+
+	return EStatusCodeAndIByteReader(status,result);
+
+}
+
+EStatusCodeAndIByteReader PDFParser::CreateFilterForStream(IByteReader* inStream,PDFName* inFilterName,PDFDictionary* inDecodeParams, PDFStreamInput* inPDFStream)
+{
+	EStatusCode status = eSuccess;
+	IByteReader* result = NULL;
+
+	// Important! in case of failure CreateFilterForStream must NOT delete inStream, as its caller
+	// is assuming ownership is NOT transferred in that case. And each clause should clean
+	// after its done in case of failure (but again - not the incoming stream)
+
+	do
+	{
+
+		if (inFilterName->GetValue() == "FlateDecode")
+		{
+			InputFlateDecodeStream* flateStream;
+			flateStream = new InputFlateDecodeStream(inStream);
+			result = flateStream;
+			EStatusCodeAndIByteReader createStatus = WrapWithPredictorStream(result, inDecodeParams);
+			if(createStatus.first == eFailure) {
+				flateStream->Assign(NULL); // assign null to remove ownership of input stream so later delete does NOT delete it
+				delete flateStream;
+				result = NULL;		
+				status = eFailure;
+			}
+			else if(createStatus.second != NULL) {
+				result = createStatus.second;				
+			}
+		}
+		else if (inFilterName->GetValue() == "LZWDecode")
+		{
+			InputLZWDecodeStream* lzwStream;
+			int early = 1;
+			if (inDecodeParams)
+			{
+				PDFObjectCastPtr<PDFInteger> earlyObj(QueryDictionaryObject(inDecodeParams, "EarlyChange"));
+				early = earlyObj->GetValue();
+			}
+			lzwStream = new InputLZWDecodeStream(early);
+			lzwStream->Assign(inStream);
+			result = lzwStream;
+			EStatusCodeAndIByteReader createStatus = WrapWithPredictorStream(result, inDecodeParams);
+			if(createStatus.first == eFailure) {
+				lzwStream->Assign(NULL); // assign null to remove ownership of input stream so later delete does NOT delete it
+				delete lzwStream;
+				result = NULL;
+				status = eFailure;
+			}
+			else if(createStatus.second != NULL) {
+				result = createStatus.second;
+			}				
 		}
 		else if (inFilterName->GetValue() == "ASCIIHexDecode")
 		{
@@ -2051,6 +2083,7 @@ EStatusCodeAndIByteReader PDFParser::CreateFilterForStream(IByteReader* inStream
 			{
 				TRACE_LOG1("PDFParser::CreateFilterForStream, filter is not supported by extender - %s",inFilterName->GetValue().substr(0, MAX_TRACE_SIZE - 200).c_str());
 				status = PDFHummus::eFailure;
+				result = NULL;
 				break;
 			}
 		}
@@ -2062,11 +2095,6 @@ EStatusCodeAndIByteReader PDFParser::CreateFilterForStream(IByteReader* inStream
 		}
 	}while(false);
 
-	if(status != PDFHummus::eSuccess)
-	{
-		delete result;
-		result = NULL;
-	}
 	return EStatusCodeAndIByteReader(status,result);
 
 }
