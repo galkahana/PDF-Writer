@@ -245,6 +245,7 @@ private:
 	PDFObject* ParseExistingInDirectStreamObject(ObjectIDType inObjectId);
 	PDFHummus::EStatusCode ParseObjectStreamHeader(ObjectStreamHeaderEntry* inHeaderInfo,ObjectIDType inObjectsCount);
 	void MovePositionInStream(LongFilePositionType inPosition);
+	EStatusCodeAndIByteReader WrapWithPredictorStream(IByteReader* inputStream, PDFDictionary* inDecodeParams);
 	EStatusCodeAndIByteReader CreateFilterForStream(IByteReader* inStream,PDFName* inFilterName,PDFDictionary* inDecodeParams, PDFStreamInput* inPDFStream);
 
 	void NotifyIndirectObjectStart(long long inObjectID, long long inGenerationNumber);
