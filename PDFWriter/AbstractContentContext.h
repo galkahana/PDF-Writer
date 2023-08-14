@@ -374,4 +374,8 @@ private:
 	void SetupColor(const TextOptions& inOptions);
 	void SetupColor(EDrawingType inDrawingType,unsigned long inColorValue,EColorSpace inColorSpace);
 	void FinishPath(const GraphicOptions& inOptions);
+
+	void SetCurrentFont(PDFUsedFont* inFontReference);
+	void SetCurrentFontSize(double inFontSize);
+	PDFHummus::EStatusCode EncodeWithCurrentFont(const std::string& inText,GlyphUnicodeMappingList& outGlyphsUnicodeMapping);
 };

@@ -957,10 +957,20 @@ void AbstractContentContext::TJHexLow(const StringOrDoubleList& inStringsAndSpac
 	mPrimitiveWriter.WriteKeyword("TJ");
 }
 
-void AbstractContentContext::Tf(PDFUsedFont* inFontReference,double inFontSize)
+void AbstractContentContext::SetCurrentFont(PDFUsedFont* inFontReference) 
 {
 	mGraphicStack.GetCurrentState().mFont = inFontReference;
+}
+
+void AbstractContentContext::SetCurrentFontSize(double inFontSize) 
+{
 	mGraphicStack.GetCurrentState().mFontSize = inFontSize;
+}
+
+void AbstractContentContext::Tf(PDFUsedFont* inFontReference,double inFontSize)
+{
+	SetCurrentFont(inFontReference);
+	SetCurrentFontSize(inFontSize);
 }
 
 class ITextCommand
@@ -973,20 +983,8 @@ public:
 
 EStatusCode AbstractContentContext::WriteTextCommandWithEncoding(const std::string& inUnicodeText,ITextCommand* inTextCommand)
 {
-	PDFUsedFont* currentFont = mGraphicStack.GetCurrentState().mFont;
-	if(!currentFont)
-	{
-		TRACE_LOG("AbstractContentContext::WriteTextCommandWithEncoding, Cannot write text, no current font is defined");
-		return PDFHummus::eFailure;
-	}
-
 	GlyphUnicodeMappingList glyphsAndUnicode;
-	EStatusCode encodingStatus = currentFont->TranslateStringToGlyphs(inUnicodeText,glyphsAndUnicode);
-
-	// encoding returns false if was unable to encode some of the glyphs. will display as missing characters
-	if(encodingStatus != PDFHummus::eSuccess)
-		TRACE_LOG("AbstractContextContext::WriteTextCommandWithEncoding, was unable to find glyphs for all characters, some will appear as missing");
-
+	EncodeWithCurrentFont(inUnicodeText, glyphsAndUnicode);
 
 	return WriteTextCommandWithDirectGlyphSelection(glyphsAndUnicode,inTextCommand);
 }
@@ -1416,20 +1414,40 @@ void AbstractContentContext::FinishPath(const GraphicOptions& inOptions)
 	}
 }
 
+EStatusCode AbstractContentContext::EncodeWithCurrentFont(const std::string& inText,GlyphUnicodeMappingList& outGlyphsUnicodeMapping) {
+	PDFUsedFont* currentFont = mGraphicStack.GetCurrentState().mFont;
+	if(!currentFont)
+	{
+		TRACE_LOG("AbstractContentContext::EncodeWithCurrentFont, Cannot write text, no current font is defined");
+		return PDFHummus::eFailure;
+	}
+
+	EStatusCode encodingStatus = currentFont->TranslateStringToGlyphs(inText,outGlyphsUnicodeMapping);
+
+	// encoding returns false if was unable to encode some of the glyphs. will display as missing characters
+	if(encodingStatus != PDFHummus::eSuccess)
+		TRACE_LOG("AbstractContextContext::EncodeWithCurrentFont, was unable to find glyphs for all characters, some will appear as missing");	
+
+	return encodingStatus;
+}
 
 void AbstractContentContext::WriteText(double inX,double inY,const std::string& inText,const TextOptions& inOptions)
 {
-    BT();
-    SetupColor(inOptions);
 	if(inOptions.font)
 	{
-		Tf(inOptions.font,inOptions.fontSize);
-		Tm(1,0,0,1,inX,inY);
+		SetCurrentFont(inOptions.font);
 	}
-	else
-		Tm(inOptions.fontSize,0,0,inOptions.fontSize,inX,inY);
-	Tj(inText);
-    ET();
+
+	GlyphUnicodeMappingList glyphsAndUnicode;
+	EncodeWithCurrentFont(inText, glyphsAndUnicode);
+
+	BT();
+    SetupColor(inOptions);
+	Tm(1,0,0,1,inX,inY);
+	SetCurrentFontSize(inOptions.fontSize);
+	Tj(glyphsAndUnicode);
+	ET();
+
 }
 
 void AbstractContentContext::DrawImage(double inX,double inY,const std::string& inImagePath,const ImageOptions& inOptions)
