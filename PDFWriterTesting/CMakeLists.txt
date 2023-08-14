@@ -13,6 +13,7 @@ create_test_sourcelist (Tests
   CIDSetWritingCFF.cpp
   CIDSetWritingTrueType.cpp
   CIDSetWritingTrueType2.cpp
+  ColorEmojiColr.cpp
   CopyingAndMergingEmptyPages.cpp
   CustomLogTest.cpp
   DCTDecodeFilterTest.cpp
