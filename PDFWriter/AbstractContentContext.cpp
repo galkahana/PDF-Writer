@@ -231,6 +231,81 @@ unsigned long CSSColorMap::GetRGBForColorName(const std::string& inColorName)
 // single instance of color map
 static CSSColorMap sColorMap;
 
+class SimpleGlyphsWritingConext {
+public:
+
+	SimpleGlyphsWritingConext(AbstractContentContext* inContentContext);
+
+	void StartWriting(double inX,double inY,const AbstractContentContext::TextOptions& inOptions);
+	void AddGlyphMapping(const GlyphUnicodeMapping& inMapping);
+	void Flush(bool inComputeAdvance = false);
+
+	double GetLatestAdvance();
+
+private:
+
+	AbstractContentContext* mContentContext;
+	double mX;
+	double mY;
+	AbstractContentContext::TextOptions mOptions;
+	GlyphUnicodeMappingList mText;
+
+	double mLatestAdvance;
+};
+
+SimpleGlyphsWritingConext::SimpleGlyphsWritingConext(AbstractContentContext* inContentContext):mOptions(NULL) {
+	mContentContext = inContentContext;
+}
+
+void SimpleGlyphsWritingConext::StartWriting(double inX,double inY,const AbstractContentContext::TextOptions& inOptions) {
+	mText.clear();
+	mX = inX;
+	mY = inY;
+	mOptions = inOptions;
+}
+	
+void SimpleGlyphsWritingConext::AddGlyphMapping(const GlyphUnicodeMapping& inMapping) {
+	mText.push_back(inMapping);
+
+}
+
+void SimpleGlyphsWritingConext::Flush(bool inComputeAdvance) {
+	// current font is expected to have been set in advance, so don't bother with it, and can
+	// grab current font
+
+	if(mText.size() == 0) {
+		if(inComputeAdvance) {
+			mLatestAdvance = 0;
+		}
+		return;
+	}
+
+    mContentContext->SetupColor(mOptions);
+	mContentContext->BT();
+	mContentContext->Tm(1,0,0,1,mX,mY);
+	mContentContext->SetCurrentFontSize(mOptions.fontSize);
+	mContentContext->Tj(mText);
+	mContentContext->ET();	
+
+	if(inComputeAdvance) {
+		UIntList glyphs;
+
+		GlyphUnicodeMappingList::iterator it = mText.begin();
+		for(;it!=mText.end(); ++it) {
+			glyphs.push_back(it->mGlyphCode);
+		}
+		
+		mLatestAdvance = mContentContext->GetCurrentFont()->CalculateTextAdvance(glyphs, mOptions.fontSize);
+	}
+
+	mText.clear();
+}
+
+double SimpleGlyphsWritingConext::GetLatestAdvance() {
+	return mLatestAdvance;
+}
+
+
 unsigned long AbstractContentContext::ColorValueForName(const std::string& inColorName)
 {
 	return sColorMap.GetRGBForColorName(inColorName);
@@ -962,6 +1037,10 @@ void AbstractContentContext::SetCurrentFont(PDFUsedFont* inFontReference)
 	mGraphicStack.GetCurrentState().mFont = inFontReference;
 }
 
+PDFUsedFont* AbstractContentContext::GetCurrentFont() {
+	return mGraphicStack.GetCurrentState().mFont;
+}
+
 void AbstractContentContext::SetCurrentFontSize(double inFontSize) 
 {
 	mGraphicStack.GetCurrentState().mFontSize = inFontSize;
@@ -1046,7 +1125,7 @@ EStatusCode AbstractContentContext::DoubleQuote(double inWordSpacing, double inC
 
 EStatusCode AbstractContentContext::TJ(const StringOrDoubleList& inStringsAndSpacing)
 {
-	PDFUsedFont* currentFont = mGraphicStack.GetCurrentState().mFont;
+	PDFUsedFont* currentFont = GetCurrentFont();
 	if(!currentFont)
 	{
 		TRACE_LOG("AbstractContentContext::TJ, Cannot write text, no current font is defined");
@@ -1086,7 +1165,7 @@ EStatusCode AbstractContentContext::Tj(const GlyphUnicodeMappingList& inText)
 
 EStatusCode AbstractContentContext::WriteTextCommandWithDirectGlyphSelection(const GlyphUnicodeMappingList& inText,ITextCommand* inTextCommand)
 {
-	PDFUsedFont* currentFont = mGraphicStack.GetCurrentState().mFont;
+	PDFUsedFont* currentFont = GetCurrentFont();
 	if(!currentFont)
 	{
 		TRACE_LOG("AbstractContentContext::WriteTextCommandWithDirectGlyphSelection, Cannot write text, no current font is defined");
@@ -1157,7 +1236,7 @@ EStatusCode AbstractContentContext::DoubleQuote(double inWordSpacing, double inC
 
 EStatusCode AbstractContentContext::TJ(const GlyphUnicodeMappingListOrDoubleList& inStringsAndSpacing)
 {
-	PDFUsedFont* currentFont = mGraphicStack.GetCurrentState().mFont;
+	PDFUsedFont* currentFont = GetCurrentFont();
 	if(!currentFont)
 	{
 		TRACE_LOG("AbstractContentContext::TJ, Cannot write text, no current font is defined");
@@ -1415,7 +1494,7 @@ void AbstractContentContext::FinishPath(const GraphicOptions& inOptions)
 }
 
 EStatusCode AbstractContentContext::EncodeWithCurrentFont(const std::string& inText,GlyphUnicodeMappingList& outGlyphsUnicodeMapping) {
-	PDFUsedFont* currentFont = mGraphicStack.GetCurrentState().mFont;
+	PDFUsedFont* currentFont = GetCurrentFont();
 	if(!currentFont)
 	{
 		TRACE_LOG("AbstractContentContext::EncodeWithCurrentFont, Cannot write text, no current font is defined");
@@ -1438,16 +1517,19 @@ void AbstractContentContext::WriteText(double inX,double inY,const std::string& 
 		SetCurrentFont(inOptions.font);
 	}
 
-	GlyphUnicodeMappingList glyphsAndUnicode;
+	GlyphUnicodeMappingList glyphsAndUnicode;	
 	EncodeWithCurrentFont(inText, glyphsAndUnicode);
 
-	BT();
-    SetupColor(inOptions);
-	Tm(1,0,0,1,inX,inY);
-	SetCurrentFontSize(inOptions.fontSize);
-	Tj(glyphsAndUnicode);
-	ET();
+	SimpleGlyphsWritingConext sharedWritingContext(this);
 
+	sharedWritingContext.StartWriting(inX,inY, inOptions);
+
+	GlyphUnicodeMappingList::iterator it = glyphsAndUnicode.begin();
+	for(; it!=glyphsAndUnicode.end(); ++it) {
+		sharedWritingContext.AddGlyphMapping(*it);
+	}
+
+	sharedWritingContext.Flush();
 }
 
 void AbstractContentContext::DrawImage(double inX,double inY,const std::string& inImagePath,const ImageOptions& inOptions)

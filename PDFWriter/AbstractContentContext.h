@@ -283,6 +283,16 @@ public:
 	// only occur when actually placing text.
 	void Tf(PDFUsedFont* inFontReference,double inFontSize);
 
+	// Tf is just setting current font and size, if you want to do those individually use 
+	// either SetCurrentFont or SetCurrentFontSize
+	void SetCurrentFont(PDFUsedFont* inFontReference);
+	// you can also get the current font
+	PDFUsedFont* GetCurrentFont();
+
+	void SetCurrentFontSize(double inFontSize);
+
+	
+
 	// place text to the current set font with Tf
 	// will return error if no font was set, or that one of the glyphs
 	// didn't succeed in encoding.
@@ -341,6 +351,11 @@ public:
     void AddContentContextListener(IContentContextListener* inExtender);
     void RemoveContentContextListener(IContentContextListener* inExtender);
 
+	// Simplified color setup
+	void SetupColor(const GraphicOptions& inOptions);
+	void SetupColor(const TextOptions& inOptions);
+	void SetupColor(EDrawingType inDrawingType,unsigned long inColorValue,EColorSpace inColorSpace);
+
 	PrimitiveObjectsWriter& GetPrimitiveWriter() {return mPrimitiveWriter;}
 protected:
 
@@ -370,12 +385,8 @@ private:
 	PDFHummus::EStatusCode WriteTextCommandWithDirectGlyphSelection(const GlyphUnicodeMappingList& inText,ITextCommand* inTextCommand);
 
 
-	void SetupColor(const GraphicOptions& inOptions);
-	void SetupColor(const TextOptions& inOptions);
-	void SetupColor(EDrawingType inDrawingType,unsigned long inColorValue,EColorSpace inColorSpace);
 	void FinishPath(const GraphicOptions& inOptions);
 
-	void SetCurrentFont(PDFUsedFont* inFontReference);
-	void SetCurrentFontSize(double inFontSize);
 	PDFHummus::EStatusCode EncodeWithCurrentFont(const std::string& inText,GlyphUnicodeMappingList& outGlyphsUnicodeMapping);
 };
+
