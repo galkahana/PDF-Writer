@@ -33,10 +33,10 @@ LayeredGlyphsDrawingContext::LayeredGlyphsDrawingContext(AbstractContentContext*
 void LayeredGlyphsDrawingContext::SetGlyph(const GlyphUnicodeMapping& inGlyph) {
     mGlyph = inGlyph;
 
-    FT_Face face = *(mContentContext->GetCurrentFont()->GetFreeTypeFont());
+    FreeTypeFaceWrapper* freeTypeFace = mContentContext->GetCurrentFont()->GetFreeTypeFont();
 
     mIterator.p = NULL;
-    FT_Bool haveLayers = FT_Get_Color_Glyph_Layer(face,
+    FT_Bool haveLayers = FT_Get_Color_Glyph_Layer(*freeTypeFace,
                                             mGlyph.mGlyphCode,
                                             &mLayerGlyphIndex,
                                             &mLayerColorIndex,
@@ -48,7 +48,7 @@ void LayeredGlyphsDrawingContext::SetGlyph(const GlyphUnicodeMapping& inGlyph) {
     
     // ok...got an interesting glyph. now's a good time to also bother with palette selection. using the default palette.
     // maybe can do this once per face and keep this on the face wrapper
-    FT_Error error = FT_Palette_Select( face, 0, &mPalette);
+    FT_Error error = freeTypeFace->SelectDefaultPalette(&mPalette);
     if (error) {
         mPalette = NULL;
         mCanDrawGlyph = false;

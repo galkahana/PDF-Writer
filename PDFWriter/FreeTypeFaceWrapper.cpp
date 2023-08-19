@@ -43,6 +43,7 @@ FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const std::string& inFon
 	mFontIndex = inFontIndex;
 	mDoesOwn = inDoOwn;
 	mGlyphIsLoaded = false;
+	ResetPaletteSelectionState();
 	SetupFormatSpecificExtender(inFontFilePath, "");
 	SelectDefaultEncoding();
 }
@@ -54,12 +55,19 @@ FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const std::string& inFon
     mFontIndex = inFontIndex;
 	mDoesOwn = inDoOwn;
 	mGlyphIsLoaded = false;
+	ResetPaletteSelectionState();
 	std::string fileExtension = GetExtension(inPFMFilePath);
 	if (fileExtension == "PFM" || fileExtension == "pfm") // just don't bother if it's not PFM
 		SetupFormatSpecificExtender(inFontFilePath, inPFMFilePath);
 	else
 		SetupFormatSpecificExtender(inFontFilePath, "");
 	SelectDefaultEncoding();
+}
+
+void FreeTypeFaceWrapper::ResetPaletteSelectionState() {
+	mPaletteSet = false;
+	mPalette = NULL;
+	mPaletteStatus = FT_Err_Ok;
 }
 
 void FreeTypeFaceWrapper::SelectDefaultEncoding() {
@@ -765,6 +773,16 @@ FT_Error FreeTypeFaceWrapper::LoadGlyph(FT_UInt inGlyphIndex, FT_Int32 inFlags)
 		mCurrentGlyph = inGlyphIndex;
 	}
 	return status;
+}
+
+FT_Error FreeTypeFaceWrapper::SelectDefaultPalette(FT_Color** outPalette) {
+	if(!mPaletteSet) {
+		mPaletteStatus = FT_Palette_Select( mFace, 0, &mPalette);
+		mPaletteSet = true;		
+	}
+
+	*outPalette = mPalette;
+	return mPaletteStatus;
 }
 
 //////////////// IOutlineEnumerator /////////////////////////////
