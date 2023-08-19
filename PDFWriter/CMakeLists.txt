@@ -28,6 +28,7 @@ DictionaryContext.cpp
 DocumentContext.cpp
 EncryptionHelper.cpp
 EncryptionOptions.cpp
+ExtGStateRegistry.cpp
 FontDescriptorWriter.cpp
 FreeTypeFaceWrapper.cpp
 FreeTypeOpenTypeWrapper.cpp
@@ -60,6 +61,7 @@ InputStringStream.cpp
 JPEGImageHandler.cpp
 JPEGImageInformation.cpp
 JPEGImageParser.cpp
+LayeredGlyphsDrawingContext.cpp
 Log.cpp
 MD5Generator.cpp
 RC4.cpp
@@ -122,6 +124,7 @@ PrimitiveObjectsWriter.cpp
 PSBool.cpp
 RefCountObject.cpp
 ResourcesDictionary.cpp
+SimpleGlyphsDrawingContext.cpp
 SimpleStringTokenizer.cpp
 StandardEncoding.cpp
 StateReader.cpp
@@ -188,6 +191,7 @@ EncryptionOptions.h
 EPDFVersion.h
 EStatusCode.h
 ETokenSeparator.h
+ExtGStateRegistry.h
 FontDescriptorWriter.h
 FreeTypeFaceWrapper.h
 FreeTypeOpenTypeWrapper.h
@@ -233,6 +237,7 @@ InputStreamSkipperStream.h
 InputStringBufferStream.h
 InputStringStream.h
 IOBasicTypes.h
+IObjectEndWritingTask.h
 IObjectsContextExtender.h
 IPageEndWritingTask.h
 IPDFParserExtender.h
@@ -244,6 +249,7 @@ IWrittenFont.h
 JPEGImageHandler.h
 JPEGImageInformation.h
 JPEGImageParser.h
+LayeredGlyphsDrawingContext.h
 Log.h
 MapIterator.h
 MD5Generator.h
@@ -315,6 +321,7 @@ RefCountObject.h
 RefCountPtr.h
 ResourcesDictionary.h
 SafeBufferMacrosDefs.h
+SimpleGlyphsDrawingContext.h
 SimpleStringTokenizer.h
 Singleton.h
 SingleValueContainerIterator.h
@@ -438,6 +445,8 @@ CatalogInformation.h
 DocumentContext.cpp
 DocumentContext.h
 DocumentContextExtenderAdapter.h
+ExtGStateRegistry.cpp
+ExtGStateRegistry.h
 GlyphUnicodeMapping.h
 GraphicState.cpp
 GraphicState.h
@@ -445,10 +454,13 @@ GraphicStateStack.cpp
 GraphicStateStack.h
 IDocumentContextExtender.h
 IFormEndWritingTask.h
+IObjectEndWritingTask.h
 ITiledPatternEndWritingTask.h
 InfoDictionary.cpp
 InfoDictionary.h
 IResourceWritingTask.h
+LayeredGlyphsDrawingContext.cpp
+LayeredGlyphsDrawingContext.h
 PageContentContext.cpp
 PageContentContext.h
 PageTree.cpp
@@ -468,6 +480,8 @@ PDFPage.h
 ProcsetResourcesConstants.h
 ResourcesDictionary.cpp
 ResourcesDictionary.h
+SimpleGlyphsDrawingContext.cpp
+SimpleGlyphsDrawingContext.h
 TrailerInformation.cpp
 TrailerInformation.h
 XObjectContentContext.cpp
