@@ -28,6 +28,7 @@ DictionaryContext.cpp
 DocumentContext.cpp
 EncryptionHelper.cpp
 EncryptionOptions.cpp
+ExtGStateRegistry.cpp
 FontDescriptorWriter.cpp
 FreeTypeFaceWrapper.cpp
 FreeTypeOpenTypeWrapper.cpp
@@ -190,6 +191,7 @@ EncryptionOptions.h
 EPDFVersion.h
 EStatusCode.h
 ETokenSeparator.h
+ExtGStateRegistry.h
 FontDescriptorWriter.h
 FreeTypeFaceWrapper.h
 FreeTypeOpenTypeWrapper.h
@@ -235,6 +237,7 @@ InputStreamSkipperStream.h
 InputStringBufferStream.h
 InputStringStream.h
 IOBasicTypes.h
+IObjectEndWritingTask.h
 IObjectsContextExtender.h
 IPageEndWritingTask.h
 IPDFParserExtender.h
@@ -442,6 +445,8 @@ CatalogInformation.h
 DocumentContext.cpp
 DocumentContext.h
 DocumentContextExtenderAdapter.h
+ExtGStateRegistry.cpp
+ExtGStateRegistry.h
 GlyphUnicodeMapping.h
 GraphicState.cpp
 GraphicState.h
@@ -449,6 +454,7 @@ GraphicStateStack.cpp
 GraphicStateStack.h
 IDocumentContextExtender.h
 IFormEndWritingTask.h
+IObjectEndWritingTask.h
 ITiledPatternEndWritingTask.h
 InfoDictionary.cpp
 InfoDictionary.h

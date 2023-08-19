@@ -76,9 +76,8 @@ void LayeredGlyphsDrawingContext::Draw(double inX, double inY, bool inComputeAdv
         } else {
             FT_Color layer_color = mPalette[mLayerColorIndex];
 
-            mContentContext->rg(double(layer_color.red)/255,double(layer_color.green)/255,double(layer_color.blue)/255);
-
-            // TODO: alpha value support
+            mContentContext->SetOpacity(double(layer_color.alpha)/255.0);
+            mContentContext->rg(double(layer_color.red)/255.0,double(layer_color.green)/255.0,double(layer_color.blue)/255.0);
         }
 
 

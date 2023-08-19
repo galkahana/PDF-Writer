@@ -1338,21 +1338,22 @@ void AbstractContentContext::DrawPath(const DoubleAndDoublePairList& inPathPoint
 
 void AbstractContentContext::SetupColor(const GraphicOptions& inOptions)
 {
-	SetupColor(inOptions.drawingType,inOptions.colorValue,inOptions.colorSpace);
+	SetupColor(inOptions.drawingType,inOptions.colorValue,inOptions.colorSpace, inOptions.opacity);
 }
 
 void AbstractContentContext::SetupColor(const TextOptions& inOptions)
 {
-	SetupColor(eFill,inOptions.colorValue,inOptions.colorSpace);
+	SetupColor(eFill,inOptions.colorValue,inOptions.colorSpace, inOptions.opacity);
 }
 
 
-void AbstractContentContext::SetupColor(EDrawingType inDrawingType,unsigned long inColorValue,EColorSpace inColorSpace)
+void AbstractContentContext::SetupColor(EDrawingType inDrawingType,unsigned long inColorValue,EColorSpace inColorSpace, double inOpacity)
 {
 	if(inDrawingType != eStroke &&
 		inDrawingType != eFill)
 		return;
 
+	SetOpacity(inOpacity);
 	switch(inColorSpace)
 	{
 		case eRGB:
@@ -1550,4 +1551,18 @@ void AbstractContentContext::DrawImage(double inX,double inY,const std::string& 
     Do(GetResourcesDictionary()->AddFormXObjectMapping(result.first));
     Q();
 
+}
+
+void AbstractContentContext::SetOpacity(double inAlpha) {
+	if(inAlpha == NO_OPACITY_VALUE) // special value allowing to fallback on the current graphic state opacity value. this allows a default behavior for high level text commands
+		return;
+
+    // registering the images at pdfwriter to allow optimization on image writes
+    ObjectIDTypeAndBool result = mDocumentContext->GetExtGStateRegistry().RegisterExtGStateForOpacity(inAlpha);
+    if(result.second)
+    {
+        // if first usage, write the extgstate
+		ScheduleObjectEndWriteTask(mDocumentContext->GetExtGStateRegistry().CreateExtGStateForOpacityWritingTask(result.first, inAlpha));
+    }
+	gs(GetResourcesDictionary()->AddExtGStateMapping(result.first));
 }
