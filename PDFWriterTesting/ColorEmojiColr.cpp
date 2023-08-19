@@ -37,7 +37,7 @@ int ColorEmojiColr(int argc, char* argv[])
 
 	do
 	{
-		status = pdfWriter.StartPDF(BuildRelativeOutputPath(argv,"ColorEmojiColr.pdf"),ePDFVersion14);
+		status = pdfWriter.StartPDF(BuildRelativeOutputPath(argv,"ColorEmojiColr.pdf"),ePDFVersion14,LogConfiguration::DefaultLogConfiguration(),PDFCreationSettings(false, true));
 		if(status != eSuccess)
 		{
 			cout<<"Failed to start file\n";
@@ -57,7 +57,7 @@ int ColorEmojiColr(int argc, char* argv[])
 																			AbstractContentContext::eGray,
 																			0);
 
-		cxt->WriteText(75,600,"\x53\x65\x67\x6F\x65\x20\x55\x49\x20\x45\x6D\x6F\x6A\x69\x3A\xE2\x98\xBA\xE2\x98\xBA\xE2\x98\xBA",textOptions);
+		cxt->WriteText(75,600,"\x53\x65\x67\x6f\x65\x20\x55\x49\x20\x45\x6d\x6f\x6a\x69\x3a\xe2\x98\xba\xe2\x98\xba\xe2\x98\xba\x2c\x20\x61\x6e\x64\x20\x73\x6f\x6d\x65\x20\x6c\x61\x74\x65\x72\x20\x74\x65\x78\x74",textOptions);
 
 		status = pdfWriter.EndPageContentContext(cxt);
 		if(status != eSuccess)

@@ -30,6 +30,9 @@
 #include "OutputStreamTraits.h"
 #include "IContentContextListener.h"
 #include "DocumentContext.h"
+#include "SimpleGlyphsDrawingContext.h"
+#include "LayeredGlyphsDrawingContext.h"
+
 #include <ctype.h>
 #include <algorithm>
 
@@ -230,81 +233,6 @@ unsigned long CSSColorMap::GetRGBForColorName(const std::string& inColorName)
 
 // single instance of color map
 static CSSColorMap sColorMap;
-
-class SimpleGlyphsWritingConext {
-public:
-
-	SimpleGlyphsWritingConext(AbstractContentContext* inContentContext);
-
-	void StartWriting(double inX,double inY,const AbstractContentContext::TextOptions& inOptions);
-	void AddGlyphMapping(const GlyphUnicodeMapping& inMapping);
-	void Flush(bool inComputeAdvance = false);
-
-	double GetLatestAdvance();
-
-private:
-
-	AbstractContentContext* mContentContext;
-	double mX;
-	double mY;
-	AbstractContentContext::TextOptions mOptions;
-	GlyphUnicodeMappingList mText;
-
-	double mLatestAdvance;
-};
-
-SimpleGlyphsWritingConext::SimpleGlyphsWritingConext(AbstractContentContext* inContentContext):mOptions(NULL) {
-	mContentContext = inContentContext;
-}
-
-void SimpleGlyphsWritingConext::StartWriting(double inX,double inY,const AbstractContentContext::TextOptions& inOptions) {
-	mText.clear();
-	mX = inX;
-	mY = inY;
-	mOptions = inOptions;
-}
-	
-void SimpleGlyphsWritingConext::AddGlyphMapping(const GlyphUnicodeMapping& inMapping) {
-	mText.push_back(inMapping);
-
-}
-
-void SimpleGlyphsWritingConext::Flush(bool inComputeAdvance) {
-	// current font is expected to have been set in advance, so don't bother with it, and can
-	// grab current font
-
-	if(mText.size() == 0) {
-		if(inComputeAdvance) {
-			mLatestAdvance = 0;
-		}
-		return;
-	}
-
-    mContentContext->SetupColor(mOptions);
-	mContentContext->BT();
-	mContentContext->Tm(1,0,0,1,mX,mY);
-	mContentContext->SetCurrentFontSize(mOptions.fontSize);
-	mContentContext->Tj(mText);
-	mContentContext->ET();	
-
-	if(inComputeAdvance) {
-		UIntList glyphs;
-
-		GlyphUnicodeMappingList::iterator it = mText.begin();
-		for(;it!=mText.end(); ++it) {
-			glyphs.push_back(it->mGlyphCode);
-		}
-		
-		mLatestAdvance = mContentContext->GetCurrentFont()->CalculateTextAdvance(glyphs, mOptions.fontSize);
-	}
-
-	mText.clear();
-}
-
-double SimpleGlyphsWritingConext::GetLatestAdvance() {
-	return mLatestAdvance;
-}
-
 
 unsigned long AbstractContentContext::ColorValueForName(const std::string& inColorName)
 {
@@ -1520,16 +1448,51 @@ void AbstractContentContext::WriteText(double inX,double inY,const std::string& 
 	GlyphUnicodeMappingList glyphsAndUnicode;	
 	EncodeWithCurrentFont(inText, glyphsAndUnicode);
 
-	SimpleGlyphsWritingConext sharedWritingContext(this);
+	SimpleGlyphsDrawingContext sharedDrawingContext(this, inOptions);
+	LayeredGlyphsDrawingContext layeredGlyphDrawing(this, inOptions);
 
-	sharedWritingContext.StartWriting(inX,inY, inOptions);
+	double x = inX;
+
+	/**
+	 * The following draws text using simple Bt..tj..Et sequances while
+	 * stopping for glyphs that require special drawing (colorful emojis are an example).
+	 * the code uses a shared context for simple text drawing to join such simple
+	 * glyphs togather for compacting the drawing code.
+	 */
+
+	sharedDrawingContext.StartWriting(x,inY);
 
 	GlyphUnicodeMappingList::iterator it = glyphsAndUnicode.begin();
 	for(; it!=glyphsAndUnicode.end(); ++it) {
-		sharedWritingContext.AddGlyphMapping(*it);
+		layeredGlyphDrawing.SetGlyph(*it);
+
+		if(!layeredGlyphDrawing.CanDraw()) {
+			// simple char, add to shared context
+			sharedDrawingContext.AddGlyphMapping(*it);
+			continue;
+		}
+
+		// special drawing alert!!1
+
+		// First, flush what glyphs were collected in the simple shared context as drawing commands. then collect what advance they made, to update later placements
+		sharedDrawingContext.Flush(true);
+		x+=sharedDrawingContext.GetLatestAdvance();
+
+
+		// Now, let's draw the special glyph
+		
+		// Since this is layered glyph drawing use it. collect its advance, to continue writing at the right spot later
+		layeredGlyphDrawing.Draw(x,inY, true);
+		x+=layeredGlyphDrawing.GetLatestAdvance();
+
+
+
+		// Done. restart shared simple glyph writing context
+		sharedDrawingContext.StartWriting(x,inY);
 	}
 
-	sharedWritingContext.Flush();
+	// flush what glyphs are remaining in shared context
+	sharedDrawingContext.Flush();
 }
 
 void AbstractContentContext::DrawImage(double inX,double inY,const std::string& inImagePath,const ImageOptions& inOptions)

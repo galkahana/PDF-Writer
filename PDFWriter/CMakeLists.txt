@@ -60,6 +60,7 @@ InputStringStream.cpp
 JPEGImageHandler.cpp
 JPEGImageInformation.cpp
 JPEGImageParser.cpp
+LayeredGlyphsDrawingContext.cpp
 Log.cpp
 MD5Generator.cpp
 RC4.cpp
@@ -122,6 +123,7 @@ PrimitiveObjectsWriter.cpp
 PSBool.cpp
 RefCountObject.cpp
 ResourcesDictionary.cpp
+SimpleGlyphsDrawingContext.cpp
 SimpleStringTokenizer.cpp
 StandardEncoding.cpp
 StateReader.cpp
@@ -244,6 +246,7 @@ IWrittenFont.h
 JPEGImageHandler.h
 JPEGImageInformation.h
 JPEGImageParser.h
+LayeredGlyphsDrawingContext.h
 Log.h
 MapIterator.h
 MD5Generator.h
@@ -315,6 +318,7 @@ RefCountObject.h
 RefCountPtr.h
 ResourcesDictionary.h
 SafeBufferMacrosDefs.h
+SimpleGlyphsDrawingContext.h
 SimpleStringTokenizer.h
 Singleton.h
 SingleValueContainerIterator.h
@@ -449,6 +453,8 @@ ITiledPatternEndWritingTask.h
 InfoDictionary.cpp
 InfoDictionary.h
 IResourceWritingTask.h
+LayeredGlyphsDrawingContext.cpp
+LayeredGlyphsDrawingContext.h
 PageContentContext.cpp
 PageContentContext.h
 PageTree.cpp
@@ -468,6 +474,8 @@ PDFPage.h
 ProcsetResourcesConstants.h
 ResourcesDictionary.cpp
 ResourcesDictionary.h
+SimpleGlyphsDrawingContext.cpp
+SimpleGlyphsDrawingContext.h
 TrailerInformation.cpp
 TrailerInformation.h
 XObjectContentContext.cpp
