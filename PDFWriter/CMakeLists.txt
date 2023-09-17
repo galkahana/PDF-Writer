@@ -79,6 +79,7 @@ OutputStreamTraits.cpp
 OutputStringBufferStream.cpp
 PageContentContext.cpp
 PageTree.cpp
+PaintedGlyphsDrawingContext.cpp
 ParsedPrimitiveHelper.cpp
 PDFArray.cpp
 PDFBoolean.cpp
@@ -271,6 +272,7 @@ OutputStreamTraits.h
 OutputStringBufferStream.h
 PageContentContext.h
 PageTree.h
+PaintedGlyphsDrawingContext.h
 ParsedPrimitiveHelper.h
 PDFArray.h
 PDFBoolean.h
@@ -465,6 +467,8 @@ PageContentContext.cpp
 PageContentContext.h
 PageTree.cpp
 PageTree.h
+PaintedGlyphsDrawingContext.cpp
+PaintedGlyphsDrawingContext.h
 PDFFormXObject.cpp
 PDFFormXObject.h
 PDFTiledPattern.cpp
