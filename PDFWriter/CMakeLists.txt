@@ -123,6 +123,7 @@ PFMFileReader.cpp
 PNGImageHandler.cpp
 PrimitiveObjectsWriter.cpp
 PSBool.cpp
+RadialGradientShadingPatternWritingTask.cpp
 RefCountObject.cpp
 ResourcesDictionary.cpp
 SimpleGlyphsDrawingContext.cpp
@@ -319,6 +320,7 @@ PNGImageHandler.h
 PrimitiveObjectsWriter.h
 ProcsetResourcesConstants.h
 PSBool.h
+RadialGradientShadingPatternWritingTask.h
 RefCountObject.h
 RefCountPtr.h
 ResourcesDictionary.h
@@ -482,6 +484,8 @@ PDFModifiedPage.h
 PDFPage.cpp
 PDFPage.h
 ProcsetResourcesConstants.h
+RadialGradientShadingPatternWritingTask.cpp
+RadialGradientShadingPatternWritingTask.h
 ResourcesDictionary.cpp
 ResourcesDictionary.h
 SimpleGlyphsDrawingContext.cpp
@@ -601,6 +605,7 @@ InputStringBufferStream.cpp
 InputStringBufferStream.h
 InputStringStream.cpp
 InputStringStream.h
+InterpretedGradientStop.h
 IOBasicTypes.h
 IReadPositionProvider.h
 OutputAESEncodeStream.cpp

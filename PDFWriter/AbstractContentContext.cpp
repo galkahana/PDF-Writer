@@ -592,6 +592,15 @@ void AbstractContentContext::SCN(double* inColorComponents, int inColorComponent
 	mPrimitiveWriter.WriteKeyword("SCN");
 }
 
+void AbstractContentContext::SCN(const std::string& inPatternName)
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+
+	mPrimitiveWriter.WriteName(inPatternName);
+	mPrimitiveWriter.WriteKeyword("SCN");
+}
+
 void AbstractContentContext::sc(double* inColorComponents, int inColorComponentsLength)
 {
 	RenewStreamConnection();
@@ -619,6 +628,15 @@ void AbstractContentContext::scn(double* inColorComponents, int inColorComponent
 
 	for(int i=0;i<inColorComponentsLength;++i)
 		mPrimitiveWriter.WriteDouble(inColorComponents[i]);
+	mPrimitiveWriter.WriteName(inPatternName);
+	mPrimitiveWriter.WriteKeyword("scn");
+}
+
+void AbstractContentContext::scn(const std::string& inPatternName)
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+
 	mPrimitiveWriter.WriteName(inPatternName);
 	mPrimitiveWriter.WriteKeyword("scn");
 }

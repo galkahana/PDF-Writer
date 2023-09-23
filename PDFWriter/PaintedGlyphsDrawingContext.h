@@ -61,6 +61,9 @@ private:
 
 	double mLatestAdvance;   
 
+    double GetFontUnitMeasurementInPDF(FT_Fixed inFixedPos);
+    void FillCurrentBounds(); 
+
     bool ExecuteOpaquePaint(FT_OpaquePaint inOpaquePaint);
     bool ExecuteColrPaint(FT_COLR_Paint inColrPaint);
     bool ExecutePaintColrLayers(FT_PaintColrLayers inColrLayers);
@@ -80,5 +83,6 @@ private:
     bool ExceutePaintRotate(FT_PaintRotate inRotate);
     bool ExecutePaintSkew(FT_PaintSkew inSkew);
     bool ExecutePaintColrGlyph(FT_PaintColrGlyph inColrGlyph);
+    bool ExecutePaintRadialGradient(FT_PaintRadialGradient inColrRadialGradient);
     
 };

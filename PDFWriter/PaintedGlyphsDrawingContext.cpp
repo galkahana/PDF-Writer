@@ -22,12 +22,20 @@
 #include "PaintedGlyphsDrawingContext.h"
 #include "PDFUsedFont.h"
 #include "Trace.h"
+#include "DocumentContext.h"
+#include "ObjectsContext.h"
+#include "IndirectObjectsReferenceRegistry.h"
+#include "ResourcesDictionary.h"
+#include "IObjectEndWritingTask.h"
+#include "DictionaryContext.h"
+#include "InterpretedGradientStop.h"
+#include "RadialGradientShadingPatternWritingTask.h"
 #include <math.h>
 
 #include FT_COLOR_H
 
-
 static const double scFix16Dot16Scale = (double(1<<16));
+static const std::string scPattern = "Pattern";
 
 PaintedGlyphsDrawingContext::PaintedGlyphsDrawingContext(AbstractContentContext* inContentContext, const AbstractContentContext::TextOptions& inOptions):mOptions(inOptions) {
     mContentContext = inContentContext;
@@ -147,6 +155,9 @@ bool PaintedGlyphsDrawingContext::ExecuteColrPaint(FT_COLR_Paint inColrPaint) {
         case FT_COLR_PAINTFORMAT_COLR_GLYPH:
             result = ExecutePaintColrGlyph(inColrPaint.u.colr_glyph);
             break;
+        case FT_COLR_PAINTFORMAT_RADIAL_GRADIENT:
+            result = ExecutePaintRadialGradient(inColrPaint.u.radial_gradient);
+            break;
         default:
             TRACE_LOG1(
 				"PaintedGlyphsDrawingContext::ExecuteColrPaint, unsupported Colrv1 paint format %d. skipping.",
@@ -212,6 +223,13 @@ bool PaintedGlyphsDrawingContext::ExecutePaintGlyph(FT_PaintGlyph inGlyph) {
     return result;
 }
 
+void PaintedGlyphsDrawingContext::FillCurrentBounds() {
+    PDFRectangle& currentBounds = mBoundsStack.back();
+    mContentContext->re(currentBounds.LowerLeftX,currentBounds.LowerLeftY,currentBounds.UpperRightX - currentBounds.LowerLeftX, currentBounds.UpperRightY - currentBounds.LowerLeftY);
+    mContentContext->f();
+}
+
+
 bool PaintedGlyphsDrawingContext::ExecutePaintSolid(FT_PaintSolid inSolid) {
     FT_UInt16 palette_index = inSolid.color.palette_index;
     FT_F2Dot14 alpha = inSolid.color.alpha;
@@ -227,11 +245,12 @@ bool PaintedGlyphsDrawingContext::ExecutePaintSolid(FT_PaintSolid inSolid) {
     }    
 
     // now fill a path. use current bounds
-    PDFRectangle& currentBounds = mBoundsStack.back();
-    mContentContext->re(currentBounds.LowerLeftX,currentBounds.LowerLeftY,currentBounds.UpperRightX - currentBounds.LowerLeftX, currentBounds.UpperRightY - currentBounds.LowerLeftY);
-    mContentContext->f();
-
+    FillCurrentBounds();
     return true;
+}
+
+double PaintedGlyphsDrawingContext::GetFontUnitMeasurementInPDF(FT_Fixed inFixedPos) {
+    return (mContentContext->GetCurrentFont()->GetFreeTypeFont()->GetInPDFMeasurements(inFixedPos) / scFix16Dot16Scale) * (mOptions.fontSize / 1000);
 }
 
 bool PaintedGlyphsDrawingContext::ExceutePaintTransform(FT_PaintTransform inTransform) {
@@ -243,8 +262,8 @@ bool PaintedGlyphsDrawingContext::ExceutePaintTransform(FT_PaintTransform inTran
         inTransform.affine.xy / scFix16Dot16Scale,
         inTransform.affine.yy / scFix16Dot16Scale,
         // vectors are in font space, so adjust translation to pdf measurements by em and then by font size
-        (freeTypeFace->GetInPDFMeasurements(inTransform.affine.dx) / scFix16Dot16Scale) * mOptions.fontSize / 1000,
-        (freeTypeFace->GetInPDFMeasurements(inTransform.affine.dy) / scFix16Dot16Scale) * mOptions.fontSize / 1000,
+        GetFontUnitMeasurementInPDF(inTransform.affine.dx),
+        GetFontUnitMeasurementInPDF(inTransform.affine.dy),
         inTransform.paint
     );
 }
@@ -278,8 +297,8 @@ bool PaintedGlyphsDrawingContext::ExceutePaintTranslate(FT_PaintTranslate inTran
         0,
         1,
         // see transform
-        (freeTypeFace->GetInPDFMeasurements(inTranslate.dx) / scFix16Dot16Scale) * mOptions.fontSize / 1000,
-        (freeTypeFace->GetInPDFMeasurements(inTranslate.dy) / scFix16Dot16Scale) * mOptions.fontSize / 1000,
+        GetFontUnitMeasurementInPDF(inTranslate.dx),
+        GetFontUnitMeasurementInPDF(inTranslate.dy),
         inTranslate.paint
     );
 
@@ -289,13 +308,13 @@ bool PaintedGlyphsDrawingContext::ExecutePaintScale(FT_PaintScale inScale) {
     FreeTypeFaceWrapper* freeTypeFace = mContentContext->GetCurrentFont()->GetFreeTypeFont();
 
     return ApplyTransformToPaint(
-        inScale.scale_x / (double(1<<16)),
+        inScale.scale_x / scFix16Dot16Scale,
         0,
         0,
-        inScale.scale_y / (double(1<<16)),
+        inScale.scale_y / scFix16Dot16Scale,
         // see transform
-        (freeTypeFace->GetInPDFMeasurements(inScale.center_x) / scFix16Dot16Scale) * mOptions.fontSize / 1000,
-        (freeTypeFace->GetInPDFMeasurements(inScale.center_y) / scFix16Dot16Scale) * mOptions.fontSize / 1000,
+        GetFontUnitMeasurementInPDF(inScale.center_x),
+        GetFontUnitMeasurementInPDF(inScale.center_y),
         inScale.paint
     );
 
@@ -312,8 +331,8 @@ bool PaintedGlyphsDrawingContext::ExceutePaintRotate(FT_PaintRotate inRotate) {
         -sin(radianAngle),
         cos(radianAngle),
         // see transform
-        (freeTypeFace->GetInPDFMeasurements(inRotate.center_x) / scFix16Dot16Scale) * mOptions.fontSize / 1000,
-        (freeTypeFace->GetInPDFMeasurements(inRotate.center_y) / scFix16Dot16Scale) * mOptions.fontSize / 1000,
+        GetFontUnitMeasurementInPDF(inRotate.center_x),
+        GetFontUnitMeasurementInPDF(inRotate.center_y),
         inRotate.paint
     );
 }
@@ -327,8 +346,8 @@ bool PaintedGlyphsDrawingContext::ExecutePaintSkew(FT_PaintSkew inSkew) {
         tan(inSkew.y_skew_angle / scFix16Dot16Scale),
         1,
         // see transform
-        (freeTypeFace->GetInPDFMeasurements(inSkew.center_x) / scFix16Dot16Scale) * mOptions.fontSize / 1000,
-        (freeTypeFace->GetInPDFMeasurements(inSkew.center_y) / scFix16Dot16Scale) * mOptions.fontSize / 1000,
+        GetFontUnitMeasurementInPDF(inSkew.center_x),
+        GetFontUnitMeasurementInPDF(inSkew.center_y),
         inSkew.paint
     );
 }
@@ -380,4 +399,58 @@ bool PaintedGlyphsDrawingContext::ExecutePaintColrGlyph(FT_PaintColrGlyph inColr
     mContentContext->Q(); 
     mDrawnGlyphs.pop_back();
     return result;   
+}
+
+
+bool PaintedGlyphsDrawingContext::ExecutePaintRadialGradient(FT_PaintRadialGradient inColrRadialGradient)
+{
+    FreeTypeFaceWrapper* freeTypeFace = mContentContext->GetCurrentFont()->GetFreeTypeFont();
+
+    double x0 = GetFontUnitMeasurementInPDF(inColrRadialGradient.c0.x);
+    double y0 = GetFontUnitMeasurementInPDF(inColrRadialGradient.c0.y);
+    double r0 = GetFontUnitMeasurementInPDF(inColrRadialGradient.r0);
+    double x1 = GetFontUnitMeasurementInPDF(inColrRadialGradient.c1.x);
+    double y1 = GetFontUnitMeasurementInPDF(inColrRadialGradient.c1.x);
+    double r1 = GetFontUnitMeasurementInPDF(inColrRadialGradient.r1);
+
+    FT_PaintExtend gradientExtend = inColrRadialGradient.colorline.extend;
+    FT_ColorStopIterator colorStopIterator = inColrRadialGradient.colorline.color_stop_iterator;
+    FT_ColorStop colorStop;
+    InterpretedGradientStopList colorLine;
+
+    while(FT_Get_Colorline_Stops(
+        *freeTypeFace,
+        &colorStop,
+        &colorStopIterator)) {
+            InterpretedGradientStop gradientStop = {
+                colorStop.stop_offset/scFix16Dot16Scale,
+                double(colorStop.color.alpha) / double(1<<14),
+                mPalette[colorStop.color.palette_index]
+            };
+
+            colorLine.push_back(
+                gradientStop
+            );
+    };
+
+    // apply shading pattern
+    ObjectIDType patternObjectId = mContentContext->GetDocumentContext()->GetObjectsContext()->GetInDirectObjectsRegistry().AllocateNewObjectID();
+    mContentContext->cs(scPattern);
+    mContentContext->scn(mContentContext->GetResourcesDictionary()->AddPatternMapping(patternObjectId));
+
+    // schedule task to create object for this shading pattern
+    mContentContext->ScheduleObjectEndWriteTask(new RadialGradientShadingPatternWritingTask(
+        x0,
+        y0,
+        r0,
+        x1,
+        y1,
+        r1,
+        colorLine,
+        patternObjectId
+    ));
+
+    // now fill a path. use current bounds
+    FillCurrentBounds();
+    return true;
 }

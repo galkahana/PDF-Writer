@@ -3316,3 +3316,7 @@ ObjectIDTypeAndBool DocumentContext::RegisterImageForDrawing(const std::string& 
 ExtGStateRegistry& DocumentContext::GetExtGStateRegistry() {
 	return mExtGStateRegistry;
 }
+
+ObjectsContext* DocumentContext::GetObjectsContext() {
+	return mObjectsContext;
+}
