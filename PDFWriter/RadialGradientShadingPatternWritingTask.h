@@ -25,6 +25,7 @@
 #include "EStatusCode.h"
 #include "IObjectEndWritingTask.h"
 #include "ObjectsBasicTypes.h"
+#include "PDFRectangle.h"
 
 
 class RadialGradientShadingPatternWritingTask: public IObjectEndWritingTask {
@@ -37,6 +38,7 @@ class RadialGradientShadingPatternWritingTask: public IObjectEndWritingTask {
             double inY1,
             double inR1,
             InterpretedGradientStopList inColorLine,
+            PDFRectangle inBounds,
             ObjectIDType inPatternObjectId
         );
 
@@ -52,5 +54,13 @@ class RadialGradientShadingPatternWritingTask: public IObjectEndWritingTask {
         double y1;
         double r1;
         InterpretedGradientStopList colorLine;
-        ObjectIDType mPatternObjectId;
+        PDFRectangle bounds;
+        ObjectIDType patternObjectId;
+
+        bool ColorLineHasTransparency();
+        PDFHummus::EStatusCode WriteRGBShadingPatternObject(ObjectIDType inObjectID, ObjectsContext* inObjectsContext);
+        PDFHummus::EStatusCode WriteRGBATiledPatternObject(ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
+        PDFHummus::EStatusCode WriteAlphaSoftMaskExtGState(ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
+        PDFHummus::EStatusCode WriteAlphaSoftMaskForm(ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
+        PDFHummus::EStatusCode WriteAlphaShadingPatternObject(ObjectIDType inObjectID, ObjectsContext* inObjectsContext);        
 };

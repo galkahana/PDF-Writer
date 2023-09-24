@@ -1016,11 +1016,11 @@ PDFFormXObject* DocumentContext::StartFormXObject(const PDFRectangle& inBounding
 			mObjectsContext->EndArray(eTokenSeparatorEndLine);
 		}
         if (inUseTransparencyGroup) {
-          xobjectContext->WriteKey(scGroup);
-	  DictionaryContext* groupContext = mObjectsContext->StartDictionary();
-	  groupContext->WriteKey(scS);
-	  groupContext->WriteNameValue(scTransparency);
-	  mObjectsContext->EndDictionary(groupContext);
+	        xobjectContext->WriteKey(scGroup);
+			DictionaryContext* groupContext = mObjectsContext->StartDictionary();
+			groupContext->WriteKey(scS);
+			groupContext->WriteNameValue(scTransparency);
+			mObjectsContext->EndDictionary(groupContext);
         }
 
 		// Resource dict
@@ -2919,8 +2919,8 @@ DoubleAndDoublePair DocumentContext::GetImageDimensions(
 
       PDFPageInput helper(&pdfParser,pdfParser.ParsePage(inImageIndex));
 
-      imageWidth = helper.GetMediaBox().UpperRightX - helper.GetMediaBox().LowerLeftX;
-      imageHeight = helper.GetMediaBox().UpperRightY - helper.GetMediaBox().LowerLeftY;
+      imageWidth = helper.GetMediaBox().GetWidth();
+      imageHeight = helper.GetMediaBox().GetHeight();
 
       break;
     }
@@ -3002,8 +3002,8 @@ DoubleAndDoublePair DocumentContext::GetImageDimensions(
 
 				PDFPageInput helper(&pdfParser,pdfParser.ParsePage(inImageIndex));
 
-				imageWidth = helper.GetMediaBox().UpperRightX - helper.GetMediaBox().LowerLeftX;
-				imageHeight = helper.GetMediaBox().UpperRightY - helper.GetMediaBox().LowerLeftY;
+				imageWidth = helper.GetMediaBox().GetHeight();
+				imageHeight = helper.GetMediaBox().GetWidth();
 
 				break;
 			}

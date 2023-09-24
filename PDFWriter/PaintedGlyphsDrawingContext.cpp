@@ -35,7 +35,6 @@
 #include FT_COLOR_H
 
 static const double scFix16Dot16Scale = (double(1<<16));
-static const std::string scPattern = "Pattern";
 
 PaintedGlyphsDrawingContext::PaintedGlyphsDrawingContext(AbstractContentContext* inContentContext, const AbstractContentContext::TextOptions& inOptions):mOptions(inOptions) {
     mContentContext = inContentContext;
@@ -225,7 +224,7 @@ bool PaintedGlyphsDrawingContext::ExecutePaintGlyph(FT_PaintGlyph inGlyph) {
 
 void PaintedGlyphsDrawingContext::FillCurrentBounds() {
     PDFRectangle& currentBounds = mBoundsStack.back();
-    mContentContext->re(currentBounds.LowerLeftX,currentBounds.LowerLeftY,currentBounds.UpperRightX - currentBounds.LowerLeftX, currentBounds.UpperRightY - currentBounds.LowerLeftY);
+    mContentContext->re(currentBounds.LowerLeftX,currentBounds.LowerLeftY,currentBounds.GetWidth(), currentBounds.GetHeight());
     mContentContext->f();
 }
 
@@ -410,7 +409,7 @@ bool PaintedGlyphsDrawingContext::ExecutePaintRadialGradient(FT_PaintRadialGradi
     double y0 = GetFontUnitMeasurementInPDF(inColrRadialGradient.c0.y);
     double r0 = GetFontUnitMeasurementInPDF(inColrRadialGradient.r0);
     double x1 = GetFontUnitMeasurementInPDF(inColrRadialGradient.c1.x);
-    double y1 = GetFontUnitMeasurementInPDF(inColrRadialGradient.c1.x);
+    double y1 = GetFontUnitMeasurementInPDF(inColrRadialGradient.c1.y);
     double r1 = GetFontUnitMeasurementInPDF(inColrRadialGradient.r1);
 
     FT_PaintExtend gradientExtend = inColrRadialGradient.colorline.extend;
@@ -435,8 +434,9 @@ bool PaintedGlyphsDrawingContext::ExecutePaintRadialGradient(FT_PaintRadialGradi
 
     // apply shading pattern
     ObjectIDType patternObjectId = mContentContext->GetDocumentContext()->GetObjectsContext()->GetInDirectObjectsRegistry().AllocateNewObjectID();
-    mContentContext->cs(scPattern);
-    mContentContext->scn(mContentContext->GetResourcesDictionary()->AddPatternMapping(patternObjectId));
+    mContentContext->cs("Pattern");
+    std::string ptName = mContentContext->GetResourcesDictionary()->AddPatternMapping(patternObjectId);
+    mContentContext->scn(ptName);
 
     // schedule task to create object for this shading pattern
     mContentContext->ScheduleObjectEndWriteTask(new RadialGradientShadingPatternWritingTask(
@@ -447,6 +447,7 @@ bool PaintedGlyphsDrawingContext::ExecutePaintRadialGradient(FT_PaintRadialGradi
         y1,
         r1,
         colorLine,
+        mBoundsStack.back(),
         patternObjectId
     ));
 

@@ -53,11 +53,12 @@ int ColorEmojiColrV1(int argc, char* argv[])
 																			BuildRelativeInputPath(
                                                                             argv,
                                                                             "fonts/noto-glyf_colr_1.ttf")),
-																			14,
+																			256,
 																			AbstractContentContext::eGray,
 																			0);
 
-		cxt->WriteText(75,600,"\xe2\x9a\x93\xe2\x9a\x94\xe2\x98\xba",textOptions);
+		//cxt->WriteText(75,600,"\xe2\x9a\x93\xe2\x9a\x94\xe2\x98\xba",textOptions);
+		cxt->WriteText(100,100,"\xe2\x98\xba",textOptions);
 
 		status = pdfWriter.EndPageContentContext(cxt);
 		if(status != eSuccess)
