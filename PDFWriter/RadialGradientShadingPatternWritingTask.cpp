@@ -71,7 +71,10 @@ RadialGradientShadingPatternWritingTask::RadialGradientShadingPatternWritingTask
 RadialGradientShadingPatternWritingTask::~RadialGradientShadingPatternWritingTask(){
 }
 
-EStatusCode RadialGradientShadingPatternWritingTask::WriteRGBShadingPatternObject(ObjectIDType inObjectID, ObjectsContext* inObjectsContext) {
+EStatusCode RadialGradientShadingPatternWritingTask::WriteRGBShadingPatternObject(
+    const InterpretedGradientStopList& inRGBColorLine,
+    ObjectIDType inObjectID, 
+    ObjectsContext* inObjectsContext) {
         EStatusCode status = eSuccess;
 
         do {
@@ -118,13 +121,13 @@ EStatusCode RadialGradientShadingPatternWritingTask::WriteRGBShadingPatternObjec
             inObjectsContext->StartArray();
             // bound contains whats within the edges, so should skip
             // first and last (which are expected to be 0 and 1)
-            InterpretedGradientStopList::iterator it1 = colorLine.begin();
-            InterpretedGradientStopList::iterator it2 = colorLine.begin();
+            InterpretedGradientStopList::const_iterator it1 = inRGBColorLine.begin();
+            InterpretedGradientStopList::const_iterator it2 = inRGBColorLine.begin();
             double firstStop = it1->stopOffset;
             ++it1;
             ++it2;
             ++it1;
-            for(; it1 != colorLine.end();++it1,++it2) {
+            for(; it1 != inRGBColorLine.end();++it1,++it2) {
                 inObjectsContext->WriteDouble(it2->stopOffset);
             }
             inObjectsContext->EndArray(eTokenSeparatorEndLine);
@@ -138,7 +141,7 @@ EStatusCode RadialGradientShadingPatternWritingTask::WriteRGBShadingPatternObjec
             functionDict->WriteKey("Encode");
             inObjectsContext->StartArray();
             // write encodes for size-1 functions
-            for(int i=0; i<colorLine.size()-1;++i) {
+            for(int i=0; i<inRGBColorLine.size()-1;++i) {
                 inObjectsContext->WriteDouble(firstStop);
                 inObjectsContext->WriteDouble(lastStop);
             }
@@ -146,10 +149,10 @@ EStatusCode RadialGradientShadingPatternWritingTask::WriteRGBShadingPatternObjec
             functionDict->WriteKey("Functions");
             // draw all stops, each in its own function. note that there should be size-1 functions!
             inObjectsContext->StartArray();
-            it1 = colorLine.begin();
-            it2 = colorLine.begin();
+            it1 = inRGBColorLine.begin();
+            it2 = inRGBColorLine.begin();
             ++it1;
-            for(; it1 != colorLine.end() && eSuccess == status;++it1,++it2) {
+            for(; it1 != inRGBColorLine.end() && eSuccess == status;++it1,++it2) {
                 DictionaryContext* colorStopDict = inObjectsContext->StartDictionary();
                 colorStopDict->WriteKey("FunctionType");
                 colorStopDict->WriteIntegerValue(2);
@@ -219,132 +222,6 @@ class FromTransparencyGroupWriter: public DocumentContextExtenderAdapter {
         }
 };
 
-EStatusCode RadialGradientShadingPatternWritingTask::WriteAlphaShadingPatternObject(ObjectIDType inObjectID, ObjectsContext* inObjectsContext) {
-        EStatusCode status = eSuccess;
-
-        do {
-            inObjectsContext->StartNewIndirectObject(inObjectID);
-            DictionaryContext* patternDict = inObjectsContext->StartDictionary();
-            patternDict->WriteKey("Type");
-            patternDict->WriteNameValue("Pattern");
-            patternDict->WriteKey("PatternType");
-            patternDict->WriteIntegerValue(2);
-            patternDict->WriteKey("Matrix");
-            inObjectsContext->StartArray();
-            inObjectsContext->WriteDouble(matrix.a);
-            inObjectsContext->WriteDouble(matrix.b);
-            inObjectsContext->WriteDouble(matrix.c);
-            inObjectsContext->WriteDouble(matrix.d);
-            inObjectsContext->WriteDouble(matrix.e);
-            inObjectsContext->WriteDouble(matrix.f);
-            inObjectsContext->EndArray(eTokenSeparatorEndLine);
-            patternDict->WriteKey("Shading");
-            DictionaryContext* shadingDict = inObjectsContext->StartDictionary();
-            shadingDict->WriteKey("ShadingType");
-            shadingDict->WriteIntegerValue(3);
-            shadingDict->WriteKey("ColorSpace");
-            shadingDict->WriteNameValue("DeviceRGB");
-            shadingDict->WriteKey("Extend");
-            inObjectsContext->StartArray();
-            inObjectsContext->WriteBoolean(true);
-            inObjectsContext->WriteBoolean(true);
-            inObjectsContext->EndArray(eTokenSeparatorEndLine);
-            shadingDict->WriteKey("Coords");
-            inObjectsContext->StartArray();
-            inObjectsContext->WriteDouble(x0);
-            inObjectsContext->WriteDouble(y0);
-            inObjectsContext->WriteDouble(r0);
-            inObjectsContext->WriteDouble(x1);
-            inObjectsContext->WriteDouble(y1);
-            inObjectsContext->WriteDouble(r1);
-            inObjectsContext->EndArray(eTokenSeparatorEndLine);
-            shadingDict->WriteKey("Function");
-            DictionaryContext* functionDict = inObjectsContext->StartDictionary();
-            functionDict->WriteKey("FunctionType");
-            functionDict->WriteIntegerValue(3);
-            functionDict->WriteKey("Bounds");
-            inObjectsContext->StartArray();
-            // bound contains whats within the edges, so should skip
-            // first and last (which are expected to be 0 and 1)
-            InterpretedGradientStopList::iterator it1 = colorLine.begin();
-            InterpretedGradientStopList::iterator it2 = colorLine.begin();
-            double firstStop = it1->stopOffset;
-            ++it1;
-            ++it2;
-            ++it1;
-            for(; it1 != colorLine.end();++it1,++it2) {
-                inObjectsContext->WriteDouble(it2->stopOffset);
-            }
-            inObjectsContext->EndArray(eTokenSeparatorEndLine);
-            // last stop, which should probably be 1, is saved cause will be used in domains
-            double lastStop = it2->stopOffset;
-            functionDict->WriteKey("Domain");
-            inObjectsContext->StartArray();
-            inObjectsContext->WriteDouble(firstStop);
-            inObjectsContext->WriteDouble(lastStop);
-            inObjectsContext->EndArray(eTokenSeparatorEndLine);
-            functionDict->WriteKey("Encode");
-            inObjectsContext->StartArray();
-            // write encodes for size-1 functions
-            for(int i=0; i<colorLine.size()-1;++i) {
-                inObjectsContext->WriteDouble(firstStop);
-                inObjectsContext->WriteDouble(lastStop);
-            }
-            inObjectsContext->EndArray(eTokenSeparatorEndLine);
-            functionDict->WriteKey("Functions");
-            // draw all stops, each in its own function. note that there should be size-1 functions!
-            inObjectsContext->StartArray();
-            it1 = colorLine.begin();
-            it2 = colorLine.begin();
-            ++it1;
-            for(; it1 != colorLine.end() && eSuccess == status;++it1,++it2) {
-                DictionaryContext* colorStopDict = inObjectsContext->StartDictionary();
-                colorStopDict->WriteKey("FunctionType");
-                colorStopDict->WriteIntegerValue(2);
-                colorStopDict->WriteKey("N");
-                colorStopDict->WriteIntegerValue(1);
-                colorStopDict->WriteKey("Domain");
-                inObjectsContext->StartArray();
-                inObjectsContext->WriteDouble(0);
-                inObjectsContext->WriteDouble(lastStop);
-                inObjectsContext->EndArray(eTokenSeparatorEndLine);
-                colorStopDict->WriteKey("C0");
-                inObjectsContext->StartArray();
-                double startAlphaValue = it2->alpha * it2->color.alpha/255.0;
-                inObjectsContext->WriteDouble(startAlphaValue);
-                inObjectsContext->WriteDouble(startAlphaValue);
-                inObjectsContext->WriteDouble(startAlphaValue);
-                inObjectsContext->EndArray(eTokenSeparatorEndLine);
-                colorStopDict->WriteKey("C1");
-                inObjectsContext->StartArray();
-                double endAlphaValue = it1->alpha * it1->color.alpha/255.0;
-                inObjectsContext->WriteDouble(endAlphaValue);
-                inObjectsContext->WriteDouble(endAlphaValue);
-                inObjectsContext->WriteDouble(endAlphaValue);
-                inObjectsContext->EndArray(eTokenSeparatorEndLine);
-                status = inObjectsContext->EndDictionary(colorStopDict);
-                if(status != eSuccess)
-                    break;
-            } 
-            if(status != eSuccess)
-                break;
-
-            inObjectsContext->EndArray(eTokenSeparatorEndLine);
-            status = inObjectsContext->EndDictionary(functionDict);
-            if(status != eSuccess)
-                break;
-            status = inObjectsContext->EndDictionary(shadingDict);
-            if(status != eSuccess)
-                break;
-            status = inObjectsContext->EndDictionary(patternDict);
-            if(status != eSuccess)
-                break;
-            inObjectsContext->EndIndirectObject();
-        }while(false);
-        return status;    
-}
-
-
 EStatusCode RadialGradientShadingPatternWritingTask::WriteAlphaSoftMaskForm(ObjectIDType inObjectID, 
                                     ObjectsContext* inObjectsContext, 
                                     DocumentContext* inDocumentContext) {
@@ -373,7 +250,28 @@ EStatusCode RadialGradientShadingPatternWritingTask::WriteAlphaSoftMaskForm(Obje
         if(status != eSuccess)
             break;
 
-        status = WriteAlphaShadingPatternObject(alphaShadingPatternObjectId, inObjectsContext);
+        // create "color line" to reuse the shading pattern code for RGB for the softmask
+        InterpretedGradientStopList alphaAsRGBColorLine;
+        InterpretedGradientStopList::const_iterator it = colorLine.begin();
+        for(; it != colorLine.end();++it) {
+            FT_Byte alphaColor = FT_Byte(floor(it->alpha * it->color.alpha));
+            FT_Color color = {
+                alphaColor,
+                alphaColor,
+                alphaColor
+            };
+
+            InterpretedGradientStop stop = {
+                it->stopOffset,
+                1,
+                color  
+            };
+
+            alphaAsRGBColorLine.push_back(stop);
+        }
+
+
+        status = WriteRGBShadingPatternObject(alphaAsRGBColorLine, alphaShadingPatternObjectId, inObjectsContext);
     } while(false);
 
 
@@ -457,7 +355,7 @@ EStatusCode RadialGradientShadingPatternWritingTask::WriteRGBATiledPatternObject
         if(status != eSuccess)
             break;
 
-        status = WriteRGBShadingPatternObject(rgbShadingPatternObjectId, inObjectsContext);
+        status = WriteRGBShadingPatternObject(colorLine, rgbShadingPatternObjectId, inObjectsContext);
     } while(false);
 
 
@@ -482,5 +380,5 @@ EStatusCode RadialGradientShadingPatternWritingTask::Write(
         if(ColorLineHasTransparency())
             return WriteRGBATiledPatternObject(patternObjectId, inObjectsContext, inDocumentContext);
         else
-            return WriteRGBShadingPatternObject(patternObjectId, inObjectsContext);
+            return WriteRGBShadingPatternObject(colorLine, patternObjectId, inObjectsContext);
 }

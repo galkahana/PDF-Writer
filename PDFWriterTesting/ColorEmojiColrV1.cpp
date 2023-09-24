@@ -59,6 +59,7 @@ int ColorEmojiColrV1(int argc, char* argv[])
 
 		cxt->WriteText(75,600,"\xe2\x9a\x93\xe2\x9a\x94\xe2\x98\xba",textOptions);
 		//cxt->WriteText(75,600,"\xe2\x98\xba",textOptions);
+		//cxt->WriteText(75,600,"\xf0\x9f\x98\xa8", textOptions);
 
 		status = pdfWriter.EndPageContentContext(cxt);
 		if(status != eSuccess)

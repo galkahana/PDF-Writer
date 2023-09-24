@@ -61,9 +61,8 @@ class RadialGradientShadingPatternWritingTask: public IObjectEndWritingTask {
         ObjectIDType patternObjectId;
 
         bool ColorLineHasTransparency();
-        PDFHummus::EStatusCode WriteRGBShadingPatternObject(ObjectIDType inObjectID, ObjectsContext* inObjectsContext);
+        PDFHummus::EStatusCode WriteRGBShadingPatternObject(const InterpretedGradientStopList& inColorLine, ObjectIDType inObjectID, ObjectsContext* inObjectsContext);
         PDFHummus::EStatusCode WriteRGBATiledPatternObject(ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
         PDFHummus::EStatusCode WriteAlphaSoftMaskExtGState(ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
         PDFHummus::EStatusCode WriteAlphaSoftMaskForm(ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
-        PDFHummus::EStatusCode WriteAlphaShadingPatternObject(ObjectIDType inObjectID, ObjectsContext* inObjectsContext);        
 };
