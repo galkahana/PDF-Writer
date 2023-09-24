@@ -24,6 +24,7 @@
 #include "AbstractContentContext.h"
 #include "PDFUsedFont.h"
 #include "PDFRectangle.h"
+#include "PDFMatrix.h"
 
 #include FT_COLOR_H
 
@@ -32,6 +33,7 @@
 
 typedef std::list<PDFRectangle> PDFRectangleList;
 typedef std::list<unsigned short> UShortList;
+typedef std::list<PDFMatrix> PDFMatrixList;
 
 class PaintedGlyphsDrawingContext {
 public:
@@ -56,6 +58,8 @@ private:
     // use the stack to track bounds. can be used to apply 
     // extra bounds via clip, or consider matrix transformations
     PDFRectangleList mBoundsStack;
+    // used for tracking graphic state, right now i only need matrix (cause patterns ignore it so have to create)
+    PDFMatrixList mGraphicStateMatrixStack;
     // used for tracking the tree, making sure it doesnt have loops
     UShortList mDrawnGlyphs;
 

@@ -26,6 +26,7 @@
 #include "IObjectEndWritingTask.h"
 #include "ObjectsBasicTypes.h"
 #include "PDFRectangle.h"
+#include "PDFMatrix.h"
 
 
 class RadialGradientShadingPatternWritingTask: public IObjectEndWritingTask {
@@ -39,6 +40,7 @@ class RadialGradientShadingPatternWritingTask: public IObjectEndWritingTask {
             double inR1,
             InterpretedGradientStopList inColorLine,
             PDFRectangle inBounds,
+            PDFMatrix inMatrix,
             ObjectIDType inPatternObjectId
         );
 
@@ -55,6 +57,7 @@ class RadialGradientShadingPatternWritingTask: public IObjectEndWritingTask {
         double r1;
         InterpretedGradientStopList colorLine;
         PDFRectangle bounds;
+        PDFMatrix matrix;
         ObjectIDType patternObjectId;
 
         bool ColorLineHasTransparency();

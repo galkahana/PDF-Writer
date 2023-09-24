@@ -98,6 +98,7 @@ PDFImageXObject.cpp
 PDFIndirectObjectReference.cpp
 PDFInteger.cpp
 PDFLiteralString.cpp
+PDFMatrix.cpp
 PDFModifiedPage.cpp
 PDFName.cpp
 PDFNull.cpp
@@ -293,6 +294,7 @@ PDFImageXObject.h
 PDFIndirectObjectReference.h
 PDFInteger.h
 PDFLiteralString.h
+PDFMatrix.h
 PDFModifiedPage.h
 PDFName.h
 PDFNull.h
@@ -666,6 +668,8 @@ ObjectsContext.h
 ObjectsContextExtenderAdapter.h
 PDFDate.cpp
 PDFDate.h
+PDFMatrix.cpp
+PDFMatrix.h
 PDFRectangle.cpp
 PDFRectangle.h
 PDFStream.cpp

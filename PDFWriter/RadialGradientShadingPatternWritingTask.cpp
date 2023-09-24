@@ -40,6 +40,7 @@ RadialGradientShadingPatternWritingTask::RadialGradientShadingPatternWritingTask
     double inR1,
     InterpretedGradientStopList inColorLine,
     PDFRectangle inBounds,
+    PDFMatrix inMatrix,
     ObjectIDType inPatternObjectId
 ) {
    x0 = inX0;
@@ -50,6 +51,7 @@ RadialGradientShadingPatternWritingTask::RadialGradientShadingPatternWritingTask
    r1 = inR1;
    colorLine = inColorLine;
    bounds = inBounds;
+   matrix = inMatrix;
    patternObjectId = inPatternObjectId;
 
     // help with edges. if there's no 0...1 pad with repeats of the nearest stop (this probably fits only with pad)   
@@ -79,6 +81,15 @@ EStatusCode RadialGradientShadingPatternWritingTask::WriteRGBShadingPatternObjec
             patternDict->WriteNameValue("Pattern");
             patternDict->WriteKey("PatternType");
             patternDict->WriteIntegerValue(2);
+            patternDict->WriteKey("Matrix");
+            inObjectsContext->StartArray();
+            inObjectsContext->WriteDouble(matrix.a);
+            inObjectsContext->WriteDouble(matrix.b);
+            inObjectsContext->WriteDouble(matrix.c);
+            inObjectsContext->WriteDouble(matrix.d);
+            inObjectsContext->WriteDouble(matrix.e);
+            inObjectsContext->WriteDouble(matrix.f);
+            inObjectsContext->EndArray(eTokenSeparatorEndLine);
             patternDict->WriteKey("Shading");
             DictionaryContext* shadingDict = inObjectsContext->StartDictionary();
             shadingDict->WriteKey("ShadingType");
@@ -218,6 +229,15 @@ EStatusCode RadialGradientShadingPatternWritingTask::WriteAlphaShadingPatternObj
             patternDict->WriteNameValue("Pattern");
             patternDict->WriteKey("PatternType");
             patternDict->WriteIntegerValue(2);
+            patternDict->WriteKey("Matrix");
+            inObjectsContext->StartArray();
+            inObjectsContext->WriteDouble(matrix.a);
+            inObjectsContext->WriteDouble(matrix.b);
+            inObjectsContext->WriteDouble(matrix.c);
+            inObjectsContext->WriteDouble(matrix.d);
+            inObjectsContext->WriteDouble(matrix.e);
+            inObjectsContext->WriteDouble(matrix.f);
+            inObjectsContext->EndArray(eTokenSeparatorEndLine);
             patternDict->WriteKey("Shading");
             DictionaryContext* shadingDict = inObjectsContext->StartDictionary();
             shadingDict->WriteKey("ShadingType");
@@ -331,20 +351,22 @@ EStatusCode RadialGradientShadingPatternWritingTask::WriteAlphaSoftMaskForm(Obje
 
     EStatusCode status = eSuccess;
 
+    PDFRectangle formBounds = matrix.Transform(bounds);
+
     do {
         ObjectIDType alphaShadingPatternObjectId = inObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID(); 
 
         // adding a small extender to allow writing full transparency group data
         FromTransparencyGroupWriter groupWriter;
         inDocumentContext->AddDocumentContextExtender(&groupWriter);
-        PDFFormXObject* form = inDocumentContext->StartFormXObject(bounds,inObjectID,NULL,false);
+        PDFFormXObject* form = inDocumentContext->StartFormXObject(formBounds,inObjectID,NULL,false);
         inDocumentContext->RemoveDocumentContextExtender(&groupWriter);
 
         XObjectContentContext* xobjectContentContext = form->GetContentContext();
 
         xobjectContentContext->cs("Pattern");
         xobjectContentContext->scn(form->GetResourcesDictionary().AddPatternMapping(alphaShadingPatternObjectId));
-        xobjectContentContext->re(bounds.LowerLeftX,bounds.LowerLeftY,bounds.GetWidth(),bounds.GetHeight());
+        xobjectContentContext->re(formBounds.LowerLeftX,formBounds.LowerLeftY,formBounds.GetWidth(),formBounds.GetHeight());
         xobjectContentContext->fStar();
 
         status = inDocumentContext->EndFormXObjectAndRelease(form);
@@ -406,14 +428,16 @@ EStatusCode RadialGradientShadingPatternWritingTask::WriteRGBATiledPatternObject
 
     do {
         ObjectIDType transparencySmaskExtGStateObjectId = inObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
-        ObjectIDType rgbShadingPatternObjectId = inObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID(); 
+        ObjectIDType rgbShadingPatternObjectId = inObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
+
+        PDFRectangle tiledBounds = matrix.Transform(bounds);
 
         PDFTiledPattern* tiledPattern = inDocumentContext->StartTiledPattern(
                                         1,
                                         1,
-                                        bounds,
-                                        bounds.GetWidth(),
-                                        bounds.GetHeight(),
+                                        tiledBounds,
+                                        tiledBounds.GetWidth(),
+                                        tiledBounds.GetHeight(),
                                         inObjectID,
                                         NULL);
 
@@ -422,7 +446,7 @@ EStatusCode RadialGradientShadingPatternWritingTask::WriteRGBATiledPatternObject
         patternContentContext->gs(tiledPattern->GetResourcesDictionary().AddExtGStateMapping(transparencySmaskExtGStateObjectId));
         patternContentContext->cs("Pattern");
         patternContentContext->scn(tiledPattern->GetResourcesDictionary().AddPatternMapping(rgbShadingPatternObjectId));
-        patternContentContext->re(bounds.LowerLeftX,bounds.LowerLeftY,bounds.GetWidth(),bounds.GetHeight());
+        patternContentContext->re(tiledBounds.LowerLeftX,tiledBounds.LowerLeftY,tiledBounds.GetWidth(),tiledBounds.GetHeight());
         patternContentContext->fStar();
 
         status = inDocumentContext->EndTiledPatternAndRelease(tiledPattern);

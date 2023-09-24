@@ -47,6 +47,7 @@ void PaintedGlyphsDrawingContext::SetGlyph(const GlyphUnicodeMapping& inGlyph) {
     mGlyph = inGlyph;
     mBoundsStack.clear();
     mDrawnGlyphs.clear();
+    mGraphicStateMatrixStack.clear();
 
     mCurrentOpaquePaint.p = NULL;
 
@@ -95,8 +96,9 @@ void PaintedGlyphsDrawingContext::Draw(double inX, double inY, bool inComputeAdv
 
     mContentContext->q();
     // initialize a graphic context with x,y so we dont have to deal with them later
-    if(inX != 0 || inY != 0)
-        mContentContext->cm(1,0,0,1,inX,inY);
+    mContentContext->cm(1,0,0,1,inX,inY);
+    // till i make glyphs forms, this is required to correctly setup patterns. otherwise start with unit matrix
+    mGraphicStateMatrixStack.push_back(PDFMatrix(1,0,0,1,inX,inY)); 
 
     // now draw the graph per it's root
     ExecuteOpaquePaint(mCurrentOpaquePaint);
@@ -188,6 +190,7 @@ bool PaintedGlyphsDrawingContext::ExecutePaintColrLayers(FT_PaintColrLayers inCo
 bool PaintedGlyphsDrawingContext::ExecutePaintGlyph(FT_PaintGlyph inGlyph) {
     // now lets save this state so we can clip without later artifacts
     mContentContext->q();
+    mGraphicStateMatrixStack.push_back(mGraphicStateMatrixStack.back()); 
 
     // clip per a regular glyph
     mContentContext->BT();
@@ -217,6 +220,7 @@ bool PaintedGlyphsDrawingContext::ExecutePaintGlyph(FT_PaintGlyph inGlyph) {
     mBoundsStack.pop_back();
 
     // restore graphic stay, cleanup.
+    mGraphicStateMatrixStack.pop_back(); 
     mContentContext->Q();
 
     return result;
@@ -277,10 +281,13 @@ bool PaintedGlyphsDrawingContext::ApplyTransformToPaint(
     FT_OpaquePaint inOpaquePaint) {
 
     mContentContext->q();
+    mGraphicStateMatrixStack.push_back(PDFMatrix(inA,inB,inC,inD,inE,inF).Multiply(mGraphicStateMatrixStack.back())); 
+
     mContentContext->cm(inA,inB,inC,inD,inE,inF);
 
     bool result = ExecuteOpaquePaint(inOpaquePaint);
 
+    mGraphicStateMatrixStack.pop_back();
     mContentContext->Q();
 
     return result;
@@ -393,8 +400,10 @@ bool PaintedGlyphsDrawingContext::ExecutePaintColrGlyph(FT_PaintColrGlyph inColr
     // ok let's do this
     mDrawnGlyphs.push_back(glyphID);
     mContentContext->q();
+    mGraphicStateMatrixStack.push_back(mGraphicStateMatrixStack.back());
     // now draw the graph per it's root
     bool result = ExecuteOpaquePaint(rootPaint);
+    mGraphicStateMatrixStack.pop_back();
     mContentContext->Q(); 
     mDrawnGlyphs.pop_back();
     return result;   
@@ -448,6 +457,7 @@ bool PaintedGlyphsDrawingContext::ExecutePaintRadialGradient(FT_PaintRadialGradi
         r1,
         colorLine,
         mBoundsStack.back(),
+        mGraphicStateMatrixStack.back(),
         patternObjectId
     ));
 
