@@ -1,5 +1,5 @@
 /*
-   Source File : PaintedGlyphsDrawingContext.h
+   Source File : LinearGradientShadingPatternWritingTask.h
 
 
    Copyright 2011 Gal Kahana PDFWriter
@@ -29,32 +29,27 @@
 #include "PDFMatrix.h"
 #include "AbstractGradientShadingPatternWritingTask.h"
 
-class RadialGradientShadingPatternWritingTask: public AbstractGradientShadingPatternWritingTask {
+
+class LinearGradientShadingPatternWritingTask: public AbstractGradientShadingPatternWritingTask {
     public:
-        RadialGradientShadingPatternWritingTask(
+        LinearGradientShadingPatternWritingTask(
             double inX0,
             double inY0,
-            double inR0,
             double inX1,
             double inY1,
-            double inR1,
             InterpretedGradientStopList inColorLine,
             PDFRectangle inBounds,
             PDFMatrix inMatrix,
             ObjectIDType inPatternObjectId
         );
 
-        virtual ~RadialGradientShadingPatternWritingTask();
+        virtual ~LinearGradientShadingPatternWritingTask();
 
     private:
         virtual void WriteShadingSpecifics(DictionaryContext* inShadingDict, ObjectsContext* inObjectsContext);
 
         double x0;
         double y0;
-        double r0;
         double x1;
         double y1;
-        double r1;
-
-
 };

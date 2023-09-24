@@ -28,8 +28,8 @@
 #include "ResourcesDictionary.h"
 #include "IObjectEndWritingTask.h"
 #include "DictionaryContext.h"
-#include "InterpretedGradientStop.h"
 #include "RadialGradientShadingPatternWritingTask.h"
+#include "LinearGradientShadingPatternWritingTask.h"
 #include <math.h>
 
 #include FT_COLOR_H
@@ -158,6 +158,9 @@ bool PaintedGlyphsDrawingContext::ExecuteColrPaint(FT_COLR_Paint inColrPaint) {
             break;
         case FT_COLR_PAINTFORMAT_RADIAL_GRADIENT:
             result = ExecutePaintRadialGradient(inColrPaint.u.radial_gradient);
+            break;
+        case FT_COLR_PAINTFORMAT_LINEAR_GRADIENT:
+            result = ExceutePaintLinearGradient(inColrPaint.u.linear_gradient);
             break;
         default:
             TRACE_LOG1(
@@ -409,27 +412,15 @@ bool PaintedGlyphsDrawingContext::ExecutePaintColrGlyph(FT_PaintColrGlyph inColr
     return result;   
 }
 
-
-bool PaintedGlyphsDrawingContext::ExecutePaintRadialGradient(FT_PaintRadialGradient inColrRadialGradient)
-{
+InterpretedGradientStopList PaintedGlyphsDrawingContext::ReadColorStops(FT_ColorStopIterator inColorStopIterator) {
     FreeTypeFaceWrapper* freeTypeFace = mContentContext->GetCurrentFont()->GetFreeTypeFont();
-
-    double x0 = GetFontUnitMeasurementInPDF(inColrRadialGradient.c0.x);
-    double y0 = GetFontUnitMeasurementInPDF(inColrRadialGradient.c0.y);
-    double r0 = GetFontUnitMeasurementInPDF(inColrRadialGradient.r0);
-    double x1 = GetFontUnitMeasurementInPDF(inColrRadialGradient.c1.x);
-    double y1 = GetFontUnitMeasurementInPDF(inColrRadialGradient.c1.y);
-    double r1 = GetFontUnitMeasurementInPDF(inColrRadialGradient.r1);
-
-    FT_PaintExtend gradientExtend = inColrRadialGradient.colorline.extend;
-    FT_ColorStopIterator colorStopIterator = inColrRadialGradient.colorline.color_stop_iterator;
     FT_ColorStop colorStop;
     InterpretedGradientStopList colorLine;
 
     while(FT_Get_Colorline_Stops(
         *freeTypeFace,
         &colorStop,
-        &colorStopIterator)) {
+        &inColorStopIterator)) {
             InterpretedGradientStop gradientStop = {
                 colorStop.stop_offset/scFix16Dot16Scale,
                 double(colorStop.color.alpha) / double(1<<14),
@@ -440,6 +431,23 @@ bool PaintedGlyphsDrawingContext::ExecutePaintRadialGradient(FT_PaintRadialGradi
                 gradientStop
             );
     };
+
+    return colorLine;
+}
+
+
+bool PaintedGlyphsDrawingContext::ExecutePaintRadialGradient(FT_PaintRadialGradient inColrRadialGradient)
+{
+
+    double x0 = GetFontUnitMeasurementInPDF(inColrRadialGradient.c0.x);
+    double y0 = GetFontUnitMeasurementInPDF(inColrRadialGradient.c0.y);
+    double r0 = GetFontUnitMeasurementInPDF(inColrRadialGradient.r0);
+    double x1 = GetFontUnitMeasurementInPDF(inColrRadialGradient.c1.x);
+    double y1 = GetFontUnitMeasurementInPDF(inColrRadialGradient.c1.y);
+    double r1 = GetFontUnitMeasurementInPDF(inColrRadialGradient.r1);
+
+    FT_PaintExtend gradientExtend = inColrRadialGradient.colorline.extend;
+    InterpretedGradientStopList colorLine = ReadColorStops(inColrRadialGradient.colorline.color_stop_iterator);
 
     // apply shading pattern
     ObjectIDType patternObjectId = mContentContext->GetDocumentContext()->GetObjectsContext()->GetInDirectObjectsRegistry().AllocateNewObjectID();
@@ -464,4 +472,74 @@ bool PaintedGlyphsDrawingContext::ExecutePaintRadialGradient(FT_PaintRadialGradi
     // now fill a path. use current bounds
     FillCurrentBounds();
     return true;
+}
+
+
+bool PaintedGlyphsDrawingContext::ExceutePaintLinearGradient(FT_PaintLinearGradient inColrLinearGradient) {
+    
+    double x0 = GetFontUnitMeasurementInPDF(inColrLinearGradient.p0.x);
+    double y0 = GetFontUnitMeasurementInPDF(inColrLinearGradient.p0.y);
+    double x1 = GetFontUnitMeasurementInPDF(inColrLinearGradient.p1.x);
+    double y1 = GetFontUnitMeasurementInPDF(inColrLinearGradient.p1.y);
+    double x2 = GetFontUnitMeasurementInPDF(inColrLinearGradient.p2.x);
+    double y2 = GetFontUnitMeasurementInPDF(inColrLinearGradient.p2.y);
+
+    // computing the projection of p0p1 on perpendicular to p0p2 to come up with 
+    // p3, such that p0 and p3 are sufficient to decribe a linear gradient cause
+    // the color is perpendicular to the line, as PDF likes it.
+    double x3,y3;
+
+    double dotProdP0P1Op0OnPerpc = (y2-y0)*(x1-x0) + (x0-x2)*(y1-y0);
+    double lengthPerpcPow2 = (y2-y0)*(y2-y0) + (x0-x2)*(x0-x2);
+    if(lengthPerpcPow2 == 0) {
+        // hmm. somethings fishy. ignore, and use x1,y1 as x3,y3
+        x3 = x1;
+        y3 = y1;
+    }
+    else {
+        double projPerpcOp0[2] = {(dotProdP0P1Op0OnPerpc/lengthPerpcPow2)*(y2-y0),
+                                    (dotProdP0P1Op0OnPerpc/lengthPerpcPow2)*(x0-x2)};
+        // now this p3 is such that it can be used instead of p1, without requiring the extra info
+        // of p2. golly
+        x3 = projPerpcOp0[0] + x0;
+        y3 = projPerpcOp0[1] + y0;
+
+    }
+
+
+    FT_PaintExtend gradientExtend = inColrLinearGradient.colorline.extend;
+    InterpretedGradientStopList colorLine = ReadColorStops(inColrLinearGradient.colorline.color_stop_iterator);
+
+    // apply shading pattern
+    ObjectIDType patternObjectId = mContentContext->GetDocumentContext()->GetObjectsContext()->GetInDirectObjectsRegistry().AllocateNewObjectID();
+    mContentContext->cs("Pattern");
+    std::string ptName = mContentContext->GetResourcesDictionary()->AddPatternMapping(patternObjectId);
+    mContentContext->scn(ptName);
+
+    // schedule task to create object for this shading pattern
+    mContentContext->ScheduleObjectEndWriteTask(new LinearGradientShadingPatternWritingTask(
+        x0,
+        y0,
+        x3,
+        y3,
+        colorLine,
+        mBoundsStack.back(),
+        mGraphicStateMatrixStack.back(),
+        patternObjectId
+    ));
+
+    /* TODO: support non perpendicular        x2,y2, via:
+    Note: An implementation can derive a single vector, from p₀ to a point p₃, by computing the orthogonal projection of the vector from p₀ to p₁ 
+    onto a line perpendicular to line p₀p₂ and passing through p₀ to obtain point p₃. The linear gradient defined using p₀, p₁ and p₂ as 
+    described above is functionally equivalent to a linear gradient defined by aligning stop offset 0 to p₀ and aligning stop offset 1.0 to p₃, 
+    with each color projecting on either side of that line in a perpendicular direction. This specification uses three points, p₀, p₁ and p₂, 
+    as that provides greater flexibility in controlling the placement and rotation of the gradient, as well as variations thereof.
+
+    */
+
+
+    // now fill a path. use current bounds
+    FillCurrentBounds();
+    return true;
+
 }

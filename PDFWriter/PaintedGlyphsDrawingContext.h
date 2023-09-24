@@ -25,6 +25,7 @@
 #include "PDFUsedFont.h"
 #include "PDFRectangle.h"
 #include "PDFMatrix.h"
+#include "InterpretedGradientStop.h"
 
 #include FT_COLOR_H
 
@@ -67,6 +68,7 @@ private:
 
     double GetFontUnitMeasurementInPDF(FT_Fixed inFixedPos);
     void FillCurrentBounds(); 
+    InterpretedGradientStopList ReadColorStops(FT_ColorStopIterator inColorStopIterator);
 
     bool ExecuteOpaquePaint(FT_OpaquePaint inOpaquePaint);
     bool ExecuteColrPaint(FT_COLR_Paint inColrPaint);
@@ -88,5 +90,5 @@ private:
     bool ExecutePaintSkew(FT_PaintSkew inSkew);
     bool ExecutePaintColrGlyph(FT_PaintColrGlyph inColrGlyph);
     bool ExecutePaintRadialGradient(FT_PaintRadialGradient inColrRadialGradient);
-    
+    bool ExceutePaintLinearGradient(FT_PaintLinearGradient inColrLinearGradient);
 };

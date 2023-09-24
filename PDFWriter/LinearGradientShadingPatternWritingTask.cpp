@@ -1,5 +1,5 @@
 /*
-   Source File : PaintedGlyphsDrawingContext.cpp
+   Source File : LinearGradientShadingPatternWritingTask.cpp
 
 
    Copyright 2011 Gal Kahana PDFWriter
@@ -20,7 +20,7 @@
 */
 
 
-#include "RadialGradientShadingPatternWritingTask.h"
+#include "LinearGradientShadingPatternWritingTask.h"
 #include "DocumentContext.h"
 #include "ObjectsContext.h"
 #include "DictionaryContext.h"
@@ -31,13 +31,11 @@
 
 using namespace PDFHummus;
 
-RadialGradientShadingPatternWritingTask::RadialGradientShadingPatternWritingTask(
+LinearGradientShadingPatternWritingTask::LinearGradientShadingPatternWritingTask(
     double inX0,
     double inY0,
-    double inR0,
     double inX1,
     double inY1,
-    double inR1,
     InterpretedGradientStopList inColorLine,
     PDFRectangle inBounds,
     PDFMatrix inMatrix,
@@ -45,25 +43,22 @@ RadialGradientShadingPatternWritingTask::RadialGradientShadingPatternWritingTask
 ):AbstractGradientShadingPatternWritingTask(inColorLine, inBounds, inMatrix, inPatternObjectId) {
    x0 = inX0;
    y0 = inY0;
-   r0 = inR0;
    x1 = inX1;
    y1 = inY1;
-   r1 = inR1;
 }
 
-RadialGradientShadingPatternWritingTask::~RadialGradientShadingPatternWritingTask(){
+LinearGradientShadingPatternWritingTask::~LinearGradientShadingPatternWritingTask(){
 }
 
-void RadialGradientShadingPatternWritingTask::WriteShadingSpecifics(DictionaryContext* inShadingDict, ObjectsContext* inObjectsContext) {
+void LinearGradientShadingPatternWritingTask::WriteShadingSpecifics(DictionaryContext* inShadingDict, ObjectsContext* inObjectsContext) {
     inShadingDict->WriteKey("ShadingType");
-    inShadingDict->WriteIntegerValue(3);
+    inShadingDict->WriteIntegerValue(2);
     inShadingDict->WriteKey("Coords");
     inObjectsContext->StartArray();
     inObjectsContext->WriteDouble(x0);
     inObjectsContext->WriteDouble(y0);
-    inObjectsContext->WriteDouble(r0);
     inObjectsContext->WriteDouble(x1);
     inObjectsContext->WriteDouble(y1);
-    inObjectsContext->WriteDouble(r1);
-    inObjectsContext->EndArray(eTokenSeparatorEndLine);    
+    inObjectsContext->EndArray(eTokenSeparatorEndLine);
 }
+
