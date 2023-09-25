@@ -119,13 +119,12 @@ EStatusCode SweepGradientShadingPatternWritingTask::WriteRGBShadingPatternObject
         inObjectsContext->EndArray(eTokenSeparatorEndLine);    
         functionDict->WriteKey("Range");
         inObjectsContext->StartArray();
-        double firstStop = inRGBColorLine.front().stopOffset;
-        double lastStop = inRGBColorLine.back().stopOffset;
-        // write encodes for size-1 functions
-        for(int i=0; i<inRGBColorLine.size()-1;++i) {
-            inObjectsContext->WriteDouble(firstStop);
-            inObjectsContext->WriteDouble(lastStop);
-        }
+        inObjectsContext->WriteInteger(0);
+        inObjectsContext->WriteInteger(1);
+        inObjectsContext->WriteInteger(0);
+        inObjectsContext->WriteInteger(1);
+        inObjectsContext->WriteInteger(0);
+        inObjectsContext->WriteInteger(1);
         inObjectsContext->EndArray(eTokenSeparatorEndLine);            
         
         // now lets make this a stream so we can wrie the Postscript code
