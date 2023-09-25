@@ -61,8 +61,10 @@ EStatusCode SweepGradientShadingPatternWritingTask::WriteRGBShadingPatternObject
 
     ObjectIDType functionObjectId = inObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID(); 
 
-    PDFMatrix patternMatrix = PDFMatrix(1,0,0,1,cX,cY).Multiply(matrix);
-    PDFRectangle domainBounds = PDFMatrix(1,0,0,1,-cX,-cY).Transform(bounds); // haha there's a simply way here
+    PDFMatrix patternProgramMatrix = PDFMatrix(1,0,0,1,cX,cY);
+
+    PDFMatrix patternMatrix = patternProgramMatrix.Multiply(matrix);
+    PDFRectangle domainBounds = patternProgramMatrix.Inverse().Transform(bounds);
 
     do {
         // shading object
@@ -145,106 +147,11 @@ EStatusCode SweepGradientShadingPatternWritingTask::WriteRGBShadingPatternObject
 }
 
 void SweepGradientShadingPatternWritingTask::WriteGradientProgram(const InterpretedGradientStopList& inRGBColorLine) {
-    double firstStop = inRGBColorLine.front().stopOffset;
-    double lastStop = inRGBColorLine.back().stopOffset;
-
     // write postscript code to define the function. thank you Skia :)
 
-    // function start
+    // function start, translate t to step per sweep function
     WriteStreamText("{exch atan 360 div\n");
     
-    // padding unto first stop
-    WriteStreamText("dup ");
-    mPrimitiveWriter.WriteDouble(firstStop);
-    WriteStreamText("le {pop ");
-    mPrimitiveWriter.WriteDouble(inRGBColorLine.front().color.red / 255.0);
-    mPrimitiveWriter.WriteDouble(inRGBColorLine.front().color.green / 255.0);
-    mPrimitiveWriter.WriteDouble(inRGBColorLine.front().color.blue / 255.0);
-    WriteStreamText("0} if\n");        
-
-    // wrapper for in between stops code
-    WriteStreamText("dup dup ");
-    mPrimitiveWriter.WriteDouble(firstStop);
-    WriteStreamText("gt exch ");
-    mPrimitiveWriter.WriteDouble(lastStop);
-    WriteStreamText("le and ");
-
-    // k. interim stops, lets prep those cursers
-    InterpretedGradientStopList::const_iterator itStartRange = inRGBColorLine.begin();
-    InterpretedGradientStopList::const_iterator itEndRange = inRGBColorLine.begin();
-    ++itEndRange;
-
-    // k. write stops, and interpolate.
-    for(; itEndRange != inRGBColorLine.end(); ++itStartRange,++itEndRange) {
-        if(itStartRange->stopOffset > firstStop) {
-            // all but first, close previous if of ifelse statement
-            WriteStreamText("}");
-        }
-        WriteStreamText("{\n");
-        if(itEndRange->stopOffset < lastStop) {
-            // all but last check value (last will enjoy the last else of ifelse)
-            WriteStreamText("dup ");
-            mPrimitiveWriter.WriteDouble(itEndRange->stopOffset);
-            WriteStreamText("le ");
-            WriteStreamText("{\n");
-        }
-        mPrimitiveWriter.WriteDouble(itStartRange->stopOffset);
-        WriteStreamText("sub ");
-
-        // if all colors are the same, just write as is
-
-        // otherwise, interpolate
-        if(itStartRange->color.red == itEndRange->color.red &&
-            itStartRange->color.green == itEndRange->color.green &&
-            itStartRange->color.blue == itEndRange->color.blue) {
-
-            WriteStreamText("pop ");
-            mPrimitiveWriter.WriteDouble(itEndRange->color.red / 255.0);
-            mPrimitiveWriter.WriteDouble(itEndRange->color.green / 255.0);
-            mPrimitiveWriter.WriteDouble(itEndRange->color.blue / 255.0);
-        } else {
-            double rangeDiff = itEndRange->stopOffset - itStartRange->stopOffset;
-            WriteColorInterpolation(itStartRange->color.red, itEndRange->color.red, rangeDiff);
-            WriteColorInterpolation(itStartRange->color.green, itEndRange->color.green, rangeDiff);
-            WriteColorInterpolation(itStartRange->color.blue, itEndRange->color.blue, rangeDiff);
-            WriteStreamText("pop ");
-        }
-    }
-
-    // "ifselse" (basically size -2, cause only all but first, and then always dual)
-    for(int i=0;i<inRGBColorLine.size()-2;++i) {
-        WriteStreamText("} ifelse\n");
-    }
-
-    WriteStreamText("0} if\n");
-
-    // padding after last stop
-    WriteStreamText("0 gt {");
-    mPrimitiveWriter.WriteDouble(inRGBColorLine.back().color.red / 255.0);
-    mPrimitiveWriter.WriteDouble(inRGBColorLine.back().color.green / 255.0);
-    mPrimitiveWriter.WriteDouble(inRGBColorLine.back().color.blue / 255.0);
-    WriteStreamText("} if\n");
-
-
-    // function end
-    WriteStreamText("}");    
-}
-
-void SweepGradientShadingPatternWritingTask::WriteColorInterpolation(FT_Byte inColorStart, FT_Byte inColorEnd, double inStopDiff) {
-    if(inColorEnd == inColorStart) {
-        // same color...so just put it there
-        mPrimitiveWriter.WriteDouble(inColorEnd/255.0);
-    } else {
-        // interpolate
-        WriteStreamText("dup ");
-        mPrimitiveWriter.WriteDouble((inColorEnd - inColorStart)/(inStopDiff*255.0));
-        WriteStreamText("mul ");
-        mPrimitiveWriter.WriteDouble(inColorStart/255.0);
-        WriteStreamText("add ");
-    }
-    WriteStreamText("exch ");
-}
-
-void SweepGradientShadingPatternWritingTask::WriteStreamText(std::string inString) {
-    mWriteStream->Write((const Byte*)(inString.c_str()),inString.size());
+    // write the rest of the steps using shared code
+    WriteColorLineStepsProgram(inRGBColorLine);
 }

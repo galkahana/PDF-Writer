@@ -40,6 +40,8 @@ public:
 
     PDFMatrix Multiply(const PDFMatrix& inRight);
     PDFRectangle Transform(const PDFRectangle& inRect);
+    PDFMatrix Inverse();
+    double Determinante();
 
 
 	double a;

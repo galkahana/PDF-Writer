@@ -120,3 +120,20 @@ PDFRectangle PDFMatrix::Transform(const PDFRectangle& inRect) {
     return PDFRectangle(minX,minY,maxX,maxY);
 
 }
+
+PDFMatrix PDFMatrix::Inverse() {
+    double det = Determinante();
+    
+    return PDFMatrix(
+        d/det,
+        -b/det,
+        -c/det,
+        a/det,
+        (c*f-d*e)/det,
+        (b*e-a*f)/det        
+    );
+}
+
+double PDFMatrix::Determinante()  {
+    return a*d-b*c;
+}

@@ -28,9 +28,12 @@
 #include "ObjectsBasicTypes.h"
 #include "PDFRectangle.h"
 #include "PDFMatrix.h"
+#include "PrimitiveObjectsWriter.h"
+
+#include <string>
 
 class DictionaryContext;
-
+class IByteWriter;
 class AbstractGradientShadingPatternWritingTask: public IObjectEndWritingTask {
     public:
         AbstractGradientShadingPatternWritingTask(
@@ -48,6 +51,15 @@ class AbstractGradientShadingPatternWritingTask: public IObjectEndWritingTask {
         PDFRectangle bounds;
         PDFMatrix matrix;
 
+        // reusable members+functions for writing shared code of gradient postscript function
+
+        // make sure to setup those in your WriteRGBShadingPatternObject version for the functions below to work
+        IByteWriter* mWriteStream;
+        PrimitiveObjectsWriter mPrimitiveWriter;
+
+        void WriteColorLineStepsProgram(const InterpretedGradientStopList& inRGBColorLine);
+        void WriteStreamText(const std::string& inString);
+
     private:
         // override to write implementation specific shading pattern details
         virtual PDFHummus::EStatusCode WriteRGBShadingPatternObject(const InterpretedGradientStopList& inColorLine, ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext) = 0;
@@ -59,4 +71,5 @@ class AbstractGradientShadingPatternWritingTask: public IObjectEndWritingTask {
         PDFHummus::EStatusCode WriteRGBATiledPatternObject(ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
         PDFHummus::EStatusCode WriteAlphaSoftMaskExtGState(ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
         PDFHummus::EStatusCode WriteAlphaSoftMaskForm(ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
+        void WriteColorInterpolation(FT_Byte inColorStart, FT_Byte inColorEnd, double inStopDiff);
 };

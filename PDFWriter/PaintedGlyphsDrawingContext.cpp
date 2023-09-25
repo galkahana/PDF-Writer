@@ -531,6 +531,7 @@ bool PaintedGlyphsDrawingContext::ExceutePaintLinearGradient(FT_PaintLinearGradi
         x3,
         y3,
         colorLine,
+        gradientExtend,
         mBoundsStack.back(),
         mGraphicStateMatrixStack.back(),
         patternObjectId

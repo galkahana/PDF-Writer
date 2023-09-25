@@ -57,10 +57,6 @@ class SweepGradientShadingPatternWritingTask: public AbstractGradientShadingPatt
         double startAngleRad;
         double endAngleRad;
 
-        IByteWriter* mWriteStream;
-        PrimitiveObjectsWriter mPrimitiveWriter;
 
         void WriteGradientProgram(const InterpretedGradientStopList& inColorLine);
-        void WriteColorInterpolation(FT_Byte inColorStart, FT_Byte inColorEnd, double inStopDiff);
-        void WriteStreamText(std::string inString);
 };
