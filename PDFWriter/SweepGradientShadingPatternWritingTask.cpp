@@ -62,7 +62,7 @@ EStatusCode SweepGradientShadingPatternWritingTask::WriteRGBShadingPatternObject
     ObjectIDType functionObjectId = inObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID(); 
 
     PDFMatrix patternMatrix = PDFMatrix(1,0,0,1,cX,cY).Multiply(matrix);
-    PDFRectangle domainBounds = PDFMatrix(1,0,0,1,-cX,-cY).Multiply(matrix).Transform(bounds);
+    PDFRectangle domainBounds = PDFMatrix(1,0,0,1,-cX,-cY).Transform(bounds); // haha there's a simply way here
 
     do {
         // shading object
@@ -110,7 +110,7 @@ EStatusCode SweepGradientShadingPatternWritingTask::WriteRGBShadingPatternObject
         DictionaryContext* functionDict = inObjectsContext->StartDictionary();
         functionDict->WriteKey("FunctionType");
         functionDict->WriteIntegerValue(4);
-        shadingDict->WriteKey("Domain");
+        functionDict->WriteKey("Domain");
         inObjectsContext->StartArray();
         inObjectsContext->WriteDouble(domainBounds.LowerLeftX);
         inObjectsContext->WriteDouble(domainBounds.UpperRightX);
@@ -176,7 +176,7 @@ void SweepGradientShadingPatternWritingTask::WriteGradientProgram(const Interpre
     ++itEndRange;
 
     // k. write stops, and interpolate.
-    for(; itEndRange != inRGBColorLine.end(); ++itEndRange) {
+    for(; itEndRange != inRGBColorLine.end(); ++itStartRange,++itEndRange) {
         if(itStartRange->stopOffset > firstStop) {
             // all but first, close previous if of ifelse statement
             WriteStreamText("}");
@@ -187,8 +187,8 @@ void SweepGradientShadingPatternWritingTask::WriteGradientProgram(const Interpre
             WriteStreamText("dup ");
             mPrimitiveWriter.WriteDouble(itEndRange->stopOffset);
             WriteStreamText("le ");
+            WriteStreamText("{\n");
         }
-        WriteStreamText("{\n");
         mPrimitiveWriter.WriteDouble(itStartRange->stopOffset);
         WriteStreamText("sub ");
 
@@ -206,10 +206,9 @@ void SweepGradientShadingPatternWritingTask::WriteGradientProgram(const Interpre
         } else {
             double rangeDiff = itEndRange->stopOffset - itStartRange->stopOffset;
             WriteColorInterpolation(itStartRange->color.red, itEndRange->color.red, rangeDiff);
-            WriteStreamText("exch ");
             WriteColorInterpolation(itStartRange->color.green, itEndRange->color.green, rangeDiff);
-            WriteStreamText("exch ");
             WriteColorInterpolation(itStartRange->color.blue, itEndRange->color.blue, rangeDiff);
+            WriteStreamText("pop ");
         }
     }
 
@@ -244,6 +243,7 @@ void SweepGradientShadingPatternWritingTask::WriteColorInterpolation(FT_Byte inC
         mPrimitiveWriter.WriteDouble(inColorStart/255.0);
         WriteStreamText("add ");
     }
+    WriteStreamText("exch ");
 }
 
 void SweepGradientShadingPatternWritingTask::WriteStreamText(std::string inString) {
