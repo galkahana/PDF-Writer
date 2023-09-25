@@ -46,7 +46,7 @@ class LinearGradientShadingPatternWritingTask: public AbstractGradientShadingPat
         virtual ~LinearGradientShadingPatternWritingTask();
 
     private:
-        virtual void WriteShadingSpecifics(DictionaryContext* inShadingDict, ObjectsContext* inObjectsContext);
+        virtual PDFHummus::EStatusCode WriteRGBShadingPatternObject(const InterpretedGradientStopList& inColorLine, ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
 
         double x0;
         double y0;

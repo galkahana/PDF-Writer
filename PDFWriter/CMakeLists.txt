@@ -134,6 +134,7 @@ SimpleStringTokenizer.cpp
 StandardEncoding.cpp
 StateReader.cpp
 StateWriter.cpp
+SweepGradientShadingPatternWritingTask.cpp
 TIFFImageHandler.cpp
 TiffUsageParameters.cpp
 Timer.cpp
@@ -338,6 +339,7 @@ SingleValueContainerIterator.h
 StandardEncoding.h
 StateReader.h
 StateWriter.h
+SweepGradientShadingPatternWritingTask.h
 TIFFImageHandler.h
 TiffUsageParameters.h
 Timer.h
@@ -500,6 +502,8 @@ ResourcesDictionary.cpp
 ResourcesDictionary.h
 SimpleGlyphsDrawingContext.cpp
 SimpleGlyphsDrawingContext.h
+LinearGradientShadingPatternWritingTask.cpp
+LinearGradientShadingPatternWritingTask.h
 TrailerInformation.cpp
 TrailerInformation.h
 XObjectContentContext.cpp

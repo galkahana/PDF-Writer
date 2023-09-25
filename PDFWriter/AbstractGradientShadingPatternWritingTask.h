@@ -44,18 +44,19 @@ class AbstractGradientShadingPatternWritingTask: public IObjectEndWritingTask {
 
         virtual PDFHummus::EStatusCode Write(ObjectsContext* inObjectsContext,
                                             PDFHummus::DocumentContext* inDocumentContext);
+    protected:
+        PDFRectangle bounds;
+        PDFMatrix matrix;
+
     private:
         // override to write implementation specific shading pattern details
-        virtual void WriteShadingSpecifics(DictionaryContext* inShadingDict, ObjectsContext* inObjectsContext) = 0;
+        virtual PDFHummus::EStatusCode WriteRGBShadingPatternObject(const InterpretedGradientStopList& inColorLine, ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext) = 0;
 
         InterpretedGradientStopList colorLine;
         ObjectIDType patternObjectId;
-        PDFRectangle bounds;
-        PDFMatrix matrix;
 
         bool ColorLineHasTransparency();
         PDFHummus::EStatusCode WriteRGBATiledPatternObject(ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
         PDFHummus::EStatusCode WriteAlphaSoftMaskExtGState(ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
         PDFHummus::EStatusCode WriteAlphaSoftMaskForm(ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
-        PDFHummus::EStatusCode WriteRGBShadingPatternObject(const InterpretedGradientStopList& inColorLine, ObjectIDType inObjectID, ObjectsContext* inObjectsContext);
 };

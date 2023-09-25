@@ -30,6 +30,7 @@
 #include "DictionaryContext.h"
 #include "RadialGradientShadingPatternWritingTask.h"
 #include "LinearGradientShadingPatternWritingTask.h"
+#include "SweepGradientShadingPatternWritingTask.h"
 #include <math.h>
 
 #include FT_COLOR_H
@@ -156,11 +157,19 @@ bool PaintedGlyphsDrawingContext::ExecuteColrPaint(FT_COLR_Paint inColrPaint) {
         case FT_COLR_PAINTFORMAT_COLR_GLYPH:
             result = ExecutePaintColrGlyph(inColrPaint.u.colr_glyph);
             break;
+        // Note: all gradients implementations are inspired/rigorously copied from Skia (https://skia.org/) implementation of shades
+        // which largely coincides with how TrueType Colrv1 works, with a really minor
+        // thing left out - sweep gradients are always 0..360 regardless of selected angles. Something
+        // that I did not choose to improve, so it's the same.
+        // Thank you Skia :) 
         case FT_COLR_PAINTFORMAT_RADIAL_GRADIENT:
             result = ExecutePaintRadialGradient(inColrPaint.u.radial_gradient);
             break;
         case FT_COLR_PAINTFORMAT_LINEAR_GRADIENT:
             result = ExceutePaintLinearGradient(inColrPaint.u.linear_gradient);
+            break;
+        case FT_COLR_PAINTFORMAT_SWEEP_GRADIENT:
+            result = ExecutePaintSweepGradient(inColrPaint.u.sweep_gradient);
             break;
         default:
             TRACE_LOG1(
@@ -506,7 +515,6 @@ bool PaintedGlyphsDrawingContext::ExceutePaintLinearGradient(FT_PaintLinearGradi
 
     }
 
-
     FT_PaintExtend gradientExtend = inColrLinearGradient.colorline.extend;
     InterpretedGradientStopList colorLine = ReadColorStops(inColrLinearGradient.colorline.color_stop_iterator);
 
@@ -528,18 +536,41 @@ bool PaintedGlyphsDrawingContext::ExceutePaintLinearGradient(FT_PaintLinearGradi
         patternObjectId
     ));
 
-    /* TODO: support non perpendicular        x2,y2, via:
-    Note: An implementation can derive a single vector, from p₀ to a point p₃, by computing the orthogonal projection of the vector from p₀ to p₁ 
-    onto a line perpendicular to line p₀p₂ and passing through p₀ to obtain point p₃. The linear gradient defined using p₀, p₁ and p₂ as 
-    described above is functionally equivalent to a linear gradient defined by aligning stop offset 0 to p₀ and aligning stop offset 1.0 to p₃, 
-    with each color projecting on either side of that line in a perpendicular direction. This specification uses three points, p₀, p₁ and p₂, 
-    as that provides greater flexibility in controlling the placement and rotation of the gradient, as well as variations thereof.
-
-    */
-
-
     // now fill a path. use current bounds
     FillCurrentBounds();
     return true;
+
+}
+
+bool PaintedGlyphsDrawingContext::ExecutePaintSweepGradient(FT_PaintSweepGradient inColrSweepGradient) {
+    double cx = GetFontUnitMeasurementInPDF(inColrSweepGradient.center.x);
+    double cy = GetFontUnitMeasurementInPDF(inColrSweepGradient.center.y);
+    double radianAngleStart = inColrSweepGradient.start_angle / scFix16Dot16Scale;
+    double radianAngleEnd = inColrSweepGradient.end_angle / scFix16Dot16Scale;
+
+    FT_PaintExtend gradientExtend = inColrSweepGradient.colorline.extend;
+    InterpretedGradientStopList colorLine = ReadColorStops(inColrSweepGradient.colorline.color_stop_iterator);
+
+    // apply shading pattern
+    ObjectIDType patternObjectId = mContentContext->GetDocumentContext()->GetObjectsContext()->GetInDirectObjectsRegistry().AllocateNewObjectID();
+    mContentContext->cs("Pattern");
+    std::string ptName = mContentContext->GetResourcesDictionary()->AddPatternMapping(patternObjectId);
+    mContentContext->scn(ptName);
+
+    // schedule task to create object for this shading pattern
+    mContentContext->ScheduleObjectEndWriteTask(new SweepGradientShadingPatternWritingTask(
+        cx,
+        cy,
+        radianAngleStart,
+        radianAngleEnd,
+        colorLine,
+        mBoundsStack.back(),
+        mGraphicStateMatrixStack.back(),
+        patternObjectId
+    ));
+
+    // now fill a path. use current bounds
+    FillCurrentBounds();
+    return true;    
 
 }

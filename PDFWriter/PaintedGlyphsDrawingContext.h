@@ -91,4 +91,5 @@ private:
     bool ExecutePaintColrGlyph(FT_PaintColrGlyph inColrGlyph);
     bool ExecutePaintRadialGradient(FT_PaintRadialGradient inColrRadialGradient);
     bool ExceutePaintLinearGradient(FT_PaintLinearGradient inColrLinearGradient);
+    bool ExecutePaintSweepGradient(FT_PaintSweepGradient inColrSweepGradient);
 };

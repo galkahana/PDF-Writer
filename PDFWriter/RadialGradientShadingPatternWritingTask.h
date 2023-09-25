@@ -1,5 +1,5 @@
 /*
-   Source File : PaintedGlyphsDrawingContext.h
+   Source File : RadialGradientShadingPatternWritingTask.h
 
 
    Copyright 2011 Gal Kahana PDFWriter
@@ -47,7 +47,7 @@ class RadialGradientShadingPatternWritingTask: public AbstractGradientShadingPat
         virtual ~RadialGradientShadingPatternWritingTask();
 
     private:
-        virtual void WriteShadingSpecifics(DictionaryContext* inShadingDict, ObjectsContext* inObjectsContext);
+        virtual PDFHummus::EStatusCode WriteRGBShadingPatternObject(const InterpretedGradientStopList& inColorLine, ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
 
         double x0;
         double y0;
