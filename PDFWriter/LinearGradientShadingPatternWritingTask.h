@@ -51,7 +51,7 @@ class LinearGradientShadingPatternWritingTask: public AbstractGradientShadingPat
 
         PDFHummus::EStatusCode WriteNativePDFLinearShadingPatternObject(const InterpretedGradientStopList& inColorLine, ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
         PDFHummus::EStatusCode WriteLinearShadingPatternWithFunctionObject(const InterpretedGradientStopList& inColorLine, ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
-        void WriteGradientRepeatProgram(const InterpretedGradientStopList& inRGBColorLine);
+        void WriteGradientFunctionProgram(const InterpretedGradientStopList& inRGBColorLine);
 
         FT_PaintExtend mGradientExtend;
         double x0;

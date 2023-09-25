@@ -295,7 +295,7 @@ EStatusCode LinearGradientShadingPatternWritingTask::WriteLinearShadingPatternWi
 
         mWriteStream = pdfStream->GetWriteStream();
         mPrimitiveWriter.SetStreamForWriting(mWriteStream);
-        WriteGradientRepeatProgram(inRGBColorLine);
+        WriteGradientFunctionProgram(inRGBColorLine);
         inObjectsContext->EndPDFStream(pdfStream);
     }while(false);
     delete pdfStream;
@@ -303,7 +303,7 @@ EStatusCode LinearGradientShadingPatternWritingTask::WriteLinearShadingPatternWi
     return status;
 }
 
-void LinearGradientShadingPatternWritingTask::WriteGradientRepeatProgram(const InterpretedGradientStopList& inRGBColorLine) {
+void LinearGradientShadingPatternWritingTask::WriteGradientFunctionProgram(const InterpretedGradientStopList& inRGBColorLine) {
     // write postscript code to define the function. thank you Skia :)
 
     WriteStreamText("{pop\n");
