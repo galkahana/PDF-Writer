@@ -28,6 +28,7 @@
 #include "PDFFormXObject.h"
 #include "TiledPatternContentContext.h"
 #include "XObjectContentContext.h"
+#include <math.h>
 
 using namespace PDFHummus;
 
