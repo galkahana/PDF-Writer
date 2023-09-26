@@ -29,6 +29,7 @@
 #include "TiledPatternContentContext.h"
 #include "XObjectContentContext.h"
 #include "PDFStream.h"
+#include <math.h>
 
 using namespace PDFHummus;
 
