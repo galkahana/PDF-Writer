@@ -473,6 +473,7 @@ bool PaintedGlyphsDrawingContext::ExecutePaintRadialGradient(FT_PaintRadialGradi
         y1,
         r1,
         colorLine,
+        gradientExtend,
         mBoundsStack.back(),
         mGraphicStateMatrixStack.back(),
         patternObjectId

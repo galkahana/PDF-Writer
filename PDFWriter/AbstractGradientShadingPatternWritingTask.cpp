@@ -324,10 +324,6 @@ void AbstractGradientShadingPatternWritingTask::WriteColorLineStepsProgram(const
     mPrimitiveWriter.WriteDouble(inRGBColorLine.back().color.green / 255.0);
     mPrimitiveWriter.WriteDouble(inRGBColorLine.back().color.blue / 255.0);
     WriteStreamText("} if\n");
-
-
-    // function end
-    WriteStreamText("}");        
 }
 
 void AbstractGradientShadingPatternWritingTask::WriteColorInterpolation(FT_Byte inColorStart, FT_Byte inColorEnd, double inStopDiff) {

@@ -39,6 +39,7 @@ class RadialGradientShadingPatternWritingTask: public AbstractGradientShadingPat
             double inY1,
             double inR1,
             InterpretedGradientStopList inColorLine,
+            FT_PaintExtend inGradientExtend,
             PDFRectangle inBounds,
             PDFMatrix inMatrix,
             ObjectIDType inPatternObjectId
@@ -49,6 +50,11 @@ class RadialGradientShadingPatternWritingTask: public AbstractGradientShadingPat
     private:
         virtual PDFHummus::EStatusCode WriteRGBShadingPatternObject(const InterpretedGradientStopList& inColorLine, ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
 
+        PDFHummus::EStatusCode WriteNativePDFRadialShadingPatternObject(const InterpretedGradientStopList& inColorLine, ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
+        PDFHummus::EStatusCode WriteRadialShadingPatternWithFunctionObject(const InterpretedGradientStopList& inColorLine, ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
+        void WriteGradientFunctionProgram(const InterpretedGradientStopList& inRGBColorLine);
+
+        FT_PaintExtend mGradientExtend;
         double x0;
         double y0;
         double r0;

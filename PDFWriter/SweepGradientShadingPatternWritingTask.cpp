@@ -154,4 +154,7 @@ void SweepGradientShadingPatternWritingTask::WriteGradientProgram(const Interpre
     
     // write the rest of the steps using shared code
     WriteColorLineStepsProgram(inRGBColorLine);
+
+    // function end
+    WriteStreamText("}");    
 }

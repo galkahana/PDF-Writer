@@ -316,4 +316,7 @@ void LinearGradientShadingPatternWritingTask::WriteGradientFunctionProgram(const
     
     // write the rest of the steps using shared code
     WriteColorLineStepsProgram(inRGBColorLine);
+
+    // function end
+    WriteStreamText("}");   
 }
