@@ -125,10 +125,9 @@ EStatusCode LinearGradientShadingPatternWritingTask::WriteNativePDFLinearShading
             functionDict->WriteKey("Bounds");
             inObjectsContext->StartArray();
             // bound contains whats within the edges, so should skip
-            // first and last (which are expected to be 0 and 1)
+            // first and last
             InterpretedGradientStopList::const_iterator it1 = inRGBColorLine.begin();
             InterpretedGradientStopList::const_iterator it2 = inRGBColorLine.begin();
-            double firstStop = it1->stopOffset;
             ++it1;
             ++it2;
             ++it1;
@@ -136,19 +135,17 @@ EStatusCode LinearGradientShadingPatternWritingTask::WriteNativePDFLinearShading
                 inObjectsContext->WriteDouble(it2->stopOffset);
             }
             inObjectsContext->EndArray(eTokenSeparatorEndLine);
-            // last stop, which should probably be 1, is saved cause will be used in domains
-            double lastStop = it2->stopOffset;
             functionDict->WriteKey("Domain");
             inObjectsContext->StartArray();
-            inObjectsContext->WriteDouble(firstStop);
-            inObjectsContext->WriteDouble(lastStop);
+            inObjectsContext->WriteDouble(0);
+            inObjectsContext->WriteDouble(1);
             inObjectsContext->EndArray(eTokenSeparatorEndLine);
             functionDict->WriteKey("Encode");
             inObjectsContext->StartArray();
             // write encodes for size-1 functions
             for(int i=0; i<inRGBColorLine.size()-1;++i) {
-                inObjectsContext->WriteDouble(firstStop);
-                inObjectsContext->WriteDouble(lastStop);
+                inObjectsContext->WriteDouble(0);
+                inObjectsContext->WriteDouble(1);
             }
             inObjectsContext->EndArray(eTokenSeparatorEndLine);
             functionDict->WriteKey("Functions");
@@ -166,7 +163,7 @@ EStatusCode LinearGradientShadingPatternWritingTask::WriteNativePDFLinearShading
                 colorStopDict->WriteKey("Domain");
                 inObjectsContext->StartArray();
                 inObjectsContext->WriteDouble(0);
-                inObjectsContext->WriteDouble(lastStop);
+                inObjectsContext->WriteDouble(1);
                 inObjectsContext->EndArray(eTokenSeparatorEndLine);
                 colorStopDict->WriteKey("C0");
                 inObjectsContext->StartArray();

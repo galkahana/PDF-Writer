@@ -42,19 +42,6 @@ AbstractGradientShadingPatternWritingTask::AbstractGradientShadingPatternWriting
    bounds = inBounds;
    matrix = inMatrix;
    patternObjectId = inPatternObjectId;
-
-    // help with edges. if there's no 0...1 pad with repeats of the nearest stop (this probably fits only with pad)   
-    InterpretedGradientStop aStop = colorLine.front();
-    if(aStop.stopOffset != 0) {
-        aStop.stopOffset = 0;
-        colorLine.push_front(aStop);
-    }
-    // same with 1, if last stop is smaller than 1...complete to 1
-    aStop = colorLine.back();
-    if(aStop.stopOffset < 1) {
-        aStop.stopOffset = 1;
-        colorLine.push_back(aStop);
-    }
 }
 
 AbstractGradientShadingPatternWritingTask::~AbstractGradientShadingPatternWritingTask(){

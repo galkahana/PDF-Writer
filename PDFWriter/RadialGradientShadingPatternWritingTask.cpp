@@ -134,7 +134,6 @@ EStatusCode RadialGradientShadingPatternWritingTask::WriteNativePDFRadialShading
             // first and last (which are expected to be 0 and 1)
             InterpretedGradientStopList::const_iterator it1 = inRGBColorLine.begin();
             InterpretedGradientStopList::const_iterator it2 = inRGBColorLine.begin();
-            double firstStop = it1->stopOffset;
             ++it1;
             ++it2;
             ++it1;
@@ -146,15 +145,15 @@ EStatusCode RadialGradientShadingPatternWritingTask::WriteNativePDFRadialShading
             double lastStop = it2->stopOffset;
             functionDict->WriteKey("Domain");
             inObjectsContext->StartArray();
-            inObjectsContext->WriteDouble(firstStop);
-            inObjectsContext->WriteDouble(lastStop);
+            inObjectsContext->WriteDouble(0);
+            inObjectsContext->WriteDouble(1);
             inObjectsContext->EndArray(eTokenSeparatorEndLine);
             functionDict->WriteKey("Encode");
             inObjectsContext->StartArray();
             // write encodes for size-1 functions
             for(int i=0; i<inRGBColorLine.size()-1;++i) {
-                inObjectsContext->WriteDouble(firstStop);
-                inObjectsContext->WriteDouble(lastStop);
+                inObjectsContext->WriteDouble(0);
+                inObjectsContext->WriteDouble(1);
             }
             inObjectsContext->EndArray(eTokenSeparatorEndLine);
             functionDict->WriteKey("Functions");

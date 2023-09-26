@@ -166,7 +166,7 @@ bool PaintedGlyphsDrawingContext::ExecuteColrPaint(FT_COLR_Paint inColrPaint) {
             result = ExecutePaintRadialGradient(inColrPaint.u.radial_gradient);
             break;
         case FT_COLR_PAINTFORMAT_LINEAR_GRADIENT:
-            result = ExceutePaintLinearGradient(inColrPaint.u.linear_gradient);
+            result = ExecutePaintLinearGradient(inColrPaint.u.linear_gradient);
             break;
         case FT_COLR_PAINTFORMAT_SWEEP_GRADIENT:
             result = ExecutePaintSweepGradient(inColrPaint.u.sweep_gradient);
@@ -485,7 +485,7 @@ bool PaintedGlyphsDrawingContext::ExecutePaintRadialGradient(FT_PaintRadialGradi
 }
 
 
-bool PaintedGlyphsDrawingContext::ExceutePaintLinearGradient(FT_PaintLinearGradient inColrLinearGradient) {
+bool PaintedGlyphsDrawingContext::ExecutePaintLinearGradient(FT_PaintLinearGradient inColrLinearGradient) {
     
     double x0 = GetFontUnitMeasurementInPDF(inColrLinearGradient.p0.x);
     double y0 = GetFontUnitMeasurementInPDF(inColrLinearGradient.p0.y);
