@@ -38,14 +38,23 @@ SweepGradientShadingPatternWritingTask::SweepGradientShadingPatternWritingTask(
     double inStartAngleRad,
     double inEndAngleRad,
     InterpretedGradientStopList inColorLine,
+    FT_PaintExtend inGradientExtend,
     PDFRectangle inBounds,
     PDFMatrix inMatrix,
     ObjectIDType inPatternObjectId
 ):AbstractGradientShadingPatternWritingTask(inColorLine, inBounds, inMatrix, inPatternObjectId) {
     cX = inCX;
     cY = inCY;
+
+    // emitting PDFs from skia fiddle i'm not getting any difference if angles an extand (tile mode)
+    // or non "default", meaning 0-360 and pad. so im keeping them but implementation ignores them.
+    // inspecting the code it does seem like angle is ignored, but there is code for extand.
+    // however, extand without support for non default angles is meaningless for sweep, so there's
+    // probably some code to put it to default.
+    // anyways, keeping to minimum, im going to save those vals, but not using them
     startAngleRad = inStartAngleRad;
     endAngleRad = inEndAngleRad;
+    mGradientExtend = inGradientExtend;
 }
 
 SweepGradientShadingPatternWritingTask::~SweepGradientShadingPatternWritingTask(){

@@ -42,6 +42,7 @@ class SweepGradientShadingPatternWritingTask: public AbstractGradientShadingPatt
             double inStartAngleRad,
             double inEndAngleRad,
             InterpretedGradientStopList inColorLine,
+            FT_PaintExtend inGradientExtend,
             PDFRectangle inBounds,
             PDFMatrix inMatrix,
             ObjectIDType inPatternObjectId
@@ -52,6 +53,7 @@ class SweepGradientShadingPatternWritingTask: public AbstractGradientShadingPatt
     private:
         virtual PDFHummus::EStatusCode WriteRGBShadingPatternObject(const InterpretedGradientStopList& inColorLine, ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
 
+        FT_PaintExtend mGradientExtend;
         double cX;
         double cY;
         double startAngleRad;

@@ -566,6 +566,7 @@ bool PaintedGlyphsDrawingContext::ExecutePaintSweepGradient(FT_PaintSweepGradien
         radianAngleStart,
         radianAngleEnd,
         colorLine,
+        gradientExtend,
         mBoundsStack.back(),
         mGraphicStateMatrixStack.back(),
         patternObjectId
