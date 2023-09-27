@@ -171,6 +171,9 @@ bool PaintedGlyphsDrawingContext::ExecuteColrPaint(FT_COLR_Paint inColrPaint) {
         case FT_COLR_PAINTFORMAT_SWEEP_GRADIENT:
             result = ExecutePaintSweepGradient(inColrPaint.u.sweep_gradient);
             break;
+        case FT_COLR_PAINTFORMAT_COMPOSITE:
+            result = ExecuetePaintComposite(inColrPaint.u.composite);
+            break;
         default:
             TRACE_LOG1(
 				"PaintedGlyphsDrawingContext::ExecuteColrPaint, unsupported Colrv1 paint format %d. skipping.",
@@ -576,4 +579,17 @@ bool PaintedGlyphsDrawingContext::ExecutePaintSweepGradient(FT_PaintSweepGradien
     FillCurrentBounds();
     return true;    
 
+}
+
+bool PaintedGlyphsDrawingContext::ExecuetePaintComposite(FT_PaintComposite inColrComposite) {
+    FT_OpaquePaint  source_paint = inColrComposite.source_paint; // "top"
+    FT_OpaquePaint  backdrop_paint = inColrComposite.backdrop_paint; // "bottom"
+    FT_Composite_Mode  composite_mode = inColrComposite.composite_mode;
+
+    // Yeah well let's maybe leave this for another effort. there's quite a few, and i want to do other things. like, nothing.
+    // do a default srcover and that's it for now
+    bool result1 = ExecuteOpaquePaint(backdrop_paint);
+    bool result2 = ExecuteOpaquePaint(source_paint);
+
+    return result1 && result2;
 }

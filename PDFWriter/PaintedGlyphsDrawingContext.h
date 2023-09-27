@@ -92,4 +92,5 @@ private:
     bool ExecutePaintRadialGradient(FT_PaintRadialGradient inColrRadialGradient);
     bool ExecutePaintLinearGradient(FT_PaintLinearGradient inColrLinearGradient);
     bool ExecutePaintSweepGradient(FT_PaintSweepGradient inColrSweepGradient);
+    bool ExecuetePaintComposite(FT_PaintComposite inColrComposite);
 };
