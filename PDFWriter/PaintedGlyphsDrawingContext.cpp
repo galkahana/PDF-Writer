@@ -591,5 +591,10 @@ bool PaintedGlyphsDrawingContext::ExecuetePaintComposite(FT_PaintComposite inCol
     bool result1 = ExecuteOpaquePaint(backdrop_paint);
     bool result2 = ExecuteOpaquePaint(source_paint);
 
+    if(composite_mode != FT_COLR_COMPOSITE_SRC_OVER) {
+        TRACE_LOG(
+            "PaintedGlyphsDrawingContext::ExecuetePaintComposite, Colrv1 Composite is not supported at this point, will default FT_COLR_COMPOSITE_SRC_OVER.");    
+    }
+
     return result1 && result2;
 }
