@@ -35,6 +35,8 @@
 
 #include FT_COLOR_H
 
+using namespace PDFHummus;
+
 static const double scFix16Dot16Scale = (double(1<<16));
 
 PaintedGlyphsDrawingContext::PaintedGlyphsDrawingContext(AbstractContentContext* inContentContext, const AbstractContentContext::TextOptions& inOptions):mOptions(inOptions) {
@@ -65,7 +67,7 @@ void PaintedGlyphsDrawingContext::SetGlyph(const GlyphUnicodeMapping& inGlyph) {
     if(!hasPaint)
         return;
 
-    FT_Error error = freeTypeFace->SelectDefaultPalette(&mPalette);
+    FT_Error error = freeTypeFace->SelectDefaultPalette(&mPalette, &mPaletteSize);
     if (error) {
         mPalette = NULL;
         mCanDrawGlyph = false;
@@ -77,7 +79,7 @@ bool PaintedGlyphsDrawingContext::CanDraw() {
     return mCanDrawGlyph;
 }
 
-void PaintedGlyphsDrawingContext::Draw(double inX, double inY, bool inComputeAdvance) {
+EStatusCode PaintedGlyphsDrawingContext::Draw(double inX, double inY, bool inComputeAdvance) {
     // set initial bounds for drawing. 
     // with some tests getting the base glyph brings 0
     UIntList glyphs;
@@ -102,8 +104,10 @@ void PaintedGlyphsDrawingContext::Draw(double inX, double inY, bool inComputeAdv
     mGraphicStateMatrixStack.push_back(PDFMatrix(1,0,0,1,inX,inY)); 
 
     // now draw the graph per it's root
-    ExecuteOpaquePaint(mCurrentOpaquePaint);
+    EStatusCode status = ExecuteOpaquePaint(mCurrentOpaquePaint) ? eSuccess: eFailure;
     mContentContext->Q();
+
+    return status;
 }
 
 double PaintedGlyphsDrawingContext::GetLatestAdvance() {
@@ -256,6 +260,12 @@ bool PaintedGlyphsDrawingContext::ExecutePaintSolid(FT_PaintSolid inSolid) {
     if(0xFFFF == palette_index) {
         mContentContext->SetupColor(AbstractContentContext::eFill,mOptions.colorValue,mOptions.colorSpace,mOptions.opacity * ( alpha / (1<<14)));
     } else {
+
+        if(palette_index >= mPaletteSize) {
+            TRACE_LOG2("LayeredGlyphsDrawingContext::Draw, requsted color index %d is too high. The color palette only holds index 0 to %d", palette_index, mPaletteSize);
+            return false;
+        }
+
         FT_Color layer_color = mPalette[palette_index];
 
         mContentContext->SetOpacity((double(layer_color.alpha)/255.0) * (alpha / (1<<14)));
@@ -424,27 +434,57 @@ bool PaintedGlyphsDrawingContext::ExecutePaintColrGlyph(FT_PaintColrGlyph inColr
     return result;   
 }
 
-InterpretedGradientStopList PaintedGlyphsDrawingContext::ReadColorStops(FT_ColorStopIterator inColorStopIterator) {
+ bool PaintedGlyphsDrawingContext::ReadColorStops(FT_ColorStopIterator inColorStopIterator, InterpretedGradientStopList* outColorLine) {
     FreeTypeFaceWrapper* freeTypeFace = mContentContext->GetCurrentFont()->GetFreeTypeFont();
     FT_ColorStop colorStop;
     InterpretedGradientStopList colorLine;
+    bool ok = true;
 
     while(FT_Get_Colorline_Stops(
         *freeTypeFace,
         &colorStop,
         &inColorStopIterator)) {
+            FT_Color color;
+
+            if(0xFFFF == colorStop.color.palette_index) {
+                if(mOptions.colorSpace != AbstractContentContext::eRGB) {
+                    TRACE_LOG1("PaintedGlyphsDrawingContext::ReadColorStops, Error - color provided in color options is not an RGB color. For Colrv1 gradients please use RGB color. color space = %d",mOptions.colorSpace);
+                    return false;
+                }
+
+				Byte r = (Byte)((mOptions.colorValue >> 16) & 0xFF);
+				Byte g = (Byte)((mOptions.colorValue >> 8) & 0xFF);
+				Byte b = (Byte)(mOptions.colorValue & 0xFF);
+                Byte a = (Byte)(mOptions.opacity*255);
+
+                color = {
+                    b,
+                    g,
+                    r,
+                    a
+                };
+            } else {
+                if(colorStop.color.palette_index >= mPaletteSize) {
+                    TRACE_LOG2("LayeredGlyphsDrawingContext::Draw, requsted color index %d is too high. The color palette only holds index 0 to %d", colorStop.color.palette_index, mPaletteSize);
+                    ok = false;
+                    break;
+                }
+
+                color = mPalette[colorStop.color.palette_index];
+            }
+
             InterpretedGradientStop gradientStop = {
                 colorStop.stop_offset/scFix16Dot16Scale,
                 double(colorStop.color.alpha) / double(1<<14),
-                mPalette[colorStop.color.palette_index]
+                color
             };
 
-            colorLine.push_back(
+            outColorLine->push_back(
                 gradientStop
             );
     };
 
-    return colorLine;
+    return ok;
 }
 
 
@@ -459,7 +499,10 @@ bool PaintedGlyphsDrawingContext::ExecutePaintRadialGradient(FT_PaintRadialGradi
     double r1 = GetFontUnitMeasurementInPDF(inColrRadialGradient.r1);
 
     FT_PaintExtend gradientExtend = inColrRadialGradient.colorline.extend;
-    InterpretedGradientStopList colorLine = ReadColorStops(inColrRadialGradient.colorline.color_stop_iterator);
+    InterpretedGradientStopList colorLine;
+    
+    if(!ReadColorStops(inColrRadialGradient.colorline.color_stop_iterator,&colorLine))
+        return false;
 
     // apply shading pattern
     ObjectIDType patternObjectId = mContentContext->GetDocumentContext()->GetObjectsContext()->GetInDirectObjectsRegistry().AllocateNewObjectID();
@@ -520,7 +563,10 @@ bool PaintedGlyphsDrawingContext::ExecutePaintLinearGradient(FT_PaintLinearGradi
     }
 
     FT_PaintExtend gradientExtend = inColrLinearGradient.colorline.extend;
-    InterpretedGradientStopList colorLine = ReadColorStops(inColrLinearGradient.colorline.color_stop_iterator);
+    InterpretedGradientStopList colorLine;
+    
+    if(!ReadColorStops(inColrLinearGradient.colorline.color_stop_iterator,&colorLine))
+        return false;
 
     // apply shading pattern
     ObjectIDType patternObjectId = mContentContext->GetDocumentContext()->GetObjectsContext()->GetInDirectObjectsRegistry().AllocateNewObjectID();
@@ -554,7 +600,10 @@ bool PaintedGlyphsDrawingContext::ExecutePaintSweepGradient(FT_PaintSweepGradien
     double radianAngleEnd = inColrSweepGradient.end_angle / scFix16Dot16Scale;
 
     FT_PaintExtend gradientExtend = inColrSweepGradient.colorline.extend;
-    InterpretedGradientStopList colorLine = ReadColorStops(inColrSweepGradient.colorline.color_stop_iterator);
+    InterpretedGradientStopList colorLine;
+    
+    if(!ReadColorStops(inColrSweepGradient.colorline.color_stop_iterator,&colorLine))
+        return false;
 
     // apply shading pattern
     ObjectIDType patternObjectId = mContentContext->GetDocumentContext()->GetObjectsContext()->GetInDirectObjectsRegistry().AllocateNewObjectID();

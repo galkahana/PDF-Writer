@@ -121,7 +121,7 @@ public:
 	FT_Error LoadGlyph(FT_UInt inGlyphIndex, FT_Int32 inFlags = 0);
 
 	// a very simple memoized version of selecting a palette
-	FT_Error SelectDefaultPalette(FT_Color** outPalette);
+	FT_Error SelectDefaultPalette(FT_Color** outPalette, unsigned short* outPaletteSize);
 
 private:
 
@@ -136,6 +136,7 @@ private:
 	bool mDoesOwn;
 	bool mUsePUACodes;
 	FT_Color* mPalette;
+	FT_Palette_Data mPaletteData;
 	FT_Error mPaletteStatus;
 	bool mPaletteSet;
 

@@ -775,13 +775,18 @@ FT_Error FreeTypeFaceWrapper::LoadGlyph(FT_UInt inGlyphIndex, FT_Int32 inFlags)
 	return status;
 }
 
-FT_Error FreeTypeFaceWrapper::SelectDefaultPalette(FT_Color** outPalette) {
+FT_Error FreeTypeFaceWrapper::SelectDefaultPalette(FT_Color** outPalette, unsigned short* outPaletteSize) {
 	if(!mPaletteSet) {
-		mPaletteStatus = FT_Palette_Select( mFace, 0, &mPalette);
+		bool statusDataGet = FT_Palette_Data_Get(mFace, &mPaletteData);
+		bool statusSelect = FT_Palette_Select( mFace, 0, &mPalette);
+
+		mPaletteStatus = statusDataGet && statusSelect;
+
 		mPaletteSet = true;		
 	}
 
 	*outPalette = mPalette;
+	*outPaletteSize = mPaletteData.num_palette_entries;
 	return mPaletteStatus;
 }
 

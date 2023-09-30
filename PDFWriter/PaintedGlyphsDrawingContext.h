@@ -43,7 +43,7 @@ public:
 
     void SetGlyph(const GlyphUnicodeMapping& inGlyph);
     bool CanDraw();
-    void Draw(double inX, double inY, bool inComputeAdvance = false);
+    PDFHummus::EStatusCode Draw(double inX, double inY, bool inComputeAdvance = false);
 
     double GetLatestAdvance();
 
@@ -56,6 +56,7 @@ private:
     bool mCanDrawGlyph;
     FT_OpaquePaint mCurrentOpaquePaint;
     FT_Color* mPalette;
+    unsigned short mPaletteSize;
     // use the stack to track bounds. can be used to apply 
     // extra bounds via clip, or consider matrix transformations
     PDFRectangleList mBoundsStack;
@@ -68,7 +69,7 @@ private:
 
     double GetFontUnitMeasurementInPDF(FT_Fixed inFixedPos);
     void FillCurrentBounds(); 
-    InterpretedGradientStopList ReadColorStops(FT_ColorStopIterator inColorStopIterator);
+    bool ReadColorStops(FT_ColorStopIterator inColorStopIterator, InterpretedGradientStopList* outColorLine);
 
     bool ExecuteOpaquePaint(FT_OpaquePaint inOpaquePaint);
     bool ExecuteColrPaint(FT_COLR_Paint inColrPaint);

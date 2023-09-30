@@ -33,7 +33,7 @@ public:
 
     void SetGlyph(const GlyphUnicodeMapping& inGlyph);
     bool CanDraw();
-    void Draw(double inX, double inY, bool inComputeAdvance = false);
+    PDFHummus::EStatusCode Draw(double inX, double inY, bool inComputeAdvance = false);
 
     double GetLatestAdvance();
 
@@ -48,6 +48,7 @@ private:
     FT_UInt  mLayerGlyphIndex;
     FT_UInt  mLayerColorIndex;
     FT_Color* mPalette;
+    unsigned short mPaletteSize;
 
 	double mLatestAdvance;   
 };
