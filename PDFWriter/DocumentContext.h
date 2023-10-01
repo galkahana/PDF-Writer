@@ -378,6 +378,9 @@ namespace PDFHummus
 		// ExtGState registry (opacity with alpha implementation)
 		ExtGStateRegistry& GetExtGStateRegistry();
 
+		// make the objects context available via document context
+		ObjectsContext* GetObjectsContext();
+
 	private:
 		ObjectsContext* mObjectsContext;
 		TrailerInformation mTrailerInformation;

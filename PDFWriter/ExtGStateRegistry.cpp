@@ -40,7 +40,7 @@ public:
                                          PDFHummus::DocumentContext* inDocumentContext) {
         inObjectsContext->StartNewIndirectObject(mObjectID);
         DictionaryContext* dict = inObjectsContext->StartDictionary();
-        dict->WriteKey("type");
+        dict->WriteKey("Type");
         dict->WriteNameValue("ExtGState");
         dict->WriteKey("ca");
         dict->WriteDoubleValue(mAlphaValue);

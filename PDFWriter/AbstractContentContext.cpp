@@ -32,6 +32,7 @@
 #include "DocumentContext.h"
 #include "SimpleGlyphsDrawingContext.h"
 #include "LayeredGlyphsDrawingContext.h"
+#include "PaintedGlyphsDrawingContext.h"
 
 #include <ctype.h>
 #include <algorithm>
@@ -591,6 +592,15 @@ void AbstractContentContext::SCN(double* inColorComponents, int inColorComponent
 	mPrimitiveWriter.WriteKeyword("SCN");
 }
 
+void AbstractContentContext::SCN(const std::string& inPatternName)
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+
+	mPrimitiveWriter.WriteName(inPatternName);
+	mPrimitiveWriter.WriteKeyword("SCN");
+}
+
 void AbstractContentContext::sc(double* inColorComponents, int inColorComponentsLength)
 {
 	RenewStreamConnection();
@@ -618,6 +628,15 @@ void AbstractContentContext::scn(double* inColorComponents, int inColorComponent
 
 	for(int i=0;i<inColorComponentsLength;++i)
 		mPrimitiveWriter.WriteDouble(inColorComponents[i]);
+	mPrimitiveWriter.WriteName(inPatternName);
+	mPrimitiveWriter.WriteKeyword("scn");
+}
+
+void AbstractContentContext::scn(const std::string& inPatternName)
+{
+	RenewStreamConnection();
+	AssertProcsetAvailable(KProcsetPDF);
+
 	mPrimitiveWriter.WriteName(inPatternName);
 	mPrimitiveWriter.WriteKeyword("scn");
 }
@@ -1451,6 +1470,7 @@ void AbstractContentContext::WriteText(double inX,double inY,const std::string& 
 
 	SimpleGlyphsDrawingContext sharedDrawingContext(this, inOptions);
 	LayeredGlyphsDrawingContext layeredGlyphDrawing(this, inOptions);
+	PaintedGlyphsDrawingContext paintedGlyphDrawing(this, inOptions);
 
 	double x = inX;
 
@@ -1465,31 +1485,43 @@ void AbstractContentContext::WriteText(double inX,double inY,const std::string& 
 
 	GlyphUnicodeMappingList::iterator it = glyphsAndUnicode.begin();
 	for(; it!=glyphsAndUnicode.end(); ++it) {
-		layeredGlyphDrawing.SetGlyph(*it);
 
-		if(!layeredGlyphDrawing.CanDraw()) {
-			// simple char, add to shared context
-			sharedDrawingContext.AddGlyphMapping(*it);
-			continue;
+		// attempt to draw with ColrV1 method
+		paintedGlyphDrawing.SetGlyph(*it);
+		if(paintedGlyphDrawing.CanDraw()) {
+			// stop simple shared context
+			sharedDrawingContext.Flush(true);
+			x+=sharedDrawingContext.GetLatestAdvance();
+
+			// draw with specialized method
+			paintedGlyphDrawing.Draw(x,inY, true);
+			x+=paintedGlyphDrawing.GetLatestAdvance();
+
+			// continue simple shared context
+			sharedDrawingContext.StartWriting(x,inY);		
+
+			continue;	
 		}
 
-		// special drawing alert!!1
+		// attempt to draw with ColrV0 method
+		layeredGlyphDrawing.SetGlyph(*it);
+		if(layeredGlyphDrawing.CanDraw()) {
+			// stop simple shared context
+			sharedDrawingContext.Flush(true);
+			x+=sharedDrawingContext.GetLatestAdvance();
 
-		// First, flush what glyphs were collected in the simple shared context as drawing commands. then collect what advance they made, to update later placements
-		sharedDrawingContext.Flush(true);
-		x+=sharedDrawingContext.GetLatestAdvance();
+			// draw with specialized method
+			layeredGlyphDrawing.Draw(x,inY, true);
+			x+=layeredGlyphDrawing.GetLatestAdvance();
 
+			// continue simple shared context
+			sharedDrawingContext.StartWriting(x,inY);		
 
-		// Now, let's draw the special glyph
-		
-		// Since this is layered glyph drawing use it. collect its advance, to continue writing at the right spot later
-		layeredGlyphDrawing.Draw(x,inY, true);
-		x+=layeredGlyphDrawing.GetLatestAdvance();
+			continue;	
+		}
 
-
-
-		// Done. restart shared simple glyph writing context
-		sharedDrawingContext.StartWriting(x,inY);
+		// ok. not a special glyph. just add to shared context
+		sharedDrawingContext.AddGlyphMapping(*it);
 	}
 
 	// flush what glyphs are remaining in shared context

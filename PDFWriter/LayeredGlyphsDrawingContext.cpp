@@ -21,8 +21,11 @@
 
 #include "LayeredGlyphsDrawingContext.h"
 #include "PDFUsedFont.h"
+#include "Trace.h"
 
 #include FT_COLOR_H
+
+using namespace PDFHummus;
 
 LayeredGlyphsDrawingContext::LayeredGlyphsDrawingContext(AbstractContentContext* inContentContext, const AbstractContentContext::TextOptions& inOptions):mOptions(inOptions) {
     mContentContext = inContentContext;
@@ -48,7 +51,7 @@ void LayeredGlyphsDrawingContext::SetGlyph(const GlyphUnicodeMapping& inGlyph) {
     
     // ok...got an interesting glyph. now's a good time to also bother with palette selection. using the default palette.
     // maybe can do this once per face and keep this on the face wrapper
-    FT_Error error = freeTypeFace->SelectDefaultPalette(&mPalette);
+    FT_Error error = freeTypeFace->SelectDefaultPalette(&mPalette, &mPaletteSize);
     if (error) {
         mPalette = NULL;
         mCanDrawGlyph = false;
@@ -59,7 +62,8 @@ bool LayeredGlyphsDrawingContext::CanDraw() {
     return mCanDrawGlyph;
 }
 
-void LayeredGlyphsDrawingContext::Draw(double inX, double inY, bool inComputeAdvance) {
+EStatusCode LayeredGlyphsDrawingContext::Draw(double inX, double inY, bool inComputeAdvance) {
+    EStatusCode status = eSuccess;
     if(inComputeAdvance) {
         // for advance, use the original glyph width...i'm thinking it probably should be the same width in the end
 		UIntList glyphs;
@@ -74,6 +78,12 @@ void LayeredGlyphsDrawingContext::Draw(double inX, double inY, bool inComputeAdv
         if(0xFFFF == mLayerColorIndex) {
             mContentContext->SetupColor(mOptions);
         } else {
+            if(mLayerColorIndex >= mPaletteSize) {
+                TRACE_LOG2("LayeredGlyphsDrawingContext::Draw, requsted color index %d is too high. The color palette only holds index 0 to %d", mLayerColorIndex, mPaletteSize);
+                status = eFailure;
+                break;
+            }
+
             FT_Color layer_color = mPalette[mLayerColorIndex];
 
             mContentContext->SetOpacity(double(layer_color.alpha)/255.0);
@@ -96,6 +106,7 @@ void LayeredGlyphsDrawingContext::Draw(double inX, double inY, bool inComputeAdv
                                         &mLayerGlyphIndex,
                                         &mLayerColorIndex,
                                         &mIterator));
+    return status;
 }
 
 double LayeredGlyphsDrawingContext::GetLatestAdvance() {

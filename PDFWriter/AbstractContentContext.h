@@ -247,9 +247,11 @@ public:
 	void SC(double* inColorComponents, int inColorComponentsLength);
 	void SCN(double* inColorComponents, int inColorComponentsLength);
 	void SCN(double* inColorComponents, int inColorComponentsLength,const std::string& inPatternName);
+	void SCN(const std::string& inPatternName);
 	void sc(double* inColorComponents, int inColorComponentsLength);
 	void scn(double* inColorComponents, int inColorComponentsLength);
 	void scn(double* inColorComponents, int inColorComponentsLength,const std::string& inPatternName);
+	void scn(const std::string& inPatternName);
 	void G(double inGray);
 	void g(double inGray);
 	void RG(double inR,double inG,double inB);
@@ -370,7 +372,18 @@ public:
 	// behavior that falls back on current graphic state
 	void SetOpacity(double inAlpha);
 
+	// accessors for internal objects, for extending content context capabilities outside of content context
 	PrimitiveObjectsWriter& GetPrimitiveWriter() {return mPrimitiveWriter;}
+	PDFHummus::DocumentContext* GetDocumentContext() {return mDocumentContext;}
+
+
+	// Derived classes should use this method to retrive the content resource dictionary, for updating procsets 'n such
+	virtual ResourcesDictionary* GetResourcesDictionary() = 0;
+	// Derived classes should implement this method for registering image writes
+	virtual void ScheduleImageWrite(const std::string& inImagePath,unsigned long inImageIndex,ObjectIDType inObjectID,const PDFParsingOptions& inParsingOptions) = 0;
+	// And a bit more generic version of the image write would be:
+	virtual void ScheduleObjectEndWriteTask(IObjectEndWritingTask* inObjectEndWritingTask) = 0;
+
 protected:
 
 	PDFHummus::DocumentContext* mDocumentContext;
@@ -379,14 +392,8 @@ protected:
 	void SetPDFStreamForWrite(PDFStream* inStream);
 
 private:
-	// Derived classes should use this method to retrive the content resource dictionary, for updating procsets 'n such
-	virtual ResourcesDictionary* GetResourcesDictionary() = 0;
 	// Derived classes should optionally use this method if the stream needs updating (use calls to SetPDFStreamForWrite for this purpose)
 	virtual void RenewStreamConnection() {};
-	// Derived classes should implement this method for registering image writes
-	virtual void ScheduleImageWrite(const std::string& inImagePath,unsigned long inImageIndex,ObjectIDType inObjectID,const PDFParsingOptions& inParsingOptions) = 0;
-	// And a bit more generic version of the image write would be:
-	virtual void ScheduleObjectEndWriteTask(IObjectEndWritingTask* inObjectEndWritingTask) = 0;
 
 
 	PrimitiveObjectsWriter mPrimitiveWriter;

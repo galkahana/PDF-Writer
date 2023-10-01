@@ -62,6 +62,7 @@ JPEGImageHandler.cpp
 JPEGImageInformation.cpp
 JPEGImageParser.cpp
 LayeredGlyphsDrawingContext.cpp
+LinearGradientShadingPatternWritingTask.cpp
 Log.cpp
 MD5Generator.cpp
 RC4.cpp
@@ -79,6 +80,7 @@ OutputStreamTraits.cpp
 OutputStringBufferStream.cpp
 PageContentContext.cpp
 PageTree.cpp
+PaintedGlyphsDrawingContext.cpp
 ParsedPrimitiveHelper.cpp
 PDFArray.cpp
 PDFBoolean.cpp
@@ -97,6 +99,7 @@ PDFImageXObject.cpp
 PDFIndirectObjectReference.cpp
 PDFInteger.cpp
 PDFLiteralString.cpp
+PDFMatrix.cpp
 PDFModifiedPage.cpp
 PDFName.cpp
 PDFNull.cpp
@@ -122,13 +125,16 @@ PFMFileReader.cpp
 PNGImageHandler.cpp
 PrimitiveObjectsWriter.cpp
 PSBool.cpp
+RadialGradientShadingPatternWritingTask.cpp
 RefCountObject.cpp
 ResourcesDictionary.cpp
+ShadingWriter.cpp
 SimpleGlyphsDrawingContext.cpp
 SimpleStringTokenizer.cpp
 StandardEncoding.cpp
 StateReader.cpp
 StateWriter.cpp
+SweepGradientShadingPatternWritingTask.cpp
 TIFFImageHandler.cpp
 TiffUsageParameters.cpp
 Timer.cpp
@@ -250,6 +256,7 @@ JPEGImageHandler.h
 JPEGImageInformation.h
 JPEGImageParser.h
 LayeredGlyphsDrawingContext.h
+LinearGradientShadingPatternWritingTask.h
 Log.h
 MapIterator.h
 MD5Generator.h
@@ -271,6 +278,7 @@ OutputStreamTraits.h
 OutputStringBufferStream.h
 PageContentContext.h
 PageTree.h
+PaintedGlyphsDrawingContext.h
 ParsedPrimitiveHelper.h
 PDFArray.h
 PDFBoolean.h
@@ -290,6 +298,7 @@ PDFImageXObject.h
 PDFIndirectObjectReference.h
 PDFInteger.h
 PDFLiteralString.h
+PDFMatrix.h
 PDFModifiedPage.h
 PDFName.h
 PDFNull.h
@@ -317,6 +326,7 @@ PNGImageHandler.h
 PrimitiveObjectsWriter.h
 ProcsetResourcesConstants.h
 PSBool.h
+RadialGradientShadingPatternWritingTask.h
 RefCountObject.h
 RefCountPtr.h
 ResourcesDictionary.h
@@ -325,9 +335,11 @@ SimpleGlyphsDrawingContext.h
 SimpleStringTokenizer.h
 Singleton.h
 SingleValueContainerIterator.h
+ShadingWriter.h
 StandardEncoding.h
 StateReader.h
 StateWriter.h
+SweepGradientShadingPatternWritingTask.h
 TIFFImageHandler.h
 TiffUsageParameters.h
 Timer.h
@@ -461,10 +473,14 @@ InfoDictionary.h
 IResourceWritingTask.h
 LayeredGlyphsDrawingContext.cpp
 LayeredGlyphsDrawingContext.h
+LinearGradientShadingPatternWritingTask.cpp
+LinearGradientShadingPatternWritingTask.h
 PageContentContext.cpp
 PageContentContext.h
 PageTree.cpp
 PageTree.h
+PaintedGlyphsDrawingContext.cpp
+PaintedGlyphsDrawingContext.h
 PDFFormXObject.cpp
 PDFFormXObject.h
 PDFTiledPattern.cpp
@@ -478,10 +494,14 @@ PDFModifiedPage.h
 PDFPage.cpp
 PDFPage.h
 ProcsetResourcesConstants.h
+RadialGradientShadingPatternWritingTask.cpp
+RadialGradientShadingPatternWritingTask.h
 ResourcesDictionary.cpp
 ResourcesDictionary.h
 SimpleGlyphsDrawingContext.cpp
 SimpleGlyphsDrawingContext.h
+ShadingWriter.cpp
+ShadingWriter.h
 TrailerInformation.cpp
 TrailerInformation.h
 XObjectContentContext.cpp
@@ -597,6 +617,7 @@ InputStringBufferStream.cpp
 InputStringBufferStream.h
 InputStringStream.cpp
 InputStringStream.h
+InterpretedGradientStop.h
 IOBasicTypes.h
 IReadPositionProvider.h
 OutputAESEncodeStream.cpp
@@ -657,6 +678,8 @@ ObjectsContext.h
 ObjectsContextExtenderAdapter.h
 PDFDate.cpp
 PDFDate.h
+PDFMatrix.cpp
+PDFMatrix.h
 PDFRectangle.cpp
 PDFRectangle.h
 PDFStream.cpp
