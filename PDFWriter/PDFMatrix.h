@@ -38,10 +38,10 @@ public:
     bool operator==(const PDFMatrix& inOther) const;
     bool operator!=(const PDFMatrix& inOther) const;
 
-    PDFMatrix Multiply(const PDFMatrix& inRight);
-    PDFRectangle Transform(const PDFRectangle& inRect);
-    PDFMatrix Inverse();
-    double Determinante();
+    PDFMatrix Multiply(const PDFMatrix& inRight) const;
+    PDFRectangle Transform(const PDFRectangle& inRect) const;
+    PDFMatrix Inverse() const;
+    double Determinante() const;
 
 
 	double a;
@@ -51,6 +51,6 @@ public:
 	double e;
 	double f;
 
-    void TransformVector(const double (&vector)[2],double (&vectorResult)[2]); // too lazy to create PDFVector...excuse me :)
+    void TransformVector(const double (&vector)[2],double (&vectorResult)[2]) const; // too lazy to create PDFVector...excuse me :)
 
 };

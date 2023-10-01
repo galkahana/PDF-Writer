@@ -27,10 +27,8 @@
 #include "ObjectsBasicTypes.h"
 #include "PDFRectangle.h"
 #include "PDFMatrix.h"
-#include "AbstractGradientShadingPatternWritingTask.h"
 
-
-class LinearGradientShadingPatternWritingTask: public AbstractGradientShadingPatternWritingTask {
+class LinearGradientShadingPatternWritingTask : public IObjectEndWritingTask {
     public:
         LinearGradientShadingPatternWritingTask(
             double inX0,
@@ -46,16 +44,18 @@ class LinearGradientShadingPatternWritingTask: public AbstractGradientShadingPat
 
         virtual ~LinearGradientShadingPatternWritingTask();
 
+        virtual PDFHummus::EStatusCode Write(ObjectsContext* inObjectsContext,
+                                            PDFHummus::DocumentContext* inDocumentContext);
+
     private:
-        virtual PDFHummus::EStatusCode WriteRGBShadingPatternObject(const InterpretedGradientStopList& inColorLine, ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
 
-        PDFHummus::EStatusCode WriteNativePDFLinearShadingPatternObject(const InterpretedGradientStopList& inColorLine, ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
-        PDFHummus::EStatusCode WriteLinearShadingPatternWithFunctionObject(const InterpretedGradientStopList& inColorLine, ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
-        void WriteGradientFunctionProgram(const InterpretedGradientStopList& inRGBColorLine);
-
-        FT_PaintExtend mGradientExtend;
         double x0;
         double y0;
         double x1;
         double y1;
+        InterpretedGradientStopList mColorLine;
+        FT_PaintExtend mGradientExtend;
+        PDFRectangle mBounds;
+        PDFMatrix mMatrix;
+        ObjectIDType mPatternObjectId;
 };

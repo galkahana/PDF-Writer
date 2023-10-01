@@ -21,14 +21,7 @@
 
 
 #include "SweepGradientShadingPatternWritingTask.h"
-#include "DocumentContext.h"
-#include "ObjectsContext.h"
-#include "DictionaryContext.h"
-#include "PDFTiledPattern.h"
-#include "PDFFormXObject.h"
-#include "TiledPatternContentContext.h"
-#include "XObjectContentContext.h"
-#include "PDFStream.h"
+#include "ShadingWriter.h"
 
 using namespace PDFHummus;
 
@@ -42,128 +35,36 @@ SweepGradientShadingPatternWritingTask::SweepGradientShadingPatternWritingTask(
     PDFRectangle inBounds,
     PDFMatrix inMatrix,
     ObjectIDType inPatternObjectId
-):AbstractGradientShadingPatternWritingTask(inColorLine, inBounds, inMatrix, inPatternObjectId) {
+) {
     cX = inCX;
     cY = inCY;
-
-    // emitting PDFs from skia fiddle i'm not getting any difference if angles an extand (tile mode)
-    // or non "default", meaning 0-360 and pad. so im keeping them but implementation ignores them.
-    // inspecting the code it does seem like angle is ignored, but there is code for extand.
-    // however, extand without support for non default angles is meaningless for sweep, so there's
-    // probably some code to put it to default.
-    // anyways, keeping to minimum, im going to save those vals, but not using them
     startAngleRad = inStartAngleRad;
     endAngleRad = inEndAngleRad;
+    mColorLine = inColorLine;
     mGradientExtend = inGradientExtend;
+    mBounds = inBounds;
+    mMatrix = inMatrix;
+    mPatternObjectId = inPatternObjectId;
 }
 
 SweepGradientShadingPatternWritingTask::~SweepGradientShadingPatternWritingTask(){
 }
 
-EStatusCode SweepGradientShadingPatternWritingTask::WriteRGBShadingPatternObject(
-    const InterpretedGradientStopList& inRGBColorLine,
-    ObjectIDType inObjectID, 
+EStatusCode SweepGradientShadingPatternWritingTask::Write(
     ObjectsContext* inObjectsContext,
     DocumentContext* inDocumentContext) {
-    EStatusCode status = eSuccess;
-    PDFStream* pdfStream = NULL;
 
-    ObjectIDType functionObjectId = inObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID(); 
+    ShadingWriter shadingWriter(inObjectsContext, inDocumentContext);
 
-    PDFMatrix patternProgramMatrix = PDFMatrix(1,0,0,1,cX,cY);
-
-    PDFMatrix patternMatrix = patternProgramMatrix.Multiply(matrix);
-    PDFRectangle domainBounds = patternProgramMatrix.Inverse().Transform(bounds);
-
-    do {
-        // shading object
-        inObjectsContext->StartNewIndirectObject(inObjectID);
-        DictionaryContext* patternDict = inObjectsContext->StartDictionary();
-        patternDict->WriteKey("Type");
-        patternDict->WriteNameValue("Pattern");
-        patternDict->WriteKey("PatternType");
-        patternDict->WriteIntegerValue(2);
-        patternDict->WriteKey("Matrix");
-        inObjectsContext->StartArray();
-        inObjectsContext->WriteDouble(patternMatrix.a);
-        inObjectsContext->WriteDouble(patternMatrix.b);
-        inObjectsContext->WriteDouble(patternMatrix.c);
-        inObjectsContext->WriteDouble(patternMatrix.d);
-        inObjectsContext->WriteDouble(patternMatrix.e);
-        inObjectsContext->WriteDouble(patternMatrix.f);
-        inObjectsContext->EndArray(eTokenSeparatorEndLine);
-        patternDict->WriteKey("Shading");
-        DictionaryContext* shadingDict = inObjectsContext->StartDictionary();
-        shadingDict->WriteKey("ShadingType");
-        shadingDict->WriteIntegerValue(1);
-        shadingDict->WriteKey("Domain");
-        inObjectsContext->StartArray();
-        inObjectsContext->WriteDouble(domainBounds.LowerLeftX);
-        inObjectsContext->WriteDouble(domainBounds.UpperRightX);
-        inObjectsContext->WriteDouble(domainBounds.LowerLeftY);
-        inObjectsContext->WriteDouble(domainBounds.UpperRightY);
-        inObjectsContext->EndArray(eTokenSeparatorEndLine);    
-        shadingDict->WriteKey("ColorSpace");
-        shadingDict->WriteNameValue("DeviceRGB");
-        shadingDict->WriteKey("Function");
-        shadingDict->WriteNewObjectReferenceValue(functionObjectId);
-        status = inObjectsContext->EndDictionary(shadingDict);
-        if(status != eSuccess)
-            break;
-        status = inObjectsContext->EndDictionary(patternDict);
-        if(status != eSuccess)
-            break;
-        inObjectsContext->EndIndirectObject();
-
-
-        // function object
-        inObjectsContext->StartNewIndirectObject(functionObjectId);
-        DictionaryContext* functionDict = inObjectsContext->StartDictionary();
-        functionDict->WriteKey("FunctionType");
-        functionDict->WriteIntegerValue(4);
-        functionDict->WriteKey("Domain");
-        inObjectsContext->StartArray();
-        inObjectsContext->WriteDouble(domainBounds.LowerLeftX);
-        inObjectsContext->WriteDouble(domainBounds.UpperRightX);
-        inObjectsContext->WriteDouble(domainBounds.LowerLeftY);
-        inObjectsContext->WriteDouble(domainBounds.UpperRightY);
-        inObjectsContext->EndArray(eTokenSeparatorEndLine);    
-        functionDict->WriteKey("Range");
-        inObjectsContext->StartArray();
-        inObjectsContext->WriteInteger(0);
-        inObjectsContext->WriteInteger(1);
-        inObjectsContext->WriteInteger(0);
-        inObjectsContext->WriteInteger(1);
-        inObjectsContext->WriteInteger(0);
-        inObjectsContext->WriteInteger(1);
-        inObjectsContext->EndArray(eTokenSeparatorEndLine);            
-        
-        // now lets make this a stream so we can wrie the Postscript code
-        PDFStream* pdfStream = inObjectsContext->StartPDFStream(functionDict);
-        if(!pdfStream) {
-            status = eFailure;
-            break;
-        }
-
-        mWriteStream = pdfStream->GetWriteStream();
-        mPrimitiveWriter.SetStreamForWriting(mWriteStream);
-        WriteGradientProgram(inRGBColorLine);
-        inObjectsContext->EndPDFStream(pdfStream);
-    }while(false);
-    delete pdfStream;
-
-    return status;
-}
-
-void SweepGradientShadingPatternWritingTask::WriteGradientProgram(const InterpretedGradientStopList& inRGBColorLine) {
-    // write postscript code to define the function. thank you Skia :)
-
-    // function start, translate t to step per sweep function
-    WriteStreamText("{exch atan 360 div\n");
-    
-    // write the rest of the steps using shared code
-    WriteColorLineStepsProgram(inRGBColorLine);
-
-    // function end
-    WriteStreamText("}");    
+    return shadingWriter.WriteSweepShadingPatternObject(
+        cX,
+        cY,
+        startAngleRad,
+        endAngleRad,
+        mColorLine,
+        mGradientExtend,
+        mBounds,
+        mMatrix,
+        mPatternObjectId
+    );
 }

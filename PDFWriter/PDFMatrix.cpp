@@ -71,7 +71,7 @@ bool PDFMatrix::operator!=(const PDFMatrix& inOther) const {
 
 }
 
-PDFMatrix PDFMatrix::Multiply(const PDFMatrix& inRight) {
+PDFMatrix PDFMatrix::Multiply(const PDFMatrix& inRight) const {
     return PDFMatrix(
         a*inRight.a + b*inRight.c,
         a*inRight.b + b*inRight.d,
@@ -82,13 +82,13 @@ PDFMatrix PDFMatrix::Multiply(const PDFMatrix& inRight) {
     );
 }
 
-void PDFMatrix::TransformVector(const double (&vector)[2], double (&vectorResult)[2]) {
+void PDFMatrix::TransformVector(const double (&vector)[2], double (&vectorResult)[2]) const{
     vectorResult[0] = a*vector[0] + c*vector[1] + e;
     vectorResult[1] = b*vector[0] + d*vector[1] + f;
 }
 
 
-PDFRectangle PDFMatrix::Transform(const PDFRectangle& inRect) {
+PDFRectangle PDFMatrix::Transform(const PDFRectangle& inRect) const{
     double t[4][2];
 
     double a[2] = {inRect.LowerLeftX, inRect.LowerLeftY};
@@ -121,7 +121,7 @@ PDFRectangle PDFMatrix::Transform(const PDFRectangle& inRect) {
 
 }
 
-PDFMatrix PDFMatrix::Inverse() {
+PDFMatrix PDFMatrix::Inverse() const {
     double det = Determinante();
     
     return PDFMatrix(
@@ -134,6 +134,6 @@ PDFMatrix PDFMatrix::Inverse() {
     );
 }
 
-double PDFMatrix::Determinante()  {
+double PDFMatrix::Determinante()  const{
     return a*d-b*c;
 }

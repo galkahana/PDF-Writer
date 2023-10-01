@@ -27,14 +27,9 @@
 #include "ObjectsBasicTypes.h"
 #include "PDFRectangle.h"
 #include "PDFMatrix.h"
-#include "AbstractGradientShadingPatternWritingTask.h"
-#include "PrimitiveObjectsWriter.h"
 
-#include <string>
 
-class IByteWriter;
-
-class SweepGradientShadingPatternWritingTask: public AbstractGradientShadingPatternWritingTask {
+class SweepGradientShadingPatternWritingTask: public IObjectEndWritingTask {
     public:
         SweepGradientShadingPatternWritingTask(
             double inCX,
@@ -50,15 +45,18 @@ class SweepGradientShadingPatternWritingTask: public AbstractGradientShadingPatt
 
         virtual ~SweepGradientShadingPatternWritingTask();
 
-    private:
-        virtual PDFHummus::EStatusCode WriteRGBShadingPatternObject(const InterpretedGradientStopList& inColorLine, ObjectIDType inObjectID, ObjectsContext* inObjectsContext, PDFHummus::DocumentContext* inDocumentContext);
+        virtual PDFHummus::EStatusCode Write(ObjectsContext* inObjectsContext,
+                                            PDFHummus::DocumentContext* inDocumentContext);
 
-        FT_PaintExtend mGradientExtend;
+    private:
+
         double cX;
         double cY;
         double startAngleRad;
         double endAngleRad;
-
-
-        void WriteGradientProgram(const InterpretedGradientStopList& inColorLine);
+        InterpretedGradientStopList mColorLine;
+        FT_PaintExtend mGradientExtend;
+        PDFRectangle mBounds;
+        PDFMatrix mMatrix;
+        ObjectIDType mPatternObjectId;
 };

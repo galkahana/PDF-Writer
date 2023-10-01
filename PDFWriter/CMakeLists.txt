@@ -4,7 +4,6 @@ set(PDFWRITER_SO_VERSION ${PDFHummus_VERSION_MAJOR})
 add_library (PDFWriter
 #sources
 AbstractContentContext.cpp
-AbstractGradientShadingPatternWritingTask.cpp
 AbstractWrittenFont.cpp
 ANSIFontWriter.cpp
 Ascii7Encoding.cpp
@@ -129,6 +128,7 @@ PSBool.cpp
 RadialGradientShadingPatternWritingTask.cpp
 RefCountObject.cpp
 ResourcesDictionary.cpp
+ShadingWriter.cpp
 SimpleGlyphsDrawingContext.cpp
 SimpleStringTokenizer.cpp
 StandardEncoding.cpp
@@ -160,7 +160,6 @@ XObjectContentContext.cpp
 
 #headers
 AbstractContentContext.h
-AbstractGradientShadingPatternWritingTask.h
 AbstractWrittenFont.h
 AdapterIByteReaderWithPositionToIReadPositionProvider.h
 ANSIFontWriter.h
@@ -336,6 +335,7 @@ SimpleGlyphsDrawingContext.h
 SimpleStringTokenizer.h
 Singleton.h
 SingleValueContainerIterator.h
+ShadingWriter.h
 StandardEncoding.h
 StateReader.h
 StateWriter.h
@@ -452,8 +452,6 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 source_group("Document Context Level" FILES
 AbstractContentContext.cpp
 AbstractContentContext.h
-AbstractGradientShadingPatternWritingTask.cpp
-AbstractGradientShadingPatternWritingTask.h
 CatalogInformation.cpp
 CatalogInformation.h
 DocumentContext.cpp
@@ -502,8 +500,8 @@ ResourcesDictionary.cpp
 ResourcesDictionary.h
 SimpleGlyphsDrawingContext.cpp
 SimpleGlyphsDrawingContext.h
-LinearGradientShadingPatternWritingTask.cpp
-LinearGradientShadingPatternWritingTask.h
+ShadingWriter.cpp
+ShadingWriter.h
 TrailerInformation.cpp
 TrailerInformation.h
 XObjectContentContext.cpp
