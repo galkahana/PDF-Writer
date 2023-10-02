@@ -92,7 +92,7 @@ if(NOT USE_BUNDLED)
 
     # libtiff
     if(NOT PDFHUMMUS_NO_TIFF)
-        find_package (TIFF COMPONENTS CXX)
+        find_package (TIFF)
         if (TIFF_FOUND)
             set (USING_UNBUNDLED_TIFF TRUE)
         else(TIFF_FOUND)
