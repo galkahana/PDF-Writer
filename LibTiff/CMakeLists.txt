@@ -16,6 +16,7 @@ tif_fax3.c
 tif_fax3sm.c
 tif_flush.c
 tif_getimage.c
+tif_hash_set.c
 tif_jbig.c
 tif_jpeg.c
 tif_luv.c
@@ -51,6 +52,7 @@ tiffvers.h
 tif_config.h
 tif_dir.h
 tif_fax3.h
+tif_hash_set.h
 tif_predict.h
 uvcode.h
 
@@ -65,6 +67,15 @@ target_include_directories(LibTiff
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
     $<INSTALL_INTERFACE:include/LibTiff> 
 )
+
+#
+# Check for unistd.h
+#
+include(CheckIncludeFile)
+check_include_file(unistd.h T_HAVE_UNISTD_H)
+if(T_HAVE_UNISTD_H)
+    target_compile_definitions(LibTiff PUBLIC HAVE_UNISTD_H=1)
+endif(T_HAVE_UNISTD_H)
 
 target_compile_definitions(LibTiff PUBLIC 
     _CRT_SECURE_NO_DEPRECATE=1
