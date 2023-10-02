@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.19)
 
 # Soname
 # MAJOR is incremented when symbols are removed or changed in an incompatible way
@@ -92,7 +92,7 @@ if(NOT USE_BUNDLED)
 
     # libtiff
     if(NOT PDFHUMMUS_NO_TIFF)
-        find_package (TIFF)
+        find_package (TIFF COMPONENTS CXX)
         if (TIFF_FOUND)
             set (USING_UNBUNDLED_TIFF TRUE)
         else(TIFF_FOUND)

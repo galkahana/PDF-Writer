@@ -5,7 +5,7 @@
             'type': 'static_library',
             'dependencies': [
                 '<(module_root_dir)/src/deps/Zlib/binding.gyp:zlib'
-            ],
+            ],       
             'defines': [
                 '_CRT_SECURE_NO_DEPRECATE=1',
                 'AVOID_WIN32_FILEIO=1',
@@ -24,7 +24,15 @@
                 'TIF_PLATFORM_CONSOLE=1',
                 'FILLODER_LSB2MSB=1'
             ],
-             'include_dirs': [
+            'conditions': [
+                ['OS == "win"', {            
+                }, {
+                    "defines": [
+                        'HAVE_UNISTD_H=1'
+                    ]
+                }]
+            ],     
+            'include_dirs': [
               '<(module_root_dir)/src/deps/Zlib',
             ],
            'sources': [
