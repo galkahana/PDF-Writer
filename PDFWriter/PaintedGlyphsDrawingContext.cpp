@@ -452,17 +452,14 @@ bool PaintedGlyphsDrawingContext::ExecutePaintColrGlyph(FT_PaintColrGlyph inColr
                     return false;
                 }
 
-				Byte r = (Byte)((mOptions.colorValue >> 16) & 0xFF);
-				Byte g = (Byte)((mOptions.colorValue >> 8) & 0xFF);
-				Byte b = (Byte)(mOptions.colorValue & 0xFF);
-                Byte a = (Byte)(mOptions.opacity*255);
-
-                color = {
-                    b,
-                    g,
-                    r,
-                    a
+                FT_Color computedColor = {
+                    (Byte)(mOptions.colorValue & 0xFF), // b
+                    (Byte)((mOptions.colorValue >> 8) & 0xFF), // g
+                    (Byte)((mOptions.colorValue >> 16) & 0xFF), // r
+                    (Byte)(mOptions.opacity*255) // a
                 };
+
+                color = computedColor;
             } else {
                 if(colorStop.color.palette_index >= mPaletteSize) {
                     TRACE_LOG2("LayeredGlyphsDrawingContext::Draw, requsted color index %d is too high. The color palette only holds index 0 to %d", colorStop.color.palette_index, mPaletteSize);
