@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.15)
 
 # Soname
 # MAJOR is incremented when symbols are removed or changed in an incompatible way
