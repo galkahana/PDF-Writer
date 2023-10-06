@@ -52,6 +52,7 @@
                 'tif_fax3sm.c',
                 'tif_flush.c',
                 'tif_getimage.c',
+                'tif_hash_set.c',
                 'tif_jbig.c',
                 'tif_jpeg.c',
                 'tif_luv.c',
@@ -84,6 +85,7 @@
                 'tif_config.h',
                 'tif_dir.h',
                 'tif_fax3.h',
+                'tif_hash_set.h',
                 'tif_predict.h',
                 'uvcode.h'
             ]
