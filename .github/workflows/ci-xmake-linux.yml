@@ -1,0 +1,42 @@
+name: Build on linux
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  linuxbuild:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Install dependencies
+        run: | 
+          sudo apt-get update
+          sudo apt-get install -y gcc cmake
+      # Force xmake to a specific folder (for cache)
+      - name: Set xmake global dir
+        run: |
+          echo "XMAKE_GLOBALDIR=${{ runner.workspace }}/.xmake-global" >> "${{ github.env }}"
+      - uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: v2.8.3
+      - name: update repo
+        run: xmake repo -u
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+      - name: cache xmake
+        uses: actions/cache@v2
+        with:
+          path: |
+            ${{ env.XMAKE_GLOBALDIR }}/.xmake/packages
+            ${{ github.workspace }}/build/.build_cache
+          key: ${{ runner.os }}-xmake-${{ hashFiles('**/xmake.lua') }}
+      # Force xmake to a specific folder (for cache)
+      - name: config
+        run: xmake config --yes -vD
+      - name: build
+        run: xmake build --yes -vD
+
