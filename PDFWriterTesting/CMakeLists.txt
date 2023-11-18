@@ -7,6 +7,7 @@ create_test_sourcelist (Tests
   AppendingAndReading.cpp
   AppendPagesTest.cpp
   AppendSpecialPagesTest.cpp
+  AppendWithAnnotations.cpp
   BasicModification.cpp
   BoxingBaseTest.cpp
   BufferedOutputStreamTest.cpp
