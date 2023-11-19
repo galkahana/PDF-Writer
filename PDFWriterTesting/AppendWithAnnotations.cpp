@@ -21,7 +21,6 @@ using namespace std;
 
 #include "testing/TestIO.h"
 
-typedef list<ObjectIDType> ObjectIDTypeList;
 
 class AnnotationsWriter : public DocumentContextExtenderAdapter
 {
@@ -34,20 +33,21 @@ public:
 						DictionaryContext* inPageDictionaryContext,
 						ObjectsContext* inPDFWriterObjectContext,
 						DocumentContext* inPDFWriterDocumentContext);	
-	void AddCopiedAnnotation(ObjectIDType inNewAnnotation);
+	void SetAnnotationObjectReference(ObjectIDType inAnnotationObjectRef);
 
 private:
 
-	ObjectIDTypeList mAnnotationsIDs;
+	ObjectIDType mAnnotationObjectRef;
 };
 
 AnnotationsWriter::AnnotationsWriter()
 {
+	mAnnotationObjectRef = 0;
 }
 
-void AnnotationsWriter::AddCopiedAnnotation(ObjectIDType inNewAnnotation)
+void AnnotationsWriter::SetAnnotationObjectReference(ObjectIDType inAnnotationObjectRef)
 {
-	mAnnotationsIDs.push_back(inNewAnnotation);
+	mAnnotationObjectRef = inAnnotationObjectRef;
 }
 
 EStatusCode AnnotationsWriter::OnPageWrite(
@@ -58,7 +58,7 @@ EStatusCode AnnotationsWriter::OnPageWrite(
 {
 	// write the comments as the page array of annotations
 	
-	if(mAnnotationsIDs.size() == 0)
+	if(mAnnotationObjectRef == 0)
 		return eSuccess;
 
 	if(inPageDictionaryContext->WriteKey("Annots") != eSuccess)
@@ -68,14 +68,11 @@ EStatusCode AnnotationsWriter::OnPageWrite(
 		return eFailure;
 	}
 
-	ObjectIDTypeList::iterator it = mAnnotationsIDs.begin();
+	inPageDictionaryContext->WriteNewObjectReferenceValue(mAnnotationObjectRef);
 
-	inPDFWriterObjectContext->StartArray();
-	for(; it != mAnnotationsIDs.end(); ++it)
-		inPDFWriterObjectContext->WriteIndirectObjectReference(*it);
-	inPDFWriterObjectContext->EndArray(eTokenSeparatorEndLine);
-	
-	mAnnotationsIDs.clear();
+
+	// reset for next time
+	mAnnotationObjectRef = 0;
 	return eSuccess;	
 }
 
@@ -99,28 +96,43 @@ EStatusCode EmbedPagesInPDF(PDFWriter* inTargetWriter, const string& inSourcePDF
 		unsigned long pagesCount = copyingContext->GetSourceDocumentParser()->GetPagesCount();
 		for(unsigned long i=0; i < pagesCount && eSuccess == status; ++i)
 		{
-			RefCountPtr<PDFDictionary> pageDictionary(copyingContext->GetSourceDocumentParser()->ParsePage(i));			
+			RefCountPtr<PDFDictionary> pageDictionary(copyingContext->GetSourceDocumentParser()->ParsePage(i));
 
-			PDFObjectCastPtr<PDFArray> annotations(copyingContext->GetSourceDocumentParser()->QueryDictionaryObject(pageDictionary.GetPtr(),"Annots"));
-			if(annotations.GetPtr())
-			{
-				SingleValueContainerIterator<PDFObjectVector> annotationDictionaryObjects =  annotations->GetIterator();
+			if(pageDictionary->Exists("Annots")) {
+				// just copy the annots object into an indirect object, if it's not already that...later we can just attach the ref to the page.
+				// copying will take care of recreating the annots object and internal object in whatever way there are in the original document,
+				// so no need ot worry about whether they are references or direct objects
+				ObjectIDType annotsRef;
+				RefCountPtr<PDFObject> annotsObject = pageDictionary->QueryDirectObject("Annots");
 
-				PDFObjectCastPtr<PDFIndirectObjectReference> annotationReference;
-				while(annotationDictionaryObjects.MoveNext() && eSuccess == status)
-				{
-					annotationReference = annotationDictionaryObjects.GetItem();
-					EStatusCodeAndObjectIDType result = copyingContext->CopyObject(annotationReference->mObjectID);
+				if(annotsObject->GetType() == PDFObject::ePDFObjectIndirectObjectReference) {
+					annotsRef = ((PDFIndirectObjectReference*)(annotsObject.GetPtr()))->mObjectID;
+				} else {
+					// direct object. recreate as indirect, for the sake of simplicity. after its done copying, copy what indirect objects
+					// it refers to (indirect annotation objects...normally)
+					ObjectsContext& objectsContext = inTargetWriter->GetObjectsContext();
+
+					annotsRef = objectsContext.StartNewIndirectObject();					
+					EStatusCodeAndObjectIDTypeList result = copyingContext->CopyDirectObjectWithDeepCopy(annotsObject.GetPtr());
+
 					status = result.first;
-					if(eSuccess == status)
-						annotationsWriter.AddCopiedAnnotation(result.second);
+					if(status != eSuccess)
+					 	break;
+
+					objectsContext.EndIndirectObject();
+
+					// done copying the annots object, now copy its depenencies
+					status = copyingContext->CopyNewObjectsForDirectObject(result.second);
+					if(status != eSuccess)
+						break;
 				}
-				if(status != eSuccess)
-					break;
+
+				// report to end page handler, so it can use this reference when writing the page
+				annotationsWriter.SetAnnotationObjectReference(annotsRef);
+
 			}
 
 			status = copyingContext->AppendPDFPageFromPDF(i).first;
-
 
 		}
 	} while(false);
