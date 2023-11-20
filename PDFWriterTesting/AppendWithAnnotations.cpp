@@ -155,7 +155,7 @@ int AppendWithAnnotations(int argc, char* argv[])
 			break;
 
 		// last but not least
-		status = EmbedPagesInPDF(&pdfWriter, BuildRelativeInputPath(argv,"a1.pdf"));
+		status = EmbedPagesInPDF(&pdfWriter, BuildRelativeInputPath(argv,"MakingComments.pdf"));
 		if(status != eSuccess)
 			break;
 
