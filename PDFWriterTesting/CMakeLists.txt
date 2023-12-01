@@ -4,6 +4,7 @@ enable_testing()
 # Test files (add new tests here)
 create_test_sourcelist (Tests
   PDFWriterTesting.cpp
+  AppendAndReplaceURLAnnotations.cpp
   AppendingAndReading.cpp
   AppendPagesTest.cpp
   AppendSpecialPagesTest.cpp
@@ -87,6 +88,8 @@ add_executable (PDFWriterTesting
     # and test specific additionals
     PDFComment.cpp
     PDFCommentWriter.cpp
+    AnnotationsWriter.cpp
+  
 )
 
 target_link_libraries (PDFWriterTesting PDFWriter)

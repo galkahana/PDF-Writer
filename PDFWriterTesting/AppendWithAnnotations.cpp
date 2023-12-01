@@ -20,61 +20,7 @@ using namespace std;
 
 
 #include "testing/TestIO.h"
-
-
-class AnnotationsWriter : public DocumentContextExtenderAdapter
-{
-public:
-
-	AnnotationsWriter();
-
-	EStatusCode OnPageWrite(
-						PDFPage* inPage,
-						DictionaryContext* inPageDictionaryContext,
-						ObjectsContext* inPDFWriterObjectContext,
-						DocumentContext* inPDFWriterDocumentContext);	
-	void SetAnnotationObjectReference(ObjectIDType inAnnotationObjectRef);
-
-private:
-
-	ObjectIDType mAnnotationObjectRef;
-};
-
-AnnotationsWriter::AnnotationsWriter()
-{
-	mAnnotationObjectRef = 0;
-}
-
-void AnnotationsWriter::SetAnnotationObjectReference(ObjectIDType inAnnotationObjectRef)
-{
-	mAnnotationObjectRef = inAnnotationObjectRef;
-}
-
-EStatusCode AnnotationsWriter::OnPageWrite(
-									PDFPage* inPage,
-									DictionaryContext* inPageDictionaryContext,
-									ObjectsContext* inPDFWriterObjectContext,
-									DocumentContext* inPDFWriterDocumentContext)
-{
-	// write the comments as the page array of annotations
-	
-	if(mAnnotationObjectRef == 0)
-		return eSuccess;
-
-	if(inPageDictionaryContext->WriteKey("Annots") != eSuccess)
-	{
-		// Failed to write Annots key! there's already an annots entry. hmm. need to coordinate with another option
-		TRACE_LOG("AnnotationsWriter::OnPageWrite, Exception. Annots already written for this page, can't write a new entr");
-		return eFailure;
-	}
-
-	inPageDictionaryContext->WriteNewObjectReferenceValue(mAnnotationObjectRef);
-
-
-	// reset for next time
-	mAnnotationObjectRef = 0;
-	return eSuccess;	
-}
+#include "AnnotationsWriter.h"
 
 EStatusCode EmbedPagesInPDF(PDFWriter* inTargetWriter, const string& inSourcePDF)
 {
@@ -154,7 +100,7 @@ int AppendWithAnnotations(int argc, char* argv[])
 		if(status != eSuccess)
 			break;
 
-		// last but not least
+		// comment annotations
 		status = EmbedPagesInPDF(&pdfWriter, BuildRelativeInputPath(argv,"MakingComments.pdf"));
 		if(status != eSuccess)
 			break;
