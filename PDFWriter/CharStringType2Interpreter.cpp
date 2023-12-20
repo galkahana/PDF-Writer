@@ -448,6 +448,9 @@ Byte* CharStringType2Interpreter::InterpretRRCurveto(Byte* inProgramCounter)
 Byte* CharStringType2Interpreter::InterpretCallSubr(Byte* inProgramCounter)
 {
 	CharString* aCharString = NULL;
+	if(mOperandStack.size() < 1)
+		return NULL;
+
 	aCharString = mImplementationHelper->GetLocalSubr(mOperandStack.back().IntegerValue);
 	mOperandStack.pop_back();
 
@@ -609,6 +612,9 @@ Byte* CharStringType2Interpreter::InterpretCallGSubr(Byte* inProgramCounter)
 {
 	CharString* aCharString = NULL;
 	aCharString = mImplementationHelper->GetGlobalSubr(mOperandStack.back().IntegerValue);
+	if(mOperandStack.size() < 1)
+		return NULL;
+		
 	mOperandStack.pop_back();
 
 	if(aCharString != NULL)
@@ -670,6 +676,9 @@ Byte* CharStringType2Interpreter::InterpretAnd(Byte* inProgramCounter)
 	CharStringOperand newOperand;
 	newOperand.IsInteger = true;
 
+	if(mOperandStack.size() < 2)
+		return NULL;
+
 	valueB = mOperandStack.back();
 	mOperandStack.pop_back();
 	valueA = mOperandStack.back();
@@ -694,6 +703,9 @@ Byte* CharStringType2Interpreter::InterpretOr(Byte* inProgramCounter)
 	CharStringOperand newOperand;
 	newOperand.IsInteger = true;
 
+	if(mOperandStack.size() < 2)
+		return NULL;
+
 	valueB = mOperandStack.back();
 	mOperandStack.pop_back();
 	valueA = mOperandStack.back();
@@ -716,6 +728,9 @@ Byte* CharStringType2Interpreter::InterpretNot(Byte* inProgramCounter)
 	CharStringOperand newOperand;
 	newOperand.IsInteger = true;
 
+	if(mOperandStack.size() < 1)
+		return NULL;
+
 	value = mOperandStack.back();
 	mOperandStack.pop_back();
 
@@ -732,6 +747,9 @@ Byte* CharStringType2Interpreter::InterpretAbs(Byte* inProgramCounter)
 
 	CharStringOperand value;
 	CharStringOperand newOperand;
+
+	if(mOperandStack.size() < 1)
+		return NULL;
 
 	value = mOperandStack.back();
 	newOperand.IsInteger = value.IsInteger;
@@ -754,6 +772,9 @@ Byte* CharStringType2Interpreter::InterpretAdd(Byte* inProgramCounter)
 	CharStringOperand valueA;
 	CharStringOperand valueB;
 	CharStringOperand newOperand;
+
+	if(mOperandStack.size() < 2)
+		return NULL;
 
 	valueB = mOperandStack.back();
 	mOperandStack.pop_back();
@@ -787,6 +808,9 @@ Byte* CharStringType2Interpreter::InterpretSub(Byte* inProgramCounter)
 	CharStringOperand valueB;
 	CharStringOperand newOperand;
 
+	if(mOperandStack.size() < 2)
+		return NULL;
+
 	valueB = mOperandStack.back();
 	mOperandStack.pop_back();
 	valueA = mOperandStack.back();
@@ -819,6 +843,9 @@ Byte* CharStringType2Interpreter::InterpretDiv(Byte* inProgramCounter)
 	CharStringOperand valueB;
 	CharStringOperand newOperand;
 
+	if(mOperandStack.size() < 2)
+		return NULL;
+
 	valueB = mOperandStack.back();
 	mOperandStack.pop_back();
 	valueA = mOperandStack.back();
@@ -850,6 +877,9 @@ Byte* CharStringType2Interpreter::InterpretNeg(Byte* inProgramCounter)
 	CharStringOperand value;
 	CharStringOperand newOperand;
 
+	if(mOperandStack.size() < 1)
+		return NULL;
+
 	value = mOperandStack.back();
 	newOperand.IsInteger = value.IsInteger;
 	mOperandStack.pop_back();
@@ -872,6 +902,9 @@ Byte* CharStringType2Interpreter::InterpretEq(Byte* inProgramCounter)
 	CharStringOperand valueB;
 	CharStringOperand newOperand;
 
+	if(mOperandStack.size() < 2)
+		return NULL;
+
 	valueB = mOperandStack.back();
 	mOperandStack.pop_back();
 	valueA = mOperandStack.back();
@@ -893,6 +926,9 @@ Byte* CharStringType2Interpreter::InterpretDrop(Byte* inProgramCounter)
 	if(status != PDFHummus::eSuccess)
 		return NULL;
 
+	if(mOperandStack.size() < 1)
+		return NULL;
+
 	mOperandStack.pop_back();
 	return inProgramCounter;
 }
@@ -905,6 +941,9 @@ Byte* CharStringType2Interpreter::InterpretPut(Byte* inProgramCounter)
 
 	CharStringOperand valueA;
 	CharStringOperand valueB;
+
+	if(mOperandStack.size() < 2)
+		return NULL;
 
 	valueB = mOperandStack.back();
 	mOperandStack.pop_back();
@@ -923,6 +962,9 @@ Byte* CharStringType2Interpreter::InterpretGet(Byte* inProgramCounter)
 		return NULL;
 
 	CharStringOperand value;
+
+	if(mOperandStack.size() < 1)
+		return NULL;
 
 	value = mOperandStack.back();
 	mOperandStack.pop_back();
@@ -947,6 +989,9 @@ Byte* CharStringType2Interpreter::InterpretIfelse(Byte* inProgramCounter)
 	CharStringOperand valueB;
 	CharStringOperand valueC;
 	CharStringOperand valueD;
+
+	if(mOperandStack.size() < 4)
+		return NULL;
 
 	valueD = mOperandStack.back();
 	mOperandStack.pop_back();
@@ -1002,6 +1047,9 @@ Byte* CharStringType2Interpreter::InterpretMul(Byte* inProgramCounter)
 	CharStringOperand valueB;
 	CharStringOperand newOperand;
 
+	if(mOperandStack.size() < 2)
+		return NULL;
+
 	valueB = mOperandStack.back();
 	mOperandStack.pop_back();
 	valueA = mOperandStack.back();
@@ -1033,6 +1081,9 @@ Byte* CharStringType2Interpreter::InterpretSqrt(Byte* inProgramCounter)
 	CharStringOperand value;
 	CharStringOperand newOperand;
 
+	if(mOperandStack.size() < 1)
+		return NULL;
+
 	value = mOperandStack.back();
 	mOperandStack.pop_back();
 
@@ -1061,6 +1112,10 @@ Byte* CharStringType2Interpreter::InterpretExch(Byte* inProgramCounter)
 	CharStringOperand valueA;
 	CharStringOperand valueB;
 
+
+	if(mOperandStack.size() < 2)
+		return NULL;
+
 	valueB = mOperandStack.back();
 	mOperandStack.pop_back();
 	valueA = mOperandStack.back();
@@ -1080,12 +1135,15 @@ Byte* CharStringType2Interpreter::InterpretIndex(Byte* inProgramCounter)
 
 	CharStringOperand value;
 
+	if(mOperandStack.size() < 1)
+		return NULL;
+
 	value = mOperandStack.back();
 	mOperandStack.pop_back();
 	long index = (value.IsInteger ? value.IntegerValue : (long)value.RealValue);
 	CharStringOperandList::reverse_iterator it = mOperandStack.rbegin();
 
-	while(index > 0)
+	while(index > 0 && it != mOperandStack.rend())
 		++it;
 	mOperandStack.push_back(*it);
 
@@ -1101,6 +1159,9 @@ Byte* CharStringType2Interpreter::InterpretRoll(Byte* inProgramCounter)
 	CharStringOperand valueA;
 	CharStringOperand valueB;
 
+	if(mOperandStack.size() < 2)
+		return NULL;
+
 	valueB = mOperandStack.back();
 	mOperandStack.pop_back();
 	valueA = mOperandStack.back();
@@ -1111,7 +1172,7 @@ Byte* CharStringType2Interpreter::InterpretRoll(Byte* inProgramCounter)
 
 	CharStringOperandList groupToShift;
 
-	for(long i=0; i < itemsCount;++i)
+	for(long i=0; i < itemsCount && mOperandStack.size() > 0;++i)
 	{
 		groupToShift.push_front(mOperandStack.back());
 		mOperandStack.pop_back();
