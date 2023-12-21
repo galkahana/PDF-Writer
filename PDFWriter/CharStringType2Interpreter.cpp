@@ -611,9 +611,10 @@ Byte* CharStringType2Interpreter::InterpretHHCurveto(Byte* inProgramCounter)
 Byte* CharStringType2Interpreter::InterpretCallGSubr(Byte* inProgramCounter)
 {
 	CharString* aCharString = NULL;
-	aCharString = mImplementationHelper->GetGlobalSubr(mOperandStack.back().IntegerValue);
 	if(mOperandStack.size() < 1)
 		return NULL;
+
+	aCharString = mImplementationHelper->GetGlobalSubr(mOperandStack.back().IntegerValue);
 		
 	mOperandStack.pop_back();
 
