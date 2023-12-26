@@ -285,6 +285,8 @@ EStatusCode CharStringType2Flattener::WriteStemMask(Byte* inProgramCounter)
 
 EStatusCode CharStringType2Flattener::Type2Cntrmask(const CharStringOperandList& inOperandList,Byte* inProgramCounter)
 {
+	mStemsCount+= (unsigned short)(inOperandList.size() / 2);
+
 	if(WriteRegularOperator(20) != PDFHummus::eSuccess)
 		return PDFHummus::eFailure;
 

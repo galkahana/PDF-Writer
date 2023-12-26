@@ -516,7 +516,7 @@ Byte* CharStringType2Interpreter::InterpretHStemHM(Byte* inProgramCounter)
 
 Byte* CharStringType2Interpreter::InterpretHintMask(Byte* inProgramCounter)
 {
-	mStemsCount+= (unsigned short)(mOperandStack.size() / 2);
+	mStemsCount+= (unsigned short)(mOperandStack.size() / 2); // assuming this is a shortcut of dropping vstem if got arguments
 
 	EStatusCode status = mImplementationHelper->Type2Hintmask(mOperandStack,inProgramCounter);
 	if(status != PDFHummus::eSuccess)
@@ -528,6 +528,8 @@ Byte* CharStringType2Interpreter::InterpretHintMask(Byte* inProgramCounter)
 
 Byte* CharStringType2Interpreter::InterpretCntrMask(Byte* inProgramCounter)
 {
+	mStemsCount+= (unsigned short)(mOperandStack.size() / 2); // assuming this is a shortcut of dropping vstem if got arguments
+
 	EStatusCode status = mImplementationHelper->Type2Cntrmask(mOperandStack,inProgramCounter);
 	if(status != PDFHummus::eSuccess)
 		return NULL;

@@ -1,0 +1,32 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [        
+        {
+            "name": "(ctest lldb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${cmake.testProgram}",
+            "args": [ "${cmake.testArgs}" ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb"
+        },
+        {
+            "name": "(ctest msvc) Launch",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${cmake.testProgram}",
+            "args": [ "${cmake.testArgs}" ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "console": "integratedTerminal"
+        }
+
+    ]
+}

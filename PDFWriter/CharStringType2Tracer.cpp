@@ -170,11 +170,15 @@ void CharStringType2Tracer::WriteStemMask(Byte* inProgramCounter)
 	unsigned short maskSize = mStemsCount/8 + (mStemsCount % 8 != 0 ? 1:0);
 	char buffer[3];
 
-	mWriter->Write((const Byte*)"(0x",1);
+	mWriter->Write((const Byte*)"(",1);
 	for(unsigned short i=0;i<maskSize;++i)
 	{
-		SAFE_SPRINTF_1(buffer,3,"%X",inProgramCounter[i]);
-		mWriter->Write((const Byte*)buffer,2);
+		Byte arg = inProgramCounter[i];
+		// writing as binary so it's easy to understand which stems are active and which ain't (used to write hex)
+		for(int j=7;j>=0;--j) {
+			SAFE_SPRINTF_1(buffer,3,"%d",(arg>>j) & 1);
+			mWriter->Write((const Byte*)buffer,1);
+		}
 	}
 
 	mWriter->Write((const Byte*)")",1);
@@ -182,6 +186,8 @@ void CharStringType2Tracer::WriteStemMask(Byte* inProgramCounter)
 
 EStatusCode CharStringType2Tracer::Type2Cntrmask(const CharStringOperandList& inOperandList,Byte* inProgramCounter)
 {
+	mStemsCount+= (unsigned short)(inOperandList.size() / 2);
+
 	WriteStemMask(inProgramCounter);
 	mPrimitiveWriter.WriteKeyword("cntrmask");
 	return PDFHummus::eSuccess;
