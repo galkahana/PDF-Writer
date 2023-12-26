@@ -459,7 +459,7 @@ Byte* CharStringType2Interpreter::InterpretCallSubr(Byte* inProgramCounter)
 {
 	CharString* aCharString = NULL;
 	if(mOperandStack.size() < 1)
-		return NULL;
+		return inProgramCounter;
 
 	cout << "stack size " << mOperandStack.size() << "\n";
 
