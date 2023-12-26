@@ -3858,6 +3858,68 @@ static EStatusCode RunCNRS2Test(char* argv[]) {
 	return status;
 }
 
+static EStatusCode NotoSerifCJKRegularFontTest(char* argv[]) {
+	EStatusCode status = eSuccess;
+	PDFWriter pdfWriter;
+
+	do
+	{
+		status = pdfWriter.StartPDF(BuildRelativeOutputPath(argv,  "NotoSerifCJKRegularFontTest.pdf"),
+			ePDFVersion14,
+			LogConfiguration(true, true,
+				BuildRelativeOutputPath(argv,  "NotoSerifCJKRegularFontTest.log")));
+		if (status != eSuccess)
+		{
+			cout << "Failed to start file\n";
+			break;
+		}
+
+		PDFPage* page = new PDFPage();
+		page->SetMediaBox(PDFRectangle(0, 0, 595, 842));
+
+		PageContentContext* cxt = pdfWriter.StartPageContentContext(page);
+
+		AbstractContentContext::TextOptions textOptions(pdfWriter.GetFontForFile(
+			BuildRelativeInputPath(
+				argv,
+				"fonts/NotoSerifCJK-Regular.ttc")),
+			14,
+			AbstractContentContext::eGray,
+			0);
+
+		cxt->WriteText(10, 400, "\xE9\xBB\x98", textOptions);
+
+		status = pdfWriter.EndPageContentContext(cxt);
+		if (status != eSuccess)
+		{
+			status = PDFHummus::eFailure;
+			cout << "Failed to end content context\n";
+			break;
+		}
+
+		status = pdfWriter.WritePageAndRelease(page);
+		if (status != eSuccess)
+		{
+			status = PDFHummus::eFailure;
+			cout << "Failed to write page\n";
+			break;
+		}
+
+
+		status = pdfWriter.EndPDF();
+		if (status != eSuccess)
+		{
+			status = PDFHummus::eFailure;
+			cout << "Failed to end pdf\n";
+			break;
+		}
+
+	} while (false);
+
+
+	return status;
+}
+
 
 int TextUsageBugs(int argc, char* argv[])
 {
@@ -3900,7 +3962,15 @@ int TextUsageBugs(int argc, char* argv[])
 			break;
 		}
 
+		status = NotoSerifCJKRegularFontTest(argv);
+		if (status != PDFHummus::eSuccess)
+		{
+			cout << "Error in RunNotoSerifCHKRegularFontTest\n";
+			status = PDFHummus::eFailure;
+			break;
+		}
+
 	} while(false);
-	return status;
+	return status == eSuccess ? 0:1;
 }
 

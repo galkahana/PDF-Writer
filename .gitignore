@@ -41,10 +41,6 @@ xcode/Build
 xcode/DerivedData
 .DS_Store
 
-#VSCode unswated#
-#################
-.vscode
-
 #unwanted other sources #
 ########################
 zlib-1.2.3
