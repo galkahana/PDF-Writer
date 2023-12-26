@@ -33,6 +33,8 @@
 #include <algorithm>
 #include <utility>
 #include <list>
+#include <iostream>
+using std::cout;
 
 
 using namespace PDFHummus;
@@ -308,6 +310,7 @@ EStatusCode CFFEmbeddedFontWriter::AddComponentGlyphs(unsigned int inGlyphID,UIn
 {
 	CharString2Dependencies dependencies;
 	EStatusCode status = mOpenTypeInput.mCFF.CalculateDependenciesForCharIndex(0,inGlyphID,dependencies);
+	cout << "status:\n" << status << "\n";
 
 	if(PDFHummus::eSuccess == status && dependencies.mCharCodes.size() !=0)
 	{

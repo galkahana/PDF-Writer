@@ -38,3 +38,8 @@ target("pdfhummus")
         add_rules("utils.symbols.export_all", {export_classes = true})
     end
 
+target("test") do
+    add_deps("pdfhummus")
+
+    add_files ("test.cpp")
+end

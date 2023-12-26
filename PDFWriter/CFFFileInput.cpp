@@ -22,6 +22,8 @@
 #include "Trace.h"
 #include "CharStringType2Interpreter.h"
 #include "StandardEncoding.h"
+#include <iostream>
+using std::cout;
 
 
 using namespace PDFHummus;
@@ -1012,6 +1014,8 @@ EStatusCode CFFFileInput::CalculateDependenciesForCharIndex(unsigned short inFon
 															unsigned short inCharStringIndex,
 															CharString2Dependencies& ioDependenciesInfo)
 {
+	cout << "inFontIndex: " << inFontIndex << "\n";
+	cout << "inCharStringIndex: " << inCharStringIndex << "\n";
 	CharStringType2Interpreter interpreter;
 
 	EStatusCode status = PrepareForGlyphIntepretation(inFontIndex,inCharStringIndex);

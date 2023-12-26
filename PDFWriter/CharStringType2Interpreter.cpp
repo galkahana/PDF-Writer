@@ -22,6 +22,9 @@
 #include "Trace.h"
 #include <math.h>
 #include <stdlib.h>
+#include <iostream>
+
+using std::cout;
  
 using namespace PDFHummus;
 
@@ -154,6 +157,11 @@ Byte* CharStringType2Interpreter::InterpretNumber(Byte* inProgramCounter)
 
 	if(newPosition)
 	{
+		if (operand.IsInteger) {
+			cout << operand.IntegerValue << "\n";
+		} else {
+			cout << operand.RealValue << "\n";
+		}
 		mOperandStack.push_back(operand);
 		EStatusCode status = mImplementationHelper->Type2InterpretNumber(operand);
 		if(status != PDFHummus::eSuccess)
@@ -180,6 +188,8 @@ Byte* CharStringType2Interpreter::InterpretOperator(Byte* inProgramCounter,bool&
 		operatorValue = *newPosition;
 		++newPosition;
 	}
+
+	cout << "\n" << "op " << operatorValue << "\n";
 
 	switch(operatorValue)
 	{
@@ -450,6 +460,8 @@ Byte* CharStringType2Interpreter::InterpretCallSubr(Byte* inProgramCounter)
 	CharString* aCharString = NULL;
 	if(mOperandStack.size() < 1)
 		return NULL;
+
+	cout << "stack size " << mOperandStack.size() << "\n";
 
 	aCharString = mImplementationHelper->GetLocalSubr(mOperandStack.back().IntegerValue);
 	mOperandStack.pop_back();
