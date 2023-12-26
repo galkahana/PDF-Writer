@@ -158,9 +158,9 @@ Byte* CharStringType2Interpreter::InterpretNumber(Byte* inProgramCounter)
 	if(newPosition)
 	{
 		if (operand.IsInteger) {
-			cout << operand.IntegerValue << "\n";
+			cout << operand.IntegerValue << " ";
 		} else {
-			cout << operand.RealValue << "\n";
+			cout << operand.RealValue << " ";
 		}
 		mOperandStack.push_back(operand);
 		EStatusCode status = mImplementationHelper->Type2InterpretNumber(operand);
