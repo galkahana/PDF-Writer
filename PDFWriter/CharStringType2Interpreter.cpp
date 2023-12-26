@@ -449,7 +449,7 @@ Byte* CharStringType2Interpreter::InterpretCallSubr(Byte* inProgramCounter)
 {
 	CharString* aCharString = NULL;
 	if(mOperandStack.size() < 1)
-		return NULL;
+		return inProgramCounter;
 
 	aCharString = mImplementationHelper->GetLocalSubr(mOperandStack.back().IntegerValue);
 	mOperandStack.pop_back();
