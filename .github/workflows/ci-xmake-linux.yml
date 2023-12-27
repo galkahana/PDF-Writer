@@ -1,10 +1,10 @@
-name: Build on linux
+name: xmake
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
   workflow_dispatch:
 
 jobs:
@@ -21,7 +21,7 @@ jobs:
           echo "XMAKE_GLOBALDIR=${{ runner.workspace }}/.xmake-global" >> "${{ github.env }}"
       - uses: xmake-io/github-action-setup-xmake@v1
         with:
-          xmake-version: v2.8.3
+          xmake-version: v2.8.6
       - name: update repo
         run: xmake repo -u
       - uses: actions/checkout@v3
