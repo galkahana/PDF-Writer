@@ -54,7 +54,7 @@ static EStatusCode RunKoreanFontTest(char* argv[]) {
 		AbstractContentContext::TextOptions textOptions(pdfWriter.GetFontForFile(
 			BuildRelativeInputPath(
 				argv,
-				"fonts/NotoSerifCJKkr-Regular.otf")),
+				"fonts/NotoSerifCJK-Regular.ttc")),
 			14,
 			AbstractContentContext::eGray,
 			0);
