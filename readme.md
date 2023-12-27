@@ -120,7 +120,7 @@ include(FetchContent)
 FetchContent_Declare(
   PDFHummus
   GIT_REPOSITORY https://github.com/galkahana/PDF-Writer.git
-  GIT_TAG        4.5
+  GIT_TAG        v4.6.2
   FIND_PACKAGE_ARGS
 )
 FetchContent_MakeAvailable(PDFHummus)
@@ -131,6 +131,27 @@ target_link_libraries (TextExtraction PDFHummus::PDFWriter)
 This will either download the project and build it or use an installed version (provided that one exists and has a matching version). 
 Change the `GIT_TAG` value to what version you'd like to install. You can use tags, branches, commit hashs. anything goes.
 Includes are included haha.
+
+You may consider an alternative form that uses URL instead of GIT_REPOSITORY, like this:
+
+```cmake
+include(FetchContent)
+
+FetchContent_Declare(
+  PDFHummus
+  URL https://github.com/galkahana/PDF-Writer/archive/refs/tags/v4.6.2.tar.gz
+  URL_HASH SHA256=0a36815ccc9d207028567f90039785c824b211169ba5da68de84d0c15455ab62
+  DOWNLOAD_EXTRACT_TIMESTAMP FALSE
+  FIND_PACKAGE_ARGS
+)
+
+FetchContent_MakeAvailable(PDFHummus)
+```
+
+This has the benefit of fetching the archive URL rather than cmake runnig `git clone` on the specified target.
+PDFWriter archives since version v4.6.2 do not include PDFWriterTesting folder and its materials, making it a singificantly smaller download.
+You can find the archive urls in the Releases area for this repository.
+
 
 Note that when installing PDFHummus with the bundled libraries built (this is the default behvaior which can be changed by setting `USE_BUNDLED` variable to `FALSE`) there are additional targets that PDFHummus includes:
 - PDFHummus::FreeType - bundled freetype library
