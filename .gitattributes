@@ -1,2 +1,2 @@
 # exclude tests from exported git archives
-export-ignore PDFWriterTesting
+PDFWriterTesting export-ignore
