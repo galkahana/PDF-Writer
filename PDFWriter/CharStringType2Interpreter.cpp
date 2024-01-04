@@ -47,15 +47,16 @@ EStatusCode CharStringType2Interpreter::Intepret(const CharString& inCharStringT
 		mGotEndChar = false;
 		mStemsCount = 0;
 		mCheckedWidth = false;
+		mSubrsNesting = 0;
 		if(!inImplementationHelper)
 		{
 			TRACE_LOG("CharStringType2Interpreter::Intepret, null implementation helper passed. pass a proper pointer!!");
-			status = PDFHummus::eFailure;
+			status = eFailure;
 			break;
 		}
 
 		status = mImplementationHelper->ReadCharString(inCharStringToIntepret.mStartPosition,inCharStringToIntepret.mEndPosition,&charString);	
-		if(status != PDFHummus::eSuccess)
+		if(status != eSuccess)
 		{
 			TRACE_LOG2("CharStringType2Interpreter::Intepret, failed to read charstring starting in %lld and ending in %lld",inCharStringToIntepret.mStartPosition,inCharStringToIntepret.mEndPosition);
 			break;
@@ -72,45 +73,55 @@ EStatusCode CharStringType2Interpreter::Intepret(const CharString& inCharStringT
 
 EStatusCode CharStringType2Interpreter::ProcessCharString(Byte* inCharString,LongFilePositionType inCharStringLength)
 {
-	EStatusCode status = PDFHummus::eSuccess;
+	EStatusCode status = eSuccess;
 	Byte* pointer = inCharString;
 	bool gotEndExecutionOperator = false;
 
 	while(pointer - inCharString < inCharStringLength &&
-			PDFHummus::eSuccess == status && 
+			eSuccess == status && 
 			!gotEndExecutionOperator &&
 			!mGotEndChar)
 	{
-		if(IsOperator(pointer))
+		LongFilePositionType readLimit = inCharStringLength - (pointer - inCharString); // should be at least 1
+
+		if(IsOperator(*pointer))
 		{
-			pointer = InterpretOperator(pointer,gotEndExecutionOperator);
+			pointer = InterpretOperator(pointer,gotEndExecutionOperator, readLimit);
 			if(!pointer)
-				status = PDFHummus::eFailure;
+				status = eFailure;
 		}
 		else
-		{
-			pointer = InterpretNumber(pointer);
+		{	
+			pointer = InterpretNumber(pointer, readLimit);
 			if(!pointer)
-				status = PDFHummus::eFailure;
+				status = eFailure;
+
+			if(mOperandStack.size() > MAX_ARGUMENTS_STACK_SIZE) {
+				TRACE_LOG1("CharStringType2Interpreter::ProcessCharString, reached maximum allows arguments count - %d, aborting", mOperandStack.size());
+				status = eFailure;
+			}
 		}
 	}
 	return status;
 }
 
-bool CharStringType2Interpreter::IsOperator(Byte* inProgramCounter)
+bool CharStringType2Interpreter::IsOperator(Byte inCurrentByte)
 {
-	return  ((*inProgramCounter) <= 27) || 
-			(29 <= (*inProgramCounter) && (*inProgramCounter) <= 31);
+	return  ((inCurrentByte) <= 27) || 
+			(29 <= (inCurrentByte) && (inCurrentByte) <= 31);
 			
 }
 
 
-Byte* CharStringType2Interpreter::InterpretNumber(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretNumber(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	CharStringOperand operand;
 	Byte* newPosition = inProgramCounter;
 
-	if(28 == *newPosition)
+	if(inReadLimit < 1)
+		return NULL; // error, cant read a single byte
+
+	if(28 == *newPosition && inReadLimit >= 3)
 	{
 		operand.IsInteger = true;
 		operand.IntegerValue = (short)(
@@ -123,19 +134,19 @@ Byte* CharStringType2Interpreter::InterpretNumber(Byte* inProgramCounter)
 		operand.IntegerValue = (short)*newPosition - 139;
 		++newPosition;
 	}
-	else if(247 <= *newPosition && *newPosition <= 250)
+	else if(247 <= *newPosition && *newPosition <= 250  && inReadLimit >= 2)
 	{
 		operand.IsInteger = true;
 		operand.IntegerValue = (*newPosition - 247) * 256 + *(newPosition + 1) + 108;
 		newPosition += 2;
 	}
-	else if(251 <= *newPosition && *newPosition <= 254)
+	else if(251 <= *newPosition && *newPosition <= 254  && inReadLimit >= 2)
 	{
 		operand.IsInteger = true;
 		operand.IntegerValue = -(short)(*newPosition - 251) * 256 - *(newPosition + 1) - 108;
 		newPosition += 2;
 	}
-	else if(255 == *newPosition)
+	else if(255 == *newPosition  && inReadLimit >= 5)
 	{
 		operand.IsInteger = false;
 		operand.RealValue = (short)(((unsigned short)(*(newPosition+1)) << 8) + (*(newPosition+2)));
@@ -156,7 +167,7 @@ Byte* CharStringType2Interpreter::InterpretNumber(Byte* inProgramCounter)
 	{
 		mOperandStack.push_back(operand);
 		EStatusCode status = mImplementationHelper->Type2InterpretNumber(operand);
-		if(status != PDFHummus::eSuccess)
+		if(status != eSuccess)
 			return NULL;
 
 	}
@@ -164,180 +175,188 @@ Byte* CharStringType2Interpreter::InterpretNumber(Byte* inProgramCounter)
 	return newPosition;
 }
 
-Byte* CharStringType2Interpreter::InterpretOperator(Byte* inProgramCounter,bool& outGotEndExecutionCommand)
+Byte* CharStringType2Interpreter::InterpretOperator(Byte* inProgramCounter,bool& outGotEndExecutionCommand,LongFilePositionType inReadLimit)
 {
 	unsigned short operatorValue;
 	Byte* newPosition = inProgramCounter;
 	outGotEndExecutionCommand = false;
+
+	if(inReadLimit < 1)
+		return NULL; // error, cant read a single byte	
 	
 	if(12 == *newPosition)
 	{
+		if(inReadLimit < 2)
+			return NULL;
+
 		operatorValue = 0x0c00 + *(newPosition + 1);
 		newPosition+=2;
+		inReadLimit-=2;
 	}
 	else
 	{
 		operatorValue = *newPosition;
 		++newPosition;
+		--inReadLimit;
 	}
 
 	switch(operatorValue)
 	{
 		case 1: // hstem
 			CheckWidth();
-			newPosition = InterpretHStem(newPosition);
+			newPosition = InterpretHStem(newPosition, inReadLimit);
 			break;
 		case 3: // vstem
 			CheckWidth();
-			newPosition = InterpretVStem(newPosition);
+			newPosition = InterpretVStem(newPosition, inReadLimit);
 			break;
 		case 4: // vmoveto
 			CheckWidth();
-			newPosition = InterpretVMoveto(newPosition);
+			newPosition = InterpretVMoveto(newPosition, inReadLimit);
 			break;
 		case 5: // rlineto
-			newPosition = InterpretRLineto(newPosition);
+			newPosition = InterpretRLineto(newPosition, inReadLimit);
 			break;
 		case 6: // hlineto
-			newPosition = InterpretHLineto(newPosition);
+			newPosition = InterpretHLineto(newPosition, inReadLimit);
 			break;
 		case 7: // vlineto
-			newPosition = InterpretVLineto(newPosition);
+			newPosition = InterpretVLineto(newPosition, inReadLimit);
 			break;
 		case 8: // rrcurveto
-			newPosition = InterpretRRCurveto(newPosition);
+			newPosition = InterpretRRCurveto(newPosition, inReadLimit);
 			break;
 		case 10: // callsubr
-			newPosition = InterpretCallSubr(newPosition);
+			newPosition = InterpretCallSubr(newPosition, inReadLimit);
 			break;
 		case 11: // return
-			newPosition = InterpretReturn(newPosition);
+			newPosition = InterpretReturn(newPosition, inReadLimit);
 			outGotEndExecutionCommand = true;
 			break;
 		case 14: // endchar
 			CheckWidth();
-			newPosition = InterpretEndChar(newPosition);
+			newPosition = InterpretEndChar(newPosition, inReadLimit);
 			break;
 		case 18: // hstemhm
 			CheckWidth();
-			newPosition = InterpretHStemHM(newPosition);
+			newPosition = InterpretHStemHM(newPosition, inReadLimit);
 			break;
 		case 19: // hintmask
 			CheckWidth();
-			newPosition = InterpretHintMask(newPosition);
+			newPosition = InterpretHintMask(newPosition, inReadLimit);
 			break;
 		case 20: // cntrmask
 			CheckWidth();
-			newPosition = InterpretCntrMask(newPosition);
+			newPosition = InterpretCntrMask(newPosition, inReadLimit);
 			break;
 		case 21: // rmoveto
 			CheckWidth();
-			newPosition = InterpretRMoveto(newPosition);
+			newPosition = InterpretRMoveto(newPosition, inReadLimit);
 			break;
 		case 22: // hmoveto
 			CheckWidth();
-			newPosition = InterpretHMoveto(newPosition);
+			newPosition = InterpretHMoveto(newPosition, inReadLimit);
 			break;
 		case 23: // vstemhm
 			CheckWidth();
-			newPosition = InterpretVStemHM(newPosition);
+			newPosition = InterpretVStemHM(newPosition, inReadLimit);
 			break;
 		case 24: // rcurveline
-			newPosition = InterpretRCurveLine(newPosition);
+			newPosition = InterpretRCurveLine(newPosition, inReadLimit);
 			break;
 		case 25: // rlinecurve
-			newPosition = InterpretRLineCurve(newPosition);
+			newPosition = InterpretRLineCurve(newPosition, inReadLimit);
 			break;
 		case 26: // vvcurveto
-			newPosition = InterpretVVCurveto(newPosition);
+			newPosition = InterpretVVCurveto(newPosition, inReadLimit);
 			break;
 		case 27: // hhcurveto
-			newPosition = InterpretHHCurveto(newPosition);
+			newPosition = InterpretHHCurveto(newPosition, inReadLimit);
 			break;
 		case 29: // callgsubr
-			newPosition = InterpretCallGSubr(newPosition);
+			newPosition = InterpretCallGSubr(newPosition, inReadLimit);
 			break;
 		case 30: // vhcurveto
-			newPosition = InterpretVHCurveto(newPosition);
+			newPosition = InterpretVHCurveto(newPosition, inReadLimit);
 			break;
 		case 31: // hvcurveto
-			newPosition = InterpretHVCurveto(newPosition);
+			newPosition = InterpretHVCurveto(newPosition, inReadLimit);
 			break;
 		
 		case 0x0c00: // dotsection, depracated
 			// ignore
 			break;
 		case 0x0c03: // and
-			newPosition = InterpretAnd(newPosition);
+			newPosition = InterpretAnd(newPosition, inReadLimit);
 			break;
 		case 0x0c04: // or
-			newPosition = InterpretOr(newPosition);
+			newPosition = InterpretOr(newPosition, inReadLimit);
 			break;
 		case 0x0c05: // not
-			newPosition = InterpretNot(newPosition);
+			newPosition = InterpretNot(newPosition, inReadLimit);
 			break;
 		case 0x0c09: // abs
-			newPosition = InterpretAbs(newPosition);
+			newPosition = InterpretAbs(newPosition, inReadLimit);
 			break;
 		case 0x0c0a: // add
-			newPosition = InterpretAdd(newPosition);
+			newPosition = InterpretAdd(newPosition, inReadLimit);
 			break;
 		case 0x0c0b: // sub
-			newPosition = InterpretSub(newPosition);
+			newPosition = InterpretSub(newPosition, inReadLimit);
 			break;
 		case 0x0c0c: // div
-			newPosition = InterpretDiv(newPosition);
+			newPosition = InterpretDiv(newPosition, inReadLimit);
 			break;
 		case 0x0c0e: // neg
-			newPosition = InterpretNeg(newPosition);
+			newPosition = InterpretNeg(newPosition, inReadLimit);
 			break;
 		case 0x0c0f: // eq
-			newPosition = InterpretEq(newPosition);
+			newPosition = InterpretEq(newPosition, inReadLimit);
 			break;
 		case 0x0c12: // drop
-			newPosition = InterpretDrop(newPosition);
+			newPosition = InterpretDrop(newPosition, inReadLimit);
 			break;
 		case 0x0c14: // put
-			newPosition = InterpretPut(newPosition);
+			newPosition = InterpretPut(newPosition, inReadLimit);
 			break;
 		case 0x0c15: // get
-			newPosition = InterpretGet(newPosition);
+			newPosition = InterpretGet(newPosition, inReadLimit);
 			break;
 		case 0x0c16: // ifelse
-			newPosition = InterpretIfelse(newPosition);
+			newPosition = InterpretIfelse(newPosition, inReadLimit);
 			break;
 		case 0x0c17: // random
-			newPosition = InterpretRandom(newPosition);
+			newPosition = InterpretRandom(newPosition, inReadLimit);
 			break;
 		case 0x0c18: // mul
-			newPosition = InterpretMul(newPosition);
+			newPosition = InterpretMul(newPosition, inReadLimit);
 			break;
 		case 0x0c1a: // sqrt
-			newPosition = InterpretSqrt(newPosition);
+			newPosition = InterpretSqrt(newPosition, inReadLimit);
 			break;
 		case 0x0c1b: // dup
-			newPosition = InterpretDup(newPosition);
+			newPosition = InterpretDup(newPosition, inReadLimit);
 			break;
 		case 0x0c1c: // exch
-			newPosition = InterpretExch(newPosition);
+			newPosition = InterpretExch(newPosition, inReadLimit);
 			break;
 		case 0x0c1d: // index
-			newPosition = InterpretIndex(newPosition);
+			newPosition = InterpretIndex(newPosition, inReadLimit);
 			break;
 		case 0x0c1e: // roll
-			newPosition = InterpretRoll(newPosition);
+			newPosition = InterpretRoll(newPosition, inReadLimit);
 			break;
 		case 0x0c22: // hflex
-			newPosition = InterpretHFlex(newPosition);
+			newPosition = InterpretHFlex(newPosition, inReadLimit);
 			break;
 		case 0x0c23: // flex
-			newPosition = InterpretFlex(newPosition);
+			newPosition = InterpretFlex(newPosition, inReadLimit);
 			break;
 		case 0x0c24: // hflex1
-			newPosition = InterpretHFlex1(newPosition);
+			newPosition = InterpretHFlex1(newPosition, inReadLimit);
 			break;
 		case 0x0c25: // flex1
-			newPosition = InterpretFlex1(newPosition);
+			newPosition = InterpretFlex1(newPosition, inReadLimit);
 			break;
 	}
 	return newPosition;
@@ -353,28 +372,28 @@ void CharStringType2Interpreter::CheckWidth()
 	}
 }
 
-Byte* CharStringType2Interpreter::InterpretHStem(Byte* inProgramCounter)
-{
-	mStemsCount+= (unsigned short)(mOperandStack.size() / 2);
+EStatusCode CharStringType2Interpreter::AddStemsCount(unsigned short inBy) {
+	if(mStemsCount + inBy > MAX_STEM_HINTS_SIZE) {
+		TRACE_LOG3("CharStringType2Interpreter::AddStemsCount, about to add %d stem hintss to current %d stem hints. This will breach the upper limit of %d, aborting.", inBy, mStemsCount, MAX_STEM_HINTS_SIZE);
+		return eFailure;
+	}
+	mStemsCount+= inBy;
 
-	EStatusCode status = mImplementationHelper->Type2Hstem(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	return eSuccess;
+}
+
+Byte* CharStringType2Interpreter::InterpretHStem(Byte* inProgramCounter, LongFilePositionType inReadLimit)
+{
+	EStatusCode status = AddStemsCount((unsigned short)(mOperandStack.size() / 2));
+	if(status != eSuccess)
+		return NULL;
+
+	status = mImplementationHelper->Type2Hstem(mOperandStack);
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
 	return inProgramCounter;
-}
-
-EStatusCode CharStringType2Interpreter::ClearNFromStack(unsigned short inCount)
-{
-	if(mOperandStack.size() >= inCount)
-	{
-		for(unsigned short i=0;i<inCount;++i)
-			mOperandStack.pop_back();
-		return PDFHummus::eSuccess;
-	}
-	else
-		return PDFHummus::eFailure;
 }
 
 void CharStringType2Interpreter::ClearStack()
@@ -382,22 +401,24 @@ void CharStringType2Interpreter::ClearStack()
 	mOperandStack.clear();
 }
 
-Byte* CharStringType2Interpreter::InterpretVStem(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretVStem(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
-	mStemsCount+= (unsigned short)(mOperandStack.size() / 2);
+	EStatusCode status = AddStemsCount((unsigned short)(mOperandStack.size() / 2));
+	if(status != eSuccess)
+		return NULL;	
 
-	EStatusCode status = mImplementationHelper->Type2Vstem(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	status = mImplementationHelper->Type2Vstem(mOperandStack);
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretVMoveto(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretVMoveto(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Vmoveto(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
@@ -405,51 +426,52 @@ Byte* CharStringType2Interpreter::InterpretVMoveto(Byte* inProgramCounter)
 	
 }
 
-Byte* CharStringType2Interpreter::InterpretRLineto(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretRLineto(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Rlineto(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretHLineto(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretHLineto(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Hlineto(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretVLineto(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretVLineto(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Vlineto(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretRRCurveto(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretRRCurveto(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2RRCurveto(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretCallSubr(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretCallSubr(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	CharString* aCharString = NULL;
 	if(mOperandStack.size() < 1)
 		return NULL;
+
 
 	aCharString = mImplementationHelper->GetLocalSubr(mOperandStack.back().IntegerValue);
 	mOperandStack.pop_back();
@@ -461,17 +483,26 @@ Byte* CharStringType2Interpreter::InterpretCallSubr(Byte* inProgramCounter)
 		
 		do
 		{
-			if(status != PDFHummus::eSuccess)
+			if(status != eSuccess)
 			{
 				TRACE_LOG2("CharStringType2Interpreter::InterpretCallSubr, failed to read charstring starting in %lld and ending in %lld",aCharString->mStartPosition,aCharString->mEndPosition);
 				break;
 			}
 			
+			++mSubrsNesting;
+			
+			if(mSubrsNesting > MAX_SUBR_NESTING_STACK_SIZE) {
+				TRACE_LOG1("CharStringType2Interpreter::InterpretCallSubr, max call stack level reached at %d. aborting", MAX_SUBR_NESTING_STACK_SIZE);
+				status = eFailure;
+				break;
+			}
+
 			status = ProcessCharString(charString,aCharString->mEndPosition - aCharString->mStartPosition);
+			--mSubrsNesting;
 		}while(false);
 
 		delete charString;
-		if(status != PDFHummus::eSuccess)
+		if(status != eSuccess)
 			return NULL;
 		else
 			return inProgramCounter;
@@ -482,19 +513,19 @@ Byte* CharStringType2Interpreter::InterpretCallSubr(Byte* inProgramCounter)
 	}
 }
 
-Byte* CharStringType2Interpreter::InterpretReturn(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretReturn(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Return(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretEndChar(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretEndChar(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Endchar(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	mGotEndChar = true;
@@ -502,122 +533,136 @@ Byte* CharStringType2Interpreter::InterpretEndChar(Byte* inProgramCounter)
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretHStemHM(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretHStemHM(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
-	mStemsCount+= (unsigned short)(mOperandStack.size() / 2);
+	EStatusCode status = AddStemsCount((unsigned short)(mOperandStack.size() / 2));
+	if(status != eSuccess)
+		return NULL;
 
-	EStatusCode status = mImplementationHelper->Type2Hstemhm(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	status = mImplementationHelper->Type2Hstemhm(mOperandStack);
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretHintMask(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretHintMask(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
-	mStemsCount+= (unsigned short)(mOperandStack.size() / 2); // assuming this is a shortcut of dropping vstem if got arguments
+	EStatusCode status = AddStemsCount((unsigned short)(mOperandStack.size() / 2)); // assuming this is a shortcut of dropping vstem if got arguments
+	if(status != eSuccess)
+		return NULL;	
 
-	EStatusCode status = mImplementationHelper->Type2Hintmask(mOperandStack,inProgramCounter);
-	if(status != PDFHummus::eSuccess)
+	status = mImplementationHelper->Type2Hintmask(mOperandStack,inProgramCounter, inReadLimit);
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
-	return inProgramCounter+(mStemsCount/8 + (mStemsCount % 8 != 0 ? 1:0));
+	LongFilePositionType programCounterStemReadSize = (mStemsCount/8 + (mStemsCount % 8 != 0 ? 1:0));
+	if(programCounterStemReadSize > inReadLimit)
+		return NULL;
+	return inProgramCounter+programCounterStemReadSize;
 }
 
-Byte* CharStringType2Interpreter::InterpretCntrMask(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretCntrMask(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
-	mStemsCount+= (unsigned short)(mOperandStack.size() / 2); // assuming this is a shortcut of dropping vstem if got arguments
+	EStatusCode status = AddStemsCount((unsigned short)(mOperandStack.size() / 2)); // assuming this is a shortcut of dropping vstem if got arguments
+	if(status != eSuccess)
+		return NULL;	
 
-	EStatusCode status = mImplementationHelper->Type2Cntrmask(mOperandStack,inProgramCounter);
-	if(status != PDFHummus::eSuccess)
+	status = mImplementationHelper->Type2Cntrmask(mOperandStack,inProgramCounter, inReadLimit);
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
-	return inProgramCounter+(mStemsCount/8 + (mStemsCount % 8 != 0 ? 1:0) );
+	LongFilePositionType programCounterStemReadSize = (mStemsCount/8 + (mStemsCount % 8 != 0 ? 1:0));
+	if(programCounterStemReadSize > inReadLimit)
+		return NULL;
+	return inProgramCounter+programCounterStemReadSize;
 }
 
-Byte* CharStringType2Interpreter::InterpretRMoveto(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretRMoveto(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Rmoveto(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretHMoveto(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretHMoveto(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Hmoveto(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretVStemHM(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretVStemHM(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
-	mStemsCount+= (unsigned short)(mOperandStack.size() / 2);
+	EStatusCode status = AddStemsCount((unsigned short)(mOperandStack.size() / 2));
+	if(status != eSuccess)
+		return NULL;	
 
-	EStatusCode status = mImplementationHelper->Type2Vstemhm(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	status = mImplementationHelper->Type2Vstemhm(mOperandStack);
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretRCurveLine(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretRCurveLine(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Rcurveline(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretRLineCurve(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretRLineCurve(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Rlinecurve(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretVVCurveto(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretVVCurveto(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Vvcurveto(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretHHCurveto(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretHHCurveto(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Hhcurveto(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretCallGSubr(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretCallGSubr(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	CharString* aCharString = NULL;
 	if(mOperandStack.size() < 1)
 		return NULL;
 
+
 	aCharString = mImplementationHelper->GetGlobalSubr(mOperandStack.back().IntegerValue);
-		
 	mOperandStack.pop_back();
 
 	if(aCharString != NULL)
@@ -627,17 +672,26 @@ Byte* CharStringType2Interpreter::InterpretCallGSubr(Byte* inProgramCounter)
 		
 		do
 		{
-			if(status != PDFHummus::eSuccess)
+			if(status != eSuccess)
 			{
-				TRACE_LOG2("CharStringType2Interpreter::InterpretCallSubr, failed to read charstring starting in %lld and ending in %lld",aCharString->mStartPosition,aCharString->mEndPosition);
+				TRACE_LOG2("CharStringType2Interpreter::InterpretCallGSubr, failed to read charstring starting in %lld and ending in %lld",aCharString->mStartPosition,aCharString->mEndPosition);
 				break;
 			}
-			
+
+			++mSubrsNesting;
+
+			if(mSubrsNesting > MAX_SUBR_NESTING_STACK_SIZE) {
+				TRACE_LOG1("CharStringType2Interpreter::InterpretCallGSubr, max call stack level reached at %d. aborting", MAX_SUBR_NESTING_STACK_SIZE);
+				status = eFailure;
+				break;
+			}
+
 			status = ProcessCharString(charString,aCharString->mEndPosition - aCharString->mStartPosition);
+			--mSubrsNesting;
 		}while(false);
 
 		delete charString;
-		if(status != PDFHummus::eSuccess)
+		if(status != eSuccess)
 			return NULL;
 		else
 			return inProgramCounter;
@@ -648,30 +702,30 @@ Byte* CharStringType2Interpreter::InterpretCallGSubr(Byte* inProgramCounter)
 	}
 }
 
-Byte* CharStringType2Interpreter::InterpretVHCurveto(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretVHCurveto(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Vhcurveto(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretHVCurveto(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretHVCurveto(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Hvcurveto(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretAnd(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretAnd(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2And(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	CharStringOperand valueA;
@@ -695,10 +749,10 @@ Byte* CharStringType2Interpreter::InterpretAnd(Byte* inProgramCounter)
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretOr(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretOr(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Or(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	CharStringOperand valueA;
@@ -721,10 +775,10 @@ Byte* CharStringType2Interpreter::InterpretOr(Byte* inProgramCounter)
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretNot(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretNot(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Not(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	CharStringOperand value;
@@ -742,10 +796,10 @@ Byte* CharStringType2Interpreter::InterpretNot(Byte* inProgramCounter)
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretAbs(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretAbs(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Abs(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	CharStringOperand value;
@@ -766,10 +820,10 @@ Byte* CharStringType2Interpreter::InterpretAbs(Byte* inProgramCounter)
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretAdd(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretAdd(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Add(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	CharStringOperand valueA;
@@ -801,10 +855,10 @@ Byte* CharStringType2Interpreter::InterpretAdd(Byte* inProgramCounter)
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretSub(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretSub(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Sub(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	CharStringOperand valueA;
@@ -836,10 +890,10 @@ Byte* CharStringType2Interpreter::InterpretSub(Byte* inProgramCounter)
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretDiv(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretDiv(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Div(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	CharStringOperand valueA;
@@ -871,10 +925,10 @@ Byte* CharStringType2Interpreter::InterpretDiv(Byte* inProgramCounter)
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretNeg(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretNeg(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Neg(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	CharStringOperand value;
@@ -895,10 +949,10 @@ Byte* CharStringType2Interpreter::InterpretNeg(Byte* inProgramCounter)
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretEq(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretEq(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Eq(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	CharStringOperand valueA;
@@ -923,10 +977,10 @@ Byte* CharStringType2Interpreter::InterpretEq(Byte* inProgramCounter)
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretDrop(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretDrop(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Drop(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	if(mOperandStack.size() < 1)
@@ -936,10 +990,10 @@ Byte* CharStringType2Interpreter::InterpretDrop(Byte* inProgramCounter)
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretPut(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretPut(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Put(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	CharStringOperand valueA;
@@ -958,10 +1012,10 @@ Byte* CharStringType2Interpreter::InterpretPut(Byte* inProgramCounter)
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretGet(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretGet(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Get(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	CharStringOperand value;
@@ -982,10 +1036,10 @@ Byte* CharStringType2Interpreter::InterpretGet(Byte* inProgramCounter)
 		return NULL;
 }
 
-Byte* CharStringType2Interpreter::InterpretIfelse(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretIfelse(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Ifelse(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	CharStringOperand valueA;
@@ -1025,10 +1079,10 @@ Byte* CharStringType2Interpreter::InterpretIfelse(Byte* inProgramCounter)
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretRandom(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretRandom(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Random(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	CharStringOperand newOperand;
@@ -1040,10 +1094,10 @@ Byte* CharStringType2Interpreter::InterpretRandom(Byte* inProgramCounter)
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretMul(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretMul(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Mul(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	CharStringOperand valueA;
@@ -1075,10 +1129,10 @@ Byte* CharStringType2Interpreter::InterpretMul(Byte* inProgramCounter)
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretSqrt(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretSqrt(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Sqrt(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	CharStringOperand value;
@@ -1096,20 +1150,23 @@ Byte* CharStringType2Interpreter::InterpretSqrt(Byte* inProgramCounter)
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretDup(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretDup(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Dup(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
+
+	if(mOperandStack.size() < 1)
+		return NULL;		
 
 	mOperandStack.push_back(mOperandStack.back());
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretExch(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretExch(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Exch(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	CharStringOperand valueA;
@@ -1130,10 +1187,10 @@ Byte* CharStringType2Interpreter::InterpretExch(Byte* inProgramCounter)
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretIndex(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretIndex(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Index(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	CharStringOperand value;
@@ -1153,10 +1210,10 @@ Byte* CharStringType2Interpreter::InterpretIndex(Byte* inProgramCounter)
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretRoll(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretRoll(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Roll(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	CharStringOperand valueA;
@@ -1181,6 +1238,9 @@ Byte* CharStringType2Interpreter::InterpretRoll(Byte* inProgramCounter)
 		mOperandStack.pop_back();
 	}
 
+	if (shiftAmount != 0 && groupToShift.size() == 0) // make sure that if there's a shift, there's what to shift
+		return NULL;
+
 	if(shiftAmount > 0)
 	{
 		for(long j=0; j < shiftAmount;++j)
@@ -1196,42 +1256,41 @@ Byte* CharStringType2Interpreter::InterpretRoll(Byte* inProgramCounter)
 			groupToShift.push_back(groupToShift.front());
 			groupToShift.pop_front();
 		}
-
 	}
-	
+	// put back the rolled group
 	for(long i=0; i < itemsCount;++i)
 	{
-		mOperandStack.push_back(mOperandStack.front());
-		mOperandStack.pop_front();
+		mOperandStack.push_back(groupToShift.front());
+		groupToShift.pop_front();
 	}
 
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretHFlex(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretHFlex(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Hflex(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretFlex(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretFlex(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Flex(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
 	return inProgramCounter;
 }
 
-Byte* CharStringType2Interpreter::InterpretHFlex1(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretHFlex1(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Hflex1(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
@@ -1239,10 +1298,10 @@ Byte* CharStringType2Interpreter::InterpretHFlex1(Byte* inProgramCounter)
 
 }
 
-Byte* CharStringType2Interpreter::InterpretFlex1(Byte* inProgramCounter)
+Byte* CharStringType2Interpreter::InterpretFlex1(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	EStatusCode status = mImplementationHelper->Type2Flex1(mOperandStack);
-	if(status != PDFHummus::eSuccess)
+	if(status != eSuccess)
 		return NULL;
 
 	ClearStack();
