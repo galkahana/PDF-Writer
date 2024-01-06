@@ -25,6 +25,10 @@
  
 using namespace PDFHummus;
 
+#define MAX_ARGUMENTS_STACK_SIZE 48
+#define MAX_STEM_HINTS_SIZE 96
+#define MAX_SUBR_NESTING_STACK_SIZE 10
+
 
 CharStringType2Interpreter::CharStringType2Interpreter(void)
 {
@@ -181,13 +185,17 @@ Byte* CharStringType2Interpreter::InterpretOperator(Byte* inProgramCounter,bool&
 	Byte* newPosition = inProgramCounter;
 	outGotEndExecutionCommand = false;
 
-	if(inReadLimit < 1)
+	if(inReadLimit < 1) {
+		TRACE_LOG("harStringType2Interpreter::InterpretOperator, operator identified but no chars to read. aborting");
 		return NULL; // error, cant read a single byte	
+	}
 	
 	if(12 == *newPosition)
 	{
-		if(inReadLimit < 2)
+		if(inReadLimit < 2) {
+			TRACE_LOG("harStringType2Interpreter::InterpretOperator, first operator char is 12. expecting another one to read whole operator, but reached read limit. aborting");
 			return NULL;
+		}
 
 		operatorValue = 0x0c00 + *(newPosition + 1);
 		newPosition+=2;
@@ -469,8 +477,10 @@ Byte* CharStringType2Interpreter::InterpretRRCurveto(Byte* inProgramCounter, Lon
 Byte* CharStringType2Interpreter::InterpretCallSubr(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	CharString* aCharString = NULL;
-	if(mOperandStack.size() < 1)
+	if(mOperandStack.size() < 1) {
+		TRACE_LOG1("CharStringType2Interpreter::InterpretCallSubr, callsubr should have at least 1 argument on stack. got %d. aborting", mOperandStack.size());
 		return NULL;
+	}
 
 
 	aCharString = mImplementationHelper->GetLocalSubr(mOperandStack.back().IntegerValue);
@@ -658,8 +668,10 @@ Byte* CharStringType2Interpreter::InterpretHHCurveto(Byte* inProgramCounter, Lon
 Byte* CharStringType2Interpreter::InterpretCallGSubr(Byte* inProgramCounter, LongFilePositionType inReadLimit)
 {
 	CharString* aCharString = NULL;
-	if(mOperandStack.size() < 1)
+	if(mOperandStack.size() < 1) {
+		TRACE_LOG1("CharStringType2Interpreter::InterpretCallGSubr, callgsubr should have at least 1 argument on stack. got %d. aborting", mOperandStack.size());
 		return NULL;
+	}
 
 
 	aCharString = mImplementationHelper->GetGlobalSubr(mOperandStack.back().IntegerValue);
@@ -733,8 +745,11 @@ Byte* CharStringType2Interpreter::InterpretAnd(Byte* inProgramCounter, LongFileP
 	CharStringOperand newOperand;
 	newOperand.IsInteger = true;
 
-	if(mOperandStack.size() < 2)
+	if(mOperandStack.size() < 2) {
+		TRACE_LOG1("CharStringType2Interpreter::InterpretAnd, and should have at least 2 arguments on stack. got %d. aborting", mOperandStack.size());
 		return NULL;
+	}
+
 
 	valueB = mOperandStack.back();
 	mOperandStack.pop_back();
@@ -760,8 +775,11 @@ Byte* CharStringType2Interpreter::InterpretOr(Byte* inProgramCounter, LongFilePo
 	CharStringOperand newOperand;
 	newOperand.IsInteger = true;
 
-	if(mOperandStack.size() < 2)
+	if(mOperandStack.size() < 2) {
+		TRACE_LOG1("CharStringType2Interpreter::InterpretOr, or should have at least 2 arguments on stack. got %d. aborting", mOperandStack.size());
 		return NULL;
+	}
+
 
 	valueB = mOperandStack.back();
 	mOperandStack.pop_back();
@@ -785,8 +803,11 @@ Byte* CharStringType2Interpreter::InterpretNot(Byte* inProgramCounter, LongFileP
 	CharStringOperand newOperand;
 	newOperand.IsInteger = true;
 
-	if(mOperandStack.size() < 1)
+	if(mOperandStack.size() < 1) {
+		TRACE_LOG1("CharStringType2Interpreter::InterpretOr, not should have at least 1 argument on stack. got %d. aborting", mOperandStack.size());
 		return NULL;
+	}
+
 
 	value = mOperandStack.back();
 	mOperandStack.pop_back();
@@ -805,8 +826,11 @@ Byte* CharStringType2Interpreter::InterpretAbs(Byte* inProgramCounter, LongFileP
 	CharStringOperand value;
 	CharStringOperand newOperand;
 
-	if(mOperandStack.size() < 1)
+	if(mOperandStack.size() < 1) {
+		TRACE_LOG1("CharStringType2Interpreter::InterpretAbs, abs should have at least 1 argument on stack. got %d. aborting", mOperandStack.size());
 		return NULL;
+	}
+
 
 	value = mOperandStack.back();
 	newOperand.IsInteger = value.IsInteger;
@@ -830,8 +854,10 @@ Byte* CharStringType2Interpreter::InterpretAdd(Byte* inProgramCounter, LongFileP
 	CharStringOperand valueB;
 	CharStringOperand newOperand;
 
-	if(mOperandStack.size() < 2)
+	if(mOperandStack.size() < 2) {
+		TRACE_LOG1("CharStringType2Interpreter::InterpretAdd, add should have at least 2 arguments on stack. got %d. aborting", mOperandStack.size());
 		return NULL;
+	}
 
 	valueB = mOperandStack.back();
 	mOperandStack.pop_back();
@@ -865,8 +891,11 @@ Byte* CharStringType2Interpreter::InterpretSub(Byte* inProgramCounter, LongFileP
 	CharStringOperand valueB;
 	CharStringOperand newOperand;
 
-	if(mOperandStack.size() < 2)
+	if(mOperandStack.size() < 2) {
+		TRACE_LOG1("CharStringType2Interpreter::InterpretSub, sub should have at least 2 arguments on stack. got %d. aborting", mOperandStack.size());
 		return NULL;
+	}
+
 
 	valueB = mOperandStack.back();
 	mOperandStack.pop_back();
@@ -900,8 +929,12 @@ Byte* CharStringType2Interpreter::InterpretDiv(Byte* inProgramCounter, LongFileP
 	CharStringOperand valueB;
 	CharStringOperand newOperand;
 
-	if(mOperandStack.size() < 2)
+
+	if(mOperandStack.size() < 2) {
+		TRACE_LOG1("CharStringType2Interpreter::InterpretDiv, div should have at least 2 arguments on stack. got %d. aborting", mOperandStack.size());
 		return NULL;
+	}
+
 
 	valueB = mOperandStack.back();
 	mOperandStack.pop_back();
@@ -934,8 +967,10 @@ Byte* CharStringType2Interpreter::InterpretNeg(Byte* inProgramCounter, LongFileP
 	CharStringOperand value;
 	CharStringOperand newOperand;
 
-	if(mOperandStack.size() < 1)
+	if(mOperandStack.size() < 1) {
+		TRACE_LOG1("CharStringType2Interpreter::InterpretNeg, neg should have at least 1 argument on stack. got %d. aborting", mOperandStack.size());
 		return NULL;
+	}
 
 	value = mOperandStack.back();
 	newOperand.IsInteger = value.IsInteger;
@@ -959,8 +994,10 @@ Byte* CharStringType2Interpreter::InterpretEq(Byte* inProgramCounter, LongFilePo
 	CharStringOperand valueB;
 	CharStringOperand newOperand;
 
-	if(mOperandStack.size() < 2)
+	if(mOperandStack.size() < 2) {
+		TRACE_LOG1("CharStringType2Interpreter::InterpretEq, eq should have at least 2 arguments on stack. got %d. aborting", mOperandStack.size());
 		return NULL;
+	}
 
 	valueB = mOperandStack.back();
 	mOperandStack.pop_back();
@@ -983,8 +1020,10 @@ Byte* CharStringType2Interpreter::InterpretDrop(Byte* inProgramCounter, LongFile
 	if(status != eSuccess)
 		return NULL;
 
-	if(mOperandStack.size() < 1)
+	if(mOperandStack.size() < 1) {
+		TRACE_LOG1("CharStringType2Interpreter::InterpretDrop, drop should have at least 1 argument on stack. got %d. aborting", mOperandStack.size());
 		return NULL;
+	}
 
 	mOperandStack.pop_back();
 	return inProgramCounter;
@@ -999,8 +1038,10 @@ Byte* CharStringType2Interpreter::InterpretPut(Byte* inProgramCounter, LongFileP
 	CharStringOperand valueA;
 	CharStringOperand valueB;
 
-	if(mOperandStack.size() < 2)
+	if(mOperandStack.size() < 2) {
+		TRACE_LOG1("CharStringType2Interpreter::InterpretPut, put should have at least 2 arguments on stack. got %d. aborting", mOperandStack.size());
 		return NULL;
+	}
 
 	valueB = mOperandStack.back();
 	mOperandStack.pop_back();
@@ -1020,20 +1061,24 @@ Byte* CharStringType2Interpreter::InterpretGet(Byte* inProgramCounter, LongFileP
 
 	CharStringOperand value;
 
-	if(mOperandStack.size() < 1)
+	if(mOperandStack.size() < 1) {
+		TRACE_LOG1("CharStringType2Interpreter::InterpretGet, get should have at least 1 argument on stack. got %d. aborting", mOperandStack.size());
 		return NULL;
+	}
 
 	value = mOperandStack.back();
 	mOperandStack.pop_back();
 	long index = (value.IsInteger ? value.IntegerValue : (long)value.RealValue);
 
-	if((mOperandStack.size() > (unsigned long)index) && (index >= 0))
+	if((mStorage.size() > (unsigned long)index) && (index >= 0))
 	{
 		mOperandStack.push_back(mStorage[index]);
 		return inProgramCounter;
 	}
-	else
+	else {
+		TRACE_LOG2("CharStringType2Interpreter::InterpretGet, input argument for get operation does not match storage size. argument value is %ld and storage size is %d. aborting", index, mStorage.size());
 		return NULL;
+	}
 }
 
 Byte* CharStringType2Interpreter::InterpretIfelse(Byte* inProgramCounter, LongFilePositionType inReadLimit)
@@ -1047,8 +1092,10 @@ Byte* CharStringType2Interpreter::InterpretIfelse(Byte* inProgramCounter, LongFi
 	CharStringOperand valueC;
 	CharStringOperand valueD;
 
-	if(mOperandStack.size() < 4)
+	if(mOperandStack.size() < 4) {
+		TRACE_LOG1("CharStringType2Interpreter::InterpretIfelse, ifelse should have at least 4 arguments on stack. got %d. aborting", mOperandStack.size());
 		return NULL;
+	}		
 
 	valueD = mOperandStack.back();
 	mOperandStack.pop_back();
@@ -1104,8 +1151,10 @@ Byte* CharStringType2Interpreter::InterpretMul(Byte* inProgramCounter, LongFileP
 	CharStringOperand valueB;
 	CharStringOperand newOperand;
 
-	if(mOperandStack.size() < 2)
+	if(mOperandStack.size() < 2) {
+		TRACE_LOG1("CharStringType2Interpreter::InterpretMul, mul should have at least 4 arguments on stack. got %d. aborting", mOperandStack.size());
 		return NULL;
+	}		
 
 	valueB = mOperandStack.back();
 	mOperandStack.pop_back();
@@ -1138,8 +1187,10 @@ Byte* CharStringType2Interpreter::InterpretSqrt(Byte* inProgramCounter, LongFile
 	CharStringOperand value;
 	CharStringOperand newOperand;
 
-	if(mOperandStack.size() < 1)
+	if(mOperandStack.size() < 1) {
+		TRACE_LOG1("CharStringType2Interpreter::InterpretSqrt, sqrt should have at least 1 argument on stack. got %d. aborting", mOperandStack.size());
 		return NULL;
+	}		
 
 	value = mOperandStack.back();
 	mOperandStack.pop_back();
@@ -1156,8 +1207,10 @@ Byte* CharStringType2Interpreter::InterpretDup(Byte* inProgramCounter, LongFileP
 	if(status != eSuccess)
 		return NULL;
 
-	if(mOperandStack.size() < 1)
-		return NULL;		
+	if(mOperandStack.size() < 1) {
+		TRACE_LOG1("CharStringType2Interpreter::InterpretDup, dup should have at least 1 argument on stack. got %d. aborting", mOperandStack.size());
+		return NULL;
+	}		
 
 	mOperandStack.push_back(mOperandStack.back());
 	return inProgramCounter;
@@ -1172,9 +1225,10 @@ Byte* CharStringType2Interpreter::InterpretExch(Byte* inProgramCounter, LongFile
 	CharStringOperand valueA;
 	CharStringOperand valueB;
 
-
-	if(mOperandStack.size() < 2)
+	if(mOperandStack.size() < 2) {
+		TRACE_LOG1("CharStringType2Interpreter::InterpretExch, exch should have at least 2 arguments on stack. got %d. aborting", mOperandStack.size());
 		return NULL;
+	}		
 
 	valueB = mOperandStack.back();
 	mOperandStack.pop_back();
@@ -1195,8 +1249,10 @@ Byte* CharStringType2Interpreter::InterpretIndex(Byte* inProgramCounter, LongFil
 
 	CharStringOperand value;
 
-	if(mOperandStack.size() < 1)
+	if(mOperandStack.size() < 1) {
+		TRACE_LOG1("CharStringType2Interpreter::InterpretExch, exch should have at least 1 argument on stack. got %d. aborting", mOperandStack.size());
 		return NULL;
+	}		
 
 	value = mOperandStack.back();
 	mOperandStack.pop_back();
@@ -1219,8 +1275,10 @@ Byte* CharStringType2Interpreter::InterpretRoll(Byte* inProgramCounter, LongFile
 	CharStringOperand valueA;
 	CharStringOperand valueB;
 
-	if(mOperandStack.size() < 2)
+	if(mOperandStack.size() < 1) {
+		TRACE_LOG1("CharStringType2Interpreter::InterpretRoll, roll should have at least 2 arguments on stack. got %d. aborting", mOperandStack.size());
 		return NULL;
+	}	
 
 	valueB = mOperandStack.back();
 	mOperandStack.pop_back();
@@ -1230,38 +1288,39 @@ Byte* CharStringType2Interpreter::InterpretRoll(Byte* inProgramCounter, LongFile
 	long shiftAmount = (valueB.IsInteger ? valueB.IntegerValue : (long)valueB.RealValue);
 	long itemsCount = (valueA.IsInteger ? valueA.IntegerValue : (long)valueA.RealValue);
 
-	CharStringOperandList groupToShift;
+	if(itemsCount > 0) {
+		CharStringOperandList groupToShift;
 
-	for(long i=0; i < itemsCount && mOperandStack.size() > 0;++i)
-	{
-		groupToShift.push_front(mOperandStack.back());
-		mOperandStack.pop_back();
-	}
-
-	if (shiftAmount != 0 && groupToShift.size() == 0) // make sure that if there's a shift, there's what to shift
-		return NULL;
-
-	if(shiftAmount > 0)
-	{
-		for(long j=0; j < shiftAmount;++j)
+		for(long i=0; i < itemsCount && mOperandStack.size() > 0;++i)
 		{
-			groupToShift.push_front(groupToShift.back());
-			groupToShift.pop_back();
+			groupToShift.push_front(mOperandStack.back());
+			mOperandStack.pop_back();
 		}
-	}
-	else
-	{
-		for(long j=0; j < -shiftAmount;++j)
+
+
+		if(shiftAmount > 0)
 		{
-			groupToShift.push_back(groupToShift.front());
+			for(long j=0; j < shiftAmount;++j)
+			{
+				groupToShift.push_front(groupToShift.back());
+				groupToShift.pop_back();
+			}
+		}
+		else
+		{
+			for(long j=0; j < -shiftAmount;++j)
+			{
+				groupToShift.push_back(groupToShift.front());
+				groupToShift.pop_front();
+			}
+		}
+		
+		// put back the rolled group
+		for(long i=0; i < itemsCount;++i)
+		{
+			mOperandStack.push_back(groupToShift.front());
 			groupToShift.pop_front();
 		}
-	}
-	// put back the rolled group
-	for(long i=0; i < itemsCount;++i)
-	{
-		mOperandStack.push_back(groupToShift.front());
-		groupToShift.pop_front();
 	}
 
 	return inProgramCounter;

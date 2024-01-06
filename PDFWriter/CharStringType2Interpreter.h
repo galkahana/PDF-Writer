@@ -26,10 +26,6 @@
 #include <vector>
 #include <list>
 
-#define MAX_ARGUMENTS_STACK_SIZE 48
-#define MAX_STEM_HINTS_SIZE 96
-#define MAX_SUBR_NESTING_STACK_SIZE 10
-
 typedef std::vector<CharStringOperand> CharStringOperandVector;
 
 class CharStringType2Interpreter
