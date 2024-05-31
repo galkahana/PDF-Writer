@@ -100,7 +100,7 @@ endif(APPLE)
 
 # Add all the ADD_TEST for each test (reusing the create_test_sourcelist list minus the generated executable)
 set (TestsToRun ${Tests})
-remove (TestsToRun PDFWriterTesting.cpp)
+list(REMOVE_ITEM TestsToRun PDFWriterTesting.cpp)
 foreach (test ${TestsToRun})
   get_filename_component (TName ${test} NAME_WE)
   add_test (NAME ${TName} COMMAND PDFWriterTesting ${TName} ${CMAKE_CURRENT_SOURCE_DIR}/Materials ${CMAKE_BINARY_DIR}/Testing/Output)
