@@ -1152,8 +1152,6 @@ EStatusCode AbstractContentContext::WriteTextCommandWithDirectGlyphSelection(con
 			stringStream.Write((const Byte*)formattingBuffer, 1);
 			formattingBuffer[0] = (*it) & 0x00ff;
 			stringStream.Write((const Byte*)formattingBuffer, 1);
-			//SAFE_SPRINTF_2(formattingBuffer,5,"%02x%02x",((*it)>>8) & 0x00ff,(*it) & 0x00ff);
-			//stringStream.Write((const Byte*)formattingBuffer,4);
 		}
 		inTextCommand->WriteHexStringCommand(stringStream.ToString());
 	}
@@ -1246,8 +1244,10 @@ EStatusCode AbstractContentContext::TJ(const GlyphUnicodeMappingListOrDoubleList
 			{
 				for(itEncoded = itEncodedList->begin();itEncoded!= itEncodedList->end();++itEncoded)
 				{
-					SAFE_SPRINTF_2(formattingBuffer,5,"%02x%02x",((*itEncoded)>>8) & 0x00ff,(*itEncoded) & 0x00ff);
-					stringStream.Write((const Byte*)formattingBuffer,4);
+					formattingBuffer[0] = ((*itEncoded) >> 8) & 0x00ff;
+					stringStream.Write((const Byte*)formattingBuffer, 1);
+					formattingBuffer[0] = (*itEncoded) & 0x00ff;
+					stringStream.Write((const Byte*)formattingBuffer, 1);					
 				}
 				stringOrDoubleList.push_back(StringOrDouble(stringStream.ToString()));
 				stringStream.Reset();
