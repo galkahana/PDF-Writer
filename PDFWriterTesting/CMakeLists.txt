@@ -100,9 +100,7 @@ endif(APPLE)
 
 # Add all the ADD_TEST for each test (reusing the create_test_sourcelist list minus the generated executable)
 set (TestsToRun ${Tests})
-list(REMOVE_ITEM TestsToRun PDFWriterTesting.cpp)
-
-message("${TestsToRun}")
+list(REMOVE_AT TestsToRun 0) # removing first item which is PDFWriterTesting. started getting a full path for it, so moved to REMOVE_AT instead of REMOVE_ITEM with the file name
 
 foreach (test ${TestsToRun})
   get_filename_component (TName ${test} NAME_WE)
