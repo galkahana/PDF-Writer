@@ -77,7 +77,19 @@ int UnicodeTextUsage(int argc, char* argv[])
 
 		EStatusCode encodingStatus = contentContext->Tj("hello \xD7\x92");
 		if (encodingStatus != PDFHummus::eSuccess)
-			cout << "Could not find some of the glyphs for this font";
+			cout << "Could not find some of the glyphs for this font Tj";
+
+		contentContext->Tm(30, 0, 0, 30, 78.4252, 562.8997);
+		StringOrDoubleList textAndPos;
+
+		textAndPos.push_back(StringOrDouble("hell"));
+		textAndPos.push_back(-50*30);
+		textAndPos.push_back(StringOrDouble("o \xD7\x92"));
+
+		encodingStatus = contentContext->TJ(textAndPos);
+		if (encodingStatus != PDFHummus::eSuccess)
+			cout << "Could not find some of the glyphs for this font using TJ";
+
 
 		// continue even if failed...want to see how it looks like
 		contentContext->ET();
