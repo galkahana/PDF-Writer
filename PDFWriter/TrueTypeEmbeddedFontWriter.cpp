@@ -154,7 +154,14 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 		// so - bottom line - the glyphs count will actually be 1 more than the maxium glyph index.
 		// and from here i'll just place the glyphs in their original indexes, and fill in the 
 		// vacant glyphs with empties.
-		mSubsetFontGlyphsCount = subsetGlyphIDs.back() + 1;
+		unsigned short maxGlyf = subsetGlyphIDs.back();
+		if(maxGlyf >= mTrueTypeInput.mMaxp.NumGlyphs)
+		{
+			TRACE_LOG2("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, error, maximum requested glyph index %ld is larger than the maximum glyph index for this font which is %ld. ",maxGlyf,mTrueTypeInput.mMaxp.NumGlyphs-1);
+			status = eFailure;
+			break;
+		}
+		mSubsetFontGlyphsCount = maxGlyf + 1;
 		
 		mFontFileStream.Assign(&outFontProgram);
 		mPrimitivesWriter.SetOpenTypeStream(&mFontFileStream);
