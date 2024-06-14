@@ -655,11 +655,11 @@ IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObj
 			if(FT_Get_CID_Is_Internally_CID_Keyed(mFace,&isCID) != 0)
 				isCID = false;	
 
-			result = new WrittenFontCFF(inObjectsContext,isCID != 0, inFontIsToBeEmbedded); // CFF fonts should know if font is to be embedded, as the embedding code involves re-encoding of glyphs
+			result = new WrittenFontCFF(inObjectsContext, this,isCID != 0, inFontIsToBeEmbedded); // CFF fonts should know if font is to be embedded, as the embedding code involves re-encoding of glyphs
 		}
 		else if(strcmp(fontFormat,scTrueType) == 0)
 		{
-			result = new WrittenFontTrueType(inObjectsContext);
+			result = new WrittenFontTrueType(inObjectsContext, this);
 		}
 		else
 		{
