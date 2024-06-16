@@ -53,6 +53,7 @@ create_test_sourcelist (Tests
   PDFObjectCastTest.cpp
   PDFObjectParserTest.cpp
   PDFParserTest.cpp
+  PDFParserNegativePrevValueTest.cpp
   PDFWithPassword.cpp
   PFBStreamTest.cpp
   PNGImageTest.cpp
