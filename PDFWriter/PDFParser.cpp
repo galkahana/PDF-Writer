@@ -1710,7 +1710,7 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 		ObjectIDType objectsCount = (ObjectIDType)streamObjectsCount->GetValue();
 
 		PDFObjectCastPtr<PDFInteger> firstStreamObjectPosition(QueryDictionaryObject(streamDictionary.GetPtr(),"First"));
-		if(!streamObjectsCount)
+		if(!firstStreamObjectPosition)
 		{
 			TRACE_LOG1("PDFParser::ParseExistingInDirectStreamObject, no First key in stream dictionary %ld",objectStreamID);
 			status = PDFHummus::eFailure;
