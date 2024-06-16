@@ -20,6 +20,7 @@
 */
 #include "InputByteArrayStream.h"
 #include <memory.h>
+#include <algorithm>
 
 InputByteArrayStream::InputByteArrayStream()
 {
@@ -73,12 +74,12 @@ void InputByteArrayStream::Skip(LongBufferSizeType inSkipSize)
 
 void InputByteArrayStream::SetPosition(LongFilePositionType inOffsetFromStart)
 {
-	mCurrentPosition = inOffsetFromStart > mArrayLength ? mArrayLength:inOffsetFromStart;
+	mCurrentPosition = std::clamp(inOffsetFromStart, (LongFilePositionType)0, mArrayLength);
 }
 
 void InputByteArrayStream::SetPositionFromEnd(LongFilePositionType inOffsetFromEnd)
 {
-	mCurrentPosition = inOffsetFromEnd > mArrayLength ? 0:(mArrayLength-inOffsetFromEnd);
+	mCurrentPosition = std::clamp(mArrayLength - inOffsetFromEnd, (LongFilePositionType)0, mArrayLength);
 }
 
 LongFilePositionType InputByteArrayStream::GetCurrentPosition()
