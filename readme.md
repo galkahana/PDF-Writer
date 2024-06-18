@@ -48,6 +48,7 @@ The project defines some optional flags to allow you to control some aspects of 
 - `PDFHuMMUS_NO_PNG` -  defines whether to exclude PNG functionality (essentially - not include LibPng) from the library. defaults to `FALSE`. when setting `TRUE` the library will not require the existance of LibPng however will not be able to embed PNG images.
 - `USE_BUNDLED` - defines whether to use bundled dependencies when building the project or use system libraries. defaults to `TRUE`. when defined as `FALSE`, the project configuration will look for installed versions of	LibJpeg, Zlib, LibTiff, FreeType, LibAesgm, LibPng and use them instead of the bundled ones (i.e. those contained in the project). Note that for optional dependencies - LibJpeg, LibTiff, LibPng - if not installed the coniguration will succeed but will automatically set the optional building flags (the 3 just described) according to the libraries avialability. As for required dependencies - FreeType, LibAesgm, Zlib - the configuration will fail if those dependencies are not found. see `USE_UNBUNDLED_FALLBACK_BUNDLED` for an alternative method to deal with dependencies not being found.
 - `USE_UNBUNDLED_FALLBACK_BUNDLED` - Defines an alternative behavior when using `USE_BUNDLED=OFF` and a certain dependency is not installed on the system. If set to `TRUE` then for a dependency that's not found it will fallback on the bundled version of this dependency. This is essentially attempting to find installed library and if not avialable use a bundled one to ensure that the build will succeed.
+- `BUILD_FUZZING_HARNESS` - defines whether the [libFuzzer](https://llvm.org/docs/LibFuzzer.html) fuzzing harness for `PDFParser` should be built. This requires `clang` or [AFL++](https://github.com/AFLplusplus/AFLplusplus).
 
 You can set any of those options when calling the `cmake` command. For example to use system libraries replaced the earlier sequence with:
 
@@ -92,6 +93,48 @@ since the last build. For This purpose there's an extra target created in the pr
 ```bash
 cmake --build build --target pdfWriterCheck [--config release]
 ```
+
+### Fuzz testing of PDFParser
+
+This project includes a simple libFuzzer fuzzing harness for `PDFParser`: [PDFWriterTesting/PDFParserFuzzingHarness.cpp](PDFWriterTesting/PDFParserFuzzingHarness.cpp).
+Building it requires clang and setting `-DBUILD_FUZZING_HARNESS=ON`.
+
+You can use [libFuzzer](https://llvm.org/docs/LibFuzzer.html) or another compatible fuzzer such as [AFL++](https://github.com/AFLplusplus/AFLplusplus).
+
+The project can then be build like this:
+
+```bash
+mkdir build
+cd build
+cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DBUILD_FUZZING_HARNESS=ON ..
+cmake --build . -- -j$(nproc)
+```
+
+Afterward, fuzzing can start:
+```bash
+./PDFParserFuzzingHarness ../PDFWriterTesting/MinimalFuzzingCorpus
+```
+
+This starts libFuzzer. When a crash is found, fuzzing is stopped and the crash is saved.
+
+#### Advanced Fuzzing
+To use advanced fuzzing features such as multi-core scaling, dictionaries, etc. install [AFL++](https://github.com/AFLplusplus/AFLplusplus) and compile the project with AFL++:
+
+```bash
+mkdir build
+cd build
+cmake -DCMAKE_C_COMPILER=afl-clang-fast -DCMAKE_CXX_COMPILER=afl-clang-fast++ -DBUILD_FUZZING_HARNESS=ON ..
+cmake --build . -- -j$(nproc)
+```
+
+To run AFL++:
+```bash
+afl-fuzz -i ../PDFWriterTesting/MinimalFuzzingCorpus -o fuzzing-out -x ../PDFWriterTesting/Materials/pdf.dict -t 50 -- ./PDFParserFuzzingHarness
+```
+
+AFL++ continues to run until stopped. Crashes and more information is found in `fuzzing-out`.
+For advanced (multi-core, comparisons, ...) information on fuzzing with AFL++ take a look at the  [documentation](https://aflplus.plus/docs/fuzzing_in_depth/) or Trail of Bits [testing handbook](https://appsec.guide/docs/fuzzing/c-cpp/aflpp/).
+
 
 ## Installing
 
