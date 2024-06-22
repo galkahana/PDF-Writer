@@ -1101,6 +1101,13 @@ EStatusCode PDFParser::ParsePreviousXrefs(PDFDictionary* inTrailer)
 
 	LongFilePositionType previousPosition = previousPositionObject->GetValue();
 
+	if(previousPosition < 0)
+	{
+		// Standard: "The byte offset from the beginning of the PDF file", thus can not be negative
+		TRACE_LOG("PDFParser::ParsePreviousXrefs, unexpected, /prev is negative.");
+		return PDFHummus::eFailure;
+    }
+
 	if(mParsedXrefs.find(previousPosition) != mParsedXrefs.end()) {
 		// safeguard against orcish mischief, trying to get the parser to endlessly loop between prevs
 		TRACE_LOG("PDFParser::ParsePreviousXrefs, unexpected, previous table position has already been parsed. possible malicious read loop attempt");
