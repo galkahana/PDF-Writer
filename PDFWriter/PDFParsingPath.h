@@ -1,5 +1,5 @@
 /*
-   Source File : IOBasicTypes.h
+   Source File : PDFParsingPath.h
 
 
    Copyright 2011 Gal Kahana PDFWriter
@@ -20,14 +20,28 @@
 */
 #pragma once
 
-#include <stdio.h>
+#include "EStatusCode.h"
+#include "ObjectsBasicTypes.h"
 
-namespace IOBasicTypes
-{
-
-	typedef unsigned char Byte;
-    typedef size_t LongBufferSizeType;
-	typedef long long LongFilePositionType;
-}
+#include <list>
+#include <string>
 
 
+typedef std::list<ObjectIDType> ObjectIDTypeList;
+
+
+class PDFParsingPath {
+
+public:
+    PDFParsingPath();
+
+    PDFHummus::EStatusCode EnterObject(ObjectIDType inObjectId);
+    PDFHummus::EStatusCode ExitObject(ObjectIDType inObjectId);
+
+    void Reset();
+private:
+
+    ObjectIDTypeList mObjectsPath;
+
+    std::string PrintPath();
+};

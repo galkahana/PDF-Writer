@@ -113,6 +113,7 @@ PDFPageMergingHelper.cpp
 PDFParser.cpp
 PDFParserTokenizer.cpp
 PDFParsingOptions.cpp
+PDFParsingPath.cpp
 PDFReal.cpp
 PDFRectangle.cpp
 PDFStream.cpp
@@ -313,6 +314,7 @@ PDFPageMergingHelper.h
 PDFParser.h
 PDFParserTokenizer.h
 PDFParsingOptions.h
+PDFParsingPath.h
 PDFReal.h
 PDFRectangle.h
 PDFStream.h
@@ -720,6 +722,8 @@ PDFNull.h
 PDFObject.cpp
 PDFObject.h
 PDFObjectCast.h
+PDFParsingPath.cpp
+PDFParsingPath.h
 PDFReal.cpp
 PDFReal.h
 PDFStreamInput.cpp

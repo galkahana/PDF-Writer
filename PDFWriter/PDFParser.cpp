@@ -85,6 +85,7 @@ void PDFParser::ResetParser()
 	mObjectStreamsCache.clear();
 	mDecryptionHelper.Reset();
 	mParsedXrefs.clear();
+	mNewObjectParsingPath.Reset();
 
 }
 
@@ -717,20 +718,38 @@ double PDFParser::GetPDFLevel()
 
 PDFObject* PDFParser::ParseNewObject(ObjectIDType inObjectId)
 {
+
 	if(inObjectId >= GetXrefSize())
 	{
 		return NULL;
 	}
-	else if(eXrefEntryExisting == mXrefTable[inObjectId].mType)
-	{
-		return ParseExistingInDirectObject(inObjectId);
-	}
-	else if(eXrefEntryStreamObject == mXrefTable[inObjectId].mType)
-	{
-		return ParseExistingInDirectStreamObject(inObjectId);
-	}
-	else
+
+	// cycle check in
+	if(mNewObjectParsingPath.EnterObject(inObjectId) != eSuccess)
 		return NULL;
+
+	PDFObject* result = NULL;
+	do {
+		if(eXrefEntryExisting == mXrefTable[inObjectId].mType)
+		{
+			result = ParseExistingInDirectObject(inObjectId);
+			break;
+		}
+		
+		if(eXrefEntryStreamObject == mXrefTable[inObjectId].mType)
+		{
+			result = ParseExistingInDirectStreamObject(inObjectId);
+			break;
+		}
+
+	} while(false);
+
+
+	// cycle check out
+	if(mNewObjectParsingPath.ExitObject(inObjectId) != eSuccess)
+		return NULL;
+
+	return result;	
 }
 
 ObjectIDType PDFParser::GetObjectsCount()
@@ -875,13 +894,19 @@ EStatusCode PDFParser::ParsePagesObjectIDs()
 EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID)
 {
 	unsigned long currentPageIndex = 0;
+	PDFParsingPath parsingPath;
 
-	return ParsePagesIDs(inPageNode,inNodeObjectID,currentPageIndex);
+	return ParsePagesIDs(inPageNode, inNodeObjectID, currentPageIndex, parsingPath);
 }
 
 static const std::string scPage = "Page";
 static const std::string scPages = "Pages";
-EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID,unsigned long& ioCurrentPageIndex)
+EStatusCode PDFParser::ParsePagesIDs(
+	PDFDictionary* inPageNode,
+	ObjectIDType inNodeObjectID,
+	unsigned long& ioCurrentPageIndex,
+	PDFParsingPath& ioParsingPath
+)
 {
 	// recursion.
 	// if this is a page, write it's node object ID in the current page index and +1
@@ -891,6 +916,12 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 
 	do
 	{
+		// add object to parsing path, checking for cycles
+		if(ioParsingPath.EnterObject(inNodeObjectID) != eSuccess) {
+			status = PDFHummus::eFailure;
+			break;
+		}
+
 		PDFObjectCastPtr<PDFName> objectType(inPageNode->QueryDirectObject("Type"));
 		if(!objectType)
 		{
@@ -952,7 +983,7 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 					break;
 				}
 
-				status = ParsePagesIDs(pageNodeObject.GetPtr(),((PDFIndirectObjectReference*)it.GetItem())->mObjectID,ioCurrentPageIndex);
+				status = ParsePagesIDs(pageNodeObject.GetPtr(),((PDFIndirectObjectReference*)it.GetItem())->mObjectID, ioCurrentPageIndex, ioParsingPath);
 			}
 		}
 		else
@@ -961,6 +992,14 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 			status = PDFHummus::eFailure;
 			break;
 		}
+
+
+		// exit object
+		if(ioParsingPath.ExitObject(inNodeObjectID) != eSuccess) {
+			status = PDFHummus::eFailure;
+			break;
+		}
+
 	}while(false);
 
 	return status;
@@ -1527,16 +1566,17 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInputVector& inXrefTable
 		else
 		{
 			SingleValueContainerIterator<PDFObjectVector> segmentsIterator  = subsectionsIndex->GetIterator();
-			PDFObjectCastPtr<PDFInteger> segmentValue;
+			PDFInteger* segmentValue;
 			while(segmentsIterator.MoveNext() && PDFHummus::eSuccess == status)
 			{
-				segmentValue = segmentsIterator.GetItem();
-				if(!segmentValue)
+				if(segmentsIterator.GetItem()->GetType() != PDFObject::ePDFObjectInteger)
 				{
 					TRACE_LOG("PDFParser::ParseXrefFromXrefStream, found non integer value in Index array of xref stream");
 					status = PDFHummus::eFailure;
 					break;
 				}
+				segmentValue = (PDFInteger*)(segmentsIterator.GetItem());
+
 				ObjectIDType startObject = (ObjectIDType)segmentValue->GetValue();
 				if(!segmentsIterator.MoveNext())
 				{
@@ -1545,13 +1585,14 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInputVector& inXrefTable
 					break;
 				}
 
-				segmentValue = segmentsIterator.GetItem();
-				if(!segmentValue)
+				if(segmentsIterator.GetItem()->GetType() != PDFObject::ePDFObjectInteger)
 				{
 					TRACE_LOG("PDFParser::ParseXrefFromXrefStream, found non integer value in Index array of xref stream");
 					status = PDFHummus::eFailure;
 					break;
 				}
+				segmentValue = (PDFInteger*)(segmentsIterator.GetItem());
+
 				ObjectIDType objectsCount = (ObjectIDType)segmentValue->GetValue();
 				ObjectIDType readXrefSize = startObject +  objectsCount;
 
@@ -1966,6 +2007,20 @@ EStatusCodeAndIByteReader PDFParser::WrapWithPredictorStream(IByteReader* inputS
 			LongBufferSizeType bitsPerComponentValue = bitsPerComponent.GetPtr() ?
 																(IOBasicTypes::LongBufferSizeType)bitsPerComponent->GetValue() :
 																8;
+
+			// validate bits per component
+			if(
+				bitsPerComponentValue != 1 &&
+				bitsPerComponentValue != 2 &&
+				bitsPerComponentValue != 4 &&
+				bitsPerComponentValue != 8 &&
+				bitsPerComponentValue != 16
+			) {
+				TRACE_LOG1("PDFParser::WrapWithPredictorStream, invalid BitsPerComponent value: %ld. allowed values: 1,2,4,8,16", bitsPerComponentValue);
+				status = PDFHummus::eFailure;
+				break;
+			}
+
 
 			switch(predictor->GetValue())
 			{
