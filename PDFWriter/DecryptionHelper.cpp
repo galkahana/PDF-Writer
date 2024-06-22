@@ -74,9 +74,10 @@ void DecryptionHelper::Reset() {
 }
 
 unsigned int ComputeLength(PDFObject* inLengthObject) {
+	// The bit length of the file encryption key shall be a multiple of 8 in the range of 40 to 256 bits. This function returns the length in bytes.
 	ParsedPrimitiveHelper lengthHelper(inLengthObject);
 	unsigned int value = lengthHelper.IsNumber() ? (unsigned int)lengthHelper.GetAsInteger() : 40;
-	return value < 40 ? value : (value / 8); // this small check here is based on some errors i saw, where the length was given in bytes instead of bits
+	return value < 40 ? std::max(value, (unsigned int)5) : value / 8; // this small check here is based on some errors i saw, where the length was given in bytes instead of bits
 }
 
 XCryptionCommon* GetFilterForName(const StringToXCryptionCommonMap& inXcryptions, const string& inName) {
