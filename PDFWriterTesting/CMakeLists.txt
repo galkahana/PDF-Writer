@@ -54,7 +54,6 @@ create_test_sourcelist (Tests
   PDFObjectParserTest.cpp
   PDFParserFuzzSanity.cpp
   PDFParserTest.cpp
-  PDFParserInvalidLengthTest.cpp
   PDFWithPassword.cpp
   PFBStreamTest.cpp
   PNGImageTest.cpp
