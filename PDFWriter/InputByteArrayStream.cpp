@@ -76,7 +76,7 @@ T clip(const T& n, const T& lower, const T& upper) {
 
 void InputByteArrayStream::Skip(LongBufferSizeType inSkipSize)
 {
-	mCurrentPosition+= clip(inSkipSize, (LongBufferSizeType)0, (LongBufferSizeType)mArrayLength-mCurrentPosition);
+	mCurrentPosition+= clip(inSkipSize, (LongBufferSizeType)0, (LongBufferSizeType)(mArrayLength-mCurrentPosition));
 }
 
 void InputByteArrayStream::SetPosition(LongFilePositionType inOffsetFromStart)
