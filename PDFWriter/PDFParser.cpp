@@ -1104,7 +1104,7 @@ EStatusCode PDFParser::ParsePreviousXrefs(PDFDictionary* inTrailer)
 	if(previousPosition < 0)
 	{
 		// Standard: "The byte offset from the beginning of the PDF file", thus can not be negative
-		TRACE_LOG("PDFParser::ParsePreviousXrefs, unexpected, /prev is negative.");
+		TRACE_LOG1("PDFParser::ParsePreviousXrefs, unexpected, /prev is negative: %ld.",previousPosition);
 		return PDFHummus::eFailure;
     }
 
