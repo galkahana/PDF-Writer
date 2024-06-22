@@ -2006,6 +2006,20 @@ EStatusCodeAndIByteReader PDFParser::WrapWithPredictorStream(IByteReader* inputS
 																(IOBasicTypes::LongBufferSizeType)bitsPerComponent->GetValue() :
 																8;
 
+			// validate bits per component
+			if(
+				bitsPerComponentValue != 1 &&
+				bitsPerComponentValue != 2 &&
+				bitsPerComponentValue != 4 &&
+				bitsPerComponentValue != 8 &&
+				bitsPerComponentValue != 16
+			) {
+				TRACE_LOG1("PDFParser::WrapWithPredictorStream, invalid BitsPerComponent value: %ld. allowed values: 1,2,4,8,16", bitsPerComponentValue);
+				status = PDFHummus::eFailure;
+				break;
+			}
+
+
 			switch(predictor->GetValue())
 			{
 				case 2:

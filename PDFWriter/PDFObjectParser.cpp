@@ -45,6 +45,7 @@
 
 using namespace PDFHummus;
 
+
 PDFObjectParser::PDFObjectParser(void)
 {
 	mParserExtender = NULL;
@@ -554,13 +555,27 @@ bool PDFObjectParser::IsNumber(const std::string& inToken)
 
 typedef BoxingBaseWithRW<long long> LongLong;
 
+// maximum allowed PDF int value = 2^31 − 1.
+#define MAX_PDF_INT 2147483647L 
+// minimum allowed PDF int value = -2^31
+#define MIN_PDF_INT ((-MAX_PDF_INT)-1) 
+
 PDFObject* PDFObjectParser::ParseNumber(const std::string& inToken)
 {
 	// once we know this is a number, then parsing is easy. just determine if it's a real or integer, so as to separate classes for better accuracy
-	if(inToken.find(scDot) != inToken.npos)
+	if(inToken.find(scDot) != inToken.npos) {
 		return new PDFReal(Double(inToken));
-	else
-		return new PDFInteger(LongLong(inToken));
+	} else {
+		long long integerValue = LongLong(inToken);
+
+		// validate int value according to PDF limits. ignore if outside of range
+		if((integerValue > MAX_PDF_INT) || (integerValue < MIN_PDF_INT)) {
+			TRACE_LOG3("PDFObjectParser::ParseNumber, parsed integer %lld is outside of the allowed range for PDF integers - %ld to %ld", integerValue, MIN_PDF_INT, MAX_PDF_INT);
+			return NULL;
+		}
+
+		return new PDFInteger(integerValue);
+	}
 }
 
 static const std::string scLeftSquare = "[";
