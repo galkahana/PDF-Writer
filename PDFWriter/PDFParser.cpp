@@ -1566,16 +1566,17 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInputVector& inXrefTable
 		else
 		{
 			SingleValueContainerIterator<PDFObjectVector> segmentsIterator  = subsectionsIndex->GetIterator();
-			PDFObjectCastPtr<PDFInteger> segmentValue;
+			PDFInteger* segmentValue;
 			while(segmentsIterator.MoveNext() && PDFHummus::eSuccess == status)
 			{
-				segmentValue = segmentsIterator.GetItem();
-				if(!segmentValue)
+				if(segmentsIterator.GetItem()->GetType() != PDFObject::ePDFObjectInteger)
 				{
 					TRACE_LOG("PDFParser::ParseXrefFromXrefStream, found non integer value in Index array of xref stream");
 					status = PDFHummus::eFailure;
 					break;
 				}
+				segmentValue = (PDFInteger*)(segmentsIterator.GetItem());
+
 				ObjectIDType startObject = (ObjectIDType)segmentValue->GetValue();
 				if(!segmentsIterator.MoveNext())
 				{
@@ -1584,13 +1585,14 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInputVector& inXrefTable
 					break;
 				}
 
-				segmentValue = segmentsIterator.GetItem();
-				if(!segmentValue)
+				if(segmentsIterator.GetItem()->GetType() != PDFObject::ePDFObjectInteger)
 				{
 					TRACE_LOG("PDFParser::ParseXrefFromXrefStream, found non integer value in Index array of xref stream");
 					status = PDFHummus::eFailure;
 					break;
 				}
+				segmentValue = (PDFInteger*)(segmentsIterator.GetItem());
+
 				ObjectIDType objectsCount = (ObjectIDType)segmentValue->GetValue();
 				ObjectIDType readXrefSize = startObject +  objectsCount;
 
