@@ -114,7 +114,7 @@ endforeach ()
 file(GLOB fuzztestfiles ${CMAKE_CURRENT_SOURCE_DIR}/Materials/fuzzing/*)
 foreach (fuzztestfile ${fuzztestfiles})
     get_filename_component (TName ${fuzztestfile} NAME)
-    add_test (NAME FuzzTest_${TName} COMMAND PDFWriterTesting PDFParserFuzzSanity ${CMAKE_CURRENT_SOURCE_DIR}/Materials ${CMAKE_BINARY_DIR}/Testing/Output ${fuzztestfile})
+    add_test (NAME FuzzTest_${TName} COMMAND PDFWriterTesting PDFParserFuzzSanity ${CMAKE_CURRENT_SOURCE_DIR}/Materials ${CMAKE_BINARY_DIR}/Testing/Output ${fuzztestfile} FuzzTest_${TName}.txt)
 endforeach ()
 
 

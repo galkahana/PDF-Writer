@@ -23,7 +23,7 @@ int PDFParserFuzzSanity(int argc, char* argv[]) {
     }
 
     // traces on
-    Trace::DefaultTrace().SetLogSettings(BuildRelativeOutputPath(argv,  "PDFParserFuzzSanity.txt"), true, true);
+    Trace::DefaultTrace().SetLogSettings(BuildRelativeOutputPath(argv,  argv[4]), true, true);
 
     // checks that returns, status doesn't matter
     parser.StartPDFParsing(pdfFile.GetInputStream());

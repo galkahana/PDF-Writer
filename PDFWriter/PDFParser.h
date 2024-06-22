@@ -178,6 +178,7 @@ private:
 	DecryptionHelper mDecryptionHelper;
 	InputOffsetStream mStream;
 	AdapterIByteReaderWithPositionToIReadPositionProvider mCurrentPositionProvider;
+	PDFParsingPath mNewObjectParsingPath;
 	
 	// we'll use this items for bacwkards reading. might turns this into a proper stream object
 	IOBasicTypes::Byte mLinesBuffer[LINE_BUFFER_SIZE];

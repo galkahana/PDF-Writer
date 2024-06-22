@@ -66,6 +66,7 @@ std::string PDFParsingPath::PrintPath() {
 	
     if(it != mObjectsPath.end()) {
         pathWriter<<*it;
+        ++it;
         for(; it != mObjectsPath.end(); ++it) {
             pathWriter<<", "<<*it;
         }

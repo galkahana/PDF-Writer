@@ -85,6 +85,7 @@ void PDFParser::ResetParser()
 	mObjectStreamsCache.clear();
 	mDecryptionHelper.Reset();
 	mParsedXrefs.clear();
+	mNewObjectParsingPath.Reset();
 
 }
 
@@ -717,20 +718,38 @@ double PDFParser::GetPDFLevel()
 
 PDFObject* PDFParser::ParseNewObject(ObjectIDType inObjectId)
 {
+
 	if(inObjectId >= GetXrefSize())
 	{
 		return NULL;
 	}
-	else if(eXrefEntryExisting == mXrefTable[inObjectId].mType)
-	{
-		return ParseExistingInDirectObject(inObjectId);
-	}
-	else if(eXrefEntryStreamObject == mXrefTable[inObjectId].mType)
-	{
-		return ParseExistingInDirectStreamObject(inObjectId);
-	}
-	else
+
+	// cycle check in
+	if(mNewObjectParsingPath.EnterObject(inObjectId) != eSuccess)
 		return NULL;
+
+	PDFObject* result = NULL;
+	do {
+		if(eXrefEntryExisting == mXrefTable[inObjectId].mType)
+		{
+			result = ParseExistingInDirectObject(inObjectId);
+			break;
+		}
+		
+		if(eXrefEntryStreamObject == mXrefTable[inObjectId].mType)
+		{
+			result = ParseExistingInDirectStreamObject(inObjectId);
+			break;
+		}
+
+	} while(false);
+
+
+	// cycle check out
+	if(mNewObjectParsingPath.ExitObject(inObjectId) != eSuccess)
+		return NULL;
+
+	return result;	
 }
 
 ObjectIDType PDFParser::GetObjectsCount()
