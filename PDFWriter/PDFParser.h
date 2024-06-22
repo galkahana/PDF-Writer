@@ -31,6 +31,7 @@
 #include "DecryptionHelper.h"
 #include "PDFParsingOptions.h"
 #include "InputOffsetStream.h"
+#include "PDFParsingPath.h"
 
 #include <map>
 #include <set>
@@ -214,7 +215,7 @@ private:
 	PDFHummus::EStatusCode SetupDecryptionHelper(const std::string& inPassword);
 	PDFHummus::EStatusCode ParsePagesObjectIDs();
 	PDFHummus::EStatusCode ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID);
-	PDFHummus::EStatusCode ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID,unsigned long& ioCurrentPageIndex);
+	PDFHummus::EStatusCode ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID,unsigned long& ioCurrentPageIndex, PDFParsingPath& ioParsingPath);
 	PDFHummus::EStatusCode ParsePreviousXrefs(PDFDictionary* inTrailer);
 	PDFHummus::EStatusCode MergeXrefWithMainXref(XrefEntryInputVector& inTableToMerge,ObjectIDType inMergedTableSize);
 	PDFHummus::EStatusCode ParseFileDirectory();

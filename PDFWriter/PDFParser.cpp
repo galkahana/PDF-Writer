@@ -875,13 +875,19 @@ EStatusCode PDFParser::ParsePagesObjectIDs()
 EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID)
 {
 	unsigned long currentPageIndex = 0;
+	PDFParsingPath parsingPath;
 
-	return ParsePagesIDs(inPageNode,inNodeObjectID,currentPageIndex);
+	return ParsePagesIDs(inPageNode, inNodeObjectID, currentPageIndex, parsingPath);
 }
 
 static const std::string scPage = "Page";
 static const std::string scPages = "Pages";
-EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID,unsigned long& ioCurrentPageIndex)
+EStatusCode PDFParser::ParsePagesIDs(
+	PDFDictionary* inPageNode,
+	ObjectIDType inNodeObjectID,
+	unsigned long& ioCurrentPageIndex,
+	PDFParsingPath& ioParsingPath
+)
 {
 	// recursion.
 	// if this is a page, write it's node object ID in the current page index and +1
@@ -891,6 +897,12 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 
 	do
 	{
+		// add object to parsing path, checking for cycles
+		if(ioParsingPath.EnterObject(inNodeObjectID) != eSuccess) {
+			status = PDFHummus::eFailure;
+			break;
+		}
+
 		PDFObjectCastPtr<PDFName> objectType(inPageNode->QueryDirectObject("Type"));
 		if(!objectType)
 		{
@@ -952,7 +964,7 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 					break;
 				}
 
-				status = ParsePagesIDs(pageNodeObject.GetPtr(),((PDFIndirectObjectReference*)it.GetItem())->mObjectID,ioCurrentPageIndex);
+				status = ParsePagesIDs(pageNodeObject.GetPtr(),((PDFIndirectObjectReference*)it.GetItem())->mObjectID, ioCurrentPageIndex, ioParsingPath);
 			}
 		}
 		else
@@ -961,6 +973,14 @@ EStatusCode PDFParser::ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNo
 			status = PDFHummus::eFailure;
 			break;
 		}
+
+
+		// exit object
+		if(ioParsingPath.ExitObject(inNodeObjectID) != eSuccess) {
+			status = PDFHummus::eFailure;
+			break;
+		}
+
 	}while(false);
 
 	return status;
