@@ -110,12 +110,19 @@ foreach (test ${TestsToRun})
   add_test (NAME ${TName} COMMAND PDFWriterTesting ${TName} ${CMAKE_CURRENT_SOURCE_DIR}/Materials ${CMAKE_BINARY_DIR}/Testing/Output)
 endforeach ()
 
-# fuzz test specific
-file(GLOB fuzztestfiles ${CMAKE_CURRENT_SOURCE_DIR}/Materials/fuzzing/*)
+# fuzz test errors specific
+file(GLOB fuzztestfiles ${CMAKE_CURRENT_SOURCE_DIR}/Materials/fuzzing/errors/*)
 foreach (fuzztestfile ${fuzztestfiles})
     get_filename_component (TName ${fuzztestfile} NAME)
     add_test (NAME FuzzTest_${TName} COMMAND PDFWriterTesting PDFParserFuzzSanity ${CMAKE_CURRENT_SOURCE_DIR}/Materials ${CMAKE_BINARY_DIR}/Testing/Output ${fuzztestfile} FuzzTest_${TName}.txt)
 endforeach ()
+
+# fuzz testing with fuzzing harness
+if(BUILD_FUZZING_HARNESS)
+    add_executable(PDFParserFuzzingHarness PDFParserFuzzingHarness.cpp)
+    target_compile_options(PDFParserFuzzingHarness PRIVATE -fsanitize=fuzzer,address -g -O2)
+    target_link_libraries(PDFParserFuzzingHarness PDFWriter -O2 -fsanitize=fuzzer,address -fuse-ld=lld)
+endif()
 
 
 # create temp dir for output files
