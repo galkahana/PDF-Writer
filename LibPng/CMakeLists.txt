@@ -41,6 +41,9 @@ if (${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "aarch64" OR ${CMAKE_HOST_SYSTEM_PRO
     )
 endif()
 
+# drop obsolete symbol, causing trouble when compiling with clang on mac, and in general unneeded
+target_compile_options(LibPng PRIVATE -UTARGET_OS_MAC)
+
 if(WIN32 AND BUILD_SHARED_LIBS)
     target_compile_definitions(LibPng PUBLIC PNG_USE_DLL)
 endif()

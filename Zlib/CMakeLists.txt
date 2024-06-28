@@ -47,6 +47,8 @@ if(Z_HAVE_UNISTD_H)
     target_compile_definitions(Zlib PUBLIC HAVE_UNISTD_H=1)
 endif(Z_HAVE_UNISTD_H)
 
+# drop obsolete symbol, causing trouble when compiling with clang on mac, and in general unneeded
+target_compile_options(Zlib PRIVATE -UTARGET_OS_MAC)
 
 if(WIN32 AND BUILD_SHARED_LIBS)
     target_compile_definitions(Zlib PUBLIC ZLIB_DLL)
