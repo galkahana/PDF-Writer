@@ -11,6 +11,7 @@ option(USE_UNBUNDLED_FALLBACK_BUNDLED  "When USE_BUNDLED is false and a certain 
 option(PDFHUMMUS_NO_DCT  "Whether to drop support for DCT streams parsing (will not use LibJpeg)")
 option(PDFHUMMUS_NO_TIFF "Whether to drop TIFF Images support (will not use LibTiff)" )
 option(PDFHUMMUS_NO_PNG "Whether to drop PNG Images support (will not use LibPng)" )
+option(BUILD_FUZZING_HARNESS "Build the fuzzing harness, requires LLVM's clang")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -159,6 +160,13 @@ if(PROJECT_IS_TOP_LEVEL AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/PDFWriterTesting)
     # to the parent project ctest.
     enable_testing()
     ADD_SUBDIRECTORY(PDFWriterTesting)
+endif()
+
+if(BUILD_FUZZING_HARNESS)
+    add_compile_options(-fsanitize=fuzzer,address -g -O2)
+
+    add_executable(PDFParserFuzzingHarness PDFWriterTesting/PDFParserFuzzingHarness.cpp)
+    target_link_libraries(PDFParserFuzzingHarness PDFWriter -O2 -fsanitize=fuzzer,address -fuse-ld=lld)
 endif()
 
 include(InstallRequiredSystemLibraries)
