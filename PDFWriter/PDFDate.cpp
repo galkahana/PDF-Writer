@@ -182,9 +182,82 @@ void PDFDate::SetToCurrentTime()
 {
 	time_t currentTime;
 	tm structuredLocalTime;
-	long timeZoneSecondsDifference;
+	char *env_SOURCE_DATE_EPOCH = std::getenv("SOURCE_DATE_EPOCH");
 
-	time(&currentTime);
+  if (env_SOURCE_DATE_EPOCH)
+	{
+		std::istringstream iss(env_SOURCE_DATE_EPOCH);
+		iss >> currentTime;
+		if (iss.fail() || !iss.eof())
+		{
+			TRACE_LOG("PDFDate::SetToCurrentTime, Could not parse SOURCE_DATE_EPOCH as integer");
+			Year = -1;
+			return;
+		}
+
+		UTC = eSame;
+	}
+	else
+	{
+		time(&currentTime);
+
+		// if unsuccesful or method unknown don't provide UTC info (currently only knows for WIN32 and OSX
+		long timeZoneSecondsDifference;
+#if defined (__MWERKS__) || defined (__GNUC__)  || defined(_AIX32) || defined(WIN32)
+		int status;
+#if !defined(__MWERKS__) // (using c methods)
+		struct tm *gmTime;
+
+		time_t localEpoch, gmEpoch;
+
+		/*First get local epoch time*/
+		localEpoch = time(NULL);
+
+		/* Using local time epoch get the GM Time */
+		gmTime = gmtime(&localEpoch);
+		gmTime->tm_isdst = -1;
+		/* Convert gm time in to epoch format */
+		gmEpoch = mktime(gmTime);
+
+		timeZoneSecondsDifference =difftime(gmEpoch, localEpoch);
+		status = 0;
+#else // __MWERKS__ (using OSX methods)
+		CFTimeZoneRef tzRef = ::CFTimeZoneCopySystem();
+		if (tzRef)
+		{
+			CFTimeInterval intervalFromGMT = ::CFTimeZoneGetSecondsFromGMT(tzRef, currentTime);
+			::CFRelease(tzRef);
+			timeZoneSecondsDifference = intervalFromGMT;
+			status = 0;
+		}
+		else
+			status = -1;
+#endif
+
+		if(0 == status)
+		{
+			if(0 == timeZoneSecondsDifference)
+			{
+				UTC = eSame;
+			}
+			else
+			{
+				UTC = timeZoneSecondsDifference > 0 ? eEarlier : eLater;
+				HourFromUTC = (int)(labs(timeZoneSecondsDifference) / 3600);
+				MinuteFromUTC = (int)((labs(timeZoneSecondsDifference) - (labs(timeZoneSecondsDifference) / 3600)*3600) / 60);
+			}
+		}
+		else
+		{
+			UTC = eUndefined;
+			TRACE_LOG("PDFDate::SetToCurrentTime, Couldn't get UTC.");
+		}
+
+#else
+		UTC = eUndefined;
+#endif
+	}
+
 	SAFE_LOCAL_TIME(structuredLocalTime,currentTime);
 
 	Year = structuredLocalTime.tm_year + 1900;
@@ -194,60 +267,6 @@ void PDFDate::SetToCurrentTime()
 	Minute = structuredLocalTime.tm_min;
 	Second = structuredLocalTime.tm_sec;
 
-	// if unsuccesful or method unknown don't provide UTC info (currently only knows for WIN32 and OSX
-#if defined (__MWERKS__) || defined (__GNUC__)  || defined(_AIX32) || defined(WIN32)
-	int status;
-#if !defined(__MWERKS__) // (using c methods)
-	struct tm *gmTime;
-
-	time_t localEpoch, gmEpoch;
-
-	/*First get local epoch time*/
-	localEpoch = time(NULL);
-
-	/* Using local time epoch get the GM Time */
-	gmTime = gmtime(&localEpoch);
-	gmTime->tm_isdst = -1;
-	/* Convert gm time in to epoch format */
-	gmEpoch = mktime(gmTime);
-
-	timeZoneSecondsDifference =difftime(gmEpoch, localEpoch);
-	status = 0;
-#else // __MWERKS__ (using OSX methods)
-	CFTimeZoneRef tzRef = ::CFTimeZoneCopySystem();
-	if (tzRef)
-	{
-		CFTimeInterval intervalFromGMT = ::CFTimeZoneGetSecondsFromGMT(tzRef, currentTime);
-		::CFRelease(tzRef);
-		timeZoneSecondsDifference = intervalFromGMT;
-		status = 0;
-	}
-	else
-		status = -1;
-#endif
-
-	if(0 == status)
-	{
-		if(0 == timeZoneSecondsDifference)
-		{
-			UTC = eSame;
-		}
-		else
-		{
-			UTC = timeZoneSecondsDifference > 0 ? eEarlier : eLater;
-			HourFromUTC = (int)(labs(timeZoneSecondsDifference) / 3600);
-			MinuteFromUTC = (int)((labs(timeZoneSecondsDifference) - (labs(timeZoneSecondsDifference) / 3600)*3600) / 60);
-		}
-	}
-	else
-	{
-		UTC = eUndefined;
-		TRACE_LOG("PDFDate::SetToCurrentTime, Couldn't get UTC.");
-	}
-
-#else
-	UTC = eUndefined;
-#endif
 }
 
 void PDFDate::ParseString(std::string inValue)
