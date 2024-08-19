@@ -51,6 +51,7 @@ using namespace PDFHummus;
 
 #define MAX_XREF_SIZE 9999999999LL
 #define MAX_HEADER_SCAN_POSITION 1024
+#define MAX_XREF_SCAN_OFFSET 1024
 
 static const XrefEntryInput scEmptyEntry;
 
@@ -1284,23 +1285,22 @@ EStatusCode PDFParser::MergeXrefWithMainXref(XrefEntryInputVector& inTableToMerg
 
 EStatusCode PDFParser::ParseFileDirectory()
 {
-	EStatusCode status = PDFHummus::eSuccess;
-
+	EStatusCode status = PDFHummus::eFailure;
 
 	MovePositionInStream(mLastXrefPosition);
+	LongFilePositionType offset = 0;
+
+	// take the object, so that we can check whether this is an Xref or an Xref stream
+	RefCountPtr<PDFObject> anObject(mObjectParser.ParseNewObject());
+	if(!anObject)
+	{
+		TRACE_LOG("PDFParser::ParseFileDirectory, cannot read xref start object. This probably indicates a melformed PDF, with bad last xref position");
+		return status;
+	}
+
 
 	do
 	{
-
-		// take the object, so that we can check whether this is an Xref or an Xref stream
-		RefCountPtr<PDFObject> anObject(mObjectParser.ParseNewObject());
-		if(!anObject)
-		{
-			status = PDFHummus::eFailure;
-			break;
-		}
-
-
 		if(anObject->GetType() == PDFObject::ePDFObjectSymbol && ((PDFSymbol*)anObject.GetPtr())->GetValue() == scXref)
 		{
 			// this would be a normal xref case
@@ -1313,27 +1313,32 @@ EStatusCode PDFParser::ParseFileDirectory()
 			mTrailer = trailer;
 
 			status = BuildXrefTableFromTable();
-			if(status != PDFHummus::eSuccess)
-				break;
+			
+			// found xref table, can stop sreaching
+			break;
 		}
 		else if(anObject->GetType() == PDFObject::ePDFObjectInteger && ((PDFInteger*)anObject.GetPtr())->GetValue() > 0)
 		{
 			// Xref stream case
 			status = BuildXrefTableAndTrailerFromXrefStream(((PDFInteger*)anObject.GetPtr())->GetValue());
-			if(status != PDFHummus::eSuccess)
-				break;
 
+			// found xref table, can stop sreaching
+			break;
 		}
 		else
 		{
-			TRACE_LOG("PDFParser::ParseFileDirectory,Unexpected object at xref start");
-			status = eFailure;
+			// xref table not found yet, but maybe we got a slightly earlier position. attempt looking for xref table by reading the next object
+			offset = mStream.GetCurrentPosition() - mLastXrefPosition;
+			TRACE_LOG("PDFParser::ParseFileDirectory,Unexpected object at xref start, attempting to read next object to find xref table");
+			RefCountPtr<PDFObject> newObject(mObjectParser.ParseNewObject());
+			anObject = newObject;
+			mStream.SetOffset(mStream.GetOffset() + offset); // assuming the rest of the read positions are going to be the same as xref, offset per difference
 		}
+	}while(!!anObject && offset < MAX_XREF_SCAN_OFFSET); // xref scan is limited, to avoid endless loops
 
-
-	}while(false);
-
-
+	if(eFailure == status) {
+		TRACE_LOG("PDFParser::ParseFileDirectory, failed to parse xref table");
+	}
 
 	return status;
 }
