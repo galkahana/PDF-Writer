@@ -56,7 +56,7 @@
 				'./src/type42/type42.c',
 				'./src/winfonts/winfnt.c',
 				'./src/base/ftsystem.c',
-				'./src/base/ftdebug.c   ',
+				'./src/base/ftdebug.c',
                 './include/freetype/config/ftconfig.h',
                 './include/freetype/config/ftheader.h',
                 './include/freetype/config/ftmodule.h',
