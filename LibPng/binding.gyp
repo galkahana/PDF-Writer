@@ -4,10 +4,10 @@
             'target_name': 'libpng',
             'type': 'static_library',
             'dependencies': [
-                '<(module_root_dir)/src/deps/Zlib/binding.gyp:zlib'
+                '<(module_root_dir)/src/deps/ZLib/binding.gyp:zlib'
             ],    
             'include_dirs': [
-              '<(module_root_dir)/src/deps/Zlib',
+              '<(module_root_dir)/src/deps/ZLib',
             ],  
             'conditions': [
                 # https://github.com/julienr/libpng-android/issues/6. disable neon optimization for arm to avoid runtime errors

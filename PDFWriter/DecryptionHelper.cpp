@@ -38,6 +38,7 @@ limitations under the License.
 #include "Trace.h"
 #include "Deletable.h"
 #include <memory>
+#include <algorithm>
 
 using namespace std;
 using namespace PDFHummus;

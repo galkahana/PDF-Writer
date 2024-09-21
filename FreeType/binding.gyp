@@ -4,11 +4,12 @@
             'target_name': 'freetype',
             'type': 'static_library',
             'defines': [
-                'FT2_BUILD_LIBRARY=1'
+                'FT2_BUILD_LIBRARY=1',
+                'FT_CONFIG_OPTION_SYSTEM_ZLIB=1'
             ],
             'include_dirs': [
              './include',
-             './include',
+             './include/freetype',
              './include/freetype/config',
              './include/src',
              './include/freetype/internal',
@@ -56,7 +57,7 @@
 				'./src/type42/type42.c',
 				'./src/winfonts/winfnt.c',
 				'./src/base/ftsystem.c',
-				'./src/base/ftdebug.c   ',
+				'./src/base/ftdebug.c',
                 './include/freetype/config/ftconfig.h',
                 './include/freetype/config/ftheader.h',
                 './include/freetype/config/ftmodule.h',

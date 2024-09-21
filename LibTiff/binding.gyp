@@ -4,7 +4,7 @@
             'target_name': 'libtiff',
             'type': 'static_library',
             'dependencies': [
-                '<(module_root_dir)/src/deps/Zlib/binding.gyp:zlib'
+                '<(module_root_dir)/src/deps/ZLib/binding.gyp:zlib'
             ],       
             'defines': [
                 '_CRT_SECURE_NO_DEPRECATE=1',
@@ -33,7 +33,7 @@
                 }]
             ],     
             'include_dirs': [
-              '<(module_root_dir)/src/deps/Zlib',
+              '<(module_root_dir)/src/deps/ZLib',
             ],
            'sources': [
                 'tif_aux.c',
