@@ -68,6 +68,12 @@ EStatusCodeAndObjectIDType PDFCommentWriter::WriteCommentsTree(PDFComment* inCom
 
 		// Start new InDirect object for annotation dictionary
 		result.second = objectsContext.StartNewIndirectObject();
+		if(result.second == 0)
+		{
+			result.first = eFailure;
+			TRACE_LOG("PDFCommentWriter::WriteCommentsTree, Exception in starting comment dictionary");
+			break;
+		}
 		
 		DictionaryContext* dictionaryContext = objectsContext.StartDictionary();
 

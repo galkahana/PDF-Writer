@@ -53,6 +53,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteEmbeddedFont(
 	MyStringBuf rawFontProgram;
 	bool notEmbedded;
 	EStatusCode status;
+	PDFStream* pdfStream = NULL;
 
 	do
 	{
@@ -72,6 +73,12 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteEmbeddedFont(
 		}
 
 		outEmbeddedFontObjectID = inObjectsContext->StartNewIndirectObject();
+		if(outEmbeddedFontObjectID == 0)
+		{
+			TRACE_LOG("TrueTypeEmbeddedFontWriter::WriteEmbeddedFont, failed to start embedded font object");
+			status = PDFHummus::eFailure;
+			break;
+		}
 		
 		DictionaryContext* fontProgramDictionaryContext = inObjectsContext->StartDictionary();
 
@@ -80,7 +87,7 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteEmbeddedFont(
 		fontProgramDictionaryContext->WriteKey(scLength1);
 		fontProgramDictionaryContext->WriteIntegerValue(rawFontProgram.GetCurrentWritePosition());
 		rawFontProgram.pubseekoff(0,std::ios_base::beg);
-		PDFStream* pdfStream = inObjectsContext->StartPDFStream(fontProgramDictionaryContext);
+		pdfStream = inObjectsContext->StartPDFStream(fontProgramDictionaryContext);
 
 
 		// now copy the created font program to the output stream
@@ -94,10 +101,10 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteEmbeddedFont(
 		}
 
 
-		inObjectsContext->EndPDFStream(pdfStream);
-		delete pdfStream;
+		status = inObjectsContext->EndPDFStream(pdfStream);
 	}while(false);
 
+	delete pdfStream;
 	return status;
 }
 

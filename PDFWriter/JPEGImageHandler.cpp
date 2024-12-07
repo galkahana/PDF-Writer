@@ -132,7 +132,12 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 			break;
 		}
 
-		mObjectsContext->StartNewIndirectObject(inImageXObjectID);
+		status = mObjectsContext->StartNewIndirectObject(inImageXObjectID);
+		if(status != PDFHummus::eSuccess)
+		{
+			TRACE_LOG1("JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation. Unexpected Error, unable to start image xobject for object ID %ld",inImageXObjectID);
+			break;
+		}
 		DictionaryContext* imageContext = mObjectsContext->StartDictionary();
 
 		// type
@@ -219,8 +224,13 @@ PDFImageXObject* JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation(
 			break;
 		}
 
-		mObjectsContext->EndPDFStream(imageStream);
+		status = mObjectsContext->EndPDFStream(imageStream);
 		delete imageStream;
+		if(status != PDFHummus::eSuccess)
+		{
+			TRACE_LOG("JPEGImageHandler::CreateAndWriteImageXObjectFromJPGInformation. Unexpected Error, failed to finalize image stream");
+			break;
+		}
 
 		imageXObject = new PDFImageXObject(inImageXObjectID,1 == inJPGImageInformation.ColorComponentsCount ? KProcsetImageB:KProcsetImageC);
 	}while(false);
@@ -369,6 +379,11 @@ PDFFormXObject* JPEGImageHandler::CreateImageFormXObjectFromImageXObject(PDFImag
 		DoubleAndDoublePair dimensions = GetImageDimensions(inJPGImageInformation);
 
 		formXObject = mDocumentContext->StartFormXObject(PDFRectangle(0,0,dimensions.first,dimensions.second),inFormXObjectID);
+		if(!formXObject)
+		{
+			TRACE_LOG("JPEGImageHandler::CreateImageFormXObjectFromImageXObject. Unexpected Error, could not start form XObject for image");
+			break;
+		}
 		XObjectContentContext* xobjectContentContext = formXObject->GetContentContext();
 
 		xobjectContentContext->q();

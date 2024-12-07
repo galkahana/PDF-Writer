@@ -38,7 +38,9 @@ public:
 
     virtual PDFHummus::EStatusCode Write(ObjectsContext* inObjectsContext,
                                          PDFHummus::DocumentContext* inDocumentContext) {
-        inObjectsContext->StartNewIndirectObject(mObjectID);
+        PDFHummus::EStatusCode status = inObjectsContext->StartNewIndirectObject(mObjectID);
+        if(status != PDFHummus::eSuccess)
+            return status;
         DictionaryContext* dict = inObjectsContext->StartDictionary();
         dict->WriteKey("Type");
         dict->WriteNameValue("ExtGState");
@@ -46,7 +48,7 @@ public:
         dict->WriteDoubleValue(mAlphaValue);
         dict->WriteKey("CA");
         dict->WriteDoubleValue(mAlphaValue);
-        EStatusCode status = inObjectsContext->EndDictionary(dict);
+        status = inObjectsContext->EndDictionary(dict);
         inObjectsContext->EndIndirectObject();
 
         return status;

@@ -61,6 +61,9 @@ EStatusCodeAndObjectIDType ReplaceAnnotation(ObjectsContext& objectsContext, PDF
 	ObjectIDTypeList referencedObjects;
 	ObjectIDType newAnnotationRef = objectsContext.StartNewIndirectObject();
 
+	if(newAnnotationRef == 0)
+		return EStatusCodeAndObjectIDType(eFailure,0);
+
 	do {
 
 		DictionaryContext* newAnnotationDicitonary = objectsContext.StartDictionary();
@@ -177,7 +180,11 @@ EStatusCode EmbedPagesInPDFAndReplaceUrl(PDFWriter* inTargetWriter, const string
 				// depending on which got replaced
 				ObjectIDType annotsRef;
 
-				annotsRef = objectsContext.StartNewIndirectObject();					
+				annotsRef = objectsContext.StartNewIndirectObject();	
+				if(annotsRef == 0) {
+					status = eFailure;
+					break;
+				}
 				objectsContext.StartArray();
 
 				ObjectIDTypeList referencedObjects;

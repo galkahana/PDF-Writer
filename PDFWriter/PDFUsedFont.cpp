@@ -127,7 +127,9 @@ EStatusCode PDFUsedFont::WriteFontDefinition()
 
 EStatusCode PDFUsedFont::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
 {
-	inStateWriter->StartNewIndirectObject(inObjectID);
+	EStatusCode status = inStateWriter->StartNewIndirectObject(inObjectID);
+	if(status != eSuccess)
+		return status;
 	DictionaryContext* pdfUsedFontObject = inStateWriter->StartDictionary();
 
 	pdfUsedFontObject->WriteKey("Type");
@@ -149,7 +151,7 @@ EStatusCode PDFUsedFont::WriteState(ObjectsContext* inStateWriter,ObjectIDType i
 	if(mWrittenFont)
 		mWrittenFont->WriteState(inStateWriter,writtenFontObject);
 
-	return PDFHummus::eSuccess;
+	return status;
 }
 
 EStatusCode PDFUsedFont::ReadState(PDFParser* inStateReader,ObjectIDType inObjectID)

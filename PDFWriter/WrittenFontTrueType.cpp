@@ -227,14 +227,16 @@ bool WrittenFontTrueType::AddToANSIRepresentation(	const GlyphUnicodeMappingList
 
 EStatusCode WrittenFontTrueType::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
 {
-	inStateWriter->StartNewIndirectObject(inObjectID);
+	EStatusCode status = inStateWriter->StartNewIndirectObject(inObjectID);
+	if(status != PDFHummus::eSuccess)
+		return status;
 
 	DictionaryContext* writtenFontDictionary = inStateWriter->StartDictionary();
 
 	writtenFontDictionary->WriteKey("Type");
 	writtenFontDictionary->WriteNameValue("WrittenFontTrueType");
 
-	EStatusCode status = AbstractWrittenFont::WriteStateInDictionary(inStateWriter,writtenFontDictionary);
+	status = AbstractWrittenFont::WriteStateInDictionary(inStateWriter,writtenFontDictionary);
 	if(PDFHummus::eSuccess == status)
 	{
 		inStateWriter->EndDictionary(writtenFontDictionary);

@@ -172,6 +172,12 @@ int ShutDownRestartTest(int argc, char* argv[])
 
 			// define an xobject form to draw a 200X100 points red rectangle
 			PDFFormXObject* xobjectForm = pdfWriterB.StartFormXObject(PDFRectangle(0,0,200,100));
+			if(!xobjectForm)
+			{
+				status = PDFHummus::eFailure;
+				cout<<"failed to create form xobject\n";
+				break;
+			}
 			ObjectIDType formObjectID = xobjectForm->GetObjectID();
 
 			XObjectContentContext* xobjectContentContext = xobjectForm->GetContentContext();

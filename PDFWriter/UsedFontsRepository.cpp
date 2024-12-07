@@ -133,7 +133,9 @@ EStatusCode UsedFontsRepository::WriteState(ObjectsContext* inStateWriter,Object
 	EStatusCode status = PDFHummus::eSuccess;
 	ObjectIDTypeList usedFontsObjects;
 
-	inStateWriter->StartNewIndirectObject(inObjectID);
+	status = inStateWriter->StartNewIndirectObject(inObjectID);
+	if(status != eSuccess)
+		return status;
 	DictionaryContext* usedFontsRepositoryObject = inStateWriter->StartDictionary();
 
 	usedFontsRepositoryObject->WriteKey("Type");

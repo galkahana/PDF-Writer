@@ -74,7 +74,7 @@ private:
 
 	void WriteWidths(const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
 						DictionaryContext* inFontContext);
-	void WriteCIDSystemInfo(ObjectIDType inCIDSystemInfoObjectID);
+	PDFHummus::EStatusCode WriteCIDSystemInfo(ObjectIDType inCIDSystemInfoObjectID);
 	void WriteWidthsItem(bool inAllWidthsSame,const FTPosList& inWidths,unsigned short inFirstCID, unsigned short inLastCID);
-	void WriteCIDSet(unsigned int cidSetMaxGlyph);
+	PDFHummus::EStatusCode WriteCIDSet(unsigned int cidSetMaxGlyph);
 };

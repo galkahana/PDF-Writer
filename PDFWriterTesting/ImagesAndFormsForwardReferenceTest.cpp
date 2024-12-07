@@ -148,6 +148,12 @@ int ImagesAndFormsForwardReferenceTest(int argc, char* argv[])
 
 		// define an xobject form to draw a 200X100 points red rectangle
 		PDFFormXObject* xobjectForm = pdfWriter.StartFormXObject(PDFRectangle(0,0,200,100),simpleFormXObjectID);
+		if(!xobjectForm)
+		{
+			status = PDFHummus::eFailure;
+			cout<<"failed to create form xobject\n";
+			break;
+		}
 
 		XObjectContentContext* xobjectContentContext = xobjectForm->GetContentContext();
 		xobjectContentContext->q();

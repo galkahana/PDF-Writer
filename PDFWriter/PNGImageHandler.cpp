@@ -102,7 +102,12 @@ PDFImageXObject* CreateImageXObjectForData(png_structp png_ptr, png_infop info_p
 		ObjectIDType imageMaskObjectId = isAlpha ? inObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID():0;
 		MyStringBuf alphaComponentsData;
 
-		inObjectsContext->StartNewIndirectObject(imageXObjectObjectId);
+		status = inObjectsContext->StartNewIndirectObject(imageXObjectObjectId);
+		if(status != eSuccess)
+		{
+			TRACE_LOG1("PNGImageHandler::CreateImageXObjectForData. Unexpected Error, could not start image object %ld", imageXObjectObjectId);
+			break;
+		}
 		DictionaryContext* imageContext = inObjectsContext->StartDictionary();
 
 		// type
@@ -168,11 +173,21 @@ PDFImageXObject* CreateImageXObjectForData(png_structp png_ptr, png_infop info_p
 			}
 		}
 
-		inObjectsContext->EndPDFStream(imageStream);
+		status = inObjectsContext->EndPDFStream(imageStream);
+		if(status != eSuccess)
+		{
+			TRACE_LOG("PNGImageHandler::CreateImageXObjectForData. Unexpected Error, could not finalize image stream");
+			break;
+		}
 
 		// if there's a soft mask, write it now
 		if (isAlpha) {
-			inObjectsContext->StartNewIndirectObject(imageMaskObjectId);
+			status = inObjectsContext->StartNewIndirectObject(imageMaskObjectId);
+			if(status != eSuccess)
+			{
+				TRACE_LOG1("PNGImageHandler::CreateImageXObjectForData. Unexpected Error, could not start image mask object %ld", imageMaskObjectId);
+				break;
+			}
 			DictionaryContext* imageMaskContext = inObjectsContext->StartDictionary();
 
 			// type
@@ -207,8 +222,13 @@ PDFImageXObject* CreateImageXObjectForData(png_structp png_ptr, png_infop info_p
 			OutputStreamTraits traits(writerMaskStream);
 			traits.CopyToOutputStream(&alphaWriteStream);
 
-			inObjectsContext->EndPDFStream(imageMaskStream);
+			status = inObjectsContext->EndPDFStream(imageMaskStream);
 			delete imageMaskStream;
+			if(status != eSuccess)
+			{
+				TRACE_LOG("PNGImageHandler::CreateImageXObjectForData. Unexpected Error, could not finalize image mask stream");
+				break;
+			}
 		}
 
 		imageXObject = new PDFImageXObject(imageXObjectObjectId, 1 == colorComponents ? KProcsetImageB : KProcsetImageC);
@@ -233,6 +253,10 @@ PDFFormXObject* CreateImageFormXObjectFromImageXObject(
 	{
 
 		formXObject = inDocumentContext->StartFormXObject(PDFRectangle(0, 0, transformed_width, transformed_height), inFormXObjectID);
+		if(!formXObject) {
+			TRACE_LOG("PNGImageHandler::CreateImageFormXObjectFromImageXObject. Unexpected Error, could not start form XObject for image");
+			break;
+		}
 		XObjectContentContext* xobjectContentContext = formXObject->GetContentContext();
 
 		// iterate the images in the list and place one on top of each other

@@ -35,11 +35,11 @@ public:
 	// Finish writing a current stream, if exists and flush to the main PDF stream
 	PDFHummus::EStatusCode FinalizeCurrentStream();
 
-	// Extensibility method, retrieves the current content stream for writing. if one does not exist - creates it.
+	// Extensibility method, retrieves the current content stream for writing. if one does not exist - creates it. (will return NULL if failed to create)
 	PDFStream* GetCurrentPageContentStream();
 
 	// Extensibility method, forces creation of a new stream, if one does not exist now.
-	void StartAStreamIfRequired();
+	PDFHummus::EStatusCode StartAStreamIfRequired();
 
 	// Extensibility method, get the page to which this content is associated
 	PDFPage* GetAssociatedPage();
@@ -50,11 +50,11 @@ private:
 	PDFStream* mCurrentStream;
 
 	PDFHummus::EStatusCode FinalizeStreamWriteAndRelease();
-	void StartContentStreamDefinition();
+	PDFHummus::EStatusCode StartContentStreamDefinition();
 
 	// AbstractContentContext implementation
 	virtual ResourcesDictionary* GetResourcesDictionary();
-	virtual void RenewStreamConnection();
+	virtual PDFHummus::EStatusCode RenewStreamConnection();
 	virtual void ScheduleImageWrite(const std::string& inImagePath,unsigned long inImageIndex,ObjectIDType inObjectID, const PDFParsingOptions& inParsingOptions);
 	virtual void ScheduleObjectEndWriteTask(IObjectEndWritingTask* inObjectEndWritingTask);
 };

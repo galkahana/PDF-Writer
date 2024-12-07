@@ -85,7 +85,7 @@ private:
 
 
 	PDFHummus::EStatusCode WriteWrittenFontState(WrittenFontRepresentation* inRepresentation,ObjectsContext* inStateWriter,ObjectIDType inObjectID);
-	void WriteGlyphEncodingInfoState(ObjectsContext* inStateWriter,
+	PDFHummus::EStatusCode WriteGlyphEncodingInfoState(ObjectsContext* inStateWriter,
 									 ObjectIDType inObjectId,
 									 const GlyphEncodingInfo& inGlyphEncodingInfo);
 	void ReadWrittenFontState(PDFParser* inStateReader,PDFDictionary* inState,WrittenFontRepresentation* inRepresentation);

@@ -63,14 +63,19 @@ EStatusCode CIDFontWriter::WriteFont(FreeTypeFaceWrapper& inFontInfo,
 {
 
 	EStatusCode status = PDFHummus::eSuccess;
-	inObjectsContext->StartNewIndirectObject(inFontOccurrence->mWrittenObjectID);
-
-	mFontInfo = &inFontInfo;
-	mFontOccurrence = inFontOccurrence;
-	mObjectsContext = inObjectsContext;
 
 	do
 	{
+		status = inObjectsContext->StartNewIndirectObject(inFontOccurrence->mWrittenObjectID);
+		if(status != eSuccess)
+		{
+			TRACE_LOG1("CIDFontWriter::WriteFont, unexpected failure. could not write font object %ld",inFontOccurrence->mWrittenObjectID);
+			break;
+		}
+
+		mFontInfo = &inFontInfo;
+		mFontOccurrence = inFontOccurrence;
+		mObjectsContext = inObjectsContext;
 		DictionaryContext* fontContext = inObjectsContext->StartDictionary();
 
 		// Type
@@ -119,7 +124,12 @@ EStatusCode CIDFontWriter::WriteFont(FreeTypeFaceWrapper& inFontInfo,
 				break;
 			}
 			inObjectsContext->EndIndirectObject();
-			WriteToUnicodeMap(toUnicodeMapObjectID);
+			status = WriteToUnicodeMap(toUnicodeMapObjectID);
+			if (status != PDFHummus::eSuccess)
+			{
+				TRACE_LOG1("CIDFontWriter::WriteFont, failed to write unicode map %ld", toUnicodeMapObjectID);
+				break;
+			}			
 		}
 		else {
 			// else just finish font writing (a bit of an edge case here...but should take care of, for cleanliness)
@@ -183,9 +193,14 @@ static const std::string scBeginBFChar = "beginbfchar";
 static const std::string scEndBFChar = "endbfchar";
 static const char* scCmapFooter = "endcmap CMapName currentdict /CMap defineresource pop end end\n";
 
-void CIDFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
+EStatusCode CIDFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 {
-	mObjectsContext->StartNewIndirectObject(inToUnicodeMap);
+	EStatusCode status = mObjectsContext->StartNewIndirectObject(inToUnicodeMap);
+	if(status != eSuccess)
+	{
+		TRACE_LOG1("CIDFontWriter::WriteToUnicodeMap, could not write to unicode map object %ld",inToUnicodeMap);
+		return status;
+	}
 	PDFStream* pdfStream = mObjectsContext->StartPDFStream();
 	IByteWriter* cmapWriteContext = pdfStream->GetWriteStream();
 	PrimitiveObjectsWriter primitiveWriter(cmapWriteContext);
@@ -221,8 +236,9 @@ void CIDFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 	}
 	primitiveWriter.WriteKeyword(scEndBFChar);
 	cmapWriteContext->Write((const Byte*)scCmapFooter,strlen(scCmapFooter));
-	mObjectsContext->EndPDFStream(pdfStream);
+	status = mObjectsContext->EndPDFStream(pdfStream);
 	delete pdfStream;
+	return status;
 }
 
 static const Byte scEntryEnding[2] = {'>','\n'};

@@ -148,6 +148,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteEmbeddedFont(
 		// as oppose to true type, the reason for using a memory stream here is mainly peformance - i don't want to start
 		// setting file pointers and move in a file stream
 	EStatusCode status;
+	PDFStream* pdfStream = NULL;
 
 	do
 	{
@@ -167,6 +168,12 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteEmbeddedFont(
 		}
 
 		outEmbeddedFontObjectID = inObjectsContext->StartNewIndirectObject();
+		if(outEmbeddedFontObjectID == 0)
+		{
+			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::WriteEmbeddedFont, failed to start new indirect object for embedded font");
+			status = PDFHummus::eFailure;
+			break;
+		}
 		
 		DictionaryContext* fontProgramDictionaryContext = inObjectsContext->StartDictionary();
 
@@ -174,7 +181,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteEmbeddedFont(
 
 		fontProgramDictionaryContext->WriteKey(scSubtype);
 		fontProgramDictionaryContext->WriteNameValue(inFontFile3SubType);
-		PDFStream* pdfStream = inObjectsContext->StartPDFStream(fontProgramDictionaryContext);
+		pdfStream = inObjectsContext->StartPDFStream(fontProgramDictionaryContext);
 
 
 		// now copy the created font program to the output stream
@@ -188,10 +195,10 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::WriteEmbeddedFont(
 		}
 
 
-		inObjectsContext->EndPDFStream(pdfStream);
-		delete pdfStream;
+		status = inObjectsContext->EndPDFStream(pdfStream);
 	}while(false);
 
+	delete pdfStream;
 	return status;		
 
 }

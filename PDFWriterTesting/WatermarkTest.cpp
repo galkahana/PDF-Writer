@@ -52,6 +52,12 @@ int WatermarkTest(int argc, char* argv[])
 
         ObjectsContext& objCtx = pdfWriter.GetObjectsContext();
         ObjectIDType gsID = objCtx.StartNewIndirectObject();
+        if(gsID == 0)
+        {
+            status = PDFHummus::eFailure;
+            cout << "failed to start extgstate object\n";
+            break;
+        }
         DictionaryContext* dict = objCtx.StartDictionary();
         dict->WriteKey("type");
         dict->WriteNameValue("ExtGState");

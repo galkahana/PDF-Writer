@@ -31,6 +31,7 @@
 */
 
 #pragma once
+#include "EStatusCode.h"
 #include "PDFWriter.h"
 #include "DictionaryContext.h"
 
@@ -47,8 +48,10 @@ public:
       m_DocumentContext(parentDoc.GetObjectsContext()),
       m_DidEnd(false)
     {
-        if(newID)
-            m_DocumentContext.StartNewIndirectObject(m_ObjID = newID);
+        if(newID) {
+            if(m_DocumentContext.StartNewIndirectObject(newID) != PDFHummus::eSuccess)
+                m_ObjID = 0;
+        }
         else
            m_ObjID              = m_DocumentContext.StartNewIndirectObject();
 	    m_DictonaryContext      = m_DocumentContext.StartDictionary();

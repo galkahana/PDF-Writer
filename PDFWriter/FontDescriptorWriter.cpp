@@ -25,7 +25,7 @@
 #include "IFontDescriptorHelper.h"
 #include "DictionaryContext.h"
 
-
+using namespace PDFHummus;
 
 
 FontDescriptorWriter::FontDescriptorWriter(void)
@@ -67,7 +67,7 @@ static const char* scFontStretchLabels[eFontStretchMax] =
 	"UltraExpanded"
 };
 
-void FontDescriptorWriter::WriteFontDescriptor(	ObjectIDType inFontDescriptorObjectID,
+EStatusCode FontDescriptorWriter::WriteFontDescriptor(	ObjectIDType inFontDescriptorObjectID,
 												const std::string& inFontPostscriptName,
 												FreeTypeFaceWrapper* inFontInfo,
 												const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,
@@ -76,7 +76,10 @@ void FontDescriptorWriter::WriteFontDescriptor(	ObjectIDType inFontDescriptorObj
 {
 	DictionaryContext* fontDescriptorDictionary;
 
-	inObjectsContext->StartNewIndirectObject(inFontDescriptorObjectID);
+	EStatusCode status = inObjectsContext->StartNewIndirectObject(inFontDescriptorObjectID);
+	if(status != eSuccess) {
+		return status;
+	}
 	fontDescriptorDictionary = inObjectsContext->StartDictionary();
 	
 	// Type
@@ -153,6 +156,7 @@ void FontDescriptorWriter::WriteFontDescriptor(	ObjectIDType inFontDescriptorObj
 
 	inObjectsContext->EndDictionary(fontDescriptorDictionary);
 	inObjectsContext->EndIndirectObject();
+	return status;
 }
 
 unsigned int FontDescriptorWriter::CalculateFlags(	FreeTypeFaceWrapper* inFontInfo,

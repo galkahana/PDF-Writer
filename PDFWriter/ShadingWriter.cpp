@@ -146,6 +146,10 @@ EStatusCode ShadingWriter::WriteSoftmaskPatternObjectForRGBAShades(
                                         tiledPatternBounds.GetHeight(),
                                         inPatternObjectId,
                                         NULL);
+        if(!tiledPattern) {
+            status = eFailure;
+            break;
+        }
 
         TiledPatternContentContext* patternContentContext = tiledPattern->GetContentContext();
         patternContentContext->gs(tiledPattern->GetResourcesDictionary().AddExtGStateMapping(transparencySmaskExtGStateObjectId));
@@ -236,7 +240,9 @@ PDFHummus::EStatusCode ShadingWriter::WriteAlphaSoftMaskExtGStateObject(
         ObjectIDType smaskFormObjectId = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
 
         // write ExtGState with soft mask reference
-        mObjectsContext->StartNewIndirectObject(inExtGStateObjectId);
+        status = mObjectsContext->StartNewIndirectObject(inExtGStateObjectId);
+        if(status != eSuccess)
+            break;
         DictionaryContext* extGStateDict = mObjectsContext->StartDictionary();
 
         extGStateDict->WriteKey("Type");
@@ -310,6 +316,10 @@ PDFHummus::EStatusCode ShadingWriter::WriteAlphaSoftMaskXObjectFormObject(
         FromTransparencyGroupWriter groupWriter;
         mDocumentContext->AddDocumentContextExtender(&groupWriter);
         PDFFormXObject* form = mDocumentContext->StartFormXObject(formBounds,inXObjectFormObjectId,NULL,false);
+        if(!form) {
+            status = eFailure;
+            break;
+        }
         mDocumentContext->RemoveDocumentContextExtender(&groupWriter);
 
         XObjectContentContext* xobjectContentContext = form->GetContentContext();
@@ -390,7 +400,9 @@ EStatusCode ShadingWriter::WriteShadingPatternObjectWithPDFNativeFunctions(
         if(status != eSuccess)
             break;
 
-        mObjectsContext->StartNewIndirectObject(shadingObjectId);
+        status = mObjectsContext->StartNewIndirectObject(shadingObjectId);
+        if(status != eSuccess)
+            break;
         DictionaryContext* shadingDict = mObjectsContext->StartDictionary();
         shadingDict->WriteKey("ShadingType");
         shadingDict->WriteIntegerValue(inShadingType);
@@ -495,7 +507,9 @@ EStatusCode ShadingWriter::WriteShadingPatternObject(
 ) {
     ObjectIDType shadingObjectId = mObjectsContext->GetInDirectObjectsRegistry().AllocateNewObjectID();
 
-    mObjectsContext->StartNewIndirectObject(inPatternObjectId);
+    EStatusCode status = mObjectsContext->StartNewIndirectObject(inPatternObjectId);
+    if(status != eSuccess)
+        return status;
     DictionaryContext* patternDict = mObjectsContext->StartDictionary();
     patternDict->WriteKey("Type");
     patternDict->WriteNameValue("Pattern");
@@ -512,7 +526,7 @@ EStatusCode ShadingWriter::WriteShadingPatternObject(
     mObjectsContext->EndArray(eTokenSeparatorEndLine);
     patternDict->WriteKey("Shading");
     patternDict->WriteNewObjectReferenceValue(shadingObjectId);
-    EStatusCode status = mObjectsContext->EndDictionary(patternDict);
+    status = mObjectsContext->EndDictionary(patternDict);
     if(eSuccess == status)
         mObjectsContext->EndIndirectObject();
 
@@ -543,7 +557,7 @@ PDFHummus::EStatusCode ShadingWriter::WriteShadingPatternObjectWithPDFCustomFunc
         IByteWriter* writeStream = pdfStream->GetWriteStream();
         PrimitiveObjectsWriter primitiveWriter(writeStream);
         WriteGradientCustomFunctionProgram(inRadialShading, writeStream, &primitiveWriter);
-        mObjectsContext->EndPDFStream(pdfStream);
+        status = mObjectsContext->EndPDFStream(pdfStream);
     } while(false);
 
     delete pdfStream;
@@ -577,7 +591,10 @@ PDFStream* ShadingWriter::StartCustomFunctionShadingPatternStream(
             break;            
 
         // function object
-        mObjectsContext->StartNewIndirectObject(functionObjectId);
+        status = mObjectsContext->StartNewIndirectObject(functionObjectId);
+        if(status != eSuccess)
+            break;
+            
         DictionaryContext* functionDict = mObjectsContext->StartDictionary();
         functionDict->WriteKey("FunctionType");
         functionDict->WriteIntegerValue(4);
@@ -930,7 +947,7 @@ EStatusCode ShadingWriter::WriteShadingPatternObjectWithPDFCustomFunctions(
         IByteWriter* writeStream = pdfStream->GetWriteStream();
         PrimitiveObjectsWriter primitiveWriter(writeStream);
         WriteGradientCustomFunctionProgram(inLinearShading, writeStream, &primitiveWriter);
-        mObjectsContext->EndPDFStream(pdfStream);
+        status = mObjectsContext->EndPDFStream(pdfStream);
     } while(false);
 
     delete pdfStream;
@@ -1050,7 +1067,7 @@ EStatusCode ShadingWriter::WriteShadingPatternObjectWithPDFCustomFunctions(
         IByteWriter* writeStream = pdfStream->GetWriteStream();
         PrimitiveObjectsWriter primitiveWriter(writeStream);
         WriteGradientCustomFunctionProgram(inSweepShading, writeStream, &primitiveWriter);
-        mObjectsContext->EndPDFStream(pdfStream);
+        status = mObjectsContext->EndPDFStream(pdfStream);
     } while(false);
 
     delete pdfStream;

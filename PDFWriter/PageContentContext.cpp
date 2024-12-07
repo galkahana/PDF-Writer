@@ -40,20 +40,33 @@ PageContentContext::~PageContentContext(void)
 {
 }
 
-void PageContentContext::StartAStreamIfRequired()
+EStatusCode PageContentContext::StartAStreamIfRequired()
 {
+    EStatusCode status = eSuccess;
 	if(!mCurrentStream)
 	{
-		StartContentStreamDefinition();
+		status = StartContentStreamDefinition();
+        if(status != eSuccess)
+        {
+            TRACE_LOG("PageContentContext::StartAStreamIfRequired, Unexpected Error, failed to start a new content stream object");
+            return status;
+        }
 		mCurrentStream = mObjectsContext->StartPDFStream();
 		SetPDFStreamForWrite(mCurrentStream);
 	}
+    return status;
 }
 
-void PageContentContext::StartContentStreamDefinition()
+EStatusCode PageContentContext::StartContentStreamDefinition()
 {
 	ObjectIDType streamObjectID = mObjectsContext->StartNewIndirectObject();
+    if(0 == streamObjectID)
+    {
+        TRACE_LOG("PageContentContext::StartContentStreamDefinition, Unexpected Error, failed to start a new stream object");
+        return eFailure;
+    }
 	mPageOfContext->AddContentStreamReference(streamObjectID);
+    return eSuccess;
 }
 
 ResourcesDictionary* PageContentContext::GetResourcesDictionary()
@@ -76,22 +89,26 @@ PDFPage* PageContentContext::GetAssociatedPage()
 
 EStatusCode PageContentContext::FinalizeStreamWriteAndRelease()
 {
-	mObjectsContext->EndPDFStream(mCurrentStream);
+	EStatusCode status = mObjectsContext->EndPDFStream(mCurrentStream);
 
-	delete mCurrentStream;
+	delete mCurrentStream; 
 	mCurrentStream = NULL;
-	return PDFHummus::eSuccess;
+	return status;
 }
 
 PDFStream* PageContentContext::GetCurrentPageContentStream()
 {
-	StartAStreamIfRequired();
+	if(StartAStreamIfRequired() != eSuccess)
+    {
+        TRACE_LOG("PageContentContext::GetCurrentPageContentStream, Unexpected Error, failed to start a new content stream object");
+        return NULL;
+    }
 	return mCurrentStream;	
 }
 
-void PageContentContext::RenewStreamConnection()
+EStatusCode PageContentContext::RenewStreamConnection()
 {
-	StartAStreamIfRequired();
+	return StartAStreamIfRequired();
 }
 
 class PageImageWritingTask : public IPageEndWritingTask
