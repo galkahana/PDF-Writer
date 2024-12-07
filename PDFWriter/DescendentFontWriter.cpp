@@ -57,14 +57,21 @@ EStatusCode DescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID,
 {
 	EStatusCode status = PDFHummus::eSuccess;
 	FontDescriptorWriter fontDescriptorWriter;
-	inObjectsContext->StartNewIndirectObject(inDecendentObjectID);
-	
-	mFontInfo = &inFontInfo;
-	mObjectsContext = inObjectsContext;
-	mCIDSetObjectID = 0;
 
 	do
 	{
+		status = inObjectsContext->StartNewIndirectObject(inDecendentObjectID);
+		if(status != eSuccess)
+		{
+			TRACE_LOG1("CFFANSIFontWriter::WriteFont, could not start writing decendent font objec %ld", inDecendentObjectID);
+			break;
+		}
+		
+		mFontInfo = &inFontInfo;
+		mObjectsContext = inObjectsContext;
+		mCIDSetObjectID = 0;
+
+
 		DictionaryContext* fontContext = inObjectsContext->StartDictionary();
 
 		// Type
@@ -103,9 +110,19 @@ EStatusCode DescendentFontWriter::WriteFont(	ObjectIDType inDecendentObjectID,
 
 		inObjectsContext->EndIndirectObject();	
 
-		WriteCIDSystemInfo(cidSystemInfoObjectID); 
+		status = WriteCIDSystemInfo(cidSystemInfoObjectID); 
+		if(status != eSuccess)
+		{
+			TRACE_LOG("CFFANSIFontWriter::WriteFont, unexpected failure. Failed to write CIDSystemInfo");
+			break;
+		}
 		mWriterHelper = inDescendentFontWriterHelper; // save the helper pointer, to write the font program reference in the descriptor
-		fontDescriptorWriter.WriteFontDescriptor(fontDescriptorObjectID,inFontName,&inFontInfo,inEncodedGlyphs,inObjectsContext,this);
+		status = fontDescriptorWriter.WriteFontDescriptor(fontDescriptorObjectID,inFontName,&inFontInfo,inEncodedGlyphs,inObjectsContext,this);
+		if(status != eSuccess)
+		{
+			TRACE_LOG("CFFANSIFontWriter::WriteFont, unexpected failure. Failed to write font descriptor");
+			break;
+		}
 
 		if(mCIDSetObjectID) // set by descriptor writer callback
 			WriteCIDSet(inMaxCIDGlyph);
@@ -210,7 +227,7 @@ static const std::string scOrdering = "Ordering";
 static const std::string scRegistry = "Registry";
 static const std::string scSupplement = "Supplement";
 
-void DescendentFontWriter::WriteCIDSystemInfo(ObjectIDType inCIDSystemInfoObjectID)
+EStatusCode DescendentFontWriter::WriteCIDSystemInfo(ObjectIDType inCIDSystemInfoObjectID)
 {
 	FT_Bool isCID;
 	const char* registry;
@@ -229,7 +246,12 @@ void DescendentFontWriter::WriteCIDSystemInfo(ObjectIDType inCIDSystemInfoObject
 		supplement = 0;
 	}
 
-	mObjectsContext->StartNewIndirectObject(inCIDSystemInfoObjectID);
+	EStatusCode status = mObjectsContext->StartNewIndirectObject(inCIDSystemInfoObjectID);
+	if(status != eSuccess)
+	{
+		TRACE_LOG1("DescendentFontWriter::WriteCIDSystemInfo, failed to start CIDSystemInfo object %ld",inCIDSystemInfoObjectID);
+		return status;
+	}
 	DictionaryContext* systemInfoContext = mObjectsContext->StartDictionary();
 
 	// Registry
@@ -246,6 +268,7 @@ void DescendentFontWriter::WriteCIDSystemInfo(ObjectIDType inCIDSystemInfoObject
 
 	mObjectsContext->EndDictionary(systemInfoContext);
 	mObjectsContext->EndIndirectObject();
+	return status;
 }
 
 static const std::string scCIDSet = "CIDSet";
@@ -265,9 +288,14 @@ void DescendentFontWriter::WriteCharSet(	DictionaryContext* inDescriptorContext,
 	inDescriptorContext->WriteNewObjectReferenceValue(mCIDSetObjectID);
 }
 
-void DescendentFontWriter::WriteCIDSet(unsigned int cidSetMaxGlyph)
+EStatusCode DescendentFontWriter::WriteCIDSet(unsigned int cidSetMaxGlyph)
 {
-	mObjectsContext->StartNewIndirectObject(mCIDSetObjectID);
+	EStatusCode status = mObjectsContext->StartNewIndirectObject(mCIDSetObjectID);
+	if(status != eSuccess)
+	{
+		TRACE_LOG1("DescendentFontWriter::WriteCIDSet, failed to start CIDSet object %ld",mCIDSetObjectID);
+		return status;
+	}
 	PDFStream* pdfStream = mObjectsContext->StartPDFStream();	
 	IByteWriter* cidSetWritingContext = pdfStream->GetWriteStream();
 	Byte buffer;
@@ -286,8 +314,9 @@ void DescendentFontWriter::WriteCIDSet(unsigned int cidSetMaxGlyph)
 		cidSetWritingContext->Write(&buffer,1);
 	}
 
-	mObjectsContext->EndPDFStream(pdfStream);
+	status = mObjectsContext->EndPDFStream(pdfStream);
 	delete pdfStream;
+	return status;
 }
 
 void DescendentFontWriter::WriteFontFileReference(

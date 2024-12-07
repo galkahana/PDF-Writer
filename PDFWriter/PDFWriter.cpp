@@ -370,6 +370,12 @@ EStatusCode PDFWriter::Shutdown(const std::string& inStateFilePath)
 		}
 
 		ObjectIDType rootObjectID = writer.GetObjectsWriter()->StartNewIndirectObject();
+		if(0 == rootObjectID)
+		{
+			TRACE_LOG("PDFWriter::Shutdown, cant start root object writing");
+			status = eFailure;
+			break;
+		}
 		DictionaryContext* pdfWriterDictionary = writer.GetObjectsWriter()->StartDictionary();
 
 		pdfWriterDictionary->WriteKey("Type");

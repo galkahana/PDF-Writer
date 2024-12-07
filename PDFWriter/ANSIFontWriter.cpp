@@ -65,14 +65,20 @@ EStatusCode ANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 	EStatusCode status = PDFHummus::eSuccess;
 	FontDescriptorWriter fontDescriptorWriter;
 
-	inObjectsContext->StartNewIndirectObject(inFontOccurrence->mWrittenObjectID);
-	
-	mFontInfo = &inFontInfo;
-	mFontOccurrence = inFontOccurrence;
-	mObjectsContext = inObjectsContext;
 
 	do
 	{
+		status = inObjectsContext->StartNewIndirectObject(inFontOccurrence->mWrittenObjectID);
+		if(status != PDFHummus::eSuccess)
+		{
+			TRACE_LOG1("ANSIFontWriter::WriteFont, Failed to start indirect object for written font %ld", inFontOccurrence->mWrittenObjectID);
+			break;
+		}
+		
+		mFontInfo = &inFontInfo;
+		mFontOccurrence = inFontOccurrence;
+		mObjectsContext = inObjectsContext;
+
 		DictionaryContext* fontContext = inObjectsContext->StartDictionary();
 
 		// Type
@@ -123,11 +129,17 @@ EStatusCode ANSIFontWriter::WriteFont(	FreeTypeFaceWrapper& inFontInfo,
 		inObjectsContext->EndIndirectObject();	
 
 		// if necessary, write a dictionary encoding
-		if(mDifferences.size() > 0)
-			WriteEncodingDictionary();
+		if(mDifferences.size() > 0) {
+			status = WriteEncodingDictionary();
+			if(status != PDFHummus::eSuccess)
+			{
+				TRACE_LOG("ANSIFontWriter::WriteFont, failed to write encoding dictionary");
+				break;
+			}
+		}
 
 		WriteToUnicodeMap(toUnicodeMapObjectID);
-		fontDescriptorWriter.WriteFontDescriptor(fontDescriptorObjectID,
+		status = fontDescriptorWriter.WriteFontDescriptor(fontDescriptorObjectID,
 												inSubsetFontName,
 												&inFontInfo,
 												mCharactersVector,
@@ -229,11 +241,16 @@ void ANSIFontWriter::WriteEncoding(DictionaryContext* inFontContext)
 
 static const std::string scBaseEncoding = "BaseEncoding";
 static const std::string scDifferences = "Differences";
-void ANSIFontWriter::WriteEncodingDictionary()
+EStatusCode ANSIFontWriter::WriteEncodingDictionary()
 {
 	DictionaryContext* encodingDictionary;
 
-	mObjectsContext->StartNewIndirectObject(mEncodingDictionaryID);
+	EStatusCode status = mObjectsContext->StartNewIndirectObject(mEncodingDictionaryID);
+	if(status != eSuccess)
+	{
+		TRACE_LOG1("ANSIFontWriter::WriteEncodingDictionary, Unexpected Error. Unable to start indirect object for encoding dictionary %ld",mEncodingDictionaryID);
+		return status;
+	}
 	encodingDictionary = mObjectsContext->StartDictionary();
 
 	// Type
@@ -280,6 +297,7 @@ void ANSIFontWriter::WriteEncodingDictionary()
 
 	mObjectsContext->EndDictionary(encodingDictionary);
 	mObjectsContext->EndIndirectObject();
+	return status;
 }
 
 static const char* scCmapHeader =
@@ -300,9 +318,13 @@ static const std::string scEndBFChar = "endbfchar";
 static const char* scCmapFooter = "endcmap CMapName currentdict /CMap defineresource pop end end\n";
 
 
-void ANSIFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
+EStatusCode ANSIFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 {
-	mObjectsContext->StartNewIndirectObject(inToUnicodeMap);
+	EStatusCode status = mObjectsContext->StartNewIndirectObject(inToUnicodeMap);
+	if(status != eSuccess) {
+		TRACE_LOG1("ANSIFontWriter::WriteToUnicodeMap, Unable to start indirect object for toUnicode map %ld",inToUnicodeMap);
+		return status;
+	}
 	PDFStream* pdfStream = mObjectsContext->StartPDFStream();
 	IByteWriter* cmapWriteContext = pdfStream->GetWriteStream();
 	PrimitiveObjectsWriter primitiveWriter(cmapWriteContext);
@@ -342,8 +364,9 @@ void ANSIFontWriter::WriteToUnicodeMap(ObjectIDType inToUnicodeMap)
 	}
 	primitiveWriter.WriteKeyword(scEndBFChar);
 	cmapWriteContext->Write((const Byte*)scCmapFooter,strlen(scCmapFooter));
-	mObjectsContext->EndPDFStream(pdfStream);
+	status = mObjectsContext->EndPDFStream(pdfStream);
 	delete pdfStream;
+	return status;
 }
 
 static const Byte scEntryEnding[2] = {'>','\n'};

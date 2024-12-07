@@ -58,7 +58,11 @@ EStatusCode EmbedPagesInPDF(PDFWriter* inTargetWriter, const string& inSourcePDF
 					// it refers to (indirect annotation objects...normally)
 					ObjectsContext& objectsContext = inTargetWriter->GetObjectsContext();
 
-					annotsRef = objectsContext.StartNewIndirectObject();					
+					annotsRef = objectsContext.StartNewIndirectObject();	
+					if(annotsRef == 0) {
+						status = eFailure;
+						break;
+					}
 					EStatusCodeAndObjectIDTypeList result = copyingContext->CopyDirectObjectWithDeepCopy(annotsObject.GetPtr());
 
 					status = result.first;

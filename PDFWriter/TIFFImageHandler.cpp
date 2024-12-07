@@ -496,14 +496,29 @@ PDFFormXObject* TIFFImageHandler::ConvertTiff2PDF(ObjectIDType inFormXObjectID)
 		if(mT2p->tiff_transferfunctioncount != 0)
 		{
 			ObjectIDTypeList transferFunctionsObjectIDs;
-			for(int i=0; i < mT2p->tiff_transferfunctioncount; i++)
-				transferFunctionsObjectIDs.push_back(WriteTransferFunction(i));
+			for(int i=0; (i < mT2p->tiff_transferfunctioncount) && (eSuccess == status); i++) {
+				ObjectIDType transferFunctionID = WriteTransferFunction(i);
+				if(transferFunctionID == 0)
+				{
+					status = eFailure;
+					break;
+				}
+				transferFunctionsObjectIDs.push_back(transferFunctionID);
+			}
+			if(status != eSuccess)
+				break;
 			mT2p->pdf_transfer_functions_gstate = WriteTransferFunctionsExtGState(transferFunctionsObjectIDs);
 		}
 
 		// Write color space palette if one exists
-		if( (mT2p->pdf_colorspace & T2P_CS_PALETTE) != 0)
+		if( (mT2p->pdf_colorspace & T2P_CS_PALETTE) != 0) {
 			mT2p->pdf_palettecs = WritePaletteCS();
+			if(mT2p->pdf_palettecs == 0)
+			{
+				status = eFailure;
+				break;
+			}
+		}
 
 		// Write ICC profile for ICC CS based color spaces
 		if( (mT2p->pdf_colorspace & T2P_CS_ICCBASED) != 0)
@@ -1693,7 +1708,11 @@ ObjectIDType TIFFImageHandler::WriteTransferFunction(int i)
 	transferFunctionStream->GetWriteStream()->Write(
 				(const IOBasicTypes::Byte*)mT2p->tiff_transferfunction[i],
 				(1<<(mT2p->tiff_bitspersample+1)));
-	mObjectsContext->EndPDFStream(transferFunctionStream);
+	EStatusCode status = mObjectsContext->EndPDFStream(transferFunctionStream);
+	if(status != PDFHummus::eSuccess)
+	{
+		transferFunctionID = 0; // mark failure with 0 returned object
+	}
 	delete transferFunctionStream;
 	return transferFunctionID;
 }
@@ -1736,10 +1755,14 @@ ObjectIDType TIFFImageHandler::WriteTransferFunctionsExtGState(const ObjectIDTyp
 ObjectIDType TIFFImageHandler::WritePaletteCS()
 {
 	ObjectIDType palleteID = mObjectsContext->StartNewIndirectObject();
+	if(0 == palleteID)
+		return 0;
 	PDFStream* paletteStream =  mObjectsContext->StartPDFStream();
 	paletteStream->GetWriteStream()->Write(
 			(const IOBasicTypes::Byte*)mT2p->pdf_palette,mT2p->pdf_palettesize);
-	mObjectsContext->EndPDFStream(paletteStream);
+	EStatusCode status = mObjectsContext->EndPDFStream(paletteStream);
+	if(status != eSuccess)
+		palleteID = 0; // mark failure with 0 returned object
 	delete paletteStream;
 	return palleteID;
 }
@@ -1750,6 +1773,8 @@ static const std::string scAlternate = "Alternate";
 ObjectIDType TIFFImageHandler::WriteICCCS()
 {
 	ObjectIDType ICCID = mObjectsContext->StartNewIndirectObject();
+	if(0 == ICCID)
+		return 0;
 	DictionaryContext* ICCDictionary = mObjectsContext->StartDictionary();
 	
 	// N
@@ -1769,7 +1794,11 @@ ObjectIDType TIFFImageHandler::WriteICCCS()
 	ICCStream->GetWriteStream()->Write(
 				(const IOBasicTypes::Byte*)mT2p->tiff_iccprofile,
 				mT2p->tiff_iccprofilelength);
-	mObjectsContext->EndPDFStream(ICCStream);
+	EStatusCode status = mObjectsContext->EndPDFStream(ICCStream);
+	if(status != PDFHummus::eSuccess)
+	{
+		ICCID = 0; // mark failure with 0 returned object
+	}
 	delete ICCStream;
 	return ICCID;	
 }
@@ -2047,6 +2076,11 @@ PDFImageXObject* TIFFImageHandler::WriteTileImageXObject(int inTileIndex)
 	do
 	{
 		ObjectIDType imageXObjectID = mObjectsContext->StartNewIndirectObject();
+		if(imageXObjectID == 0)
+		{
+			TRACE_LOG("TIFFImageHandler::WriteTileImageXObject, unexpected failure. unable to create image xobject");
+			break;
+		}
 		DictionaryContext* imageContext = mObjectsContext->StartDictionary();
 	
 		WriteCommonImageDictionaryProperties(imageContext);
@@ -2084,7 +2118,8 @@ PDFImageXObject* TIFFImageHandler::WriteTileImageXObject(int inTileIndex)
 		if(WriteImageTileData(imageStream,inTileIndex) != PDFHummus::eSuccess)
 			break;
 
-		mObjectsContext->EndPDFStream(imageStream);
+		if(mObjectsContext->EndPDFStream(imageStream) != PDFHummus::eSuccess)
+			break;
 
 		// Creating Image XObject procset value is dummy, because resources  on the 
 		// container will be set externally.
@@ -2677,6 +2712,11 @@ PDFImageXObject* TIFFImageHandler::WriteUntiledImageXObject()
 	do
 	{
 		ObjectIDType imageXObjectID = mObjectsContext->StartNewIndirectObject();
+		if(imageXObjectID == 0)
+		{
+			TRACE_LOG("TIFFImageHandler::WriteUntiledImageXObject, unexpected failure. unable to create image xobject");
+			break;
+		}		
 		DictionaryContext* imageContext = mObjectsContext->StartDictionary();
 	
 		WriteCommonImageDictionaryProperties(imageContext);
@@ -2709,7 +2749,8 @@ PDFImageXObject* TIFFImageHandler::WriteUntiledImageXObject()
 		if(WriteImageData(imageStream) != PDFHummus::eSuccess)
 			break;
 
-		mObjectsContext->EndPDFStream(imageStream);
+		if(mObjectsContext->EndPDFStream(imageStream) != PDFHummus::eSuccess)
+			break;
 
 		// Creating Image XObject procset value is dummy, because resources  on the 
 		// container will be set externally.
@@ -3208,6 +3249,10 @@ PDFFormXObject* TIFFImageHandler::WriteImagesFormXObject(const PDFImageXObjectLi
 																		inFormXObjectID);
 	do
 	{
+		if(!xobjectForm) {
+			status = PDFHummus::eFailure;
+			break;
+		}
 
 		XObjectContentContext* xobjectContentContext = xobjectForm->GetContentContext();
 

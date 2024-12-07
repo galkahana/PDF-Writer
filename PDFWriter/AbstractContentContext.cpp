@@ -243,6 +243,7 @@ unsigned long AbstractContentContext::ColorValueForName(const std::string& inCol
 AbstractContentContext::AbstractContentContext(PDFHummus::DocumentContext* inDocumentContext)
 {
 	mDocumentContext = inDocumentContext;
+	mCurrentStatusCode = eSuccess;
 }
 
 AbstractContentContext::~AbstractContentContext(void)
@@ -261,9 +262,9 @@ void AbstractContentContext::AssertProcsetAvailable(const std::string& inProcset
 
 
 static const std::string scAddRectangleToPath = "re";
-void AbstractContentContext::re(double inLeft,double inBottom, double inWidth,double inHeight)
+EStatusCode AbstractContentContext::re(double inLeft,double inBottom, double inWidth,double inHeight)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteDouble(inLeft);
@@ -271,114 +272,127 @@ void AbstractContentContext::re(double inLeft,double inBottom, double inWidth,do
 	mPrimitiveWriter.WriteDouble(inWidth);
 	mPrimitiveWriter.WriteDouble(inHeight);
 	mPrimitiveWriter.WriteKeyword(scAddRectangleToPath);
+	return GetCurrentStatusCode();
 }
 
 static const std::string scFill = "f";
-void AbstractContentContext::f()
+EStatusCode AbstractContentContext::f()
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteKeyword(scFill);
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::S()
+EStatusCode AbstractContentContext::S()
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteKeyword("S");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::s()
+EStatusCode AbstractContentContext::s()
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteKeyword("s");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::F()
+EStatusCode AbstractContentContext::F()
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteKeyword("F");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::fStar()
+EStatusCode AbstractContentContext::fStar()
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteKeyword("f*");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::B()
+EStatusCode AbstractContentContext::B()
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteKeyword("B");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::BStar()
+EStatusCode AbstractContentContext::BStar()
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteKeyword("B*");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::b()
+EStatusCode AbstractContentContext::b()
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteKeyword("b");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::bStar()
+EStatusCode AbstractContentContext::bStar()
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteKeyword("b*");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::n()
+EStatusCode AbstractContentContext::n()
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteKeyword("n");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::m(double inX,double inY)
+EStatusCode AbstractContentContext::m(double inX,double inY)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteDouble(inX);
 	mPrimitiveWriter.WriteDouble(inY);
 	mPrimitiveWriter.WriteKeyword("m");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::l(double inX,double inY)
+EStatusCode AbstractContentContext::l(double inX,double inY)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteDouble(inX);
 	mPrimitiveWriter.WriteDouble(inY);
 	mPrimitiveWriter.WriteKeyword("l");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::c(	double inX1,double inY1, 
+EStatusCode AbstractContentContext::c(	double inX1,double inY1, 
 							double inX2, double inY2, 
 							double inX3, double inY3)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteDouble(inX1);
@@ -388,12 +402,13 @@ void AbstractContentContext::c(	double inX1,double inY1,
 	mPrimitiveWriter.WriteDouble(inX3);
 	mPrimitiveWriter.WriteDouble(inY3);
 	mPrimitiveWriter.WriteKeyword("c");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::v(	double inX2,double inY2, 
+EStatusCode AbstractContentContext::v(	double inX2,double inY2, 
 							double inX3, double inY3)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteDouble(inX2);
@@ -401,12 +416,13 @@ void AbstractContentContext::v(	double inX2,double inY2,
 	mPrimitiveWriter.WriteDouble(inX3);
 	mPrimitiveWriter.WriteDouble(inY3);
 	mPrimitiveWriter.WriteKeyword("v");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::y(	double inX1,double inY1, 
+EStatusCode AbstractContentContext::y(	double inX1,double inY1, 
 							double inX3, double inY3)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteDouble(inX1);
@@ -414,19 +430,21 @@ void AbstractContentContext::y(	double inX1,double inY1,
 	mPrimitiveWriter.WriteDouble(inX3);
 	mPrimitiveWriter.WriteDouble(inY3);
 	mPrimitiveWriter.WriteKeyword("y");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::h()
+EStatusCode AbstractContentContext::h()
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteKeyword("h");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::q()
+EStatusCode AbstractContentContext::q()
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteKeyword("q");
@@ -435,11 +453,13 @@ void AbstractContentContext::q()
     IContentContextListenerSet::iterator it = mListeners.begin();
     for(; it != mListeners.end();++it)
         (*it)->Onq(this);
+
+	return GetCurrentStatusCode();
 }
 
 EStatusCode AbstractContentContext::Q()
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteKeyword("Q");
@@ -449,12 +469,12 @@ EStatusCode AbstractContentContext::Q()
     for(; it != mListeners.end();++it)
         (*it)->OnQ(this);
     
-    return status;
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::cm(double inA, double inB, double inC, double inD, double inE, double inF)
+EStatusCode AbstractContentContext::cm(double inA, double inB, double inC, double inD, double inE, double inF)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteDouble(inA);
@@ -464,47 +484,52 @@ void AbstractContentContext::cm(double inA, double inB, double inC, double inD, 
 	mPrimitiveWriter.WriteDouble(inE);
 	mPrimitiveWriter.WriteDouble(inF);
 	mPrimitiveWriter.WriteKeyword("cm");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::w(double inLineWidth)
+EStatusCode AbstractContentContext::w(double inLineWidth)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteDouble(inLineWidth);
 	mPrimitiveWriter.WriteKeyword("w");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::J(int inLineCapStyle)
+EStatusCode AbstractContentContext::J(int inLineCapStyle)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteInteger(inLineCapStyle);
 	mPrimitiveWriter.WriteKeyword("J");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::j(int inLineJoinStyle)
+EStatusCode AbstractContentContext::j(int inLineJoinStyle)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteInteger(inLineJoinStyle);
 	mPrimitiveWriter.WriteKeyword("j");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::M(double inMiterLimit)
+EStatusCode AbstractContentContext::M(double inMiterLimit)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteDouble(inMiterLimit);
 	mPrimitiveWriter.WriteKeyword("M");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::d(double* inDashArray, int inDashArrayLength, double inDashPhase)
+EStatusCode AbstractContentContext::d(double* inDashArray, int inDashArrayLength, double inDashPhase)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.StartArray();
@@ -513,177 +538,195 @@ void AbstractContentContext::d(double* inDashArray, int inDashArrayLength, doubl
 	mPrimitiveWriter.EndArray(eTokenSeparatorSpace);
 	mPrimitiveWriter.WriteDouble(inDashPhase);
 	mPrimitiveWriter.WriteKeyword("d");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::ri(const std::string& inRenderingIntentName)
+EStatusCode AbstractContentContext::ri(const std::string& inRenderingIntentName)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteName(inRenderingIntentName);
 	mPrimitiveWriter.WriteKeyword("ri");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::i(int inFlatness)
+EStatusCode AbstractContentContext::i(int inFlatness)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteInteger(inFlatness);
 	mPrimitiveWriter.WriteKeyword("i");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::gs(const std::string& inGraphicStateName)
+EStatusCode AbstractContentContext::gs(const std::string& inGraphicStateName)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteName(inGraphicStateName);
 	mPrimitiveWriter.WriteKeyword("gs");
+	return GetCurrentStatusCode();
 }
 
 
-void AbstractContentContext::CS(const std::string& inColorSpaceName)
+EStatusCode AbstractContentContext::CS(const std::string& inColorSpaceName)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteName(inColorSpaceName);
 	mPrimitiveWriter.WriteKeyword("CS");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::cs(const std::string& inColorSpaceName)
+EStatusCode AbstractContentContext::cs(const std::string& inColorSpaceName)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteName(inColorSpaceName);
 	mPrimitiveWriter.WriteKeyword("cs");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::SC(double* inColorComponents, int inColorComponentsLength)
+EStatusCode AbstractContentContext::SC(double* inColorComponents, int inColorComponentsLength)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	for(int i=0;i<inColorComponentsLength;++i)
 		mPrimitiveWriter.WriteDouble(inColorComponents[i]);
 	mPrimitiveWriter.WriteKeyword("SC");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::SCN(double* inColorComponents, int inColorComponentsLength)
+EStatusCode AbstractContentContext::SCN(double* inColorComponents, int inColorComponentsLength)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	for(int i=0;i<inColorComponentsLength;++i)
 		mPrimitiveWriter.WriteDouble(inColorComponents[i]);
 	mPrimitiveWriter.WriteKeyword("SCN");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::SCN(double* inColorComponents, int inColorComponentsLength,const std::string& inPatternName)
+EStatusCode AbstractContentContext::SCN(double* inColorComponents, int inColorComponentsLength,const std::string& inPatternName)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	for(int i=0;i<inColorComponentsLength;++i)
 		mPrimitiveWriter.WriteDouble(inColorComponents[i]);
 	mPrimitiveWriter.WriteName(inPatternName);
 	mPrimitiveWriter.WriteKeyword("SCN");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::SCN(const std::string& inPatternName)
+EStatusCode AbstractContentContext::SCN(const std::string& inPatternName)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteName(inPatternName);
 	mPrimitiveWriter.WriteKeyword("SCN");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::sc(double* inColorComponents, int inColorComponentsLength)
+EStatusCode AbstractContentContext::sc(double* inColorComponents, int inColorComponentsLength)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	for(int i=0;i<inColorComponentsLength;++i)
 		mPrimitiveWriter.WriteDouble(inColorComponents[i]);
 	mPrimitiveWriter.WriteKeyword("sc");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::scn(double* inColorComponents, int inColorComponentsLength)
+EStatusCode AbstractContentContext::scn(double* inColorComponents, int inColorComponentsLength)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	for(int i=0;i<inColorComponentsLength;++i)
 		mPrimitiveWriter.WriteDouble(inColorComponents[i]);
 	mPrimitiveWriter.WriteKeyword("scn");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::scn(double* inColorComponents, int inColorComponentsLength,const std::string& inPatternName)
+EStatusCode AbstractContentContext::scn(double* inColorComponents, int inColorComponentsLength,const std::string& inPatternName)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	for(int i=0;i<inColorComponentsLength;++i)
 		mPrimitiveWriter.WriteDouble(inColorComponents[i]);
 	mPrimitiveWriter.WriteName(inPatternName);
 	mPrimitiveWriter.WriteKeyword("scn");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::scn(const std::string& inPatternName)
+EStatusCode AbstractContentContext::scn(const std::string& inPatternName)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteName(inPatternName);
 	mPrimitiveWriter.WriteKeyword("scn");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::G(double inGray)
+EStatusCode AbstractContentContext::G(double inGray)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteDouble(inGray);
 	mPrimitiveWriter.WriteKeyword("G");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::g(double inGray)
+EStatusCode AbstractContentContext::g(double inGray)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteDouble(inGray);
 	mPrimitiveWriter.WriteKeyword("g");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::RG(double inR,double inG,double inB)
+EStatusCode AbstractContentContext::RG(double inR,double inG,double inB)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteDouble(inR);
 	mPrimitiveWriter.WriteDouble(inG);
 	mPrimitiveWriter.WriteDouble(inB);
 	mPrimitiveWriter.WriteKeyword("RG");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::rg(double inR,double inG,double inB)
+EStatusCode AbstractContentContext::rg(double inR,double inG,double inB)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteDouble(inR);
 	mPrimitiveWriter.WriteDouble(inG);
 	mPrimitiveWriter.WriteDouble(inB);
 	mPrimitiveWriter.WriteKeyword("rg");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::K(double inC,double inM,double inY,double inK)
+EStatusCode AbstractContentContext::K(double inC,double inM,double inY,double inK)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteDouble(inC);
@@ -691,11 +734,12 @@ void AbstractContentContext::K(double inC,double inM,double inY,double inK)
 	mPrimitiveWriter.WriteDouble(inY);
 	mPrimitiveWriter.WriteDouble(inK);
 	mPrimitiveWriter.WriteKeyword("K");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::k(double inC,double inM,double inY,double inK)
+EStatusCode AbstractContentContext::k(double inC,double inM,double inY,double inK)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteDouble(inC);
@@ -703,76 +747,84 @@ void AbstractContentContext::k(double inC,double inM,double inY,double inK)
 	mPrimitiveWriter.WriteDouble(inY);
 	mPrimitiveWriter.WriteDouble(inK);
 	mPrimitiveWriter.WriteKeyword("k");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::W()
+EStatusCode AbstractContentContext::W()
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteKeyword("W");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::WStar()
+EStatusCode AbstractContentContext::WStar()
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteKeyword("W*");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::Do(const std::string& inXObjectName)
+EStatusCode AbstractContentContext::Do(const std::string& inXObjectName)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 
 	mPrimitiveWriter.WriteName(inXObjectName);	
 	mPrimitiveWriter.WriteKeyword("Do");	
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::Tc(double inCharacterSpace)
+EStatusCode AbstractContentContext::Tc(double inCharacterSpace)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 	AssertProcsetAvailable(KProcsetText);
 
 	mPrimitiveWriter.WriteDouble(inCharacterSpace);
 	mPrimitiveWriter.WriteKeyword("Tc");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::Tw(double inWordSpace)
+EStatusCode AbstractContentContext::Tw(double inWordSpace)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 	AssertProcsetAvailable(KProcsetText);
 
 	mPrimitiveWriter.WriteDouble(inWordSpace);
 	mPrimitiveWriter.WriteKeyword("Tw");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::Tz(int inHorizontalScaling)
+EStatusCode AbstractContentContext::Tz(int inHorizontalScaling)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 	AssertProcsetAvailable(KProcsetText);
 
 	mPrimitiveWriter.WriteInteger(inHorizontalScaling);
 	mPrimitiveWriter.WriteKeyword("Tz");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::TL(double inTextLeading)
+EStatusCode AbstractContentContext::TL(double inTextLeading)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 	AssertProcsetAvailable(KProcsetText);
 
 	mPrimitiveWriter.WriteDouble(inTextLeading);
 	mPrimitiveWriter.WriteKeyword("TL");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::TfLow(const std::string& inFontName,double inFontSize)
+EStatusCode AbstractContentContext::TfLow(const std::string& inFontName,double inFontSize)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 	AssertProcsetAvailable(KProcsetText);
 
@@ -782,71 +834,78 @@ void AbstractContentContext::TfLow(const std::string& inFontName,double inFontSi
 
 	mGraphicStack.GetCurrentState().mPlacedFontName = inFontName;
 	mGraphicStack.GetCurrentState().mPlacedFontSize = inFontSize;
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::Tr(int inRenderingMode)
+EStatusCode AbstractContentContext::Tr(int inRenderingMode)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 	AssertProcsetAvailable(KProcsetText);
 
 	mPrimitiveWriter.WriteInteger(inRenderingMode);
 	mPrimitiveWriter.WriteKeyword("Tr");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::Ts(double inFontRise)
+EStatusCode AbstractContentContext::Ts(double inFontRise)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 	AssertProcsetAvailable(KProcsetText);
 
 	mPrimitiveWriter.WriteDouble(inFontRise);
 	mPrimitiveWriter.WriteKeyword("Ts");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::BT()
+EStatusCode AbstractContentContext::BT()
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 	AssertProcsetAvailable(KProcsetText);
 
 	mPrimitiveWriter.WriteKeyword("BT");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::ET()
+EStatusCode AbstractContentContext::ET()
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 	AssertProcsetAvailable(KProcsetText);
 
 	mPrimitiveWriter.WriteKeyword("ET");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::Td(double inTx, double inTy)
+EStatusCode AbstractContentContext::Td(double inTx, double inTy)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 	AssertProcsetAvailable(KProcsetText);
 
 	mPrimitiveWriter.WriteDouble(inTx);
 	mPrimitiveWriter.WriteDouble(inTy);
 	mPrimitiveWriter.WriteKeyword("Td");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::TD(double inTx, double inTy)
+EStatusCode AbstractContentContext::TD(double inTx, double inTy)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 	AssertProcsetAvailable(KProcsetText);
 
 	mPrimitiveWriter.WriteDouble(inTx);
 	mPrimitiveWriter.WriteDouble(inTy);
 	mPrimitiveWriter.WriteKeyword("TD");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::Tm(double inA, double inB, double inC, double inD, double inE, double inF)
+EStatusCode AbstractContentContext::Tm(double inA, double inB, double inC, double inD, double inE, double inF)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 	AssertProcsetAvailable(KProcsetText);
 
@@ -857,63 +916,69 @@ void AbstractContentContext::Tm(double inA, double inB, double inC, double inD, 
 	mPrimitiveWriter.WriteDouble(inE);
 	mPrimitiveWriter.WriteDouble(inF);
 	mPrimitiveWriter.WriteKeyword("Tm");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::TStar()
+EStatusCode AbstractContentContext::TStar()
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 	AssertProcsetAvailable(KProcsetText);
 
 	mPrimitiveWriter.WriteKeyword("T*");
+	return GetCurrentStatusCode();
 }
 
 
-void AbstractContentContext::TjLow(const std::string& inText)
+EStatusCode AbstractContentContext::TjLow(const std::string& inText)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 	AssertProcsetAvailable(KProcsetText);
 
 	mPrimitiveWriter.WriteLiteralString(inText);
 	mPrimitiveWriter.WriteKeyword("Tj");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::TjHexLow(const std::string& inText)
+EStatusCode AbstractContentContext::TjHexLow(const std::string& inText)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 	AssertProcsetAvailable(KProcsetText);
 
 	mPrimitiveWriter.WriteHexString(inText);
 	mPrimitiveWriter.WriteKeyword("Tj");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::QuoteLow(const std::string& inText)
+EStatusCode AbstractContentContext::QuoteLow(const std::string& inText)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 	AssertProcsetAvailable(KProcsetText);
 
 	mPrimitiveWriter.WriteLiteralString(inText);
 	mPrimitiveWriter.WriteKeyword("'");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::QuoteHexLow(const std::string& inText)
+EStatusCode AbstractContentContext::QuoteHexLow(const std::string& inText)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 	AssertProcsetAvailable(KProcsetText);
 
 	mPrimitiveWriter.WriteHexString(inText);
 	mPrimitiveWriter.WriteKeyword("Quote");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::DoubleQuoteLow(	double inWordSpacing, 
+EStatusCode AbstractContentContext::DoubleQuoteLow(	double inWordSpacing, 
 											double inCharacterSpacing, 
 											const std::string& inText)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 	AssertProcsetAvailable(KProcsetText);
 
@@ -921,11 +986,12 @@ void AbstractContentContext::DoubleQuoteLow(	double inWordSpacing,
 	mPrimitiveWriter.WriteDouble(inCharacterSpacing);
 	mPrimitiveWriter.WriteLiteralString(inText);
 	mPrimitiveWriter.WriteKeyword("\"");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::DoubleQuoteHexLow(double inWordSpacing, double inCharacterSpacing, const std::string& inText)
+EStatusCode AbstractContentContext::DoubleQuoteHexLow(double inWordSpacing, double inCharacterSpacing, const std::string& inText)
 {
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 	AssertProcsetAvailable(KProcsetText);
 
@@ -933,12 +999,13 @@ void AbstractContentContext::DoubleQuoteHexLow(double inWordSpacing, double inCh
 	mPrimitiveWriter.WriteDouble(inCharacterSpacing);
 	mPrimitiveWriter.WriteHexString(inText);
 	mPrimitiveWriter.WriteKeyword("\"");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::TJLow(const StringOrDoubleList& inStringsAndSpacing)
+EStatusCode AbstractContentContext::TJLow(const StringOrDoubleList& inStringsAndSpacing)
 {
 	StringOrDoubleList::const_iterator it = inStringsAndSpacing.begin();
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 	AssertProcsetAvailable(KProcsetText);
 
@@ -955,12 +1022,13 @@ void AbstractContentContext::TJLow(const StringOrDoubleList& inStringsAndSpacing
 	mPrimitiveWriter.EndArray(eTokenSeparatorSpace);
 
 	mPrimitiveWriter.WriteKeyword("TJ");
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::TJHexLow(const StringOrDoubleList& inStringsAndSpacing)
+EStatusCode AbstractContentContext::TJHexLow(const StringOrDoubleList& inStringsAndSpacing)
 {
 	StringOrDoubleList::const_iterator it = inStringsAndSpacing.begin();
-	RenewStreamConnection();
+	RenewStreamConnectAndStoreResult();
 	AssertProcsetAvailable(KProcsetPDF);
 	AssertProcsetAvailable(KProcsetText);
 
@@ -977,6 +1045,7 @@ void AbstractContentContext::TJHexLow(const StringOrDoubleList& inStringsAndSpac
 	mPrimitiveWriter.EndArray(eTokenSeparatorSpace);
 
 	mPrimitiveWriter.WriteKeyword("TJ");
+	return GetCurrentStatusCode();
 }
 
 void AbstractContentContext::SetCurrentFont(PDFUsedFont* inFontReference) 
@@ -1282,17 +1351,24 @@ EStatusCode AbstractContentContext::TJ(const GlyphUnicodeMappingListOrDoubleList
 	return PDFHummus::eSuccess;	
 }
 
-void AbstractContentContext::WriteFreeCode(const std::string& inFreeCode)
+EStatusCode AbstractContentContext::WriteFreeCode(const std::string& inFreeCode)
 {
-    RenewStreamConnection();
-    mPrimitiveWriter.GetWritingStream()->Write((const Byte*)(inFreeCode.c_str()),inFreeCode.length());
+    RenewStreamConnectAndStoreResult();
+	IByteWriter* stream = mPrimitiveWriter.GetWritingStream();
+	if(!!stream)
+    	stream->Write((const Byte*)(inFreeCode.c_str()),inFreeCode.length());
+	return GetCurrentStatusCode();
 }
-void AbstractContentContext::WriteFreeCode(IByteReader* inFreeCodeSource)
+
+EStatusCode AbstractContentContext::WriteFreeCode(IByteReader* inFreeCodeSource)
 {
-	RenewStreamConnection();
-    
-    OutputStreamTraits traits(mPrimitiveWriter.GetWritingStream());
-    traits.CopyToOutputStream(inFreeCodeSource);
+	RenewStreamConnectAndStoreResult();
+	IByteWriter* stream = mPrimitiveWriter.GetWritingStream();
+	if(!!stream) {
+		OutputStreamTraits traits(stream);
+		traits.CopyToOutputStream(inFreeCodeSource);
+	}    
+	return GetCurrentStatusCode();
 }
 
 void AbstractContentContext::AddContentContextListener(IContentContextListener* inExtender)
@@ -1305,21 +1381,22 @@ void AbstractContentContext::RemoveContentContextListener(IContentContextListene
     mListeners.erase(inExtender);
 }
 
-void AbstractContentContext::DrawRectangle(double inLeft,double inBottom,double inWidth,double inHeight,const GraphicOptions& inOptions)
+EStatusCode AbstractContentContext::DrawRectangle(double inLeft,double inBottom,double inWidth,double inHeight,const GraphicOptions& inOptions)
 {
 	SetupColor(inOptions);
 	if(inOptions.drawingType == eStroke)
 		w(inOptions.strokeWidth);
 	re(inLeft,inBottom,inWidth,inHeight);
 	FinishPath(inOptions);
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::DrawSquare(double inLeft,double inBottom,double inEdge,const GraphicOptions& inOptions)
+EStatusCode AbstractContentContext::DrawSquare(double inLeft,double inBottom,double inEdge,const GraphicOptions& inOptions)
 {
-	DrawRectangle(inLeft,inBottom,inEdge,inEdge,inOptions);
+	return DrawRectangle(inLeft,inBottom,inEdge,inEdge,inOptions);
 }
 
-void AbstractContentContext::DrawCircle(double inCenterX,double inCenterY,double inRadius,const GraphicOptions& inOptions)
+EStatusCode AbstractContentContext::DrawCircle(double inCenterX,double inCenterY,double inRadius,const GraphicOptions& inOptions)
 {
     const double magic = 0.551784;
     double x = inCenterX;
@@ -1335,13 +1412,14 @@ void AbstractContentContext::DrawCircle(double inCenterX,double inCenterY,double
     c(x+rmagic,y+r,x+r,y+rmagic,x+r,y);
     c(x+r,y-rmagic,x+rmagic,y-r,x,y-r);
     c(x-rmagic,y-r,x-r,y-rmagic,x-r,y);
-	FinishPath(inOptions);
+	FinishPath(inOptions);	
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::DrawPath(const DoubleAndDoublePairList& inPathPoints,const GraphicOptions& inOptions)
+EStatusCode AbstractContentContext::DrawPath(const DoubleAndDoublePairList& inPathPoints,const GraphicOptions& inOptions)
 {
 	if(inPathPoints.size() == 0)
-		return;
+		return GetCurrentStatusCode();
 
 	SetupColor(inOptions);
 	if(inOptions.drawingType == eStroke)
@@ -1353,24 +1431,25 @@ void AbstractContentContext::DrawPath(const DoubleAndDoublePairList& inPathPoint
 	for(;it!=inPathPoints.end();++it)
 		l(it->first,it->second);
 	FinishPath(inOptions);
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::SetupColor(const GraphicOptions& inOptions)
+EStatusCode AbstractContentContext::SetupColor(const GraphicOptions& inOptions)
 {
-	SetupColor(inOptions.drawingType,inOptions.colorValue,inOptions.colorSpace, inOptions.opacity);
+	return SetupColor(inOptions.drawingType,inOptions.colorValue,inOptions.colorSpace, inOptions.opacity);
 }
 
-void AbstractContentContext::SetupColor(const TextOptions& inOptions)
+EStatusCode AbstractContentContext::SetupColor(const TextOptions& inOptions)
 {
-	SetupColor(eFill,inOptions.colorValue,inOptions.colorSpace, inOptions.opacity);
+	return SetupColor(eFill,inOptions.colorValue,inOptions.colorSpace, inOptions.opacity);
 }
 
 
-void AbstractContentContext::SetupColor(EDrawingType inDrawingType,unsigned long inColorValue,EColorSpace inColorSpace, double inOpacity)
+EStatusCode AbstractContentContext::SetupColor(EDrawingType inDrawingType,unsigned long inColorValue,EColorSpace inColorSpace, double inOpacity)
 {
 	if(inDrawingType != eStroke &&
 		inDrawingType != eFill)
-		return;
+		return GetCurrentStatusCode();
 
 	SetOpacity(inOpacity);
 	switch(inColorSpace)
@@ -1411,9 +1490,10 @@ void AbstractContentContext::SetupColor(EDrawingType inDrawingType,unsigned long
 				break;
 			}
 	}
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::FinishPath(const GraphicOptions& inOptions)
+EStatusCode AbstractContentContext::FinishPath(const GraphicOptions& inOptions)
 {
 	switch(inOptions.drawingType)
 	{
@@ -1439,6 +1519,7 @@ void AbstractContentContext::FinishPath(const GraphicOptions& inOptions)
 			}
 
 	}
+	return GetCurrentStatusCode();
 }
 
 EStatusCode AbstractContentContext::EncodeWithCurrentFont(const std::string& inText,GlyphUnicodeMappingList& outGlyphsUnicodeMapping) {
@@ -1458,7 +1539,7 @@ EStatusCode AbstractContentContext::EncodeWithCurrentFont(const std::string& inT
 	return encodingStatus;
 }
 
-void AbstractContentContext::WriteText(double inX,double inY,const std::string& inText,const TextOptions& inOptions)
+EStatusCode AbstractContentContext::WriteText(double inX,double inY,const std::string& inText,const TextOptions& inOptions)
 {
 	if(inOptions.font)
 	{
@@ -1526,9 +1607,10 @@ void AbstractContentContext::WriteText(double inX,double inY,const std::string& 
 
 	// flush what glyphs are remaining in shared context
 	sharedDrawingContext.Flush();
+	return GetCurrentStatusCode();
 }
 
-void AbstractContentContext::DrawImage(double inX,double inY,const std::string& inImagePath,const ImageOptions& inOptions)
+EStatusCode AbstractContentContext::DrawImage(double inX,double inY,const std::string& inImagePath,const ImageOptions& inOptions)
 {
 	double transformation[6] = {1,0,0,1,0,0};
 
@@ -1582,12 +1664,13 @@ void AbstractContentContext::DrawImage(double inX,double inY,const std::string& 
     cm(transformation[0],transformation[1],transformation[2],transformation[3],transformation[4],transformation[5]);
     Do(GetResourcesDictionary()->AddFormXObjectMapping(result.first));
     Q();
+	return GetCurrentStatusCode();
 
 }
 
-void AbstractContentContext::SetOpacity(double inAlpha) {
+EStatusCode AbstractContentContext::SetOpacity(double inAlpha) {
 	if(inAlpha == NO_OPACITY_VALUE) // special value allowing to fallback on the current graphic state opacity value. this allows a default behavior for high level text commands
-		return;
+		return GetCurrentStatusCode();
 
     // registering the images at pdfwriter to allow optimization on image writes
     ObjectIDTypeAndBool result = mDocumentContext->GetExtGStateRegistry().RegisterExtGStateForOpacity(inAlpha);
@@ -1597,4 +1680,17 @@ void AbstractContentContext::SetOpacity(double inAlpha) {
 		ScheduleObjectEndWriteTask(mDocumentContext->GetExtGStateRegistry().CreateExtGStateForOpacityWritingTask(result.first, inAlpha));
     }
 	gs(GetResourcesDictionary()->AddExtGStateMapping(result.first));
+	return GetCurrentStatusCode();
+}
+
+
+EStatusCode AbstractContentContext::GetCurrentStatusCode() {
+	return mCurrentStatusCode;
+}
+
+PDFHummus::EStatusCode AbstractContentContext::RenewStreamConnectAndStoreResult() {
+	EStatusCode status = RenewStreamConnection();
+	if(status != eSuccess)
+		mCurrentStatusCode = status;
+	return status;
 }

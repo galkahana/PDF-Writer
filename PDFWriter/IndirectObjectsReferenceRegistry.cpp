@@ -176,7 +176,9 @@ EStatusCode IndirectObjectsReferenceRegistry::WriteState(ObjectsContext* inState
 {
 	ObjectIDTypeList objects;
 
-	inStateWriter->StartNewIndirectObject(inObjectID);
+	EStatusCode status = inStateWriter->StartNewIndirectObject(inObjectID);
+	if(status != eSuccess)
+		return status;
 	
 	DictionaryContext* myDictionary = inStateWriter->StartDictionary();
 	
@@ -203,9 +205,11 @@ EStatusCode IndirectObjectsReferenceRegistry::WriteState(ObjectsContext* inState
 
 	it = mObjectsWritesRegistry.begin();
 
-	for(; it != mObjectsWritesRegistry.end(); ++it,++itIDs)
+	for(; (it != mObjectsWritesRegistry.end()) && (eSuccess == status); ++it,++itIDs)
 	{
-		inStateWriter->StartNewIndirectObject(*itIDs);
+		status = inStateWriter->StartNewIndirectObject(*itIDs);
+		if(status != eSuccess)
+			break;
 
 		DictionaryContext* registryDictionary = inStateWriter->StartDictionary();
 		
@@ -235,7 +239,7 @@ EStatusCode IndirectObjectsReferenceRegistry::WriteState(ObjectsContext* inState
 		inStateWriter->EndIndirectObject();
 	}
 
-	return PDFHummus::eSuccess;
+	return status;
 }
 
 EStatusCode IndirectObjectsReferenceRegistry::ReadState(PDFParser* inStateReader,ObjectIDType inObjectID)

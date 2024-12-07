@@ -68,6 +68,10 @@ AbstractContentContext* PDFModifiedPage::StartContentContext()
 		}
 		PDFRectangle mediaBox = PDFPageInput(&mWriter->GetModifiedFileParser(), page).GetMediaBox();
 		mCurrentContext = mWriter->StartFormXObject(mediaBox);
+		if(!mCurrentContext) {
+			TRACE_LOG("AbstractContentContext::PDFModifiedPage, failed to start form xobject");
+			return NULL;
+		}
 	}
 	return mCurrentContext->GetContentContext();
 }
@@ -143,6 +147,7 @@ PDFObject* PDFModifiedPage::findInheritedResources(PDFParser* inParser,PDFDictio
 PDFHummus::EStatusCode PDFModifiedPage::WritePage()
 {
 	EStatusCode status = EndContentContext(); // just in case someone forgot to close the latest content context
+	PDFDocumentCopyingContext* copyingContext = NULL;
 
 	do {
 		if (status != eSuccess || !mIsDirty) {
@@ -158,7 +163,7 @@ PDFHummus::EStatusCode PDFModifiedPage::WritePage()
 
 
 		// create a copying context, so we can copy the page dictionary, and modify its contents + resources dict
-		PDFDocumentCopyingContext* copyingContext = mWriter->CreatePDFCopyingContextForModifiedFile();
+		copyingContext = mWriter->CreatePDFCopyingContextForModifiedFile();
 
 		// get the page object
 		ObjectIDType pageObjectID = copyingContext->GetSourceDocumentParser()->GetPageObjectID(mPageIndex);
@@ -168,7 +173,11 @@ PDFHummus::EStatusCode PDFModifiedPage::WritePage()
 		MapIterator<PDFNameToPDFObjectMap>  pageDictionaryObjectIt = pageDictionaryObject->GetIterator();
 
 		// create modified page object
-		objectContext.StartModifiedIndirectObject(pageObjectID);
+		status = objectContext.StartModifiedIndirectObject(pageObjectID);
+		if(status != eSuccess) {
+			TRACE_LOG1("PDFModifiedPage::WritePage, failed to start modified page object %ld", pageObjectID);
+			break;
+		}
 		DictionaryContext* modifiedPageObject = mWriter->GetObjectsContext().StartDictionary();
 
 		// copy all elements of the page to the new page object, but the "Contents", "Resources" and "Annots" elements
@@ -314,10 +323,21 @@ PDFHummus::EStatusCode PDFModifiedPage::WritePage()
 
 		if (resourcesIndirect != 0)
 		{
-			if (newResourcesIndirect != 0)
-				objectContext.StartNewIndirectObject(newResourcesIndirect);
-			else
-				objectContext.StartModifiedIndirectObject(resourcesIndirect);
+			if (newResourcesIndirect != 0) {
+				status = objectContext.StartNewIndirectObject(newResourcesIndirect);
+				if(status != eSuccess) {
+					TRACE_LOG1("PDFModifiedPage::WritePage, failed to start new resources object %ld", newResourcesIndirect);
+					break;
+				}				
+			} else {
+				status = objectContext.StartModifiedIndirectObject(resourcesIndirect);
+				if(status != eSuccess) {
+					TRACE_LOG1("PDFModifiedPage::WritePage, failed to start modified resources object %ld", resourcesIndirect);
+					break;
+				}
+			}
+
+
 			PDFObjectCastPtr<PDFDictionary> resourceDict(copyingContext->GetSourceDocumentParser()->ParseNewObject(resourcesIndirect));
 			formResourcesNames = WriteModifiedResourcesDict(copyingContext->GetSourceDocumentParser(), resourceDict.GetPtr(), objectContext, copyingContext);
 			objectContext.EndIndirectObject();
@@ -328,16 +348,28 @@ PDFHummus::EStatusCode PDFModifiedPage::WritePage()
 		PrimitiveObjectsWriter primitivesWriter;
 		if (newEncapsulatingObjectID != 0)
 		{
-			objectContext.StartNewIndirectObject(newEncapsulatingObjectID);
+			status = objectContext.StartNewIndirectObject(newEncapsulatingObjectID);
+			if(status != eSuccess) {
+				TRACE_LOG1("PDFModifiedPage::WritePage, failed to start encapsulating object %ld", newEncapsulatingObjectID);
+				break;
+			}
 			newStream = objectContext.StartPDFStream();
 			primitivesWriter.SetStreamForWriting(newStream->GetWriteStream());
 			primitivesWriter.WriteKeyword("q");
-			objectContext.EndPDFStream(newStream);
+			status = objectContext.EndPDFStream(newStream);
 			delete newStream;
+			if(status != eSuccess) {
+				TRACE_LOG1("PDFModifiedPage::WritePage, failed to end encapsulating stream %ld", newEncapsulatingObjectID);
+				break;
+			}
 		}
 
 		// last but not least, create the actual content stream object, placing the form
-		objectContext.StartNewIndirectObject(newContentObjectID);
+		status = objectContext.StartNewIndirectObject(newContentObjectID);
+		if(status != eSuccess) {
+			TRACE_LOG1("PDFModifiedPage::WritePage, failed to start content object %ld", newContentObjectID);
+			break;
+		}		
 		newStream = objectContext.StartPDFStream();
 		primitivesWriter.SetStreamForWriting(newStream->GetWriteStream());
 
@@ -361,11 +393,12 @@ PDFHummus::EStatusCode PDFModifiedPage::WritePage()
 			primitivesWriter.WriteKeyword("Q");
 		}
 
-		objectContext.EndPDFStream(newStream);
+		status = objectContext.EndPDFStream(newStream);
 
 		delete newStream;
-		delete copyingContext;
 	} while (false);
+
+	delete copyingContext;
 
 	return status;
 }

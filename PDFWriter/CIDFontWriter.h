@@ -60,7 +60,7 @@ private:
 
 	void WriteEncoding(DictionaryContext* inFontContext);
 	void CalculateCharacterEncodingArray();
-	void WriteToUnicodeMap(ObjectIDType inToUnicodeMap);
+	PDFHummus::EStatusCode WriteToUnicodeMap(ObjectIDType inToUnicodeMap);
 	void WriteGlyphEntry(IByteWriter* inWriter,unsigned short inEncodedCharacter,const ULongVector& inUnicodeValues);
 
 };

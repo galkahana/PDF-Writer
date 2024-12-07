@@ -72,6 +72,7 @@ EStatusCode CFFEmbeddedFontWriter::WriteEmbeddedFont(
 		// as oppose to true type, the reason for using a memory stream here is mainly peformance - i don't want to start
 		// setting file pointers and move in a file stream
 	EStatusCode status;
+	PDFStream* pdfStream = NULL;
 
 	do
 	{
@@ -84,13 +85,19 @@ EStatusCode CFFEmbeddedFontWriter::WriteEmbeddedFont(
 
 		if(notEmbedded)
 		{
-			// can't embed. mark succesful, and go back empty
+			// can't embed [forbidden...which a font has a all the right to be]. mark succesful, and go back empty
 			outEmbeddedFontObjectID = 0;
 			TRACE_LOG("CFFEmbeddedFontWriter::WriteEmbeddedFont, font may not be embedded. so not embedding");
 			return PDFHummus::eSuccess;
 		}
 
 		outEmbeddedFontObjectID = inObjectsContext->StartNewIndirectObject();
+		if(0 == outEmbeddedFontObjectID)
+		{
+			TRACE_LOG("CFFEmbeddedFontWriter::WriteEmbeddedFont, failed to start writing embedded font object");
+			status = PDFHummus::eFailure;
+			break;
+		}
 		
 		DictionaryContext* fontProgramDictionaryContext = inObjectsContext->StartDictionary();
 
@@ -98,7 +105,7 @@ EStatusCode CFFEmbeddedFontWriter::WriteEmbeddedFont(
 
 		fontProgramDictionaryContext->WriteKey(scSubtype);
 		fontProgramDictionaryContext->WriteNameValue(inFontFile3SubType);
-		PDFStream* pdfStream = inObjectsContext->StartPDFStream(fontProgramDictionaryContext);
+		pdfStream = inObjectsContext->StartPDFStream(fontProgramDictionaryContext);
 
 
 		// now copy the created font program to the output stream
@@ -111,11 +118,10 @@ EStatusCode CFFEmbeddedFontWriter::WriteEmbeddedFont(
 			break;
 		}
 
-
-		inObjectsContext->EndPDFStream(pdfStream);
-		delete pdfStream;
+		status = inObjectsContext->EndPDFStream(pdfStream);
 	}while(false);
 
+	delete pdfStream;
 	return status;	
 }
 

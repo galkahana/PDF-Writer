@@ -351,7 +351,11 @@ EStatusCode AbstractWrittenFont::WriteWrittenFontState(WrittenFontRepresentation
 {
 	ObjectIDTypeList objectIDs;
 
-	inStateWriter->StartNewIndirectObject(inObjectID);	
+	EStatusCode status = inStateWriter->StartNewIndirectObject(inObjectID);	
+	if(status != PDFHummus::eSuccess) {
+		TRACE_LOG1("AbstractWrittenFont::WriteWrittenFontState, failed to write object for object ID = %ld",inObjectID);
+		return status;
+	}
 	DictionaryContext* writtenFontObject = inStateWriter->StartDictionary();
 
 	writtenFontObject->WriteKey("Type");
@@ -383,18 +387,22 @@ EStatusCode AbstractWrittenFont::WriteWrittenFontState(WrittenFontRepresentation
 		ObjectIDTypeList::iterator itIDs = objectIDs.begin();
 
 		it = inRepresentation->mGlyphIDToEncodedChar.begin();
-		for(; it != inRepresentation->mGlyphIDToEncodedChar.end();++it,++itIDs)
-			WriteGlyphEncodingInfoState(inStateWriter,*itIDs,it->second);
+		for(; it != inRepresentation->mGlyphIDToEncodedChar.end() && (eSuccess == status);++it,++itIDs)
+			status = WriteGlyphEncodingInfoState(inStateWriter,*itIDs,it->second);
 	}
 
-	return PDFHummus::eSuccess;
+	return status;
 }
 
-void AbstractWrittenFont::WriteGlyphEncodingInfoState(ObjectsContext* inStateWriter,
+EStatusCode AbstractWrittenFont::WriteGlyphEncodingInfoState(ObjectsContext* inStateWriter,
 													  ObjectIDType inObjectID,
 													  const GlyphEncodingInfo& inGlyphEncodingInfo)
 {
-	inStateWriter->StartNewIndirectObject(inObjectID);	
+	EStatusCode status = inStateWriter->StartNewIndirectObject(inObjectID);	
+	if(status != PDFHummus::eSuccess) {
+		TRACE_LOG1("AbstractWrittenFont::WriteGlyphEncodingInfoState, failed to write object for object ID = %ld",inObjectID);
+		return status;
+	}
 	DictionaryContext* glyphEncodingInfoObject = inStateWriter->StartDictionary();
 
 	glyphEncodingInfoObject->WriteKey("Type");
@@ -414,6 +422,8 @@ void AbstractWrittenFont::WriteGlyphEncodingInfoState(ObjectsContext* inStateWri
 
 	inStateWriter->EndDictionary(glyphEncodingInfoObject);
 	inStateWriter->EndIndirectObject();
+
+	return status;
 	
 }
 

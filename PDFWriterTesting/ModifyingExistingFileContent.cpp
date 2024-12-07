@@ -59,7 +59,12 @@ static EStatusCode TestPageSizeModification(PDFWriter* inPDFWriter)
         
         MapIterator<PDFNameToPDFObjectMap>  thirdPageObjectIt = thirdPageObject->GetIterator();
         
-        inPDFWriter->GetObjectsContext().StartModifiedIndirectObject(thirdPageID);
+        status = inPDFWriter->GetObjectsContext().StartModifiedIndirectObject(thirdPageID);
+        if(status != eSuccess)
+        {
+            cout<<"failed to start modified page object\n";
+            break;
+        }
         DictionaryContext* modifiedPageObject = inPDFWriter->GetObjectsContext().StartDictionary();
         
         while(thirdPageObjectIt.MoveNext())
@@ -174,7 +179,12 @@ static EStatusCode TestAddingComments(PDFWriter* inPDFWriter)
         
         MapIterator<PDFNameToPDFObjectMap>  fourthPageObjectIt = fourthPageObject->GetIterator();
         
-        inPDFWriter->GetObjectsContext().StartModifiedIndirectObject(fourthPageID);
+        status = inPDFWriter->GetObjectsContext().StartModifiedIndirectObject(fourthPageID);
+        if(status != eSuccess)
+        {
+            cout<<"failed to start modified page object\n";
+            break;
+        }
         DictionaryContext* modifiedPageObject = inPDFWriter->GetObjectsContext().StartDictionary();
         
         while(fourthPageObjectIt.MoveNext())

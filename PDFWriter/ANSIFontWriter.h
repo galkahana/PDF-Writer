@@ -62,8 +62,8 @@ private:
 	void WriteWidths(DictionaryContext* inFontContext);
 	void CalculateDifferences();
 	void WriteEncoding(DictionaryContext* inFontContext);
-	void WriteEncodingDictionary();
-	void WriteToUnicodeMap(ObjectIDType inToUnicodeMap);
+	PDFHummus::EStatusCode WriteEncodingDictionary();
+	PDFHummus::EStatusCode WriteToUnicodeMap(ObjectIDType inToUnicodeMap);
 	void WriteGlyphEntry(IByteWriter* inWriter,unsigned short inEncodedCharacter,const ULongVector& inUnicodeValues);
 
 	FreeTypeFaceWrapper* mFontInfo;

@@ -39,6 +39,8 @@ PrimitiveObjectsWriter::~PrimitiveObjectsWriter(void)
 static const IOBasicTypes::Byte scSpace[] = {' '};
 void PrimitiveObjectsWriter::WriteTokenSeparator(ETokenSeparator inSeparate)
 {
+	if(!mStreamForWriting)
+		return;
 	if(eTokenSeparatorSpace == inSeparate)
 		mStreamForWriting->Write(scSpace,1);
 	else if(eTokenSeparatorEndLine == inSeparate)
@@ -48,11 +50,15 @@ void PrimitiveObjectsWriter::WriteTokenSeparator(ETokenSeparator inSeparate)
 static const IOBasicTypes::Byte scNewLine[2] = {'\r','\n'};
 void PrimitiveObjectsWriter::EndLine()
 {
+	if(!mStreamForWriting)
+		return;
 	mStreamForWriting->Write(scNewLine,2);
 }
 
 void PrimitiveObjectsWriter::WriteKeyword(const std::string& inKeyword)
 {
+	if(!mStreamForWriting)
+		return;
 	mStreamForWriting->Write((const IOBasicTypes::Byte *)inKeyword.c_str(),inKeyword.size());
 	EndLine();
 }
@@ -66,6 +72,8 @@ from the pdf reference:
 This syntax is required to represent any of the delimiter or white-space characters or the number sign character itself; 
 it is recommended but not required for characters whose codes are outside the range 33 (!) to 126 (~).
 */
+	if(!mStreamForWriting)
+		return;
 
 	mStreamForWriting->Write(scSlash,1);
 
@@ -92,6 +100,8 @@ it is recommended but not required for characters whose codes are outside the ra
 
 void PrimitiveObjectsWriter::WriteInteger(long long inIntegerToken,ETokenSeparator inSeparate)
 {
+	if(!mStreamForWriting)
+		return;
 	char buffer[512];
 
 	SAFE_SPRINTF_1(buffer,512,"%lld",inIntegerToken);
@@ -104,6 +114,8 @@ static const IOBasicTypes::Byte scRightParanthesis[1] = {')'};
 
 void PrimitiveObjectsWriter::WriteUnsafeLiteralString(const std::string& inString,ETokenSeparator inSeparate)
 {
+	if(!mStreamForWriting)
+		return;
 	mStreamForWriting->Write(scLeftParanthesis,1);
 	mStreamForWriting->Write((const IOBasicTypes::Byte *)inString.c_str(),inString.size());
 	mStreamForWriting->Write(scRightParanthesis,1);
@@ -112,6 +124,8 @@ void PrimitiveObjectsWriter::WriteUnsafeLiteralString(const std::string& inStrin
 
 void PrimitiveObjectsWriter::WriteLiteralString(const std::string& inString,ETokenSeparator inSeparate)
 {
+	if(!mStreamForWriting)
+		return;
 	mStreamForWriting->Write(scLeftParanthesis,1);
 	// doing some string conversion, so that charachters are written as safe ones.
 	IOBasicTypes::Byte buffer[5];
@@ -143,6 +157,8 @@ void PrimitiveObjectsWriter::WriteLiteralString(const std::string& inString,ETok
 
 void PrimitiveObjectsWriter::WriteDouble(double inDoubleToken,ETokenSeparator inSeparate)
 {
+	if(!mStreamForWriting)
+		return;
 	// make sure we get proper decimal point writing
 	std::stringstream s;
 	// use classic locale for no worries writing
@@ -185,6 +201,8 @@ static const IOBasicTypes::Byte scFalse[5] = {'f','a','l','s','e'};
 
 void PrimitiveObjectsWriter::WriteBoolean(bool inBoolean,ETokenSeparator inSeparate)
 {
+	if(!mStreamForWriting)
+		return;
 	if(inBoolean)
 		mStreamForWriting->Write(scTrue,4);
 	else
@@ -195,6 +213,8 @@ void PrimitiveObjectsWriter::WriteBoolean(bool inBoolean,ETokenSeparator inSepar
 static const IOBasicTypes::Byte scNull[4] = {'n','u','l','l'};
 void PrimitiveObjectsWriter::WriteNull(ETokenSeparator inSeparate)
 {
+	if(!mStreamForWriting)
+		return;
 	mStreamForWriting->Write(scNull,4);	
 	WriteTokenSeparator(inSeparate);
 }
@@ -208,12 +228,16 @@ void PrimitiveObjectsWriter::SetStreamForWriting(IByteWriter* inStreamForWriting
 static const IOBasicTypes::Byte scOpenBracketSpace[2] = {'[',' '};
 void PrimitiveObjectsWriter::StartArray()
 {
+	if(!mStreamForWriting)
+		return;
 	mStreamForWriting->Write(scOpenBracketSpace,2);
 }
 
 static const IOBasicTypes::Byte scCloseBracket[1] = {']'};
 void PrimitiveObjectsWriter::EndArray(ETokenSeparator inSeparate)
 {
+	if(!mStreamForWriting)
+		return;
 	mStreamForWriting->Write(scCloseBracket,1);
 	WriteTokenSeparator(inSeparate);
 }
@@ -222,6 +246,8 @@ static const IOBasicTypes::Byte scLeftAngle[1] = {'<'};
 static const IOBasicTypes::Byte scRightAngle[1] = {'>'};
 void PrimitiveObjectsWriter::WriteHexString(const std::string& inString,ETokenSeparator inSeparate)
 {
+	if(!mStreamForWriting)
+		return;
 	mStreamForWriting->Write(scLeftAngle,1);
 	IOBasicTypes::Byte buffer[3];
 	std::string::const_iterator it = inString.begin();
@@ -238,6 +264,8 @@ void PrimitiveObjectsWriter::WriteHexString(const std::string& inString,ETokenSe
 
 void PrimitiveObjectsWriter::WriteEncodedHexString(const std::string& inString, ETokenSeparator inSeparate)
 {
+	if(!mStreamForWriting)
+		return;
 	// string is already encoded, so no need to sprintf
 	mStreamForWriting->Write(scLeftAngle, 1);
 	std::string::const_iterator it = inString.begin();

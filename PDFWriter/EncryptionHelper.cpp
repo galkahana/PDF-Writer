@@ -368,9 +368,11 @@ EStatusCode EncryptionHelper::Setup(const DecryptionHelper& inDecryptionSource)
 }
 
 
-PDFHummus::EStatusCode EncryptionHelper::WriteState(ObjectsContext* inStateWriter, ObjectIDType inObjectID)
+EStatusCode EncryptionHelper::WriteState(ObjectsContext* inStateWriter, ObjectIDType inObjectID)
 {
-	inStateWriter->StartNewIndirectObject(inObjectID);
+	EStatusCode status = inStateWriter->StartNewIndirectObject(inObjectID);
+	if(status != eSuccess)
+		return status;
 	DictionaryContext* encryptionObject = inStateWriter->StartDictionary();
 
 	encryptionObject->WriteKey("Type");
@@ -415,7 +417,7 @@ PDFHummus::EStatusCode EncryptionHelper::WriteState(ObjectsContext* inStateWrite
 	inStateWriter->EndDictionary(encryptionObject);
 	inStateWriter->EndIndirectObject();
 
-	return eSuccess;
+	return status;
 }
 
 PDFHummus::EStatusCode EncryptionHelper::ReadState(PDFParser* inStateReader, ObjectIDType inObjectID)

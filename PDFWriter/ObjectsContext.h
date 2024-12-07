@@ -103,14 +103,14 @@ public:
 	void EndArray(ETokenSeparator inSeparate = eTokenSeparatorNone);
 
 	// Indirect objects writing
-	// override that allocate a new object ID and returns it
+	// override that allocate a new object ID and returns it. Error return is marked by a 0 object ID
 	ObjectIDType StartNewIndirectObject();
 	// override for objects that already have been allocated in advance, and have an object ID
-	void StartNewIndirectObject(ObjectIDType inObjectID);
+	PDFHummus::EStatusCode StartNewIndirectObject(ObjectIDType inObjectID);
 	void EndIndirectObject();
 
     // for modified files scenarios, modify an existing object
-    void StartModifiedIndirectObject(ObjectIDType inObjectID);
+    PDFHummus::EStatusCode StartModifiedIndirectObject(ObjectIDType inObjectID);
 
 	// Sets whether streams created by the objects context will be compressed (with flate) or not
 	void SetCompressStreams(bool inCompressStreams);
@@ -122,7 +122,7 @@ public:
 	PDFStream* StartPDFStream(DictionaryContext* inStreamDictionary=NULL,bool inForceDirectExtentObject = false);
 	// same as StartPDFStream but forces the stream to create an unfiltered stream
 	PDFStream* StartUnfilteredPDFStream(DictionaryContext* inStreamDictionary=NULL);
-	void EndPDFStream(PDFStream* inStream);
+	PDFHummus::EStatusCode EndPDFStream(PDFStream* inStream);
 
 	// Extensibility
 	void SetObjectsContextExtender(IObjectsContextExtender* inExtender);
@@ -150,7 +150,7 @@ private:
 	DictionaryContextList mDictionaryStack;
 
 	void WritePDFStreamEndWithoutExtent();
-	void WritePDFStreamExtent(PDFStream* inStream);
+	PDFHummus::EStatusCode WritePDFStreamExtent(PDFStream* inStream);
     void WriteXrefNumber(IByteWriter* inStream,LongFilePositionType inElement, size_t inElementSize);
 	bool IsEncrypting();
 	std::string MaybeEncryptString(const std::string& inString);

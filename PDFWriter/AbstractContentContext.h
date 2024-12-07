@@ -191,98 +191,103 @@ public:
 	AbstractContentContext(PDFHummus::DocumentContext* inDocumentContext);
 	virtual ~AbstractContentContext(void);
 
+	// all of the drawing operators return StatusCode, in case writing goes wrong (right now it's about maxing out on PDF files size limit of 10gbs). instead of checking right after each one you can use
+	// GetCurrentStatusCode after a series of them, to find out if a problem occured while writing them. For the sake of convenience.
+	PDFHummus::EStatusCode GetCurrentStatusCode();
+
+
 	// High level methods
-	void DrawRectangle(double inLeft,double inBottom,double inWidth,double inHeight,const GraphicOptions& inOptions=GraphicOptions());
-	void DrawSquare(double inLeft,double inBottom,double inEdge,const GraphicOptions& inOptions=GraphicOptions());
-	void DrawCircle(double inCenterX,double inCenterY,double inRadius,const GraphicOptions& inOptions=GraphicOptions());
-	void DrawPath(const DoubleAndDoublePairList& inPathPoints,const GraphicOptions& inOptions=GraphicOptions());
-	void WriteText(double inX,double inY,const std::string& inText,const TextOptions& inOptions);
+	PDFHummus::EStatusCode DrawRectangle(double inLeft,double inBottom,double inWidth,double inHeight,const GraphicOptions& inOptions=GraphicOptions());
+	PDFHummus::EStatusCode DrawSquare(double inLeft,double inBottom,double inEdge,const GraphicOptions& inOptions=GraphicOptions());
+	PDFHummus::EStatusCode DrawCircle(double inCenterX,double inCenterY,double inRadius,const GraphicOptions& inOptions=GraphicOptions());
+	PDFHummus::EStatusCode DrawPath(const DoubleAndDoublePairList& inPathPoints,const GraphicOptions& inOptions=GraphicOptions());
+	PDFHummus::EStatusCode WriteText(double inX,double inY,const std::string& inText,const TextOptions& inOptions);
 	static unsigned long ColorValueForName(const std::string& inColorName);
-	void DrawImage(double inX,double inY,const std::string& inImagePath,const ImageOptions& inOptions=ImageOptions());
+	PDFHummus::EStatusCode DrawImage(double inX,double inY,const std::string& inImagePath,const ImageOptions& inOptions=ImageOptions());
 
 
 	// PDF Operators. For explanations on the meanings of each operator read Appendix A "Operator Summary" of the PDF Reference Manual (1.7)
 	
 	// path stroke/fill
-	void b();
-	void B();
-	void bStar();
-	void BStar();
-	void s();
-	void S();
-	void f();
-	void F();
-	void fStar();
-	void n();
+	PDFHummus::EStatusCode b();
+	PDFHummus::EStatusCode B();
+	PDFHummus::EStatusCode bStar();
+	PDFHummus::EStatusCode BStar();
+	PDFHummus::EStatusCode s();
+	PDFHummus::EStatusCode S();
+	PDFHummus::EStatusCode f();
+	PDFHummus::EStatusCode F();
+	PDFHummus::EStatusCode fStar();
+	PDFHummus::EStatusCode n();
 
 	// path construction
-	void m(double inX,double inY);
-	void l(double inX,double inY);
-	void c(	double inX1,double inY1, 
+	PDFHummus::EStatusCode m(double inX,double inY);
+	PDFHummus::EStatusCode l(double inX,double inY);
+	PDFHummus::EStatusCode c(	double inX1,double inY1, 
 			double inX2, double inY2, 
 			double inX3, double inY3);
-	void v(	double inX2,double inY2, 
+	PDFHummus::EStatusCode v(	double inX2,double inY2, 
 			double inX3, double inY3);
-	void y(	double inX1,double inY1, 
+	PDFHummus::EStatusCode y(	double inX1,double inY1, 
 			double inX3, double inY3);
-	void h();
-	void re(double inLeft,double inBottom, double inWidth,double inHeight);
+	PDFHummus::EStatusCode h();
+	PDFHummus::EStatusCode re(double inLeft,double inBottom, double inWidth,double inHeight);
 
 	// graphic state
-	void q();
+	PDFHummus::EStatusCode q();
 	PDFHummus::EStatusCode Q(); // Status code returned, in case there's inbalance in "q-Q"s
-	void cm(double inA, double inB, double inC, double inD, double inE, double inF);
-	void w(double inLineWidth);
-	void J(int inLineCapStyle);
-	void j(int inLineJoinStyle);
-	void M(double inMiterLimit);
-	void d(double* inDashArray, int inDashArrayLength, double inDashPhase);
-	void ri(const std::string& inRenderingIntentName);
-	void i(int inFlatness);
-	void gs(const std::string& inGraphicStateName);
+	PDFHummus::EStatusCode cm(double inA, double inB, double inC, double inD, double inE, double inF);
+	PDFHummus::EStatusCode w(double inLineWidth);
+	PDFHummus::EStatusCode J(int inLineCapStyle);
+	PDFHummus::EStatusCode j(int inLineJoinStyle);
+	PDFHummus::EStatusCode M(double inMiterLimit);
+	PDFHummus::EStatusCode d(double* inDashArray, int inDashArrayLength, double inDashPhase);
+	PDFHummus::EStatusCode ri(const std::string& inRenderingIntentName);
+	PDFHummus::EStatusCode i(int inFlatness);
+	PDFHummus::EStatusCode gs(const std::string& inGraphicStateName);
 
 	// color operators
-	void CS(const std::string& inColorSpaceName);
-	void cs(const std::string& inColorSpaceName);
-	void SC(double* inColorComponents, int inColorComponentsLength);
-	void SCN(double* inColorComponents, int inColorComponentsLength);
-	void SCN(double* inColorComponents, int inColorComponentsLength,const std::string& inPatternName);
-	void SCN(const std::string& inPatternName);
-	void sc(double* inColorComponents, int inColorComponentsLength);
-	void scn(double* inColorComponents, int inColorComponentsLength);
-	void scn(double* inColorComponents, int inColorComponentsLength,const std::string& inPatternName);
-	void scn(const std::string& inPatternName);
-	void G(double inGray);
-	void g(double inGray);
-	void RG(double inR,double inG,double inB);
-	void rg(double inR,double inG,double inB);
-	void K(double inC,double inM,double inY,double inK);
-	void k(double inC,double inM,double inY,double inK);
+	PDFHummus::EStatusCode CS(const std::string& inColorSpaceName);
+	PDFHummus::EStatusCode cs(const std::string& inColorSpaceName);
+	PDFHummus::EStatusCode SC(double* inColorComponents, int inColorComponentsLength);
+	PDFHummus::EStatusCode SCN(double* inColorComponents, int inColorComponentsLength);
+	PDFHummus::EStatusCode SCN(double* inColorComponents, int inColorComponentsLength,const std::string& inPatternName);
+	PDFHummus::EStatusCode SCN(const std::string& inPatternName);
+	PDFHummus::EStatusCode sc(double* inColorComponents, int inColorComponentsLength);
+	PDFHummus::EStatusCode scn(double* inColorComponents, int inColorComponentsLength);
+	PDFHummus::EStatusCode scn(double* inColorComponents, int inColorComponentsLength,const std::string& inPatternName);
+	PDFHummus::EStatusCode scn(const std::string& inPatternName);
+	PDFHummus::EStatusCode G(double inGray);
+	PDFHummus::EStatusCode g(double inGray);
+	PDFHummus::EStatusCode RG(double inR,double inG,double inB);
+	PDFHummus::EStatusCode rg(double inR,double inG,double inB);
+	PDFHummus::EStatusCode K(double inC,double inM,double inY,double inK);
+	PDFHummus::EStatusCode k(double inC,double inM,double inY,double inK);
 
 	// clip operators
-	void W();
-	void WStar();
+	PDFHummus::EStatusCode W();
+	PDFHummus::EStatusCode WStar();
 
 	// XObject usage
-	void Do(const std::string& inXObjectName);
+	PDFHummus::EStatusCode Do(const std::string& inXObjectName);
 
 	// Text state operators
-	void Tc(double inCharacterSpace);
-	void Tw(double inWordSpace);
-	void Tz(int inHorizontalScaling);
-	void TL(double inTextLeading);
-	void Tr(int inRenderingMode);
-	void Ts(double inFontRise);
+	PDFHummus::EStatusCode Tc(double inCharacterSpace);
+	PDFHummus::EStatusCode Tw(double inWordSpace);
+	PDFHummus::EStatusCode Tz(int inHorizontalScaling);
+	PDFHummus::EStatusCode TL(double inTextLeading);
+	PDFHummus::EStatusCode Tr(int inRenderingMode);
+	PDFHummus::EStatusCode Ts(double inFontRise);
 
 	// Text object operators
-	void BT();
-	void ET();
+	PDFHummus::EStatusCode BT();
+	PDFHummus::EStatusCode ET();
 
 	// Text positioning operators
-	void Td(double inTx, double inTy);
-	void TD(double inTx, double inTy);
-	void Tm(double inA, double inB, double inC, double inD, double inE, double inF);
-	void TStar();
+	PDFHummus::EStatusCode Td(double inTx, double inTy);
+	PDFHummus::EStatusCode TD(double inTx, double inTy);
+	PDFHummus::EStatusCode Tm(double inA, double inB, double inC, double inD, double inE, double inF);
+	PDFHummus::EStatusCode TStar();
 
 	//
 	// Text showing operators using the library handling of fonts with unicode text using UTF 16
@@ -335,42 +340,42 @@ public:
 	// font and text usage
 
 	// Low level setting of font. for the high level version, see below
-	void TfLow(const std::string& inFontName,double inFontSize); 
+	PDFHummus::EStatusCode TfLow(const std::string& inFontName,double inFontSize); 
 
 	// first version of Tj writes the string in literal string paranthesis, 
 	// second version of Tj writes the string in hex string angle brackets
-	void TjLow(const std::string& inText);
-	void TjHexLow(const std::string& inText); 
+	PDFHummus::EStatusCode TjLow(const std::string& inText);
+	PDFHummus::EStatusCode TjHexLow(const std::string& inText); 
 
-	void QuoteLow(const std::string& inText); // matches the operator '
-	void QuoteHexLow(const std::string& inText);
+	PDFHummus::EStatusCode QuoteLow(const std::string& inText); // matches the operator '
+	PDFHummus::EStatusCode QuoteHexLow(const std::string& inText);
 
-	void DoubleQuoteLow(double inWordSpacing, double inCharacterSpacing, const std::string& inText); // matches the operator "
-	void DoubleQuoteHexLow(double inWordSpacing, double inCharacterSpacing, const std::string& inText); 
+	PDFHummus::EStatusCode DoubleQuoteLow(double inWordSpacing, double inCharacterSpacing, const std::string& inText); // matches the operator "
+	PDFHummus::EStatusCode DoubleQuoteHexLow(double inWordSpacing, double inCharacterSpacing, const std::string& inText); 
 
 	// similar to the TJ PDF command, TJ() recieves an input an array of items which
 	// can be either a string or a double
-	void TJLow(const StringOrDoubleList& inStringsAndSpacing);
-	void TJHexLow(const StringOrDoubleList& inStringsAndSpacing);
+	PDFHummus::EStatusCode TJLow(const StringOrDoubleList& inStringsAndSpacing);
+	PDFHummus::EStatusCode TJHexLow(const StringOrDoubleList& inStringsAndSpacing);
 
     // introduce free code
-    void WriteFreeCode(const std::string& inFreeCode);
-    void WriteFreeCode(IByteReader* inFreeCodeSource);
+    PDFHummus::EStatusCode WriteFreeCode(const std::string& inFreeCode);
+    PDFHummus::EStatusCode WriteFreeCode(IByteReader* inFreeCodeSource);
 
     // Extensibility
     void AddContentContextListener(IContentContextListener* inExtender);
     void RemoveContentContextListener(IContentContextListener* inExtender);
 
 	// Simplified color setup
-	void SetupColor(const GraphicOptions& inOptions);
-	void SetupColor(const TextOptions& inOptions);
-	void SetupColor(EDrawingType inDrawingType,unsigned long inColorValue,EColorSpace inColorSpace, double inOpacity);
+	PDFHummus::EStatusCode SetupColor(const GraphicOptions& inOptions);
+	PDFHummus::EStatusCode SetupColor(const TextOptions& inOptions);
+	PDFHummus::EStatusCode SetupColor(EDrawingType inDrawingType,unsigned long inColorValue,EColorSpace inColorSpace, double inOpacity);
 
 	// Opacity. sets for both fill and stroke, for simplicity sake.
 	// Alpha value is 0 to 1, where 1 is opaque and 0 is fully transparent.
 	// 255.0 is a special value which skips setting an alpha value. can be used for calling always but with a default
 	// behavior that falls back on current graphic state
-	void SetOpacity(double inAlpha);
+	PDFHummus::EStatusCode SetOpacity(double inAlpha);
 
 	// accessors for internal objects, for extending content context capabilities outside of content context
 	PrimitiveObjectsWriter& GetPrimitiveWriter() {return mPrimitiveWriter;}
@@ -393,7 +398,13 @@ protected:
 
 private:
 	// Derived classes should optionally use this method if the stream needs updating (use calls to SetPDFStreamForWrite for this purpose)
-	virtual void RenewStreamConnection() {};
+	virtual PDFHummus::EStatusCode RenewStreamConnection() {return PDFHummus::eSuccess;};
+
+	PDFHummus::EStatusCode RenewStreamConnectAndStoreResult();
+
+	// This variable holds success until an operator writing fails.
+	// This way one can write a series of operators and then check if they all succeeded.
+	PDFHummus::EStatusCode mCurrentStatusCode;
 
 
 	PrimitiveObjectsWriter mPrimitiveWriter;
@@ -410,7 +421,7 @@ private:
 	PDFHummus::EStatusCode WriteTextCommandWithDirectGlyphSelection(const GlyphUnicodeMappingList& inText,ITextCommand* inTextCommand);
 
 
-	void FinishPath(const GraphicOptions& inOptions);
+	PDFHummus::EStatusCode FinishPath(const GraphicOptions& inOptions);
 
 	PDFHummus::EStatusCode EncodeWithCurrentFont(const std::string& inText,GlyphUnicodeMappingList& outGlyphsUnicodeMapping);
 };

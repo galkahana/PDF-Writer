@@ -34,7 +34,7 @@ using namespace PDFHummus;
 
 typedef std::vector<ObjectIDType> ULongVector;
 
-static void AddPageToNewTree(unsigned long inPageIndex, PDFWriter& inWriter, PDFDocumentCopyingContext* inCopyingContext) {
+static EStatusCode AddPageToNewTree(unsigned long inPageIndex, PDFWriter& inWriter, PDFDocumentCopyingContext* inCopyingContext) {
 	CatalogInformation& catalogInformation = inWriter.GetDocumentContext().GetCatalogInformation();
 	IndirectObjectsReferenceRegistry& objectsRegistry = inWriter.GetObjectsContext().GetInDirectObjectsRegistry();
 	PDFParser& modifiedFileParser = inWriter.GetModifiedFileParser();
@@ -50,7 +50,11 @@ static void AddPageToNewTree(unsigned long inPageIndex, PDFWriter& inWriter, PDF
 	ObjectsContext& objectContext = inWriter.GetObjectsContext();
 
 
-	objectContext.StartModifiedIndirectObject(pageObjectId);
+	EStatusCode status = objectContext.StartModifiedIndirectObject(pageObjectId);
+	if(status != eSuccess) {
+		cout<<"failed to start modified page object\n";
+		return status;
+	}
 	DictionaryContext* modifiedPageObject = objectContext.StartDictionary();
 
 	// copy all elements of the page to the new page object, but the "Parent" element
@@ -69,6 +73,8 @@ static void AddPageToNewTree(unsigned long inPageIndex, PDFWriter& inWriter, PDF
 
 	objectContext.EndDictionary(modifiedPageObject);
 	objectContext.EndIndirectObject();
+
+	return status;
 
 }
 
@@ -107,8 +113,18 @@ int PageOrderModification(int argc, char* argv[])
 		// direct access to the document context catalog information, which holds the page tree
 		
 		// add pages in any order that you want
-		AddPageToNewTree(1, pdfWriter, copyingContext);
-		AddPageToNewTree(0, pdfWriter, copyingContext);
+		status = AddPageToNewTree(1, pdfWriter, copyingContext);
+		if(status != eSuccess) 
+		{
+			cout << "failed to add page 1\n";
+			break;
+		}
+		status = AddPageToNewTree(0, pdfWriter, copyingContext);
+		if(status != eSuccess) 
+		{
+			cout << "failed to add page 0\n";
+			break;
+		}
 
 		// delete previous page tree to allow override
 		PDFObjectCastPtr<PDFIndirectObjectReference> catalogReference(modifiedFileParser.GetTrailer()->QueryDirectObject("Root"));
@@ -116,7 +132,12 @@ int PageOrderModification(int argc, char* argv[])
 		PDFObjectCastPtr<PDFIndirectObjectReference> pagesReference(catalog->QueryDirectObject("Pages"));
 		IndirectObjectsReferenceRegistry& objectsRegistry = pdfWriter.GetObjectsContext().GetInDirectObjectsRegistry();
 
-		objectsRegistry.DeleteObject(pagesReference->mObjectID);
+		status = objectsRegistry.DeleteObject(pagesReference->mObjectID);
+		if(status != eSuccess) 
+		{
+			cout << "failed to delete previous page tree\n";
+			break;
+		}
 
 		status = pdfWriter.EndPDF();
 		if (status != eSuccess)

@@ -280,6 +280,11 @@ static EStatusCode MergeEmptyPageToForm(char* argv[], const string& inEmptyFileN
         
         // create form for two pages.
         PDFFormXObject* newFormXObject = pdfWriter.StartFormXObject(PDFRectangle(0,0,297.5,842));
+		if(!newFormXObject)
+		{
+			status = PDFHummus::eFailure;
+			break;
+		}
         
 		XObjectContentContext* xobjectContentContext = newFormXObject->GetContentContext();
         

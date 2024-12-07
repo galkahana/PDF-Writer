@@ -210,7 +210,12 @@ static EStatusCode ModifyImageObject(PDFWriter* inWriter,ObjectIDType inImageObj
         RefCountPtr<PDFDictionary> imageDictionary(imageStream->QueryStreamDictionary());
         
         // strt object for modified image
-        inWriter->GetObjectsContext().StartModifiedIndirectObject(inImageObject);
+        status = inWriter->GetObjectsContext().StartModifiedIndirectObject(inImageObject);
+        if(status != eSuccess)
+        {
+            cout<<"failed to start modified image object\n";
+            break;
+        }
         
         DictionaryContext* newImageDictionary = inWriter->GetObjectsContext().StartDictionary();
         
@@ -252,7 +257,8 @@ static EStatusCode ModifyImageObject(PDFWriter* inWriter,ObjectIDType inImageObj
         status = traits.CopyToOutputStream(sourceImage);
         
         // finalize stream
-        inWriter->GetObjectsContext().EndPDFStream(newImageStream);
+        if(status != eFailure)
+            status = inWriter->GetObjectsContext().EndPDFStream(newImageStream);
         delete newImageStream;
 		delete sourceImage;
 

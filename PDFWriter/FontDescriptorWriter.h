@@ -20,6 +20,7 @@
 */
 #pragma once
 
+#include "EStatusCode.h"
 #include "ObjectsBasicTypes.h"
 #include "WrittenFontRepresentation.h"
 
@@ -42,7 +43,7 @@ public:
 	FontDescriptorWriter(void);
 	~FontDescriptorWriter(void);
 
-	void WriteFontDescriptor(	ObjectIDType inFontDescriptorObjectID,
+	PDFHummus::EStatusCode WriteFontDescriptor(	ObjectIDType inFontDescriptorObjectID,
 								const std::string& inFontPostscriptName,
 								FreeTypeFaceWrapper* inFontInfo,
 								const UIntAndGlyphEncodingInfoVector& inEncodedGlyphs,

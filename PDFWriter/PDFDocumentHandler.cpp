@@ -307,6 +307,10 @@ PDFFormXObject* PDFDocumentHandler::CreatePDFFormXObjectForPage(PDFDictionary* i
 
 		// Create a new form XObject
 		result = inPredefinedFormId == 0 ? mDocumentContext->StartFormXObject(inFormBox,inTransformationMatrix): mDocumentContext->StartFormXObject(inFormBox,inPredefinedFormId,inTransformationMatrix);
+		if(!result) {
+			TRACE_LOG("PDFDocumentHandler::CreatePDFFormXObjectForPage, failed to create form xobject");
+			break;
+		}
 
 		// copy the page content to the target XObject stream
 		if(WritePageContentToSingleStream(result->GetContentStream()->GetWriteStream(),inPageObject) != PDFHummus::eSuccess)
@@ -598,8 +602,12 @@ EStatusCode PDFDocumentHandler::CopyInDirectObject(ObjectIDType inSourceObjectID
 		XrefEntryInput* xrefEntry = mParser->GetXrefEntry(inSourceObjectID);
 		if ((xrefEntry != NULL) && (xrefEntry->mType == eXrefEntryDelete)) {
 			// if the object is deleted, replace with a deleted object
-			mObjectsContext->GetInDirectObjectsRegistry().DeleteObject(inTargetObjectID);
-			return PDFHummus::eSuccess;
+			status = mObjectsContext->GetInDirectObjectsRegistry().DeleteObject(inTargetObjectID);
+			if (status != PDFHummus::eSuccess) {
+				TRACE_LOG1("PDFDocumentHandler::CopyInDirectObject, failed mark object as deleted. %ld", inTargetObjectID);
+				return status;
+			}
+			return status;
 		}
 		else {
 			// fail
@@ -608,7 +616,9 @@ EStatusCode PDFDocumentHandler::CopyInDirectObject(ObjectIDType inSourceObjectID
 		}
 	}
 
-	mObjectsContext->StartNewIndirectObject(inTargetObjectID);
+	status = mObjectsContext->StartNewIndirectObject(inTargetObjectID);
+	if(PDFHummus::eSuccess != status)
+		return status;
 	status = WriteObjectByType(sourceObject.GetPtr(),eTokenSeparatorEndLine, &writingPolicy);
 	if(PDFHummus::eSuccess == status)
 	{
@@ -942,9 +952,21 @@ EStatusCode PDFDocumentHandler::WritePDFStreamInputToContentContext(PageContentC
 	
 	do
 	{
-		inContentContext->StartAStreamIfRequired();
+		status = inContentContext->StartAStreamIfRequired();
+		if(status != PDFHummus::eSuccess)
+		{
+			TRACE_LOG("PDFDocumentHandler::WritePDFStreamInputToContentContext, failed to start a stream in content context");
+			break;
+		}
 
-		status = WritePDFStreamInputToStream(inContentContext->GetCurrentPageContentStream()->GetWriteStream(),inContentSource);
+		PDFStream* contentStream = inContentContext->GetCurrentPageContentStream();
+		if(!contentStream)
+		{
+			TRACE_LOG("PDFDocumentHandler::WritePDFStreamInputToContentContext, failed to get current page content stream");
+			status = PDFHummus::eFailure;
+			break;
+		}
+		status = WritePDFStreamInputToStream(contentStream->GetWriteStream(),inContentSource);
 		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("PDFDocumentHandler::WritePDFStreamInputToContentContext, failed to write content stream from page input to target page");
@@ -1556,7 +1578,9 @@ EStatusCode PDFDocumentHandler::CopyDirectObjectToIndirectObject(PDFObject* inOb
 	ObjectIDTypeList newObjectsToWrite;
 	OutWritingPolicy writingPolicy(this, newObjectsToWrite);
 
-	mObjectsContext->StartNewIndirectObject(inTargetObjectID);
+	status = mObjectsContext->StartNewIndirectObject(inTargetObjectID);
+	if(status != PDFHummus::eSuccess)
+		return status;
 	status = WriteObjectByType(inObject,eTokenSeparatorEndLine, &writingPolicy);
 	if(PDFHummus::eSuccess == status)
 	{
@@ -1626,9 +1650,22 @@ EStatusCode PDFDocumentHandler::WritePDFStreamInputToContentContext(PageContentC
 	
 	do
 	{
-		inContentContext->StartAStreamIfRequired();
+		status = inContentContext->StartAStreamIfRequired();
+		if(status != PDFHummus::eSuccess)
+		{
+			TRACE_LOG("PDFDocumentHandler::WritePDFStreamInputToContentContext, failed to start a stream in content context");
+			break;
+		}
 
-		status = WritePDFStreamInputToStream(inContentContext->GetCurrentPageContentStream()->GetWriteStream(),inContentSource,inMappedResourcesNames);
+		PDFStream* contentStream = inContentContext->GetCurrentPageContentStream();
+		if(!contentStream)
+		{
+			TRACE_LOG("PDFDocumentHandler::WritePDFStreamInputToContentContext, failed to get current page content stream");
+			status = PDFHummus::eFailure;
+			break;
+		}
+
+		status = WritePDFStreamInputToStream(contentStream->GetWriteStream(),inContentSource,inMappedResourcesNames);
 		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("PDFDocumentHandler::WritePDFStreamInputToContentContext, failed to write content stream from page input to target page");
@@ -2066,7 +2103,7 @@ EStatusCode PDFDocumentHandler::WriteStreamObject(PDFStreamInput* inStream, IObj
 		return PDFHummus::eFailure;
 	}
 
-	mObjectsContext->EndPDFStream(newStream);
+	status = mObjectsContext->EndPDFStream(newStream);
 	delete newStream;
 	delete streamReader;
 	return status;

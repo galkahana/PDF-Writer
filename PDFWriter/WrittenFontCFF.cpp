@@ -241,7 +241,10 @@ bool WrittenFontCFF::HasEnoughSpaceForGlyphs(const GlyphUnicodeMappingListList& 
 
 EStatusCode WrittenFontCFF::WriteState(ObjectsContext* inStateWriter,ObjectIDType inObjectID)
 {
-	inStateWriter->StartNewIndirectObject(inObjectID);
+	EStatusCode status = inStateWriter->StartNewIndirectObject(inObjectID);
+	
+	if(status != PDFHummus::eSuccess)
+		return status;
 
 	DictionaryContext* writtenFontDictionary = inStateWriter->StartDictionary();
 
@@ -278,7 +281,7 @@ EStatusCode WrittenFontCFF::WriteState(ObjectsContext* inStateWriter,ObjectIDTyp
 	writtenFontDictionary->WriteKey("mIsCID");
 	writtenFontDictionary->WriteBooleanValue(mIsCID);
 
-	EStatusCode status = AbstractWrittenFont::WriteStateInDictionary(inStateWriter,writtenFontDictionary);
+	status = AbstractWrittenFont::WriteStateInDictionary(inStateWriter,writtenFontDictionary);
 	if(PDFHummus::eSuccess == status)
 	{
 		inStateWriter->EndDictionary(writtenFontDictionary);
