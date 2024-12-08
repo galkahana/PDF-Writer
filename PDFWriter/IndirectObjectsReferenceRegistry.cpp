@@ -37,6 +37,7 @@ using namespace PDFHummus;
 IndirectObjectsReferenceRegistry::IndirectObjectsReferenceRegistry(void)
 {
     SetupInitialFreeObject();
+	SetShouldValidateMaxWritePositionForXref(true);
 }
 
 void IndirectObjectsReferenceRegistry::SetupInitialFreeObject()
@@ -49,6 +50,11 @@ void IndirectObjectsReferenceRegistry::SetupInitialFreeObject()
     singleFreeObjectInformation.mGenerationNumber = 65535;
     singleFreeObjectInformation.mWritePosition = 0;
 	mObjectsWritesRegistry.push_back(singleFreeObjectInformation);
+}
+
+void IndirectObjectsReferenceRegistry::SetShouldValidateMaxWritePositionForXref(bool inShouldValidate)
+{
+	mShouldValidateMaxWritePositionForXref = inShouldValidate;
 }
 
 IndirectObjectsReferenceRegistry::~IndirectObjectsReferenceRegistry(void)
@@ -70,6 +76,20 @@ ObjectIDType IndirectObjectsReferenceRegistry::AllocateNewObjectID()
 	return newObjectID;
 }
 
+EStatusCode IndirectObjectsReferenceRegistry::MaybeValidateMaxWritePositionForXref(LongFilePositionType inWritePosition)
+{
+	if(!mShouldValidateMaxWritePositionForXref)
+		return PDFHummus::eSuccess;
+
+	if(inWritePosition > 9999999999LL) // if write position is larger than what can be represented by 10 digits, xref write will fail
+	{
+		TRACE_LOG1("IndirectObjectsReferenceRegistry::MaybeValidateMaxWritePositionForXref, Write position out of bounds. Trying to write an object at position that cannot be represented in Xref = %lld. probably means file got too long",inWritePosition);
+		return PDFHummus::eFailure;
+	}
+
+	return PDFHummus::eSuccess;	
+}
+
 
 EStatusCode IndirectObjectsReferenceRegistry::MarkObjectAsWritten(ObjectIDType inObjectID,LongFilePositionType inWritePosition)
 {
@@ -86,9 +106,8 @@ EStatusCode IndirectObjectsReferenceRegistry::MarkObjectAsWritten(ObjectIDType i
 		return PDFHummus::eFailure; // trying to mark as written an object that was already marked as such in the past. probably a mistake [till we have revisions]
 	}
 
-	if(inWritePosition > 9999999999LL) // if write position is larger than what can be represented by 10 digits, xref write will fail
+	if(MaybeValidateMaxWritePositionForXref(inWritePosition) != PDFHummus::eSuccess) // if write position is larger than what can be represented by 10 digits, xref write will fail
 	{
-		TRACE_LOG1("IndirectObjectsReferenceRegistry::MarkObjectAsWritten, Write position out of bounds. Trying to write an object at position that cannot be represented in Xref = %lld. probably means file got too long",inWritePosition);
 		return PDFHummus::eFailure;
 	}
 
@@ -155,12 +174,10 @@ PDFHummus::EStatusCode IndirectObjectsReferenceRegistry::MarkObjectAsUpdated(Obj
 		return PDFHummus::eFailure; 
 	}
 
-	if(inNewWritePosition > 9999999999LL) // if write position is larger than what can be represented by 10 digits, xref write will fail
+	if(MaybeValidateMaxWritePositionForXref(inNewWritePosition) != PDFHummus::eSuccess) // if write position is larger than what can be represented by 10 digits, xref write will fail
 	{
-		TRACE_LOG1("IndirectObjectsReferenceRegistry::MarkObjectAsUpdated, Write position out of bounds. Trying to write an object at position that cannot be represented in Xref = %lld. probably means file got too long",inNewWritePosition);
 		return PDFHummus::eFailure;
-	}
-
+	}	
     
     mObjectsWritesRegistry[inObjectID].mIsDirty = true;
     mObjectsWritesRegistry[inObjectID].mWritePosition = inNewWritePosition;

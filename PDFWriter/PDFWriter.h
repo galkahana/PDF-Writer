@@ -59,10 +59,16 @@ struct PDFCreationSettings
 	bool CompressStreams;
 	bool EmbedFonts;
 	EncryptionOptions DocumentEncryptionOptions;
+	bool WriteXrefAsXrefStream;
 
-	PDFCreationSettings(bool inCompressStreams, bool inEmbedFonts,EncryptionOptions inDocumentEncryptionOptions = EncryptionOptions::DefaultEncryptionOptions()):DocumentEncryptionOptions(inDocumentEncryptionOptions){
+	PDFCreationSettings(
+		bool inCompressStreams, 
+		bool inEmbedFonts,
+		EncryptionOptions inDocumentEncryptionOptions = EncryptionOptions::DefaultEncryptionOptions(), 
+		bool inWriteXrefAsXrefStream = false):DocumentEncryptionOptions(inDocumentEncryptionOptions){
 		CompressStreams = inCompressStreams;
 		EmbedFonts = inEmbedFonts;
+		WriteXrefAsXrefStream = inWriteXrefAsXrefStream;
 	}
 
 };

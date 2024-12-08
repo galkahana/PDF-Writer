@@ -60,6 +60,7 @@ DocumentContext::DocumentContext()
 	mObjectsContext = NULL;
 	mParserExtender = NULL;
     mModifiedDocumentIDExists = false;
+	SetWriteXrefAsXrefStream(false);
 }
 
 DocumentContext::~DocumentContext(void)
@@ -80,10 +81,24 @@ void DocumentContext::SetObjectsContext(ObjectsContext* inObjectsContext)
 	mPNGImageHandler.SetOperationsContexts(this, mObjectsContext);
 #endif
 	mExtGStateRegistry.SetObjectsContext(mObjectsContext);
+	SetupXrefMaxWritePositionValidation();
+}
+
+void DocumentContext::SetupXrefMaxWritePositionValidation()
+{
+	// Validating Max Xref position to be 10 digits long is only relevant for regular xref writing.
+	// Cancel validation if xref stream is used instead.
+	if(mObjectsContext)
+		mObjectsContext->GetInDirectObjectsRegistry().SetShouldValidateMaxWritePositionForXref(!mWriteXrefAsXrefStream);
 }
 
 void DocumentContext::SetEmbedFonts(bool inEmbedFonts) {
 	mUsedFontsRepository.SetEmbedFonts(inEmbedFonts);
+}
+
+void DocumentContext::SetWriteXrefAsXrefStream(bool inWriteXrefAsXrefStream) {
+	mWriteXrefAsXrefStream = inWriteXrefAsXrefStream;
+	SetupXrefMaxWritePositionValidation();
 }
 
 void DocumentContext::SetOutputFileInformation(OutputFile* inOutputFile)
@@ -222,13 +237,20 @@ EStatusCode	DocumentContext::FinalizeNewPDF()
 		if (status != eSuccess)
 			break;
 
-		status = mObjectsContext->WriteXrefTable(xrefTablePosition);
-		if(status != eSuccess)
-			break;
+		if(mWriteXrefAsXrefStream) {
+			status = WriteXrefStream(xrefTablePosition);
+            if(status != eSuccess)
+                break;			
+		} else {
+			status = mObjectsContext->WriteXrefTable(xrefTablePosition);
+			if(status != eSuccess)
+				break;
 
-		status = WriteTrailerDictionary();
-		if(status != eSuccess)
-			break;
+			status = WriteTrailerDictionary();
+			if(status != eSuccess)
+				break;
+
+		}
 
 		WriteXrefReference(xrefTablePosition);
 		WriteFinalEOF();
@@ -2343,8 +2365,31 @@ void DocumentContext::UnRegisterCopyingContext(PDFDocumentCopyingContext* inCopy
 	mCopyingContexts.erase(inCopyingContext);
 }
 
+
+bool DocumentContext::RequiresXrefStream(PDFParser* inModifiedFileParser)
+{
+    // modification requires xref stream if the original document uses one...so just ask trailer
+    if(!inModifiedFileParser->GetTrailer())
+        return false;
+
+    PDFObjectCastPtr<PDFName> typeObject = inModifiedFileParser->GetTrailer()->QueryDirectObject("Type");
+
+    if(!typeObject)
+        return false;
+
+    return typeObject->GetValue() == "XRef";
+
+
+}
+
+
 EStatusCode DocumentContext::SetupModifiedFile(PDFParser* inModifiedFileParser)
 {
+	// determine if file requires xref stream, in which case set it up
+	if(RequiresXrefStream(inModifiedFileParser)) {
+		SetWriteXrefAsXrefStream(true); // it may already have been setup to be true earlier by the users request, but if not, and this file requires it, set it up now
+	}		
+
     // setup trailer and save original document ID
 
     if(!inModifiedFileParser->GetTrailer())
@@ -2514,9 +2559,11 @@ EStatusCode	DocumentContext::FinalizeModifiedPDF(PDFParser* inModifiedFileParser
 		status = CopyEncryptionDictionary(inModifiedFileParser);
         if(status != eSuccess)
             break;
-        if(RequiresXrefStream(inModifiedFileParser))
+        if(mWriteXrefAsXrefStream)
         {
             status = WriteXrefStream(xrefTablePosition);
+            if(status != eSuccess)
+                break;			
         }
         else
         {
@@ -2781,21 +2828,6 @@ EStatusCode DocumentContext::CopyEncryptionDictionary(PDFParser* inModifiedFileP
 	return eSuccess;
 }
 
-bool DocumentContext::RequiresXrefStream(PDFParser* inModifiedFileParser)
-{
-    // modification requires xref stream if the original document uses one...so just ask trailer
-    if(!inModifiedFileParser->GetTrailer())
-        return false;
-
-    PDFObjectCastPtr<PDFName> typeObject = inModifiedFileParser->GetTrailer()->QueryDirectObject("Type");
-
-    if(!typeObject)
-        return false;
-
-    return typeObject->GetValue() == "XRef";
-
-
-}
 
 EStatusCode DocumentContext::WriteXrefStream(LongFilePositionType& outXrefPosition)
 {

@@ -76,6 +76,7 @@ create_test_sourcelist (Tests
   UppercaseSequanceTest.cpp
   WatermarkTest.cpp
   WatermarkWithContextOpacityTest.cpp
+  XrefStreamsTest.cpp
 )
 
 # add the testing executable

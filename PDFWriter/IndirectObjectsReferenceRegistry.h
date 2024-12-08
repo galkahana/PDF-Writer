@@ -89,12 +89,16 @@ public:
 	void Reset();
  
     void SetupXrefFromModifiedFile(PDFParser* inModifiedFileParser);
+
+	void SetShouldValidateMaxWritePositionForXref(bool inShouldValidateMaxWritePositionForXref);
     
 private:
 	ObjectWriteInformationVector mObjectsWritesRegistry;
+	bool mShouldValidateMaxWritePositionForXref;
     
     void SetupInitialFreeObject();
     void AppendExistingItem(ObjectWriteInformation::EObjectReferenceType inObjectReferenceType,
                             unsigned long inGenerationNumber,
                             LongFilePositionType inWritePosition);
+	PDFHummus::EStatusCode MaybeValidateMaxWritePositionForXref(LongFilePositionType inWritePosition);
 };

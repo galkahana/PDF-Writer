@@ -119,6 +119,7 @@ namespace PDFHummus
 		void SetObjectsContext(ObjectsContext* inObjectsContext);
 		void SetOutputFileInformation(OutputFile* inOutputFile);
 		void SetEmbedFonts(bool inEmbedFonts);
+		void SetWriteXrefAsXrefStream(bool inWriteXrefAsXrefStream);
 		PDFHummus::EStatusCode	WriteHeader(EPDFVersion inPDFVersion);
 		PDFHummus::EStatusCode	FinalizeNewPDF();
         PDFHummus::EStatusCode	FinalizeModifiedPDF(PDFParser* inModifiedFileParser,EPDFVersion inModifiedPDFVersion);
@@ -413,6 +414,7 @@ namespace PDFHummus
 	    StringAndULongPairToHummusImageInformationMap mImagesInformation;
 		EncryptionHelper mEncryptionHelper;
 		ExtGStateRegistry mExtGStateRegistry;
+		bool mWriteXrefAsXrefStream;
 
 		void WriteHeaderComment(EPDFVersion inPDFVersion);
 		void Write4BinaryBytes();
@@ -461,5 +463,6 @@ namespace PDFHummus
 		bool RequiresXrefStream(PDFParser* inModifiedFileParser);
         PDFHummus::EStatusCode WriteXrefStream(LongFilePositionType& outXrefPosition);
 		HummusImageInformation& GetImageInformationStructFor(const std::string& inImageFile,unsigned long inImageIndex);
+		void SetupXrefMaxWritePositionValidation();
 	};
 }
