@@ -200,22 +200,8 @@ PDFUsedFont::TextMeasures PDFUsedFont::CalculateTextDimensions(const UIntList& i
 {
     // now calculate the placement bounding box. using the algorithm described in the FreeType turtorial part 2, minus the kerning part, and with no scale
 
-    // first, calculate the pen advancements
-    int           pen_x, pen_y;
     std::list<FT_Vector> pos;
-    pen_x = 0;   /* start at (0,0) */
-    pen_y = 0;
-    
-    UIntList::const_iterator it = inGlyphsList.begin();
-    for(; it != inGlyphsList.end();++it)
-    {
-        pos.push_back(FT_Vector());
-
-        pos.back().x = pen_x;
-        pos.back().y = pen_y;
-
-        pen_x += mFaceWrapper.GetGlyphWidth(*it);
-    }
+    UIntList::const_iterator it;
     
     // now let's combine with the bbox, so we get the nice bbox for the whole string
     
