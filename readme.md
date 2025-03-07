@@ -1,5 +1,5 @@
 Welcome to PDF-Writer, Also known as [PDFHummus](http://www.pdfhummus.com).   
-PDFHummus is a Fast and Free C++ Library for Creating, Parsing an Manipulating PDF Files and Streams. 
+PDFHummus is a Fast and Free C++ Library for Creating, Parsing and Manipulating PDF Files and Streams. 
 
 Documentation is available [here](https://github.com/galkahana/PDF-Writer/wiki).
 Project site is [here](http://www.pdfhummus.com). 
@@ -46,9 +46,9 @@ The project defines some optional flags to allow you to control some aspects of 
 - `PDFHUMMUS_NO_DCT` - defines whether to exclude DCT functionality (essentially - not include LibJpeg) from the library. defaults to `FALSE`. when setting `TRUE` the library will not require the existance of LibJpeg however will not be able to decode DCT streams from PDF files. (note that this has no baring on the ability to include JPEG images. That ability does not require LibJpeg given the innate ability of PDF files to include DCT encoded streams).
 - `PDFHUMMUS_NO_TIFF` - defines whether to exclude TIFF functionality (essentially - not include LibTiff) from the library. defaults to `FALSE`. when setting `TRUE` the library will not require the existance of LibTiff however will not be able to embed TIFF images.
 - `PDFHuMMUS_NO_PNG` -  defines whether to exclude PNG functionality (essentially - not include LibPng) from the library. defaults to `FALSE`. when setting `TRUE` the library will not require the existance of LibPng however will not be able to embed PNG images.
-- `USE_BUNDLED` - defines whether to use bundled dependencies when building the project or use system libraries. defaults to `TRUE`. when defined as `FALSE`, the project configuration will look for installed versions of	LibJpeg, Zlib, LibTiff, FreeType, LibAesgm, LibPng and use them instead of the bundled ones (i.e. those contained in the project). Note that for optional dependencies - LibJpeg, LibTiff, LibPng - if not installed the coniguration will succeed but will automatically set the optional building flags (the 3 just described) according to the libraries avialability. As for required dependencies - FreeType, LibAesgm, Zlib - the configuration will fail if those dependencies are not found. see `USE_UNBUNDLED_FALLBACK_BUNDLED` for an alternative method to deal with dependencies not being found.
-- `USE_UNBUNDLED_FALLBACK_BUNDLED` - Defines an alternative behavior when using `USE_BUNDLED=OFF` and a certain dependency is not installed on the system. If set to `TRUE` then for a dependency that's not found it will fallback on the bundled version of this dependency. This is essentially attempting to find installed library and if not avialable use a bundled one to ensure that the build will succeed.
-- `BUILD_FUZZING_HARNESS` - Enable a fuzz testing target for PDFParser. This makes it possible to runn fuzz tests and debug potential vulnarbilities. read more about this in [here](https://github.com/galkahana/PDF-Writer/wiki/Fuzz-Testing-Of-PDFParser). By default it's `OFF`, set it up with `ON`.
+- `USE_BUNDLED` - defines whether to use bundled dependencies when building the project or use system libraries. defaults to `TRUE`. when defined as `FALSE`, the project configuration will look for installed versions of	LibJpeg, Zlib, LibTiff, FreeType, LibAesgm, LibPng and use them instead of the bundled ones (i.e. those contained in the project). Note that for optional dependencies - LibJpeg, LibTiff, LibPng - if not installed the configuration will succeed but will automatically set the optional building flags (the 3 just described) according to the libraries availability. As for required dependencies - FreeType, LibAesgm, Zlib - the configuration will fail if those dependencies are not found. see `USE_UNBUNDLED_FALLBACK_BUNDLED` for an alternative method to deal with dependencies not being found.
+- `USE_UNBUNDLED_FALLBACK_BUNDLED` - Defines an alternative behavior when using `USE_BUNDLED=OFF` and a certain dependency is not installed on the system. If set to `TRUE` then for a dependency that's not found it will fallback on the bundled version of this dependency. This is essentially attempting to find installed library and if not available use a bundled one to ensure that the build will succeed.
+- `BUILD_FUZZING_HARNESS` - Enable a fuzz testing target for PDFParser. This makes it possible to run fuzz tests and debug potential vulnerabilities. read more about this in [here](https://github.com/galkahana/PDF-Writer/wiki/Fuzz-Testing-Of-PDFParser). By default it's `OFF`, set it up with `ON`.
 
 You can set any of those options when calling the `cmake` command. For example to use system libraries replaced the earlier sequence with:
 
@@ -150,11 +150,11 @@ FetchContent_MakeAvailable(PDFHummus)
 ```
 
 This has the benefit of fetching the archive URL rather than cmake runnig `git clone` on the specified target.
-PDFWriter archives since version v4.6.2 do not include PDFWriterTesting folder and its materials, making it a singificantly smaller download.
+PDFWriter archives since version v4.6.2 do not include PDFWriterTesting folder and its materials, making it a significantly smaller download.
 You can find the archive urls in the Releases area for this repository.
 
 
-Note that when installing PDFHummus with the bundled libraries built (this is the default behvaior which can be changed by setting `USE_BUNDLED` variable to `FALSE`) there are additional targets that PDFHummus includes:
+Note that when installing PDFHummus with the bundled libraries built (this is the default behavior which can be changed by setting `USE_BUNDLED` variable to `FALSE`) there are additional targets that PDFHummus includes:
 - PDFHummus::FreeType - bundled freetype library
 - PDFHummus::LibAesgm - bundled aesgm library
 - PDFHummus::LibJpeg - bundled libjpeg library
@@ -162,7 +162,7 @@ Note that when installing PDFHummus with the bundled libraries built (this is th
 - PDFHummus::LibTiff - bundled libtiff library
 - PDFHummus:::Zlib - bundled zlib library
 
-You can use those targets in additon or instead of using PDFWriter if this makes sense to your project (like if you are extracting images, having LibJpeg or LibPng around can be useful).
+You can use those targets in addition or instead of using PDFWriter if this makes sense to your project (like if you are extracting images, having LibJpeg or LibPng around can be useful).
 
 # Packaging PDFHummus for installing someplace else
 
@@ -197,7 +197,7 @@ This should help you enable testing and debugging the tests in vscode.
 I wrote a post about how to compile and use the library for the iPhone and iPad environments. you can read it [here](http://pdfhummus.com/post/45501609236/how-to-build-iphone-apps-that-use-pdfhummus).
  
 
-## Build insturctions for other scenraios
+## Build instructions for other scenarios
 
 It should be quite simple to construct project files in the various building environments (say VS and Xcode) if you want them. Here are some pointers:
 - All the PDFWriter sources are in PDFWriter folder (you can get it by downloading the git project or from the Downloads section).
