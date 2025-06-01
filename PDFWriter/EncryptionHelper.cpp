@@ -269,7 +269,6 @@ EStatusCode EncryptionHelper::Setup(
 		mLength = 5;
 		mV = 1;
 		mRevision = (inUserProtectionOptionsFlag & 0xF00) ? 3 : 2;
-		usingAES = false;
 	}
 
 	defaultEncryption->Setup(usingAES);
