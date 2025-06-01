@@ -217,14 +217,14 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 					if (!!cryptFilter) {
 						PDFObjectCastPtr<PDFName> cfmName(inParser->QueryDictionaryObject(cryptFilter.GetPtr(), "CFM"));
 						RefCountPtr<PDFObject> lengthObject(inParser->QueryDictionaryObject(cryptFilter.GetPtr(), "Length"));
-						unsigned int length = !lengthObject ? mLength : ComputeByteLength(lengthObject.GetPtr());
+						unsigned int cryptLength = !lengthObject ? mLength : ComputeByteLength(lengthObject.GetPtr());
 
 						XCryptionCommon* encryption = new XCryptionCommon();
 						encryption->Setup(cfmName->GetValue() == "AESV2"); 
 						encryption->SetupInitialEncryptionKey(
 							inPassword,
 							mRevision,
-							length,
+							cryptLength,
 							mO,
 							mP,
 							mFileIDPart1,
