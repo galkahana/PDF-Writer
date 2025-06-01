@@ -139,7 +139,7 @@ public:
 
 	// algorithm 3.6 is intended to authenticate the user passowrd. 
 	// It essentially runs 3.4 or 3.5 (based on revision) and compares the result
-	// to the provided oU value.
+	// to the provided "U" value.
 	bool algorithm3_6(unsigned int inRevision,
 		unsigned int inLength,
 		const ByteList& inPassword,
