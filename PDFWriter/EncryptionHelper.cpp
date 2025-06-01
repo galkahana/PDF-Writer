@@ -210,7 +210,7 @@ EStatusCode EncryptionHelper::WriteEncryptionDictionary(ObjectsContext* inObject
 		stdCf->WriteNameValue("DocOpen");
 
 		stdCf->WriteKey("Length");
-		stdCf->WriteIntegerValue(128);
+		stdCf->WriteIntegerValue(mLength * 8);
 
 		inObjectsContext->EndDictionary(stdCf);
 		inObjectsContext->EndDictionary(cf);
