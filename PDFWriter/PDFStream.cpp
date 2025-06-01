@@ -163,6 +163,8 @@ DictionaryContext* PDFStream::GetStreamDictionaryForDirectExtentStream()
     return mStreamDictionaryContextForDirectExtentStream;
 }
 
+const std::string scEmpty;
+
 void PDFStream::FlushStreamContentForDirectExtentStream()
 {
     mTemporaryStream.pubseekoff(0,std::ios_base::beg);
@@ -172,7 +174,7 @@ void PDFStream::FlushStreamContentForDirectExtentStream()
     OutputStreamTraits streamCopier(mOutputStream);
     streamCopier.CopyToOutputStream(&inputStreamForWrite);
     
-    mTemporaryStream.str();
+    mTemporaryStream.str(scEmpty);
     mOutputStream = NULL;
 }
 

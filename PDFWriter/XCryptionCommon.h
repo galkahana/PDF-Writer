@@ -61,7 +61,7 @@ public:
 		long long inP,
 		const ByteList& inFileIDPart1,
 		bool inEncryptMetaData
-		);
+		); // with alrogithm 3.2
 	// Setup key directly
 	void SetupInitialEncryptionKey(const ByteList& inEncryptionKey);
 
@@ -79,14 +79,30 @@ public:
 	static ByteList stringToByteList(const std::string& inString);
 	static ByteList substr(const ByteList& inList, IOBasicTypes::LongBufferSizeType inStart, IOBasicTypes::LongBufferSizeType inEnd);
 	static void append(ByteList& ioTargetList, const ByteList& inSource);
-	static ByteList add(const ByteList& inA, const ByteList& inB);
+	static ByteList concat(const ByteList& inA, const ByteList& inB);
 	static std::string ByteListToString(const ByteList& inByteList);
 
 	// PDF xcryption algorithms (Important! length must be passed in bytes and not in bits. which normally means - the PDF value / 8)
+	
+	// Algorithm 3.1 is general (not security handlers specific). 
+	// It creates an ecnryption key for aes/rc4 based on security handler document level 
+	// encryption key, object number and generation number
 	ByteList algorithm3_1(ObjectIDType inObjectNumber,
 		unsigned long inGenerationNumber,
 		const ByteList& inEncryptionKey,
 		bool inIsUsingAES);
+	
+	// Starting from algorithm 3.2 the algorithms are specific to standard security handler
+	// standard security handlers allows for the user access permisions, as well as of user and owner passwords (owner password 
+	// permits full control, while user passowrd provide only the control defined by the defined access permissions).
+
+
+	// Algorithm 3.2 creates an encryption key based on provided password and 
+	// document stored encryption parameters.
+	// This encryption can can be used as basis for encrypting or decrypting the document content.
+	// It is also used as part of the 3.3-3.5 algorithms in order to create encrypted
+	// versions of user and owner passwords to be stored in the document, for a later
+	// authentication by a reader application.
 	ByteList algorithm3_2(unsigned int inRevision,
 		unsigned int inLength,
 		const ByteList& inPassword,
@@ -94,10 +110,19 @@ public:
 		long long inP,
 		const ByteList& inFileIDPart1,
 		bool inEncryptMetaData);
+
+	// Algorithm 3.3 creates the standard security handler "O" value,
+	// which is the owner key, allowing a reader to authenticate an owner password.
+	// The process essentially creates an encryption key from the owner password and uses it to encrypt the user password.
+	// The reverse process at 3.7, used to authenticate and input owner password, does the same process with the input, alleged owner password.
 	ByteList algorithm3_3(unsigned int inRevision,
 		unsigned int inLength,
 		const ByteList& inOwnerPassword,
 		const ByteList& inUserPassword);
+
+	// algorithm 3.4 and 3.5 create the standard security handler "U" value,
+	// which is the user key, allowing a reader to authenticate a user password.
+	// 3_4 is used when the revision 2, while 3_5 is for revision 3 and above.
 	ByteList algorithm3_4(unsigned int inLength,
 		const ByteList& inUserPassword,
 		const ByteList& inO,
@@ -111,6 +136,10 @@ public:
 		long long inP,
 		const ByteList& inFileIDPart1,
 		bool inEncryptMetaData);
+
+	// algorithm 3.6 is intended to authenticate the user passowrd. 
+	// It essentially runs 3.4 or 3.5 (based on revision) and compares the result
+	// to the provided oU value.
 	bool algorithm3_6(unsigned int inRevision,
 		unsigned int inLength,
 		const ByteList& inPassword,
@@ -119,6 +148,9 @@ public:
 		const ByteList& inFileIDPart1,
 		bool inEncryptMetaData,
 		const ByteList inU);
+	// algorithm 3.7 is intended to authenticate the owner passowrd.
+	// It converts the owner password to a user password with the same algorithm as 3.3, and then
+	// continues to authenticate the resultant user password with algorithm 3.6.
 	bool algorithm3_7(unsigned int inRevision,
 		unsigned int inLength,
 		const ByteList& inPassword,

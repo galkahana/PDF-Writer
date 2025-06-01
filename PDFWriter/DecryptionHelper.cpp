@@ -111,7 +111,7 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 			if(!filter)
 				TRACE_LOG("DecryptionHelper::Setup, no filter defined");
 			else
-				TRACE_LOG1("DecryptionHelper::Setup, Only Standard encryption filter is supported. Unsupported filter encountered - %s",filter->GetValue().substr(0, MAX_TRACE_SIZE - 200).c_str());
+				TRACE_LOG1("DecryptionHelper::Setup, Only Standard encryption handler is supported. Unsupported filter value encountered - %s",filter->GetValue().substr(0, MAX_TRACE_SIZE - 200).c_str());
 			break;
 		}
 
@@ -127,7 +127,7 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 
 		// supporting versions 1,2 and 4
 		if (mV != 1 && mV != 2 && mV != 4) {
-			TRACE_LOG1("DecryptionHelper::Setup, Only 1 and 2 are supported values for V. Unsupported filter encountered - %d", mV);
+			TRACE_LOG1("DecryptionHelper::Setup, Only 1, 2 and 4 are supported values for V. Unsupported V value encountered - %d", mV);
 			break;
 		}
 
@@ -220,7 +220,7 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 						unsigned int length = !lengthObject ? mLength : ComputeByteLength(lengthObject.GetPtr());
 
 						XCryptionCommon* encryption = new XCryptionCommon();
-						encryption->Setup(cfmName->GetValue() == "AESV2"); // singe xcryptions are always RC4
+						encryption->Setup(cfmName->GetValue() == "AESV2"); 
 						encryption->SetupInitialEncryptionKey(
 							inPassword,
 							mRevision,
@@ -243,9 +243,9 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 
 		}
 		else {
-			// single xcryption, use as the single encryption source
+			// single xcryption, use as the single encryption method
 			XCryptionCommon* defaultEncryption = new XCryptionCommon();
-			defaultEncryption->Setup(false); // single xcryptions are always RC4
+			defaultEncryption->Setup(false); //non (or rather - pre) version 4 are RC4
 			defaultEncryption->SetupInitialEncryptionKey(
 				inPassword,
 				mRevision,

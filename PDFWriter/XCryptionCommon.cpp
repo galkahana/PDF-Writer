@@ -117,7 +117,7 @@ void XCryptionCommon::append(ByteList& ioTargetList, const ByteList& inSource) {
 		ioTargetList.push_back(*it);
 }
 
-ByteList XCryptionCommon::add(const ByteList& inA, const ByteList& inB) {
+ByteList XCryptionCommon::concat(const ByteList& inA, const ByteList& inB) {
 	ByteList buffer;
 
 	append(buffer, inA);
@@ -219,8 +219,8 @@ ByteList XCryptionCommon::algorithm3_3(unsigned int inRevision,
 	unsigned int inLength,
 	const ByteList& inOwnerPassword,
 	const ByteList& inUserPassword) {
-	ByteList ownerPassword32Chars = add(substr(inOwnerPassword, 0, 32), (inOwnerPassword.size()<32 ? substr(mPaddingFiller, 0, 32 - inOwnerPassword.size()) : ByteList()));
-	ByteList userPassword32Chars = add(substr(inUserPassword, 0, 32), (inUserPassword.size()<32 ? substr(mPaddingFiller, 0, 32 - inUserPassword.size()) : ByteList()));
+	ByteList ownerPassword32Chars = concat(substr(inOwnerPassword, 0, 32), (inOwnerPassword.size()<32 ? substr(mPaddingFiller, 0, 32 - inOwnerPassword.size()) : ByteList()));
+	ByteList userPassword32Chars = concat(substr(inUserPassword, 0, 32), (inUserPassword.size()<32 ? substr(mPaddingFiller, 0, 32 - inUserPassword.size()) : ByteList()));
 	MD5Generator md5;
 	ByteList hashResult;
 
@@ -302,7 +302,7 @@ ByteList XCryptionCommon::algorithm3_5(unsigned int inRevision,
 		hashResult = RC4Encode(newEncryptionKey, hashResult);
 	}
 
-	return add(hashResult, substr(mPaddingFiller, 0, 16));
+	return concat(hashResult, substr(mPaddingFiller, 0, 16));
 }
 
 bool XCryptionCommon::algorithm3_6(unsigned int inRevision,
@@ -328,7 +328,7 @@ bool XCryptionCommon::algorithm3_7(unsigned int inRevision,
 	const ByteList& inFileIDPart1,
 	bool inEncryptMetaData,
 	const ByteList inU) {
-	ByteList password32Chars = add(substr(inPassword, 0, 32), (inPassword.size()<32 ? substr(mPaddingFiller, 0, 32 - inPassword.size()) : ByteList()));
+	ByteList password32Chars = concat(substr(inPassword, 0, 32), (inPassword.size()<32 ? substr(mPaddingFiller, 0, 32 - inPassword.size()) : ByteList()));
 	MD5Generator md5;
 	ByteList hashResult;
 
