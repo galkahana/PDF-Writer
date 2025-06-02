@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.19)
 
 # Soname
 # MAJOR is incremented when symbols are removed or changed in an incompatible way
@@ -151,7 +151,13 @@ else(NOT USE_BUNDLED)
 
 endif(NOT USE_BUNDLED)
 
+# open ssl is never bundled
+find_package(OpenSSL REQUIRED)
+set(PDFHUMMUS_DEPENDS_OPENSSL "find_dependency(OpenSSL)")
+
+
 ADD_SUBDIRECTORY(PDFWriter)
+
 
 if(PROJECT_IS_TOP_LEVEL AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/PDFWriterTesting)
     # avoid installing the testing lib altogether when included in another project.

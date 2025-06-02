@@ -425,6 +425,11 @@ else(PDFHUMMUS_NO_PNG)
     endif(USING_UNBUNDLED_PNG)
 endif(PDFHUMMUS_NO_PNG)
 
+
+# openssl is never bundled, always fetch/incorprate externally available package
+target_link_libraries(PDFWriter OpenSSL::Crypto)
+
+
 target_include_directories(PDFWriter
     INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
