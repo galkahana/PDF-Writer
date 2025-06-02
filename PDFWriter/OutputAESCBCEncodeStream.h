@@ -1,5 +1,5 @@
 /*
-Source File : OutputRC4XcodeStream.h
+Source File : OutputAESCBCEncodeStream.h
 
 
 Copyright 2016 Gal Kahana PDFWriter
@@ -27,13 +27,13 @@ limitations under the License.
 typedef std::list<IOBasicTypes::Byte> ByteList;
 
 
-class OutputAESEncodeStream : public IByteWriterWithPosition
+class OutputAESCBCEncodeStream : public IByteWriterWithPosition
 {
 public:
-	OutputAESEncodeStream(void);
-	virtual ~OutputAESEncodeStream(void);
+	OutputAESCBCEncodeStream(void);
+	virtual ~OutputAESCBCEncodeStream(void);
 
-	OutputAESEncodeStream(
+	OutputAESCBCEncodeStream(
 		IByteWriterWithPosition* inTargetStream, 
 		const ByteList& inEncryptionKey, 
 		bool inOwnsStream,

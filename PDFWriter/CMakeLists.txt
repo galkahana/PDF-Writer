@@ -38,7 +38,8 @@ GraphicState.cpp
 GraphicStateStack.cpp
 IndirectObjectsReferenceRegistry.cpp
 InfoDictionary.cpp
-InputAESDecodeStream.cpp
+InputAESCBCDecodeStream.cpp
+InputAESECBDecodeStream.cpp
 InputAscii85DecodeStream.cpp
 InputAsciiHexDecodeStream.cpp
 InputBufferedStream.cpp
@@ -69,7 +70,8 @@ RC4.cpp
 ObjectsContext.cpp
 OpenTypeFileInput.cpp
 OpenTypePrimitiveReader.cpp
-OutputAESEncodeStream.cpp
+OutputAESCBCEncodeStream.cpp
+OutputAESECBEncodeStream.cpp
 OutputBufferedStream.cpp
 OutputFile.cpp
 OutputFileStream.cpp
@@ -223,7 +225,8 @@ ITiledPatternEndWritingTask.h
 IFreeTypeFaceExtender.h
 IndirectObjectsReferenceRegistry.h
 InfoDictionary.h
-InputAESDecodeStream.h
+InputAESCBCDecodeStream.h
+InputAESECBDecodeStream.h
 InputAscii85DecodeStream.h
 InputAsciiHexDecodeStream.h
 InputBufferedStream.h
@@ -268,7 +271,8 @@ ObjectsContext.h
 ObjectsContextExtenderAdapter.h
 OpenTypeFileInput.h
 OpenTypePrimitiveReader.h
-OutputAESEncodeStream.h
+OutputAESCBCEncodeStream.h
+OutputAESECBEncodeStream.h
 OutputBufferedStream.h
 OutputFile.h
 OutputFileStream.h
@@ -592,8 +596,10 @@ IByteReader.h
 IByteReaderWithPosition.h
 IByteWriter.h
 IByteWriterWithPosition.h
-InputAESDecodeStream.cpp
-InputAESDecodeStream.h
+InputAESCBCDecodeStream.cpp
+InputAESCBCDecodeStream.h
+InputAESECBDecodeStream.cpp
+InputAESECBDecodeStream.h
 InputAscii85DecodeStream.cpp
 InputAscii85DecodeStream.h
 InputAsciiHexDecodeStream.cpp
@@ -627,8 +633,10 @@ InputStringStream.h
 InterpretedGradientStop.h
 IOBasicTypes.h
 IReadPositionProvider.h
-OutputAESEncodeStream.cpp
-OutputAESEncodeStream.h
+OutputAESCBCEncodeStream.cpp
+OutputAESCBCEncodeStream.h
+OutputAESECBEncodeStream.cpp
+OutputAESECBEncodeStream.h
 OutputBufferedStream.cpp
 OutputBufferedStream.h
 OutputFile.cpp

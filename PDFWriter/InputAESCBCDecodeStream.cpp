@@ -1,5 +1,5 @@
 /*
-Source File : InputAESDecodeStream.h
+Source File : InputAESCBCDecodeStream.h
 
 
 Copyright 2016 Gal Kahana PDFWriter
@@ -17,7 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "InputAESDecodeStream.h"
+#include "InputAESCBCDecodeStream.h"
 
 #include <algorithm>
 #include <string.h>
@@ -25,13 +25,13 @@ limitations under the License.
 using namespace IOBasicTypes;
 
 
-InputAESDecodeStream::InputAESDecodeStream()
+InputAESCBCDecodeStream::InputAESCBCDecodeStream()
 {
 	mSourceStream = NULL;
 }
 
 
-InputAESDecodeStream::InputAESDecodeStream(
+InputAESCBCDecodeStream::InputAESCBCDecodeStream(
 	IByteReader* inSourceReader, 
 	const ByteList& inKey,
 	bool inIsFinalBlockPadded)
@@ -53,7 +53,7 @@ InputAESDecodeStream::InputAESDecodeStream(
 	mHitEnd = false;
 }
 
-InputAESDecodeStream::~InputAESDecodeStream(void)
+InputAESCBCDecodeStream::~InputAESCBCDecodeStream(void)
 {
 	if (mSourceStream)
 		delete mSourceStream;
@@ -62,12 +62,12 @@ InputAESDecodeStream::~InputAESDecodeStream(void)
 		delete[] mKey;
 }
 
-bool InputAESDecodeStream::NotEnded()
+bool InputAESCBCDecodeStream::NotEnded()
 {
 	return (mSourceStream && mSourceStream->NotEnded()) || !mHitEnd || ((mOutIndex - mOut) < mOutLength);
 }
 
-LongBufferSizeType InputAESDecodeStream::Read(IOBasicTypes::Byte* inBuffer, LongBufferSizeType inSize)
+LongBufferSizeType InputAESCBCDecodeStream::Read(IOBasicTypes::Byte* inBuffer, LongBufferSizeType inSize)
 {
 	if (!mSourceStream)
 		return 0;
@@ -120,7 +120,7 @@ LongBufferSizeType InputAESDecodeStream::Read(IOBasicTypes::Byte* inBuffer, Long
 	return inSize - left;
 }
 
-bool InputAESDecodeStream::DecryptNextBlockAndRefillNext()
+bool InputAESCBCDecodeStream::DecryptNextBlockAndRefillNext()
 {
 	// decrypt next block
 	memcpy(mIn, mInNext, AES_BLOCK_SIZE);

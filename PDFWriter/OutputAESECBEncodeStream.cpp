@@ -1,5 +1,5 @@
 /*
-Source File : InputRC4XcodeStream.cpp
+Source File : OutputAESECBEncodeStream.cpp
 
 
 Copyright 2016 Gal Kahana PDFWriter
@@ -17,29 +17,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "OutputAESEncodeStream.h"
-#include "MD5Generator.h"
-#include "PDFDate.h"
+#include "OutputAESECBEncodeStream.h"
 
 #include <string.h>
 
 using namespace IOBasicTypes;
 
-unsigned char scZeroIV[16] = {
-	0,0,0,0,
-	0,0,0,0,
-	0,0,0,0,
-	0,0,0,0
-};
 
-OutputAESEncodeStream::OutputAESEncodeStream(void)
+OutputAESECBEncodeStream::OutputAESECBEncodeStream(void)
 {
 	mTargetStream = NULL;
 	mOwnsStream = false;
-	mWroteIV = false;
 }
 
-OutputAESEncodeStream::~OutputAESEncodeStream(void)
+OutputAESECBEncodeStream::~OutputAESECBEncodeStream(void)
 {
 	Flush();
 	if(mEncryptionKey)
@@ -48,17 +39,13 @@ OutputAESEncodeStream::~OutputAESEncodeStream(void)
 		delete mTargetStream;
 }
 
-OutputAESEncodeStream::OutputAESEncodeStream(
+OutputAESECBEncodeStream::OutputAESECBEncodeStream(
 	IByteWriterWithPosition* inTargetStream, 
 	const ByteList& inEncryptionKey, 
-	bool inOwnsStream,
-	bool inPadFinalBlock,
-	bool inIVIsZero) 
+	bool inOwnsStream) 
 {
 	mTargetStream = inTargetStream;
 	mOwnsStream = inOwnsStream;
-	mPadFinalBlock = inPadFinalBlock;
-	mIVIsZero = inIVIsZero;
 
 	if (!mTargetStream)
 		return;
@@ -73,12 +60,9 @@ OutputAESEncodeStream::OutputAESEncodeStream(
 	for (; it != inEncryptionKey.end(); ++i, ++it)
 		mEncryptionKey[i] = *it;
 	mEncrypt.key(mEncryptionKey, mEncryptionKeyLength);
-	
-	mWroteIV = false;
-
 }
 
-LongFilePositionType OutputAESEncodeStream::GetCurrentPosition() 
+LongFilePositionType OutputAESECBEncodeStream::GetCurrentPosition() 
 {
 	if (mTargetStream)
 		return mTargetStream->GetCurrentPosition();
@@ -86,34 +70,12 @@ LongFilePositionType OutputAESEncodeStream::GetCurrentPosition()
 		return 0;
 }
 
-LongBufferSizeType OutputAESEncodeStream::Write(const IOBasicTypes::Byte* inBuffer, IOBasicTypes::LongBufferSizeType inSize) 
+LongBufferSizeType OutputAESECBEncodeStream::Write(const IOBasicTypes::Byte* inBuffer, IOBasicTypes::LongBufferSizeType inSize) 
 {
 	if (!mTargetStream)
 		return 0;
 
-	// write IV if didn't write yet
-	if (!mWroteIV) {
-		if(mIVIsZero) {
-			// constant IV of 0s
-			memcpy(mIV, scZeroIV, AES_BLOCK_SIZE); 
-		} else {
-			// random IV using MD5 of current time
-			MD5Generator md5;
-			// encode current time
-			PDFDate currentTime;
-			currentTime.SetToCurrentTime();
-			md5.Accumulate(currentTime.ToString());
-			memcpy(mIV, (const unsigned char*)md5.ToStringAsString().c_str(), AES_BLOCK_SIZE); // md5 should give us the desired 16 bytes
-		}
-		// write IV to output stream
-		mTargetStream->Write(mIV, AES_BLOCK_SIZE);
-		mWroteIV = true;
-	}
-
-
 	// input and existing buffer sizes smaller than block size, so just copy and return
-
-
 	IOBasicTypes::LongBufferSizeType left = inSize;
 
 	while (left > 0) {
@@ -122,14 +84,13 @@ LongBufferSizeType OutputAESEncodeStream::Write(const IOBasicTypes::Byte* inBuff
 			memcpy(mInIndex, inBuffer + inSize - left, left);
 			mInIndex += left;
 			left = 0;
-		}
-		else {
+		} else {
 			// otherwise, enough to fill block. fill, encode and continue
 			IOBasicTypes::LongBufferSizeType remainder = AES_BLOCK_SIZE - (mInIndex - mIn);
 			memcpy(mInIndex, inBuffer + inSize - left, remainder);
 
 			// encrypt
-			mEncrypt.cbc_encrypt(mIn, mOut, AES_BLOCK_SIZE, mIV);
+			mEncrypt.ecb_encrypt(mIn, mOut, AES_BLOCK_SIZE);
 			mTargetStream->Write(mOut, AES_BLOCK_SIZE);
 			mInIndex = mIn;
 			left -= remainder;
@@ -139,24 +100,11 @@ LongBufferSizeType OutputAESEncodeStream::Write(const IOBasicTypes::Byte* inBuff
 	return inSize;
 }
 
-void OutputAESEncodeStream::Flush() {
-	// if there's a full buffer waiting, write it now.
+void OutputAESECBEncodeStream::Flush() {
+	// if there's a full buffer waiting, write it now. (there can be either full buffer, or 0 bytes. no partial buffer and padding support is required here)
 	if (mInIndex - mIn == AES_BLOCK_SIZE) {
-		mEncrypt.cbc_encrypt(mIn, mOut, AES_BLOCK_SIZE, mIV);
+		mEncrypt.ecb_encrypt(mIn, mOut, AES_BLOCK_SIZE);
 		mTargetStream->Write(mOut, AES_BLOCK_SIZE);
 		mInIndex = mIn;
-
-		// to support the option of not padding, we'll just not pad if the block is full. otherwise assume its an unintended mistake, and pad
-		if (!mPadFinalBlock) {
-			return;
-		}
 	}
-
-	// if padding is a requirement (either cause we ain't got a full block or we got a full block but padding is requested either way)
-	// fill the last block with padding bytes. if the last block was full and padding is required still, fill it with the block size (AES_BLOCK_SIZE) as padding bytes
-	unsigned char remainder = (unsigned char)(AES_BLOCK_SIZE - (mInIndex - mIn));
-	for (size_t i = 0; i < remainder; ++i)
-		mInIndex[i] = remainder;
-	mEncrypt.cbc_encrypt(mIn, mOut, AES_BLOCK_SIZE, mIV);
-	mTargetStream->Write(mOut, AES_BLOCK_SIZE);
 }

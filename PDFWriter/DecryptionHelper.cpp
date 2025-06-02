@@ -34,7 +34,7 @@ limitations under the License.
 #include "RefCountPtr.h"
 #include "OutputStringBufferStream.h"
 #include "InputRC4XcodeStream.h"
-#include "InputAESDecodeStream.h"
+#include "InputAESCBCDecodeStream.h"
 #include "Trace.h"
 #include "Deletable.h"
 #include <memory>
@@ -469,7 +469,7 @@ void DecryptionHelper::OnObjectEnd(PDFObject* inObject) {
 
 IByteReader* DecryptionHelper::CreateDecryptionReader(IByteReader* inSourceStream, const ByteList& inEncryptionKey, bool inIsUsingAES) {
 	if (inIsUsingAES)
-		return new InputAESDecodeStream(inSourceStream, inEncryptionKey, true);
+		return new InputAESCBCDecodeStream(inSourceStream, inEncryptionKey, true);
 	else
 		return new InputRC4XcodeStream(inSourceStream, inEncryptionKey);
 }
