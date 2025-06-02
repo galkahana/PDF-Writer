@@ -154,6 +154,7 @@ static const std::string scPDFVersion14 = "PDF-1.4";
 static const std::string scPDFVersion15 = "PDF-1.5";
 static const std::string scPDFVersion16 = "PDF-1.6";
 static const std::string scPDFVersion17 = "PDF-1.7";
+static const std::string scPDFVersion20 = "PDF-2.0";
 
 void DocumentContext::WriteHeaderComment(EPDFVersion inPDFVersion)
 {
@@ -182,8 +183,11 @@ void DocumentContext::WriteHeaderComment(EPDFVersion inPDFVersion)
 			mObjectsContext->WriteComment(scPDFVersion16);
 			break;
 		case ePDFVersion17:
-        case ePDFVersionExtended:
 			mObjectsContext->WriteComment(scPDFVersion17);
+			break;
+		case ePDFVersion20:
+        case ePDFVersionExtended:
+			mObjectsContext->WriteComment(scPDFVersion20);
 			break;
 	}
 }

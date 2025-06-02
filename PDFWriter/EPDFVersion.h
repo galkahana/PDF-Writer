@@ -31,7 +31,8 @@ enum EPDFVersion
 	ePDFVersion15 = 15,
 	ePDFVersion16 = 16,
 	ePDFVersion17 = 17,
-	ePDFVersionMax = ePDFVersion17,
+    ePDFVersion20 = 20,
+	ePDFVersionMax = ePDFVersion20,
 	ePDFVersionExtended = ePDFVersionMax + 1
 };
 
