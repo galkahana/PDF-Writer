@@ -469,7 +469,7 @@ void DecryptionHelper::OnObjectEnd(PDFObject* inObject) {
 
 IByteReader* DecryptionHelper::CreateDecryptionReader(IByteReader* inSourceStream, const ByteList& inEncryptionKey, bool inIsUsingAES) {
 	if (inIsUsingAES)
-		return new InputAESDecodeStream(inSourceStream, inEncryptionKey);
+		return new InputAESDecodeStream(inSourceStream, inEncryptionKey, true);
 	else
 		return new InputRC4XcodeStream(inSourceStream, inEncryptionKey);
 }

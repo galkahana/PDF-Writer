@@ -33,7 +33,14 @@ public:
 	OutputAESEncodeStream(void);
 	virtual ~OutputAESEncodeStream(void);
 
-	OutputAESEncodeStream(IByteWriterWithPosition* inTargetStream, const ByteList& inEncryptionKey, bool inOwnsStream);
+	OutputAESEncodeStream(
+		IByteWriterWithPosition* inTargetStream, 
+		const ByteList& inEncryptionKey, 
+		bool inOwnsStream,
+		// inPadFinalBlock can be false only if the message size is a multiple of AES_BLOCK_SIZE
+		bool inPadFinalBlock,
+		// in PDF V2.0 encryption of keys uses a constant IV of 0. when encrypting those keys, pass true here, otherwise a random IV is generated.
+		bool inIVIsZero); 
 
 	virtual IOBasicTypes::LongBufferSizeType Write(const IOBasicTypes::Byte* inBuffer, IOBasicTypes::LongBufferSizeType inSize);
 	virtual IOBasicTypes::LongFilePositionType GetCurrentPosition();
@@ -43,6 +50,8 @@ private:
 	IByteWriterWithPosition* mTargetStream;
 
 	bool mWroteIV;
+	bool mIVIsZero;
+	bool mPadFinalBlock;; 
 
 
 	// inEncryptionKey in array form, for aes

@@ -25,6 +25,12 @@ limitations under the License.
 
 using namespace IOBasicTypes;
 
+unsigned char scZeroIV[16] = {
+	0,0,0,0,
+	0,0,0,0,
+	0,0,0,0,
+	0,0,0,0
+};
 
 OutputAESEncodeStream::OutputAESEncodeStream(void)
 {
@@ -42,17 +48,24 @@ OutputAESEncodeStream::~OutputAESEncodeStream(void)
 		delete mTargetStream;
 }
 
-OutputAESEncodeStream::OutputAESEncodeStream(IByteWriterWithPosition* inTargetStream, const ByteList& inEncryptionKey, bool inOwnsStream) 
+OutputAESEncodeStream::OutputAESEncodeStream(
+	IByteWriterWithPosition* inTargetStream, 
+	const ByteList& inEncryptionKey, 
+	bool inOwnsStream,
+	bool inPadFinalBlock,
+	bool inIVIsZero) 
 {
 	mTargetStream = inTargetStream;
 	mOwnsStream = inOwnsStream;
+	mPadFinalBlock = inPadFinalBlock;
+	mIVIsZero = inIVIsZero;
 
 	if (!mTargetStream)
 		return;
 
 	mInIndex = mIn;
 
-	// convert inEncryptionKey to internal rep and init encrypt [let's hope its 16...]
+	// convert inEncryptionKey to internal rep and init encrypt. length should be something supported by AES (in bytes, so AES-128 is 16, AES-256 is 32 etc.)
 	mEncryptionKey = new unsigned char[inEncryptionKey.size()];
 	mEncryptionKeyLength = inEncryptionKey.size();
 	ByteList::const_iterator it = inEncryptionKey.begin();
@@ -80,15 +93,19 @@ LongBufferSizeType OutputAESEncodeStream::Write(const IOBasicTypes::Byte* inBuff
 
 	// write IV if didn't write yet
 	if (!mWroteIV) {
-		// create IV and write it to output file [use existing PDFDate]
-		MD5Generator md5;
-		// encode current time
-		PDFDate currentTime;
-		currentTime.SetToCurrentTime();
-		md5.Accumulate(currentTime.ToString());
-		memcpy(mIV, (const unsigned char*)md5.ToStringAsString().c_str(), AES_BLOCK_SIZE); // md5 should give us the desired 16 bytes
-
-																						   // now write mIV to the output stream
+		if(mIVIsZero) {
+			// constant IV of 0s
+			memcpy(mIV, scZeroIV, AES_BLOCK_SIZE); 
+		} else {
+			// random IV using MD5 of current time
+			MD5Generator md5;
+			// encode current time
+			PDFDate currentTime;
+			currentTime.SetToCurrentTime();
+			md5.Accumulate(currentTime.ToString());
+			memcpy(mIV, (const unsigned char*)md5.ToStringAsString().c_str(), AES_BLOCK_SIZE); // md5 should give us the desired 16 bytes
+		}
+		// write IV to output stream
 		mTargetStream->Write(mIV, AES_BLOCK_SIZE);
 		mWroteIV = true;
 	}
@@ -128,9 +145,15 @@ void OutputAESEncodeStream::Flush() {
 		mEncrypt.cbc_encrypt(mIn, mOut, AES_BLOCK_SIZE, mIV);
 		mTargetStream->Write(mOut, AES_BLOCK_SIZE);
 		mInIndex = mIn;
+
+		// to support the option of not padding, we'll just not pad if the block is full. otherwise assume its an unintended mistake, and pad
+		if (!mPadFinalBlock) {
+			return;
+		}
 	}
 
-	// (otherwise or in addition) finish encoding by completing a full block with the block remainder size. if the remainder is AES_BLOCK_SIZE cause block is empty, fill with AES_BLOCK_SIZE
+	// if padding is a requirement (either cause we ain't got a full block or we got a full block but padding is requested either way)
+	// fill the last block with padding bytes. if the last block was full and padding is required still, fill it with the block size (AES_BLOCK_SIZE) as padding bytes
 	unsigned char remainder = (unsigned char)(AES_BLOCK_SIZE - (mInIndex - mIn));
 	for (size_t i = 0; i < remainder; ++i)
 		mInIndex[i] = remainder;

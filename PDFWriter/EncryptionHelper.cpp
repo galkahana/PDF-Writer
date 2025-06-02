@@ -133,7 +133,7 @@ IByteWriterWithPosition* EncryptionHelper::CreateEncryptionStream(IByteWriterWit
 
 IByteWriterWithPosition* EncryptionHelper::CreateEncryptionWriter(IByteWriterWithPosition* inToWrapStream, const ByteList& inEncryptionKey, bool inIsUsingAES) {
 	if (inIsUsingAES) {
-		return new OutputAESEncodeStream(inToWrapStream, inEncryptionKey, false);
+		return new OutputAESEncodeStream(inToWrapStream, inEncryptionKey, false, true, false);
 	}
 	else {
 		return new OutputRC4XcodeStream(inToWrapStream, inEncryptionKey, false);
