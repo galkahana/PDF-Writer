@@ -22,6 +22,7 @@ limitations under the License.
 
 #include "IOBasicTypes.h"
 #include "ObjectsBasicTypes.h"
+#include "ByteList.h"
 
 #include <list>
 #include <string>
@@ -29,7 +30,6 @@ limitations under the License.
 
 class XCryptionCommon;
 
-typedef std::list<IOBasicTypes::Byte> ByteList;
 typedef std::list<ByteList> ByteListList;
 typedef std::map<std::string, XCryptionCommon*> StringToXCryptionCommonMap;
 
@@ -74,13 +74,6 @@ public:
 
 	// get original encryption key (without particular object additions)
 	const ByteList& GetInitialEncryptionKey() const;
-
-	// bytelist operations (class methods)
-	static ByteList stringToByteList(const std::string& inString);
-	static ByteList substr(const ByteList& inList, IOBasicTypes::LongBufferSizeType inStart, IOBasicTypes::LongBufferSizeType inEnd);
-	static void append(ByteList& ioTargetList, const ByteList& inSource);
-	static ByteList concat(const ByteList& inA, const ByteList& inB);
-	static std::string ByteListToString(const ByteList& inByteList);
 
 	// PDF xcryption algorithms (Important! length must be passed in bytes and not in bits. which normally means - the PDF value / 8)
 	

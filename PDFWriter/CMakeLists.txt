@@ -8,6 +8,7 @@ AbstractWrittenFont.cpp
 ANSIFontWriter.cpp
 Ascii7Encoding.cpp
 ArrayOfInputStreamsStream.cpp
+ByteList.cpp
 CatalogInformation.cpp
 CFFANSIFontWriter.cpp
 CFFDescendentFontWriter.cpp
@@ -159,6 +160,7 @@ WinAnsiEncoding.cpp
 WrittenFontCFF.cpp
 WrittenFontTrueType.cpp
 XCryptionCommon.cpp
+XCryptionCommon2_0.cpp
 XObjectContentContext.cpp
 
 #headers
@@ -170,6 +172,7 @@ Ascii7Encoding.h
 ArrayOfInputStreamsStream.h
 BetweenIncluding.h
 BoxingBase.h
+ByteList.h
 CatalogInformation.h
 CFFANSIFontWriter.h
 CFFDescendentFontWriter.h
@@ -368,6 +371,7 @@ WrittenFontCFF.h
 WrittenFontRepresentation.h
 WrittenFontTrueType.h
 XCryptionCommon.h
+XCryptionCommon2_0.h
 XObjectContentContext.h
 )
 
@@ -787,6 +791,8 @@ SimpleStringTokenizer.h
 )
 
 source_group("XCryption" FILES
+ByteList.cpp
+ByteList.h
 DecryptionHelper.cpp
 DecryptionHelper.h
 EncryptionHelper.cpp
@@ -795,6 +801,8 @@ EncryptionOptions.cpp
 EncryptionOptions.h
 XCryptionCommon.cpp
 XCryptionCommon.h
+XCryptionCommon2_0.cpp
+XCryptionCommon2_0.h
 )
 
 source_group("State Serialization" FILES

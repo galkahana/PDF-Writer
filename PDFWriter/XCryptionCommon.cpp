@@ -89,54 +89,6 @@ const ByteList& XCryptionCommon::GetCurrentObjectKey() {
 	return  mEncryptionKeysStack.size() > 0 ? mEncryptionKeysStack.back() : scEmptyByteList;
 }
 
-ByteList XCryptionCommon::stringToByteList(const std::string& inString) {
-	ByteList buffer;
-	std::string::const_iterator it = inString.begin();
-
-	for (; it != inString.end(); ++it)
-		buffer.push_back((Byte)*it);
-
-	return buffer;
-}
-ByteList XCryptionCommon::substr(const ByteList& inList, IOBasicTypes::LongBufferSizeType inStart, IOBasicTypes::LongBufferSizeType inLength) {
-	ByteList buffer;
-	ByteList::const_iterator it = inList.begin();
-
-	for (IOBasicTypes::LongBufferSizeType i = 0; i < inStart && it != inList.end(); ++i, ++it);
-
-	for (IOBasicTypes::LongBufferSizeType i = 0; i < inLength && it != inList.end(); ++i, ++it)
-		buffer.push_back((Byte)*it);
-
-	return buffer;
-}
-
-void XCryptionCommon::append(ByteList& ioTargetList, const ByteList& inSource) {
-	ByteList::const_iterator it = inSource.begin();
-
-	for (; it != inSource.end(); ++it)
-		ioTargetList.push_back(*it);
-}
-
-ByteList XCryptionCommon::concat(const ByteList& inA, const ByteList& inB) {
-	ByteList buffer;
-
-	append(buffer, inA);
-	append(buffer, inB);
-
-	return buffer;
-}
-
-
-std::string XCryptionCommon::ByteListToString(const ByteList& inByteList) {
-	std::string buffer;
-	ByteList::const_iterator it = inByteList.begin();
-
-	for (; it != inByteList.end(); ++it)
-		buffer.push_back((char)*it);
-
-	return buffer;
-}
-
 const Byte scAESSuffix[] = { 0x73, 0x41, 0x6C, 0x54 };
 ByteList XCryptionCommon::algorithm3_1(ObjectIDType inObjectNumber,
 	unsigned long inGenerationNumber,

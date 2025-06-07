@@ -73,7 +73,7 @@ LongBufferSizeType InputAESCBCDecodeStream::Read(IOBasicTypes::Byte* inBuffer, L
 		return 0;
 
 	
-	// first read, this is special case where IV need to be read, followed by an intiial block read
+	// first read, this is special case where IV need to be read, followed by an initial block read
 	if (!mIsInit) {
 		mIsInit = true; // let's get the state change out of the way
 

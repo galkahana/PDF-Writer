@@ -37,6 +37,7 @@ limitations under the License.
 #include "InputAESCBCDecodeStream.h"
 #include "Trace.h"
 #include "Deletable.h"
+#include "ByteList.h"
 #include <memory>
 #include <algorithm>
 
@@ -148,7 +149,7 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 		}
 		else {
 			ParsedPrimitiveHelper oHelper(o.GetPtr());
-			mO = XCryptionCommon::stringToByteList(oHelper.ToString());
+			mO = stringToByteList(oHelper.ToString());
 		}
 
 		RefCountPtr<PDFObject> u(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "U"));
@@ -157,7 +158,7 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 		}
 		else {
 			ParsedPrimitiveHelper uHelper(u.GetPtr());
-			mU = XCryptionCommon::stringToByteList(uHelper.ToString());
+			mU = stringToByteList(uHelper.ToString());
 		}
 
 		RefCountPtr<PDFObject> p(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "P"));
@@ -186,7 +187,7 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 			RefCountPtr<PDFObject> idPart1Object(inParser->QueryArrayObject(idArray.GetPtr(), 0));
 			if (!!idPart1Object) {
 				ParsedPrimitiveHelper idPart1ObjectHelper(idPart1Object.GetPtr());
-				mFileIDPart1 = XCryptionCommon::stringToByteList(idPart1ObjectHelper.ToString());
+				mFileIDPart1 = stringToByteList(idPart1ObjectHelper.ToString());
 			}
 		}
 
@@ -262,7 +263,7 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 		}
 
 		// authenticate password, try to determine if user or owner
-		ByteList password = XCryptionCommon::stringToByteList(inPassword);
+		ByteList password = stringToByteList(inPassword);
 		mDidSucceedOwnerPasswordVerification = AuthenticateOwnerPassword(password);
 		mFailedPasswordVerification = !mDidSucceedOwnerPasswordVerification && !AuthenticateUserPassword(password);
 

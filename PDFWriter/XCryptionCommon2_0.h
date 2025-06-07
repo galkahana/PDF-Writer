@@ -1,0 +1,51 @@
+#pragma once
+#include "ByteList.h"
+
+typedef std::pair<ByteList, ByteList> ByteListPair;
+
+class XCryptionCommon2_0 {
+public:
+    XCryptionCommon2_0(void);
+    virtual ~XCryptionCommon2_0(void);
+
+
+    // 1. For when decrypting
+    ByteList RetrieveFileEncryptionKey(
+        const ByteList& inPassword, // user or owner password
+        const ByteList& inO,
+        const ByteList& inU,
+        const ByteList& inOE,
+        const ByteList& inUE
+    );
+    bool AuthenticateUserPassword(
+        const ByteList& inPassword,
+        const ByteList& inU
+    );
+    bool AuthenticateOwnerPassword(
+        const ByteList& inPassword,
+        const ByteList& inO,
+        const ByteList& inU
+    );
+    bool AuthenticaePerms(
+        const ByteList& inFileEncryptionKey,
+        const ByteList& inPerms,
+        long long inP
+    );
+
+    // 2. for when encrypting
+    ByteList GenerateFileEncryptionKey();
+    ByteListPair CreateUandUEValues(
+        const ByteList& inUserPassword,
+        const ByteList& inFileEncryptionKey
+    );
+    ByteListPair CreateOandOEValues(
+        const ByteList& inOwnerPassword,
+        const ByteList& inFileEncryptionKey,
+        const ByteList& inU
+    );
+    ByteList CreatePerms(
+        const ByteList& inFileEncryptionKey,
+        long long inP,
+        bool inEncryptMetadata
+    );
+};

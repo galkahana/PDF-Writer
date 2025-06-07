@@ -178,11 +178,11 @@ EStatusCode EncryptionHelper::WriteEncryptionDictionary(ObjectsContext* inObject
 
 	// O
 	encryptContext->WriteKey(scO);
-	encryptContext->WriteHexStringValue(XCryptionCommon::ByteListToString(mO));
+	encryptContext->WriteHexStringValue(ByteListToString(mO));
 
 	// U
 	encryptContext->WriteKey(scU);
-	encryptContext->WriteHexStringValue(XCryptionCommon::ByteListToString(mU));
+	encryptContext->WriteHexStringValue(ByteListToString(mU));
 
 	// P
 	encryptContext->WriteKey(scP);
@@ -282,10 +282,10 @@ EStatusCode EncryptionHelper::Setup(
 	int32_t truncP = int32_t(((inUserProtectionOptionsFlag | 0xFFFFF0C0) & 0xFFFFFFFC));
 	mP = truncP;
 
-	ByteList ownerPassword = XCryptionCommon::stringToByteList(inOwnerPassword.size() > 0 ? inOwnerPassword : inUserPassword);
-	ByteList userPassword = XCryptionCommon::stringToByteList(inUserPassword);
+	ByteList ownerPassword = stringToByteList(inOwnerPassword.size() > 0 ? inOwnerPassword : inUserPassword);
+	ByteList userPassword = stringToByteList(inUserPassword);
 	mEncryptMetaData = inEncryptMetadata;
-	mFileIDPart1 = XCryptionCommon::stringToByteList(inFileIDPart1);
+	mFileIDPart1 = stringToByteList(inFileIDPart1);
 
 	mO = mXcryptAuthentication->algorithm3_3(mRevision,mLength,ownerPassword,userPassword);
 	if (mRevision == 2)
@@ -402,16 +402,16 @@ EStatusCode EncryptionHelper::WriteState(ObjectsContext* inStateWriter, ObjectID
 	encryptionObject->WriteBooleanValue(mEncryptMetaData);
 
 	encryptionObject->WriteKey("mFileIDPart1");
-	encryptionObject->WriteLiteralStringValue(XCryptionCommon::ByteListToString(mFileIDPart1));
+	encryptionObject->WriteLiteralStringValue(ByteListToString(mFileIDPart1));
 
 	encryptionObject->WriteKey("mO");
-	encryptionObject->WriteLiteralStringValue(XCryptionCommon::ByteListToString(mO));
+	encryptionObject->WriteLiteralStringValue(ByteListToString(mO));
 
 	encryptionObject->WriteKey("mU");
-	encryptionObject->WriteLiteralStringValue(XCryptionCommon::ByteListToString(mU));
+	encryptionObject->WriteLiteralStringValue(ByteListToString(mU));
 
 	encryptionObject->WriteKey("InitialEncryptionKey");
-	encryptionObject->WriteLiteralStringValue(mXcryptAuthentication ? XCryptionCommon::ByteListToString(mXcryptAuthentication->GetInitialEncryptionKey()) : "");
+	encryptionObject->WriteLiteralStringValue(mXcryptAuthentication ? ByteListToString(mXcryptAuthentication->GetInitialEncryptionKey()) : "");
 
 	inStateWriter->EndDictionary(encryptionObject);
 	inStateWriter->EndIndirectObject();
@@ -448,13 +448,13 @@ PDFHummus::EStatusCode EncryptionHelper::ReadState(PDFParser* inStateReader, Obj
 	mEncryptMetaData = encryptMetaData->GetValue();
 
 	PDFObjectCastPtr<PDFLiteralString> fileIDPart1 = encryptionObjectState->QueryDirectObject("mFileIDPart1");
-	mFileIDPart1 = XCryptionCommon::stringToByteList(fileIDPart1->GetValue());
+	mFileIDPart1 = stringToByteList(fileIDPart1->GetValue());
 
 	PDFObjectCastPtr<PDFLiteralString> o = encryptionObjectState->QueryDirectObject("mO");
-	mO = XCryptionCommon::stringToByteList(o->GetValue());
+	mO = stringToByteList(o->GetValue());
 
 	PDFObjectCastPtr<PDFLiteralString> u = encryptionObjectState->QueryDirectObject("mU");
-	mU = XCryptionCommon::stringToByteList(u->GetValue());
+	mU = stringToByteList(u->GetValue());
 
 	PDFObjectCastPtr<PDFLiteralString> InitialEncryptionKey = encryptionObjectState->QueryDirectObject("InitialEncryptionKey");
 	XCryptionCommon* defaultEncryption = new XCryptionCommon();
@@ -465,7 +465,7 @@ PDFHummus::EStatusCode EncryptionHelper::ReadState(PDFParser* inStateReader, Obj
 	mXcryptStreams = defaultEncryption;
 	mXcryptStrings = defaultEncryption;
 	mXcryptAuthentication = defaultEncryption;
-	mXcryptAuthentication->SetupInitialEncryptionKey(XCryptionCommon::stringToByteList(InitialEncryptionKey->GetValue()));
+	mXcryptAuthentication->SetupInitialEncryptionKey(stringToByteList(InitialEncryptionKey->GetValue()));
 
 	return eSuccess;
 }

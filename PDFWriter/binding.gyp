@@ -44,6 +44,7 @@
                'ANSIFontWriter.cpp',
                'Ascii7Encoding.cpp',
                'ArrayOfInputStreamsStream.cpp',
+               'ByteList.cpp',
                'CatalogInformation.cpp',
                'CFFANSIFontWriter.cpp',
                'CFFDescendentFontWriter.cpp',
@@ -195,6 +196,7 @@
                'WrittenFontCFF.cpp',
                'WrittenFontTrueType.cpp',
                'XCryptionCommon.cpp',
+               'XCryptionCommon2_0.cpp',
                'XObjectContentContext.cpp',
                'AbstractContentContext.h',
                'AbstractWrittenFont.h',
@@ -204,6 +206,7 @@
                'ArrayOfInputStreamsStream.h',
                'BetweenIncluding.h',
                'BoxingBase.h',
+               'ByteList.h',
                'CatalogInformation.h',
                'CFFANSIFontWriter.h',
                'CFFDescendentFontWriter.h',
@@ -402,6 +405,7 @@
                'WrittenFontRepresentation.h',
                'WrittenFontTrueType.h',
                'XCryptionCommon.h',
+               'XCryptionCommon2_0.h',
                'XObjectContentContext.h'
             ]
         }

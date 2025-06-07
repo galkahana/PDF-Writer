@@ -20,6 +20,7 @@ limitations under the License.
 #include "OutputAESCBCEncodeStream.h"
 #include "MD5Generator.h"
 #include "PDFDate.h"
+#include "aescpp.h"
 
 #include <string.h>
 
