@@ -24,7 +24,7 @@ limitations under the License.
 #include "InputStringStream.h"
 #include "OutputStreamTraits.h"
 #include "OutputRC4XcodeStream.h"
-#include "OutputAESCBCEncodeStream.h"
+#include "OutputAESEncodeStream.h"
 #include "ObjectsContext.h"
 #include "DictionaryContext.h"
 #include "DecryptionHelper.h"
@@ -133,7 +133,7 @@ IByteWriterWithPosition* EncryptionHelper::CreateEncryptionStream(IByteWriterWit
 
 IByteWriterWithPosition* EncryptionHelper::CreateEncryptionWriter(IByteWriterWithPosition* inToWrapStream, const ByteList& inEncryptionKey, bool inIsUsingAES) {
 	if (inIsUsingAES) {
-		return new OutputAESCBCEncodeStream(inToWrapStream, inEncryptionKey, false, true, false);
+		return new OutputAESEncodeStream(inToWrapStream, inEncryptionKey, false);
 	}
 	else {
 		return new OutputRC4XcodeStream(inToWrapStream, inEncryptionKey, false);

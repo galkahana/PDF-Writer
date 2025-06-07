@@ -1,5 +1,5 @@
 /*
-Source File : OutputAESECBEncodeStream.cpp
+Source File : OutputAESEncodeStream.cpp
 
 
 Copyright 2016 Gal Kahana PDFWriter
@@ -17,20 +17,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "OutputAESECBEncodeStream.h"
+#include "OutputAESEncodeStream.h"
+#include "MD5Generator.h"
+#include "PDFDate.h"
+#include "aescpp.h"
 
 #include <string.h>
 
 using namespace IOBasicTypes;
 
-
-OutputAESECBEncodeStream::OutputAESECBEncodeStream(void)
+OutputAESEncodeStream::OutputAESEncodeStream(void)
 {
 	mTargetStream = NULL;
 	mOwnsStream = false;
+	mWroteIV = false;
 }
 
-OutputAESECBEncodeStream::~OutputAESECBEncodeStream(void)
+OutputAESEncodeStream::~OutputAESEncodeStream(void)
 {
 	Flush();
 	if(mEncryptionKey)
@@ -39,7 +42,7 @@ OutputAESECBEncodeStream::~OutputAESECBEncodeStream(void)
 		delete mTargetStream;
 }
 
-OutputAESECBEncodeStream::OutputAESECBEncodeStream(
+OutputAESEncodeStream::OutputAESEncodeStream(
 	IByteWriterWithPosition* inTargetStream, 
 	const ByteList& inEncryptionKey, 
 	bool inOwnsStream) 
@@ -60,9 +63,12 @@ OutputAESECBEncodeStream::OutputAESECBEncodeStream(
 	for (; it != inEncryptionKey.end(); ++i, ++it)
 		mEncryptionKey[i] = *it;
 	mEncrypt.key(mEncryptionKey, mEncryptionKeyLength);
+	
+	mWroteIV = false;
+
 }
 
-LongFilePositionType OutputAESECBEncodeStream::GetCurrentPosition() 
+LongFilePositionType OutputAESEncodeStream::GetCurrentPosition() 
 {
 	if (mTargetStream)
 		return mTargetStream->GetCurrentPosition();
@@ -70,12 +76,29 @@ LongFilePositionType OutputAESECBEncodeStream::GetCurrentPosition()
 		return 0;
 }
 
-LongBufferSizeType OutputAESECBEncodeStream::Write(const IOBasicTypes::Byte* inBuffer, IOBasicTypes::LongBufferSizeType inSize) 
+LongBufferSizeType OutputAESEncodeStream::Write(const IOBasicTypes::Byte* inBuffer, IOBasicTypes::LongBufferSizeType inSize) 
 {
 	if (!mTargetStream)
 		return 0;
 
+	// write IV if didn't write yet
+	if (!mWroteIV) {
+		// random IV using MD5 of current time
+		MD5Generator md5;
+		// encode current time
+		PDFDate currentTime;
+		currentTime.SetToCurrentTime();
+		md5.Accumulate(currentTime.ToString());
+		memcpy(mIV, (const unsigned char*)md5.ToStringAsString().c_str(), AES_BLOCK_SIZE); // md5 should give us the desired 16 bytes
+		// write IV to output stream
+		mTargetStream->Write(mIV, AES_BLOCK_SIZE);
+		mWroteIV = true;
+	}
+
+
 	// input and existing buffer sizes smaller than block size, so just copy and return
+
+
 	IOBasicTypes::LongBufferSizeType left = inSize;
 
 	while (left > 0) {
@@ -84,13 +107,14 @@ LongBufferSizeType OutputAESECBEncodeStream::Write(const IOBasicTypes::Byte* inB
 			memcpy(mInIndex, inBuffer + inSize - left, left);
 			mInIndex += left;
 			left = 0;
-		} else {
+		}
+		else {
 			// otherwise, enough to fill block. fill, encode and continue
 			IOBasicTypes::LongBufferSizeType remainder = AES_BLOCK_SIZE - (mInIndex - mIn);
 			memcpy(mInIndex, inBuffer + inSize - left, remainder);
 
 			// encrypt
-			mEncrypt.ecb_encrypt(mIn, mOut, AES_BLOCK_SIZE);
+			mEncrypt.cbc_encrypt(mIn, mOut, AES_BLOCK_SIZE, mIV);
 			mTargetStream->Write(mOut, AES_BLOCK_SIZE);
 			mInIndex = mIn;
 			left -= remainder;
@@ -100,11 +124,18 @@ LongBufferSizeType OutputAESECBEncodeStream::Write(const IOBasicTypes::Byte* inB
 	return inSize;
 }
 
-void OutputAESECBEncodeStream::Flush() {
-	// if there's a full buffer waiting, write it now. (there can be either full buffer, or 0 bytes. no partial buffer and padding support is required here)
+void OutputAESEncodeStream::Flush() {
+	// if there's a full buffer waiting, write it now.
 	if (mInIndex - mIn == AES_BLOCK_SIZE) {
-		mEncrypt.ecb_encrypt(mIn, mOut, AES_BLOCK_SIZE);
+		mEncrypt.cbc_encrypt(mIn, mOut, AES_BLOCK_SIZE, mIV);
 		mTargetStream->Write(mOut, AES_BLOCK_SIZE);
 		mInIndex = mIn;
 	}
+
+	// fill the last block with padding bytes. if the last block was full and padding is required still, fill it with the block size (AES_BLOCK_SIZE) as padding bytes
+	unsigned char remainder = (unsigned char)(AES_BLOCK_SIZE - (mInIndex - mIn));
+	for (size_t i = 0; i < remainder; ++i)
+		mInIndex[i] = remainder;
+	mEncrypt.cbc_encrypt(mIn, mOut, AES_BLOCK_SIZE, mIV);
+	mTargetStream->Write(mOut, AES_BLOCK_SIZE);
 }

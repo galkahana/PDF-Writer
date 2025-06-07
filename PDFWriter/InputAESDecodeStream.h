@@ -1,5 +1,5 @@
 /*
-   Source File : InputAESECBDecodeStream.h
+   Source File : InputAESDecodeStream.h
 
 
    Copyright 2011 Gal Kahana PDFWriter
@@ -28,17 +28,16 @@
 
 typedef std::list<IOBasicTypes::Byte> ByteList;
 
-class InputAESECBDecodeStream : public IByteReader
+class InputAESDecodeStream : public IByteReader
 {
 public:
-	InputAESECBDecodeStream(void);
-	~InputAESECBDecodeStream(void);
+	InputAESDecodeStream(void);
+	~InputAESDecodeStream(void);
 
-	// InputAESECBDecodeStream owns inSourceReader and will delete it on destruction.
-	InputAESECBDecodeStream(
+	// InputAESDecodeStream owns inSourceReader and will delete it on destruction.
+	InputAESDecodeStream(
 		IByteReader* inSourceReader, 
-		const ByteList& inKey // inKey list length can be anything the underlying AES implemenetaion supports, specifically AES-128, AES-256, etc.
-	); 
+		const ByteList& inKey); // inKey list length can be anything the underlying AES implemenetaion supports, specifically AES-128, AES-256, etc.
 
 	// IByteReader implementation. note that "inBufferSize" determines how many
 	// bytes will be placed in the Buffer...not how many are actually read from the underlying
@@ -48,14 +47,17 @@ public:
 	virtual bool NotEnded();
 
 private:
-	// with ECB message size is always multiple of AES_BLOCK_SIZE, so there's no of the variable block size stuff here
 
 	// inEncryptionKey in array form, for aes
 	unsigned char* mKey;
 	std::size_t  mKeyLength;
+	unsigned char mIV[AES_BLOCK_SIZE];
 	unsigned char mIn[AES_BLOCK_SIZE];
+	unsigned char mInNext[AES_BLOCK_SIZE];
 	unsigned char mOut[AES_BLOCK_SIZE];
 	unsigned char *mOutIndex;
+	unsigned char mOutLength;
+	bool mIsInit;
 	bool mHitEnd;
 
 

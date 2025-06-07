@@ -1,5 +1,5 @@
 /*
-Source File : OutputAESCBCEncodeStream.h
+Source File : OutputAESEncodeStream.h
 
 
 Copyright 2016 Gal Kahana PDFWriter
@@ -27,20 +27,16 @@ limitations under the License.
 typedef std::list<IOBasicTypes::Byte> ByteList;
 
 
-class OutputAESCBCEncodeStream : public IByteWriterWithPosition
+class OutputAESEncodeStream : public IByteWriterWithPosition
 {
 public:
-	OutputAESCBCEncodeStream(void);
-	virtual ~OutputAESCBCEncodeStream(void);
+	OutputAESEncodeStream(void);
+	virtual ~OutputAESEncodeStream(void);
 
-	OutputAESCBCEncodeStream(
+	OutputAESEncodeStream(
 		IByteWriterWithPosition* inTargetStream, 
 		const ByteList& inEncryptionKey, 
-		bool inOwnsStream,
-		// inPadFinalBlock can be false only if the message size is a multiple of AES_BLOCK_SIZE
-		bool inPadFinalBlock,
-		// in PDF V2.0 encryption of keys uses a constant IV of 0. when encrypting those keys, pass true here, otherwise a random IV is generated.
-		bool inIVIsZero); 
+		bool inOwnsStream); 
 
 	virtual IOBasicTypes::LongBufferSizeType Write(const IOBasicTypes::Byte* inBuffer, IOBasicTypes::LongBufferSizeType inSize);
 	virtual IOBasicTypes::LongFilePositionType GetCurrentPosition();
@@ -50,9 +46,6 @@ private:
 	IByteWriterWithPosition* mTargetStream;
 
 	bool mWroteIV;
-	bool mIVIsZero;
-	bool mPadFinalBlock;; 
-
 
 	// inEncryptionKey in array form, for aes
 	unsigned char* mEncryptionKey;

@@ -1,5 +1,5 @@
 /*
-Source File : InputAESCBCDecodeStream.h
+Source File : InputAESDecodeStream.h
 
 
 Copyright 2016 Gal Kahana PDFWriter
@@ -17,7 +17,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "InputAESCBCDecodeStream.h"
+#include "InputAESDecodeStream.h"
 
 #include <algorithm>
 #include <string.h>
@@ -25,19 +25,17 @@ limitations under the License.
 using namespace IOBasicTypes;
 
 
-InputAESCBCDecodeStream::InputAESCBCDecodeStream()
+InputAESDecodeStream::InputAESDecodeStream()
 {
 	mSourceStream = NULL;
 }
 
 
-InputAESCBCDecodeStream::InputAESCBCDecodeStream(
+InputAESDecodeStream::InputAESDecodeStream(
 	IByteReader* inSourceReader, 
-	const ByteList& inKey,
-	bool inIsFinalBlockPadded)
+	const ByteList& inKey)
 {
 	mSourceStream = inSourceReader;
-	mIsFinalBlockPadded = inIsFinalBlockPadded;
 
 	// convert inEncryptionKey to internal rep and init decrypt. length should be something supported by AES (in bytes, so AES-128 is 16, AES-256 is 32 etc.)
 	mKeyLength = inKey.size();
@@ -53,7 +51,7 @@ InputAESCBCDecodeStream::InputAESCBCDecodeStream(
 	mHitEnd = false;
 }
 
-InputAESCBCDecodeStream::~InputAESCBCDecodeStream(void)
+InputAESDecodeStream::~InputAESDecodeStream(void)
 {
 	if (mSourceStream)
 		delete mSourceStream;
@@ -62,12 +60,12 @@ InputAESCBCDecodeStream::~InputAESCBCDecodeStream(void)
 		delete[] mKey;
 }
 
-bool InputAESCBCDecodeStream::NotEnded()
+bool InputAESDecodeStream::NotEnded()
 {
 	return (mSourceStream && mSourceStream->NotEnded()) || !mHitEnd || ((mOutIndex - mOut) < mOutLength);
 }
 
-LongBufferSizeType InputAESCBCDecodeStream::Read(IOBasicTypes::Byte* inBuffer, LongBufferSizeType inSize)
+LongBufferSizeType InputAESDecodeStream::Read(IOBasicTypes::Byte* inBuffer, LongBufferSizeType inSize)
 {
 	if (!mSourceStream)
 		return 0;
@@ -120,7 +118,7 @@ LongBufferSizeType InputAESCBCDecodeStream::Read(IOBasicTypes::Byte* inBuffer, L
 	return inSize - left;
 }
 
-bool InputAESCBCDecodeStream::DecryptNextBlockAndRefillNext()
+bool InputAESDecodeStream::DecryptNextBlockAndRefillNext()
 {
 	// decrypt next block
 	memcpy(mIn, mInNext, AES_BLOCK_SIZE);
@@ -138,14 +136,9 @@ bool InputAESCBCDecodeStream::DecryptNextBlockAndRefillNext()
 		// totalRead should be 0 or AES_BLOCK_SIZE. So this means we hit the end of the stream, and the just decrypted block is the final block.
 		mHitEnd = true; 
 
-		if(mIsFinalBlockPadded) {
-			// if decrypted data is padded, determine how much of the decrypted block is actual data by reading the last byte, which should have the padding length.
-			size_t paddingLength = std::min<size_t>(mOut[AES_BLOCK_SIZE - 1], AES_BLOCK_SIZE);
-			mOutLength = AES_BLOCK_SIZE - paddingLength;
-		} else {
-			// if there's no padding, final block can be read as a whole
-			mOutLength = AES_BLOCK_SIZE; 
-		}	
+		// dealing with padding of final block - Determine how much of the decrypted block is actual data by reading the last byte, which should have the padding length.
+		size_t paddingLength = std::min<size_t>(mOut[AES_BLOCK_SIZE - 1], AES_BLOCK_SIZE);
+		mOutLength = AES_BLOCK_SIZE - paddingLength;
 	}	
 
 
