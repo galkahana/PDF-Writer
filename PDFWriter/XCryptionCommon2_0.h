@@ -9,7 +9,7 @@ public:
     virtual ~XCryptionCommon2_0(void);
 
 
-    // 1. For when decrypting
+    // 1. For when reading
     ByteList RetrieveFileEncryptionKey(
         const ByteList& inPassword, // user or owner password
         const ByteList& inO,
@@ -32,7 +32,7 @@ public:
         long long inP
     );
 
-    // 2. for when encrypting
+    // 2. for when writing
     ByteList GenerateFileEncryptionKey();
     ByteListPair CreateUandUEValues(
         const ByteList& inUserPassword,
