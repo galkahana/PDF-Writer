@@ -195,6 +195,7 @@
                'WrittenFontTrueType.cpp',
                'XCryptionCommon.cpp',
                'XCryptionCommon2_0.cpp',
+               'XCryptor.cpp',
                'XObjectContentContext.cpp',
                'AbstractContentContext.h',
                'AbstractWrittenFont.h',
@@ -402,6 +403,7 @@
                'WrittenFontTrueType.h',
                'XCryptionCommon.h',
                'XCryptionCommon2_0.h',
+               'XCryptor.h',
                'XObjectContentContext.h'
             ]
         }

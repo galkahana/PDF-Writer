@@ -34,6 +34,7 @@ limitations under the License.
 #include "PDFLiteralString.h"
 #include "PDFInteger.h"
 #include "PDFBoolean.h"
+#include "XCryptionCommon.h"
 
 #include <stdint.h>
 
@@ -45,7 +46,6 @@ EncryptionHelper::EncryptionHelper(void)
 	mIsDocumentEncrypted = false;
 	mEncryptionPauseLevel = 0;
 	mSupportsEncryption = true;
-	mXcryptAuthentication = NULL;
 	mXcryptStreams = NULL;
 	mXcryptStrings = NULL;
 
@@ -62,7 +62,7 @@ EncryptionHelper::~EncryptionHelper(void)
 }
 
 void EncryptionHelper::Release() {
-	StringToXCryptionCommonMap::iterator it = mXcrypts.begin();
+	StringToXCryptorMap::iterator it = mXcrypts.begin();
 	for (; it != mXcrypts.end(); ++it)
 		delete it->second;
 	mXcrypts.clear();
@@ -93,7 +93,7 @@ void EncryptionHelper::OnObjectStart(long long inObjectID, long long inGeneratio
 	if (!IsEncrypting())
 		return;
 
-	StringToXCryptionCommonMap::iterator it = mXcrypts.begin();
+	StringToXCryptorMap::iterator it = mXcrypts.begin();
 	for (; it != mXcrypts.end(); ++it) {
 		it->second->OnObjectStart(inObjectID, inGenerationNumber);
 	}
@@ -102,7 +102,7 @@ void EncryptionHelper::OnObjectEnd() {
 	if (!IsEncrypting())
 		return;
 
-	StringToXCryptionCommonMap::iterator it = mXcrypts.begin();
+	StringToXCryptorMap::iterator it = mXcrypts.begin();
 	for (; it != mXcrypts.end(); ++it) {
 		it->second->OnObjectEnd();
 	}
@@ -114,7 +114,7 @@ std::string EncryptionHelper::EncryptString(const std::string& inStringToEncrypt
 
 	OutputStringBufferStream buffer;
 
-	IByteWriterWithPosition* encryptStream = CreateEncryptionWriter(&buffer, mXcryptStrings->GetCurrentObjectKey(), mXcryptStrings->IsUsingAES());
+	IByteWriterWithPosition* encryptStream = CreateEncryptionWriter(&buffer, mXcryptStrings->GetCurrentObjectKey(), mXcryptStrings->GetIsUsingAES());
 	if (encryptStream) {
 		InputStringStream inputStream(inStringToEncrypt);
 		OutputStreamTraits traits(encryptStream);
@@ -128,7 +128,7 @@ std::string EncryptionHelper::EncryptString(const std::string& inStringToEncrypt
 }
 
 IByteWriterWithPosition* EncryptionHelper::CreateEncryptionStream(IByteWriterWithPosition* inToWrapStream) {
-	return  CreateEncryptionWriter(inToWrapStream, mXcryptStreams->GetCurrentObjectKey(),mXcryptStreams->IsUsingAES());
+	return  CreateEncryptionWriter(inToWrapStream, mXcryptStreams->GetCurrentObjectKey(),mXcryptStreams->GetIsUsingAES());
 }
 
 IByteWriterWithPosition* EncryptionHelper::CreateEncryptionWriter(IByteWriterWithPosition* inToWrapStream, const ByteList& inEncryptionKey, bool inIsUsingAES) {
@@ -230,7 +230,7 @@ EStatusCode EncryptionHelper::WriteEncryptionDictionary(ObjectsContext* inObject
 
 static const string scStdCF = "StdCF";
 
-EStatusCode EncryptionHelper::Setup(
+void EncryptionHelper::Setup(
 	bool inShouldEncrypt,
 	double inPDFLevel,
 	const string& inUserPassword,
@@ -242,15 +242,13 @@ EStatusCode EncryptionHelper::Setup(
 
 	if (!inShouldEncrypt) {
 		SetupNoEncryption();
-		return eSuccess;
+		return;
 	}
 
 	mIsDocumentEncrypted = false;
 	mSupportsEncryption = false;
 
 	bool usingAES = inPDFLevel >= 1.6;
-	XCryptionCommon* defaultEncryption = new XCryptionCommon();
-
 
 	if (inPDFLevel >= 1.4) {
 		mLength = 16;
@@ -271,13 +269,6 @@ EStatusCode EncryptionHelper::Setup(
 		mRevision = (inUserProtectionOptionsFlag & 0xF00) ? 3 : 2;
 	}
 
-	defaultEncryption->Setup(usingAES);
-	mXcrypts.insert(StringToXCryptionCommonMap::value_type(scStdCF, defaultEncryption));
-	mXcryptStreams = defaultEncryption;
-	mXcryptStrings = defaultEncryption;
-	mXcryptAuthentication = defaultEncryption;
-
-
 	// compute P out of inUserProtectionOptionsFlag. inUserProtectionOptionsFlag can be a more relaxed number setting as 1s only the enabled access. mP will restrict to PDF Expected bits
 	int32_t truncP = int32_t(((inUserProtectionOptionsFlag | 0xFFFFF0C0) & 0xFFFFFFFC));
 	mP = truncP;
@@ -287,25 +278,28 @@ EStatusCode EncryptionHelper::Setup(
 	mEncryptMetaData = inEncryptMetadata;
 	mFileIDPart1 = stringToByteList(inFileIDPart1);
 
-	mO = mXcryptAuthentication->algorithm3_3(mRevision,mLength,ownerPassword,userPassword);
-	if (mRevision == 2)
-		mU = mXcryptAuthentication->algorithm3_4(mLength,userPassword,mO,mP,mFileIDPart1,mEncryptMetaData);
-	else
-		mU = mXcryptAuthentication->algorithm3_5(mRevision,mLength,userPassword, mO, mP, mFileIDPart1, mEncryptMetaData);
-
-	defaultEncryption->SetupInitialEncryptionKey(
-		inUserPassword,
+	XCryptionCommon xcryptionCommon;
+	mO = xcryptionCommon.CreateOValue(mRevision,mLength,ownerPassword,userPassword);
+	ByteList fileEncryptionKey = xcryptionCommon.RetrieveFileEncryptionKey(
+		userPassword,
 		mRevision,
 		mLength,
 		mO,
 		mP,
 		mFileIDPart1,
 		mEncryptMetaData);
+	mU = xcryptionCommon.CreateUValue(
+		fileEncryptionKey,
+		mRevision,
+		mFileIDPart1);		
+
+	XCryptor* defaultEncryption = new XCryptor(usingAES, fileEncryptionKey);
+	mXcrypts.insert(StringToXCryptorMap::value_type(scStdCF, defaultEncryption));
+	mXcryptStreams = defaultEncryption;
+	mXcryptStrings = defaultEncryption;
 
 	mIsDocumentEncrypted = true;
 	mSupportsEncryption = true;
-
-	return eSuccess;
 }
 
 void EncryptionHelper::SetupNoEncryption() 
@@ -314,56 +308,45 @@ void EncryptionHelper::SetupNoEncryption()
 	mSupportsEncryption = true;
 }
 
-EStatusCode EncryptionHelper::Setup(const DecryptionHelper& inDecryptionSource) 
+void EncryptionHelper::Setup(const DecryptionHelper& inDecryptionSource) 
 {
+	// This would be a setup for modified PDF, where the encryption setup is borrowing from the parser descryption setup
 	if (!inDecryptionSource.IsEncrypted() || !inDecryptionSource.CanDecryptDocument()) {
 		SetupNoEncryption();
-		return eSuccess;
+		return;
 	}
 
-	mIsDocumentEncrypted = false;
-	mSupportsEncryption = false;
+	mIsDocumentEncrypted = true;
+	mSupportsEncryption = true;
 
-	do {
+	mLength = inDecryptionSource.GetLength();
+	mV = inDecryptionSource.GetV();
+	mRevision = inDecryptionSource.GetRevision();
+	mP = inDecryptionSource.GetP();
+	mEncryptMetaData = inDecryptionSource.GetEncryptMetaData();
+	mFileIDPart1 = inDecryptionSource.GetFileIDPart1();
+	mO = inDecryptionSource.GetO();
+	mU = inDecryptionSource.GetU();
 
-		mLength = inDecryptionSource.GetLength();
-		mV = inDecryptionSource.GetV();
-		mRevision = inDecryptionSource.GetRevision();
-		mP = inDecryptionSource.GetP();
-		mEncryptMetaData = inDecryptionSource.GetEncryptMetaData();
-		mFileIDPart1 = inDecryptionSource.GetFileIDPart1();
-		mO = inDecryptionSource.GetO();
-		mU = inDecryptionSource.GetU();
+	// initialize xcryptors
+	mXcryptStreams = NULL;
+	// xcrypt to use for strings
+	mXcryptStrings = NULL;
+	StringToXCryptorMap::const_iterator it = inDecryptionSource.GetXcrypts().begin();
+	StringToXCryptorMap::const_iterator itEnd = inDecryptionSource.GetXcrypts().end();
+	for (; it != itEnd; ++it) {
+		// creating parallel copies for 
+		XCryptor* xCryption = new XCryptor(it->second->GetIsUsingAES(), it->second->GetFileEncryptionKey());
+		mXcrypts.insert(StringToXCryptorMap::value_type(it->first, xCryption));
 
-		// initialize xcryptors
-		mXcryptStreams = NULL;
-		// xcrypt to use for strings
-		mXcryptStrings = NULL;
-		// xcrypt to use for password authentication
-		mXcryptAuthentication = NULL;
-		StringToXCryptionCommonMap::const_iterator it = inDecryptionSource.GetXcrypts().begin();
-		StringToXCryptionCommonMap::const_iterator itEnd = inDecryptionSource.GetXcrypts().end();
-		for (; it != itEnd; ++it) {
-			XCryptionCommon* xCryption = new XCryptionCommon();
-			xCryption->Setup(it->second->IsUsingAES());
-			xCryption->SetupInitialEncryptionKey(it->second->GetInitialEncryptionKey());
-			mXcrypts.insert(StringToXCryptionCommonMap::value_type(it->first, xCryption));
+		// see if it fits any of the global xcryptors
+		if (it->second == inDecryptionSource.GetStreamXcrypt())
+			mXcryptStreams = xCryption;
+		if (it->second == inDecryptionSource.GetStringXcrypt())
+			mXcryptStrings = xCryption;
 
-			// see if it fits any of the global xcryptors
-			if (it->second == inDecryptionSource.GetStreamXcrypt())
-				mXcryptStreams = xCryption;
-			if (it->second == inDecryptionSource.GetStringXcrypt())
-				mXcryptStrings = xCryption;
-			if (it->second == inDecryptionSource.GetAuthenticationXcrypt())
-				mXcryptAuthentication = xCryption;
-		}
-
-
-		mIsDocumentEncrypted = true;
-		mSupportsEncryption = true;
-	} while (false);
-
-	return eSuccess;
+		// it is expected that one of those xcryptor has "StdCF" as its key
+	}
 }
 
 
@@ -383,8 +366,7 @@ EStatusCode EncryptionHelper::WriteState(ObjectsContext* inStateWriter, ObjectID
 	encryptionObject->WriteKey("mSupportsEncryption");
 	encryptionObject->WriteBooleanValue(mSupportsEncryption);
 
-	encryptionObject->WriteKey("mUsingAES");
-	encryptionObject->WriteBooleanValue(mXcryptAuthentication ? mXcryptAuthentication->IsUsingAES():false);
+
 
 	encryptionObject->WriteKey("mLength");
 	encryptionObject->WriteIntegerValue(mLength);
@@ -410,8 +392,14 @@ EStatusCode EncryptionHelper::WriteState(ObjectsContext* inStateWriter, ObjectID
 	encryptionObject->WriteKey("mU");
 	encryptionObject->WriteLiteralStringValue(ByteListToString(mU));
 
+	StringToXCryptorMap::const_iterator it = mXcrypts.find(scStdCF);
+	XCryptor* defaultEncryption = (it == mXcrypts.end()) ? NULL: it->second;
+
+	encryptionObject->WriteKey("mUsingAES");
+	encryptionObject->WriteBooleanValue(defaultEncryption ? defaultEncryption->GetIsUsingAES():false);
+
 	encryptionObject->WriteKey("InitialEncryptionKey");
-	encryptionObject->WriteLiteralStringValue(mXcryptAuthentication ? ByteListToString(mXcryptAuthentication->GetInitialEncryptionKey()) : "");
+	encryptionObject->WriteLiteralStringValue(defaultEncryption ? ByteListToString(defaultEncryption->GetFileEncryptionKey()) : "");
 
 	inStateWriter->EndDictionary(encryptionObject);
 	inStateWriter->EndIndirectObject();
@@ -429,8 +417,6 @@ PDFHummus::EStatusCode EncryptionHelper::ReadState(PDFParser* inStateReader, Obj
 	PDFObjectCastPtr<PDFBoolean> supportsEncryption = encryptionObjectState->QueryDirectObject("mSupportsEncryption");
 	mSupportsEncryption = supportsEncryption->GetValue();
 
-	PDFObjectCastPtr<PDFBoolean> usingAESObject = encryptionObjectState->QueryDirectObject("mUsingAES");
-	bool usingAES = usingAESObject->GetValue();
 
 	PDFObjectCastPtr<PDFInteger> length = encryptionObjectState->QueryDirectObject("mLength");
 	mLength = (unsigned int)length->GetValue();
@@ -456,16 +442,18 @@ PDFHummus::EStatusCode EncryptionHelper::ReadState(PDFParser* inStateReader, Obj
 	PDFObjectCastPtr<PDFLiteralString> u = encryptionObjectState->QueryDirectObject("mU");
 	mU = stringToByteList(u->GetValue());
 
-	PDFObjectCastPtr<PDFLiteralString> InitialEncryptionKey = encryptionObjectState->QueryDirectObject("InitialEncryptionKey");
-	XCryptionCommon* defaultEncryption = new XCryptionCommon();
 
 	// setup encryption
-	defaultEncryption->Setup(usingAES);
-	mXcrypts.insert(StringToXCryptionCommonMap::value_type(scStdCF, defaultEncryption));
+	PDFObjectCastPtr<PDFLiteralString> InitialEncryptionKeyObject = encryptionObjectState->QueryDirectObject("InitialEncryptionKey");
+	ByteList initialEncryptionKey = stringToByteList(InitialEncryptionKeyObject->GetValue());
+	PDFObjectCastPtr<PDFBoolean> usingAESObject = encryptionObjectState->QueryDirectObject("mUsingAES");
+	bool usingAES = usingAESObject->GetValue();
+
+
+	XCryptor* defaultEncryption = new XCryptor(usingAES, initialEncryptionKey);
+	mXcrypts.insert(StringToXCryptorMap::value_type(scStdCF, defaultEncryption));
 	mXcryptStreams = defaultEncryption;
 	mXcryptStrings = defaultEncryption;
-	mXcryptAuthentication = defaultEncryption;
-	mXcryptAuthentication->SetupInitialEncryptionKey(stringToByteList(InitialEncryptionKey->GetValue()));
 
 	return eSuccess;
 }

@@ -159,6 +159,7 @@ WrittenFontCFF.cpp
 WrittenFontTrueType.cpp
 XCryptionCommon.cpp
 XCryptionCommon2_0.cpp
+XCryptor.cpp
 XObjectContentContext.cpp
 
 #headers
@@ -368,6 +369,7 @@ WrittenFontRepresentation.h
 WrittenFontTrueType.h
 XCryptionCommon.h
 XCryptionCommon2_0.h
+XCryptor.h
 XObjectContentContext.h
 )
 
@@ -795,6 +797,8 @@ XCryptionCommon.cpp
 XCryptionCommon.h
 XCryptionCommon2_0.cpp
 XCryptionCommon2_0.h
+XCryptor.cpp
+XCryptor.h
 )
 
 source_group("State Serialization" FILES
