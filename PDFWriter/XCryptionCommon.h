@@ -25,8 +25,12 @@ limitations under the License.
 
 #include <list>
 
-class XCryptionCommon;
-
+/**
+ * XCryption common implements encryption and decryption functionality for PDF files pre PDF 2.0.
+ * It fits encryption dicts where the "V" is either 1, 2 or 4. 
+ * In PDF 2.0, those algorithms are decpreated and XCryptionCommon2_0 should be used instead.
+ * 
+ */
 class XCryptionCommon {
 public:
 

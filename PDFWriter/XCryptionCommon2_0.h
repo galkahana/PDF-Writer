@@ -3,6 +3,11 @@
 
 typedef std::pair<ByteList, ByteList> ByteListPair;
 
+/*
+ * XCryption common implements encryption and decryption functionality for PDF files of version 2.0 (or higher?!).
+ * It fits encryption dicts where the "V" is either 5 (and standard handler revision 6). 
+ * For pre PDF 2.0, XCryptionCommon should be used instead.
+ */
 class XCryptionCommon2_0 {
 public:
     XCryptionCommon2_0(void);
