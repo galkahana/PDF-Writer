@@ -77,6 +77,8 @@ public:
 	const ByteList& GetFileIDPart1() const;
 	const ByteList& GetO() const;
 	const ByteList& GetU() const;
+	const ByteList& GetOE() const;
+	const ByteList& GetUE() const;
 	const StringToXCryptorMap& GetXcrypts() const;
 	XCryptor* GetStreamXcrypt() const;
 	XCryptor* GetStringXcrypt() const;
@@ -125,6 +127,8 @@ private:
 	unsigned int mRevision;
 	ByteList mO;
 	ByteList mU;
+	ByteList mOE;
+	ByteList mUE;
 	long long mP;
 	bool mEncryptMetaData;
 	ByteList mFileIDPart1;

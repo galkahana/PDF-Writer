@@ -126,4 +126,7 @@ private:
 	long long mP;
 	bool mEncryptMetaData;
 	ByteList mFileIDPart1;
+	// PDF2.0
+	ByteList mOE;
+	ByteList mUE;
 };

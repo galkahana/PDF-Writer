@@ -20,13 +20,16 @@ limitations under the License.
 */
 #include "XCryptor.h"
 #include "XCryptionCommon.h"
+#include "XCryptionCommon2_0.h"
 #include "IOBasicTypes.h"
 
 using namespace IOBasicTypes;
 
-XCryptor::XCryptor(bool inUsingAES, const ByteList& inFileEncryptionKey)
+static const ByteList scEmptyByteList;
+
+XCryptor::XCryptor(EXCryptorAlgo inExcryptorAlgo, const ByteList& inFileEncryptionKey)
 {
-	mUsingAES = inUsingAES;
+	mExcryptorAlgo = inExcryptorAlgo;
 	mFileEncryptionKey = inFileEncryptionKey;
 }
 
@@ -34,22 +37,35 @@ XCryptor::~XCryptor(void)
 {
 }
 
-bool XCryptor::GetIsUsingAES() {
-	return mUsingAES;
+EXCryptorAlgo XCryptor::GetExcryptorAlgo() const {
+	return mExcryptorAlgo;
 }
 
-const ByteList& XCryptor::GetFileEncryptionKey()
+bool XCryptor::GetIsUsingAES() const {
+	return mExcryptorAlgo == eAESV2 || mExcryptorAlgo == eAESV3;
+}
+
+bool XCryptor::GetIsUsing2_0() const {
+	return mExcryptorAlgo == eAESV3;
+}
+
+const ByteList& XCryptor::GetFileEncryptionKey() const
 {
 	return mFileEncryptionKey;
 }
 
 const ByteList& XCryptor::OnObjectStart(long long inObjectID, long long inGenerationNumber) {
+	if (GetIsUsing2_0()) {
+		// PDF2.0 always uses the file encyption key. no need for considering object keys.
+		return mFileEncryptionKey;
+	}
+
     XCryptionCommon xcryption;
 
 	mEncryptionKeysStack.push_back(
 		xcryption.RetrieveObjectEncryptionKey(
 			mFileEncryptionKey,
-			mUsingAES,
+			GetIsUsingAES(),
 			(ObjectIDType)inObjectID, 
 			(unsigned long)inGenerationNumber
 		)
@@ -59,12 +75,17 @@ const ByteList& XCryptor::OnObjectStart(long long inObjectID, long long inGenera
 }
 
 void XCryptor::OnObjectEnd() {
+	if(GetIsUsing2_0())
+		return;
+
 	mEncryptionKeysStack.pop_back();
 }
 
-const ByteList scEmptyByteList;
+const ByteList& XCryptor::GetCurrentObjectKey() const {
+	if(GetIsUsing2_0()) {
+		return mFileEncryptionKey;
+	}
 
-const ByteList& XCryptor::GetCurrentObjectKey() {
 	return  mEncryptionKeysStack.size() > 0 ? mEncryptionKeysStack.back() : scEmptyByteList;
 }
 

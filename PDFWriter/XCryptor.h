@@ -32,6 +32,13 @@ class XCryptor;
 typedef std::list<ByteList> ByteListList;
 typedef std::map<std::string, XCryptor*> StringToXCryptorMap;
 
+
+enum EXCryptorAlgo {
+	eRC4 = 0,
+	eAESV2 = 1,
+	eAESV3 = 2
+};
+
 /*
 * XCryptor is a class that manages encryption keys for objects in a PDF document.
 * It represents either a crypt filter, or a default encryption mechanism, in earlier revisions.
@@ -40,21 +47,26 @@ typedef std::map<std::string, XCryptor*> StringToXCryptorMap;
 class XCryptor {
 public:
 
-	XCryptor(bool isUsingAES, const ByteList& inFileEncryptionKey);
+	XCryptor(EXCryptorAlgo inExcryptorAlgo, const ByteList& inFileEncryptionKey);
 	virtual ~XCryptor(void);
 
-	bool GetIsUsingAES();
-	const ByteList& GetFileEncryptionKey();
+	EXCryptorAlgo GetExcryptorAlgo() const;
+	// returns true if xcryptor algo is AES, false if RC4
+	bool GetIsUsingAES() const;
+	const ByteList& GetFileEncryptionKey() const;
 
 	// Call on object start, will recompute a key for the new object (returns, so you can use if makes sense)
 	const ByteList& OnObjectStart(long long inObjectID, long long inGenerationNumber);
 	// Call on object end, will pop the computed key for this object
 	void OnObjectEnd();
-	const ByteList& GetCurrentObjectKey(); // will return empty key if stack is empty
+	const ByteList& GetCurrentObjectKey() const; // will return empty key if stack is empty
 			
 
 private:
 	ByteListList mEncryptionKeysStack;
-	bool mUsingAES;
+	EXCryptorAlgo mExcryptorAlgo;
 	ByteList mFileEncryptionKey;
+
+
+	bool GetIsUsing2_0() const; 
 };

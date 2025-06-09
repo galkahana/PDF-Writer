@@ -39,6 +39,7 @@ limitations under the License.
 #include "Deletable.h"
 #include "ByteList.h"
 #include "XCryptionCommon.h"
+#include "XCryptionCommon2_0.h"
 #include <memory>
 #include <algorithm>
 
@@ -93,7 +94,6 @@ XCryptor* GetFilterForName(const StringToXCryptorMap& inXcryptions, const string
 
 static const string scStdCF = "StdCF";
 EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPassword) {
-	XCryptionCommon xcryption;
 	mSupportsDecryption = false;
 	mFailedPasswordVerification = false;
 	mDidSucceedOwnerPasswordVerification = false;
@@ -127,9 +127,9 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 			mV = (unsigned int)vHelper.GetAsInteger();
 		}
 
-		// supporting versions 1,2 and 4
-		if (mV != 1 && mV != 2 && mV != 4) {
-			TRACE_LOG1("DecryptionHelper::Setup, Only 1, 2 and 4 are supported values for V. Unsupported V value encountered - %d", mV);
+		// supporting versions 1, 2, 4 and 5
+		if (mV != 1 && mV != 2 && mV != 4 && mV != 5) {
+			TRACE_LOG1("DecryptionHelper::Setup, Only 1, 2, 4 and 5 are supported values for V. Unsupported V value encountered - %d", mV);
 			break;
 		}
 
@@ -161,6 +161,31 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 			ParsedPrimitiveHelper uHelper(u.GetPtr());
 			mU = stringToByteList(uHelper.ToString());
 		}
+
+		RefCountPtr<PDFObject> oE(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "OE"));
+		if (!oE) {
+			if (mV >= 5) {
+				TRACE_LOG("DecryptionHelper::Setup, OE not defined in encryption dictionary, but V > 5. This is unexpected. breaking");
+				break;
+			}
+		}
+		else {
+			ParsedPrimitiveHelper oHelper(oE.GetPtr());
+			mOE = stringToByteList(oHelper.ToString());
+		}
+
+		RefCountPtr<PDFObject> uE(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "UE"));
+		if (!uE) {
+			if (mV >= 5) {
+				TRACE_LOG("DecryptionHelper::Setup, UE not defined in encryption dictionary, but V > 5. This is unexpected. breaking");
+				break;
+			}
+		}
+		else {
+			ParsedPrimitiveHelper oHelper(uE.GetPtr());
+			mUE = stringToByteList(oHelper.ToString());
+		}
+
 
 		RefCountPtr<PDFObject> p(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "P"));
 		if (!p) {
@@ -204,7 +229,7 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 		ByteList password = stringToByteList(inPassword);
 
 		// Setup crypt filters, or a default filter
-		if (mV == 4) {
+		if (mV == 4 || mV == 5) {
 			// multiple xcryptions. read crypt filters, determine which does what
 			PDFObjectCastPtr<PDFDictionary> cryptFilters(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "CF"));
 			if (!!cryptFilters) {
@@ -219,21 +244,41 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 					// and object will be released
 					cryptFilter = cryptFiltersIt.GetValue();
 					if (!!cryptFilter) {
-						PDFObjectCastPtr<PDFName> cfmName(inParser->QueryDictionaryObject(cryptFilter.GetPtr(), "CFM"));
+						PDFObjectCastPtr<PDFName> cfmNameObject(inParser->QueryDictionaryObject(cryptFilter.GetPtr(), "CFM"));
 						RefCountPtr<PDFObject> lengthObject(inParser->QueryDictionaryObject(cryptFilter.GetPtr(), "Length"));
 						unsigned int cryptLength = !lengthObject ? mLength : ComputeByteLength(lengthObject.GetPtr());
-						// retrieve encryption key, based on this crypt filter params
-						ByteList fileEncryptionKey = xcryption.RetrieveFileEncryptionKey(
-							password,
-							mRevision,
-							cryptLength,
-							mO,
-							mP,
-							mFileIDPart1,
-							mEncryptMetaData);						
-
 						// setup encryption method (based on cfmName) and key (based on length)
-						XCryptor* encryption = new XCryptor(cfmName->GetValue() == "AESV2", fileEncryptionKey);
+						string cfmName = cfmNameObject->GetValue();
+						if(cfmName != "AESV2" && cfmName != "AESV3" && cfmName != "RC4") {
+							continue; // probably "None"". could also be unsupported. in any case, ignore and this means that this crypt filter will not encrypt
+						}
+						EXCryptorAlgo xCryptorAlgo = cfmName == "AESV3" ? eAESV3 : (cfmName == "AESV2" ? eAESV2 : eRC4);
+
+						// retrieve encryption key, based on this crypt filter params
+						ByteList fileEncryptionKey;
+						if(xCryptorAlgo == eAESV3) {
+							XCryptionCommon2_0 xcryption2_0;
+							fileEncryptionKey = xcryption2_0.RetrieveFileEncryptionKey(
+								password,
+								mO,
+								mU,
+								mOE,
+								mUE);
+						} else {
+							XCryptionCommon xcryption;
+							fileEncryptionKey = xcryption.RetrieveFileEncryptionKey(
+								password,
+								mRevision,
+								cryptLength,
+								mO,
+								mP,
+								mFileIDPart1,
+								mEncryptMetaData);						
+
+						}
+
+						
+						XCryptor* encryption = new XCryptor(xCryptorAlgo, fileEncryptionKey);
 						mXcrypts.insert(StringToXCryptorMap::value_type(cryptFiltersIt.GetKey()->GetValue(), encryption));
 					}
 				}
@@ -246,6 +291,7 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 			}
 
 		} else {
+			XCryptionCommon xcryption;
 			ByteList fileEncryptionKey = xcryption.RetrieveFileEncryptionKey(
 				password,
 				mRevision,
@@ -256,7 +302,7 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 				mEncryptMetaData);
 
 			// single xcryption, use as the single encryption method
-			XCryptor* defaultEncryption = new XCryptor(false, fileEncryptionKey); //non (or rather - pre) version 4 are RC4 always and not using AES
+			XCryptor* defaultEncryption = new XCryptor(eRC4, fileEncryptionKey); //non (or rather - pre) version 4 are RC4 always and not using AES
 			mXcrypts.insert(StringToXCryptorMap::value_type(scStdCF, defaultEncryption));
 			mXcryptStreams = defaultEncryption;
 			mXcryptStrings = defaultEncryption;
@@ -476,29 +522,48 @@ IByteReader* DecryptionHelper::CreateDecryptionReader(IByteReader* inSourceStrea
 
 
 bool DecryptionHelper::AuthenticateUserPassword(const ByteList& inPassword) {
-	XCryptionCommon xcryption;
-	return xcryption.AuthenticateUserPassword(
+	if(mV >= 5) {
+		XCryptionCommon2_0 xcryption2_0;
+		return xcryption2_0.AuthenticateUserPassword(
 						inPassword,
-						mRevision,
-						mLength,
-						mO,
-						mP,
-						mFileIDPart1,
-						mEncryptMetaData,
-						mU);
+						mU
+					);
+	} else {
+		XCryptionCommon xcryption;
+		return xcryption.AuthenticateUserPassword(
+							inPassword,
+							mRevision,
+							mLength,
+							mO,
+							mP,
+							mFileIDPart1,
+							mEncryptMetaData,
+							mU);
+
+	}
 }
 
 bool DecryptionHelper::AuthenticateOwnerPassword(const ByteList& inPassword) {
-	XCryptionCommon xcryption;
-	return xcryption.AuthenticateOwnerPassword(
+	if(mV >= 5) {
+		XCryptionCommon2_0 xcryption2_0;
+		return xcryption2_0.AuthenticateOwnerPassword(
 						inPassword,
-						mRevision,
-						mLength,
 						mO,
-						mP,
-						mFileIDPart1,
-						mEncryptMetaData,
-						mU);
+						mU
+					);
+	} else {
+		XCryptionCommon xcryption;
+		return xcryption.AuthenticateOwnerPassword(
+							inPassword,
+							mRevision,
+							mLength,
+							mO,
+							mP,
+							mFileIDPart1,
+							mEncryptMetaData,
+							mU);
+
+	}
 }
 
 unsigned int DecryptionHelper::GetLength() const
@@ -540,6 +605,17 @@ const ByteList& DecryptionHelper::GetU() const
 {
 	return mU;
 }
+
+const ByteList& DecryptionHelper::GetOE() const
+{
+	return mOE;
+}
+
+const ByteList& DecryptionHelper::GetUE() const
+{
+	return mUE;
+}
+
 
 void DecryptionHelper::PauseDecryption() {
 	++mDecryptionPauseLevel;
