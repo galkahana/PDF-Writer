@@ -137,6 +137,7 @@ void EncryptionHelper::Setup(
 		ByteListPair oAndOE = xcryptionCommon2_0.CreateOandOEValues(ownerPassword, fileEncryptionKey, mU);
 		mO = oAndOE.first;
 		mOE = oAndOE.second;
+		mPerms = xcryptionCommon2_0.CreatePerms(fileEncryptionKey, mP, mEncryptMetaData);
 	} else {
 		// Pre PDF 2.0 algos
 		XCryptionCommon xcryptionCommon;
@@ -195,6 +196,7 @@ void EncryptionHelper::Setup(const DecryptionHelper& inDecryptionSource)
 	mU = inDecryptionSource.GetU();
 	mOE = inDecryptionSource.GetOE();
 	mUE = inDecryptionSource.GetUE();
+	mPerms = inDecryptionSource.GetPerms();
 
 	// initialize xcryptors
 	mXcryptStreams = NULL;
@@ -300,6 +302,7 @@ static const string scP = "P";
 static const string scOE = "OE";
 static const string scUE = "UE";
 static const string scEncryptMetadata = "EncryptMetadata";
+static const string scPerms = "Perms";
 
 EStatusCode EncryptionHelper::WriteEncryptionDictionary(ObjectsContext* inObjectsContext) {
 
@@ -335,7 +338,12 @@ EStatusCode EncryptionHelper::WriteEncryptionDictionary(ObjectsContext* inObject
 	encryptContext->WriteKey(scU);
 	encryptContext->WriteHexStringValue(ByteListToString(mU));
 
-	// PDF 2.0/v5 also writes OE and UE
+
+	// P
+	encryptContext->WriteKey(scP);
+	encryptContext->WriteIntegerValue(mP);
+
+	// PDF 2.0/v5 also writes OE, UE and Perms
 	if (mV >= 5) {
 		// OE
 		encryptContext->WriteKey(scOE);
@@ -344,11 +352,11 @@ EStatusCode EncryptionHelper::WriteEncryptionDictionary(ObjectsContext* inObject
 		// UE
 		encryptContext->WriteKey(scUE);
 		encryptContext->WriteHexStringValue(ByteListToString(mUE));
-	}
 
-	// P
-	encryptContext->WriteKey(scP);
-	encryptContext->WriteIntegerValue(mP);
+		// Perms
+		encryptContext->WriteKey(scPerms);
+		encryptContext->WriteHexStringValue(ByteListToString(mPerms));
+	}
 
 	// EncryptMetadata
 	encryptContext->WriteKey(scEncryptMetadata);
@@ -439,6 +447,9 @@ EStatusCode EncryptionHelper::WriteState(ObjectsContext* inStateWriter, ObjectID
 	encryptionObject->WriteKey("mUE");
 	encryptionObject->WriteLiteralStringValue(ByteListToString(mUE));	
 
+	encryptionObject->WriteKey("mPerms");
+	encryptionObject->WriteLiteralStringValue(ByteListToString(mPerms));
+
 	StringToXCryptorMap::const_iterator it = mXcrypts.find(scStdCF);
 	XCryptor* defaultEncryption = (it == mXcrypts.end()) ? NULL: it->second;
 
@@ -500,6 +511,9 @@ PDFHummus::EStatusCode EncryptionHelper::ReadState(PDFParser* inStateReader, Obj
 
 	PDFObjectCastPtr<PDFLiteralString> uE = encryptionObjectState->QueryDirectObject("mUE");
 	mUE = stringToByteList(uE->GetValue());	
+
+	PDFObjectCastPtr<PDFLiteralString> perms = encryptionObjectState->QueryDirectObject("mPerms");
+	mPerms = stringToByteList(perms->GetValue());
 
 	// setup default encryption
 	PDFObjectCastPtr<PDFDictionary> defaultEncryptionObject = encryptionObjectState->QueryDirectObject("DefaultEncryption");

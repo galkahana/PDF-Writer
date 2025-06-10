@@ -89,8 +89,5 @@
         "xtree": "cpp",
         "xutility": "cpp",
         "*.inc": "c"
-    },
-    "cmake.configureArgs": [
-        "-DOPENSSL_ROOT_DIR=C:/Program Files/OpenSSL-Win64/lib/VC/x64/MD"
-    ],
+    }
 }

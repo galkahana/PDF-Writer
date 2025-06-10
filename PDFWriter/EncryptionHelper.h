@@ -129,4 +129,5 @@ private:
 	// PDF2.0
 	ByteList mOE;
 	ByteList mUE;
+	ByteList mPerms;
 };

@@ -170,9 +170,9 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 			}
 		}
 		else {
-			ParsedPrimitiveHelper oHelper(oE.GetPtr());
-			mOE = stringToByteList(oHelper.ToString());
-		}
+			ParsedPrimitiveHelper oEHelper(oE.GetPtr());
+			mOE = stringToByteList(oEHelper.ToString());
+		}	
 
 		RefCountPtr<PDFObject> uE(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "UE"));
 		if (!uE) {
@@ -180,11 +180,22 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 				TRACE_LOG("DecryptionHelper::Setup, UE not defined in encryption dictionary, but V > 5. This is unexpected. breaking");
 				break;
 			}
+		} else {
+			ParsedPrimitiveHelper uEHelper(uE.GetPtr());
+			mUE = stringToByteList(uEHelper.ToString());
+		}
+
+		RefCountPtr<PDFObject> perms(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "Perms"));
+		if (!perms) {
+			if (mV >= 5) {
+				TRACE_LOG("DecryptionHelper::Setup, Perms not defined in encryption dictionary, but V > 5. This is unexpected. breaking");
+				break;
+			}
 		}
 		else {
-			ParsedPrimitiveHelper oHelper(uE.GetPtr());
-			mUE = stringToByteList(oHelper.ToString());
-		}
+			ParsedPrimitiveHelper permsHelper(perms.GetPtr());
+			mPerms = stringToByteList(permsHelper.ToString());
+		}			
 
 
 		RefCountPtr<PDFObject> p(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "P"));
@@ -614,6 +625,11 @@ const ByteList& DecryptionHelper::GetOE() const
 const ByteList& DecryptionHelper::GetUE() const
 {
 	return mUE;
+}
+
+const ByteList& DecryptionHelper::GetPerms() const
+{
+	return mPerms;
 }
 
 

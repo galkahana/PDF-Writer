@@ -119,11 +119,11 @@ int PDFWithPassword(int argc, char* argv[])
 			break;
 		}
 
-		/*status = RunTest(argv, ePDFVersion20);
+		status = RunTest(argv, ePDFVersion20);
 		if (status != eSuccess) {
 			cout << "failed to run PDF2.0 test\n";
 			break;
-		}*/		
+		}		
 
 	}while(false);
 

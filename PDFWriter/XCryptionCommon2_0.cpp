@@ -108,9 +108,9 @@ static ByteList encryptKeyCBC(const ByteList& inKey, const ByteList& inData, Byt
     Byte* outBuffer = new Byte[inData.size()];
 
     encrypt.key(keyBuffer, inKey.size());
-    encrypt.cbc_encrypt(dataBuffer, dataBuffer, inData.size(), inIV);
+    encrypt.cbc_encrypt(dataBuffer, outBuffer, inData.size(), inIV);
 
-    ByteList result = byteArrayToByteList(dataBuffer, inData.size());
+    ByteList result = byteArrayToByteList(outBuffer, inData.size());
 
     delete[] keyBuffer;
     delete[] dataBuffer;
@@ -155,24 +155,6 @@ static ByteList encryptKeyECB(const ByteList& inKey, const ByteList& inData) {
     return result;
 }
 
-long long byteListToLittleEndian(const ByteList& inList) {
-    long long result = 0;
-    ByteList::const_iterator it = inList.begin();
-    for (int i = 0; i < 8 && it != inList.end(); ++i, ++it) {
-        result |= ((long long)(*it)) << (8 * i);
-    }
-    return result;
-}
-
-long long byteListToBigEndian(const ByteList& inList) {
-    long long result = 0;
-    ByteList::const_iterator it = inList.begin();
-    for (int i = 0; i < 8 && it != inList.end(); ++i, ++it) {
-        result = (result << 8) | ((long long)(*it));
-    }
-    return result;
-}
-
 static ByteListPair createHashRoundKey(const ByteList& inK, const ByteList& inTrimmedPassword, const ByteList& inAdditionalKey) {
     ByteList K1;  
 
@@ -185,10 +167,34 @@ static ByteListPair createHashRoundKey(const ByteList& inK, const ByteList& inTr
     }
 
     ByteList E = encryptKeyCBC(substr(inK,0,16), K1, substr(inK, 16, 16));
-    // determine which sha algorithm to use, based on big endian representaiton of E first 16 bytes
-    long long eAsNumber = byteListToLittleEndian(substr(E, 0, 16));
+    // the specs here wants to use the first 16 bytes of E as a big endian number and go mod 3. 
+    // problem is that 16 bytes of a number is hugh and kinda doesn't fit into long long, or any of the simple int types.
+    // fortunately (as is pointed out in QPDF and others...but originally i read it there - https://github.com/qpdf/qpdf/blob/main/libqpdf/QPDF_encryption.cc#L286)
+    // If you just want to get the mod 3, then just sum all the bytes as ints and mod that and you got the same result. 
+    // here's why:
+    // x = a1*256^15 + a2*256^14 + ... + a16*256^0
+    // (1) (y + z) mod n = ((y mod n) + (z mod n)) mod n
+    // [why? (k1*n+rem1 + k2*n + rem2) mod n = (rem1 + rem2) mod n, because k1*n and k2*n don't contribute to the mod, and so only the remainders do]
+    // so x mod 3 can become:
+    // (a1*256^15 mod 3 + a2*256^14 mod 3 + ... + a16*256^0 mod 3) mod 3
+    //
+    // now 256 mod 3 = 1, so 256^n mod 3 = 1 for any n. this means ai*256^n mod 3 = ai mod 3. here's why:
+    // 256^n is some 3k+1. ai*(3k+1) = ai*3k + ai. let's consider mod 3 of that. ai*3K is dividable by 3, so it doesn't contribute to mod 3, and so it's just ai mod 3. 
+    // Summing all of them items up with this in mind we get to (a1*256^15 mod 3 + a2*256^14 mod 3 + ... + a16*256^0 mod 3) = (a1 mod 3 + a2 mod 3 + ... + a16 mod 3).
+    //
+    // obviously if x = y then also x mod 3 = y mod 3, so add them mods to each side.
+    // so (a1 mod 3 + a2 mod 3 + ... + a16 mod 3) mod 3 = (a1*256^15 mod 3 + a2*256^14 mod 3 + ... + a16*256^0 mod 3) mod 3 = x mod 3.
+    // as to why we can just sum and mod 3 and don't need to mod each item and finally mod 3 like the left side here does, that's back to (1) above.
+    // which means (a1 + a2 + ... + a16) mod 3 = x mod 3.
+    long long result = 0;
+    ByteList::const_iterator itE = E.begin();
+    for (int i=0; i<16;++i, ++itE) {
+        result += (*itE);
+    }
+    Byte eMod3 = result % 3;
+
     ByteList newK;
-    switch(eAsNumber % 3) {
+    switch(eMod3) {
         case 0:
             newK = createSHA256(E);
             break;
@@ -374,8 +380,12 @@ bool XCryptionCommon2_0::AuthenticaePerms(
     }
     
 
-    // now verify the P value against 0..4 bytes
-    long long permsP = byteListToLittleEndian(substr(decryptedPerms, 0, 4));
+    // now verify the P value against 0..4 bytes representing little endian long long
+    long long permsP = 0;
+    it = decryptedPerms.begin();
+    for(int i = 0; i < 4; ++i, ++it) {
+         permsP |= ((long long)(*it)) << (8 * i);
+    }
 
     if (permsP != inP) {
         return false;
