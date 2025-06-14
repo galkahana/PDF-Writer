@@ -34,12 +34,10 @@ public:
 	InputAESDecodeStream(void);
 	~InputAESDecodeStream(void);
 
-	// Note that assigning passes ownership on the stream, use Assign(NULL) to remove ownership
-	InputAESDecodeStream(IByteReader* inSourceReader, const ByteList& inKey);
-
-	// Assigning passes ownership of the input stream to the decoder stream. 
-	// if you don't care for that, then after finishing with the decode, Assign(NULL).
-	void Assign(IByteReader* inSourceReader, const ByteList& inKey = ByteList());
+	// InputAESDecodeStream owns inSourceReader and will delete it on destruction.
+	InputAESDecodeStream(
+		IByteReader* inSourceReader, 
+		const ByteList& inKey); // inKey list length can be anything the underlying AES implemenetaion supports, specifically AES-128, AES-256, etc.
 
 	// IByteReader implementation. note that "inBufferSize" determines how many
 	// bytes will be placed in the Buffer...not how many are actually read from the underlying
@@ -58,12 +56,16 @@ private:
 	unsigned char mInNext[AES_BLOCK_SIZE];
 	unsigned char mOut[AES_BLOCK_SIZE];
 	unsigned char *mOutIndex;
-	unsigned char mReadBlockSize;
-	bool mIsIvInit;
+	unsigned char mOutLength;
+	bool mIsInit;
 	bool mHitEnd;
 
 
 	IByteReader *mSourceStream;
 	AESdecrypt mDecrypt;
+
+
+	bool DecryptNextBlockAndRefillNext();
+
 
 };

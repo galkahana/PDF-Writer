@@ -28,124 +28,130 @@ limitations under the License.
 using namespace std;
 using namespace IOBasicTypes;
 
-const Byte scPaddingFiller[] = { 0x28,0xBF,0x4E,0x5E,0x4E,0x75,0x8A,0x41,0x64,0x00,0x4E,0x56,0xFF,0xFA,0x01,0x08,0x2E,0x2E,0x00,0xB6,0xD0,0x68,0x3E,0x80,0x2F,0x0C,0xA9,0xFE,0x64,0x53,0x69,0x7A };
+
+#define STANDARD_PASSWORD_LENGTH 32
+
+const Byte scPaddingFiller[STANDARD_PASSWORD_LENGTH] = { 
+	0x28,0xBF,0x4E,0x5E,0x4E,0x75,0x8A,0x41,
+	0x64,0x00,0x4E,0x56,0xFF,0xFA,0x01,0x08,
+	0x2E,0x2E,0x00,0xB6,0xD0,0x68,0x3E,0x80,
+	0x2F,0x0C,0xA9,0xFE,0x64,0x53,0x69,0x7A 
+};
+
+const Byte scFixedEnd[] = { 0xFF,0xFF,0xFF,0xFF };
+
+
+static ByteList standardizePassword(const ByteList& inPassword) {
+	if(inPassword.size() > STANDARD_PASSWORD_LENGTH) {
+		return substr(inPassword, 0, STANDARD_PASSWORD_LENGTH);
+	} else if (inPassword.size() < STANDARD_PASSWORD_LENGTH) {
+		ByteList standardizedPassword = inPassword;
+		for(int i = 0; i < STANDARD_PASSWORD_LENGTH - inPassword.size(); ++i) {
+			standardizedPassword.push_back(scPaddingFiller[i]);
+		}
+		return standardizedPassword;
+	} else {
+		return inPassword;
+	}
+}
+
+static ByteList rc4Encode(const ByteList& inKey, const ByteList& inToEncode) {
+	RC4 rc4(inKey);
+	ByteList target;
+	Byte buffer;
+	ByteList::const_iterator it = inToEncode.begin();
+
+	for (; it != inToEncode.end(); ++it) {
+		buffer = rc4.DecodeNextByte((Byte)*it);
+		target.push_back(buffer);
+	}
+	return target;
+}
+
+static ByteList rc4Encode(const ByteList& inKey, const Byte* inToEncode, size_t inLength) {
+	RC4 rc4(inKey);
+	ByteList target;
+	Byte buffer;
+
+	for (size_t i = 0; i < inLength; ++i) {
+		buffer = rc4.DecodeNextByte((Byte)inToEncode[i]);
+		target.push_back(buffer);
+	}
+	return target;
+}
+
 XCryptionCommon::XCryptionCommon(void)
 {
-	for (int i = 0; i < 32; ++i)
-		mPaddingFiller.push_back(scPaddingFiller[i]);
-
 }
 
 XCryptionCommon::~XCryptionCommon(void)
 {
 }
 
-void XCryptionCommon::Setup(bool inUsingAES) {
-	mUsingAES = inUsingAES;
-}
-
-void XCryptionCommon::SetupInitialEncryptionKey(const std::string& inUserPassword,
+ByteList XCryptionCommon::RetrieveFileEncryptionKey(
+	const ByteList& inUserPassword,
 	unsigned int inRevision,
 	unsigned int inLength,
 	const ByteList& inO,
 	long long inP,
 	const ByteList& inFileIDPart1,
-	bool inEncryptMetaData) {
-	ByteList password = stringToByteList(inUserPassword);
-
-	mEncryptionKey = algorithm3_2(inRevision, inLength, password, inO, inP, inFileIDPart1, inEncryptMetaData);
-}
-
-void XCryptionCommon::SetupInitialEncryptionKey(const ByteList& inEncryptionKey) 
-{
-	mEncryptionKey = inEncryptionKey;
-}
-
-const ByteList& XCryptionCommon::GetInitialEncryptionKey() const
-{
-	return mEncryptionKey;
-}
-
-const ByteList& XCryptionCommon::OnObjectStart(long long inObjectID, long long inGenerationNumber) {
-	mEncryptionKeysStack.push_back(ComputeEncryptionKeyForObject((ObjectIDType)inObjectID, (unsigned long)inGenerationNumber));
-
-	return mEncryptionKeysStack.back();
-}
-
-ByteList XCryptionCommon::ComputeEncryptionKeyForObject(
-	ObjectIDType inObjectNumber,
-	unsigned long inGenerationNumber) {
-	return algorithm3_1(inObjectNumber, inGenerationNumber, mEncryptionKey, mUsingAES);
-}
+	bool inEncryptMetaData
+) {
+	// Algorithm 3.2 creates an encryption key based on provided password and 
+	// document stored encryption parameters.
+	// This encryption can can be used as basis for encrypting or decrypting the document content.
+	// It is also used as part of the 3.3-3.5 algorithms in order to create encrypted
+	// versions of user and owner passwords to be stored in the document, for a later
+	// authentication by a reader application.
 
 
-void XCryptionCommon::OnObjectEnd() {
-	mEncryptionKeysStack.pop_back();
-}
-
-const ByteList scEmptyByteList;
-
-const ByteList& XCryptionCommon::GetCurrentObjectKey() {
-	return  mEncryptionKeysStack.size() > 0 ? mEncryptionKeysStack.back() : scEmptyByteList;
-}
-
-ByteList XCryptionCommon::stringToByteList(const std::string& inString) {
-	ByteList buffer;
-	std::string::const_iterator it = inString.begin();
-
-	for (; it != inString.end(); ++it)
-		buffer.push_back((Byte)*it);
-
-	return buffer;
-}
-ByteList XCryptionCommon::substr(const ByteList& inList, IOBasicTypes::LongBufferSizeType inStart, IOBasicTypes::LongBufferSizeType inLength) {
-	ByteList buffer;
-	ByteList::const_iterator it = inList.begin();
-
-	for (IOBasicTypes::LongBufferSizeType i = 0; i < inStart && it != inList.end(); ++i, ++it);
-
-	for (IOBasicTypes::LongBufferSizeType i = 0; i < inLength && it != inList.end(); ++i, ++it)
-		buffer.push_back((Byte)*it);
-
-	return buffer;
-}
-
-void XCryptionCommon::append(ByteList& ioTargetList, const ByteList& inSource) {
-	ByteList::const_iterator it = inSource.begin();
-
-	for (; it != inSource.end(); ++it)
-		ioTargetList.push_back(*it);
-}
-
-ByteList XCryptionCommon::add(const ByteList& inA, const ByteList& inB) {
-	ByteList buffer;
-
-	append(buffer, inA);
-	append(buffer, inB);
-
-	return buffer;
-}
+	MD5Generator md5;
+	ByteList standardPassword = standardizePassword(inUserPassword);
+	uint32_t truncP = uint32_t(inP);
+	Byte truncPBuffer[4];
+	ByteList hashResult;
 
 
-std::string XCryptionCommon::ByteListToString(const ByteList& inByteList) {
-	std::string buffer;
-	ByteList::const_iterator it = inByteList.begin();
+	md5.Accumulate(standardPassword);
+	md5.Accumulate(inO);
+	for (int i = 0; i < 4; ++i) {
+		truncPBuffer[i] = truncP & 0xFF;
+		truncP >>= 8;
+	}
+	md5.Accumulate(truncPBuffer, 4);
+	md5.Accumulate(inFileIDPart1);
 
-	for (; it != inByteList.end(); ++it)
-		buffer.push_back((char)*it);
+	if (inRevision >= 4 && !inEncryptMetaData)
+		md5.Accumulate(scFixedEnd, 4);
 
-	return buffer;
+	hashResult = md5.ToString();
+
+	if (inRevision >= 3) {
+		for (int i = 0; i < 50; ++i) {
+			MD5Generator anotherMD5;
+			anotherMD5.Accumulate(substr(hashResult, 0, inLength));
+			hashResult = anotherMD5.ToString();
+
+		}
+	}
+
+	return inRevision == 2 ? substr(hashResult, 0, 5) : substr(hashResult, 0, inLength);	
 }
 
 const Byte scAESSuffix[] = { 0x73, 0x41, 0x6C, 0x54 };
-ByteList XCryptionCommon::algorithm3_1(ObjectIDType inObjectNumber,
-	unsigned long inGenerationNumber,
-	const ByteList& inEncryptionKey,
-	bool inIsUsingAES) {
+ByteList XCryptionCommon::RetrieveObjectEncryptionKey(
+	const ByteList& inFileEncryptionKey,
+	bool inIsUsingAES,
+	ObjectIDType inObjectNumber, 
+	unsigned long inGenerationNumber) {
+	// Algorithm 3.1 
+	// Generates an object level encryption key.
+	// It is an md hash of the file encryption key, the object number, and the generation number.  For AES it also includes a "sAlT" suffix.
+
 	MD5Generator md5;
-	ByteList result = inEncryptionKey;
+	ByteList result = inFileEncryptionKey;
 	Byte buffer;
-	LongBufferSizeType outputKeyLength = std::min<size_t>(inEncryptionKey.size() + 5, 16U);
+	LongBufferSizeType outputKeyLength = std::min<size_t>(inFileEncryptionKey.size() + 5, 16U);
 
 	buffer = inObjectNumber & 0xff;
 	result.push_back(buffer);
@@ -172,59 +178,92 @@ ByteList XCryptionCommon::algorithm3_1(ObjectIDType inObjectNumber,
 	return substr(md5.ToString(), 0, outputKeyLength);
 }
 
-const Byte scFixedEnd[] = { 0xFF,0xFF,0xFF,0xFF };
-ByteList XCryptionCommon::algorithm3_2(unsigned int inRevision,
-	unsigned int inLength,
+bool XCryptionCommon::AuthenticateUserPassword(
+	// parameters for generating a file encryption key with the password and based on the a "CreateUValue" call to generate the input password based "U" value
 	const ByteList& inPassword,
+	unsigned int inRevision,
+	unsigned int inLength,
 	const ByteList& inO,
 	long long inP,
 	const ByteList& inFileIDPart1,
-	bool inEncryptMetaData) {
-	MD5Generator md5;
-	ByteList password32Chars = substr(inPassword, 0, 32);
-	if (password32Chars.size() < 32)
-		append(password32Chars, substr(mPaddingFiller, 0, 32 - inPassword.size()));
-	uint32_t truncP = uint32_t(inP);
-	Byte truncPBuffer[4];
-	ByteList hashResult;
+	bool inEncryptMetaData,
+	// the original document "U" value to compare against, and determine if 
+	const ByteList& inU
+) {
+	// Algorithm 3.6
+	// This algorithm is intended to authenticate the user password.
+	// the principal is simple: attempt to recreate a "U" value with the password. then compare it to the original "U" value.
+	// If the two match, the password is authenticated. otherwise - not.
 
+	// Create "file encryption key" based on the password and other parameters.
+	ByteList fileEncryptionKey = RetrieveFileEncryptionKey(
+		inPassword,
+		inRevision,
+		inLength,
+		inO,
+		inP,
+		inFileIDPart1,
+		inEncryptMetaData
+	);
 
-	md5.Accumulate(password32Chars);
-	md5.Accumulate(inO);
-	for (int i = 0; i < 4; ++i) {
-		truncPBuffer[i] = truncP & 0xFF;
-		truncP >>= 8;
+	// Create the "U" value based on the file encryption key.
+	ByteList uValue = CreateUValue(fileEncryptionKey, inRevision, inFileIDPart1);
+
+	// Compare the created "U" value to the original "U" value.
+	if (inRevision == 2) {
+		// with revision 2 we compare all 32 bytes of the U values
+		return uValue == inU;
+	} else {
+		// remember the "arbitrary padding" of 16 bytes at the end of U? natrually no need to compare them...so just compare the first 16 bytes
+		return substr(uValue, 0, 16) == substr(inU, 0, 16);
 	}
-	md5.Accumulate(truncPBuffer, 4);
-	md5.Accumulate(inFileIDPart1);
-
-	if (inRevision >= 4 && !inEncryptMetaData)
-		md5.Accumulate(scFixedEnd, 4);
-
-	hashResult = md5.ToString();
-
-	if (inRevision >= 3) {
-		for (int i = 0; i < 50; ++i) {
-			MD5Generator anotherMD5;
-			anotherMD5.Accumulate(substr(hashResult, 0, inLength));
-			hashResult = anotherMD5.ToString();
-
-		}
-	}
-
-	return inRevision == 2 ? substr(hashResult, 0, 5) : substr(hashResult, 0, inLength);
 }
 
-ByteList XCryptionCommon::algorithm3_3(unsigned int inRevision,
-	unsigned int inLength,
+ByteList XCryptionCommon::CreateUValue(
+	const ByteList& inFileEncryptionKey,
+	unsigned int inRevision,
+	const ByteList& inFileIDPart1) {
+	if (inRevision == 2) {
+		// algorithm 3.4
+		return rc4Encode(inFileEncryptionKey, scPaddingFiller, STANDARD_PASSWORD_LENGTH);		
+	} else {
+		// algorithm 3.5
+		MD5Generator md5;
+		ByteList hashResult;
+
+		md5.Accumulate(scPaddingFiller, STANDARD_PASSWORD_LENGTH);
+		md5.Accumulate(inFileIDPart1);
+		hashResult = md5.ToString();
+
+		hashResult = rc4Encode(inFileEncryptionKey, hashResult);
+
+		for (Byte i = 1; i <= 19; ++i) {
+			ByteList newEncryptionKey;
+			ByteList::const_iterator it = inFileEncryptionKey.begin();
+			for (; it != inFileEncryptionKey.end(); ++it)
+				newEncryptionKey.push_back((*it) ^ i);
+			hashResult = rc4Encode(newEncryptionKey, hashResult);
+		}
+
+		// as arbitrary padding, we append the first 16 bytes of the scPaddingFiller
+		for(int i = 0; i < 16; ++i) {
+			hashResult.push_back(scPaddingFiller[i]);
+		}
+		return hashResult;
+	}
+}
+
+static ByteList createOwnerEncryptionKey(
 	const ByteList& inOwnerPassword,
-	const ByteList& inUserPassword) {
-	ByteList ownerPassword32Chars = add(substr(inOwnerPassword, 0, 32), (inOwnerPassword.size()<32 ? substr(mPaddingFiller, 0, 32 - inOwnerPassword.size()) : ByteList()));
-	ByteList userPassword32Chars = add(substr(inUserPassword, 0, 32), (inUserPassword.size()<32 ? substr(mPaddingFiller, 0, 32 - inUserPassword.size()) : ByteList()));
+	unsigned int inRevision,
+	unsigned int inLength) {
+	// (a) to (d) of algirhtm 3.3 to create owner encryption key
+
+	ByteList standardOwnerPassword = standardizePassword(inOwnerPassword);
 	MD5Generator md5;
 	ByteList hashResult;
 
-	md5.Accumulate(ownerPassword32Chars);
+	md5.Accumulate(standardOwnerPassword);
 
 	hashResult = md5.ToString();
 
@@ -236,9 +275,30 @@ ByteList XCryptionCommon::algorithm3_3(unsigned int inRevision,
 		}
 	}
 
-	ByteList RC4Key = (inRevision == 2 ? substr(hashResult, 0, 5) : substr(hashResult, 0, inLength));
+	return substr(hashResult, 0, inRevision == 2 ? 5 : inLength);
 
-	hashResult = RC4Encode(RC4Key, userPassword32Chars);
+}
+
+ByteList XCryptionCommon::CreateOValue(	
+	unsigned int inRevision,
+	unsigned int inLength,
+	const ByteList& inOwnerPassword,
+	const ByteList& inUserPassword) {
+	// Algorithm 3.3 creates the standard security handler "O" value,
+	// which is the owner key, allowing a reader to authenticate an owner password.
+	// The process essentially creates an encryption key from the owner password and uses it to encrypt the user password.
+	// The reverse process at 3.7, used to authenticate and input owner password, does the same process with the input, alleged owner password.
+
+	// Part 1, prepare encryption key from owner password
+	ByteList RC4Key = createOwnerEncryptionKey(
+		inOwnerPassword,
+		inRevision,
+		inLength
+	);
+
+	// Part 2, encrypt user password with the encryption key
+	ByteList standardUserPassword = standardizePassword(inUserPassword);
+	ByteList encryptedPassword = rc4Encode(RC4Key, standardUserPassword);
 
 	if (inRevision >= 3) {
 		for (Byte i = 1; i <= 19; ++i) {
@@ -246,111 +306,43 @@ ByteList XCryptionCommon::algorithm3_3(unsigned int inRevision,
 			ByteList::iterator it = RC4Key.begin();
 			for (; it != RC4Key.end(); ++it)
 				newRC4Key.push_back((*it) ^ i);
-			hashResult = RC4Encode(newRC4Key, hashResult);
+			encryptedPassword = rc4Encode(newRC4Key, encryptedPassword);
 		}
 	}
 
-	return hashResult;
+	return encryptedPassword;
 }
 
-ByteList XCryptionCommon::RC4Encode(const ByteList& inKey, const ByteList& inToEncode) {
-	RC4 rc4(inKey);
-	ByteList target;
-	Byte buffer;
-	ByteList::const_iterator it = inToEncode.begin();
-
-	for (; it != inToEncode.end(); ++it) {
-		buffer = rc4.DecodeNextByte((Byte)*it);
-		target.push_back(buffer);
-	}
-	return target;
-}
-
-ByteList XCryptionCommon::algorithm3_4(unsigned int inLength,
-	const ByteList& inUserPassword,
-	const ByteList& inO,
-	long long inP,
-	const ByteList& inFileIDPart1,
-	bool inEncryptMetaData) {
-	ByteList encryptionKey = algorithm3_2(2, inLength, inUserPassword, inO, inP, inFileIDPart1, inEncryptMetaData);
-
-	return RC4Encode(encryptionKey, mPaddingFiller);
-}
-
-ByteList XCryptionCommon::algorithm3_5(unsigned int inRevision,
+bool XCryptionCommon::AuthenticateOwnerPassword(
+	const ByteList& inMaybeOwnerPassword,
+	unsigned int inRevision,
 	unsigned int inLength,
-	const ByteList& inUserPassword,
-	const ByteList& inO,
-	long long inP,
-	const ByteList& inFileIDPart1,
-	bool inEncryptMetaData) {
-	ByteList encryptionKey = algorithm3_2(inRevision, inLength, inUserPassword, inO, inP, inFileIDPart1, inEncryptMetaData);
-	MD5Generator md5;
-	ByteList hashResult;
-
-	md5.Accumulate(mPaddingFiller);
-	md5.Accumulate(inFileIDPart1);
-	hashResult = md5.ToString();
-
-	hashResult = RC4Encode(encryptionKey, hashResult);
-
-	for (Byte i = 1; i <= 19; ++i) {
-		ByteList newEncryptionKey;
-		ByteList::iterator it = encryptionKey.begin();
-		for (; it != encryptionKey.end(); ++it)
-			newEncryptionKey.push_back((*it) ^ i);
-		hashResult = RC4Encode(newEncryptionKey, hashResult);
-	}
-
-	return add(hashResult, substr(mPaddingFiller, 0, 16));
-}
-
-bool XCryptionCommon::algorithm3_6(unsigned int inRevision,
-	unsigned int inLength,
-	const ByteList& inPassword,
 	const ByteList& inO,
 	long long inP,
 	const ByteList& inFileIDPart1,
 	bool inEncryptMetaData,
 	const ByteList inU) {
-	ByteList hashResult = (inRevision == 2) ?
-		algorithm3_4(inLength, inPassword, inO, inP, inFileIDPart1, inEncryptMetaData) :
-		algorithm3_5(inRevision, inLength, inPassword, inO, inP, inFileIDPart1, inEncryptMetaData);
+	// algorithm 3.7 is intended to authenticate the owner passowrd.
+	// It converts the owner password to encryption key similarly to algorithm 3.3, and then uses that key to decrypt
+	// a "user password" from the O value. now just authenticate the result algorithm 3.6 as one would with a user.
+	// if that "user password" is authenaticated, this means teh owner password is authenticated as well.
 
-	return (inRevision == 2) ? (hashResult == inU) : (substr(hashResult, 0, 16) == substr(inU, 0, 16));
-}
+	// Part 1: Create what is maybe the owner encryption key based on the candidate owner password.
+	ByteList RC4Key = createOwnerEncryptionKey(
+		inMaybeOwnerPassword,
+		inRevision,
+		inLength
+	);
 
-bool XCryptionCommon::algorithm3_7(unsigned int inRevision,
-	unsigned int inLength,
-	const ByteList& inPassword,
-	const ByteList& inO,
-	long long inP,
-	const ByteList& inFileIDPart1,
-	bool inEncryptMetaData,
-	const ByteList inU) {
-	ByteList password32Chars = add(substr(inPassword, 0, 32), (inPassword.size()<32 ? substr(mPaddingFiller, 0, 32 - inPassword.size()) : ByteList()));
-	MD5Generator md5;
-	ByteList hashResult;
+	ByteList decryptedUserPassword;
 
-	md5.Accumulate(password32Chars);
-
-	hashResult = md5.ToString();
-
-	if (inRevision >= 3) {
-		for (int i = 0; i < 50; ++i) {
-			MD5Generator anotherMD5;
-			anotherMD5.Accumulate(hashResult);
-			hashResult = anotherMD5.ToString();
-		}
-	}
-
-	ByteList RC4Key = (inRevision == 2 ? substr(hashResult, 0, 5) : substr(hashResult, 0, inLength));
-
+	// Part 2: Decrypt the "user password" from the O value using the maybe owner encryption key.
+	// This is the "reverse" application of similar steps in algorithm 3.3, which created the "O" value.
 	if (inRevision == 2) {
-		hashResult = RC4Encode(RC4Key, inO);
+		decryptedUserPassword = rc4Encode(RC4Key, inO);
 	}
 	else if (inRevision >= 3) {
-		hashResult = inO;
+		decryptedUserPassword = inO;
 
 		for (int i = 19; i >= 0; --i) {
 			ByteList newEncryptionKey;
@@ -358,20 +350,19 @@ bool XCryptionCommon::algorithm3_7(unsigned int inRevision,
 			for (; it != RC4Key.end(); ++it)
 				newEncryptionKey.push_back((*it) ^ i);
 
-			hashResult = RC4Encode(newEncryptionKey, hashResult);
+			decryptedUserPassword = rc4Encode(newEncryptionKey, decryptedUserPassword);
 		}
 	}
 
-	return algorithm3_6(inRevision,
+	// Part 3: attempt to authenticate the user password, using the decrypted "user password" as the input password.
+	return AuthenticateUserPassword(
+		decryptedUserPassword,
+		inRevision,
 		inLength,
-		hashResult,
 		inO,
 		inP,
 		inFileIDPart1,
 		inEncryptMetaData,
-		inU);
-}
-
-bool XCryptionCommon::IsUsingAES() {
-	return mUsingAES;
+		inU
+	);
 }

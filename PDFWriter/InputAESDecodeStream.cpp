@@ -31,9 +31,24 @@ InputAESDecodeStream::InputAESDecodeStream()
 }
 
 
-InputAESDecodeStream::InputAESDecodeStream(IByteReader* inSourceReader, const ByteList& inKey)
+InputAESDecodeStream::InputAESDecodeStream(
+	IByteReader* inSourceReader, 
+	const ByteList& inKey)
 {
-	Assign(inSourceReader, inKey);
+	mSourceStream = inSourceReader;
+
+	// convert inEncryptionKey to internal rep and init decrypt. length should be something supported by AES (in bytes, so AES-128 is 16, AES-256 is 32 etc.)
+	mKeyLength = inKey.size();
+	mKey = new unsigned char[mKeyLength];
+	ByteList::const_iterator it = inKey.begin();
+	size_t i = 0;
+	for (; it != inKey.end(); ++i, ++it)
+		mKey[i] = *it;
+	mDecrypt.key(mKey, mKeyLength);
+	mIsInit = false; // first read flag. for reading initial IV and first block for decrypting
+	mOutLength = AES_BLOCK_SIZE; // initially, the length is constant AES_BLOCK_SIZE. when the underlying stream uses padding for the final block, this will be reduced by the padding length
+	mOutIndex = mOut + mOutLength; // mOutIndex placed at end of mOut to mark that there's no aviailable decrypted data yet
+	mHitEnd = false;
 }
 
 InputAESDecodeStream::~InputAESDecodeStream(void)
@@ -45,28 +60,9 @@ InputAESDecodeStream::~InputAESDecodeStream(void)
 		delete[] mKey;
 }
 
-
-void InputAESDecodeStream::Assign(IByteReader* inSourceReader, const ByteList& inKey)
-{
-	mSourceStream = inSourceReader;
-
-	// convert inEncryptionKey to internal rep and init decrypt [let's hope its 16...]
-	mKeyLength = inKey.size();
-	mKey = new unsigned char[mKeyLength];
-	ByteList::const_iterator it = inKey.begin();
-	size_t i = 0;
-	for (; it != inKey.end(); ++i, ++it)
-		mKey[i] = *it;
-	mDecrypt.key(mKey, mKeyLength);
-	mIsIvInit = false; // first read flag. still need to read IV
-	mReadBlockSize = AES_BLOCK_SIZE;
-	mOutIndex = mOut + mReadBlockSize;
-	mHitEnd = false;
-}
-
 bool InputAESDecodeStream::NotEnded()
 {
-	return (mSourceStream && mSourceStream->NotEnded()) || !mHitEnd || ((mOutIndex - mOut) < mReadBlockSize);
+	return (mSourceStream && mSourceStream->NotEnded()) || !mHitEnd || ((mOutIndex - mOut) < mOutLength);
 }
 
 LongBufferSizeType InputAESDecodeStream::Read(IOBasicTypes::Byte* inBuffer, LongBufferSizeType inSize)
@@ -75,69 +71,45 @@ LongBufferSizeType InputAESDecodeStream::Read(IOBasicTypes::Byte* inBuffer, Long
 		return 0;
 
 	
-	// if iv not init yet, init now
-	if (!mIsIvInit) {
-		// read iv buffer
+	// first read, this is special case where IV need to be read, followed by an initial block read
+	if (!mIsInit) {
+		mIsInit = true; // let's get the state change out of the way
+
+		// read iv 
 		LongBufferSizeType ivRead = mSourceStream->Read(mIV, AES_BLOCK_SIZE);
 		if (ivRead < AES_BLOCK_SIZE)
 			return 0;
-		// read first buffer
+
+		// read first block for decryption
 		LongBufferSizeType firstBlockLength = mSourceStream->Read(mInNext, AES_BLOCK_SIZE);
 		if (firstBlockLength < AES_BLOCK_SIZE)
 			return 0;
-
-		// decrypt first buffer
-		memcpy(mIn, mInNext, AES_BLOCK_SIZE);
-		if (mDecrypt.cbc_decrypt(mIn, mOut, AES_BLOCK_SIZE, mIV) != EXIT_SUCCESS)
-			return 0;
-		mOutIndex = mOut;
-
-		// read next buffer, to determine if first buffer contains padding
-		LongBufferSizeType secondBlockLength = mSourceStream->Read(mInNext, AES_BLOCK_SIZE);
-		if (secondBlockLength < AES_BLOCK_SIZE) {
-			mHitEnd = true;
-			 // secondBlockLength should be 0. this is the case that first buffer already contains padding (using min for safety)
-			mReadBlockSize = AES_BLOCK_SIZE - std::min<size_t>(mOut[AES_BLOCK_SIZE - 1], AES_BLOCK_SIZE);
-		}
-		else
-			mReadBlockSize = AES_BLOCK_SIZE;
-		mIsIvInit = true;
 	}
 
 
 	IOBasicTypes::LongBufferSizeType left = inSize;
 	IOBasicTypes::LongBufferSizeType remainderRead;
 
-
+	// fill the buffer by reading decrypted data and refilling it by decrypting following blocks from source stream
 	while (left > 0) {
-		remainderRead = std::min<size_t>(left,(mReadBlockSize - (mOutIndex - mOut)));
+		remainderRead = std::min<size_t>(left,(mOutLength - (mOutIndex - mOut)));
 		if (remainderRead > 0) {
-			// fill block with remainder from latest decryption
+			// fill block with what's available in the decrypted output buffer
 			memcpy(inBuffer + inSize - left, mOutIndex, remainderRead);
 			mOutIndex += remainderRead;
 			left -= remainderRead;
 		}
 
 		if (left > 0) {
+			// buffer not full yet, attempt to decrypt from source stream
 			if (mHitEnd) {
 				// that's true EOF...so finish
 				break;
-			}
-			else {
-				// decrypt next block
-				memcpy(mIn, mInNext, AES_BLOCK_SIZE);
-				if (mDecrypt.cbc_decrypt(mIn, mOut, AES_BLOCK_SIZE, mIV) != EXIT_SUCCESS)
+			} else {
+				// otherwise, decrypt next block, break on failure
+				bool decryptSuccess = DecryptNextBlockAndRefillNext();
+				if (!decryptSuccess) {
 					break;
-				mOutIndex = mOut;
-
-				// read next buffer from input stream
-				LongBufferSizeType totalRead = mSourceStream->Read(mInNext, AES_BLOCK_SIZE);
-				if (totalRead < AES_BLOCK_SIZE) { // this means that we got to final block, with padding
-					mHitEnd = true; // should be 0. 
-					// now we know that next block is the final one, and can consider padding (using min for safety)
-					mReadBlockSize = AES_BLOCK_SIZE - std::min<size_t>(mOut[AES_BLOCK_SIZE - 1], AES_BLOCK_SIZE);
-					// Gal: one can find out here that the next block is actually empty...that's not gonna be great for
-					// NotEnded + read of 1 byte....
 				}
 			}
 		}
@@ -145,3 +117,30 @@ LongBufferSizeType InputAESDecodeStream::Read(IOBasicTypes::Byte* inBuffer, Long
 
 	return inSize - left;
 }
+
+bool InputAESDecodeStream::DecryptNextBlockAndRefillNext()
+{
+	// decrypt next block
+	memcpy(mIn, mInNext, AES_BLOCK_SIZE);
+	if (mDecrypt.cbc_decrypt(mIn, mOut, AES_BLOCK_SIZE, mIV) != EXIT_SUCCESS)
+		return false;
+	
+	// reset available output index
+	mOutIndex = mOut;
+	
+	// Read next source buffer into next block.
+	// this is done now to support padding requirements, so that if we hit the end, we can determine how many bytes are avialable
+	// already in the just decrypted mOut based on read padding size
+	LongBufferSizeType totalRead = mSourceStream->Read(mInNext, AES_BLOCK_SIZE);
+	if (totalRead < AES_BLOCK_SIZE) { 
+		// totalRead should be 0 or AES_BLOCK_SIZE. So this means we hit the end of the stream, and the just decrypted block is the final block.
+		mHitEnd = true; 
+
+		// dealing with padding of final block - Determine how much of the decrypted block is actual data by reading the last byte, which should have the padding length.
+		size_t paddingLength = std::min<size_t>(mOut[AES_BLOCK_SIZE - 1], AES_BLOCK_SIZE);
+		mOutLength = AES_BLOCK_SIZE - paddingLength;
+	}	
+
+
+	return true;
+}	

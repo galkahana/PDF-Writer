@@ -1,5 +1,5 @@
 /*
-Source File : InputRC4XcodeStream.cpp
+Source File : OutputAESEncodeStream.cpp
 
 
 Copyright 2016 Gal Kahana PDFWriter
@@ -20,11 +20,11 @@ limitations under the License.
 #include "OutputAESEncodeStream.h"
 #include "MD5Generator.h"
 #include "PDFDate.h"
+#include "aescpp.h"
 
 #include <string.h>
 
 using namespace IOBasicTypes;
-
 
 OutputAESEncodeStream::OutputAESEncodeStream(void)
 {
@@ -42,7 +42,10 @@ OutputAESEncodeStream::~OutputAESEncodeStream(void)
 		delete mTargetStream;
 }
 
-OutputAESEncodeStream::OutputAESEncodeStream(IByteWriterWithPosition* inTargetStream, const ByteList& inEncryptionKey, bool inOwnsStream) 
+OutputAESEncodeStream::OutputAESEncodeStream(
+	IByteWriterWithPosition* inTargetStream, 
+	const ByteList& inEncryptionKey, 
+	bool inOwnsStream) 
 {
 	mTargetStream = inTargetStream;
 	mOwnsStream = inOwnsStream;
@@ -52,7 +55,7 @@ OutputAESEncodeStream::OutputAESEncodeStream(IByteWriterWithPosition* inTargetSt
 
 	mInIndex = mIn;
 
-	// convert inEncryptionKey to internal rep and init encrypt [let's hope its 16...]
+	// convert inEncryptionKey to internal rep and init encrypt. length should be something supported by AES (in bytes, so AES-128 is 16, AES-256 is 32 etc.)
 	mEncryptionKey = new unsigned char[inEncryptionKey.size()];
 	mEncryptionKeyLength = inEncryptionKey.size();
 	ByteList::const_iterator it = inEncryptionKey.begin();
@@ -80,15 +83,14 @@ LongBufferSizeType OutputAESEncodeStream::Write(const IOBasicTypes::Byte* inBuff
 
 	// write IV if didn't write yet
 	if (!mWroteIV) {
-		// create IV and write it to output file [use existing PDFDate]
+		// random IV using MD5 of current time
 		MD5Generator md5;
 		// encode current time
 		PDFDate currentTime;
 		currentTime.SetToCurrentTime();
 		md5.Accumulate(currentTime.ToString());
 		memcpy(mIV, (const unsigned char*)md5.ToStringAsString().c_str(), AES_BLOCK_SIZE); // md5 should give us the desired 16 bytes
-
-																						   // now write mIV to the output stream
+		// write IV to output stream
 		mTargetStream->Write(mIV, AES_BLOCK_SIZE);
 		mWroteIV = true;
 	}
@@ -130,7 +132,7 @@ void OutputAESEncodeStream::Flush() {
 		mInIndex = mIn;
 	}
 
-	// (otherwise or in addition) finish encoding by completing a full block with the block remainder size. if the remainder is AES_BLOCK_SIZE cause block is empty, fill with AES_BLOCK_SIZE
+	// fill the last block with padding bytes. if the last block was full and padding is required still, fill it with the block size (AES_BLOCK_SIZE) as padding bytes
 	unsigned char remainder = (unsigned char)(AES_BLOCK_SIZE - (mInIndex - mIn));
 	for (size_t i = 0; i < remainder; ++i)
 		mInIndex[i] = remainder;

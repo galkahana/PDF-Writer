@@ -21,7 +21,7 @@ limitations under the License.
 #pragma once
 
 #include "EStatusCode.h"
-#include "XCryptionCommon.h"
+#include "XCryptor.h"
 
 #include <string>
 
@@ -38,7 +38,8 @@ public:
 
 
 	/*
-		Setup will fail for case of bad password, for decryption that can be handled.
+		Setup will fail for unsupported decryption options (will not fail for failing to authenticate!).
+		Checks password so later can ask DidFailPasswordVerification and DidSucceedOwnerPasswordVerification to verify authentication. 
 	*/
 	PDFHummus::EStatusCode Setup(PDFParser* inParser,const std::string& inPassword);
 
@@ -76,11 +77,12 @@ public:
 	const ByteList& GetFileIDPart1() const;
 	const ByteList& GetO() const;
 	const ByteList& GetU() const;
-	const ByteList& GetInitialEncryptionKey() const;
-	const StringToXCryptionCommonMap& GetXcrypts() const;
-	XCryptionCommon* GetStreamXcrypt() const;
-	XCryptionCommon* GetStringXcrypt() const;
-	XCryptionCommon* GetAuthenticationXcrypt() const;
+	const ByteList& GetOE() const;
+	const ByteList& GetUE() const;
+	const ByteList& GetPerms() const;
+	const StringToXCryptorMap& GetXcrypts() const;
+	XCryptor* GetStreamXcrypt() const;
+	XCryptor* GetStringXcrypt() const;
 
 	// Reset after or before usage
 	void Reset();
@@ -102,13 +104,11 @@ private:
 	PDFParser* mParser;
 
 	// named xcrypts, for V4
-	StringToXCryptionCommonMap mXcrypts; 
+	StringToXCryptorMap mXcrypts; 
 	// xcrypt to use for streams
-	XCryptionCommon* mXcryptStreams;
+	XCryptor* mXcryptStreams;
 	// xcrypt to use for strings
-	XCryptionCommon* mXcryptStrings;
-	// xcrypt to use for password authentication
-	XCryptionCommon* mXcryptAuthentication;
+	XCryptor* mXcryptStrings;
 
 	bool mIsEncrypted;
 	bool mSupportsDecryption;
@@ -119,7 +119,7 @@ private:
 	unsigned int mLength; // mLength is in bytes!
 	
 	IByteReader* CreateDecryptionReader(IByteReader* inSourceStream,const ByteList& inEncryptionKey, bool inUsingAES);
-	XCryptionCommon* GetCryptForStream(PDFStreamInput* inStream);
+	XCryptor* GetCryptForStream(PDFStreamInput* inStream);
 
 	// Standard filter specific
 	bool mFailedPasswordVerification;
@@ -128,6 +128,9 @@ private:
 	unsigned int mRevision;
 	ByteList mO;
 	ByteList mU;
+	ByteList mOE;
+	ByteList mUE;
+	ByteList mPerms;
 	long long mP;
 	bool mEncryptMetaData;
 	ByteList mFileIDPart1;

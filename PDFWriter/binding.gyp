@@ -5,6 +5,9 @@
             'type': 'static_library',
             'cflags!': [ '-fno-exceptions' ],
             'cflags_cc!': [ '-fno-exceptions' ],
+            'defines': [
+               'PDFHUMMUS_NO_OPENSSL=1'
+            ],
             'conditions': [
                ['OS=="mac"', {
                   'xcode_settings': {
@@ -44,6 +47,7 @@
                'ANSIFontWriter.cpp',
                'Ascii7Encoding.cpp',
                'ArrayOfInputStreamsStream.cpp',
+               'ByteList.cpp',
                'CatalogInformation.cpp',
                'CFFANSIFontWriter.cpp',
                'CFFDescendentFontWriter.cpp',
@@ -193,6 +197,8 @@
                'WrittenFontCFF.cpp',
                'WrittenFontTrueType.cpp',
                'XCryptionCommon.cpp',
+               'XCryptionCommon2_0.cpp',
+               'XCryptor.cpp',
                'XObjectContentContext.cpp',
                'AbstractContentContext.h',
                'AbstractWrittenFont.h',
@@ -202,6 +208,7 @@
                'ArrayOfInputStreamsStream.h',
                'BetweenIncluding.h',
                'BoxingBase.h',
+               'ByteList.h',
                'CatalogInformation.h',
                'CFFANSIFontWriter.h',
                'CFFDescendentFontWriter.h',
@@ -302,7 +309,7 @@
                'ObjectsContextExtenderAdapter.h',
                'OpenTypeFileInput.h',
                'OpenTypePrimitiveReader.h',
-               'OutputAESEncodeStream.h',
+               'OutputAESCEncodeStream.h',
                'OutputBufferedStream.h',
                'OutputFile.h',
                'OutputFileStream.h',
@@ -398,6 +405,8 @@
                'WrittenFontRepresentation.h',
                'WrittenFontTrueType.h',
                'XCryptionCommon.h',
+               'XCryptionCommon2_0.h',
+               'XCryptor.h',
                'XObjectContentContext.h'
             ]
         }

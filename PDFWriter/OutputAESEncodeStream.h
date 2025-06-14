@@ -1,5 +1,5 @@
 /*
-Source File : OutputRC4XcodeStream.h
+Source File : OutputAESEncodeStream.h
 
 
 Copyright 2016 Gal Kahana PDFWriter
@@ -33,7 +33,10 @@ public:
 	OutputAESEncodeStream(void);
 	virtual ~OutputAESEncodeStream(void);
 
-	OutputAESEncodeStream(IByteWriterWithPosition* inTargetStream, const ByteList& inEncryptionKey, bool inOwnsStream);
+	OutputAESEncodeStream(
+		IByteWriterWithPosition* inTargetStream, 
+		const ByteList& inEncryptionKey, 
+		bool inOwnsStream); 
 
 	virtual IOBasicTypes::LongBufferSizeType Write(const IOBasicTypes::Byte* inBuffer, IOBasicTypes::LongBufferSizeType inSize);
 	virtual IOBasicTypes::LongFilePositionType GetCurrentPosition();
@@ -43,7 +46,6 @@ private:
 	IByteWriterWithPosition* mTargetStream;
 
 	bool mWroteIV;
-
 
 	// inEncryptionKey in array form, for aes
 	unsigned char* mEncryptionKey;

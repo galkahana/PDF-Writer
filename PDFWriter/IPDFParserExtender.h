@@ -6,6 +6,7 @@ class IByteReader;
 class PDFName;
 class PDFDictionary;
 class PDFStreamInput;
+class PDFObject;
 
 
 class IPDFParserExtender

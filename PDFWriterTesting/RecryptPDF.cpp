@@ -57,6 +57,22 @@ int RecryptPDF(int argc, char* argv[])
 			break;
 		}
 
+#ifndef PDFHUMMUS_NO_OPENSSL
+		// same but for a PDF2.0 fellow
+		status = PDFWriter::RecryptPDF(
+			BuildRelativeInputPath(argv,"PDFWithPassword20.pdf"),
+			"user",
+			BuildRelativeOutputPath(argv,"RecryptPDFWithPasswordToNothingPDF20.pdf"),
+			LogConfiguration::DefaultLogConfiguration(),
+			PDFCreationSettings(true, true),
+			ePDFVersion20);
+		if (status != PDFHummus::eSuccess)
+		{
+			cout << "failed to decrypt PDF2.0\n";
+			break;
+		}			
+#endif
+
 		// recrypt an encrypted document with new password
 		status = PDFWriter::RecryptPDF(
 			BuildRelativeInputPath(argv,"PDFWithPassword.pdf"),
@@ -69,6 +85,22 @@ int RecryptPDF(int argc, char* argv[])
 			cout << "failed to encrypt PDF with new password PDF\n";
 			break;
 		}
+
+#ifndef PDFHUMMUS_NO_OPENSSL
+		// again, but for a PDF2.0 fellow
+		status = PDFWriter::RecryptPDF(
+			BuildRelativeInputPath(argv,"PDFWithPassword20.pdf"),
+			"user",
+			BuildRelativeOutputPath(argv,"RecryptPDFWithPasswordToNewPasswordPDF20.pdf"),
+			LogConfiguration::DefaultLogConfiguration(),
+			PDFCreationSettings(true, true, EncryptionOptions("user1", 4, "owner1"))
+		);
+		if (status != PDFHummus::eSuccess)
+		{
+			cout << "failed to encrypt PDF2.0 with new password PDF\n";
+			break;
+		}
+#endif
 
 		// recrypt a plain to document to one with password
 		status = PDFWriter::RecryptPDF(

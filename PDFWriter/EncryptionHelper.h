@@ -21,7 +21,7 @@ limitations under the License.
 #pragma once
 
 #include "EStatusCode.h"
-#include "XCryptionCommon.h"
+#include "XCryptor.h"
 
 #include <string>
 
@@ -39,10 +39,10 @@ public:
 	/*
 		Initial step. starts (or not) encryption. note that you need file ID here, so you need to compute it before calling
 		this method.
-		will return status ok always. if you want to know whether ecnryption is actually supported for this input, call SupportsEncryption later.
+		if you want to know whether ecnryption is actually supported for this input, call SupportsEncryption later.
 		No need to call this setup prior to creating the first object. so you can delay till you are ready to create the file id.
 	*/
-	PDFHummus::EStatusCode Setup(
+	void Setup(
 		bool inShouldEncrypt,
 		double inPDFLevel,
 		const std::string& inUserPassword,
@@ -54,7 +54,7 @@ public:
 	// short one for setting up no ecnryption
 	void SetupNoEncryption();
 	// Setup with existing decryption helper. This can be used to setup encryption with another PDF existing setup, or in modified PDF scenarios
-	PDFHummus::EStatusCode Setup(const DecryptionHelper& inDecryptionSource);
+	void Setup(const DecryptionHelper& inDecryptionSource);
 
 	/*
 		SupportsEncryption will respond true, if the encryption requested is supported. this includes true on the case that encryption was not requested
@@ -100,13 +100,11 @@ public:
 
 private:
 	// named xcrypts, for V4
-	StringToXCryptionCommonMap mXcrypts;
+	StringToXCryptorMap mXcrypts;
 	// xcrypt to use for streams
-	XCryptionCommon* mXcryptStreams;
+	XCryptor* mXcryptStreams;
 	// xcrypt to use for strings
-	XCryptionCommon* mXcryptStrings;
-	// xcrypt to use for password authentication
-	XCryptionCommon* mXcryptAuthentication;
+	XCryptor* mXcryptStrings;
 
 
 	bool mIsDocumentEncrypted;
@@ -128,4 +126,8 @@ private:
 	long long mP;
 	bool mEncryptMetaData;
 	ByteList mFileIDPart1;
+	// PDF2.0
+	ByteList mOE;
+	ByteList mUE;
+	ByteList mPerms;
 };

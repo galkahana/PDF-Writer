@@ -8,6 +8,7 @@ AbstractWrittenFont.cpp
 ANSIFontWriter.cpp
 Ascii7Encoding.cpp
 ArrayOfInputStreamsStream.cpp
+ByteList.cpp
 CatalogInformation.cpp
 CFFANSIFontWriter.cpp
 CFFDescendentFontWriter.cpp
@@ -157,6 +158,8 @@ WinAnsiEncoding.cpp
 WrittenFontCFF.cpp
 WrittenFontTrueType.cpp
 XCryptionCommon.cpp
+XCryptionCommon2_0.cpp
+XCryptor.cpp
 XObjectContentContext.cpp
 
 #headers
@@ -168,6 +171,7 @@ Ascii7Encoding.h
 ArrayOfInputStreamsStream.h
 BetweenIncluding.h
 BoxingBase.h
+ByteList.h
 CatalogInformation.h
 CFFANSIFontWriter.h
 CFFDescendentFontWriter.h
@@ -364,6 +368,8 @@ WrittenFontCFF.h
 WrittenFontRepresentation.h
 WrittenFontTrueType.h
 XCryptionCommon.h
+XCryptionCommon2_0.h
+XCryptor.h
 XObjectContentContext.h
 )
 
@@ -424,6 +430,14 @@ else(PDFHUMMUS_NO_PNG)
         target_link_libraries(PDFWriter PDFHummus::LibPng)
     endif(USING_UNBUNDLED_PNG)
 endif(PDFHUMMUS_NO_PNG)
+
+
+# openssl
+if(PDFHUMMUS_NO_OPENSSL)
+    target_compile_definitions(PDFWriter PUBLIC PDFHUMMUS_NO_OPENSSL=1)    
+else(PDFHUMMUS_NO_OPENSSL)
+    target_link_libraries(PDFWriter OpenSSL::Crypto)
+endif(PDFHUMMUS_NO_OPENSSL)
 
 target_include_directories(PDFWriter
     INTERFACE
@@ -774,6 +788,8 @@ SimpleStringTokenizer.h
 )
 
 source_group("XCryption" FILES
+ByteList.cpp
+ByteList.h
 DecryptionHelper.cpp
 DecryptionHelper.h
 EncryptionHelper.cpp
@@ -782,6 +798,10 @@ EncryptionOptions.cpp
 EncryptionOptions.h
 XCryptionCommon.cpp
 XCryptionCommon.h
+XCryptionCommon2_0.cpp
+XCryptionCommon2_0.h
+XCryptor.cpp
+XCryptor.h
 )
 
 source_group("State Serialization" FILES

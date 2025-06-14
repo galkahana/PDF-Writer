@@ -22,6 +22,7 @@
 #include "PDFPage.h"
 #include "PDFRectangle.h"
 #include "PageContentContext.h"
+#include "BoxingBase.h"
 
 #include <iostream>
 
@@ -30,18 +31,19 @@
 using namespace std;
 using namespace PDFHummus;
 
-static EStatusCode RunTest(char* argv[], bool inUseAES)
+static EStatusCode RunTest(char* argv[], EPDFVersion pdfVersion)
 {
 	PDFWriter pdfWriter;
-	LogConfiguration logConfiguration(true, true, BuildRelativeOutputPath(argv, inUseAES ? "PDFWithPasswordAESLog.txt":"PDFWithPasswordRC4Log.txt"));
+	string pdfFileName = string("PDFWithPassword") + Int(pdfVersion).ToString();
+	LogConfiguration logConfiguration(true, true, BuildRelativeOutputPath(argv, pdfFileName + ".txt"));
 	EStatusCode status;
 	PDFPage* page = NULL;
 
 	do
 	{
 		status = pdfWriter.StartPDF(
-			BuildRelativeOutputPath(argv, inUseAES ?  "PDFWithPasswordAES.pdf" : "PDFWithPasswordRC4.pdf"),
-			inUseAES ? ePDFVersion16 : ePDFVersion14,
+			BuildRelativeOutputPath(argv,pdfFileName + ".pdf"),
+			pdfVersion,
 			logConfiguration,
 			PDFCreationSettings(true, true, EncryptionOptions("user", 4, "owner"))); // 4 should translate to -3900 in actual PDF
 		if (status != PDFHummus::eSuccess)
@@ -105,18 +107,25 @@ int PDFWithPassword(int argc, char* argv[])
 
 	do
 	{
-		status = RunTest(argv, false);
+		status = RunTest(argv, ePDFVersion14);
 		if (status != eSuccess) {
 			cout << "failed to run RC4 test\n";
 			break;
 		}
 
-		status = RunTest(argv, true);
+		status = RunTest(argv, ePDFVersion16);
 		if (status != eSuccess) {
 			cout << "failed to run AES test\n";
 			break;
 		}
 
+#ifndef PDFHUMMUS_NO_OPENSSL
+		status = RunTest(argv, ePDFVersion20);
+		if (status != eSuccess) {
+			cout << "failed to run PDF2.0 test\n";
+			break;
+		}		
+#endif
 	}while(false);
 
 	return status == eSuccess ? 0:1;

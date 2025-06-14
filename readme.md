@@ -21,9 +21,12 @@ For documentation about how to use the library API you should head for the Wiki 
 # Short tour of the project
 
 There are 8 folders to this project:
-- **FreeType, LibAesgm, LibJpeg, LibPng, LibTiff, Zlib**: 6 libraries that are dependencies to PDFWriter. They are bundled here for convenience. You don't have to use them to compile PDFWriter, but rather use what versions you have installed on your setup.
+- **FreeType, LibAesgm, LibJpeg, LibPng, LibTiff, Zlib**: 6 libraries that are dependencies to PDFWriter. They are bundled here for convenience. You don't have to use them to compile PDFWriter, but rather use what versions you have installed on your setup. 
 - **PDFWriter**: main folder, includes the library implementation
 - **PDFWriterTesting**: test folder, includes test source code that's used with cmake testing application - ctest.
+
+# Pre requisits
+- **OpenSSL** - External installation of openssl is required for this library to support PDF2.0 encryption. It is not provided with the codebase as a bundled option. If you do not wish to require this dependency set the PDFHUMMUS_NO_OPENSSL compile flag/cmake option to "1".
 
 # Building, Installing and testing the project with CMake
 
@@ -46,6 +49,7 @@ The project defines some optional flags to allow you to control some aspects of 
 - `PDFHUMMUS_NO_DCT` - defines whether to exclude DCT functionality (essentially - not include LibJpeg) from the library. defaults to `FALSE`. when setting `TRUE` the library will not require the existance of LibJpeg however will not be able to decode DCT streams from PDF files. (note that this has no baring on the ability to include JPEG images. That ability does not require LibJpeg given the innate ability of PDF files to include DCT encoded streams).
 - `PDFHUMMUS_NO_TIFF` - defines whether to exclude TIFF functionality (essentially - not include LibTiff) from the library. defaults to `FALSE`. when setting `TRUE` the library will not require the existance of LibTiff however will not be able to embed TIFF images.
 - `PDFHuMMUS_NO_PNG` -  defines whether to exclude PNG functionality (essentially - not include LibPng) from the library. defaults to `FALSE`. when setting `TRUE` the library will not require the existance of LibPng however will not be able to embed PNG images.
+- `PDFHUMMUS_NO_OPENSSL` - defines whether to excplude OpenSSL dependent functionality, by not including OpenSSL. This means that PDF2.0 encryption and decryption will not be functional. defaults to `FALSE`. when setting to `TRUE` the library will not require openssl, however PDF 2.0 with encryption cannot be created nor parsed.
 - `USE_BUNDLED` - defines whether to use bundled dependencies when building the project or use system libraries. defaults to `TRUE`. when defined as `FALSE`, the project configuration will look for installed versions of	LibJpeg, Zlib, LibTiff, FreeType, LibAesgm, LibPng and use them instead of the bundled ones (i.e. those contained in the project). Note that for optional dependencies - LibJpeg, LibTiff, LibPng - if not installed the coniguration will succeed but will automatically set the optional building flags (the 3 just described) according to the libraries avialability. As for required dependencies - FreeType, LibAesgm, Zlib - the configuration will fail if those dependencies are not found. see `USE_UNBUNDLED_FALLBACK_BUNDLED` for an alternative method to deal with dependencies not being found.
 - `USE_UNBUNDLED_FALLBACK_BUNDLED` - Defines an alternative behavior when using `USE_BUNDLED=OFF` and a certain dependency is not installed on the system. If set to `TRUE` then for a dependency that's not found it will fallback on the bundled version of this dependency. This is essentially attempting to find installed library and if not avialable use a bundled one to ensure that the build will succeed.
 - `BUILD_FUZZING_HARNESS` - Enable a fuzz testing target for PDFParser. This makes it possible to runn fuzz tests and debug potential vulnarbilities. read more about this in [here](https://github.com/galkahana/PDF-Writer/wiki/Fuzz-Testing-Of-PDFParser). By default it's `OFF`, set it up with `ON`.
@@ -164,6 +168,8 @@ Note that when installing PDFHummus with the bundled libraries built (this is th
 
 You can use those targets in additon or instead of using PDFWriter if this makes sense to your project (like if you are extracting images, having LibJpeg or LibPng around can be useful).
 
+Important: The library is dependent on OpenSSL. The is no bundling of OpenSSL. you will need to have it preinstalled for building to complete unless you turn off PDF 2.0 encryption/decryption support with `PDFHUMMUS_NO_OPENSSL`.
+
 # Packaging PDFHummus for installing someplace else
 
 The project contains definitions for `cpack`, cmake packaging mechanism. It might be useful for when you want to build PDFHummus and then install it someplace else.
@@ -201,5 +207,5 @@ I wrote a post about how to compile and use the library for the iPhone and iPad 
 
 It should be quite simple to construct project files in the various building environments (say VS and Xcode) if you want them. Here are some pointers:
 - All the PDFWriter sources are in PDFWriter folder (you can get it by downloading the git project or from the Downloads section).
-- The library is dependent on the dlls/shared libraries of Zlib, LibTiff, LibJpeg, LibPng and FreeType. When linking - make sure they are available.
+- The library is dependent on the dlls/shared libraries of Zlib, LibTiff, LibJpeg, LibPng, FreeType and OpenSSL. When linking - make sure they are available.
 - The library should support well both 32 bit and 64 bit environments. It's using standard C++ libraries.
