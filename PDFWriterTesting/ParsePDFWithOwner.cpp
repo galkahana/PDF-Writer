@@ -26,7 +26,7 @@ int ParsePDFWithOwner(int argc, char* argv[])
 			break;
 		}
 
-		status = parser.StartPDFParsing(pdfFile.GetInputStream(), PDFParsingOptions("000000"));
+		status = parser.StartPDFParsing(pdfFile.GetInputStream(), PDFParsingOptions("111111"));
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"unable to parse input file";
