@@ -70,7 +70,21 @@ int RecryptPDF(int argc, char* argv[])
 		{
 			cout << "failed to decrypt PDF2.0\n";
 			break;
-		}			
+		}		
+		
+		// again with the owner password
+		status = PDFWriter::RecryptPDF(
+			BuildRelativeInputPath(argv,"PDFWithPassword20.pdf"),
+			"owner",
+			BuildRelativeOutputPath(argv,"RecryptPDFWithPasswordToNothingOwnerPDF20.pdf"),
+			LogConfiguration::DefaultLogConfiguration(),
+			PDFCreationSettings(true, true),
+			ePDFVersion20);
+		if (status != PDFHummus::eSuccess)
+		{
+			cout << "failed to decrypt PDF2.0 with owner password\n";
+			break;
+		}				
 #endif
 
 		// recrypt an encrypted document with new password

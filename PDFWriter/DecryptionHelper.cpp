@@ -150,6 +150,9 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 			mRevision = (unsigned int)revisionHelper.GetAsInteger();
 		}
 
+		size_t ouLength = mRevision <= 4 ? 32 : 48; // R <= 4 is 32 bytes, R >= 5 is 48 bytes
+		size_t oEuELength = 32;
+
 		RefCountPtr<PDFObject> o(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "O"));
 		if (!o) {
 			break;
@@ -157,6 +160,11 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 		else {
 			ParsedPrimitiveHelper oHelper(o.GetPtr());
 			mO = stringToByteList(oHelper.ToString());
+			if(mO.size() > ouLength) {
+				// some wiseasses might use longer value then expected and this causes trouble with auth. trim.
+				mO = substr(mO, 0, ouLength);
+			}
+
 		}
 
 		RefCountPtr<PDFObject> u(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "U"));
@@ -166,6 +174,10 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 		else {
 			ParsedPrimitiveHelper uHelper(u.GetPtr());
 			mU = stringToByteList(uHelper.ToString());
+			if(mU.size() > ouLength) {
+				mU = substr(mU, 0, ouLength);
+			}
+
 		}
 
 		RefCountPtr<PDFObject> oE(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "OE"));
@@ -178,6 +190,9 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 		else {
 			ParsedPrimitiveHelper oEHelper(oE.GetPtr());
 			mOE = stringToByteList(oEHelper.ToString());
+			if(mOE.size() > oEuELength) {
+				mOE = substr(mOE, 0, oEuELength);
+			}
 		}	
 
 		RefCountPtr<PDFObject> uE(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "UE"));
@@ -189,6 +204,9 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 		} else {
 			ParsedPrimitiveHelper uEHelper(uE.GetPtr());
 			mUE = stringToByteList(uEHelper.ToString());
+			if(mUE.size() > oEuELength) {
+				mUE = substr(mUE, 0, oEuELength);
+			}
 		}
 
 		RefCountPtr<PDFObject> perms(inParser->QueryDictionaryObject(encryptionDictionary.GetPtr(), "Perms"));
