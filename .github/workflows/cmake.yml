@@ -18,7 +18,7 @@ jobs:
           os: [ubuntu-latest, macos-latest, windows-latest]
           include:
             - os: macos-latest
-              extra_cmake_config_flags: -DCMAKE_OSX_ARCHITECTURES="arm64" # was univeral, now just arm till i bundle open ssl
+              extra_cmake_config_flags: -DCMAKE_OSX_ARCHITECTURES="arm64" # was univeral, now just arm, because of openssl dependency (which is not universal on the CI mac)
             - os: windows-latest
               extra_cmake_config_flags: -DCMAKE_GENERATOR_PLATFORM=x64 # make sure it's x64
 

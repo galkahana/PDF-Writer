@@ -21,9 +21,12 @@ For documentation about how to use the library API you should head for the Wiki 
 # Short tour of the project
 
 There are 8 folders to this project:
-- **FreeType, LibAesgm, LibJpeg, LibPng, LibTiff, Zlib**: 6 libraries that are dependencies to PDFWriter. They are bundled here for convenience. You don't have to use them to compile PDFWriter, but rather use what versions you have installed on your setup.
+- **FreeType, LibAesgm, LibJpeg, LibPng, LibTiff, Zlib**: 6 libraries that are dependencies to PDFWriter. They are bundled here for convenience. You don't have to use them to compile PDFWriter, but rather use what versions you have installed on your setup. 
 - **PDFWriter**: main folder, includes the library implementation
 - **PDFWriterTesting**: test folder, includes test source code that's used with cmake testing application - ctest.
+
+# Pre requisits
+- **OpenSSL** - External installation of openssl is required for this library to support PDF2.0 encryption. It is not provided with the codebase as a bundled option. If you do not wish to require this dependency set the PDFHUMMUS_NO_OPENSSL compile flag/cmake option to "1".
 
 # Building, Installing and testing the project with CMake
 
@@ -165,6 +168,8 @@ Note that when installing PDFHummus with the bundled libraries built (this is th
 
 You can use those targets in additon or instead of using PDFWriter if this makes sense to your project (like if you are extracting images, having LibJpeg or LibPng around can be useful).
 
+Important: The library is dependent on OpenSSL. The is no bundling of OpenSSL. you will need to have it preinstalled for building to complete unless you turn off PDF 2.0 encryption/decryption support with `PDFHUMMUS_NO_OPENSSL`.
+
 # Packaging PDFHummus for installing someplace else
 
 The project contains definitions for `cpack`, cmake packaging mechanism. It might be useful for when you want to build PDFHummus and then install it someplace else.
@@ -202,5 +207,5 @@ I wrote a post about how to compile and use the library for the iPhone and iPad 
 
 It should be quite simple to construct project files in the various building environments (say VS and Xcode) if you want them. Here are some pointers:
 - All the PDFWriter sources are in PDFWriter folder (you can get it by downloading the git project or from the Downloads section).
-- The library is dependent on the dlls/shared libraries of Zlib, LibTiff, LibJpeg, LibPng and FreeType. When linking - make sure they are available.
+- The library is dependent on the dlls/shared libraries of Zlib, LibTiff, LibJpeg, LibPng, FreeType and OpenSSL. When linking - make sure they are available.
 - The library should support well both 32 bit and 64 bit environments. It's using standard C++ libraries.
