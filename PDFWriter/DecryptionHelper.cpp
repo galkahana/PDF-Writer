@@ -128,6 +128,12 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 		}
 
 		// supporting versions 1, 2, 4 and 5
+#ifdef PDFHUMMUS_NO_OPENSSL		
+		if (mV == 5) {
+			TRACE_LOG("DecryptionHelper::Setup, V value of 5 is only supported with OpenSSL installed. Please install OpenSSL and make sure PDFHUMMUS_NO_OPENSSL is not defined and try again.");
+			break;
+		}
+#endif
 		if (mV != 1 && mV != 2 && mV != 4 && mV != 5) {
 			TRACE_LOG1("DecryptionHelper::Setup, Only 1, 2, 4 and 5 are supported values for V. Unsupported V value encountered - %d", mV);
 			break;
@@ -247,7 +253,8 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 				MapIterator<PDFNameToPDFObjectMap>  cryptFiltersIt = cryptFilters->GetIterator();
 
 				// read crypt filters
-				while (cryptFiltersIt.MoveNext())
+				EStatusCode status = eSuccess;
+				while (cryptFiltersIt.MoveNext() && status == eSuccess)
 				{
 					PDFObjectCastPtr<PDFDictionary> cryptFilter;
 					// A little caveat of those smart ptrs need to be handled here
@@ -268,6 +275,11 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 						// retrieve encryption key, based on this crypt filter params
 						ByteList fileEncryptionKey;
 						if(xCryptorAlgo == eAESV3) {
+#ifdef PDFHUMMUS_NO_OPENSSL		
+							TRACE_LOG("DecryptionHelper::Setup, AESV3 is only supported with OpenSSL installed. Please install OpenSSL and make sure PDFHUMMUS_NO_OPENSSL is not defined and try again.");
+							status = eFailure;
+							break;
+#else
 							XCryptionCommon2_0 xcryption2_0;
 							fileEncryptionKey = xcryption2_0.RetrieveFileEncryptionKey(
 								password,
@@ -275,6 +287,7 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 								mU,
 								mOE,
 								mUE);
+#endif
 						} else {
 							XCryptionCommon xcryption;
 							fileEncryptionKey = xcryption.RetrieveFileEncryptionKey(
@@ -292,6 +305,10 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 						XCryptor* encryption = new XCryptor(xCryptorAlgo, fileEncryptionKey);
 						mXcrypts.insert(StringToXCryptorMap::value_type(cryptFiltersIt.GetKey()->GetValue(), encryption));
 					}
+				}
+				if(status != eSuccess) {
+					TRACE_LOG("DecryptionHelper::Setup, Failed to read crypt filters from encryption dictionary. breaking");
+					break;
 				}
 				
 
@@ -534,11 +551,16 @@ IByteReader* DecryptionHelper::CreateDecryptionReader(IByteReader* inSourceStrea
 
 bool DecryptionHelper::AuthenticateUserPassword(const ByteList& inPassword) {
 	if(mV >= 5) {
+#ifdef PDFHUMMUS_NO_OPENSSL
+		TRACE_LOG("DecryptionHelper::AuthenticateUserPassword, V value of 5 is only supported with OpenSSL installed. Please install OpenSSL and make sure PDFHUMMUS_NO_OPENSSL is not defined and try again.");
+		return false;
+#else
 		XCryptionCommon2_0 xcryption2_0;
 		return xcryption2_0.AuthenticateUserPassword(
 						inPassword,
 						mU
 					);
+#endif
 	} else {
 		XCryptionCommon xcryption;
 		return xcryption.AuthenticateUserPassword(
@@ -556,12 +578,17 @@ bool DecryptionHelper::AuthenticateUserPassword(const ByteList& inPassword) {
 
 bool DecryptionHelper::AuthenticateOwnerPassword(const ByteList& inPassword) {
 	if(mV >= 5) {
+#ifdef PDFHUMMUS_NO_OPENSSL
+		TRACE_LOG("DecryptionHelper:AuthenticateOwnerPassword, V value of 5 is only supported with OpenSSL installed. Please install OpenSSL and make sure PDFHUMMUS_NO_OPENSSL is not defined and try again.");
+		return false;
+#else
 		XCryptionCommon2_0 xcryption2_0;
 		return xcryption2_0.AuthenticateOwnerPassword(
 						inPassword,
 						mO,
 						mU
 					);
+#endif
 	} else {
 		XCryptionCommon xcryption;
 		return xcryption.AuthenticateOwnerPassword(

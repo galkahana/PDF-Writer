@@ -432,9 +432,12 @@ else(PDFHUMMUS_NO_PNG)
 endif(PDFHUMMUS_NO_PNG)
 
 
-# openssl is never bundled, always fetch/incorprate externally available package
-target_link_libraries(PDFWriter OpenSSL::Crypto)
-
+# openssl
+if(PDFHUMMUS_NO_OPENSSL)
+    target_compile_definitions(PDFWriter PUBLIC PDFHUMMUS_NO_OPENSSL=1)    
+else(PDFHUMMUS_NO_OPENSSL)
+    target_link_libraries(PDFWriter OpenSSL::Crypto)
+endif(PDFHUMMUS_NO_OPENSSL)
 
 target_include_directories(PDFWriter
     INTERFACE

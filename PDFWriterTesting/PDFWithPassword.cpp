@@ -119,12 +119,13 @@ int PDFWithPassword(int argc, char* argv[])
 			break;
 		}
 
+#ifndef PDFHUMMUS_NO_OPENSSL
 		status = RunTest(argv, ePDFVersion20);
 		if (status != eSuccess) {
 			cout << "failed to run PDF2.0 test\n";
 			break;
 		}		
-
+#endif
 	}while(false);
 
 	return status == eSuccess ? 0:1;

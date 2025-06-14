@@ -36,7 +36,7 @@ limitations under the License.
 #include "PDFBoolean.h"
 #include "XCryptionCommon.h"
 #include "XCryptionCommon2_0.h"
-
+#include "Trace.h"
 #include <stdint.h>
 
 using namespace PDFHummus;
@@ -94,11 +94,18 @@ void EncryptionHelper::Setup(
 	// Determine mV (encryption algorithm version),  mRevision (standard security handler revision), and mLength (encryption key length) based on PDF level, using the strongest encryption that the PDF version allows
 	if (inPDFLevel >= 1.4) {
 		if (inPDFLevel >= 2.0) {
+#ifdef PDFHUMMUS_NO_OPENSSL
+			// PDF 2.0 is not supported without OpenSSL
+			TRACE_LOG("EncryptionHelper::Setup - PDF 2.0 encryption is not supported without open ssl. either install OpenSSL or use a lower PDF level. aborting.");
+			return;
+#else		
 			mLength = 32;
 			mV = 5;
 			mRevision = 6;
+#endif			
 		}
-		else {
+		else 
+		{
 			mLength = 16;
 			if (inPDFLevel >= 1.6) {
 				mV = 4;
@@ -129,6 +136,7 @@ void EncryptionHelper::Setup(
 	ByteList fileEncryptionKey;
 	if(mV >= 5) {
 		// PDF 2.0 algos
+#ifndef PDFHUMMUS_NO_OPENSSL
 		XCryptionCommon2_0 xcryptionCommon2_0;
 		fileEncryptionKey = xcryptionCommon2_0.GenerateFileEncryptionKey();
 		ByteListPair uAndUE = xcryptionCommon2_0.CreateUandUEValues(userPassword, fileEncryptionKey);
@@ -138,6 +146,7 @@ void EncryptionHelper::Setup(
 		mO = oAndOE.first;
 		mOE = oAndOE.second;
 		mPerms = xcryptionCommon2_0.CreatePerms(fileEncryptionKey, mP, mEncryptMetaData);
+#endif		
 	} else {
 		// Pre PDF 2.0 algos
 		XCryptionCommon xcryptionCommon;
