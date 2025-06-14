@@ -5,6 +5,9 @@
             'type': 'static_library',
             'cflags!': [ '-fno-exceptions' ],
             'cflags_cc!': [ '-fno-exceptions' ],
+            'defines': [
+               'PDFHUMMUS_NO_OPENSSL=1'
+            ],
             'conditions': [
                ['OS=="mac"', {
                   'xcode_settings': {
