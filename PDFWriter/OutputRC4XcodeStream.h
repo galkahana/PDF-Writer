@@ -22,9 +22,9 @@ limitations under the License.
 #include "IByteWriterWithPosition.h"
 #include "RC4.h"
 
-#include <list>
+#include <string>
 
-typedef std::list<IOBasicTypes::Byte> ByteList;
+typedef std::basic_string<IOBasicTypes::Byte> ByteList;
 
 
 class OutputRC4XcodeStream : public IByteWriterWithPosition
