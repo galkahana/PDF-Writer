@@ -3,50 +3,23 @@
 using namespace IOBasicTypes;
 
 ByteList stringToByteList(const std::string& inString) {
-	ByteList buffer;
-	std::string::const_iterator it = inString.begin();
-
-	for (; it != inString.end(); ++it)
-		buffer.push_back((Byte)*it);
-
-	return buffer;
+	return ByteList(reinterpret_cast<const Byte *>(inString.data()), inString.size());
 }
 
+// are substr, append and concat really needed?
 ByteList substr(const ByteList& inList, IOBasicTypes::LongBufferSizeType inStart, IOBasicTypes::LongBufferSizeType inLength) {
-	ByteList buffer;
-	ByteList::const_iterator it = inList.begin();
-
-	for (IOBasicTypes::LongBufferSizeType i = 0; i < inStart && it != inList.end(); ++i, ++it);
-
-	for (IOBasicTypes::LongBufferSizeType i = 0; i < inLength && it != inList.end(); ++i, ++it)
-		buffer.push_back((Byte)*it);
-
-	return buffer;
+	return inList.substr(inStart, inLength);
 }
 
 void append(ByteList& ioTargetList, const ByteList& inSource) {
-	ByteList::const_iterator it = inSource.begin();
-
-	for (; it != inSource.end(); ++it)
-		ioTargetList.push_back(*it);
+	ioTargetList.append(inSource);
 }
 
 ByteList concat(const ByteList& inA, const ByteList& inB) {
-	ByteList buffer;
-
-	append(buffer, inA);
-	append(buffer, inB);
-
-	return buffer;
+	return inA + inB;
 }
 
 
 std::string ByteListToString(const ByteList& inByteList) {
-	std::string buffer;
-	ByteList::const_iterator it = inByteList.begin();
-
-	for (; it != inByteList.end(); ++it)
-		buffer.push_back((char)*it);
-
-	return buffer;
+	return std::string(reinterpret_cast<const char *>(inByteList.data()), inByteList.size());
 }

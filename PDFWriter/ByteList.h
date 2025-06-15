@@ -2,10 +2,9 @@
 
 #include "IOBasicTypes.h"
 
-#include <list>
 #include <string>
 
-typedef std::list<IOBasicTypes::Byte> ByteList;
+typedef std::basic_string<IOBasicTypes::Byte> ByteList;
 
 
 ByteList stringToByteList(const std::string& inString);
