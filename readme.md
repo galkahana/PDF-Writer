@@ -35,7 +35,7 @@ cmake --install . --prefix ./install --config Release
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `PDFHUMMUS_NO_DCT` | FALSE | Exclude DCT/JPEG functionality |
+| `PDFHUMMUS_NO_DCT` | FALSE | Exclude DCT decoding support |
 | `PDFHUMMUS_NO_TIFF` | FALSE | Exclude TIFF support |
 | `PDFHUMMUS_NO_PNG` | FALSE | Exclude PNG support |
 | `PDFHUMMUS_NO_OPENSSL` | FALSE | Exclude PDF2.0 encryption |
