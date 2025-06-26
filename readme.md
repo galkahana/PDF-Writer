@@ -35,10 +35,10 @@ cmake --install . --prefix ./install --config Release
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `PDFHUMMUS_NO_DCT` | FALSE | Exclude DCT decoding support |
-| `PDFHUMMUS_NO_TIFF` | FALSE | Exclude TIFF support |
-| `PDFHUMMUS_NO_PNG` | FALSE | Exclude PNG support |
-| `PDFHUMMUS_NO_OPENSSL` | FALSE | Exclude PDF2.0 encryption |
+| `PDFHUMMUS_NO_DCT` | FALSE | Exclude DCT decoding support/Detach LibJpeg dependency |
+| `PDFHUMMUS_NO_TIFF` | FALSE | Exclude TIFF Images support/Detach LibTiff dependency |
+| `PDFHUMMUS_NO_PNG` | FALSE | Exclude PNG Images support/Detatch LibgPng dependency |
+| `PDFHUMMUS_NO_OPENSSL` | FALSE | Exclude PDF2.0 encryption/Detach OpenSSL dependency |
 | `USE_BUNDLED` | TRUE | Use bundled dependencies |
 | `USE_UNBUNDLED_FALLBACK_BUNDLED` | FALSE | Fallback to bundled if system libs not found |
 | `BUILD_FUZZING_HARNESS` | FALSE | Enable fuzz testing |
