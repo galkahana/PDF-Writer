@@ -3136,8 +3136,8 @@ DoubleAndDoublePair DocumentContext::GetImageDimensions(
 
 				PDFPageInput helper(&pdfParser,pdfParser.ParsePage(inImageIndex));
 
-				imageWidth = helper.GetMediaBox().GetHeight();
-				imageHeight = helper.GetMediaBox().GetWidth();
+				imageWidth = helper.GetMediaBox().GetWidth();
+				imageHeight = helper.GetMediaBox().GetHeight();
 
 				break;
 			}
