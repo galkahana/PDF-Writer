@@ -127,6 +127,7 @@ static ByteList createSHA512(const ByteList& inKey) {
     return result;
 }
 
+
 #ifdef USE_OPENSSL_AES
 
 static ByteList encryptKeySSL(const ByteList& inKey, const ByteList& inData, Byte* inIV, const EVP_CIPHER* cipher) {
@@ -194,24 +195,6 @@ static ByteList encryptKeyCBC(const ByteList& inKey, const ByteList& inData, Byt
     return result;
 }
 
-static ByteList encryptKeyCBCZeroIV(const ByteList& inKey, const ByteList& inData) {
-    Byte zeroIV[AES_BLOCK_SIZE_BYTES] = { // this is NOT a const. IV is used internally by AESencrypt, so it needs to be mutable
-        0,0,0,0,
-        0,0,0,0,
-        0,0,0,0,
-        0,0,0,0
-    };
-
-    return encryptKeyCBC(inKey, inData, zeroIV);
-}
-
-static ByteList encryptKeyCBC(const ByteList& inKey, const ByteList& inData, const ByteList& inIV) {
-    Byte* ivBuffer = byteListToNewByteArray(inIV);
-    ByteList result = encryptKeyCBC(inKey, inData, ivBuffer);
-    delete[] ivBuffer;
-    return result;
-}
-
 static ByteList encryptKeyECB(const ByteList& inKey, const ByteList& inData) {
     AESencrypt encrypt;
     Byte* keyBuffer = byteListToNewByteArray(inKey);
@@ -231,6 +214,27 @@ static ByteList encryptKeyECB(const ByteList& inKey, const ByteList& inData) {
 }
 
 #endif
+
+static ByteList encryptKeyCBC(const ByteList& inKey, const ByteList& inData, const ByteList& inIV) {
+    Byte* ivBuffer = byteListToNewByteArray(inIV);
+    ByteList result = encryptKeyCBC(inKey, inData, ivBuffer);
+    delete[] ivBuffer;
+    return result;
+}
+
+static ByteList encryptKeyCBCZeroIV(const ByteList& inKey, const ByteList& inData) {
+    Byte zeroIV[AES_BLOCK_SIZE_BYTES] = { // this is NOT a const. IV is used internally by AESencrypt, so it needs to be mutable
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0
+    };
+
+    return encryptKeyCBC(inKey, inData, zeroIV);
+}
+
+
+
 
 static ByteListPair createHashRoundKey(const ByteList& inK, const ByteList& inTrimmedPassword, const ByteList& inAdditionalKey) {
     ByteList K1;  

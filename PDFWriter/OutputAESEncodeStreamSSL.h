@@ -21,6 +21,7 @@ limitations under the License.
 #pragma once
 #include "IByteWriterWithPosition.h"
 #include "IOBasicTypes.h"
+#include "AESConstants.h"
 
 #include <string>
 #include <openssl/evp.h>
