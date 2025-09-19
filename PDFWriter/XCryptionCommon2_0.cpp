@@ -127,7 +127,6 @@ static ByteList createSHA512(const ByteList& inKey) {
     return result;
 }
 
-
 #ifdef USE_OPENSSL_AES
 
 static ByteList encryptKeySSL(const ByteList& inKey, const ByteList& inData, Byte* inIV, const EVP_CIPHER* cipher) {
@@ -175,6 +174,28 @@ static ByteList encryptKeyECB(const ByteList& inKey, const ByteList& inData) {
     return encryptKeySSL(inKey, inData, NULL, cipher);
 }
 
+static void performECBDecryption(const ByteList& inKey, Byte* keyBuffer, Byte* encryptedKeyBuffer, Byte* outputBuffer, size_t dataSize) {
+    const EVP_CIPHER* cipher = (inKey.size() == 16) ? EVP_aes_128_ecb() : EVP_aes_256_ecb();
+    
+    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    if (!ctx)
+        return;
+
+    do {
+        if (EVP_DecryptInit_ex(ctx, cipher, NULL, keyBuffer, NULL) != 1)
+            break;
+
+        EVP_CIPHER_CTX_set_padding(ctx, 0);
+
+        int outlen;
+        if (EVP_DecryptUpdate(ctx, outputBuffer, &outlen, encryptedKeyBuffer, dataSize) != 1)
+            break;
+
+    } while (false);
+
+    EVP_CIPHER_CTX_free(ctx);
+}
+
 #else
 
 static ByteList encryptKeyCBC(const ByteList& inKey, const ByteList& inData, Byte* inIV) {
@@ -211,6 +232,12 @@ static ByteList encryptKeyECB(const ByteList& inKey, const ByteList& inData) {
     delete[] outBuffer;
 
     return result;
+}
+
+static void performECBDecryption(const ByteList& inKey, Byte* keyBuffer, Byte* encryptedKeyBuffer, Byte* outputBuffer, size_t dataSize) {
+    AESdecrypt decryptor;
+    decryptor.key(keyBuffer, inKey.size());
+    decryptor.ecb_decrypt(encryptedKeyBuffer, outputBuffer, dataSize);
 }
 
 #endif
@@ -340,14 +367,11 @@ static ByteList decryptKeyCBCZeroIV(const ByteList& inKey, const ByteList& inEnc
 }
 
 static ByteList decryptKeyECB(const ByteList& inKey, const ByteList& inEncryptedKey) {
-    AESdecrypt decryptor;
-
     Byte* keyBuffer = byteListToNewByteArray(inKey);
     Byte* encryptedKeyBuffer = byteListToNewByteArray(inEncryptedKey);
     Byte* outputBuffer = new Byte[inEncryptedKey.size()];
 
-    decryptor.key(keyBuffer, inKey.size());
-    decryptor.ecb_decrypt(encryptedKeyBuffer, outputBuffer, inEncryptedKey.size());
+    performECBDecryption(inKey, keyBuffer, encryptedKeyBuffer, outputBuffer, inEncryptedKey.size());
     ByteList result = byteArrayToByteList(outputBuffer, inEncryptedKey.size());
 
     delete[] keyBuffer;
