@@ -1,20 +1,7 @@
-# Claude Code Context - OpenSSL AES Migration
+# Claude Code Context - PDF-Writer Development Guide
 
-## Project Goal
-Replace LibAesgm AES encryption with OpenSSL-based alternatives while maintaining backward compatibility. This will eventually allow removing the LibAesgm dependency entirely.
-
-## Current AES Usage Analysis
-
-### 1. Stream Classes (PDF 1.4+ encryption)
-- `InputAESDecodeStream` - AES CBC decryption for PDF streams
-- `OutputAESEncodeStream` - AES CBC encryption for PDF streams
-- Located in: `PDFWriter/Input|OutputAESEncodeStream.{h,cpp}`
-- Used by: `EncryptionHelper.cpp`, `DecryptionHelper.cpp`
-
-### 2. XCryptionCommon2_0 (PDF 2.0 encryption)
-- Functions: `encryptKeyCBC()`, `encryptKeyECB()`, `decryptKeyCBC()`, `decryptKeyECB()`
-- Located in: `PDFWriter/XCryptionCommon2_0.cpp`
-- Uses both OpenSSL (SHA-256/384/512) and LibAesgm (AES operations)
+## Project Overview
+PDF-Writer is a C++ library for creating and manipulating PDF files. This guide contains development patterns, coding standards, and best practices discovered during active development.
 
 ## Coding Standards Discovered
 - **C99 Compatible**: No modern C++ features, conservative early 2000s style
@@ -24,71 +11,37 @@ Replace LibAesgm AES encryption with OpenSSL-based alternatives while maintainin
 - **ByteList**: typedef for `std::basic_string<IOBasicTypes::Byte>`
 - **CamelCase**: Classes and methods
 
-## Implementation Plan
+## Project Structure
 
-### Phase 1: CMake Configuration ✅
-- Add `USE_OPENSSL_AES` option (default OFF for compatibility) ✅
-- Conditional compilation: `#ifdef USE_OPENSSL_AES` ✅
-- Skip LibAesgm linking when using OpenSSL AES ✅
-- Early OpenSSL detection and `USE_OPENSSL_AES` determination ✅
-
-### Phase 2: OpenSSL Stream Classes ✅
-- `InputAESDecodeStreamSSL` - EVP-based AES CBC decryption ✅
-- `OutputAESEncodeStreamSSL` - EVP-based AES CBC encryption ✅
-- Match existing API exactly, same constructor signatures ✅
-- Added `AESConstants.h` for shared constants ✅
-
-### Phase 3: XCryptionCommon2_0 Alternatives ✅
-- OpenSSL versions of: `encryptKeyCBC()`, `encryptKeyECB()`, `decryptKeyCBC()`, `decryptKeyECB()` ✅
-- Complete OpenSSL implementation for all AES operations ✅
-- Refactored with do-while-false error handling pattern ✅
-- Conditional compilation throughout the file ✅
-
-### Phase 4: Factory Pattern Updates ✅
-- Update `EncryptionHelper.cpp` and `DecryptionHelper.cpp` ✅
-- Choose implementation based on `USE_OPENSSL_AES` flag ✅
-- Maintain identical external API ✅
+### Key Components
+- **PDFWriter**: Core library for PDF creation and manipulation
+- **PDFWriterTesting**: Comprehensive test suite with 82+ tests
+- **Conditional Features**: Support for optional dependencies (OpenSSL, LibJpeg, LibPng, LibTiff)
+- **Cross-platform**: Works on multiple operating systems and architectures
 
 ## Build Commands
 ```bash
-# Build with LibAesgm (force disable OpenSSL)
-cmake .. -DPDFHUMMUS_NO_OPENSSL=TRUE
-cmake --build . --config Release
-
-# Build with OpenSSL AES (auto-detected when OpenSSL available)
+# Standard build
 cmake ..
 cmake --build . --config Release
 
-# Test both configurations
+# Build with specific features disabled
+cmake .. -DPDFHUMMUS_NO_OPENSSL=TRUE    # Disable OpenSSL/PDF 2.0 support
+cmake .. -DPDFHUMMUS_NO_PNG=TRUE        # Disable PNG support
+cmake .. -DPDFHUMMUS_NO_DCT=TRUE        # Disable JPEG support
+cmake .. -DPDFHUMMUS_NO_TIFF=TRUE       # Disable TIFF support
+
+# Run tests
 ctest --test-dir . -C Release
 ```
 
-## Implementation Notes & Lessons Learned
+## Development Notes & Patterns
 
-### CMake Issues Fixed
-- Fixed CMake bug: `PDFHUMMUS_DEPENDS_OPENSSL` was incorrectly set to `find_dependency(PNG)` instead of `find_dependency(OpenSSL)`
-- Consolidated duplicate OpenSSL detection logic between `USE_BUNDLED=TRUE/FALSE` sections
-- LibAesgm linking now properly skipped when `USE_OPENSSL_AES=TRUE`
-
-### Technical Implementation Details
-- OpenSSL EVP API requires `EVP_CIPHER_CTX_set_padding(ctx, 0)` to match LibAesgm's manual padding behavior
-- XCryptionCommon2_0 uses both CBC (with zero IV) and ECB modes for PDF 2.0 key derivation functions
-- All AES operations have complete OpenSSL alternatives:
-  - `encryptKeyCBC()`, `encryptKeyECB()`, `decryptKeyCBC()`, `decryptKeyECB()`
-  - Separate `decryptKeyCBCZeroIV()` function for CBC decryption with zero IV
-- AES block size hardcoded as `16` in OpenSSL version instead of `AES_BLOCK_SIZE` for consistency
-- Constants properly referenced through `AESConstants.h` header
-
-### Code Style Observations
-- Codebase maintains C99 compatibility - no modern C++ features used
-- Hungarian notation: `m` prefix for members, `in` prefix for parameters
-- Manual memory management throughout (`new[]`/`delete[]`, no smart pointers)
-- Conservative early 2000s C++ style maintained for consistency
-
-### Build System Logic
-- `USE_OPENSSL_AES` automatically determined: `TRUE` if OpenSSL available and `PDFHUMMUS_NO_OPENSSL=FALSE`
-- Conditional source file inclusion working via CMake variables
-- Factory pattern updates in both `EncryptionHelper.cpp` and `DecryptionHelper.cpp`
+### Conditional Compilation
+- Tests that require specific dependencies should be wrapped with appropriate `#ifndef` guards
+- Examples: `#ifndef PDFHUMMUS_NO_OPENSSL`, `#ifndef PDFHUMMUS_NO_PNG`
+- Provide fallback implementations that return success (0) when features are disabled
+- Follow patterns established in `JPGImageTest.cpp`, `PDFWithPassword.cpp`, etc.
 
 ## Code Review & Development Guidelines
 
@@ -120,8 +73,16 @@ ctest --test-dir . -C Release
 - **Manual memory management**: Use `new[]`/`delete[]` consistently with the existing codebase
 - **Interface naming**: `I` prefix for interfaces (e.g., `IByteReader`)
 
-## Current Status
-- ✅ Implementation complete
-- ✅ Build system verified
-- ✅ Code review guidelines documented
-- ✅ Ready for testing
+## Testing Guidelines
+
+### Test Organization
+- Tests are located in `PDFWriterTesting/` directory
+- Each test should be self-contained and return 0 for success, non-zero for failure
+- Use `BuildRelativeOutputPath()` and `BuildRelativeInputPath()` for file paths
+- Test materials should be placed in `PDFWriterTesting/Materials/`
+
+### Running Tests
+- Full test suite: `ctest --test-dir . -C Release`
+- Specific test: `ctest --test-dir . -C Release -R TestName`
+- Verbose output: `ctest --test-dir . -C Release --verbose -R TestName`
+- Output on failure: `ctest --test-dir . -C Release --output-on-failure`
