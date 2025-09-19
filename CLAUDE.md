@@ -39,8 +39,8 @@ Replace LibAesgm AES encryption with OpenSSL-based alternatives while maintainin
 - Added `AESConstants.h` for shared constants ✅
 
 ### Phase 3: XCryptionCommon2_0 Alternatives ✅
-- OpenSSL versions of: `encryptKeyCBC()`, `encryptKeyECB()` ✅
-- Shared decrypt functions using LibAesgm implementation ✅
+- OpenSSL versions of: `encryptKeyCBC()`, `encryptKeyECB()`, `decryptKeyCBC()`, `decryptKeyECB()` ✅
+- Complete OpenSSL implementation for all AES operations ✅
 - Refactored with do-while-false error handling pattern ✅
 - Conditional compilation throughout the file ✅
 
@@ -51,15 +51,15 @@ Replace LibAesgm AES encryption with OpenSSL-based alternatives while maintainin
 
 ## Build Commands
 ```bash
-# Build with LibAesgm (default)
+# Build with LibAesgm (force disable OpenSSL)
+cmake .. -DPDFHUMMUS_NO_OPENSSL=TRUE
+cmake --build . --config Release
+
+# Build with OpenSSL AES (auto-detected when OpenSSL available)
 cmake ..
 cmake --build . --config Release
 
-# Build with OpenSSL AES
-cmake .. -DUSE_OPENSSL_AES=ON
-cmake --build . --config Release
-
-# Test
+# Test both configurations
 ctest --test-dir . -C Release
 ```
 
@@ -73,9 +73,11 @@ ctest --test-dir . -C Release
 ### Technical Implementation Details
 - OpenSSL EVP API requires `EVP_CIPHER_CTX_set_padding(ctx, 0)` to match LibAesgm's manual padding behavior
 - XCryptionCommon2_0 uses both CBC (with zero IV) and ECB modes for PDF 2.0 key derivation functions
-- All AES operations needed OpenSSL alternatives, not just the stream classes:
-  - `encryptKeyCBC()`, `encryptKeyECB()`, `decryptKeyCBCZeroIV()`, `decryptKeyECB()`
+- All AES operations have complete OpenSSL alternatives:
+  - `encryptKeyCBC()`, `encryptKeyECB()`, `decryptKeyCBC()`, `decryptKeyECB()`
+  - Separate `decryptKeyCBCZeroIV()` function for CBC decryption with zero IV
 - AES block size hardcoded as `16` in OpenSSL version instead of `AES_BLOCK_SIZE` for consistency
+- Constants properly referenced through `AESConstants.h` header
 
 ### Code Style Observations
 - Codebase maintains C99 compatibility - no modern C++ features used
