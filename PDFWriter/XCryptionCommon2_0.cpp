@@ -196,6 +196,28 @@ static void performECBDecryption(const ByteList& inKey, Byte* keyBuffer, Byte* e
     EVP_CIPHER_CTX_free(ctx);
 }
 
+static void performCBCZeroIVDecryption(const ByteList& inKey, Byte* keyBuffer, Byte* encryptedKeyBuffer, Byte* outputBuffer, size_t dataSize, Byte* iv) {
+    const EVP_CIPHER* cipher = (inKey.size() == 16) ? EVP_aes_128_cbc() : EVP_aes_256_cbc();
+    
+    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    if (!ctx)
+        return;
+
+    do {
+        if (EVP_DecryptInit_ex(ctx, cipher, NULL, keyBuffer, iv) != 1)
+            break;
+
+        EVP_CIPHER_CTX_set_padding(ctx, 0);
+
+        int outlen;
+        if (EVP_DecryptUpdate(ctx, outputBuffer, &outlen, encryptedKeyBuffer, dataSize) != 1)
+            break;
+
+    } while (false);
+
+    EVP_CIPHER_CTX_free(ctx);
+}
+
 #else
 
 static ByteList encryptKeyCBC(const ByteList& inKey, const ByteList& inData, Byte* inIV) {
@@ -238,6 +260,12 @@ static void performECBDecryption(const ByteList& inKey, Byte* keyBuffer, Byte* e
     AESdecrypt decryptor;
     decryptor.key(keyBuffer, inKey.size());
     decryptor.ecb_decrypt(encryptedKeyBuffer, outputBuffer, dataSize);
+}
+
+static void performCBCZeroIVDecryption(const ByteList& inKey, Byte* keyBuffer, Byte* encryptedKeyBuffer, Byte* outputBuffer, size_t dataSize, Byte* iv) {
+    AESdecrypt decryptor;
+    decryptor.key(keyBuffer, inKey.size());
+    decryptor.cbc_decrypt(encryptedKeyBuffer, outputBuffer, dataSize, iv);
 }
 
 #endif
@@ -344,7 +372,6 @@ static ByteList createHash(const ByteList& inKey, const ByteList& inTrimmedPassw
 }
 
 static ByteList decryptKeyCBCZeroIV(const ByteList& inKey, const ByteList& inEncryptedKey) {
-    AESdecrypt decryptor;
     unsigned char iv[AES_BLOCK_SIZE_BYTES] = { // this is NOT a const. IV is used internally by AESdecrypt, so it needs to be mutable
         0,0,0,0,
         0,0,0,0,
@@ -355,8 +382,7 @@ static ByteList decryptKeyCBCZeroIV(const ByteList& inKey, const ByteList& inEnc
     Byte* encryptedKeyBuffer = byteListToNewByteArray(inEncryptedKey);
     Byte* outputBuffer = new Byte[inEncryptedKey.size()];
 
-    decryptor.key(keyBuffer, inKey.size());
-    decryptor.cbc_decrypt(encryptedKeyBuffer, outputBuffer, inEncryptedKey.size(), iv);
+    performCBCZeroIVDecryption(inKey, keyBuffer, encryptedKeyBuffer, outputBuffer, inEncryptedKey.size(), iv);
     ByteList result = byteArrayToByteList(outputBuffer, inEncryptedKey.size());
 
     delete[] keyBuffer;
