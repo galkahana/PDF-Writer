@@ -20,9 +20,14 @@
 */
 #ifndef PDFHUMMUS_NO_OPENSSL
 #include "XCryptionCommon2_0.h"
+#include "AESConstants.h"
 #include <openssl/sha.h>
 #include <openssl/rand.h>
+#ifdef USE_OPENSSL_AES
+#include <openssl/evp.h>
+#else
 #include "aescpp.h"
+#endif
 
 #include <utility>
 #include <vector>
@@ -122,6 +127,55 @@ static ByteList createSHA512(const ByteList& inKey) {
     return result;
 }
 
+#ifdef USE_OPENSSL_AES
+
+static ByteList encryptKeySSL(const ByteList& inKey, const ByteList& inData, Byte* inIV, const EVP_CIPHER* cipher) {
+    ByteList result;
+    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    if (!ctx)
+        return result;
+
+    Byte* keyBuffer = NULL;
+    Byte* dataBuffer = NULL;
+    Byte* outBuffer = NULL;
+
+    do {
+        keyBuffer = byteListToNewByteArray(inKey);
+        dataBuffer = byteListToNewByteArray(inData);
+        outBuffer = new Byte[inData.size()];
+
+        if (EVP_EncryptInit_ex(ctx, cipher, NULL, keyBuffer, inIV) != 1)
+            break;
+
+        EVP_CIPHER_CTX_set_padding(ctx, 0);
+
+        int outlen;
+        if (EVP_EncryptUpdate(ctx, outBuffer, &outlen, dataBuffer, inData.size()) != 1)
+            break;
+
+        result = byteArrayToByteList(outBuffer, outlen);
+    } while (false);
+
+    if (keyBuffer) delete[] keyBuffer;
+    if (dataBuffer) delete[] dataBuffer;
+    if (outBuffer) delete[] outBuffer;
+    EVP_CIPHER_CTX_free(ctx);
+
+    return result;
+}
+
+static ByteList encryptKeyCBC(const ByteList& inKey, const ByteList& inData, Byte* inIV) {
+    const EVP_CIPHER* cipher = (inKey.size() == 16) ? EVP_aes_128_cbc() : EVP_aes_256_cbc();
+    return encryptKeySSL(inKey, inData, inIV, cipher);
+}
+
+static ByteList encryptKeyECB(const ByteList& inKey, const ByteList& inData) {
+    const EVP_CIPHER* cipher = (inKey.size() == 16) ? EVP_aes_128_ecb() : EVP_aes_256_ecb();
+    return encryptKeySSL(inKey, inData, NULL, cipher);
+}
+
+#else
+
 static ByteList encryptKeyCBC(const ByteList& inKey, const ByteList& inData, Byte* inIV) {
     AESencrypt encrypt;
     Byte* keyBuffer = byteListToNewByteArray(inKey);
@@ -136,12 +190,12 @@ static ByteList encryptKeyCBC(const ByteList& inKey, const ByteList& inData, Byt
     delete[] keyBuffer;
     delete[] dataBuffer;
     delete[] outBuffer;
-    
+
     return result;
 }
 
 static ByteList encryptKeyCBCZeroIV(const ByteList& inKey, const ByteList& inData) {
-    Byte zeroIV[AES_BLOCK_SIZE] = { // this is NOT a const. IV is used internally by AESencrypt, so it needs to be mutable
+    Byte zeroIV[AES_BLOCK_SIZE_BYTES] = { // this is NOT a const. IV is used internally by AESencrypt, so it needs to be mutable
         0,0,0,0,
         0,0,0,0,
         0,0,0,0,
@@ -175,6 +229,8 @@ static ByteList encryptKeyECB(const ByteList& inKey, const ByteList& inData) {
 
     return result;
 }
+
+#endif
 
 static ByteListPair createHashRoundKey(const ByteList& inK, const ByteList& inTrimmedPassword, const ByteList& inAdditionalKey) {
     ByteList K1;  
@@ -256,11 +312,9 @@ static ByteList createHash(const ByteList& inKey, const ByteList& inTrimmedPassw
     return substr(K, 0, 32);  // done here (hurrah!)
 }
 
-
-
 static ByteList decryptKeyCBCZeroIV(const ByteList& inKey, const ByteList& inEncryptedKey) {
     AESdecrypt decryptor;
-    unsigned char iv[AES_BLOCK_SIZE] = { // this is NOT a const. IV is used internally by AESdecrypt, so it needs to be mutable
+    unsigned char iv[AES_BLOCK_SIZE_BYTES] = { // this is NOT a const. IV is used internally by AESdecrypt, so it needs to be mutable
         0,0,0,0,
         0,0,0,0,
         0,0,0,0,

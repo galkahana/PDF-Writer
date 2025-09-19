@@ -1,6 +1,23 @@
 set(PDFWRITER_LIB_VERSION ${PDFHummus_VERSION_MAJOR}.${PDFHummus_VERSION_MINOR}.0)
 set(PDFWRITER_SO_VERSION ${PDFHummus_VERSION_MAJOR})
 
+# Conditional AES sources
+if(USE_OPENSSL_AES)
+    set(AES_SOURCES
+        InputAESDecodeStreamSSL.cpp
+        OutputAESEncodeStreamSSL.cpp
+        InputAESDecodeStreamSSL.h
+        OutputAESEncodeStreamSSL.h
+    )
+else()
+    set(AES_SOURCES
+        InputAESDecodeStream.cpp
+        OutputAESEncodeStream.cpp
+        InputAESDecodeStream.h
+        OutputAESEncodeStream.h
+    )
+endif()
+
 add_library (PDFWriter
 #sources
 AbstractContentContext.cpp
@@ -39,7 +56,7 @@ GraphicState.cpp
 GraphicStateStack.cpp
 IndirectObjectsReferenceRegistry.cpp
 InfoDictionary.cpp
-InputAESDecodeStream.cpp
+${AES_SOURCES}
 InputAscii85DecodeStream.cpp
 InputAsciiHexDecodeStream.cpp
 InputBufferedStream.cpp
@@ -70,7 +87,6 @@ RC4.cpp
 ObjectsContext.cpp
 OpenTypeFileInput.cpp
 OpenTypePrimitiveReader.cpp
-OutputAESEncodeStream.cpp
 OutputBufferedStream.cpp
 OutputFile.cpp
 OutputFileStream.cpp
@@ -165,6 +181,7 @@ XObjectContentContext.cpp
 #headers
 AbstractContentContext.h
 AbstractWrittenFont.h
+AESConstants.h
 AdapterIByteReaderWithPositionToIReadPositionProvider.h
 ANSIFontWriter.h
 Ascii7Encoding.h
@@ -227,7 +244,6 @@ ITiledPatternEndWritingTask.h
 IFreeTypeFaceExtender.h
 IndirectObjectsReferenceRegistry.h
 InfoDictionary.h
-InputAESDecodeStream.h
 InputAscii85DecodeStream.h
 InputAsciiHexDecodeStream.h
 InputBufferedStream.h
@@ -272,7 +288,6 @@ ObjectsContext.h
 ObjectsContextExtenderAdapter.h
 OpenTypeFileInput.h
 OpenTypePrimitiveReader.h
-OutputAESEncodeStream.h
 OutputBufferedStream.h
 OutputFile.h
 OutputFileStream.h
@@ -391,11 +406,13 @@ else(USING_UNBUNDLED_Freetype)
 endif(USING_UNBUNDLED_Freetype)
 
 # libaesgm
-if(USING_UNBUNDLED_aesgm)
-    target_link_libraries(PDFWriter Aesgm::Aesgm)
-else(USING_UNBUNDLED_aesgm)
-    target_link_libraries(PDFWriter PDFHummus::LibAesgm)
-endif(USING_UNBUNDLED_aesgm)
+if(NOT USE_OPENSSL_AES)
+    if(USING_UNBUNDLED_aesgm)
+        target_link_libraries(PDFWriter Aesgm::Aesgm)
+    else(USING_UNBUNDLED_aesgm)
+        target_link_libraries(PDFWriter PDFHummus::LibAesgm)
+    endif(USING_UNBUNDLED_aesgm)
+endif()
 
 # libjpeg
 if(PDFHUMMUS_NO_DCT)
@@ -434,9 +451,12 @@ endif(PDFHUMMUS_NO_PNG)
 
 # openssl
 if(PDFHUMMUS_NO_OPENSSL)
-    target_compile_definitions(PDFWriter PUBLIC PDFHUMMUS_NO_OPENSSL=1)    
+    target_compile_definitions(PDFWriter PUBLIC PDFHUMMUS_NO_OPENSSL=1)
 else(PDFHUMMUS_NO_OPENSSL)
     target_link_libraries(PDFWriter OpenSSL::Crypto)
+    if(USE_OPENSSL_AES)
+        target_compile_definitions(PDFWriter PRIVATE USE_OPENSSL_AES=1)
+    endif()
 endif(PDFHUMMUS_NO_OPENSSL)
 
 target_include_directories(PDFWriter
@@ -601,8 +621,6 @@ IByteReader.h
 IByteReaderWithPosition.h
 IByteWriter.h
 IByteWriterWithPosition.h
-InputAESDecodeStream.cpp
-InputAESDecodeStream.h
 InputAscii85DecodeStream.cpp
 InputAscii85DecodeStream.h
 InputAsciiHexDecodeStream.cpp
@@ -636,8 +654,6 @@ InputStringStream.h
 InterpretedGradientStop.h
 IOBasicTypes.h
 IReadPositionProvider.h
-OutputAESEncodeStream.cpp
-OutputAESEncodeStream.h
 OutputBufferedStream.cpp
 OutputBufferedStream.h
 OutputFile.cpp

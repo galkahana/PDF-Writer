@@ -1,8 +1,8 @@
 /*
-   Source File : IOBasicTypes.h
+   Source File : AESConstants.h
 
 
-   Copyright 2011 Gal Kahana PDFWriter
+   Copyright 2025 Gal Kahana PDFWriter
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,19 +16,8 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
 #pragma once
 
-#include <stdio.h>
-
-namespace IOBasicTypes
-{
-
-	typedef unsigned char Byte;
-    typedef size_t LongBufferSizeType;
-	typedef long long LongFilePositionType;
-
-}
-
-
+#define AES_BLOCK_SIZE_BYTES 16
