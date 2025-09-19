@@ -18,6 +18,7 @@ limitations under the License.
 */
 
 #include "InputAESDecodeStreamSSL.h"
+#include "AESConstants.h"
 
 #include <algorithm>
 #include <string.h>
