@@ -1,3 +1,5 @@
+#ifndef PDFHUMMUS_NO_OPENSSL
+
 #include "PDFParser.h"
 #include "EStatusCode.h"
 #include "InputFile.h"
@@ -50,6 +52,13 @@ int ParsePDFWithOwner(int argc, char* argv[])
 
 
     return status == eSuccess ? 0:1;
-
-
 }
+
+#else // PDFHUMMUS_NO_OPENSSL
+
+int ParsePDFWithOwner(int argc, char* argv[])
+{
+	return 0;
+}
+
+#endif

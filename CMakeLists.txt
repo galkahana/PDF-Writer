@@ -15,9 +15,25 @@ option(PDFHUMMUS_NO_OPENSSL "Whether to drop OpenSSL Usage, and therefore PDF2.0
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-if(NOT USE_BUNDLED)
-    FIND_PACKAGE(PkgConfig)
+# OpenSSL detection and AES implementation choice - done early to inform all subsequent logic
+if(NOT PDFHUMMUS_NO_OPENSSL)
+    find_package (OpenSSL)
+    if (OPENSSL_FOUND)
+        set(PDFHUMMUS_DEPENDS_OPENSSL "find_dependency(OpenSSL)")
+        set(USE_OPENSSL_AES TRUE)
+        message(STATUS "Using OpenSSL for AES encryption")
+    else(OPENSSL_FOUND)
+        message(WARNING "OpenSSL not found, disabling PDF 2.0 encyrption/decryption")
+        set (PDFHUMMUS_NO_OPENSSL TRUE)
+        set(USE_OPENSSL_AES FALSE)
+        message(STATUS "Using LibAesgm for AES encryption")
+    endif(OPENSSL_FOUND)
+else()
+    set(USE_OPENSSL_AES FALSE)
+    message(STATUS "Using LibAesgm for AES encryption")
+endif()
 
+if(NOT USE_BUNDLED)
     # zlib
     if(USE_UNBUNDLED_FALLBACK_BUNDLED)
         find_package (ZLIB)
@@ -57,7 +73,9 @@ if(NOT USE_BUNDLED)
         if(aesgm_FOUND)
             set (USING_UNBUNDLED_aesgm TRUE)
         else(aesgm_FOUND)
-            ADD_SUBDIRECTORY(LibAesgm)
+            if(NOT USE_OPENSSL_AES)
+                ADD_SUBDIRECTORY(LibAesgm)
+            endif()
         endif(aesgm_FOUND)
     else(USE_UNBUNDLED_FALLBACK_BUNDLED)
         find_package (Aesgm REQUIRED)
@@ -128,25 +146,6 @@ if(NOT USE_BUNDLED)
         set(PDFHUMMUS_DEPENDS_PNG "find_dependency(PNG)")
     endif()    
 
-    # OpenSSL
-    if(NOT PDFHUMMUS_NO_OPENSSL)
-        find_package (OpenSSL)
-        if (OPENSSL_FOUND)
-            set (USING_UNBUNDLED_OPENSSL TRUE)
-        else(OPENSSL_FOUND)
-            if(USE_UNBUNDLED_FALLBACK_BUNDLED)
-                # no bundled open ssl option, so turn off open ssl anyways
-                message(WARNING "OpenSSL not found and there's no bundled option, disabling PDF 2.0 encyrption/decryption")
-                set (PDFHUMMUS_NO_OPENSSL TRUE)
-            else(USE_UNBUNDLED_FALLBACK_BUNDLED)
-                message(WARNING "OpenSSL not found, disabling PDF 2.0 encyrption/decryption")
-               set (PDFHUMMUS_NO_OPENSSL TRUE)
-            endif(USE_UNBUNDLED_FALLBACK_BUNDLED)
-        endif(OPENSSL_FOUND)
-    endif(NOT PDFHUMMUS_NO_OPENSSL)
-    if(USING_UNBUNDLED_PNG)
-        set(PDFHUMMUS_DEPENDS_OPENSSL "find_dependency(PNG)")
-    endif()    
 
 else(NOT USE_BUNDLED)
     # zlib
@@ -156,7 +155,9 @@ else(NOT USE_BUNDLED)
     ADD_SUBDIRECTORY(FreeType)
 
     # libaesgm
-    ADD_SUBDIRECTORY(LibAesgm)
+    if(NOT USE_OPENSSL_AES)
+        ADD_SUBDIRECTORY(LibAesgm)
+    endif()
 
     # libjpeg
     if(NOT PDFHUMMUS_NO_DCT)
@@ -173,22 +174,7 @@ else(NOT USE_BUNDLED)
         ADD_SUBDIRECTORY(LibPng)
     endif(NOT PDFHUMMUS_NO_PNG)
 
-    if(NOT PDFHUMMUS_NO_OPENSSL)
-        # OpenSSL is never bundled
-        find_package (OpenSSL)
-        if (OPENSSL_FOUND)
-            set (USING_UNBUNDLED_OPENSSL TRUE)       
-        else(OPENSSL_FOUND)
-            message(WARNING "OpenSSL not found and there's no bundled option, disabling PDF 2.0 encyrption/decryption")
-            set (PDFHUMMUS_NO_OPENSSL TRUE)
-        endif(OPENSSL_FOUND)
-        if(USING_UNBUNDLED_OPENSSL)
-            set(PDFHUMMUS_DEPENDS_OPENSSL "find_dependency(OpenSSL)")
-        endif(USING_UNBUNDLED_OPENSSL)
-    endif(NOT PDFHUMMUS_NO_OPENSSL)
-
 endif(NOT USE_BUNDLED)
-
 
 ADD_SUBDIRECTORY(PDFWriter)
 
