@@ -55,7 +55,7 @@ ctest --test-dir . -C Release
 - **Do-while-false pattern**: Use for functions with multiple cleanup steps and potential early exits
 - **Early returns**: Handle initial validation failures immediately to simplify main logic flow
 - **Single cleanup section**: Consolidate all resource cleanup in one place at function end
-- **Resource management**: Always clean up dynamically allocated memory and OpenSSL contexts
+- **Resource management**: Always clean up dynamically allocated memory and external library contexts (e.g., OpenSSL, FreeType)
 
 ### Code Structure Best Practices
 - **Factor out duplication**: When you see repeated patterns, especially error-prone ones, create shared helper functions
