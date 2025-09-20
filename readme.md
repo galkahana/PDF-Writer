@@ -92,6 +92,15 @@ Install these extensions:
 cd build && cpack .
 ```
 
+### Development Guidelines
+For detailed development guidelines, coding standards, and contribution patterns, see [CLAUDE.md](./CLAUDE.md). This document contains:
+- Project coding standards and conventions
+- Build commands and configuration options
+- Error handling patterns and best practices
+- Testing guidelines and organizational structure
+
+This documentation is also optimized for AI-assisted development with Claude Code.
+
 ## Additional Build Instructions
 
 **iOS**: See [build guide](http://pdfhummus.com/post/45501609236/how-to-build-iphone-apps-that-use-pdfhummus)
