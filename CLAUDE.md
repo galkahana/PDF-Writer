@@ -86,3 +86,42 @@ ctest --test-dir . -C Release
 - Specific test: `ctest --test-dir . -C Release -R TestName`
 - Verbose output: `ctest --test-dir . -C Release --verbose -R TestName`
 - Output on failure: `ctest --test-dir . -C Release --output-on-failure`
+
+### Test Development Best Practices
+
+Based on successful development of PDF outline examples, here are patterns for creating comprehensive, reusable test code:
+
+#### Creating Example Tests
+- **Demonstrate both simple and complex use cases** - Include both basic functionality and nested/hierarchical structures
+- **Show real-world scenarios** - Create examples for both new PDF creation and existing PDF modification
+- **Test incrementally** - Build, test, and refine after each change to catch issues early
+- **Include edge cases** - Test with varying parameters (e.g., different page sizes, mixed content)
+
+#### Code Reusability Patterns
+- **Extract shared functionality** - When you see duplicate code across tests, factor it into reusable classes/functions
+- **Design flexible APIs** - Support both common cases (with defaults) and edge cases (with overrides)
+  ```cpp
+  // Common case with default
+  CreateOutlineTree(context, items, count, defaultPageHeight, outlineId);
+  // Edge case without default
+  CreateOutlineTree(context, items, count, outlineId);
+  ```
+- **Place reusable code in separate files** - Add to CMakeLists.txt under "test specific additionals"
+- **Use meaningful abstractions** - Create classes like `OutlineBuilder` that encapsulate domain logic
+
+#### API Design Guidelines
+- **Make common cases simple** - Provide convenient defaults for typical usage
+- **Allow for exceptions** - Enable per-item overrides when needed (e.g., individual page heights)
+- **Be explicit about magic numbers** - Replace hardcoded values with named parameters
+- **Design for real-world usage** - Parse actual data from existing files rather than assuming constants
+
+#### Examples as Documentation
+- **Self-contained demonstrations** - Each test should work as a standalone example
+- **Clear variable naming** - Use descriptive names that explain purpose (e.g., `page0Height`, `outlineObjectId`)
+- **Show complete workflows** - Include both the setup and the usage of functionality
+- **Comment the why, not the what** - Explain business logic and design decisions
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.

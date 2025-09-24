@@ -56,6 +56,8 @@ create_test_sourcelist (Tests
   PDFParserFuzzSanity.cpp
   PDFParserTest.cpp
   PDFWithPassword.cpp
+  PDFOutlinesTest.cpp
+  PDFAddOutlinesToExistingTest.cpp
   PFBStreamTest.cpp
   PNGImageTest.cpp
   RecryptPDF.cpp
@@ -93,6 +95,7 @@ add_executable (PDFWriterTesting
     PDFComment.cpp
     PDFCommentWriter.cpp
     AnnotationsWriter.cpp
+    OutlineBuilder.cpp
   
 )
 
