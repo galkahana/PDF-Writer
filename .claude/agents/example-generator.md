@@ -59,7 +59,7 @@ The agent evaluates requests on:
    - Check for conditional compilation requirements
    - Review PDF specification if needed
 
-2. **Code Generation Following PR #313 Patterns**
+2. **Code Generation Following PDF-Writer Best Practices**
    - **Make common cases simple**: Design APIs with convenient defaults
    - **Support both simple and complex scenarios**: Show basic usage and advanced options
    - **Demonstrate real-world usage**: Include both new PDF creation and existing PDF modification
@@ -70,6 +70,19 @@ The agent evaluates requests on:
    - Implement proper resource cleanup
    - Add conditional compilation guards if needed
    - Follow Hungarian notation and C99-compatible code style
+
+   **PDF-Writer API Best Practices:**
+   - **Prefer WriteText**: Use `AbstractContentContext::TextOptions` instead of manual BT/Tf/Tm/Tj/ET sequences
+     ```cpp
+     AbstractContentContext::TextOptions textOptions(
+         pdfWriter.GetFontForFile(BuildRelativeInputPath(argv, "fonts/arial.ttf")),
+         14,
+         AbstractContentContext::eGray,
+         0);
+     pageContent->WriteText(100, 700, "Text content", textOptions);
+     ```
+   - **Stream utilities**: Use `CopyToOutputStream` for efficient stream copying instead of manual buffers
+   - **Stream lifecycle**: Don't call `FinalizeStreamWrite()` (EndPDFStream handles it), do call `delete pdfStream` after `EndPDFStream()`
 
 3. **Testing and Build Commands** (from CLAUDE.md updates)
    - Add test to CMakeLists.txt
@@ -130,11 +143,16 @@ Given the emphasis on form operations, the agent should handle:
 **Status**: ✅ Ready for review / ⚠️ Draft - needs testing
 ```
 
-### Error Handling
+### Error Handling & Status Reporting
+- **Be honest about failures**: Always report actual status including crashes, segfaults, and build failures
+- **Don't leave stale status**: Update ALL status indicators (file comments, console output) when fixing issues
+- **Be explicit about problems**: Use "⚠️ Stream creation causes segfault" not "✅ Stream creation implemented" when broken
+- **Don't claim success with failures**: If there are crashes or errors, clearly state what's broken
+- **Include error details**: Provide specific error messages and debugging information in reports
 - If request is unclear: Ask for clarification with specific questions
 - If out of scope: Explain why and suggest alternatives
 - If dependencies missing: Note conditional compilation requirements
-- If build fails: Debug and fix or report specific blockers
+- If build fails: Debug and fix or report specific blockers with full error details
 
 ### Development Patterns from PR #313
 - **API Design**: Make common cases simple, support exceptions
