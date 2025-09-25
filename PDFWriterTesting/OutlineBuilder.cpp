@@ -21,6 +21,7 @@
 #include "OutlineBuilder.h"
 #include "ObjectsContext.h"
 #include "DictionaryContext.h"
+#include "PDFTextString.h"
 
 OutlineBuilder::OutlineBuilder()
 {
@@ -46,8 +47,8 @@ EStatusCode OutlineBuilder::WriteOutlineItem(ObjectsContext* inObjectsContext, O
         DictionaryContext* outlineItemDict = inObjectsContext->StartDictionary();
 
         outlineItemDict->WriteKey("Title");
-        outlineItemDict->WriteLiteralStringValue(inItem.title);
-
+        outlineItemDict->WriteLiteralStringValue(PDFTextString().FromUTF8(inItem.title).ToString());
+        
         outlineItemDict->WriteKey("Parent");
         outlineItemDict->WriteObjectReferenceValue(inParentId);
 
