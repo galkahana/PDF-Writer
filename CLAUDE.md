@@ -37,6 +37,43 @@ ctest --test-dir . -C Release
 
 ## Development Notes & Patterns
 
+### Community Solution Patterns (PR #313)
+Based on successful outline/annotation example implementation:
+
+#### Helper Class Approach
+- **OutlineBuilder Pattern**: Create dedicated helper classes for complex PDF operations
+- **Flexible APIs**: Support both simple defaults and advanced customization
+- **Recursive Generation**: Use recursive methods for hierarchical PDF structures
+- **Example**: `OutlineBuilder` class with `CreateOutlineTree()` and `WriteOutlineItems()`
+
+#### Document Extension Pattern
+- **IDocumentContextExtender**: Use for modifying PDF catalog and document structure
+- **DocumentContextExtenderAdapter**: Extend this base class and override specific methods
+- **OnCatalogWrite()**: Key method for attaching document-level structures like outlines
+- **Integration**: Register extenders via `GetDocumentContext().AddDocumentContextExtender()`
+
+#### API Design Principles Proven Effective
+- **"Make common cases simple"**: Provide convenient defaults for typical usage
+- **Support exceptions**: Allow per-item overrides and edge case handling
+- **Overloaded constructors**: Multiple ways to create objects based on complexity needed
+- **Optional parameters**: Use optional params for advanced features, required for basics
+
+#### Implementation Details
+- **UTF-8 Support**: Use `PDFTextString` for international text in outlines
+- **Page References**: Get page IDs via `WritePageAndReturnPageID()` for destinations
+- **Object Management**: Use `ObjectsContext` for creating PDF indirect objects
+- **Resource Cleanup**: Follow do-while-false pattern with proper cleanup
+
+#### Helper Structure Examples
+```cpp
+struct OutlineItem {
+    std::string title;
+    ObjectIDType pageReference;
+    std::vector<OutlineItem> children;  // Support nesting
+    // Optional customization fields
+};
+```
+
 ### Conditional Compilation
 - Tests that require specific dependencies should be wrapped with appropriate `#ifndef` guards
 - Examples: `#ifndef PDFHUMMUS_NO_OPENSSL`, `#ifndef PDFHUMMUS_NO_PNG`
