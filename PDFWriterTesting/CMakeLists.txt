@@ -33,6 +33,7 @@ create_test_sourcelist (Tests
   ImagesAndFormsForwardReferenceTest.cpp
   InputFlateDecodeTester.cpp
   InputImagesAsStreamsTest.cpp
+  ICCProfileEmbeddingTest.cpp
   JpegLibTest.cpp
   JPGImageTest.cpp
   LinksTest.cpp
