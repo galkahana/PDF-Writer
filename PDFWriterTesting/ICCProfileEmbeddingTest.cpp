@@ -168,8 +168,7 @@ EStatusCode ICCProfileEmbedder::CreateOutputIntent(
     inCatalogDictionaryContext->WriteKey("OutputIntents");
     inObjectsContext->StartArray();
 
-    // Start the OutputIntent dictionary as an indirect object
-    ObjectIDType outputIntentObjectID = inObjectsContext->StartNewIndirectObject();
+    // Create the OutputIntent dictionary directly in the array (not as indirect object)
     DictionaryContext* outputIntentDict = inObjectsContext->StartDictionary();
 
     // Required fields for OutputIntent
@@ -192,11 +191,10 @@ EStatusCode ICCProfileEmbedder::CreateOutputIntent(
     outputIntentDict->WriteKey("DestOutputProfile");
     outputIntentDict->WriteObjectReferenceValue(mICCProfileObjectID);
 
+    // End the dictionary (this closes the OutputIntent dictionary in the array)
     inObjectsContext->EndDictionary(outputIntentDict);
-    inObjectsContext->EndIndirectObject();
 
-    // Reference the OutputIntent in the array
-    inObjectsContext->WriteIndirectObjectReference(outputIntentObjectID);
+    // End the OutputIntents array
     inObjectsContext->EndArray();
 
     return eSuccess;
