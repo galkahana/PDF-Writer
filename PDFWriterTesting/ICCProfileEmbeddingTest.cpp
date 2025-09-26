@@ -28,8 +28,14 @@
    - ✅ File I/O patterns for ICC profile reading
    - ✅ ICC stream creation implemented with correct PDF-Writer patterns
    - ✅ OutputIntent creation implemented and working
+   - ✅ Fixed PDF corruption by moving ICC embedding before PDF finalization
 
    This provides a complete working example for ICC profile embedding in PDF-Writer.
+
+   IMPORTANT: The ICC profile must be embedded BEFORE calling EndPDF().
+   The OnCatalogWrite method only creates references to the already-embedded profile.
+   This prevents PDF corruption from creating nested indirect objects.
+
    The main work remaining is:
    1. Test with real ICC profile files
    2. Add support for different color spaces (CMYK, Lab)
@@ -67,6 +73,9 @@ public:
     // Set the ICC profile file path to embed
     EStatusCode SetICCProfilePath(const string& inICCProfilePath);
 
+    // Pre-embed the ICC profile as a stream object (call before PDF finalization)
+    EStatusCode EmbedICCProfile(ObjectsContext* inObjectsContext);
+
     // DocumentContextExtenderAdapter override
     virtual EStatusCode OnCatalogWrite(
         CatalogInformation* inCatalogInformation,
@@ -97,6 +106,11 @@ EStatusCode ICCProfileEmbedder::SetICCProfilePath(const string& inICCProfilePath
 {
     mICCProfilePath = inICCProfilePath;
     return eSuccess;
+}
+
+EStatusCode ICCProfileEmbedder::EmbedICCProfile(ObjectsContext* inObjectsContext)
+{
+    return EmbedICCProfileAsStream(inObjectsContext);
 }
 
 EStatusCode ICCProfileEmbedder::EmbedICCProfileAsStream(ObjectsContext* inObjectsContext)
@@ -268,15 +282,15 @@ EStatusCode ICCProfileEmbedder::OnCatalogWrite(
 
     do
     {
-        // First embed the ICC profile as a stream object
-        status = EmbedICCProfileAsStream(inPDFWriterObjectContext);
-        if (status != eSuccess)
+        // Only create the OutputIntent if ICC profile was already embedded
+        if (mICCProfileObjectID == 0)
         {
-            TRACE_LOG("ICCProfileEmbedder::OnCatalogWrite, failed to embed ICC profile stream");
+            TRACE_LOG("ICCProfileEmbedder::OnCatalogWrite, ICC profile not embedded yet. Call EmbedICCProfile() before PDF finalization.");
+            status = eFailure;
             break;
         }
 
-        // Then create the OutputIntent that references the ICC profile
+        // Create the OutputIntent that references the already-embedded ICC profile
         status = CreateOutputIntent(inCatalogDictionaryContext, inPDFWriterObjectContext);
         if (status != eSuccess)
         {
@@ -356,6 +370,15 @@ int ICCProfileEmbeddingTest(int argc, char* argv[])
         if (status != eSuccess)
         {
             cout << "Failed to write page" << endl;
+            break;
+        }
+
+        // Embed the ICC profile BEFORE finalizing the PDF
+        // This prevents creating nested indirect objects during catalog writing
+        status = iccEmbedder.EmbedICCProfile(&pdfWriter.GetObjectsContext());
+        if (status != eSuccess)
+        {
+            cout << "Failed to embed ICC profile" << endl;
             break;
         }
 
