@@ -84,6 +84,13 @@ The agent evaluates requests on:
    - **Stream utilities**: Use `CopyToOutputStream` for efficient stream copying instead of manual buffers
    - **Stream lifecycle**: Don't call `FinalizeStreamWrite()` (EndPDFStream handles it), do call `delete pdfStream` after `EndPDFStream()`
 
+   **Critical PDF Object Lifecycle Rules:**
+   - **EndPDFStream includes EndIndirectObject**: Never call both `EndPDFStream()` and `EndIndirectObject()` on the same object - EndPDFStream handles the EndIndirectObject call internally
+   - **No nested indirect objects**: Never create indirect objects during the writing of another indirect object (e.g., during OnCatalogWrite)
+   - **Embed streams before PDF finalization**: Always call stream embedding methods (like `EmbedICCProfileAsStream`) before `EndPDF()`, not during catalog writing
+   - **DocumentContextExtender limitations**: Methods like `OnCatalogWrite` should only modify dictionary structures, never create new indirect objects
+   - **Dictionary vs Object creation**: Use direct dictionary creation (StartDictionary/EndDictionary) within catalog structures, not separate indirect object creation
+
 3. **Testing and Build Commands** (from CLAUDE.md updates)
    - Add test to CMakeLists.txt
    - Build with `cmake --build . --config Release`
