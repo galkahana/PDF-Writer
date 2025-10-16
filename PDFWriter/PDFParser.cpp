@@ -1938,7 +1938,7 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 				{
 					PDFObjectCastPtr<PDFDictionary> decodeParamsItem(QueryArrayObject(decodeParams.GetPtr(),i));
 
-					createStatus = CreateFilterForStream(result,(PDFName*)filterObject.GetPtr(), !decodeParamsItem ? NULL: decodeParamsItem.GetPtr(), inStream);
+					createStatus = CreateFilterForStream(result,filterObjectItem.GetPtr(), !decodeParamsItem ? NULL: decodeParamsItem.GetPtr(), inStream);
 				}
 
 				if(createStatus.first != eSuccess)
