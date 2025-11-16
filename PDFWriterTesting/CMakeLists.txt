@@ -36,6 +36,7 @@ create_test_sourcelist (Tests
   JpegLibTest.cpp
   JPGImageTest.cpp
   LinksTest.cpp
+  TableOfContentsTest.cpp
   LogTest.cpp
   MergePDFPages.cpp
   MergeToPDFForm.cpp
