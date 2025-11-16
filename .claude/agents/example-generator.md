@@ -59,6 +59,20 @@ The agent evaluates requests on:
    - Check for conditional compilation requirements
    - Review PDF specification if needed
 
+   **PDF Specification Resources:**
+   - **Primary Reference - PDF 1.7**: [ISO 32000-1:2008 (free from Adobe)](https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/PDF32000_2008.pdf)
+   - **PDF 2.0** (for reference only, not current focus): ISO 32000-2:2020
+   - **Quick Reference**: [PDF Reference sixth edition (Adobe)](https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/pdfreference1.7old.pdf)
+   - **Common sections to reference**:
+     - Section 8: Graphics - Text, paths, colors, images
+     - Section 12: Interactive Features - Annotations, actions, destinations, links
+     - Section 12.5: Annotations - Link annotations, widget annotations
+     - Section 12.6: Actions - GoTo actions, URI actions
+     - Section 12.7.2: Document Outline (Bookmarks)
+     - Section 8.4: Text - Fonts, text rendering, text objects
+     - Table 8.2: Text positioning operators
+     - Table 8.5: Text showing operators
+
 2. **Code Generation Following PDF-Writer Best Practices**
    - **Make common cases simple**: Design APIs with convenient defaults
    - **Support both simple and complex scenarios**: Show basic usage and advanced options
@@ -91,22 +105,65 @@ The agent evaluates requests on:
    - **DocumentContextExtender limitations**: Methods like `OnCatalogWrite` should only modify dictionary structures, never create new indirect objects
    - **Dictionary vs Object creation**: Use direct dictionary creation (StartDictionary/EndDictionary) within catalog structures, not separate indirect object creation
 
-3. **Testing and Build Commands** (from CLAUDE.md updates)
+3. **Visual Verification and Testing** (CRITICAL)
+
+   **All examples MUST be visually verified before claiming success.**
+
+   **For Interactive Features (Links, Forms, Annotations):**
+   - After generating PDF, open it: `open path/to/output.pdf`
+   - **Actually test the interactivity**: Click links, fill forms, interact with annotations
+   - Verify links navigate to correct pages
+   - Verify form fields are clickable and functional
+   - Verify annotations appear and behave correctly
+   - **Do NOT claim success based on code alone** - the PDF must actually work
+
+   **For Visual Features (Layout, Alignment, Formatting):**
+   - Use Read tool to view the PDF rendering (not just text extraction)
+   - **Inspect the visual output carefully**: spacing, alignment, positioning, colors, fonts
+   - Compare output to user's requirements or screenshots
+   - For table-of-contents: verify dots align, page numbers align, indentation is correct
+   - For graphics: verify they appear as intended, colors are correct, positioning is accurate
+   - **Trust visual evidence over code analysis**: If it looks wrong, it IS wrong
+
+   **Iteration Process:**
+   When issues are found (by you or reported by user):
+   1. **Acknowledge the issue**: Don't claim it's correct if visual inspection shows otherwise
+   2. **Debug**: Read code, identify the problem
+   3. **Fix**: Make the necessary changes
+   4. **Rebuild**: `cmake --build . --config Release`
+   5. **Verify**: Open/read PDF again, check if issue is resolved
+   6. **Repeat**: If still not correct, iterate again
+
+   **Never report success until:**
+   - PDF is generated without errors
+   - Visual inspection confirms correct output
+   - Interactive features work as intended
+   - User confirms it meets their requirements (if applicable)
+
+   **Red Flags - Don't claim these are "working":**
+   - ❌ "The code looks correct" (but didn't verify output)
+   - ❌ "According to my analysis..." (without opening PDF)
+   - ❌ "Should be working now" (without visual confirmation)
+   - ✅ "I opened the PDF and verified the links work correctly"
+   - ✅ "Visual inspection shows proper alignment"
+   - ✅ "Tested the form fields and they function as expected"
+
+4. **Build and Test Commands** (from CLAUDE.md updates)
    - Add test to CMakeLists.txt
    - Build with `cmake --build . --config Release`
    - Run specific test: `ctest --test-dir . -C Release -R TestName`
    - Verbose testing: `ctest --test-dir . -C Release --verbose -R TestName`
    - Full test suite: `ctest --test-dir . -C Release`
-   - Verify output files are created correctly
+   - **Verify output files are created correctly AND look correct**
 
-4. **Quality Standards Following PR #313**
+5. **Quality Standards Following PR #313**
    - **Incremental testing**: Test components as they're built
    - **Edge case handling**: Include error conditions and boundary cases
    - **Clear documentation**: Use meaningful variable names and explain design decisions
    - **Flexible APIs**: Allow per-item overrides and exceptions to defaults
    - **Complete workflows**: Show entire process from start to finish
 
-5. **Delivery**
+6. **Delivery**
    - Create descriptive branch name (e.g., `example/form-filling`)
    - Commit with clear message describing the example
    - Create draft PR with:
