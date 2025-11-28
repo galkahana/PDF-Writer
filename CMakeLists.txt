@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.19)
 # Soname
 # MAJOR is incremented when symbols are removed or changed in an incompatible way
 # MINOR is incremented when new symbols are added
-project(PDFHummus VERSION 4.7.0)
+project(PDFHummus VERSION 4.8.0)
 
 
 option(USE_BUNDLED  "Whether to use bundled libraries" TRUE)
