@@ -8,7 +8,8 @@ Welcome to the PDF-Writer user guide! PDF-Writer is a comprehensive C++ library 
 - **PDF-to-PDF operations**: Powerful capabilities for reusing existing PDF content - create templates, merge documents, compose pages
 - **Parsing & modification**: Not just creation - read, extract, and modify existing PDFs
 - **Cross-platform**: Works on Windows, macOS, Linux, iOS
-- **No dependencies**: Core functionality works standalone; optional features for images (LibJpeg, LibPng, LibTiff) and encryption (OpenSSL)
+- **Bundled dependencies**: All libraries included (FreeType, Zlib, LibPng, LibTiff, etc.) - just add to your project and build
+- **Minimal external dependencies**: Only OpenSSL is external (optional, for PDF 2.0 encryption only)
 
 ## Quick Start
 

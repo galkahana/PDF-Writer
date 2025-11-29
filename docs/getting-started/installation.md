@@ -6,7 +6,10 @@ This guide shows you how to set up PDF-Writer in your C++ project.
 
 - **Compiler**: Visual Studio (Windows), GCC, or Clang (Linux/macOS)
 - **CMake**: 3.10 or later ([download](https://cmake.org/))
-- **Optional**: OpenSSL (for PDF 2.0 encryption features)
+
+**That's it!** All other dependencies (FreeType, Zlib, LibPng, LibTiff, LibJpeg, LibAesgm) are bundled with the library.
+
+**Optional**: OpenSSL (only for PDF 2.0 encryption features - PDF 1.7 and earlier encryption works without it)
 
 ## Quick Start
 
@@ -107,26 +110,39 @@ target_link_libraries(myapp PDFHummus::PDFWriter)
 - Larger repository
 - Manual updates
 
+## Bundled Dependencies
+
+**PDF-Writer bundles all required libraries** for portability and easy setup:
+
+- **FreeType** - Font rendering (always included)
+- **Zlib** - Compression (always included)
+- **LibPng** - PNG image support (included by default)
+- **LibTiff** - TIFF image support (included by default)
+- **LibJpeg** - JPEG decoding for parsing (included by default)
+- **LibAesgm** - AES encryption (included by default)
+
+**OpenSSL** is the only external dependency (required only for PDF 2.0 encryption features).
+
+This bundling ensures consistent behavior across platforms and eliminates dependency management headaches.
+
 ## Customizing the Build
 
-PDF-Writer has optional features you can enable/disable:
+You can disable optional features if needed:
 
 ### Disabling Image Format Support
 
-If you don't need certain image formats, you can reduce dependencies:
+**JPEG embedding** is native to PDF and always available. The flags below control parsing/decoding and other formats:
 
 ```bash
-# Disable JPEG support
+# Disable JPEG decoding (for parsing existing PDFs with JPEGs)
+# Note: JPEG embedding still works (native PDF support)
 cmake .. -DPDFHUMMUS_NO_DCT=TRUE
 
-# Disable PNG support
+# Disable PNG support (removes bundled LibPng)
 cmake .. -DPDFHUMMUS_NO_PNG=TRUE
 
-# Disable TIFF support
+# Disable TIFF support (removes bundled LibTiff)
 cmake .. -DPDFHUMMUS_NO_TIFF=TRUE
-
-# Disable all image formats
-cmake .. -DPDFHUMMUS_NO_DCT=TRUE -DPDFHUMMUS_NO_PNG=TRUE -DPDFHUMMUS_NO_TIFF=TRUE
 ```
 
 In FetchContent:
@@ -137,15 +153,22 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/galkahana/PDF-Writer.git
   GIT_TAG        v4.8.0
 )
-set(PDFHUMMUS_NO_PNG TRUE CACHE BOOL "" FORCE)  # Disable PNG
+# Disable PNG if not needed
+set(PDFHUMMUS_NO_PNG TRUE CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(PDFHummus)
 ```
 
-### Disabling Encryption (PDF 2.0)
+**When to disable**:
+- Building for embedded systems with size constraints
+- Only using JPEG images
+- Reducing attack surface for security-sensitive applications
 
-If you don't need encryption features and want to avoid OpenSSL dependency:
+### Disabling PDF 2.0 Encryption
+
+OpenSSL is required only for PDF 2.0 encryption features. PDF 1.7 and earlier encryption works natively.
 
 ```bash
+# Disable OpenSSL dependency (removes PDF 2.0 encryption only)
 cmake .. -DPDFHUMMUS_NO_OPENSSL=TRUE
 ```
 
@@ -155,6 +178,8 @@ Or in CMake:
 set(PDFHUMMUS_NO_OPENSSL TRUE CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(PDFHummus)
 ```
+
+**Note**: Standard encryption (RC4, AES-128, AES-256 for PDF 1.7 and earlier) still works without OpenSSL.
 
 ### Using System Libraries
 
