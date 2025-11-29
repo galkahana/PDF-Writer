@@ -389,7 +389,7 @@ switch(imageType) {
 
 ## Making Images Clickable
 
-Combine images with URL links (see [Links & Annotations](links-and-annotations.md)):
+Combine images with URL links (see [Links](links-and-annotations.md)):
 
 ```cpp
 // Place image
@@ -398,7 +398,7 @@ ctx->DrawImage(100, 700, "logo.jpg");
 
 // Add clickable link over the image
 PDFRectangle linkArea(100, 700, 100 + dims.first, 700 + dims.second);
-// See Links & Annotations guide for complete link creation
+// See Links guide for complete link creation
 ```
 
 ## Common Issues
@@ -476,7 +476,7 @@ opts.boundingBoxHeight = 300;
 
 ## Next Steps
 
-→ **[Links & Annotations](links-and-annotations.md)** - Make images clickable
+→ **[Links](links-and-annotations.md)** - Make images clickable
 → **[Graphics & Drawing](graphics-and-drawing.md)** - Draw shapes around images
 → **[PDF-to-PDF Operations](pdf-to-pdf.md)** - Use PDF pages as images
 
