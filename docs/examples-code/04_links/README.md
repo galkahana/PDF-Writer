@@ -34,6 +34,6 @@ Open `interactive_links.pdf` in a PDF viewer and click the blue underlined text:
 
 ## See Also
 
-- [Documentation: Links](../../guides/links-and-annotations.md)
+- [Documentation: Links](../../guides/links.md)
 - Test file: PDFWriterTesting/LinksTest.cpp
 - Test file: PDFWriterTesting/AppendAndReplaceURLAnnotations.cpp

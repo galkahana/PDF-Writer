@@ -1,4 +1,4 @@
-# Links & Annotations
+# Links
 
 Learn how to make your PDFs interactive with clickable URL links.
 

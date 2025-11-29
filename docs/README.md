@@ -52,7 +52,7 @@ New to PDF-Writer? Start here:
 - **[Low-Level APIs](guides/low-level-apis.md)** - Direct PDF object creation with ObjectsContext
 - **[Encryption & Security](guides/encryption-and-security.md)** - Password protection and encryption
 - **[Document Outlines](guides/outlines.md)** - Creating bookmarks and navigation
-- **[Links](guides/links-and-annotations.md)** - Creating clickable URL links
+- **[Links](guides/links.md)** - Creating clickable URL links
 
 ### Best Practices
 

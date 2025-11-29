@@ -389,7 +389,7 @@ switch(imageType) {
 
 ## Making Images Clickable
 
-Combine images with URL links (see [Links](links-and-annotations.md)):
+Combine images with URL links (see [Links](links.md)):
 
 ```cpp
 // Place image
@@ -476,7 +476,7 @@ opts.boundingBoxHeight = 300;
 
 ## Next Steps
 
-→ **[Links](links-and-annotations.md)** - Make images clickable
+→ **[Links](links.md)** - Make images clickable
 → **[Graphics & Drawing](graphics-and-drawing.md)** - Draw shapes around images
 → **[PDF-to-PDF Operations](pdf-to-pdf.md)** - Use PDF pages as images
 

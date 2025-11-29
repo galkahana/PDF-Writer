@@ -575,7 +575,7 @@ ctx->WriteText(100, 686, "Line 2", opts);  // 700 - 14
 Now that you can add text, learn about:
 
 → **[Images](images.md)** - Embed JPEG, PNG, and TIFF images
-→ **[Links](links-and-annotations.md)** - Make text clickable
+→ **[Links](links.md)** - Make text clickable
 → **[Graphics & Drawing](graphics-and-drawing.md)** - Draw shapes and lines
 
 ## See Also
