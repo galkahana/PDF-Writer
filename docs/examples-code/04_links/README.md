@@ -31,7 +31,6 @@ This will create `interactive_links.pdf` with clickable URL links.
 Open `interactive_links.pdf` in a PDF viewer and click the blue underlined text:
 1. **Visit PDF-Writer on GitHub** - Opens the GitHub repository
 2. **View Documentation** - Opens the PDF-Writer website
-3. **Email the Author** - Opens your email client
 
 ## See Also
 

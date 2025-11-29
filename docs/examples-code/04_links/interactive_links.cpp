@@ -51,7 +51,6 @@ int main(int argc, char* argv[]) {
 
         ctx->WriteText(100, 700, "Visit PDF-Writer on GitHub", linkOpts);
         ctx->WriteText(100, 650, "View Documentation", linkOpts);
-        ctx->WriteText(100, 600, "Email the Author", linkOpts);
 
         // Draw underlines for links (optional but conventional)
         AbstractContentContext::GraphicOptions lineOpts(
@@ -60,7 +59,6 @@ int main(int argc, char* argv[]) {
 
         ctx->DrawPath(100, 698, 280, 698, lineOpts);
         ctx->DrawPath(100, 648, 260, 648, lineOpts);
-        ctx->DrawPath(100, 598, 240, 598, lineOpts);
 
         // Example 4: Show link area visualization (for demo purposes)
         AbstractContentContext::TextOptions noteOpts(font, 10,
@@ -83,12 +81,6 @@ int main(int argc, char* argv[]) {
         pdfWriter.AttachURLLinktoCurrentPage(
             "https://www.pdfhummus.com",
             PDFRectangle(100, 647, 260, 662)
-        );
-
-        // Link 3: Email link (mailto:)
-        pdfWriter.AttachURLLinktoCurrentPage(
-            "mailto:galkahana@hotmail.com",
-            PDFRectangle(100, 597, 240, 612)
         );
 
         // Finalize page

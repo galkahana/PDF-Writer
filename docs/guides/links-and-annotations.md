@@ -1,6 +1,6 @@
 # Links & Annotations
 
-Learn how to make your PDFs interactive with clickable links and annotations.
+Learn how to make your PDFs interactive with clickable URL links.
 
 ## Quick Start
 
@@ -32,7 +32,7 @@ pdfWriter.EndPDF();
 
 ## URL Links
 
-Create clickable links that open web pages or email addresses.
+Create clickable links that open web pages.
 
 ### Basic URL Link
 
@@ -87,19 +87,6 @@ pdfWriter.AttachURLLinktoCurrentPage("https://yourcompany.com", linkRect);
 pdfWriter.WritePageAndRelease(page);
 ```
 
-### Email Links
-
-```cpp
-// Create mailto link
-pdfWriter.AttachURLLinktoCurrentPage("mailto:support@example.com", linkRect);
-
-// With subject and body (URL-encoded)
-pdfWriter.AttachURLLinktoCurrentPage(
-    "mailto:support@example.com?subject=Feedback&body=Hello",
-    linkRect
-);
-```
-
 ## Defining Link Areas
 
 The `PDFRectangle` defines where users can click:
@@ -136,137 +123,8 @@ pdfWriter.AttachURLLinktoCurrentPage("https://docs.example.com",
 pdfWriter.AttachURLLinktoCurrentPage("https://github.com/example/repo",
     PDFRectangle(100, 650, 280, 665));
 
-pdfWriter.AttachURLLinktoCurrentPage("mailto:contact@example.com",
+pdfWriter.AttachURLLinktoCurrentPage("https://example.com/contact",
     PDFRectangle(100, 600, 220, 615));
-
-pdfWriter.WritePageAndRelease(page);
-```
-
-## Internal Links
-
-Navigate between pages within the same PDF.
-
-### Link to Specific Page
-
-```cpp
-PDFWriter pdfWriter;
-pdfWriter.StartPDF("multi_page.pdf", ePDFVersion13);
-
-// Create first page
-PDFPage* page1 = new PDFPage();
-page1->SetMediaBox(PDFRectangle(0, 0, 595, 842));
-
-PageContentContext* ctx = pdfWriter.StartPageContentContext(page1);
-PDFUsedFont* font = pdfWriter.GetFontForFile("fonts/arial.ttf");
-
-AbstractContentContext::TextOptions textOpts(font, 12, AbstractContentContext::eRGB, 0x0000FF);
-ctx->WriteText(100, 700, "Go to Page 2", textOpts);
-
-pdfWriter.EndPageContentContext(ctx);
-
-// Write first page and get its ID
-ObjectIDType page1ID = pdfWriter.WritePageAndReturnPageID(page1);
-delete page1;
-
-// Create second page
-PDFPage* page2 = new PDFPage();
-page2->SetMediaBox(PDFRectangle(0, 0, 595, 842));
-
-ctx = pdfWriter.StartPageContentContext(page2);
-ctx->WriteText(100, 700, "This is Page 2", textOpts);
-pdfWriter.EndPageContentContext(ctx);
-
-ObjectIDType page2ID = pdfWriter.WritePageAndReturnPageID(page2);
-delete page2;
-
-// Now add link on page 1 pointing to page 2
-// Use modification mode to add link to already-written page
-pdfWriter.Shutdown("multi_page.pdf");
-
-// Reopen for modification
-pdfWriter.ModifyPDF("multi_page.pdf", ePDFVersion13, "multi_page.pdf");
-
-PDFPageInput pageInput(&pdfWriter.GetModifiedFileParser(), page1ID);
-PageContentContext* modCtx = pdfWriter.StartPageContentContext(&pageInput);
-
-// Add the internal link
-// Note: Internal link creation requires lower-level APIs
-// See Low-Level APIs guide for internal page navigation
-
-pdfWriter.EndPDF();
-```
-
-**Note**: Full internal link creation requires lower-level APIs. See the [Low-Level APIs](low-level-apis.md) guide for detailed internal navigation patterns.
-
-## Comment Annotations
-
-Add sticky note comments to your PDF pages.
-
-### Basic Comment
-
-```cpp
-#include "PDFComment.h"
-
-PageContentContext* ctx = pdfWriter.StartPageContentContext(page);
-
-// Draw content...
-
-pdfWriter.EndPageContentContext(ctx);
-
-// Create comment annotation
-PDFComment comment;
-comment.Text = "Review this section carefully";
-comment.CommentatorName = "Editor";
-comment.Time.Year = 2025;
-comment.Time.Month = 1;
-comment.Time.Day = 15;
-comment.Time.Hour = 10;
-comment.Time.Minute = 30;
-
-// Position the comment icon
-PDFRectangle commentRect(100, 700, 118, 718);  // 18x18 icon
-comment.Rect = commentRect;
-
-// Attach to current page
-pdfWriter.AttachCommentToCurrentPage(comment);
-
-pdfWriter.WritePageAndRelease(page);
-```
-
-### Comment with Color
-
-```cpp
-PDFComment comment;
-comment.Text = "Important: Verify these figures";
-comment.CommentatorName = "Reviewer";
-
-// Set comment color (RGB 0-255)
-comment.Color.Red = 255;
-comment.Color.Green = 255;
-comment.Color.Blue = 0;  // Yellow
-
-comment.Rect = PDFRectangle(200, 500, 218, 518);
-
-pdfWriter.AttachCommentToCurrentPage(comment);
-```
-
-### Multiple Comments
-
-```cpp
-pdfWriter.EndPageContentContext(ctx);
-
-// Add multiple comments
-PDFComment comment1;
-comment1.Text = "Check formatting";
-comment1.CommentatorName = "Alice";
-comment1.Rect = PDFRectangle(100, 700, 118, 718);
-pdfWriter.AttachCommentToCurrentPage(comment1);
-
-PDFComment comment2;
-comment2.Text = "Update contact information";
-comment2.CommentatorName = "Bob";
-comment2.Rect = PDFRectangle(100, 600, 118, 618);
-pdfWriter.AttachCommentToCurrentPage(comment2);
 
 pdfWriter.WritePageAndRelease(page);
 ```
@@ -329,7 +187,7 @@ int main() {
         pdfWriter.AttachURLLinktoCurrentPage("https://docs.example.com",
             PDFRectangle(100, 647, 250, 662));
 
-        pdfWriter.AttachURLLinktoCurrentPage("mailto:support@example.com",
+        pdfWriter.AttachURLLinktoCurrentPage("https://example.com/contact",
             PDFRectangle(100, 597, 225, 612));
 
         pdfWriter.WritePageAndRelease(page);
@@ -418,80 +276,6 @@ int main() {
 }
 ```
 
-### Example 3: Document with Comments
-
-```cpp
-#include "PDFWriter.h"
-#include "PDFPage.h"
-#include "PageContentContext.h"
-#include "PDFComment.h"
-#include <iostream>
-
-using namespace PDFHummus;
-
-int main() {
-    PDFWriter pdfWriter;
-    EStatusCode status = eSuccess;
-
-    do {
-        status = pdfWriter.StartPDF("annotated.pdf", ePDFVersion13);
-        if (status != eSuccess) break;
-
-        PDFPage* page = new PDFPage();
-        page->SetMediaBox(PDFRectangle(0, 0, 595, 842));
-
-        PageContentContext* ctx = pdfWriter.StartPageContentContext(page);
-        PDFUsedFont* font = pdfWriter.GetFontForFile("fonts/arial.ttf");
-
-        // Document content
-        AbstractContentContext::TextOptions textOpts(font, 12,
-            AbstractContentContext::eGray, 0);
-
-        ctx->WriteText(100, 750, "Q1 Revenue Report", textOpts);
-        ctx->WriteText(100, 700, "Total Revenue: $1,234,567", textOpts);
-        ctx->WriteText(100, 650, "Growth Rate: 15%", textOpts);
-
-        pdfWriter.EndPageContentContext(ctx);
-
-        // Add review comment
-        PDFComment comment1;
-        comment1.Text = "Please verify these numbers with accounting";
-        comment1.CommentatorName = "Manager";
-        comment1.Time.Year = 2025;
-        comment1.Time.Month = 1;
-        comment1.Time.Day = 15;
-        comment1.Color.Red = 255;
-        comment1.Color.Green = 255;
-        comment1.Color.Blue = 0;  // Yellow
-        comment1.Rect = PDFRectangle(80, 700, 98, 718);
-        pdfWriter.AttachCommentToCurrentPage(comment1);
-
-        // Add approval comment
-        PDFComment comment2;
-        comment2.Text = "Looks good, approved";
-        comment2.CommentatorName = "Director";
-        comment2.Time.Year = 2025;
-        comment2.Time.Month = 1;
-        comment2.Time.Day = 16;
-        comment2.Color.Red = 0;
-        comment2.Color.Green = 255;
-        comment2.Color.Blue = 0;  // Green
-        comment2.Rect = PDFRectangle(80, 650, 98, 668);
-        pdfWriter.AttachCommentToCurrentPage(comment2);
-
-        pdfWriter.WritePageAndRelease(page);
-
-        status = pdfWriter.EndPDF();
-        if (status != eSuccess) break;
-
-        std::cout << "Created annotated.pdf with comments!" << std::endl;
-
-    } while(false);
-
-    return (status == eSuccess) ? 0 : 1;
-}
-```
-
 ## Common Issues
 
 ### Link Not Clickable
@@ -525,43 +309,19 @@ pdfWriter.AttachURLLinktoCurrentPage("https://example.com", rect);  // Right tim
 pdfWriter.WritePageAndRelease(page);
 ```
 
-### Comment Not Showing
+## Other Annotations
 
-**Problem**: Rectangle defines comment icon position, must be visible
+URL links are the high-level annotation feature available in PDF-Writer. For other annotation types (comments, highlights, shapes, stamps, etc.), you'll need to use lower-level APIs with `ObjectsContext`.
 
-```cpp
-// Ensure comment rectangle is within page bounds
-PDFRectangle commentRect(100, 700, 118, 718);  // 18x18 icon
-comment.Rect = commentRect;
-
-// Color helps visibility
-comment.Color.Red = 255;
-comment.Color.Green = 255;
-comment.Color.Blue = 0;
-```
-
-## Advanced Annotations
-
-For more complex annotation types, you'll need lower-level APIs:
-
-- **Highlight annotations** - Highlight text passages
-- **Shape annotations** - Circles, squares, polygons
-- **File attachments** - Embed files in PDF
-- **Popup annotations** - Expandable popups
-- **Free text annotations** - Text boxes
-- **Stamp annotations** - "Approved", "Draft" stamps
-
-See the [Low-Level APIs](low-level-apis.md) guide for creating these advanced annotations.
+See the [Low-Level APIs](low-level-apis.md) guide for creating advanced annotations.
 
 ## Tips and Best Practices
 
 1. **Visual feedback** - Use blue color and underlines for clickable text
 2. **Test link areas** - Verify rectangles cover the intended area
 3. **Timing matters** - Always add links after `EndPageContentContext()`
-4. **Comment colors** - Use colors to categorize comments (red = urgent, yellow = review, green = approved)
-5. **Accessibility** - Provide alternative text for screen readers when possible
-6. **Link validation** - Verify URLs are properly formatted before adding
-7. **Rectangle precision** - Use `GetImageDimensions()` for exact image link areas
+4. **Link validation** - Verify URLs are properly formatted before adding
+5. **Rectangle precision** - Use `GetImageDimensions()` for exact image link areas
 
 ## Next Steps
 
@@ -580,4 +340,3 @@ A complete, compilable example is available at:
 - [Text & Fonts](text-and-fonts.md#measuring-text) - Text measurement for precise link areas
 - [Images](images.md) - Making images clickable
 - Test file: PDFWriterTesting/LinksTest.cpp:35
-- Test file: PDFWriterTesting/PDFCommentWriter.cpp:41
