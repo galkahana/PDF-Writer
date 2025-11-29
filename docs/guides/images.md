@@ -295,6 +295,73 @@ delete formXObject;
 
 **Note**: Any class implementing `IByteReaderWithPosition` can be used as a stream source.
 
+## Low-Level Image APIs
+
+For advanced control, you can create image objects manually instead of using `DrawImage()`:
+
+### Image XObject vs Form XObject
+
+**Image XObject** (JPEG only):
+- Always sized at 1x1 units
+- Requires manual transformation when placing
+- More control over exact positioning
+
+```cpp
+// Create image XObject at 1x1 size
+PDFImageXObject* imageXObject =
+    pdfWriter.CreateImageXObjectFromJPGFile("photo.jpg");
+
+PageContentContext* ctx = pdfWriter.StartPageContentContext(page);
+
+// Place with custom transformation (scale to 400x300)
+ctx->q();
+ctx->cm(400, 0, 0, 300, 100, 500);  // Scale and position
+ctx->Do(page->GetResourcesDictionary().AddImageXObjectMapping(imageXObject));
+ctx->Q();
+
+delete imageXObject;
+```
+
+**Form XObject** (all formats):
+- Auto-sized based on image resolution
+- Simpler positioning with translation
+- Can be reused efficiently
+
+```cpp
+// Create form XObject at natural dimensions
+PDFFormXObject* formXObject =
+    pdfWriter.CreateFormXObjectFromJPGFile("photo.jpg");
+
+PageContentContext* ctx = pdfWriter.StartPageContentContext(page);
+
+// Place with simple translation
+ctx->q();
+ctx->cm(1, 0, 0, 1, 100, 500);  // Just translate to position
+ctx->Do(page->GetResourcesDictionary().AddFormXObjectMapping(formXObject->GetObjectID()));
+ctx->Q();
+
+delete formXObject;
+```
+
+**Also available for PNG and TIFF**:
+```cpp
+#ifndef PDFHUMMUS_NO_PNG
+PDFFormXObject* pngForm = pdfWriter.CreateFormXObjectFromPNGFile("image.png");
+#endif
+
+#ifndef PDFHUMMUS_NO_TIFF
+PDFFormXObject* tiffForm = pdfWriter.CreateFormXObjectFromTIFFFile("scan.tif");
+#endif
+```
+
+**When to use low-level APIs**:
+- Need to reuse the same image multiple times efficiently
+- Require forward references (allocating object ID before creation)
+- Want manual control over resource dictionaries
+- Building custom page composition workflows
+
+For more details, see [Low-Level APIs](low-level-apis.md).
+
 ## Image Type Detection
 
 Automatically determine image format:
