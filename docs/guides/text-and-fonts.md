@@ -200,22 +200,7 @@ TextOptions(font, 14, AbstractContentContext::eRGB, 0x000000, 1.0);
 
 ## Text Positioning
 
-PDF uses a **bottom-left origin** coordinate system:
-
-```
-     ← X increases right
-  ↑
-  Y increases up
-
-(0, 842) ─────────────── (595, 842)
-    │                          │
-    │        A4 Page          │
-    │      595 x 842          │
-    │                          │
-(0, 0) ───────────────── (595, 0)
-```
-
-**Examples**:
+PDF uses a **bottom-left origin** coordinate system (see [Core Concepts](../getting-started/core-concepts.md#coordinate-system) for details).
 
 ```cpp
 // Near top of A4 page
@@ -223,15 +208,12 @@ ctx->WriteText(100, 750, "Near top", textOptions);
 
 // Near bottom
 ctx->WriteText(100, 50, "Near bottom", textOptions);
-
-// Centered horizontally (approximate)
-ctx->WriteText(250, 400, "Centered", textOptions);
 ```
 
-**Coordinates are**:
-- In points (1 point = 1/72 inch)
-- At the text **baseline** (bottom of most letters)
-- At the **left edge** of the text
+**Key points**:
+- Coordinates are at the text **baseline** (bottom of most letters), not top
+- Position is at the **left edge** of the text
+- Y increases upward (0 is at bottom of page)
 
 ## Unicode and International Text
 

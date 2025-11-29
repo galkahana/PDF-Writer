@@ -67,7 +67,7 @@ status = pdfWriter.EndPDF();
 
 ## Error Handling Pattern
 
-PDF-Writer uses the **do-while-false pattern** for error handling:
+The **recommended pattern** for error handling is do-while-false:
 
 ```cpp
 PDFWriter pdfWriter;
@@ -190,21 +190,16 @@ Open `output.pdf` in any PDF viewer - you'll see a blank A4 page!
 
 ## Adding Multiple Pages
 
-Want more than one page? Just write multiple pages in the loop:
+Want more than one page? Create and write each page:
 
 ```cpp
-PDFPage* page = new PDFPage();
-page->SetMediaBox(PDFRectangle(0, 0, 595, 842));
-
-// Write 5 pages
+// Write 5 blank pages
 for (int i = 0; i < 5; i++) {
-    pdfWriter.WritePage(page);
+    PDFPage* page = new PDFPage();
+    page->SetMediaBox(PDFRectangle(0, 0, 595, 842));
+    pdfWriter.WritePageAndRelease(page);
 }
-
-delete page;
 ```
-
-**Note**: You can reuse the same `PDFPage` object if all pages have identical properties.
 
 ## Next Steps
 
