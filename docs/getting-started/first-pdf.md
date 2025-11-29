@@ -16,40 +16,47 @@ using namespace PDFHummus;
 
 int main() {
     PDFWriter pdfWriter;
-    EStatusCode status;
+    EStatusCode status = eSuccess;
+    PDFPage* page = NULL;
 
-    // Start a new PDF document
-    status = pdfWriter.StartPDF("output.pdf", ePDFVersion13);
-    if (status != eSuccess) {
-        std::cout << "Failed to create PDF" << std::endl;
-        return 1;
-    }
+    do {
+        // Start a new PDF document
+        status = pdfWriter.StartPDF("output.pdf", ePDFVersion13);
+        if (status != eSuccess) {
+            std::cout << "Failed to start PDF" << std::endl;
+            break;
+        }
 
-    // Create a page (standard A4 size: 595x842 points)
-    PDFPage* page = new PDFPage();
-    page->SetMediaBox(PDFRectangle(0, 0, 595, 842));
+        // Create a page (standard A4 size: 595x842 points)
+        page = new PDFPage();
+        page->SetMediaBox(PDFRectangle(0, 0, 595, 842));
 
-    // Write the page to the PDF
-    status = pdfWriter.WritePage(page);
-    if (status != eSuccess) {
-        std::cout << "Failed to write page" << std::endl;
-        delete page;
-        return 1;
-    }
+        // Write the page to the PDF
+        status = pdfWriter.WritePage(page);
+        if (status != eSuccess) {
+            std::cout << "Failed to write page" << std::endl;
+            break;
+        }
 
+        // Finalize the PDF
+        status = pdfWriter.EndPDF();
+        if (status != eSuccess) {
+            std::cout << "Failed to end PDF" << std::endl;
+            break;
+        }
+
+        std::cout << "Successfully created output.pdf!" << std::endl;
+
+    } while(false);
+
+    // Cleanup
     delete page;
 
-    // Finalize the PDF
-    status = pdfWriter.EndPDF();
-    if (status != eSuccess) {
-        std::cout << "Failed to finalize PDF" << std::endl;
-        return 1;
-    }
-
-    std::cout << "Successfully created output.pdf!" << std::endl;
-    return 0;
+    return (status == eSuccess) ? 0 : 1;
 }
 ```
+
+This uses the **do-while-false pattern**, which is the recommended error handling approach in PDF-Writer. It ensures proper cleanup regardless of where an error occurs.
 
 **Save this as `first_pdf.cpp`**
 
@@ -215,66 +222,13 @@ Or explore core concepts:
 
 → **[Core Concepts](core-concepts.md)** - Understand PDF-Writer's architecture
 
-## Complete Example with Error Handling
-
-Here's a production-ready version with proper error handling and cleanup:
-
-```cpp
-#include "PDFWriter.h"
-#include "PDFPage.h"
-#include "PDFRectangle.h"
-#include <iostream>
-
-using namespace PDFHummus;
-
-int main() {
-    PDFWriter pdfWriter;
-    EStatusCode status = eSuccess;
-    PDFPage* page = NULL;
-
-    do {
-        // Start PDF
-        status = pdfWriter.StartPDF("output.pdf", ePDFVersion13);
-        if (status != eSuccess) {
-            std::cout << "Failed to start PDF" << std::endl;
-            break;
-        }
-
-        // Create and write page
-        page = new PDFPage();
-        page->SetMediaBox(PDFRectangle(0, 0, 595, 842));
-
-        status = pdfWriter.WritePage(page);
-        if (status != eSuccess) {
-            std::cout << "Failed to write page" << std::endl;
-            break;
-        }
-
-        // Finalize
-        status = pdfWriter.EndPDF();
-        if (status != eSuccess) {
-            std::cout << "Failed to end PDF" << std::endl;
-            break;
-        }
-
-        std::cout << "Success!" << std::endl;
-
-    } while(false);
-
-    // Cleanup
-    delete page;
-
-    return (status == eSuccess) ? 0 : 1;
-}
-```
-
-This uses the **do-while-false pattern** commonly used in PDF-Writer for error handling with multiple cleanup steps. See [Error Handling Patterns](../guides/error-handling.md) for more details.
-
 ## Compilable Example
 
 A complete, compilable version of this example is available at:
 
-→ **[examples-code/01_first_pdf/](../../examples-code/01_first_pdf/)** (coming soon)
+→ **[examples-code/01_first_pdf/](../examples-code/01_first_pdf/)**
+
+For more on the do-while-false pattern and error handling, see [Error Handling Patterns](../guides/error-handling.md).
 
 ## Troubleshooting
 

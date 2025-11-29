@@ -62,14 +62,14 @@ New to PDF-Writer? Start here:
 
 ## Code Examples
 
-Complete, compilable examples:
+Complete, compilable examples with build instructions:
 
-- **[Basic Examples](examples/basic-examples.md)** - Simple PDF creation workflows
-- **[Text Examples](examples/text-examples.md)** - Font and text rendering
-- **[Image Examples](examples/image-examples.md)** - Working with images
-- **[PDF-to-PDF Examples](examples/pdf-to-pdf-examples.md)** - Reusing existing content
-- **[Parsing Examples](examples/parsing-examples.md)** - Reading and extracting data
-- **[Modification Examples](examples/modification-examples.md)** - Editing existing PDFs
+- **[First PDF](examples-code/01_first_pdf/)** - Minimal working example
+- **[Text & Fonts](examples-code/02_text_and_fonts/)** - Font loading and text rendering
+- **Images** (coming soon) - Working with JPEG, PNG, TIFF
+- **PDF-to-PDF** (coming soon) - Reusing existing content
+- **Parsing** (coming soon) - Reading and extracting data
+- **Modification** (coming soon) - Editing existing PDFs
 
 ## Additional Resources
 

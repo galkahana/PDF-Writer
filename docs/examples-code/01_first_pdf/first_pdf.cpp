@@ -19,36 +19,41 @@ using namespace PDFHummus;
 
 int main() {
     PDFWriter pdfWriter;
-    EStatusCode status;
+    EStatusCode status = eSuccess;
+    PDFPage* page = NULL;
 
-    // Start a new PDF document
-    status = pdfWriter.StartPDF("output.pdf", ePDFVersion13);
-    if (status != eSuccess) {
-        std::cout << "Failed to create PDF" << std::endl;
-        return 1;
-    }
+    do {
+        // Start a new PDF document
+        status = pdfWriter.StartPDF("output.pdf", ePDFVersion13);
+        if (status != eSuccess) {
+            std::cout << "Failed to start PDF" << std::endl;
+            break;
+        }
 
-    // Create a page (standard A4 size: 595x842 points)
-    PDFPage* page = new PDFPage();
-    page->SetMediaBox(PDFRectangle(0, 0, 595, 842));
+        // Create a page (standard A4 size: 595x842 points)
+        page = new PDFPage();
+        page->SetMediaBox(PDFRectangle(0, 0, 595, 842));
 
-    // Write the page to the PDF
-    status = pdfWriter.WritePage(page);
-    if (status != eSuccess) {
-        std::cout << "Failed to write page" << std::endl;
-        delete page;
-        return 1;
-    }
+        // Write the page to the PDF
+        status = pdfWriter.WritePage(page);
+        if (status != eSuccess) {
+            std::cout << "Failed to write page" << std::endl;
+            break;
+        }
 
+        // Finalize the PDF
+        status = pdfWriter.EndPDF();
+        if (status != eSuccess) {
+            std::cout << "Failed to end PDF" << std::endl;
+            break;
+        }
+
+        std::cout << "Successfully created output.pdf!" << std::endl;
+
+    } while(false);
+
+    // Cleanup
     delete page;
 
-    // Finalize the PDF
-    status = pdfWriter.EndPDF();
-    if (status != eSuccess) {
-        std::cout << "Failed to finalize PDF" << std::endl;
-        return 1;
-    }
-
-    std::cout << "Successfully created output.pdf!" << std::endl;
-    return 0;
+    return (status == eSuccess) ? 0 : 1;
 }
