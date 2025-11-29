@@ -67,10 +67,8 @@ Complete, compilable examples with build instructions:
 
 - **[First PDF](examples-code/01_first_pdf/)** - Minimal working example
 - **[Text & Fonts](examples-code/02_text_and_fonts/)** - Font loading and text rendering
-- **Images** (coming soon) - Working with JPEG, PNG, TIFF
-- **PDF-to-PDF** (coming soon) - Reusing existing content
-- **Parsing** (coming soon) - Reading and extracting data
-- **Modification** (coming soon) - Editing existing PDFs
+- **[Images](examples-code/03_images/)** - Working with JPEG, PNG, TIFF
+- **[Links](examples-code/04_links/)** - Creating clickable URL links
 
 ## Additional Resources
 
