@@ -26,6 +26,7 @@ New to PDF-Writer? Start here:
 - **[Creating PDF Documents](guides/creating-pdfs.md)** - Starting a PDF, adding pages, document properties
 - **[Text & Fonts](guides/text-and-fonts.md)** - Font loading, text rendering, Unicode support
 - **[Images](guides/images.md)** - Embedding JPEG, PNG, TIFF images
+- **[Links](guides/links.md)** - Creating clickable URL links
 - **[Graphics & Drawing](guides/graphics-and-drawing.md)** - Shapes, paths, colors, line styles
 
 ### Working with Existing PDFs
@@ -52,7 +53,6 @@ New to PDF-Writer? Start here:
 - **[Low-Level APIs](guides/low-level-apis.md)** - Direct PDF object creation with ObjectsContext
 - **[Encryption & Security](guides/encryption-and-security.md)** - Password protection and encryption
 - **[Document Outlines](guides/outlines.md)** - Creating bookmarks and navigation
-- **[Links](guides/links.md)** - Creating clickable URL links
 
 ### Best Practices
 
