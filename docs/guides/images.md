@@ -480,9 +480,14 @@ opts.boundingBoxHeight = 300;
 → **[Graphics & Drawing](graphics-and-drawing.md)** - Draw shapes around images
 → **[PDF-to-PDF Operations](pdf-to-pdf.md)** - Use PDF pages as images
 
+## Compilable Example
+
+A complete, compilable example is available at:
+
+→ **[examples-code/03_images/](../examples-code/03_images/)** - Shows native size, scaling, and fit transformations
+
 ## See Also
 
 - [Core Concepts](../getting-started/core-concepts.md#coordinate-system) - Coordinate system
-- [Example Code](../examples-code/03_images/) - Compilable image examples
 - Test file: PDFWriterTesting/HighLevelImages.cpp:55
 - Test file: PDFWriterTesting/JPGImageTest.cpp:76
