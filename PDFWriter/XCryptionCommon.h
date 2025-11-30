@@ -21,7 +21,7 @@ limitations under the License.
 #pragma once
 
 #include "ObjectsBasicTypes.h"
-#include "ByteList.h"
+#include "ByteListUtils.h"
 
 #include <list>
 

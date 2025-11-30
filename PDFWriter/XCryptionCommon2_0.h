@@ -21,7 +21,7 @@
 #pragma once
 
 #ifndef PDFHUMMUS_NO_OPENSSL
-#include "ByteList.h"
+#include "ByteListUtils.h"
 
 typedef std::pair<ByteList, ByteList> ByteListPair;
 

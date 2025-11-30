@@ -41,7 +41,7 @@ limitations under the License.
 #endif
 #include "Trace.h"
 #include "Deletable.h"
-#include "ByteList.h"
+#include "ByteListUtils.h"
 #include "XCryptionCommon.h"
 #include "XCryptionCommon2_0.h"
 #include <memory>

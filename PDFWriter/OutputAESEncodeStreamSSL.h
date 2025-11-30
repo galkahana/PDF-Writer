@@ -23,10 +23,9 @@ limitations under the License.
 #include "IOBasicTypes.h"
 #include "AESConstants.h"
 
-#include <string>
+#include "ByteList.h"
 #include <openssl/evp.h>
 
-typedef std::basic_string<IOBasicTypes::Byte> ByteList;
 
 
 class OutputAESEncodeStreamSSL : public IByteWriterWithPosition
