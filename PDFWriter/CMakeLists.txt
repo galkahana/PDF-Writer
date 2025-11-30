@@ -26,6 +26,8 @@ ANSIFontWriter.cpp
 Ascii7Encoding.cpp
 ArrayOfInputStreamsStream.cpp
 ByteList.cpp
+ByteListSSOImpl.cpp
+ByteListVectorImpl.cpp
 CatalogInformation.cpp
 CFFANSIFontWriter.cpp
 CFFDescendentFontWriter.cpp
@@ -189,6 +191,8 @@ ArrayOfInputStreamsStream.h
 BetweenIncluding.h
 BoxingBase.h
 ByteList.h
+ByteListSSOImpl.h
+ByteListVectorImpl.h
 CatalogInformation.h
 CFFANSIFontWriter.h
 CFFDescendentFontWriter.h
@@ -806,6 +810,8 @@ SimpleStringTokenizer.h
 source_group("XCryption" FILES
 ByteList.cpp
 ByteList.h
+ByteListSSOImpl.cpp
+ByteListSSOImpl.h
 DecryptionHelper.cpp
 DecryptionHelper.h
 EncryptionHelper.cpp

@@ -1,94 +1,40 @@
 #include "ByteList.h"
+#include "ByteListSSOImpl.h"
+#include "ByteListVectorImpl.h"
 #include <algorithm>
 #include <iterator>
+#include <cstring>
 
 using namespace IOBasicTypes;
 
-// ===== SSOImpl Implementation =====
-
-ByteList::SSOImpl::SSOImpl() : mSize(0) {
+ByteList::ByteList() : mImpl(new ByteListSSOImpl()) {
 }
 
-ByteList::SSOImpl::SSOImpl(const Byte* inData, size_t inSize) : mSize(inSize) {
-	if (inSize > 0) {
-		std::memcpy(mBuffer, inData, inSize);
-	}
-}
-
-void ByteList::SSOImpl::push_back(Byte inByte) {
-	mBuffer[mSize++] = inByte;
-}
-
-size_t ByteList::SSOImpl::size() const {
-	return mSize;
-}
-
-bool ByteList::SSOImpl::empty() const {
-	return mSize == 0;
-}
-
-void ByteList::SSOImpl::clear() {
-	mSize = 0;
-}
-
-const Byte* ByteList::SSOImpl::data() const {
-	return mBuffer;
-}
-
-Byte* ByteList::SSOImpl::data() {
-	return mBuffer;
-}
-
-Byte& ByteList::SSOImpl::operator[](size_t inIndex) {
-	return mBuffer[inIndex];
-}
-
-const Byte& ByteList::SSOImpl::operator[](size_t inIndex) const {
-	return mBuffer[inIndex];
-}
-
-ByteList::SSOImpl::iterator ByteList::SSOImpl::begin() {
-	return mBuffer;
-}
-
-ByteList::SSOImpl::const_iterator ByteList::SSOImpl::begin() const {
-	return mBuffer;
-}
-
-ByteList::SSOImpl::iterator ByteList::SSOImpl::end() {
-	return mBuffer + mSize;
-}
-
-ByteList::SSOImpl::const_iterator ByteList::SSOImpl::end() const {
-	return mBuffer + mSize;
-}
-
-// ===== ByteList Implementation =====
-
-ByteList::ByteList() : mUsingSSO(true) {
+ByteList::~ByteList() {
+	delete mImpl;
 }
 
 ByteList::ByteList(const Byte* inData, size_t inSize) {
-	if (inSize <= SSO_CAPACITY) {
-		mUsingSSO = true;
-		mSSOBuffer = SSOImpl(inData, inSize);
+	ByteListSSOImpl ssoImpl;
+	if (ssoImpl.canHandle(inSize)) {
+		mImpl = new ByteListSSOImpl(inData, inSize);
 	} else {
-		mUsingSSO = false;
-		mVectorBuffer.assign(inData, inData + inSize);
+		mImpl = new ByteListVectorImpl(inData, inSize);
 	}
 }
 
 template<typename InputIterator>
 ByteList::ByteList(InputIterator inFirst, InputIterator inLast) {
 	size_t distance = std::distance(inFirst, inLast);
-	if (distance <= SSO_CAPACITY) {
-		mUsingSSO = true;
+	ByteListSSOImpl tempImpl;
+	if (tempImpl.canHandle(distance)) {
+		ByteListSSOImpl* ssoImpl = new ByteListSSOImpl();
 		for (InputIterator it = inFirst; it != inLast; ++it) {
-			mSSOBuffer.push_back(*it);
+			ssoImpl->push_back(*it);
 		}
+		mImpl = ssoImpl;
 	} else {
-		mUsingSSO = false;
-		mVectorBuffer.assign(inFirst, inLast);
+		mImpl = new ByteListVectorImpl(inFirst, inLast);
 	}
 }
 
@@ -96,87 +42,66 @@ ByteList::ByteList(InputIterator inFirst, InputIterator inLast) {
 template ByteList::ByteList(const Byte*, const Byte*);
 template ByteList::ByteList(Byte*, Byte*);
 
-ByteList::ByteList(const ByteList& inOther) : mUsingSSO(inOther.mUsingSSO) {
-	if (mUsingSSO) {
-		mSSOBuffer = inOther.mSSOBuffer;
-	} else {
-		mVectorBuffer = inOther.mVectorBuffer;
-	}
+ByteList::ByteList(const ByteList& inOther) : mImpl(inOther.mImpl->clone()) {
 }
 
 ByteList& ByteList::operator=(const ByteList& inOther) {
 	if (this != &inOther) {
-		mUsingSSO = inOther.mUsingSSO;
-		if (mUsingSSO) {
-			mSSOBuffer = inOther.mSSOBuffer;
-			mVectorBuffer.clear();
-		} else {
-			mVectorBuffer = inOther.mVectorBuffer;
-			mSSOBuffer.clear();
-		}
+		delete mImpl;
+		mImpl = inOther.mImpl->clone();
 	}
 	return *this;
 }
 
 Byte& ByteList::operator[](size_t inIndex) {
-	return mUsingSSO ? mSSOBuffer[inIndex] : mVectorBuffer[inIndex];
+	return (*mImpl)[inIndex];
 }
 
 const Byte& ByteList::operator[](size_t inIndex) const {
-	return mUsingSSO ? mSSOBuffer[inIndex] : mVectorBuffer[inIndex];
+	return (*mImpl)[inIndex];
 }
 
 Byte& ByteList::back() {
-	return mUsingSSO ? mSSOBuffer[mSSOBuffer.size() - 1] : mVectorBuffer.back();
+	return (*mImpl)[mImpl->size() - 1];
 }
 
 const Byte& ByteList::back() const {
-	return mUsingSSO ? mSSOBuffer[mSSOBuffer.size() - 1] : mVectorBuffer.back();
+	return (*mImpl)[mImpl->size() - 1];
 }
 
 ByteList::iterator ByteList::begin() {
-	return mUsingSSO ? mSSOBuffer.begin() : (mVectorBuffer.empty() ? nullptr : &mVectorBuffer[0]);
+	return mImpl->begin();
 }
 
 ByteList::const_iterator ByteList::begin() const {
-	return mUsingSSO ? mSSOBuffer.begin() : (mVectorBuffer.empty() ? nullptr : &mVectorBuffer[0]);
+	return mImpl->begin();
 }
 
 ByteList::iterator ByteList::end() {
-	return mUsingSSO ? mSSOBuffer.end() : (mVectorBuffer.empty() ? nullptr : &mVectorBuffer[0] + mVectorBuffer.size());
+	return mImpl->end();
 }
 
 ByteList::const_iterator ByteList::end() const {
-	return mUsingSSO ? mSSOBuffer.end() : (mVectorBuffer.empty() ? nullptr : &mVectorBuffer[0] + mVectorBuffer.size());
+	return mImpl->end();
 }
 
 size_t ByteList::size() const {
-	return mUsingSSO ? mSSOBuffer.size() : mVectorBuffer.size();
+	return mImpl->size();
 }
 
 bool ByteList::empty() const {
-	return mUsingSSO ? mSSOBuffer.empty() : mVectorBuffer.empty();
+	return mImpl->empty();
 }
 
 void ByteList::push_back(Byte inByte) {
-	if (mUsingSSO) {
-		if (mSSOBuffer.size() < SSO_CAPACITY) {
-			mSSOBuffer.push_back(inByte);
-		} else {
-			switchToVector();
-			mVectorBuffer.push_back(inByte);
-		}
-	} else {
-		mVectorBuffer.push_back(inByte);
+	if (!mImpl->canHandle(mImpl->size() + 1)) {
+		switchToVector();
 	}
+	mImpl->push_back(inByte);
 }
 
 void ByteList::clear() {
-	if (mUsingSSO) {
-		mSSOBuffer.clear();
-	} else {
-		mVectorBuffer.clear();
-	}
+	mImpl->clear();
 }
 
 ByteList ByteList::substr(size_t inStart, size_t inLength) const {
@@ -195,31 +120,19 @@ void ByteList::append(const ByteList& inSource) {
 
 	size_t newSize = size() + inSource.size();
 	
-	if (mUsingSSO && newSize > SSO_CAPACITY) {
+	if (!mImpl->canHandle(newSize)) {
 		switchToVector();
 	}
 
-	if (mUsingSSO) {
-		for (size_t i = 0; i < inSource.size(); ++i) {
-			mSSOBuffer.push_back(inSource[i]);
-		}
-	} else {
-		mVectorBuffer.insert(mVectorBuffer.end(), inSource.begin(), inSource.end());
-	}
+	mImpl->append(inSource.begin(), inSource.end());
 }
 
 const Byte* ByteList::data() const {
-	return mUsingSSO ? mSSOBuffer.data() : (mVectorBuffer.empty() ? nullptr : &mVectorBuffer[0]);
+	return mImpl->data();
 }
 
 Byte* ByteList::data() {
-	return mUsingSSO ? mSSOBuffer.data() : (mVectorBuffer.empty() ? nullptr : &mVectorBuffer[0]);
-}
-
-ByteList ByteList::operator+(const ByteList& inOther) const {
-	ByteList result(*this);
-	result.append(inOther);
-	return result;
+	return mImpl->data();
 }
 
 bool ByteList::operator==(const ByteList& inOther) const {
@@ -229,21 +142,13 @@ bool ByteList::operator==(const ByteList& inOther) const {
 	return std::memcmp(data(), inOther.data(), size()) == 0;
 }
 
-bool ByteList::operator!=(const ByteList& inOther) const {
-	return !(*this == inOther);
-}
-
 void ByteList::switchToVector() {
-	if (!mUsingSSO) {
-		return;
-	}
-	
-	mVectorBuffer.assign(mSSOBuffer.begin(), mSSOBuffer.end());
-	mSSOBuffer.clear();
-	mUsingSSO = false;
+	// Assume we need to switch - caller already determined this
+	ByteListVectorImpl* newImpl = new ByteListVectorImpl(mImpl->begin(), mImpl->end());
+	delete mImpl;
+	mImpl = newImpl;
 }
 
-// ===== Helper Functions =====
 
 ByteList stringToByteList(const std::string& inString) {
 	return ByteList(reinterpret_cast<const Byte *>(inString.data()), inString.size());
@@ -258,7 +163,9 @@ void append(ByteList& ioTargetList, const ByteList& inSource) {
 }
 
 ByteList concat(const ByteList& inA, const ByteList& inB) {
-	return inA + inB;
+	ByteList result(inA);
+	result.append(inB);
+	return result;
 }
 
 std::string ByteListToString(const ByteList& inByteList) {
