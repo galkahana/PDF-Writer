@@ -24,11 +24,9 @@
 #include "IByteReader.h"
 #include "IOBasicTypes.h"
 #include "AESConstants.h"
+#include "ByteList.h"
 
-#include <string>
 #include <openssl/evp.h>
-
-typedef std::basic_string<IOBasicTypes::Byte> ByteList;
 
 class InputAESDecodeStreamSSL : public IByteReader
 {

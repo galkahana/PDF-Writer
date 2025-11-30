@@ -67,10 +67,7 @@
 
 #include "EStatusCode.h"
 #include "IOBasicTypes.h"
-#include <string>
-
-
-typedef std::basic_string<IOBasicTypes::Byte> ByteList;
+#include "ByteList.h"
 
 class MD5Generator
 {

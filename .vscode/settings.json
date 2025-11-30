@@ -88,6 +88,9 @@
         "xtr1common": "cpp",
         "xtree": "cpp",
         "xutility": "cpp",
-        "*.inc": "c"
+        "*.inc": "c",
+        "__verbose_abort": "cpp",
+        "execution": "cpp",
+        "print": "cpp"
     }
 }
