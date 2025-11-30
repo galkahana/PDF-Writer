@@ -28,11 +28,7 @@ ByteList::ByteList(InputIterator inFirst, InputIterator inLast) {
 	size_t distance = std::distance(inFirst, inLast);
 	ByteListSSOImpl tempImpl;
 	if (tempImpl.canHandle(distance)) {
-		ByteListSSOImpl* ssoImpl = new ByteListSSOImpl();
-		for (InputIterator it = inFirst; it != inLast; ++it) {
-			ssoImpl->push_back(*it);
-		}
-		mImpl = ssoImpl;
+		mImpl = new ByteListSSOImpl(inFirst, inLast);
 	} else {
 		mImpl = new ByteListVectorImpl(inFirst, inLast);
 	}

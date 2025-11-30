@@ -12,6 +12,17 @@ ByteListSSOImpl::ByteListSSOImpl(const Byte* inData, size_t inSize) : mSize(inSi
 	}
 }
 
+template<typename InputIterator>
+ByteListSSOImpl::ByteListSSOImpl(InputIterator inFirst, InputIterator inLast) : mSize(0) {
+	for (InputIterator it = inFirst; it != inLast; ++it) {
+		push_back(*it);
+	}
+}
+
+// Explicit instantiation for pointer types
+template ByteListSSOImpl::ByteListSSOImpl(const Byte*, const Byte*);
+template ByteListSSOImpl::ByteListSSOImpl(Byte*, Byte*);
+
 void ByteListSSOImpl::push_back(Byte inByte) {
 	mBuffer[mSize++] = inByte;
 }

@@ -10,6 +10,8 @@ class ByteListSSOImpl : public IByteListImpl {
 public:
 	ByteListSSOImpl();
 	ByteListSSOImpl(const IOBasicTypes::Byte* inData, size_t inSize);
+	template<typename InputIterator>
+	ByteListSSOImpl(InputIterator inFirst, InputIterator inLast);
 
 	// IByteListImpl interface
 	virtual void push_back(IOBasicTypes::Byte inByte);
