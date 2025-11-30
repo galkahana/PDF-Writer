@@ -7,30 +7,31 @@
 
 using namespace IOBasicTypes;
 
-ByteList::ByteList() : mImpl(new ByteListSSOImpl()) {
+ByteList::ByteList() : mImpl(&mSSOImpl) {
 }
 
 ByteList::~ByteList() {
-	delete mImpl;
 }
 
 ByteList::ByteList(const Byte* inData, size_t inSize) {
-	ByteListSSOImpl ssoImpl;
-	if (ssoImpl.canHandle(inSize)) {
-		mImpl = new ByteListSSOImpl(inData, inSize);
+	if (mSSOImpl.canHandle(inSize)) {
+		mSSOImpl = ByteListSSOImpl(inData, inSize);
+		mImpl = &mSSOImpl;
 	} else {
-		mImpl = new ByteListVectorImpl(inData, inSize);
+		mVectorImpl = ByteListVectorImpl(inData, inSize);
+		mImpl = &mVectorImpl;
 	}
 }
 
 template<typename InputIterator>
 ByteList::ByteList(InputIterator inFirst, InputIterator inLast) {
 	size_t distance = std::distance(inFirst, inLast);
-	ByteListSSOImpl tempImpl;
-	if (tempImpl.canHandle(distance)) {
-		mImpl = new ByteListSSOImpl(inFirst, inLast);
+	if (mSSOImpl.canHandle(distance)) {
+		mSSOImpl = ByteListSSOImpl(inFirst, inLast);
+		mImpl = &mSSOImpl;
 	} else {
-		mImpl = new ByteListVectorImpl(inFirst, inLast);
+		mVectorImpl = ByteListVectorImpl(inFirst, inLast);
+		mImpl = &mVectorImpl;
 	}
 }
 
@@ -38,13 +39,25 @@ ByteList::ByteList(InputIterator inFirst, InputIterator inLast) {
 template ByteList::ByteList(const Byte*, const Byte*);
 template ByteList::ByteList(Byte*, Byte*);
 
-ByteList::ByteList(const ByteList& inOther) : mImpl(inOther.mImpl->clone()) {
+ByteList::ByteList(const ByteList& inOther) {
+	if (inOther.mImpl == &inOther.mSSOImpl) {
+		mSSOImpl = inOther.mSSOImpl;
+		mImpl = &mSSOImpl;
+	} else {
+		mVectorImpl = inOther.mVectorImpl;
+		mImpl = &mVectorImpl;
+	}
 }
 
 ByteList& ByteList::operator=(const ByteList& inOther) {
 	if (this != &inOther) {
-		delete mImpl;
-		mImpl = inOther.mImpl->clone();
+		if (inOther.mImpl == &inOther.mSSOImpl) {
+			mSSOImpl = inOther.mSSOImpl;
+			mImpl = &mSSOImpl;
+		} else {
+			mVectorImpl = inOther.mVectorImpl;
+			mImpl = &mVectorImpl;
+		}
 	}
 	return *this;
 }
@@ -139,10 +152,9 @@ bool ByteList::operator==(const ByteList& inOther) const {
 }
 
 void ByteList::switchToVector() {
-	// Assume we need to switch - caller already determined this
-	ByteListVectorImpl* newImpl = new ByteListVectorImpl(mImpl->begin(), mImpl->end());
-	delete mImpl;
-	mImpl = newImpl;
+	// Copy data from SSO to vector, then switch pointer
+	mVectorImpl = ByteListVectorImpl(mImpl->begin(), mImpl->end());
+	mImpl = &mVectorImpl;
 }
 
 

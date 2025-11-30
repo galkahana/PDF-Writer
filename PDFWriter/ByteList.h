@@ -5,8 +5,8 @@
 
 #include <string>
 
-class ByteListSSOImpl;
-class ByteListVectorImpl;
+#include "ByteListSSOImpl.h"
+#include "ByteListVectorImpl.h"
 
 // ByteList implementation using vector with fallback on Small String Optimization (SSO) for small sizes
 class ByteList {
@@ -53,7 +53,9 @@ public:
 	bool operator==(const ByteList& inOther) const;
 
 private:
-	IByteListImpl* mImpl;
+	ByteListSSOImpl mSSOImpl;
+	ByteListVectorImpl mVectorImpl;
+	IByteListImpl* mImpl;  // Points to either mSSOImpl or mVectorImpl
 
 	void switchToVector();
 };
