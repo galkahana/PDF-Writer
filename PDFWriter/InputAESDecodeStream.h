@@ -23,10 +23,7 @@
 #include "EStatusCode.h"
 #include "IByteReader.h"
 #include "aescpp.h"
-
-#include <string>
-
-typedef std::basic_string<IOBasicTypes::Byte> ByteList;
+#include "ByteList.h"
 
 class InputAESDecodeStream : public IByteReader
 {

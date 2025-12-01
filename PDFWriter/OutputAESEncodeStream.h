@@ -21,10 +21,7 @@ limitations under the License.
 #pragma once
 #include "IByteWriterWithPosition.h"
 #include "aescpp.h"
-
-#include <string>
-
-typedef std::basic_string<IOBasicTypes::Byte> ByteList;
+#include "ByteList.h"
 
 
 class OutputAESEncodeStream : public IByteWriterWithPosition
