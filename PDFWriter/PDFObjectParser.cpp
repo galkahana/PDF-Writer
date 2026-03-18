@@ -41,6 +41,8 @@
 #include "IPDFParserExtender.h"
 #include "DecryptionHelper.h"
 
+#include <cerrno>
+#include <cstdlib>
 #include <sstream>
 
 using namespace PDFHummus;
@@ -557,24 +559,17 @@ bool PDFObjectParser::IsNumber(const std::string& inToken)
 	return isNumber;
 }
 
-typedef BoxingBaseWithRW<long long> LongLong;
-
-// maximum allowed PDF int value = 2^31 − 1.
-#define MAX_PDF_INT 2147483647L 
-// minimum allowed PDF int value = -2^31
-#define MIN_PDF_INT ((-MAX_PDF_INT)-1) 
-
 PDFObject* PDFObjectParser::ParseNumber(const std::string& inToken)
 {
 	// once we know this is a number, then parsing is easy. just determine if it's a real or integer, so as to separate classes for better accuracy
 	if(inToken.find(scDot) != inToken.npos) {
 		return new PDFReal(Double(inToken));
 	} else {
-		long long integerValue = LongLong(inToken);
-
-		// validate int value according to PDF limits. ignore if outside of range
-		if((integerValue > MAX_PDF_INT) || (integerValue < MIN_PDF_INT)) {
-			TRACE_LOG3("PDFObjectParser::ParseNumber, parsed integer %lld is outside of the allowed range for PDF integers - %ld to %ld", integerValue, MIN_PDF_INT, MAX_PDF_INT);
+		errno = 0;
+		// use strtoll to parse long long with overflow validation
+		long long integerValue = std::strtoll(inToken.c_str(), NULL, 10);
+		if(errno == ERANGE) {
+			TRACE_LOG1("PDFObjectParser::ParseNumber, integer overflow for token %s", inToken.c_str());
 			return NULL;
 		}
 
