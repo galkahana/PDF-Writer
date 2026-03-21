@@ -599,19 +599,25 @@ EStatusCode PDFDocumentHandler::CopyInDirectObject(ObjectIDType inSourceObjectID
 	RefCountPtr<PDFObject> sourceObject = mParser->ParseNewObject(inSourceObjectID);
 	if(!sourceObject)
 	{
+		// if the object did not parse, check if it does not have an xref entry or is marked for deletion. in either of those
+		// cases it means we have a reference to a non existant object, which is _valid_ in PDF and just means it's a null.
+		// in all those cases, create a deleted object reference, so we can keep the xref table sequential.
 		XrefEntryInput* xrefEntry = mParser->GetXrefEntry(inSourceObjectID);
-		if ((xrefEntry != NULL) && (xrefEntry->mType == eXrefEntryDelete)) {
-			// if the object is deleted, replace with a deleted object
+		if (
+			(xrefEntry == NULL) || // index exceeds xref entry size
+			(xrefEntry != NULL) && (
+				xrefEntry->mType == eXrefEntryDelete // object is marked as deleted (free object)
+				|| xrefEntry->mType == eXrefEntryUndefined // object is internally marked as undefined which means we got holes in the source xref tables ranges
+			))  {
 			status = mObjectsContext->GetInDirectObjectsRegistry().DeleteObject(inTargetObjectID);
 			if (status != PDFHummus::eSuccess) {
-				TRACE_LOG1("PDFDocumentHandler::CopyInDirectObject, failed mark object as deleted. %ld", inTargetObjectID);
+				TRACE_LOG2("PDFDocumentHandler::CopyInDirectObject, failed mark source object %ld object as deleted object with target ID %ld", inSourceObjectID, inTargetObjectID);
 				return status;
 			}
 			return status;
-		}
-		else {
-			// fail
-			TRACE_LOG1("PDFDocumentHandler::CopyInDirectObject, object not found. %ld", inSourceObjectID);
+		} else {
+			// fail, couldn't parse an object that has a valid xref entry
+			TRACE_LOG1("PDFDocumentHandler::CopyInDirectObject, cannot parse source object %ld", inSourceObjectID);
 			return PDFHummus::eFailure;
 		}
 	}
