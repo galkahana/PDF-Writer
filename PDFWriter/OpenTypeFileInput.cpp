@@ -559,6 +559,12 @@ EStatusCode OpenTypeFileInput::ReadHMtx()
 
 	mPrimitivesReader.SetOffset(it->second.Offset);
 
+	if(mHHea.NumberOfHMetrics > mMaxp.NumGlyphs)
+	{
+		TRACE_LOG("OpenTypeFileInput::ReadHMtx, numberOfHMetrics exceeds numGlyphs");
+		return PDFHummus::eFailure;
+	}
+
 	mHMtx = new HMtxTableEntry[mMaxp.NumGlyphs];
 
 	unsigned int i=0;
