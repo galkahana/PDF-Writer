@@ -28,6 +28,7 @@ using namespace IOBasicTypes;
 InputAESDecodeStream::InputAESDecodeStream()
 {
 	mSourceStream = NULL;
+	mKey = NULL;
 }
 
 
