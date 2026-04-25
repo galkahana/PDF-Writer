@@ -23,7 +23,7 @@
 #include "EStatusCode.h"
 #include "IByteReader.h"
 
-#define LZW_MAX_CODE 4097
+#define LZW_TABLE_SIZE 4097
 
 
 class InputLZWDecodeStream : public IByteReader
@@ -60,12 +60,12 @@ private:
 		int length;
 		int head;
 		IOBasicTypes::Byte tail;
-	} table[LZW_MAX_CODE];
+	} table[LZW_TABLE_SIZE];
 	int nextCode;			// next code to be used
 	int nextBits;			// number of bits in next code word
 	int prevCode;			// previous code used in stream
 	int newChar;			// next char to be added to table
-	IOBasicTypes::Byte		seqBuf[LZW_MAX_CODE];		// buffer for current sequence
+	IOBasicTypes::Byte		seqBuf[LZW_TABLE_SIZE];		// buffer for current sequence
 	int seqLength;		// length of current sequence
 	int seqIndex;			// index into current sequence
 	bool first;			// first code after a table clear

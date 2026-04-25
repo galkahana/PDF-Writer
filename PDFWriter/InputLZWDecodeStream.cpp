@@ -113,7 +113,7 @@ bool InputLZWDecodeStream::ProcessNextCode()
 		if(!mCurrentlyEncoding)
 			break;		
 
-		if (nextCode >= LZW_MAX_CODE) 
+		if (nextCode >= LZW_TABLE_SIZE) 
 		{
 			//error(getPos(), "Bad LZW stream - expected clear-table code");
 			ClearTable();
@@ -129,7 +129,7 @@ bool InputLZWDecodeStream::ProcessNextCode()
 		else if (code < nextCode) 
 		{
 			seqLength = table[code].length;
-			if (seqLength >= LZW_MAX_CODE)
+			if (seqLength > LZW_TABLE_SIZE)
 			{
 				TRACE_LOG("InputLZWDecodeStream::ProcessNextCode, sequence length exceeds seqBuf bounds");
 				mCurrentlyEncoding = false;
@@ -143,7 +143,7 @@ bool InputLZWDecodeStream::ProcessNextCode()
 		}
 		else if (code == nextCode) 
 		{
-			if (seqLength >= LZW_MAX_CODE)
+			if (seqLength >= LZW_TABLE_SIZE)
 			{
 				TRACE_LOG("InputLZWDecodeStream::ProcessNextCode, sequence length exceeds seqBuf bounds");
 				mCurrentlyEncoding = false;
