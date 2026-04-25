@@ -191,6 +191,7 @@ int InputLZWDecodeStream::GetCode() {
 	{
 		if(mSourceStream->Read(&buffer, 1) != 1)
 		{
+			mCurrentlyEncoding = false;
 			TRACE_LOG("InputLZWDecodeStream::GetCode, unexpected EOF in LZW stream");
 			return -1;
 		}
