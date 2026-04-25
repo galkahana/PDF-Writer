@@ -189,10 +189,12 @@ int InputLZWDecodeStream::GetCode() {
 	IOBasicTypes::Byte buffer;
 	while (inputBits < nextBits) 
 	{
-		mSourceStream->Read(&buffer, 1);
+		if(mSourceStream->Read(&buffer, 1) != 1)
+		{
+			TRACE_LOG("InputLZWDecodeStream::GetCode, unexpected EOF in LZW stream");
+			return -1;
+		}
 		c = buffer;
-
-		if (c == -1) return -1;
 		inputBuf = (inputBuf << 8) | (c & 0xff);
 		inputBits += 8;
 	}
