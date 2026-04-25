@@ -20,6 +20,7 @@
 */
 #include "InputPredictorTIFFSubStream.h"
 #include "Trace.h"
+#include <stddef.h>
 
 using namespace IOBasicTypes;
 
@@ -96,10 +97,22 @@ void InputPredictorTIFFSubStream::Assign(IByteReader* inSourceStream,
 										Byte inBitsPerComponent,
 										LongBufferSizeType inColumns)
 {
-	// Validate inputs before modifying member state
+	// Always take ownership of the source stream first
+	delete mSourceStream;
+	mSourceStream = inSourceStream;
+
+	// Clean up previous buffers
+	delete[] mRowBuffer;
+	mRowBuffer = NULL;
+	delete[] mReadColors;
+	mReadColors = NULL;
+	mReadColorsCount = 0;
+
+	// Validate inputs
 	if(inColumns == 0 || inColors == 0 || inBitsPerComponent == 0)
 	{
-		TRACE_LOG("InputPredictorTIFFSubStream::Assign, invalid zero parameter");
+		if(inSourceStream != NULL)
+			TRACE_LOG("InputPredictorTIFFSubStream::Assign, invalid zero parameter");
 		return;
 	}
 
@@ -117,24 +130,23 @@ void InputPredictorTIFFSubStream::Assign(IByteReader* inSourceStream,
 		TRACE_LOG("InputPredictorTIFFSubStream::Assign, overflow in buffer size calculation");
 		return;
 	}
+	LongBufferSizeType totalBits = colorsTimesColumns * inBitsPerComponent;
 
-	LongBufferSizeType bufferSize = (colorsTimesColumns * inBitsPerComponent) / 8;
-	if(bufferSize == 0)
+	// Check that +7 won't overflow before ceiling division
+	if(totalBits > SIZE_MAX - 7)
 	{
-		TRACE_LOG("InputPredictorTIFFSubStream::Assign, buffer size is 0");
+		TRACE_LOG("InputPredictorTIFFSubStream::Assign, overflow in buffer size rounding");
 		return;
 	}
+	LongBufferSizeType bufferSize = (totalBits + 7) / 8;
 
-	// All validation passed - now update member state
-	mSourceStream = inSourceStream;
+	// All validation passed - update remaining member state
 	mColors = inColors;
 	mBitsPerComponent = inBitsPerComponent;
 	mColumns = inColumns;
 
-	delete[] mRowBuffer;
 	mRowBuffer = new Byte[bufferSize];
 
-	delete[] mReadColors;
 	mReadColorsCount = colorsTimesColumns;
 	mReadColors = new unsigned short[mReadColorsCount];
 	mReadColorsIndex = mReadColors + mReadColorsCount; // assign to end of array so will know that should read new buffer
