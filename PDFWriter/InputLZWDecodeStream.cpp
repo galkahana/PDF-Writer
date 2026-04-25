@@ -23,7 +23,6 @@
 #include "Trace.h"
 #include "zlib.h"
 
-
 InputLZWDecodeStream::InputLZWDecodeStream(int early)
 {
 	mSourceStream = NULL;
@@ -114,7 +113,7 @@ bool InputLZWDecodeStream::ProcessNextCode()
 		if(!mCurrentlyEncoding)
 			break;		
 
-		if (nextCode >= 4097) 
+		if (nextCode >= LZW_TABLE_SIZE) 
 		{
 			//error(getPos(), "Bad LZW stream - expected clear-table code");
 			ClearTable();
@@ -130,6 +129,12 @@ bool InputLZWDecodeStream::ProcessNextCode()
 		else if (code < nextCode) 
 		{
 			seqLength = table[code].length;
+			if (seqLength > LZW_TABLE_SIZE)
+			{
+				TRACE_LOG("InputLZWDecodeStream::ProcessNextCode, sequence length exceeds seqBuf bounds");
+				mCurrentlyEncoding = false;
+				break;
+			}
 			for (i = seqLength - 1, j = code; i > 0; --i) {
 				seqBuf[i] = table[j].tail;
 				j = table[j].head;
@@ -138,6 +143,12 @@ bool InputLZWDecodeStream::ProcessNextCode()
 		}
 		else if (code == nextCode) 
 		{
+			if (seqLength >= LZW_TABLE_SIZE)
+			{
+				TRACE_LOG("InputLZWDecodeStream::ProcessNextCode, sequence length exceeds seqBuf bounds");
+				mCurrentlyEncoding = false;
+				break;
+			}
 			seqBuf[seqLength] = newChar;
 			++seqLength;
 		}
