@@ -191,8 +191,8 @@ void InputPredictorPNGOptimumStream::Assign(IByteReader* inSourceStream,
 	}
 	LongBufferSizeType totalBits = colorsTimesColumns * inBitsPerComponent;
 
-	// Check that +7 won't overflow (extremely unlikely but be thorough)
-	if(totalBits > SIZE_MAX - 8)
+	// Check that totalBits + 7 won't overflow
+	if(totalBits > SIZE_MAX - 7)
 	{
 		TRACE_LOG("InputPredictorPNGOptimumStream::Assign, overflow in buffer size calculation");
 		return;
