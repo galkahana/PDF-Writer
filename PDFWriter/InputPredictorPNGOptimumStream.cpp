@@ -22,7 +22,7 @@
 
 #include "Trace.h"
 #include <stdlib.h>
-#include <stddef.h>
+#include <stdint.h>
 
 /*
 	Note from Gal: Note that optimum also implements the others. this is because PNG compression requires that the first byte in the line holds the algo -
@@ -201,7 +201,7 @@ void InputPredictorPNGOptimumStream::Assign(IByteReader* inSourceStream,
 	// All validation passed - now update member state
 	mSourceStream = inSourceStream;
 
-	mBytesPerPixel = inColors * inBitsPerComponent / 8;
+	mBytesPerPixel = (inColors * inBitsPerComponent + 7) / 8;
 	if(mBytesPerPixel == 0)
 		mBytesPerPixel = 1;
 
