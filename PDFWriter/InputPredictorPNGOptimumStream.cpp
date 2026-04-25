@@ -140,15 +140,45 @@ void InputPredictorPNGOptimumStream::Assign(IByteReader* inSourceStream,
 
 	delete[] mBuffer;
 	delete[] mUpValues;
+	mBuffer = NULL;
+	mUpValues = NULL;
+	mBufferSize = 0;
+	mIndex = NULL;
+	mFunctionType = 0;
+
+	// Validate inputs to prevent overflow in buffer size calculation
+	if(inColumns == 0 || inColors == 0 || inBitsPerComponent == 0)
+	{
+		TRACE_LOG("InputPredictorPNGOptimumStream::Assign, invalid zero parameter");
+		return;
+	}
+
+	// Check multiplication overflow: inColumns * inColors
+	if(inColumns > 0xFFFFFFFF / inColors)
+	{
+		TRACE_LOG("InputPredictorPNGOptimumStream::Assign, overflow in buffer size calculation");
+		return;
+	}
+	LongBufferSizeType colorsTimesColumns = inColumns * inColors;
+
+	// Check next multiplication: colorsTimesColumns * inBitsPerComponent
+	if(colorsTimesColumns > 0xFFFFFFFF / inBitsPerComponent)
+	{
+		TRACE_LOG("InputPredictorPNGOptimumStream::Assign, overflow in buffer size calculation");
+		return;
+	}
+
 	mBytesPerPixel = inColors * inBitsPerComponent / 8;
+	if(mBytesPerPixel == 0)
+		mBytesPerPixel = 1;
+
 	// Rows may contain empty bits at end
-	mBufferSize = (inColumns * inColors * inBitsPerComponent + 7) / 8 + 1;
+	mBufferSize = (colorsTimesColumns * inBitsPerComponent + 7) / 8 + 1;
 	mBuffer = new Byte[mBufferSize];
 	memset(mBuffer,0,mBufferSize);
 	mUpValues = new Byte[mBufferSize];
 	memset(mUpValues,0,mBufferSize); // that's less important
 	mIndex = mBuffer + mBufferSize;
-	mFunctionType = 0;
 }
 
 char InputPredictorPNGOptimumStream::PaethPredictor(char inLeft,char inUp,char inUpLeft)
