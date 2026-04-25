@@ -20,7 +20,7 @@
 */
 #include "InputPredictorTIFFSubStream.h"
 #include "Trace.h"
-#include <stddef.h>
+#include <stdint.h>
 
 using namespace IOBasicTypes;
 
