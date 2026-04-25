@@ -22,6 +22,7 @@
 
 #include "Trace.h"
 #include <stdlib.h>
+#include <stdint.h>
 
 /*
 	Note from Gal: Note that optimum also implements the others. this is because PNG compression requires that the first byte in the line holds the algo -
@@ -37,6 +38,7 @@ InputPredictorPNGOptimumStream::InputPredictorPNGOptimumStream(void)
 	mIndex = NULL;
 	mBufferSize = 0;
 	mUpValues = NULL;
+	mBytesPerPixel = 0;
 
 }
 
@@ -57,6 +59,7 @@ InputPredictorPNGOptimumStream::InputPredictorPNGOptimumStream(IByteReader* inSo
 	mIndex = NULL;
 	mBufferSize = 0;
 	mUpValues = NULL;
+	mBytesPerPixel = 0;
 
 	Assign(inSourceStream,inColors,inBitsPerComponent,inColumns);
 }
@@ -64,6 +67,9 @@ InputPredictorPNGOptimumStream::InputPredictorPNGOptimumStream(IByteReader* inSo
 
 LongBufferSizeType InputPredictorPNGOptimumStream::Read(Byte* inBuffer,LongBufferSizeType inBufferSize)
 {
+	if(!mSourceStream || !mBuffer)
+		return 0;
+
 	LongBufferSizeType readBytes = 0;
 
 
@@ -102,11 +108,15 @@ LongBufferSizeType InputPredictorPNGOptimumStream::Read(Byte* inBuffer,LongBuffe
 
 bool InputPredictorPNGOptimumStream::NotEnded()
 {
+	if(!mSourceStream || !mBuffer)
+		return false;
 	return mSourceStream->NotEnded() || (LongBufferSizeType)(mIndex - mBuffer) < mBufferSize;
 }
 
 void InputPredictorPNGOptimumStream::DecodeNextByte(Byte& outDecodedByte)
 {
+	LongBufferSizeType pos = (LongBufferSizeType)(mIndex - mBuffer);
+
 	// decoding function is determined by mFunctionType
 	switch(mFunctionType)
 	{
@@ -114,17 +124,30 @@ void InputPredictorPNGOptimumStream::DecodeNextByte(Byte& outDecodedByte)
 			outDecodedByte = *mIndex;
 			break;
 		case 1:
-			outDecodedByte = (Byte)((char)*(mIndex-mBytesPerPixel) + (char)*mIndex);
+		{
+			// Per PNG spec, corresponding byte is mBytesPerPixel back, 0 before scanline start
+			Byte leftValue = (pos > mBytesPerPixel) ? *(mIndex - mBytesPerPixel) : 0;
+			outDecodedByte = (Byte)((char)leftValue + (char)*mIndex);
 			break;
+		}
 		case 2:
-			outDecodedByte = (Byte)((char)mUpValues[mIndex-mBuffer] + (char)*mIndex);
+			outDecodedByte = (Byte)((char)mUpValues[pos] + (char)*mIndex);
 			break;
 		case 3:
-			outDecodedByte = (Byte)((char)mBuffer[mIndex-mBuffer - 1]/2 + (char)mUpValues[mIndex-mBuffer]/2 + (char)*mIndex);
+		{
+			// Per PNG spec, corresponding byte is mBytesPerPixel back, 0 before scanline start
+			char leftVal = (pos > mBytesPerPixel) ? (char)mBuffer[pos - mBytesPerPixel] : 0;
+			outDecodedByte = (Byte)(leftVal/2 + (char)mUpValues[pos]/2 + (char)*mIndex);
 			break;
+		}
 		case 4:
-			outDecodedByte = (Byte)(PaethPredictor(mBuffer[mIndex-mBuffer - 1],mUpValues[mIndex-mBuffer],mUpValues[mIndex-mBuffer - 1]) + (char)*mIndex);
+		{
+			// Per PNG spec, corresponding byte is mBytesPerPixel back, 0 before scanline start
+			char leftVal = (pos > mBytesPerPixel) ? (char)mBuffer[pos - mBytesPerPixel] : 0;
+			char upLeftVal = (pos > mBytesPerPixel) ? (char)mUpValues[pos - mBytesPerPixel] : 0;
+			outDecodedByte = (Byte)(PaethPredictor(leftVal,(char)mUpValues[pos],upLeftVal) + (char)*mIndex);
 			break;
+		}
 	}
 
 	*mIndex = outDecodedByte; // saving the encoded value back to the buffer, for later copying as "Up value", and current using as "Left" value
@@ -136,19 +159,59 @@ void InputPredictorPNGOptimumStream::Assign(IByteReader* inSourceStream,
 											IOBasicTypes::Byte inBitsPerComponent,
 											IOBasicTypes::LongBufferSizeType inColumns)
 {
-	mSourceStream = inSourceStream;
-
 	delete[] mBuffer;
 	delete[] mUpValues;
-	mBytesPerPixel = inColors * inBitsPerComponent / 8;
+	mBuffer = NULL;
+	mUpValues = NULL;
+	mBufferSize = 0;
+	mIndex = NULL;
+	mFunctionType = 0;
+	mBytesPerPixel = 0;
+
+	// Validate inputs to prevent overflow in buffer size calculation
+	if(inColumns == 0 || inColors == 0 || inBitsPerComponent == 0)
+	{
+		TRACE_LOG("InputPredictorPNGOptimumStream::Assign, invalid zero parameter");
+		return;
+	}
+
+	// Check multiplication overflow: inColumns * inColors
+	if(inColumns > SIZE_MAX / inColors)
+	{
+		TRACE_LOG("InputPredictorPNGOptimumStream::Assign, overflow in buffer size calculation");
+		return;
+	}
+	LongBufferSizeType colorsTimesColumns = inColumns * inColors;
+
+	// Check next multiplication: colorsTimesColumns * inBitsPerComponent
+	if(colorsTimesColumns > SIZE_MAX / inBitsPerComponent)
+	{
+		TRACE_LOG("InputPredictorPNGOptimumStream::Assign, overflow in buffer size calculation");
+		return;
+	}
+	LongBufferSizeType totalBits = colorsTimesColumns * inBitsPerComponent;
+
+	// Check that totalBits + 7 won't overflow
+	if(totalBits > SIZE_MAX - 7)
+	{
+		TRACE_LOG("InputPredictorPNGOptimumStream::Assign, overflow in buffer size calculation");
+		return;
+	}
+
+	// All validation passed - now update member state
+	mSourceStream = inSourceStream;
+
+	mBytesPerPixel = (inColors * inBitsPerComponent + 7) / 8;
+	if(mBytesPerPixel == 0)
+		mBytesPerPixel = 1;
+
 	// Rows may contain empty bits at end
-	mBufferSize = (inColumns * inColors * inBitsPerComponent + 7) / 8 + 1;
+	mBufferSize = (totalBits + 7) / 8 + 1;
 	mBuffer = new Byte[mBufferSize];
 	memset(mBuffer,0,mBufferSize);
 	mUpValues = new Byte[mBufferSize];
 	memset(mUpValues,0,mBufferSize); // that's less important
 	mIndex = mBuffer + mBufferSize;
-	mFunctionType = 0;
 }
 
 char InputPredictorPNGOptimumStream::PaethPredictor(char inLeft,char inUp,char inUpLeft)
@@ -159,7 +222,7 @@ char InputPredictorPNGOptimumStream::PaethPredictor(char inLeft,char inUp,char i
 	int pUpLeft = abs(p - inUpLeft);
 
 	if(pLeft <= pUp && pLeft <= pUpLeft)
-	  return pLeft;
+	  return inLeft;
 	else if(pUp <= pUpLeft)
 	  return inUp;
 	else
