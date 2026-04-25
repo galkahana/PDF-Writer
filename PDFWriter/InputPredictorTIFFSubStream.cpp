@@ -96,9 +96,33 @@ void InputPredictorTIFFSubStream::Assign(IByteReader* inSourceStream,
 	mColors = inColors;
 	mBitsPerComponent = inBitsPerComponent;
 	mColumns = inColumns;
-	
+
+	// Check for overflow in buffer size calculations
+	if(inColumns > 0 && inColors > 0 && inBitsPerComponent > 0)
+	{
+		if(inColumns > 0xFFFFFFFF / inColors)
+		{
+			TRACE_LOG("InputPredictorTIFFSubStream::Assign, overflow in columns * colors");
+			mSourceStream = NULL;
+			return;
+		}
+		IOBasicTypes::LongBufferSizeType colorsTimesColumns = inColumns * inColors;
+		if(colorsTimesColumns > 0xFFFFFFFF / inBitsPerComponent)
+		{
+			TRACE_LOG("InputPredictorTIFFSubStream::Assign, overflow in buffer size calculation");
+			mSourceStream = NULL;
+			return;
+		}
+	}
+
 	delete mRowBuffer;
 	IOBasicTypes::LongBufferSizeType bufferSize = (inColumns*inColors*inBitsPerComponent)/8;
+	if(bufferSize == 0)
+	{
+		TRACE_LOG("InputPredictorTIFFSubStream::Assign, buffer size is 0");
+		mSourceStream = NULL;
+		return;
+	}
 	mRowBuffer = new Byte[bufferSize];
 
 	mReadColorsCount = inColumns * inColors;
