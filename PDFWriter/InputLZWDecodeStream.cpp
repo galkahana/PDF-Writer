@@ -130,6 +130,12 @@ bool InputLZWDecodeStream::ProcessNextCode()
 		else if (code < nextCode) 
 		{
 			seqLength = table[code].length;
+			if (seqLength >= 4097)
+			{
+				TRACE_LOG("InputLZWDecodeStream::ProcessNextCode, sequence length exceeds seqBuf bounds");
+				mCurrentlyEncoding = false;
+				break;
+			}
 			for (i = seqLength - 1, j = code; i > 0; --i) {
 				seqBuf[i] = table[j].tail;
 				j = table[j].head;
@@ -138,6 +144,12 @@ bool InputLZWDecodeStream::ProcessNextCode()
 		}
 		else if (code == nextCode) 
 		{
+			if (seqLength >= 4097)
+			{
+				TRACE_LOG("InputLZWDecodeStream::ProcessNextCode, sequence length exceeds seqBuf bounds");
+				mCurrentlyEncoding = false;
+				break;
+			}
 			seqBuf[seqLength] = newChar;
 			++seqLength;
 		}
