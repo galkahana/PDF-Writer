@@ -115,7 +115,7 @@ bool InputPredictorPNGOptimumStream::NotEnded()
 
 void InputPredictorPNGOptimumStream::DecodeNextByte(Byte& outDecodedByte)
 {
-	LongBufferSizeType pos = mIndex - mBuffer;
+	LongBufferSizeType pos = (LongBufferSizeType)(mIndex - mBuffer);
 
 	// decoding function is determined by mFunctionType
 	switch(mFunctionType)
@@ -125,7 +125,7 @@ void InputPredictorPNGOptimumStream::DecodeNextByte(Byte& outDecodedByte)
 			break;
 		case 1:
 		{
-			// Per PNG spec, bytes before the scanline start are treated as 0
+			// Per PNG spec, corresponding byte is mBytesPerPixel back, 0 before scanline start
 			Byte leftValue = (pos > mBytesPerPixel) ? *(mIndex - mBytesPerPixel) : 0;
 			outDecodedByte = (Byte)((char)leftValue + (char)*mIndex);
 			break;
@@ -135,16 +135,16 @@ void InputPredictorPNGOptimumStream::DecodeNextByte(Byte& outDecodedByte)
 			break;
 		case 3:
 		{
-			// Per PNG spec, use 0 for left value at row start
-			char leftVal = (pos > 1) ? (char)mBuffer[pos - 1] : 0;
+			// Per PNG spec, corresponding byte is mBytesPerPixel back, 0 before scanline start
+			char leftVal = (pos > mBytesPerPixel) ? (char)mBuffer[pos - mBytesPerPixel] : 0;
 			outDecodedByte = (Byte)(leftVal/2 + (char)mUpValues[pos]/2 + (char)*mIndex);
 			break;
 		}
 		case 4:
 		{
-			// Per PNG spec, use 0 for left/upper-left at row start
-			char leftVal = (pos > 1) ? (char)mBuffer[pos - 1] : 0;
-			char upLeftVal = (pos > 1) ? (char)mUpValues[pos - 1] : 0;
+			// Per PNG spec, corresponding byte is mBytesPerPixel back, 0 before scanline start
+			char leftVal = (pos > mBytesPerPixel) ? (char)mBuffer[pos - mBytesPerPixel] : 0;
+			char upLeftVal = (pos > mBytesPerPixel) ? (char)mUpValues[pos - mBytesPerPixel] : 0;
 			outDecodedByte = (Byte)(PaethPredictor(leftVal,(char)mUpValues[pos],upLeftVal) + (char)*mIndex);
 			break;
 		}
