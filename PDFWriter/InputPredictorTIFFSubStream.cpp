@@ -204,7 +204,13 @@ void InputPredictorTIFFSubStream::DecodeBufferToColors()
 		{
 			for(LongBufferSizeType j=0; j < (LongBufferSizeType)(8/mBitsPerComponent); ++j)
 			{
-				mReadColors[(i+1)*8/mBitsPerComponent - j - 1] = mRowBuffer[i] & mBitMask;
+				LongBufferSizeType writeIndex = (i+1)*8/mBitsPerComponent - j - 1;
+				// defensive bounds check: with non-power-of-two BitsPerComponent or
+				// counts that don't divide evenly, the computed index could in principle
+				// land outside the mReadColors array.
+				if(writeIndex >= mReadColorsCount)
+					break;
+				mReadColors[writeIndex] = mRowBuffer[i] & mBitMask;
 				mRowBuffer[i] = mRowBuffer[i]>>mBitsPerComponent;
 			}
 		}
