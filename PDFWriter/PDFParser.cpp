@@ -47,6 +47,7 @@
 #include "ArrayOfInputStreamsStream.h"
 
 #include  <algorithm>
+#include <limits.h>
 using namespace PDFHummus;
 
 #define MAX_XREF_SIZE 9999999999LL
@@ -643,7 +644,7 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInputVector& inXrefTable,
 			// guard against overflow when computing the segment end. ObjectIDType is
 			// unsigned, so a wrap would yield a small firstNonSectionObject and either
 			// skip the entry-reading loop entirely or read into the wrong object slots.
-			if(segmentSize > (ObjectIDType)(-1) - currentObject)
+			if(segmentSize > ULONG_MAX - currentObject)
 			{
 				TRACE_LOG2("PDFParser::ParseXref, xref segment overflows object id space (start=%lu size=%lu)", (unsigned long)currentObject, (unsigned long)segmentSize);
 				status = PDFHummus::eFailure;
