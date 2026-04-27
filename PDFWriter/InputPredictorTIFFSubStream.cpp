@@ -211,8 +211,7 @@ void InputPredictorTIFFSubStream::DecodeBufferToColors()
 				// defensive bounds check: with non-power-of-two BitsPerComponent or
 				// counts that don't divide evenly, the computed index could in principle
 				// land outside the mReadColors array. fall through gracefully rather
-				// than write past the buffer; unfilled cells were zero-initialized in
-				// Assign(), so downstream reads see 0 instead of uninitialized memory.
+				// than write past the buffer.
 				if(writeIndex >= mReadColorsCount)
 				{
 					TRACE_LOG3("InputPredictorTIFFSubStream::DecodeBufferToColors, write index %lu out of bounds (count=%lu, bpc=%u), skipping",
