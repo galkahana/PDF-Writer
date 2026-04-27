@@ -880,7 +880,18 @@ EStatusCode PDFParser::ParsePagesObjectIDs()
 			break;
 		}
 
-		mPagesCount = (unsigned long)totalPagesCount->GetValue();
+		long long pagesCountValue = totalPagesCount->GetValue();
+		// reject negative counts and counts larger than the xref table can possibly hold.
+		// every leaf page is an indirect object that must have an xref entry, so the
+		// declared /Count cannot legitimately exceed the xref size.
+		if(pagesCountValue < 0 || (unsigned long long)pagesCountValue > (unsigned long long)mXrefSize)
+		{
+			TRACE_LOG2("PDFParser::ParsePagesObjectIDs, invalid pages count %lld (xref size %lu)", pagesCountValue, (unsigned long)mXrefSize);
+			status = PDFHummus::eFailure;
+			break;
+		}
+
+		mPagesCount = (unsigned long)pagesCountValue;
 		mPagesObjectIDs = new ObjectIDType[mPagesCount];
 
 		// now iterate through pages objects, and fill up the IDs [don't really need the object ID for the root pages tree...but whatever
