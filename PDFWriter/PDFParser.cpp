@@ -636,9 +636,20 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInputVector& inXrefTable,
 				break;
 			}
 			// parse segment size
-			if(ObjectIDTypeBox(token.second) == 0)
+			ObjectIDType segmentSize = ObjectIDTypeBox(token.second);
+			if(segmentSize == 0)
 				continue; // probably will never happen
-			firstNonSectionObject = currentObject + ObjectIDTypeBox(token.second);
+
+			// guard against overflow when computing the segment end. ObjectIDType is
+			// unsigned, so a wrap would yield a small firstNonSectionObject and either
+			// skip the entry-reading loop entirely or read into the wrong object slots.
+			if(segmentSize > (ObjectIDType)(-1) - currentObject)
+			{
+				TRACE_LOG2("PDFParser::ParseXref, xref segment overflows object id space (start=%lu size=%lu)", (unsigned long)currentObject, (unsigned long)segmentSize);
+				status = PDFHummus::eFailure;
+				break;
+			}
+			firstNonSectionObject = currentObject + segmentSize;
 
             // if the segment declared objects above the xref size, consult policy on what to do
             if(firstNonSectionObject > inXrefSize && mAllowExtendingSegments)
