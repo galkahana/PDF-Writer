@@ -148,7 +148,10 @@ void InputPredictorTIFFSubStream::Assign(IByteReader* inSourceStream,
 	mRowBuffer = new Byte[bufferSize];
 
 	mReadColorsCount = colorsTimesColumns;
-	mReadColors = new unsigned short[mReadColorsCount];
+	// value-initialize so any cell not written by DecodeBufferToColors (e.g. when a
+	// defensive bounds check trips on a crafted input) reads back as 0 instead of
+	// uninitialized heap memory.
+	mReadColors = new unsigned short[mReadColorsCount]();
 	mReadColorsIndex = mReadColors + mReadColorsCount; // assign to end of array so will know that should read new buffer
 	mIndexInColor = 0;
 
@@ -207,9 +210,15 @@ void InputPredictorTIFFSubStream::DecodeBufferToColors()
 				LongBufferSizeType writeIndex = (i+1)*8/mBitsPerComponent - j - 1;
 				// defensive bounds check: with non-power-of-two BitsPerComponent or
 				// counts that don't divide evenly, the computed index could in principle
-				// land outside the mReadColors array.
+				// land outside the mReadColors array. fall through gracefully rather
+				// than write past the buffer; unfilled cells were zero-initialized in
+				// Assign(), so downstream reads see 0 instead of uninitialized memory.
 				if(writeIndex >= mReadColorsCount)
+				{
+					TRACE_LOG3("InputPredictorTIFFSubStream::DecodeBufferToColors, write index %lu out of bounds (count=%lu, bpc=%u), skipping",
+						(unsigned long)writeIndex, (unsigned long)mReadColorsCount, (unsigned)mBitsPerComponent);
 					break;
+				}
 				mReadColors[writeIndex] = mRowBuffer[i] & mBitMask;
 				mRowBuffer[i] = mRowBuffer[i]>>mBitsPerComponent;
 			}
