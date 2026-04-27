@@ -2102,7 +2102,14 @@ EStatusCodeAndIByteReader PDFParser::CreateFilterForStream(IByteReader* inStream
 			if (inDecodeParams)
 			{
 				PDFObjectCastPtr<PDFInteger> earlyObj(QueryDictionaryObject(inDecodeParams, "EarlyChange"));
-				early = earlyObj->GetValue();
+				if (!earlyObj)
+				{
+					TRACE_LOG("PDFParser::CreateFilterForStream, missing or invalid EarlyChange in LZW DecodeParams, defaulting to 1");
+				}
+				else
+				{
+					early = earlyObj->GetValue();
+				}
 			}
 			lzwStream = new InputLZWDecodeStream(early);
 			lzwStream->Assign(inStream);
