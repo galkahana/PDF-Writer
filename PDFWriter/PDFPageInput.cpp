@@ -191,7 +191,7 @@ PDFObject* PDFPageInput::QueryInheritedValue(PDFDictionary* inDictionary, const 
 			parentID = ((PDFIndirectObjectReference*)parentDirect.GetPtr())->mObjectID;
 			if(ioParsingPath->EnterObject(parentID) != PDFHummus::eSuccess)
 			{
-				TRACE_LOG2("PDFPageInput::QueryInheritedValue, cycle detected in Parent chain at object %ld while searching for %s",
+				TRACE_LOG2("PDFPageInput::QueryInheritedValue, cycle detected in Parent chain at object %lu while searching for %s",
 					parentID, inName.substr(0, 100).c_str());
 				return NULL;
 			}
