@@ -35,7 +35,6 @@
 #include "PDFDictionary.h"
 #include "EStatusCode.h"
 #include "ObjectsBasicTypes.h"
-#include "PDFParsingPath.h"
 
 #include <string>
 
@@ -44,6 +43,7 @@
 class PDFObject;
 class PDFParser;
 class PDFArray;
+class PDFParsingPath;
 
 class PDFPageInput
 {
