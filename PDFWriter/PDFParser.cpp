@@ -47,7 +47,8 @@
 #include "ArrayOfInputStreamsStream.h"
 
 #include  <algorithm>
-#include <limits.h>
+#include <cerrno>
+#include <cstdlib>
 using namespace PDFHummus;
 
 #define MAX_XREF_SIZE 9999999999LL
@@ -554,6 +555,22 @@ EStatusCode PDFParser::InitializeXref()
 typedef BoxingBaseWithRW<ObjectIDType> ObjectIDTypeBox;
 typedef BoxingBaseWithRW<unsigned long> ULong;
 typedef BoxingBaseWithRW<LongFilePositionType> LongFilePositionTypeBox;
+static const ObjectIDType scMaxObjectIDType = (ObjectIDType)(-1);
+
+static bool ParseObjectIDTypeToken(const std::string& inToken, ObjectIDType& outValue)
+{
+	errno = 0;
+	char* endPtr = NULL;
+	unsigned long parsedValue = std::strtoul(inToken.c_str(), &endPtr, 10);
+	if (errno == ERANGE || endPtr == inToken.c_str() || *endPtr != 0)
+		return false;
+
+	if (parsedValue > (unsigned long)scMaxObjectIDType)
+		return false;
+
+	outValue = (ObjectIDType)parsedValue;
+	return true;
+}
 
 
 EStatusCode PDFParser::ExtendXrefToSize(XrefEntryInputVector& inXrefTable, ObjectIDType inXrefSize) {
@@ -622,7 +639,13 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInputVector& inXrefTable,
 				break;
 
 			// parse segment start
-			ObjectIDType segmentStart = ObjectIDTypeBox(token.second);
+			ObjectIDType segmentStart;
+			if(!ParseObjectIDTypeToken(token.second, segmentStart))
+			{
+				TRACE_LOG1("PDFParser::ParseXref, invalid section start token while reading xref: %s", token.second.substr(0, MAX_TRACE_SIZE - 200).c_str());
+				status = PDFHummus::eFailure;
+				break;
+			}
 			
 			// for first xref (one with no Prev), first object must be 0. some files incorrectly start at 1.
 			// this should take care of this, adding extra measure of safety when reading the first xref
@@ -637,14 +660,20 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInputVector& inXrefTable,
 				break;
 			}
 			// parse segment size
-			ObjectIDType segmentSize = ObjectIDTypeBox(token.second);
+			ObjectIDType segmentSize;
+			if(!ParseObjectIDTypeToken(token.second, segmentSize))
+			{
+				TRACE_LOG1("PDFParser::ParseXref, invalid section size token while reading xref: %s", token.second.substr(0, MAX_TRACE_SIZE - 200).c_str());
+				status = PDFHummus::eFailure;
+				break;
+			}
 			if(segmentSize == 0)
 				continue; // probably will never happen
 
 			// guard against overflow when computing the segment end. ObjectIDType is
 			// unsigned, so a wrap would yield a small firstNonSectionObject and either
 			// skip the entry-reading loop entirely or read into the wrong object slots.
-			if(segmentSize > ULONG_MAX - currentObject)
+			if(segmentSize > scMaxObjectIDType - currentObject)
 			{
 				TRACE_LOG2("PDFParser::ParseXref, xref segment overflows object id space (start=%lu size=%lu)", (unsigned long)currentObject, (unsigned long)segmentSize);
 				status = PDFHummus::eFailure;
