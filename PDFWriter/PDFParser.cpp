@@ -881,17 +881,20 @@ EStatusCode PDFParser::ParsePagesObjectIDs()
 		}
 
 		long long pagesCountValue = totalPagesCount->GetValue();
-		// reject negative counts and counts larger than the xref table can possibly hold.
+		// reject negative counts and counts larger than the actual xref table can hold.
 		// every leaf page is an indirect object that must have an xref entry, so the
-		// declared /Count cannot legitimately exceed the xref size.
-		if(pagesCountValue < 0 || (unsigned long long)pagesCountValue > mXrefSize)
+		// declared /Count cannot legitimately exceed the number of entries we read.
+		// note: do NOT compare against mXrefSize directly - that is the trailer /Size
+		// value (attacker-controlled). GetXrefSize() clamps it to mXrefTable.size().
+		ObjectIDType actualXrefSize = GetXrefSize();
+		if(pagesCountValue < 0 || (unsigned long long)pagesCountValue > actualXrefSize)
 		{
-			TRACE_LOG2("PDFParser::ParsePagesObjectIDs, invalid pages count %lld (xref size %lu)", pagesCountValue, mXrefSize);
+			TRACE_LOG2("PDFParser::ParsePagesObjectIDs, invalid pages count %lld (actual xref size %lu)", pagesCountValue, actualXrefSize);
 			status = PDFHummus::eFailure;
 			break;
 		}
 
-		// safe: bounded above by mXrefSize (an unsigned long) by the check above
+		// safe: bounded above by actualXrefSize (an ObjectIDType) by the check above
 		mPagesCount = (unsigned long)pagesCountValue;
 		mPagesObjectIDs = new ObjectIDType[mPagesCount];
 
