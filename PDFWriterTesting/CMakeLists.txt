@@ -45,6 +45,7 @@ create_test_sourcelist (Tests
   OutputFileStreamTest.cpp
   PageModifierTest.cpp
   PageOrderModification.cpp
+  ParentCycleSanity.cpp
   ParsePDFWithOwner.cpp
   ParsingBadXref.cpp
   ParsingFaulty.cpp

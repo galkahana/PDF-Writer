@@ -33,7 +33,6 @@ class ObjectsContext;
 class ResourcesDictionary;
 class PDFParser;
 class PDFObject;
-class PDFParsingPath;
 
 typedef std::vector<PDFFormXObject*> PDFFormXObjectVector;
 
@@ -71,8 +70,6 @@ private:
 	unsigned char GetDifferentChar(unsigned char);
 	std::vector<std::string> WriteNewResourcesDictionary(ObjectsContext& inObjectContext);
 	PDFObject* findInheritedResources(PDFParser* inParser,PDFDictionary* inDictionary);
-	PDFObject* findInheritedResources(PDFParser* inParser,PDFDictionary* inDictionary,
-	                                  PDFParsingPath* ioParsingPath,int inCurrentDepth);
 
 };
 

@@ -34,7 +34,6 @@
 #include "InputFlateDecodeStream.h"
 #include "ObjectsContext.h"
 #include "PDFIndirectObjectReference.h"
-#include "PDFParsingPath.h"
 #include "PDFBoolean.h"
 #include "PDFSymbol.h"
 #include "DictionaryContext.h"
@@ -2506,64 +2505,6 @@ void PDFDocumentHandler::RegisterFormRelatedObjects(PDFFormXObject* inFormXObjec
     mDocumentContext->RegisterFormEndWritingTask(inFormXObject,new ObjectsCopyingTask(this,inObjectsToWrite));
 }
 
-static const std::string scParent = "Parent";
-static const int scMaxInheritedLookupDepth = 100;
-
-PDFObject* PDFDocumentHandler::FindPageResources(PDFParser* inParser, PDFDictionary* inDictionary,
-                                                 PDFParsingPath* ioParsingPath, int inCurrentDepth) {
-	if(!inDictionary)
-		return NULL;
-
-	if(inCurrentDepth >= scMaxInheritedLookupDepth)
-	{
-		TRACE_LOG1("PDFDocumentHandler::FindPageResources, reached maximum inherited lookup depth of %d while searching for Resources",
-			scMaxInheritedLookupDepth);
-		return NULL;
-	}
-
-	if(inDictionary->Exists("Resources")) {
-		return inParser->QueryDictionaryObject(inDictionary, "Resources");
-	}
-
-	if(inDictionary->Exists(scParent))
-	{
-		// Get parent as direct object first to detect indirect references
-		RefCountPtr<PDFObject> parentDirect(inDictionary->QueryDirectObject(scParent));
-		if(!parentDirect)
-			return NULL;
-
-		// Extract parent ID if it's an indirect reference
-		ObjectIDType parentID = 0;
-		bool isIndirectRef = (parentDirect->GetType() == PDFObject::ePDFObjectIndirectObjectReference);
-		if(isIndirectRef)
-		{
-			parentID = ((PDFIndirectObjectReference*)parentDirect.GetPtr())->mObjectID;
-			if(ioParsingPath->EnterObject(parentID) != PDFHummus::eSuccess)
-			{
-				TRACE_LOG1("PDFDocumentHandler::FindPageResources, cycle detected in Parent chain at object %lu while searching for Resources",
-					parentID);
-				return NULL;
-			}
-		}
-
-		PDFObjectCastPtr<PDFDictionary> parent(inParser->QueryDictionaryObject(inDictionary, scParent));
-
-		PDFObject* result = NULL;
-		if(!!parent)
-		{
-			result = FindPageResources(inParser, parent.GetPtr(), ioParsingPath, inCurrentDepth + 1);
-		}
-
-		if(isIndirectRef)
-			ioParsingPath->ExitObject(parentID);
-
-		return result;
-	}
-
-	return NULL;
-}
-
 PDFObject* PDFDocumentHandler::FindPageResources(PDFParser* inParser, PDFDictionary* inDictionary) {
-	PDFParsingPath parsingPath;
-	return FindPageResources(inParser, inDictionary, &parsingPath, 0);
+	return inParser->QueryInheritedDictionaryEntry(inDictionary, "Resources");
 }

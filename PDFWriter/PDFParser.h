@@ -43,6 +43,7 @@ class PDFStreamInput;
 class PDFDictionary;
 class PDFName;
 class IPDFParserExtender;
+class PDFParsingPath;
 
 typedef std::pair<PDFHummus::EStatusCode,IByteReader*> EStatusCodeAndIByteReader;
 
@@ -112,6 +113,11 @@ public:
 	// Query a dictinary object, if indirect, go and fetch the indirect object and return it instead
 	// [if you want the direct dictionary value, use PDFDictionary::QueryDirectObject [will AddRef automatically]
 	PDFObject* QueryDictionaryObject(PDFDictionary* inDictionary,const std::string& inName);
+
+	// Walk the /Parent chain looking for an inherited entry by name.
+	// Returns the first matching entry (resolved via QueryDictionaryObject), or NULL if none found.
+	// Guards against /Parent chain cycles and bounds the recursion depth, so it is safe on malformed input.
+	PDFObject* QueryInheritedDictionaryEntry(PDFDictionary* inDictionary,const std::string& inName);
 	
 	// Query an array object, if indirect, go and fetch the indirect object and return it instead
 	// [if you want the direct array value, use the PDFArray direct access to the vector [and use AddRef, cause it won't]
@@ -174,6 +180,9 @@ public:
     IByteReaderWithPosition* GetParserStream();
     
 private:
+	PDFObject* QueryInheritedDictionaryEntry(PDFDictionary* inDictionary,const std::string& inName,
+	                                         PDFParsingPath* ioParsingPath,int inCurrentDepth);
+
 	PDFObjectParser mObjectParser;
 	DecryptionHelper mDecryptionHelper;
 	InputOffsetStream mStream;
