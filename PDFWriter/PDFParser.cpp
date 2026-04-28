@@ -2167,9 +2167,23 @@ EStatusCodeAndIByteReader PDFParser::CreateFilterForStream(IByteReader* inStream
 #endif
 		else if (inFilterName->GetValue() == "Crypt")
 		{
-			PDFObjectCastPtr<PDFName> cryptFilterName(QueryDictionaryObject(inDecodeParams, "Name"));
+			// per PDF spec, when DecodeParms or Name is missing, the default crypt
+			// filter name is "Identity" (i.e. no decryption applied)
+			std::string cryptName = "Identity";
+			if (inDecodeParams)
+			{
+				PDFObjectCastPtr<PDFName> cryptFilterName(QueryDictionaryObject(inDecodeParams, "Name"));
+				if (!cryptFilterName)
+				{
+					TRACE_LOG("PDFParser::CreateFilterForStream, missing or invalid Name in Crypt DecodeParms, defaulting to Identity");
+				}
+				else
+				{
+					cryptName = cryptFilterName->GetValue();
+				}
+			}
 
-			result = mDecryptionHelper.CreateDecryptionFilterForStream(inPDFStream, inStream, cryptFilterName->GetValue());
+			result = mDecryptionHelper.CreateDecryptionFilterForStream(inPDFStream, inStream, cryptName);
 		}
 		else if(mParserExtender)
 		{
