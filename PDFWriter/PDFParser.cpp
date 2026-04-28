@@ -1126,6 +1126,71 @@ PDFObject* PDFParser::QueryDictionaryObject(PDFDictionary* inDictionary,const st
 	}
 }
 
+static const std::string scParent = "Parent";
+static const int scMaxInheritedLookupDepth = 100;
+
+PDFObject* PDFParser::QueryInheritedDictionaryEntry(PDFDictionary* inDictionary,const std::string& inName,
+                                                    PDFParsingPath* ioParsingPath,int inCurrentDepth)
+{
+	if(!inDictionary)
+		return NULL;
+
+	if(inCurrentDepth >= scMaxInheritedLookupDepth)
+	{
+		TRACE_LOG2("PDFParser::QueryInheritedDictionaryEntry, reached maximum inherited lookup depth of %d while searching for %s",
+			scMaxInheritedLookupDepth, inName.substr(0, 100).c_str());
+		return NULL;
+	}
+
+	if(inDictionary->Exists(inName))
+	{
+		return QueryDictionaryObject(inDictionary, inName);
+	}
+
+	if(inDictionary->Exists(scParent))
+	{
+		// Get parent as direct object first to detect indirect references
+		RefCountPtr<PDFObject> parentDirect(inDictionary->QueryDirectObject(scParent));
+		if(!parentDirect)
+			return NULL;
+
+		// Extract parent ID if it's an indirect reference
+		ObjectIDType parentID = 0;
+		bool isIndirectRef = (parentDirect->GetType() == PDFObject::ePDFObjectIndirectObjectReference);
+		if(isIndirectRef)
+		{
+			parentID = ((PDFIndirectObjectReference*)parentDirect.GetPtr())->mObjectID;
+			if(ioParsingPath->EnterObject(parentID) != PDFHummus::eSuccess)
+			{
+				TRACE_LOG2("PDFParser::QueryInheritedDictionaryEntry, cycle detected in Parent chain at object %lu while searching for %s",
+					parentID, inName.substr(0, 100).c_str());
+				return NULL;
+			}
+		}
+
+		PDFObjectCastPtr<PDFDictionary> parent(QueryDictionaryObject(inDictionary, scParent));
+
+		PDFObject* result = NULL;
+		if(!!parent)
+		{
+			result = QueryInheritedDictionaryEntry(parent.GetPtr(), inName, ioParsingPath, inCurrentDepth + 1);
+		}
+
+		if(isIndirectRef)
+			ioParsingPath->ExitObject(parentID);
+
+		return result;
+	}
+
+	return NULL;
+}
+
+PDFObject* PDFParser::QueryInheritedDictionaryEntry(PDFDictionary* inDictionary,const std::string& inName)
+{
+	PDFParsingPath parsingPath;
+	return QueryInheritedDictionaryEntry(inDictionary, inName, &parsingPath, 0);
+}
+
 PDFObject* PDFParser::QueryArrayObject(PDFArray* inArray,unsigned long inIndex)
 {
 	RefCountPtr<PDFObject> anObject(inArray->QueryObject(inIndex));

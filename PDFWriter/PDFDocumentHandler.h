@@ -48,7 +48,6 @@ class IPDFParserExtender;
 class ICategoryServicesCommand;
 class PDFIndirectObjectReference;
 class PDFObject;
-class PDFParsingPath;
 
 
 namespace PDFHummus
@@ -325,8 +324,6 @@ private:
                                                            PDFDictionary* inSourcePage,
                                                            const StringToStringMap& inMappedResourcesNames);
 	PDFObject* FindPageResources(PDFParser* inParser, PDFDictionary* inDictionary);
-	PDFObject* FindPageResources(PDFParser* inParser, PDFDictionary* inDictionary,
-	                             PDFParsingPath* ioParsingPath, int inCurrentDepth);
 
 
 };

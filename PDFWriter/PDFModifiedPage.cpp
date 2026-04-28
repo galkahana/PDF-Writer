@@ -35,7 +35,6 @@
 #include "BoxingBase.h"
 #include "PDFStream.h"
 #include "PDFObject.h"
-#include "PDFParsingPath.h"
 #include "Trace.h"
 
 #include <string>
@@ -126,66 +125,8 @@ vector<string> PDFModifiedPage::WriteNewResourcesDictionary(ObjectsContext& inOb
 	return formResourcesNames;	
 }
 
-static const std::string scParent = "Parent";
-static const int scMaxInheritedLookupDepth = 100;
-
-PDFObject* PDFModifiedPage::findInheritedResources(PDFParser* inParser,PDFDictionary* inDictionary,
-                                                   PDFParsingPath* ioParsingPath,int inCurrentDepth) {
-	if(!inDictionary)
-		return NULL;
-
-	if(inCurrentDepth >= scMaxInheritedLookupDepth)
-	{
-		TRACE_LOG1("PDFModifiedPage::findInheritedResources, reached maximum inherited lookup depth of %d while searching for Resources",
-			scMaxInheritedLookupDepth);
-		return NULL;
-	}
-
-	if(inDictionary->Exists("Resources")) {
-		return inParser->QueryDictionaryObject(inDictionary, "Resources");
-	}
-
-	if(inDictionary->Exists(scParent))
-	{
-		// Get parent as direct object first to detect indirect references
-		RefCountPtr<PDFObject> parentDirect(inDictionary->QueryDirectObject(scParent));
-		if(!parentDirect)
-			return NULL;
-
-		// Extract parent ID if it's an indirect reference
-		ObjectIDType parentID = 0;
-		bool isIndirectRef = (parentDirect->GetType() == PDFObject::ePDFObjectIndirectObjectReference);
-		if(isIndirectRef)
-		{
-			parentID = ((PDFIndirectObjectReference*)parentDirect.GetPtr())->mObjectID;
-			if(ioParsingPath->EnterObject(parentID) != PDFHummus::eSuccess)
-			{
-				TRACE_LOG1("PDFModifiedPage::findInheritedResources, cycle detected in Parent chain at object %lu while searching for Resources",
-					parentID);
-				return NULL;
-			}
-		}
-
-		PDFObjectCastPtr<PDFDictionary> parent(inParser->QueryDictionaryObject(inDictionary, scParent));
-
-		PDFObject* result = NULL;
-		if(!!parent)
-		{
-			result = findInheritedResources(inParser, parent.GetPtr(), ioParsingPath, inCurrentDepth + 1);
-		}
-
-		if(isIndirectRef)
-			ioParsingPath->ExitObject(parentID);
-
-		return result;
-	}
-
-	return NULL;
-}
-
 PDFObject* PDFModifiedPage::findInheritedResources(PDFParser* inParser,PDFDictionary* inDictionary) {
-	PDFParsingPath parsingPath;
-	return findInheritedResources(inParser, inDictionary, &parsingPath, 0);
+	return inParser->QueryInheritedDictionaryEntry(inDictionary, "Resources");
 }
 
 PDFHummus::EStatusCode PDFModifiedPage::WritePage()

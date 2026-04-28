@@ -1,2 +1,7 @@
 # exclude tests from exported git archives
 PDFWriterTesting export-ignore
+
+# PDF test materials are binary; never apply line-ending translation,
+# otherwise Windows checkout corrupts the precise byte offsets baked
+# into xref tables.
+*.pdf binary
