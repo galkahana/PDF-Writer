@@ -34,6 +34,7 @@
 #include "PDFObjectCast.h"
 #include "PDFDictionary.h"
 #include "EStatusCode.h"
+#include "ObjectsBasicTypes.h"
 
 #include <string>
 
@@ -42,6 +43,7 @@
 class PDFObject;
 class PDFParser;
 class PDFArray;
+class PDFParsingPath;
 
 class PDFPageInput
 {
@@ -71,6 +73,8 @@ private:
     PDFObjectCastPtr<PDFDictionary> mPageObject;
     
 	PDFObject* QueryInheritedValue(PDFDictionary* inDictionary,const std::string& inName);
+	PDFObject* QueryInheritedValue(PDFDictionary* inDictionary,const std::string& inName,
+	                               PDFParsingPath* ioParsingPath,int inCurrentDepth);
     PDFHummus::EStatusCode SetPDFRectangleFromPDFArray(PDFArray* inPDFArray,PDFRectangle& outPDFRectangle);
     
     void AssertPageObjectValid();
