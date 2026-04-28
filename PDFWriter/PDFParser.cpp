@@ -2142,7 +2142,7 @@ EStatusCodeAndIByteReader PDFParser::CreateFilterForStream(IByteReader* inStream
 				PDFObjectCastPtr<PDFName> cryptFilterName(QueryDictionaryObject(inDecodeParams, "Name"));
 				if (!cryptFilterName)
 				{
-					TRACE_LOG("PDFParser::CreateFilterForStream, missing or invalid Name in Crypt DecodeParams, defaulting to Identity");
+					TRACE_LOG("PDFParser::CreateFilterForStream, missing or invalid Name in Crypt DecodeParms, defaulting to Identity");
 				}
 				else
 				{
