@@ -25,6 +25,9 @@
 #include "Trace.h"
 #include "PDFName.h"
 #include "ParsedPrimitiveHelper.h"
+#include "PDFIndirectObjectReference.h"
+
+#include <set>
 
 using namespace PDFHummus;
 
@@ -151,21 +154,65 @@ PDFRectangle PDFPageInput::GetArtBox()
 
 
 static const std::string scParent = "Parent";
-PDFObject* PDFPageInput::QueryInheritedValue(PDFDictionary* inDictionary,const std::string& inName)
+static const int scMaxInheritedLookupDepth = 100;
+
+PDFObject* PDFPageInput::QueryInheritedValue(PDFDictionary* inDictionary, const std::string& inName,
+                                              std::set<ObjectIDType>* ioVisitedParentIDs, int inCurrentDepth)
 {
+	if(!inDictionary)
+		return NULL;
+
+	// Check depth limit
+	if(inCurrentDepth >= scMaxInheritedLookupDepth)
+	{
+		TRACE_LOG2("PDFPageInput::QueryInheritedValue, reached maximum inherited lookup depth of %d while searching for %s",
+			scMaxInheritedLookupDepth, inName.substr(0, 100).c_str());
+		return NULL;
+	}
+
+	// Check if key exists in current dictionary
 	if(inDictionary->Exists(inName))
 	{
-		return mParser->QueryDictionaryObject(inDictionary,inName);
+		return mParser->QueryDictionaryObject(inDictionary, inName);
 	}
-	else if(inDictionary->Exists(scParent))
+
+	// Check for Parent and recurse
+	if(inDictionary->Exists(scParent))
 	{
-		PDFObjectCastPtr<PDFDictionary> parent(mParser->QueryDictionaryObject(inDictionary,scParent));
+		// Get parent as direct object first to detect indirect references
+		RefCountPtr<PDFObject> parentDirect(inDictionary->QueryDirectObject(scParent));
+		if(!parentDirect)
+			return NULL;
+
+		// If parent is an indirect reference, check for cycles
+		if(parentDirect->GetType() == PDFObject::ePDFObjectIndirectObjectReference)
+		{
+			ObjectIDType parentID = ((PDFIndirectObjectReference*)parentDirect.GetPtr())->mObjectID;
+			if(ioVisitedParentIDs->find(parentID) != ioVisitedParentIDs->end())
+			{
+				TRACE_LOG2("PDFPageInput::QueryInheritedValue, cycle detected in Parent chain at object %ld while searching for %s",
+					parentID, inName.substr(0, 100).c_str());
+				return NULL;
+			}
+			ioVisitedParentIDs->insert(parentID);
+		}
+
+		// Now resolve the parent dictionary
+		PDFObjectCastPtr<PDFDictionary> parent(mParser->QueryDictionaryObject(inDictionary, scParent));
 		if(!parent)
 			return NULL;
-		return QueryInheritedValue(parent.GetPtr(),inName);
+
+		// Recurse into parent
+		return QueryInheritedValue(parent.GetPtr(), inName, ioVisitedParentIDs, inCurrentDepth + 1);
 	}
-	else
-		return NULL;
+
+	return NULL;
+}
+
+PDFObject* PDFPageInput::QueryInheritedValue(PDFDictionary* inDictionary, const std::string& inName)
+{
+	std::set<ObjectIDType> visitedParentIDs;
+	return QueryInheritedValue(inDictionary, inName, &visitedParentIDs, 0);
 }
 
 EStatusCode PDFPageInput::SetPDFRectangleFromPDFArray(PDFArray* inPDFArray,PDFRectangle& outPDFRectangle)
