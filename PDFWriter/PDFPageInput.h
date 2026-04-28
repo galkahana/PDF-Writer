@@ -35,9 +35,9 @@
 #include "PDFDictionary.h"
 #include "EStatusCode.h"
 #include "ObjectsBasicTypes.h"
+#include "PDFParsingPath.h"
 
 #include <string>
-#include <set>
 
 
 
@@ -74,7 +74,7 @@ private:
     
 	PDFObject* QueryInheritedValue(PDFDictionary* inDictionary,const std::string& inName);
 	PDFObject* QueryInheritedValue(PDFDictionary* inDictionary,const std::string& inName,
-	                               std::set<ObjectIDType>* ioVisitedParentIDs,int inCurrentDepth);
+	                               PDFParsingPath* ioParsingPath,int inCurrentDepth);
     PDFHummus::EStatusCode SetPDFRectangleFromPDFArray(PDFArray* inPDFArray,PDFRectangle& outPDFRectangle);
     
     void AssertPageObjectValid();
