@@ -148,7 +148,14 @@ void InputPredictorTIFFSubStream::Assign(IByteReader* inSourceStream,
 	mRowBuffer = new Byte[bufferSize];
 
 	mReadColorsCount = colorsTimesColumns;
-	mReadColors = new unsigned short[mReadColorsCount];
+	// only the sub-byte path in DecodeBufferToColors can leave cells unwritten when
+	// the defensive bounds check trips. value-initialize in that case so unwritten
+	// cells read as 0 instead of uninitialized heap memory. the 8 and >8 bpc paths
+	// fully overwrite the buffer and don't need the extra zero pass.
+	if(inBitsPerComponent < 8)
+		mReadColors = new unsigned short[mReadColorsCount]();
+	else
+		mReadColors = new unsigned short[mReadColorsCount];
 	mReadColorsIndex = mReadColors + mReadColorsCount; // assign to end of array so will know that should read new buffer
 	mIndexInColor = 0;
 
@@ -200,11 +207,25 @@ void InputPredictorTIFFSubStream::DecodeBufferToColors()
 	}
 	else if(8 > mBitsPerComponent)
 	{
-		for(; i < (mReadColorsCount*mBitsPerComponent/8);++i)
+		bool stop = false;
+		for(; !stop && i < (mReadColorsCount*mBitsPerComponent/8);++i)
 		{
 			for(LongBufferSizeType j=0; j < (LongBufferSizeType)(8/mBitsPerComponent); ++j)
 			{
-				mReadColors[(i+1)*8/mBitsPerComponent - j - 1] = mRowBuffer[i] & mBitMask;
+				LongBufferSizeType writeIndex = (i+1)*8/mBitsPerComponent - j - 1;
+				// defensive bounds check: with non-power-of-two BitsPerComponent or
+				// counts that don't divide evenly, the computed index could in principle
+				// land outside the mReadColors array. break out of both loops, since
+				// writeIndex grows monotonically with i and would keep tripping; unfilled
+				// cells were zero-initialized in Assign(), so downstream reads see 0.
+				if(writeIndex >= mReadColorsCount)
+				{
+					TRACE_LOG3("InputPredictorTIFFSubStream::DecodeBufferToColors, write index %zu out of bounds (count=%zu, bpc=%u), aborting decode",
+						(size_t)writeIndex, (size_t)mReadColorsCount, (unsigned)mBitsPerComponent);
+					stop = true;
+					break;
+				}
+				mReadColors[writeIndex] = mRowBuffer[i] & mBitMask;
 				mRowBuffer[i] = mRowBuffer[i]>>mBitsPerComponent;
 			}
 		}
