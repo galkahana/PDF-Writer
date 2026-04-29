@@ -108,14 +108,17 @@ EStatusCode JPEGImageParser::Parse(IByteReaderWithPosition* inImageStream,JPEGIm
 						SkipTag();
 					break;
 				case scAPP13TagID:
-                    if(PhotoshopMarkerNotFound)
-                    {
-                        // photoshop tags may be corrupt, so internal method will return if the 
-                        // photoshop tag is OK. otherwise skip it, and wait for the next one...parhaps will be better
-                        status = ReadPhotoshopData(outImageInformation,PhotoshopMarkerNotFound);
-                    }
-                    else
-                        status = SkipTag();
+                	if(PhotoshopMarkerNotFound)
+					{
+						// photoshop tags may be corrupt, so internal method will return if the 
+						// photoshop tag is OK. otherwise skip it, and wait for the next one...parhaps will be better
+						bool photoshopDataOK = false;
+						status = ReadPhotoshopData(outImageInformation,photoshopDataOK);
+						if(PDFHummus::eSuccess == status && photoshopDataOK)
+							PhotoshopMarkerNotFound = false;
+					}
+					else
+						status = SkipTag();
 					break;				
 				case scAPP1TagID:
 					if(ExifMarkerNotFound)
@@ -280,7 +283,7 @@ EStatusCode JPEGImageParser::SkipStream(unsigned long inSkip, unsigned long& ref
 	return PDFHummus::eSuccess;
 }
 
-EStatusCode JPEGImageParser::ReadPhotoshopData(JPEGImageInformation& outImageInformation, bool outPhotoshopDataOK)
+EStatusCode JPEGImageParser::ReadPhotoshopData(JPEGImageInformation& outImageInformation, bool& outPhotoshopDataOK)
 {
 	// code below uses a two level status where the primary is in charge of read error
 	// and the secondary is in charge of realizing whether the data is correct. 

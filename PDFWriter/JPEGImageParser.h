@@ -68,7 +68,7 @@ private:
 	void SkipStream(unsigned long inSkip);
 	PDFHummus::EStatusCode SkipStream(unsigned long inSkip, unsigned long& refReadLimit);
 	PDFHummus::EStatusCode ReadJFIFData(JPEGImageInformation& outImageInformation);
-	PDFHummus::EStatusCode ReadPhotoshopData(JPEGImageInformation& outImageInformation,bool outPhotoshopDataOK);
+	PDFHummus::EStatusCode ReadPhotoshopData(JPEGImageInformation& outImageInformation,bool& outPhotoshopDataOK);
 	PDFHummus::EStatusCode ReadExifData(JPEGImageInformation& outImageInformation);
 	PDFHummus::EStatusCode GetResolutionFromExif(	JPEGImageInformation& outImageInformation,
 									   unsigned long inXResolutionOffset,
