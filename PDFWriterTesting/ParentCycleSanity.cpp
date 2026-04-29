@@ -23,8 +23,7 @@
    ParentCycle.pdf contains a single page whose /Parent points back to itself
    and which has no /Resources. Walking the parent chain looking for inherited
    /Resources used to recurse forever -> stack overflow. With the fix in place
-   each consumer-layer caller must return (success or eFailure) without
-   crashing the process.
+   each consumer-layer caller must return with success, as a simple pdf with one empty page.
 */
 #include "PDFParser.h"
 #include "PDFPageInput.h"
@@ -51,43 +50,49 @@ static EStatusCode exercisePageInputPath(const string& inSourcePath) {
 		return eFailure;
 
 	PDFPageInput pageInput(&parser, parser.ParsePage(0));
-	// These call QueryInheritedValue which walks /Parent. With the cycle
-	// guard the call returns; without it the process stack-overflows.
-	pageInput.GetMediaBox();
-	pageInput.GetCropBox();
-	pageInput.GetRotate();
+	PDFRectangle mediaBox = pageInput.GetMediaBox();
+	if(mediaBox.GetWidth() != 612 || mediaBox.GetHeight() != 792) {
+		cout << "ParentCycleSanity: PDFPageInput path failed to get correct media box" << endl;
+		return eFailure;
+	}
 	return eSuccess;
 }
 
 static EStatusCode exerciseModifiedPagePath(const string& inSourcePath, const string& inOutputPath) {
 	PDFWriter writer;
-	if(writer.ModifyPDF(inSourcePath, ePDFVersion14, inOutputPath) != eSuccess)
+	EStatusCode status;
+	status = writer.ModifyPDF(inSourcePath, ePDFVersion14, inOutputPath);
+	if(status != eSuccess)
 		return eFailure;
 
 	PDFModifiedPage modifiedPage(&writer, 0);
-	// StartContentContext -> findInheritedResources walks the /Parent chain.
-	// May legitimately fail to start a context if the page has no resources;
-	// we only require that it does not crash.
-	modifiedPage.StartContentContext();
-	modifiedPage.EndContentContext();
-	modifiedPage.WritePage();
+	AbstractContentContext* context = modifiedPage.StartContentContext();
+	if(!context)
+		return eFailure;
+	status = modifiedPage.EndContentContext();
+	if(status != eSuccess)
+		return eFailure;
+	status = modifiedPage.WritePage();
+	if(status != eSuccess)
+		return eFailure;
 
-	writer.EndPDF();
-	return eSuccess;
+	return writer.EndPDF();
 }
 
 static EStatusCode exerciseDocumentHandlerPath(const string& inSourcePath, const string& inOutputPath) {
 	PDFWriter writer;
-	if(writer.StartPDF(inOutputPath, ePDFVersion14) != eSuccess)
+	EStatusCode status;
+	status = writer.StartPDF(inOutputPath, ePDFVersion14);
+	if(status != eSuccess)
 		return eFailure;
 
-	// AppendPDFPagesFromPDF -> FindPageResources walks the /Parent chain.
-	// The append may itself fail because of the malformed source; the
-	// regression check is just that we return.
-	writer.AppendPDFPagesFromPDF(inSourcePath, PDFPageRange());
+	// AppendPDFPagesFromPDF -> FindPageResources walks the /Parent chain. if can't handle cycles, will crash.
+	// The append may shouldn't fail because it's expected to just be a simple empty page
+	status = writer.AppendPDFPagesFromPDF(inSourcePath, PDFPageRange()).first;
+	if(status != eSuccess)
+		return eFailure;
 
-	writer.EndPDF();
-	return eSuccess;
+	return writer.EndPDF();
 }
 
 int ParentCycleSanity(int argc, char* argv[]) {
