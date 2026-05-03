@@ -153,6 +153,8 @@ private:
 
 
 	void FreeTables();
+	void FreeSubrs();
+	void FreeCharStrings();
 	bool IsComment(const std::string& inToken);
 	PDFHummus::EStatusCode ReadFontDictionary();
 	PDFHummus::EStatusCode ReadFontInfoDictionary();
