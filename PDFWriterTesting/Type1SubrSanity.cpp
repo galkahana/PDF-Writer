@@ -96,7 +96,10 @@ static string BuildMalformedPFB(const string& inEncryptedPayload) {
 
 static EStatusCode parseSyntheticPFB(const string& inPlaintext) {
 	string pfb = BuildMalformedPFB(inPlaintext);
-	InputByteArrayStream stream((Byte*)pfb.data(), (LongFilePositionType)pfb.size());
+	// &pfb[0] returns char* (non-const) on a non-const string in every
+	// supported standard; pfb.data() is const char* pre-C++17 and would
+	// require a const-stripping cast.
+	InputByteArrayStream stream((Byte*)&pfb[0], (LongFilePositionType)pfb.size());
 	Type1Input type1;
 	return type1.ReadType1File(&stream);
 }
@@ -225,6 +228,29 @@ static bool parsingMalformedCharstring_returnsFailure() {
 	return true;
 }
 
+// std::map::insert is no-op on duplicate keys, so without an explicit check
+// we would silently leak the second charstring's Code allocation. The fix
+// rejects the duplicate so the outer cleanup runs.
+static bool parsingDuplicateCharstringName_returnsFailure() {
+	// Arrange
+	const string payload =
+		"/Private\n"
+		"/CharStrings 2 dict dup begin\n"
+		"/A 4 RD test ND\n"
+		"/A 4 RD test ND\n"
+		"end\n";
+
+	// Act
+	EStatusCode status = parseSyntheticPFB(payload);
+
+	// Assert
+	if(status == eSuccess) {
+		cout << "Type1SubrSanity: duplicate charstring name was accepted" << endl;
+		return false;
+	}
+	return true;
+}
+
 // V-352 lesson: prove the fix didn't break the happy path, not just that it didn't crash.
 static bool parsingValidPFB_returnsUsableSubrAtValidIndex(char* argv[]) {
 	// Arrange
@@ -292,6 +318,7 @@ int Type1SubrSanity(int argc, char* argv[]) {
 	if(!parsingNegativeSubrCodeLength_returnsFailure()) return 1;
 	if(!parsingDuplicateSubrsWithBadSecondCount_returnsFailure()) return 1;
 	if(!parsingMalformedCharstring_returnsFailure()) return 1;
+	if(!parsingDuplicateCharstringName_returnsFailure()) return 1;
 	if(!parsingValidPFB_returnsUsableSubrAtValidIndex(argv)) return 1;
 	if(!getSubrWithNegativeIndex_returnsNull(argv)) return 1;
 	if(!getSubrWithIndexBeyondCount_returnsNull(argv)) return 1;

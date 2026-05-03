@@ -737,6 +737,11 @@ EStatusCode Type1Input::ParseSubrs()
 				status = eFailure;
 				break;
 			}
+			// Free any previous Code buffer at this index in case a malformed
+			// font defines the same subr twice. delete[] NULL is well-defined
+			// (default ctor zero-inits Code) so the first-time path is fine.
+			delete[] mSubrs[subrIndex].Code;
+			mSubrs[subrIndex].Code = NULL;
 			mSubrs[subrIndex].CodeLength = (int)codeLength;
 			mSubrs[subrIndex].Code = new Byte[mSubrs[subrIndex].CodeLength];
 
@@ -827,7 +832,20 @@ EStatusCode Type1Input::ParseCharstrings()
 
 			mPFBDecoder.Read(charString.Code,charString.CodeLength);
 
-			mCharStrings.insert(StringToType1CharStringMap::value_type(characterName,charString));
+			// std::map::insert is no-op on duplicate keys; without checking we
+			// would leak charString.Code on a malformed font that names the
+			// same charstring twice. Reject the duplicate cleanly so the
+			// outer FreeCharStrings cleanup runs on the prior entries.
+			std::pair<StringToType1CharStringMap::iterator,bool> insertResult =
+				mCharStrings.insert(StringToType1CharStringMap::value_type(characterName,charString));
+			if(!insertResult.second)
+			{
+				TRACE_LOG1("Type1Input::ParseCharstrings, duplicate charstring name: %s",characterName.c_str());
+				delete[] charString.Code;
+				charString.Code = NULL;
+				status = eFailure;
+				break;
+			}
 
 			// skip ND token
 			mPFBDecoder.GetNextToken();
