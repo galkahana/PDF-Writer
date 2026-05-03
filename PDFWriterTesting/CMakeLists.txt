@@ -73,6 +73,7 @@ create_test_sourcelist (Tests
   TrueTypeAnsiWriteBug.cpp
   TrueTypeTest.cpp
   TTCTest.cpp
+  Type1SubrSanity.cpp
   Type1Test.cpp
   UnicodeTextUsage.cpp
   UppercaseSequanceTest.cpp

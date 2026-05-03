@@ -29,6 +29,21 @@
 
 using namespace PDFHummus;
 
+// Conservative caps on attacker-controlled Type 1 sizes.
+// Real fonts are far below these; a malformed font with values above
+// is rejected rather than driving allocations / array indexing OOB.
+#define MAX_TYPE1_SUBRS_COUNT 65535
+#define MAX_TYPE1_CODE_LENGTH 65535
+
+// Parse a token as a long and verify it falls within [inMinInclusive, inMaxInclusive].
+// Used to bound attacker-controlled counts/indices/lengths from PFB tokens before
+// they drive allocations or array indexing.
+static bool TryParseBoundedLong(const std::string& inToken,long inMinInclusive,long inMaxInclusive,long& outValue)
+{
+	outValue = Long(inToken);
+	return outValue >= inMinInclusive && outValue <= inMaxInclusive;
+}
+
 Type1Input::Type1Input(void)
 {
 	mSubrsCount = 0;
@@ -636,23 +651,27 @@ EStatusCode Type1Input::ParseDoubleVector(std::vector<double>& inVector)
 
 EStatusCode Type1Input::ParseSubrs()
 {
-	int subrIndex;
+	long subrIndex;
 
 	// get the subrs count
 	BoolAndString token = mPFBDecoder.GetNextToken();
 	if(!token.first)
 		return eFailure;
 
-	mSubrsCount = Long(token.second);
-    if(mSubrsCount == 0)
-    {
-        mSubrs = NULL;
-        return eSuccess;
-    }
-    else
-        mSubrs = new Type1CharString[mSubrsCount];
+	if(!TryParseBoundedLong(token.second,0,MAX_TYPE1_SUBRS_COUNT,mSubrsCount))
+	{
+		TRACE_LOG1("Type1Input::ParseSubrs, subrs count out of range: %ld",mSubrsCount);
+		mSubrsCount = 0;
+		return eFailure;
+	}
+	if(mSubrsCount == 0)
+	{
+		mSubrs = NULL;
+		return eSuccess;
+	}
+	mSubrs = new Type1CharString[mSubrsCount];
 
-	// parse the subrs. they look like this: 	
+	// parse the subrs. they look like this:
 	// dup index nbytes RD ~n~binary~bytes~ NP
 
 	// skip till the first dup
@@ -670,13 +689,23 @@ EStatusCode Type1Input::ParseSubrs()
 		token = mPFBDecoder.GetNextToken();
 		if(!token.first)
 			break;
-				
-		subrIndex = Int(token.second);
+
+		if(!TryParseBoundedLong(token.second,0,mSubrsCount - 1,subrIndex))
+		{
+			TRACE_LOG2("Type1Input::ParseSubrs, subr index %ld out of range [0,%ld)",subrIndex,mSubrsCount);
+			return eFailure;
+		}
 		token = mPFBDecoder.GetNextToken();
 		if(!token.first)
 			break;
 
-		mSubrs[subrIndex].CodeLength = Int(token.second);
+		long codeLength;
+		if(!TryParseBoundedLong(token.second,1,MAX_TYPE1_CODE_LENGTH,codeLength))
+		{
+			TRACE_LOG1("Type1Input::ParseSubrs, subr CodeLength out of range: %ld",codeLength);
+			return eFailure;
+		}
+		mSubrs[subrIndex].CodeLength = (int)codeLength;
 		mSubrs[subrIndex].Code = new Byte[mSubrs[subrIndex].CodeLength];
 
 		// skip the RD token (will also skip space)
@@ -732,7 +761,13 @@ EStatusCode Type1Input::ParseCharstrings()
 
 		characterName = FromPSName(token.second);
 
-		charString.CodeLength = Int(mPFBDecoder.GetNextToken().second);
+		long codeLength;
+		if(!TryParseBoundedLong(mPFBDecoder.GetNextToken().second,1,MAX_TYPE1_CODE_LENGTH,codeLength))
+		{
+			TRACE_LOG1("Type1Input::ParseCharstrings, charstring CodeLength out of range: %ld",codeLength);
+			return eFailure;
+		}
+		charString.CodeLength = (int)codeLength;
 
 		charString.Code = new Byte[charString.CodeLength];
 
@@ -826,16 +861,16 @@ EStatusCode Type1Input::CalculateDependenciesForCharIndex(const std::string& inC
 
 Type1CharString* Type1Input::GetSubr(long inSubrIndex)
 {
-	if(mCurrentDependencies)
-		mCurrentDependencies->mSubrs.insert((unsigned short)inSubrIndex);
-
-	if(inSubrIndex >= mSubrsCount)
+	if(inSubrIndex < 0 || inSubrIndex >= mSubrsCount || !mSubrs)
 	{
 		TRACE_LOG2("CharStringType1Tracer::GetLocalSubr exception, asked for %ld and there are only %ld count subrs",inSubrIndex,mSubrsCount);
 		return NULL;
 	}
-	else
-		return mSubrs+inSubrIndex;
+
+	if(mCurrentDependencies)
+		mCurrentDependencies->mSubrs.insert((unsigned short)inSubrIndex);
+
+	return mSubrs+inSubrIndex;
 }
 
 EStatusCode Type1Input::Type1Seac(const LongList& inOperandList)

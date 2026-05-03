@@ -32,6 +32,8 @@ struct Type1CharString
 {
 	Byte* Code;
 	int CodeLength;
+
+	Type1CharString() : Code(NULL), CodeLength(0) {}
 };
 
 typedef std::list<long> LongList;
