@@ -56,19 +56,28 @@ Type1Input::~Type1Input(void)
 	FreeTables();
 }
 
-void Type1Input::FreeTables()
+void Type1Input::FreeSubrs()
 {
 	for(long i=0;i<mSubrsCount;++i)
 		delete[] mSubrs[i].Code;
 	delete[] mSubrs;
 	mSubrs = NULL;
 	mSubrsCount = 0;
+}
 
+void Type1Input::FreeCharStrings()
+{
 	StringToType1CharStringMap::iterator itCharStrings = mCharStrings.begin();
 
 	for(; itCharStrings != mCharStrings.end(); ++itCharStrings)
 		delete[] itCharStrings->second.Code;
 	mCharStrings.clear();
+}
+
+void Type1Input::FreeTables()
+{
+	FreeSubrs();
+	FreeCharStrings();
 }
 
 void Type1Input::Reset()
@@ -651,139 +660,188 @@ EStatusCode Type1Input::ParseDoubleVector(std::vector<double>& inVector)
 
 EStatusCode Type1Input::ParseSubrs()
 {
+	EStatusCode status = eSuccess;
+	long newCount;
 	long subrIndex;
+	BoolAndString token;
 
-	// get the subrs count
-	BoolAndString token = mPFBDecoder.GetNextToken();
-	if(!token.first)
-		return eFailure;
+	// Drop any previously parsed subrs first - handles a malformed font that
+	// declares /Subrs more than once and guarantees the failure path below
+	// finds a clean slate to leave behind via FreeSubrs().
+	FreeSubrs();
 
-	if(!TryParseBoundedLong(token.second,0,MAX_TYPE1_SUBRS_COUNT,mSubrsCount))
+	do
 	{
-		TRACE_LOG1("Type1Input::ParseSubrs, subrs count out of range: %ld",mSubrsCount);
-		mSubrsCount = 0;
-		return eFailure;
-	}
-	if(mSubrsCount == 0)
-	{
-		mSubrs = NULL;
-		return eSuccess;
-	}
-	mSubrs = new Type1CharString[mSubrsCount];
-
-	// parse the subrs. they look like this:
-	// dup index nbytes RD ~n~binary~bytes~ NP
-
-	// skip till the first dup
-	while(token.first)
-	{
-		token = mPFBDecoder.GetNextToken();
-		if(token.second.compare("dup") == 0)
-			break;
-	}
-	if(!token.first)
-		return eFailure;
-
-	for(long i=0;i<mSubrsCount && token.first;++i)
-	{
+		// get the subrs count
 		token = mPFBDecoder.GetNextToken();
 		if(!token.first)
-			break;
-
-		if(!TryParseBoundedLong(token.second,0,mSubrsCount - 1,subrIndex))
 		{
-			TRACE_LOG2("Type1Input::ParseSubrs, subr index %ld out of range [0,%ld)",subrIndex,mSubrsCount);
-			return eFailure;
-		}
-		token = mPFBDecoder.GetNextToken();
-		if(!token.first)
+			status = eFailure;
 			break;
-
-		long codeLength;
-		if(!TryParseBoundedLong(token.second,1,MAX_TYPE1_CODE_LENGTH,codeLength))
-		{
-			TRACE_LOG1("Type1Input::ParseSubrs, subr CodeLength out of range: %ld",codeLength);
-			return eFailure;
 		}
-		mSubrs[subrIndex].CodeLength = (int)codeLength;
-		mSubrs[subrIndex].Code = new Byte[mSubrs[subrIndex].CodeLength];
 
-		// skip the RD token (will also skip space)
-		mPFBDecoder.GetNextToken();
+		if(!TryParseBoundedLong(token.second,0,MAX_TYPE1_SUBRS_COUNT,newCount))
+		{
+			TRACE_LOG1("Type1Input::ParseSubrs, subrs count out of range: %ld",newCount);
+			status = eFailure;
+			break;
+		}
+		if(newCount == 0)
+			break; // status stays eSuccess; no allocation needed
 
-		mPFBDecoder.Read(mSubrs[subrIndex].Code,mSubrs[subrIndex].CodeLength);
+		mSubrsCount = newCount;
+		mSubrs = new Type1CharString[mSubrsCount];
 
-		// skip till next line or array end
-		while ( token.first )
+		// parse the subrs. they look like this:
+		// dup index nbytes RD ~n~binary~bytes~ NP
+
+		// skip till the first dup
+		while(token.first)
 		{
 			token = mPFBDecoder.GetNextToken();
-
-			if ( 0 == token.second.compare("dup") )
-				break;
-			if ( 0 == token.second.compare("ND") )
-				break;
-			if ( 0 == token.second.compare("|-") ) // synonym for "ND"
-				break;
-			if ( 0 == token.second.compare("def") )
+			if(token.second.compare("dup") == 0)
 				break;
 		}
-	}
-	if(!token.first)
-		return eFailure;
+		if(!token.first)
+		{
+			status = eFailure;
+			break;
+		}
 
-	return mPFBDecoder.GetInternalState();
+		for(long i=0;i<mSubrsCount && token.first && status == eSuccess;++i)
+		{
+			token = mPFBDecoder.GetNextToken();
+			if(!token.first)
+			{
+				status = eFailure;
+				break;
+			}
+
+			if(!TryParseBoundedLong(token.second,0,mSubrsCount - 1,subrIndex))
+			{
+				TRACE_LOG2("Type1Input::ParseSubrs, subr index %ld out of range [0,%ld)",subrIndex,mSubrsCount);
+				status = eFailure;
+				break;
+			}
+			token = mPFBDecoder.GetNextToken();
+			if(!token.first)
+			{
+				status = eFailure;
+				break;
+			}
+
+			long codeLength;
+			if(!TryParseBoundedLong(token.second,1,MAX_TYPE1_CODE_LENGTH,codeLength))
+			{
+				TRACE_LOG1("Type1Input::ParseSubrs, subr CodeLength out of range: %ld",codeLength);
+				status = eFailure;
+				break;
+			}
+			mSubrs[subrIndex].CodeLength = (int)codeLength;
+			mSubrs[subrIndex].Code = new Byte[mSubrs[subrIndex].CodeLength];
+
+			// skip the RD token (will also skip space)
+			mPFBDecoder.GetNextToken();
+
+			mPFBDecoder.Read(mSubrs[subrIndex].Code,mSubrs[subrIndex].CodeLength);
+
+			// skip till next line or array end
+			while ( token.first )
+			{
+				token = mPFBDecoder.GetNextToken();
+
+				if ( 0 == token.second.compare("dup") )
+					break;
+				if ( 0 == token.second.compare("ND") )
+					break;
+				if ( 0 == token.second.compare("|-") ) // synonym for "ND"
+					break;
+				if ( 0 == token.second.compare("def") )
+					break;
+			}
+		}
+		if(status != eSuccess)
+			break;
+
+		status = mPFBDecoder.GetInternalState();
+	} while(false);
+
+	if(status != eSuccess)
+		FreeSubrs(); // leave a clean state on any failure rather than partial subrs
+
+	return status;
 }
 
 EStatusCode Type1Input::ParseCharstrings()
 {
+	EStatusCode status = eSuccess;
 	BoolAndString token;
 	std::string characterName;
 	Type1CharString charString;
 
-	// skip till "begin"
-	while(mPFBDecoder.NotEnded())
+	// Drop any previously parsed charstrings first - handles a malformed font
+	// that declares /CharStrings more than once and guarantees the failure
+	// path below finds a clean slate to leave behind via FreeCharStrings().
+	FreeCharStrings();
+
+	do
 	{
-		token = mPFBDecoder.GetNextToken();
-		if(!token.first || token.second.compare("begin") == 0)
-			break;
-	}
-	if(!token.first)
-		return eFailure;
-
-	// Charstrings look like this:
-	// charactername nbytes RD ~n~binary~bytes~ ND
-	while(token.first && mPFBDecoder.GetInternalState() == eSuccess)
-	{
-		token = mPFBDecoder.GetNextToken();
-
-		if("end" == token.second)
-			break;
-
-		characterName = FromPSName(token.second);
-
-		long codeLength;
-		if(!TryParseBoundedLong(mPFBDecoder.GetNextToken().second,1,MAX_TYPE1_CODE_LENGTH,codeLength))
+		// skip till "begin"
+		while(mPFBDecoder.NotEnded())
 		{
-			TRACE_LOG1("Type1Input::ParseCharstrings, charstring CodeLength out of range: %ld",codeLength);
-			return eFailure;
+			token = mPFBDecoder.GetNextToken();
+			if(!token.first || token.second.compare("begin") == 0)
+				break;
 		}
-		charString.CodeLength = (int)codeLength;
+		if(!token.first)
+		{
+			status = eFailure;
+			break;
+		}
 
-		charString.Code = new Byte[charString.CodeLength];
+		// Charstrings look like this:
+		// charactername nbytes RD ~n~binary~bytes~ ND
+		while(token.first && mPFBDecoder.GetInternalState() == eSuccess)
+		{
+			token = mPFBDecoder.GetNextToken();
 
-		// skip the RD token (will also skip space)
-		mPFBDecoder.GetNextToken();
+			if("end" == token.second)
+				break;
+
+			characterName = FromPSName(token.second);
+
+			long codeLength;
+			if(!TryParseBoundedLong(mPFBDecoder.GetNextToken().second,1,MAX_TYPE1_CODE_LENGTH,codeLength))
+			{
+				TRACE_LOG1("Type1Input::ParseCharstrings, charstring CodeLength out of range: %ld",codeLength);
+				status = eFailure;
+				break;
+			}
+			charString.CodeLength = (int)codeLength;
+
+			charString.Code = new Byte[charString.CodeLength];
+
+			// skip the RD token (will also skip space)
+			mPFBDecoder.GetNextToken();
 
 
-		mPFBDecoder.Read(charString.Code,charString.CodeLength);
+			mPFBDecoder.Read(charString.Code,charString.CodeLength);
 
-		mCharStrings.insert(StringToType1CharStringMap::value_type(characterName,charString));
+			mCharStrings.insert(StringToType1CharStringMap::value_type(characterName,charString));
 
-		// skip ND token
-		mPFBDecoder.GetNextToken();
-	}
+			// skip ND token
+			mPFBDecoder.GetNextToken();
+		}
+		if(status != eSuccess)
+			break;
 
-	return mPFBDecoder.GetInternalState();
+		status = mPFBDecoder.GetInternalState();
+	} while(false);
+
+	if(status != eSuccess)
+		FreeCharStrings(); // leave a clean state on any failure rather than partial charstrings
+
+	return status;
 }
 
 Type1CharString* Type1Input::GetGlyphCharString(Byte inCharStringIndex)

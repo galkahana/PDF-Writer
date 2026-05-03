@@ -174,6 +174,57 @@ static bool parsingNegativeSubrCodeLength_returnsFailure() {
 	return true;
 }
 
+// A second /Subrs whose count is out of range used to leave mSubrs pointing
+// at the first /Subrs's array while resetting mSubrsCount, so FreeTables
+// would skip per-subr Code cleanup and leak. With the do-while-false +
+// FreeTables-on-failure pattern in place, ParseSubrs must reject and leave
+// no dangling state. We can only assert "didn't crash + parse failed" here;
+// the leak itself is invisible without a sanitizer, but the cleanup is what
+// makes the no-crash outcome possible at all.
+static bool parsingDuplicateSubrsWithBadSecondCount_returnsFailure() {
+	// Arrange
+	// "ND" terminator on the last subr is load-bearing: ParseSubrs's per-subr
+	// "skip till next line or array end" loop will otherwise consume the
+	// trailing /Subrs token, hiding the duplicate from ReadPrivateDictionary.
+	const string payload =
+		"/Private\n"
+		"/Subrs 2 array\n"
+		"dup 0 4 RD test NP\n"
+		"dup 1 4 RD test ND\n"
+		"/Subrs 999999 array\n";
+
+	// Act
+	EStatusCode status = parseSyntheticPFB(payload);
+
+	// Assert
+	if(status == eSuccess) {
+		cout << "Type1SubrSanity: duplicate /Subrs with bad second count was accepted" << endl;
+		return false;
+	}
+	return true;
+}
+
+// ParseCharstrings now mirrors ParseSubrs's do-while-false + FreeCharStrings-on-failure
+// pattern. Malformed CodeLength must be rejected without leaving partial charstrings.
+static bool parsingMalformedCharstring_returnsFailure() {
+	// Arrange
+	const string payload =
+		"/Private\n"
+		"/CharStrings 1 dict dup begin\n"
+		"/A 99999999 RD test ND\n"
+		"end\n";
+
+	// Act
+	EStatusCode status = parseSyntheticPFB(payload);
+
+	// Assert
+	if(status == eSuccess) {
+		cout << "Type1SubrSanity: malformed charstring CodeLength was accepted" << endl;
+		return false;
+	}
+	return true;
+}
+
 // V-352 lesson: prove the fix didn't break the happy path, not just that it didn't crash.
 static bool parsingValidPFB_returnsUsableSubrAtValidIndex(char* argv[]) {
 	// Arrange
@@ -239,6 +290,8 @@ int Type1SubrSanity(int argc, char* argv[]) {
 	if(!parsingOutOfRangeSubrIndex_returnsFailure()) return 1;
 	if(!parsingHugeSubrCodeLength_returnsFailure()) return 1;
 	if(!parsingNegativeSubrCodeLength_returnsFailure()) return 1;
+	if(!parsingDuplicateSubrsWithBadSecondCount_returnsFailure()) return 1;
+	if(!parsingMalformedCharstring_returnsFailure()) return 1;
 	if(!parsingValidPFB_returnsUsableSubrAtValidIndex(argv)) return 1;
 	if(!getSubrWithNegativeIndex_returnsNull(argv)) return 1;
 	if(!getSubrWithIndexBeyondCount_returnsNull(argv)) return 1;
