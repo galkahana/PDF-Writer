@@ -29,6 +29,21 @@
 
 using namespace PDFHummus;
 
+// Conservative caps on attacker-controlled Type 1 sizes.
+// Real fonts are far below these; a malformed font with values above
+// is rejected rather than driving allocations / array indexing OOB.
+#define MAX_TYPE1_SUBRS_COUNT 65535
+#define MAX_TYPE1_CODE_LENGTH 65535
+
+// Parse a token as a long and verify it falls within [inMinInclusive, inMaxInclusive].
+// Used to bound attacker-controlled counts/indices/lengths from PFB tokens before
+// they drive allocations or array indexing.
+static bool TryParseBoundedLong(const std::string& inToken,long inMinInclusive,long inMaxInclusive,long& outValue)
+{
+	outValue = Long(inToken);
+	return outValue >= inMinInclusive && outValue <= inMaxInclusive;
+}
+
 Type1Input::Type1Input(void)
 {
 	mSubrsCount = 0;
@@ -41,19 +56,28 @@ Type1Input::~Type1Input(void)
 	FreeTables();
 }
 
-void Type1Input::FreeTables()
+void Type1Input::FreeSubrs()
 {
 	for(long i=0;i<mSubrsCount;++i)
 		delete[] mSubrs[i].Code;
 	delete[] mSubrs;
 	mSubrs = NULL;
 	mSubrsCount = 0;
+}
 
+void Type1Input::FreeCharStrings()
+{
 	StringToType1CharStringMap::iterator itCharStrings = mCharStrings.begin();
 
 	for(; itCharStrings != mCharStrings.end(); ++itCharStrings)
 		delete[] itCharStrings->second.Code;
 	mCharStrings.clear();
+}
+
+void Type1Input::FreeTables()
+{
+	FreeSubrs();
+	FreeCharStrings();
 }
 
 void Type1Input::Reset()
@@ -636,119 +660,206 @@ EStatusCode Type1Input::ParseDoubleVector(std::vector<double>& inVector)
 
 EStatusCode Type1Input::ParseSubrs()
 {
-	int subrIndex;
+	EStatusCode status = eSuccess;
+	long newCount;
+	long subrIndex;
+	BoolAndString token;
 
-	// get the subrs count
-	BoolAndString token = mPFBDecoder.GetNextToken();
-	if(!token.first)
-		return eFailure;
+	// Drop any previously parsed subrs first - handles a malformed font that
+	// declares /Subrs more than once and guarantees the failure path below
+	// finds a clean slate to leave behind via FreeSubrs().
+	FreeSubrs();
 
-	mSubrsCount = Long(token.second);
-    if(mSubrsCount == 0)
-    {
-        mSubrs = NULL;
-        return eSuccess;
-    }
-    else
-        mSubrs = new Type1CharString[mSubrsCount];
-
-	// parse the subrs. they look like this: 	
-	// dup index nbytes RD ~n~binary~bytes~ NP
-
-	// skip till the first dup
-	while(token.first)
+	do
 	{
-		token = mPFBDecoder.GetNextToken();
-		if(token.second.compare("dup") == 0)
-			break;
-	}
-	if(!token.first)
-		return eFailure;
-
-	for(long i=0;i<mSubrsCount && token.first;++i)
-	{
+		// get the subrs count
 		token = mPFBDecoder.GetNextToken();
 		if(!token.first)
+		{
+			status = eFailure;
 			break;
-				
-		subrIndex = Int(token.second);
-		token = mPFBDecoder.GetNextToken();
-		if(!token.first)
+		}
+
+		if(!TryParseBoundedLong(token.second,0,MAX_TYPE1_SUBRS_COUNT,newCount))
+		{
+			TRACE_LOG1("Type1Input::ParseSubrs, subrs count out of range: %ld",newCount);
+			status = eFailure;
 			break;
+		}
+		if(newCount == 0)
+			break; // status stays eSuccess; no allocation needed
 
-		mSubrs[subrIndex].CodeLength = Int(token.second);
-		mSubrs[subrIndex].Code = new Byte[mSubrs[subrIndex].CodeLength];
+		mSubrsCount = newCount;
+		mSubrs = new Type1CharString[mSubrsCount];
 
-		// skip the RD token (will also skip space)
-		mPFBDecoder.GetNextToken();
+		// parse the subrs. they look like this:
+		// dup index nbytes RD ~n~binary~bytes~ NP
 
-		mPFBDecoder.Read(mSubrs[subrIndex].Code,mSubrs[subrIndex].CodeLength);
-
-		// skip till next line or array end
-		while ( token.first )
+		// skip till the first dup
+		while(token.first)
 		{
 			token = mPFBDecoder.GetNextToken();
-
-			if ( 0 == token.second.compare("dup") )
-				break;
-			if ( 0 == token.second.compare("ND") )
-				break;
-			if ( 0 == token.second.compare("|-") ) // synonym for "ND"
-				break;
-			if ( 0 == token.second.compare("def") )
+			if(token.second.compare("dup") == 0)
 				break;
 		}
-	}
-	if(!token.first)
-		return eFailure;
+		if(!token.first)
+		{
+			status = eFailure;
+			break;
+		}
 
-	return mPFBDecoder.GetInternalState();
+		for(long i=0;i<mSubrsCount && token.first && status == eSuccess;++i)
+		{
+			token = mPFBDecoder.GetNextToken();
+			if(!token.first)
+			{
+				status = eFailure;
+				break;
+			}
+
+			if(!TryParseBoundedLong(token.second,0,mSubrsCount - 1,subrIndex))
+			{
+				TRACE_LOG2("Type1Input::ParseSubrs, subr index %ld out of range [0,%ld)",subrIndex,mSubrsCount);
+				status = eFailure;
+				break;
+			}
+			token = mPFBDecoder.GetNextToken();
+			if(!token.first)
+			{
+				status = eFailure;
+				break;
+			}
+
+			long codeLength;
+			if(!TryParseBoundedLong(token.second,1,MAX_TYPE1_CODE_LENGTH,codeLength))
+			{
+				TRACE_LOG1("Type1Input::ParseSubrs, subr CodeLength out of range: %ld",codeLength);
+				status = eFailure;
+				break;
+			}
+			// Free any previous Code buffer at this index in case a malformed
+			// font defines the same subr twice. delete[] NULL is well-defined
+			// (default ctor zero-inits Code) so the first-time path is fine.
+			delete[] mSubrs[subrIndex].Code;
+			mSubrs[subrIndex].Code = NULL;
+			mSubrs[subrIndex].CodeLength = (int)codeLength;
+			mSubrs[subrIndex].Code = new Byte[mSubrs[subrIndex].CodeLength];
+
+			// skip the RD token (will also skip space)
+			mPFBDecoder.GetNextToken();
+
+			mPFBDecoder.Read(mSubrs[subrIndex].Code,mSubrs[subrIndex].CodeLength);
+
+			// skip till next line or array end
+			while ( token.first )
+			{
+				token = mPFBDecoder.GetNextToken();
+
+				if ( 0 == token.second.compare("dup") )
+					break;
+				if ( 0 == token.second.compare("ND") )
+					break;
+				if ( 0 == token.second.compare("|-") ) // synonym for "ND"
+					break;
+				if ( 0 == token.second.compare("def") )
+					break;
+			}
+		}
+		if(status != eSuccess)
+			break;
+
+		status = mPFBDecoder.GetInternalState();
+	} while(false);
+
+	if(status != eSuccess)
+		FreeSubrs(); // leave a clean state on any failure rather than partial subrs
+
+	return status;
 }
 
 EStatusCode Type1Input::ParseCharstrings()
 {
+	EStatusCode status = eSuccess;
 	BoolAndString token;
 	std::string characterName;
 	Type1CharString charString;
 
-	// skip till "begin"
-	while(mPFBDecoder.NotEnded())
+	// Drop any previously parsed charstrings first - handles a malformed font
+	// that declares /CharStrings more than once and guarantees the failure
+	// path below finds a clean slate to leave behind via FreeCharStrings().
+	FreeCharStrings();
+
+	do
 	{
-		token = mPFBDecoder.GetNextToken();
-		if(!token.first || token.second.compare("begin") == 0)
+		// skip till "begin"
+		while(mPFBDecoder.NotEnded())
+		{
+			token = mPFBDecoder.GetNextToken();
+			if(!token.first || token.second.compare("begin") == 0)
+				break;
+		}
+		if(!token.first)
+		{
+			status = eFailure;
 			break;
-	}
-	if(!token.first)
-		return eFailure;
+		}
 
-	// Charstrings look like this:
-	// charactername nbytes RD ~n~binary~bytes~ ND
-	while(token.first && mPFBDecoder.GetInternalState() == eSuccess)
-	{
-		token = mPFBDecoder.GetNextToken();
+		// Charstrings look like this:
+		// charactername nbytes RD ~n~binary~bytes~ ND
+		while(token.first && mPFBDecoder.GetInternalState() == eSuccess)
+		{
+			token = mPFBDecoder.GetNextToken();
 
-		if("end" == token.second)
+			if("end" == token.second)
+				break;
+
+			characterName = FromPSName(token.second);
+
+			long codeLength;
+			if(!TryParseBoundedLong(mPFBDecoder.GetNextToken().second,1,MAX_TYPE1_CODE_LENGTH,codeLength))
+			{
+				TRACE_LOG1("Type1Input::ParseCharstrings, charstring CodeLength out of range: %ld",codeLength);
+				status = eFailure;
+				break;
+			}
+			charString.CodeLength = (int)codeLength;
+
+			charString.Code = new Byte[charString.CodeLength];
+
+			// skip the RD token (will also skip space)
+			mPFBDecoder.GetNextToken();
+
+
+			mPFBDecoder.Read(charString.Code,charString.CodeLength);
+
+			// std::map::insert is no-op on duplicate keys; without checking we
+			// would leak charString.Code on a malformed font that names the
+			// same charstring twice. Reject the duplicate cleanly so the
+			// outer FreeCharStrings cleanup runs on the prior entries.
+			std::pair<StringToType1CharStringMap::iterator,bool> insertResult =
+				mCharStrings.insert(StringToType1CharStringMap::value_type(characterName,charString));
+			if(!insertResult.second)
+			{
+				TRACE_LOG1("Type1Input::ParseCharstrings, duplicate charstring name: %s",characterName.c_str());
+				delete[] charString.Code;
+				charString.Code = NULL;
+				status = eFailure;
+				break;
+			}
+
+			// skip ND token
+			mPFBDecoder.GetNextToken();
+		}
+		if(status != eSuccess)
 			break;
 
-		characterName = FromPSName(token.second);
+		status = mPFBDecoder.GetInternalState();
+	} while(false);
 
-		charString.CodeLength = Int(mPFBDecoder.GetNextToken().second);
+	if(status != eSuccess)
+		FreeCharStrings(); // leave a clean state on any failure rather than partial charstrings
 
-		charString.Code = new Byte[charString.CodeLength];
-
-		// skip the RD token (will also skip space)
-		mPFBDecoder.GetNextToken();
-
-
-		mPFBDecoder.Read(charString.Code,charString.CodeLength);
-
-		mCharStrings.insert(StringToType1CharStringMap::value_type(characterName,charString));
-
-		// skip ND token
-		mPFBDecoder.GetNextToken();
-	}
-
-	return mPFBDecoder.GetInternalState();
+	return status;
 }
 
 Type1CharString* Type1Input::GetGlyphCharString(Byte inCharStringIndex)
@@ -826,16 +937,16 @@ EStatusCode Type1Input::CalculateDependenciesForCharIndex(const std::string& inC
 
 Type1CharString* Type1Input::GetSubr(long inSubrIndex)
 {
-	if(mCurrentDependencies)
-		mCurrentDependencies->mSubrs.insert((unsigned short)inSubrIndex);
-
-	if(inSubrIndex >= mSubrsCount)
+	if(inSubrIndex < 0 || inSubrIndex >= mSubrsCount || !mSubrs)
 	{
 		TRACE_LOG2("CharStringType1Tracer::GetLocalSubr exception, asked for %ld and there are only %ld count subrs",inSubrIndex,mSubrsCount);
 		return NULL;
 	}
-	else
-		return mSubrs+inSubrIndex;
+
+	if(mCurrentDependencies)
+		mCurrentDependencies->mSubrs.insert((unsigned short)inSubrIndex);
+
+	return mSubrs+inSubrIndex;
 }
 
 EStatusCode Type1Input::Type1Seac(const LongList& inOperandList)

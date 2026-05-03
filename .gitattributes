@@ -5,3 +5,8 @@ PDFWriterTesting export-ignore
 # otherwise Windows checkout corrupts the precise byte offsets baked
 # into xref tables.
 *.pdf binary
+
+# PFB (Type 1 font) fixtures are binary by structure — segment markers
+# and length fields would be mangled by autocrlf on Windows.
+*.pfb binary
+*.PFB binary
