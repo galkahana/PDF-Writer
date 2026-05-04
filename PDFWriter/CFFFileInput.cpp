@@ -305,30 +305,72 @@ EStatusCode CFFFileInput::ReadHeader()
 EStatusCode CFFFileInput::ReadIndexHeader(unsigned long** outOffsets,unsigned short& outItemsCount)
 {
 	Byte offSizeForIndex;
+	EStatusCode status = PDFHummus::eFailure;
 
-	EStatusCode status = mPrimitivesReader.ReadCard16(outItemsCount);
-	if(status != PDFHummus::eSuccess)
-		return PDFHummus::eFailure;
+	*outOffsets = NULL;
 
-	if(0 == outItemsCount)
+	do
 	{
+		status = mPrimitivesReader.ReadCard16(outItemsCount);
+		if(status != PDFHummus::eSuccess)
+			break;
+
+		if(0 == outItemsCount)
+			break;
+
+		status = mPrimitivesReader.ReadOffSize(offSizeForIndex);
+		if(status != PDFHummus::eSuccess)
+			break;
+
+		// CFF spec requires offSize ∈ {1, 2, 3, 4}.
+		if(offSizeForIndex < 1 || offSizeForIndex > 4)
+		{
+			TRACE_LOG1("CFFFileInput::ReadIndexHeader, invalid INDEX offSize %d (must be 1..4)", offSizeForIndex);
+			status = PDFHummus::eFailure;
+			break;
+		}
+
+		mPrimitivesReader.SetOffSize(offSizeForIndex);
+		*outOffsets = new unsigned long[outItemsCount + 1];
+
+		for(unsigned long i = 0; i <= outItemsCount && status == eSuccess; ++ i)
+			status = mPrimitivesReader.ReadOffset((*outOffsets)[i]);
+		if(status != eSuccess)
+			break;
+
+		// offsets[0] must be >= 1: callers do Skip(offsets[0] - 1) to advance past
+		// pre-data padding, and offsets[0] == 0 would underflow that subtraction.
+		if((*outOffsets)[0] < 1)
+		{
+			TRACE_LOG1("CFFFileInput::ReadIndexHeader, INDEX offsets[0] = %lu (must be >= 1; would underflow Skip)", (*outOffsets)[0]);
+			status = PDFHummus::eFailure;
+			break;
+		}
+
+		// Offsets must be monotonically non-decreasing.
+		for(unsigned long i = 0; i < outItemsCount; ++i)
+		{
+			if((*outOffsets)[i+1] < (*outOffsets)[i])
+			{
+				TRACE_LOG3("CFFFileInput::ReadIndexHeader, non-monotonic INDEX offset at i=%lu: %lu -> %lu",
+					i, (*outOffsets)[i], (*outOffsets)[i+1]);
+				status = PDFHummus::eFailure;
+				break;
+			}
+		}
+		if(status != PDFHummus::eSuccess)
+			break;
+
+		status = mPrimitivesReader.GetInternalState();
+	} while(false);
+
+	if(status != PDFHummus::eSuccess)
+	{
+		delete[] *outOffsets;
 		*outOffsets = NULL;
-		return PDFHummus::eSuccess;
 	}
 
-	mPrimitivesReader.ReadOffSize(offSizeForIndex);
-	if(status != PDFHummus::eSuccess)
-		return PDFHummus::eFailure;
-
-	mPrimitivesReader.SetOffSize(offSizeForIndex);
-	*outOffsets = new unsigned long[outItemsCount + 1];
-
-	for(unsigned long i = 0; i <= outItemsCount && status == eSuccess; ++ i)
-		status = mPrimitivesReader.ReadOffset((*outOffsets)[i]);
-
-	if (status != eSuccess)
-		return status;
-	return mPrimitivesReader.GetInternalState();
+	return status;
 }
 
 EStatusCode CFFFileInput::ReadNameIndex()
@@ -1094,8 +1136,17 @@ EStatusCode CFFFileInput::ReadCharString(	LongFilePositionType inCharStringStart
 											Byte** outCharString)
 {
 	EStatusCode status = PDFHummus::eSuccess;
-	mPrimitivesReader.SetOffset(inCharStringStart);
 	*outCharString = NULL;
+
+	// end must be >= start; otherwise the unsigned subtraction below underflows.
+	if(inCharStringEnd < inCharStringStart)
+	{
+		TRACE_LOG2("CFFFileInput::ReadCharString, end (%lld) < start (%lld)",
+			(long long)inCharStringEnd, (long long)inCharStringStart);
+		return PDFHummus::eFailure;
+	}
+
+	mPrimitivesReader.SetOffset(inCharStringStart);
 
 	do
 	{

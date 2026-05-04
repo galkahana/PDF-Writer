@@ -15,6 +15,7 @@ create_test_sourcelist (Tests
   CIDSetWritingCFF.cpp
   CIDSetWritingTrueType.cpp
   CIDSetWritingTrueType2.cpp
+  CFFIndexSanity.cpp
   ColorEmojiColr.cpp
   ColorEmojiColrV1.cpp
   CopyingAndMergingEmptyPages.cpp
