@@ -306,19 +306,27 @@ EStatusCode CFFFileInput::ReadIndexHeader(unsigned long** outOffsets,unsigned sh
 {
 	Byte offSizeForIndex;
 
+	*outOffsets = NULL;
+
 	EStatusCode status = mPrimitivesReader.ReadCard16(outItemsCount);
 	if(status != PDFHummus::eSuccess)
 		return PDFHummus::eFailure;
 
 	if(0 == outItemsCount)
-	{
-		*outOffsets = NULL;
 		return PDFHummus::eSuccess;
-	}
 
-	mPrimitivesReader.ReadOffSize(offSizeForIndex);
+	// V-033: capture ReadOffSize's own status (was checking the prior ReadCard16 status by accident).
+	status = mPrimitivesReader.ReadOffSize(offSizeForIndex);
 	if(status != PDFHummus::eSuccess)
 		return PDFHummus::eFailure;
+
+	// V-034: CFF spec requires offSize ∈ {1,2,3,4}. ReadOffset's switch has no default and would
+	// leave offsets uninitialized for any other value.
+	if(offSizeForIndex < 1 || offSizeForIndex > 4)
+	{
+		TRACE_LOG1("CFFFileInput::ReadIndexHeader, invalid INDEX offSize %d (must be 1..4)", offSizeForIndex);
+		return PDFHummus::eFailure;
+	}
 
 	mPrimitivesReader.SetOffSize(offSizeForIndex);
 	*outOffsets = new unsigned long[outItemsCount + 1];
@@ -328,6 +336,25 @@ EStatusCode CFFFileInput::ReadIndexHeader(unsigned long** outOffsets,unsigned sh
 
 	if (status != eSuccess)
 		return status;
+
+	// V-036: reject malformed offset tables before downstream consumers do unsigned subtraction
+	// (offsets[i+1] - offsets[i] wraps to ~ULONG_MAX on non-monotonic input and is fed to new Byte[N]).
+	// CFF spec: first offset is always 1; offsets are monotonically non-decreasing.
+	if((*outOffsets)[0] < 1)
+	{
+		TRACE_LOG1("CFFFileInput::ReadIndexHeader, INDEX offsets[0] = %lu (must be >= 1)", (*outOffsets)[0]);
+		return PDFHummus::eFailure;
+	}
+	for(unsigned long i = 0; i < outItemsCount; ++i)
+	{
+		if((*outOffsets)[i+1] < (*outOffsets)[i])
+		{
+			TRACE_LOG3("CFFFileInput::ReadIndexHeader, non-monotonic INDEX offset at i=%lu: %lu -> %lu",
+				i, (*outOffsets)[i], (*outOffsets)[i+1]);
+			return PDFHummus::eFailure;
+		}
+	}
+
 	return mPrimitivesReader.GetInternalState();
 }
 
@@ -1094,8 +1121,21 @@ EStatusCode CFFFileInput::ReadCharString(	LongFilePositionType inCharStringStart
 											Byte** outCharString)
 {
 	EStatusCode status = PDFHummus::eSuccess;
-	mPrimitivesReader.SetOffset(inCharStringStart);
 	*outCharString = NULL;
+
+	// V-037: defend against end < start (signed subtraction goes negative, then casts to a huge
+	// LongBufferSizeType — uncaught bad_alloc aborts process). The central V-036 fix in
+	// ReadIndexHeader already prevents this for INDEX-derived offsets; this is belt-and-suspenders
+	// since CharString::mStartPosition / mEndPosition are stored fields that could reach here
+	// from any future code path.
+	if(inCharStringEnd < inCharStringStart)
+	{
+		TRACE_LOG2("CFFFileInput::ReadCharString, end (%lld) < start (%lld)",
+			(long long)inCharStringEnd, (long long)inCharStringStart);
+		return PDFHummus::eFailure;
+	}
+
+	mPrimitivesReader.SetOffset(inCharStringStart);
 
 	do
 	{
