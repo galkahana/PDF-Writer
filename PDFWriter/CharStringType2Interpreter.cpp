@@ -74,7 +74,7 @@ EStatusCode CharStringType2Interpreter::Intepret(const CharString& inCharStringT
 
 	}while(false);
 
-	delete charString;
+	delete[] charString;
 
 	return status;
 }
@@ -515,7 +515,7 @@ Byte* CharStringType2Interpreter::InterpretCallSubr(Byte* inProgramCounter, Long
 			--mSubrsNesting;
 		}while(false);
 
-		delete charString;
+		delete[] charString;
 		if(status != eSuccess)
 			return NULL;
 		else
@@ -706,7 +706,7 @@ Byte* CharStringType2Interpreter::InterpretCallGSubr(Byte* inProgramCounter, Lon
 			--mSubrsNesting;
 		}while(false);
 
-		delete charString;
+		delete[] charString;
 		if(status != eSuccess)
 			return NULL;
 		else
@@ -1054,7 +1054,7 @@ Byte* CharStringType2Interpreter::InterpretPut(Byte* inProgramCounter, LongFileP
 
 	long index = (valueB.IsInteger ? valueB.IntegerValue : (long)valueB.RealValue);
 	if(index < 0 || (unsigned long)index >= mStorage.size()) {
-		TRACE_LOG2("CharStringType2Interpreter::InterpretPut, put index %ld is out of range. storage size is %d. aborting", index, mStorage.size());
+		TRACE_LOG2("CharStringType2Interpreter::InterpretPut, put index %ld is out of range. storage size is %lu. aborting", index, (unsigned long)mStorage.size());
 		return NULL;
 	}
 	mStorage[index] = valueA;
