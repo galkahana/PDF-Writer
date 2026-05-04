@@ -519,7 +519,7 @@ EStatusCode CharStringType1Interpreter::InterpretDiv()
 EStatusCode CharStringType1Interpreter::InterpretCallOtherSubr()
 {
 	if(mOperandStack.size() < 2) {
-		TRACE_LOG1("CharStringType1Interpreter::InterpretCallOtherSubr, calling calothersubrs with too few arguments. Expected at least 2 (one for othersubr index and one for count of arguments), called with %d. Aborting", mOperandStack.size());
+		TRACE_LOG1("CharStringType1Interpreter::InterpretCallOtherSubr, calling calothersubrs with too few arguments. Expected at least 2 (one for othersubr index and one for count of arguments), called with %lu. Aborting", (unsigned long)mOperandStack.size());
 		return eFailure;
 	}
 
@@ -537,9 +537,9 @@ EStatusCode CharStringType1Interpreter::InterpretCallOtherSubr()
 	long argumentsCount = mOperandStack.back();
 	mOperandStack.pop_back();
 
-	if(argumentsCount < mOperandStack.size()) {
-		TRACE_LOG2("CharStringType1Interpreter::InterpretCallOtherSubr, number of arguments to call othersubr is too low. Number of arguments argument states %ld, but only %d arguments are on the stack. Aborting", argumentsCount, mOperandStack.size());
-		return eFailure;		
+	if(argumentsCount < 0 || (size_t)argumentsCount > mOperandStack.size()) {
+		TRACE_LOG2("CharStringType1Interpreter::InterpretCallOtherSubr, number of arguments to call othersubr is invalid. Number of arguments argument states %ld, but only %lu arguments are on the stack. Aborting", argumentsCount, (unsigned long)mOperandStack.size());
+		return eFailure;
 	}
 
 	for(long i=0;i<argumentsCount;++i)
@@ -552,18 +552,28 @@ EStatusCode CharStringType1Interpreter::DefaultCallOtherSubr()
 {
 	/*
 		K. at first i thought of actually implementing first 4 othersubrs- flex mechanism (hint replacement just does basically nothing).
-		but then i figured that for the purpose of running this interpreter - meaning getting the stack right, judging by how these 4 are used - 
-		i don't reallly need to do anything to get the stack right, other than do the default behavior for unknown subrs. the only damage is that 
+		but then i figured that for the purpose of running this interpreter - meaning getting the stack right, judging by how these 4 are used -
+		i don't reallly need to do anything to get the stack right, other than do the default behavior for unknown subrs. the only damage is that
 		setcurrentpoint won't necesserily get the right points after calling 0 othersubr. well...as long as it's getting the 2 parameter i'm happy,
 		and it does. actual flex implementation is only necessery if drawing the thing. so i'll leave it to implementation, and by default
 		just behave like it's unknown.
 
 	*/
 
+	if(mOperandStack.size() < 2) {
+		TRACE_LOG1("CharStringType1Interpreter::DefaultCallOtherSubr, called with too few items on operand stack. Expected at least 2 (othersubr index and arguments count), has %lu. Aborting", (unsigned long)mOperandStack.size());
+		return eFailure;
+	}
+
 	LongList::reverse_iterator it = mOperandStack.rbegin();
 	++it;
 	long argumentsCount = *it;
 	++it;
+
+	if(argumentsCount < 0 || (size_t)argumentsCount > mOperandStack.size() - 2) {
+		TRACE_LOG2("CharStringType1Interpreter::DefaultCallOtherSubr, invalid argumentsCount %ld for operand stack of size %lu. Aborting", argumentsCount, (unsigned long)mOperandStack.size());
+		return eFailure;
+	}
 
 	for(long i=0;i<argumentsCount;++i)
 	{
