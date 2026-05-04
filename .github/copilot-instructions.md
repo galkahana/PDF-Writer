@@ -21,6 +21,12 @@ Prioritize correctness, regressions, security, and missing tests over style nits
 - Approve with follow-ups: only 🔵 Low / ⚪ Info findings and no blocking risk.
 - Approve: no actionable findings.
 
+## Scope Discipline (strict by default)
+- When asked to fix specific findings, change only those requested findings unless the user explicitly asks to include additional issues.
+- If additional issues are discovered while implementing a fix, list them as optional follow-ups instead of silently fixing them.
+- Before expanding scope (for example, medium/low cleanup while fixing critical/high issues), ask for explicit approval.
+- Treat the user's requested scope as the highest-priority constraint for implementation.
+
 ## Output Format (always follow)
 1. Verdict
 - Decision: Approve | Request changes | Comment | Approve with follow-ups
