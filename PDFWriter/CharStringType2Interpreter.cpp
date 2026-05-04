@@ -28,6 +28,9 @@ using namespace PDFHummus;
 #define MAX_ARGUMENTS_STACK_SIZE 48
 #define MAX_STEM_HINTS_SIZE 96
 #define MAX_SUBR_NESTING_STACK_SIZE 10
+// Transient array size fixed by the Adobe Type 2 Charstring Format spec
+// (Technical Note #5177): put/get index a 32-entry array, slots 0..31.
+#define TRANSIENT_ARRAY_SIZE 32
 
 
 CharStringType2Interpreter::CharStringType2Interpreter(void)
@@ -52,6 +55,7 @@ EStatusCode CharStringType2Interpreter::Intepret(const CharString& inCharStringT
 		mStemsCount = 0;
 		mCheckedWidth = false;
 		mSubrsNesting = 0;
+		mStorage.assign(TRANSIENT_ARRAY_SIZE, CharStringOperand());
 		if(!inImplementationHelper)
 		{
 			TRACE_LOG("CharStringType2Interpreter::Intepret, null implementation helper passed. pass a proper pointer!!");
@@ -1048,7 +1052,12 @@ Byte* CharStringType2Interpreter::InterpretPut(Byte* inProgramCounter, LongFileP
 	valueA = mOperandStack.back();
 	mOperandStack.pop_back();
 
-	mStorage[(valueB.IsInteger ? valueB.IntegerValue : (long)valueB.RealValue)] = valueA;
+	long index = (valueB.IsInteger ? valueB.IntegerValue : (long)valueB.RealValue);
+	if(index < 0 || (unsigned long)index >= mStorage.size()) {
+		TRACE_LOG2("CharStringType2Interpreter::InterpretPut, put index %ld is out of range. storage size is %d. aborting", index, mStorage.size());
+		return NULL;
+	}
+	mStorage[index] = valueA;
 
 	return inProgramCounter;
 }
@@ -1257,10 +1266,17 @@ Byte* CharStringType2Interpreter::InterpretIndex(Byte* inProgramCounter, LongFil
 	value = mOperandStack.back();
 	mOperandStack.pop_back();
 	long index = (value.IsInteger ? value.IntegerValue : (long)value.RealValue);
-	CharStringOperandList::reverse_iterator it = mOperandStack.rbegin();
 
-	while(index > 0 && it != mOperandStack.rend())
+	if(index < 0 || (unsigned long)index >= mOperandStack.size()) {
+		TRACE_LOG1("CharStringType2Interpreter::InterpretIndex, index value %ld is out of range. aborting", index);
+		return NULL;
+	}
+
+	CharStringOperandList::reverse_iterator it = mOperandStack.rbegin();
+	while(index > 0) {
 		++it;
+		--index;
+	}
 	mOperandStack.push_back(*it);
 
 	return inProgramCounter;
