@@ -1085,7 +1085,7 @@ Byte* CharStringType2Interpreter::InterpretGet(Byte* inProgramCounter, LongFileP
 		return inProgramCounter;
 	}
 	else {
-		TRACE_LOG2("CharStringType2Interpreter::InterpretGet, input argument for get operation does not match storage size. argument value is %ld and storage size is %d. aborting", index, mStorage.size());
+		TRACE_LOG2("CharStringType2Interpreter::InterpretGet, input argument for get operation does not match storage size. argument value is %ld and storage size is %lu. aborting", index, (unsigned long)mStorage.size());
 		return NULL;
 	}
 }
