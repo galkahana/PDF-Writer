@@ -154,6 +154,49 @@ static bool DefaultCallOtherSubr_ArgumentsCountExceedsStack_ReturnsFailure() {
 	return true;
 }
 
+// Negative argumentsCount must also be rejected. Pre-fix this slipped
+// through the buggy `argumentsCount < size()` compare (the long-as-
+// size_t conversion turned -1 into a huge unsigned, failing the inverted
+// check) and the `for(i=0;i<-1;++i)` loop happened to skip, leaving the
+// interpreter in a silently-wrong state. The post-fix `argumentsCount
+// < 0` guard pins this case explicitly.
+//
+// Plaintext bytes:
+//   0xFF 0xFF 0xFF 0xFF 0xFF   push -1 (4-byte signed-32 encoding)
+//   0x8B                       push 0 (otherSubrIndex; helper says supported)
+//   0x0C 0x10                  callothersubr
+static bool InterpretCallOtherSubr_NegativeArgumentsCount_ReturnsFailure() {
+	// Arrange + Act
+	Type1TestHelperWithOtherSubr helper;
+	EStatusCode status = INTERPRET_PLAIN(&helper, "\xFF\xFF\xFF\xFF\xFF\x8B\x0C\x10");
+
+	// Assert
+	if(status == eSuccess) {
+		cout << "CharStringType1InterpreterTest: callothersubr with negative count was accepted" << endl;
+		return false;
+	}
+	return true;
+}
+
+// Same plaintext, default route. Pre-fix DefaultCallOtherSubr's
+// `for(i=0;i<-1;++i)` skipped without dereferencing past rend(), so
+// the function returned success — the negative branch is purely a
+// post-fix invariant.
+//
+// Plaintext bytes: same as above.
+static bool DefaultCallOtherSubr_NegativeArgumentsCount_ReturnsFailure() {
+	// Arrange + Act
+	Type1TestHelper helper;
+	EStatusCode status = INTERPRET_PLAIN(&helper, "\xFF\xFF\xFF\xFF\xFF\x8B\x0C\x10");
+
+	// Assert
+	if(status == eSuccess) {
+		cout << "CharStringType1InterpreterTest: DefaultCallOtherSubr with negative count was accepted" << endl;
+		return false;
+	}
+	return true;
+}
+
 // Happy path: 1 real arg, argumentsCount=1, otherSubrIndex=0,
 // callothersubr, endchar. The helper marks the index as supported, so
 // CallOtherSubr runs (no-op) and the post-call pop loop drains the one
@@ -203,6 +246,8 @@ int CharStringType1InterpreterTest(int argc, char* argv[]) {
 	(void) argv;
 	if(!InterpretCallOtherSubr_ArgumentsCountExceedsStack_ReturnsFailure()) return 1;
 	if(!DefaultCallOtherSubr_ArgumentsCountExceedsStack_ReturnsFailure()) return 1;
+	if(!InterpretCallOtherSubr_NegativeArgumentsCount_ReturnsFailure()) return 1;
+	if(!DefaultCallOtherSubr_NegativeArgumentsCount_ReturnsFailure()) return 1;
 	if(!InterpretCallOtherSubr_ValidArgumentsCount_ReturnsSuccess()) return 1;
 	if(!DefaultCallOtherSubr_ValidArgumentsCount_ReturnsSuccess()) return 1;
 	return 0;

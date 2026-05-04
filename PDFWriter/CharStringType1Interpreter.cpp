@@ -519,7 +519,7 @@ EStatusCode CharStringType1Interpreter::InterpretDiv()
 EStatusCode CharStringType1Interpreter::InterpretCallOtherSubr()
 {
 	if(mOperandStack.size() < 2) {
-		TRACE_LOG1("CharStringType1Interpreter::InterpretCallOtherSubr, calling calothersubrs with too few arguments. Expected at least 2 (one for othersubr index and one for count of arguments), called with %lu. Aborting", (unsigned long)mOperandStack.size());
+		TRACE_LOG1("CharStringType1Interpreter::InterpretCallOtherSubr, calling callothersubr with too few arguments. Expected at least 2 (one for othersubr index and one for count of arguments), called with %lu. Aborting", (unsigned long)mOperandStack.size());
 		return eFailure;
 	}
 
@@ -553,7 +553,7 @@ EStatusCode CharStringType1Interpreter::DefaultCallOtherSubr()
 	/*
 		K. at first i thought of actually implementing first 4 othersubrs- flex mechanism (hint replacement just does basically nothing).
 		but then i figured that for the purpose of running this interpreter - meaning getting the stack right, judging by how these 4 are used -
-		i don't reallly need to do anything to get the stack right, other than do the default behavior for unknown subrs. the only damage is that
+		i don't really need to do anything to get the stack right, other than do the default behavior for unknown subrs. the only damage is that
 		setcurrentpoint won't necesserily get the right points after calling 0 othersubr. well...as long as it's getting the 2 parameter i'm happy,
 		and it does. actual flex implementation is only necessery if drawing the thing. so i'll leave it to implementation, and by default
 		just behave like it's unknown.
