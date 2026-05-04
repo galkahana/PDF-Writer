@@ -338,10 +338,11 @@ EStatusCode CFFFileInput::ReadIndexHeader(unsigned long** outOffsets,unsigned sh
 		if(status != eSuccess)
 			break;
 
-		// CFF spec: first offset is always 1.
+		// offsets[0] must be >= 1: callers do Skip(offsets[0] - 1) to advance past
+		// pre-data padding, and offsets[0] == 0 would underflow that subtraction.
 		if((*outOffsets)[0] < 1)
 		{
-			TRACE_LOG1("CFFFileInput::ReadIndexHeader, INDEX offsets[0] = %lu (must be >= 1)", (*outOffsets)[0]);
+			TRACE_LOG1("CFFFileInput::ReadIndexHeader, INDEX offsets[0] = %lu (must be >= 1; would underflow Skip)", (*outOffsets)[0]);
 			status = PDFHummus::eFailure;
 			break;
 		}
