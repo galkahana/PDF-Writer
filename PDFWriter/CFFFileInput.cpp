@@ -643,11 +643,13 @@ long CFFFileInput::GetSingleIntegerValueFromDict(const UShortToDictOperandListMa
 {
 	UShortToDictOperandListMap::const_iterator it = inDict.find(inKey);
 
-	if(it != inDict.end())
-		return it->second.front().IntegerValue;
-	else
+	// Reject malformed entries (key with no operands, or a real where an
+	// integer is expected) so garbage from front() / the union doesn't flow
+	// into seek offsets and INDEX read amounts downstream.
+	if(it == inDict.end() || it->second.empty() || !it->second.front().IsInteger)
 		return inDefault;
 
+	return it->second.front().IntegerValue;
 }
 
 static const unsigned short scCharstringType = 0x0C06;
@@ -684,13 +686,30 @@ EStatusCode CFFFileInput::ReadPrivateDict(const UShortToDictOperandListMap& inRe
 	}
 	else
 	{
-		outPrivateDict->mPrivateDictStart = (LongFilePositionType)it->second.back().IntegerValue;
-		outPrivateDict->mPrivateDictEnd = (LongFilePositionType)(
-														it->second.back().IntegerValue + 
-														it->second.front().IntegerValue);
+		// /Private operand list is (size, offset) — two integers. Reject
+		// fewer operands or non-integer reals before they flow into
+		// SetOffset and ReadDict's read amount.
+		if(it->second.size() < 2)
+		{
+			TRACE_LOG1("CFFFileInput::ReadPrivateDict, /Private has %lu operands (need at least 2)",
+				(unsigned long)it->second.size());
+			return PDFHummus::eFailure;
+		}
+		const DictOperand& sizeOperand = it->second.front();
+		const DictOperand& offsetOperand = it->second.back();
+		if(!sizeOperand.IsInteger || !offsetOperand.IsInteger)
+		{
+			TRACE_LOG("CFFFileInput::ReadPrivateDict, /Private size and offset must be integers");
+			return PDFHummus::eFailure;
+		}
 
-		mPrimitivesReader.SetOffset(it->second.back().IntegerValue);
-		status = ReadDict(it->second.front().IntegerValue,outPrivateDict->mPrivateDict);
+		outPrivateDict->mPrivateDictStart = (LongFilePositionType)offsetOperand.IntegerValue;
+		outPrivateDict->mPrivateDictEnd = (LongFilePositionType)(
+														offsetOperand.IntegerValue +
+														sizeOperand.IntegerValue);
+
+		mPrimitivesReader.SetOffset(offsetOperand.IntegerValue);
+		status = ReadDict(sizeOperand.IntegerValue,outPrivateDict->mPrivateDict);
 	}
 	return status;
 }
