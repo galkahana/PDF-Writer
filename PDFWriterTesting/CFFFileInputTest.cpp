@@ -134,6 +134,30 @@ static bool GetSingleIntegerValueFromDict_RealOperand_FallsBackToDefault() {
 	return true;
 }
 
+// /CharStrings with a negative integer operand: every caller of this
+// helper treats the result as a non-negative offset / enum-id, so a
+// negative value would have flowed into SetOffset(negative) and failed
+// the seek. Post-fix the helper rejects negative and falls back to the
+// default (0), which makes ReadCharStrings a no-op.
+static bool GetSingleIntegerValueFromDict_NegativeOperand_FallsBackToDefault() {
+	// Arrange: top dict = [<int -1> <op CharStrings>]. -1 in CFF 2-byte
+	// signed form: 0x1C 0xFF 0xFF.
+	CFFFileInput cff;
+	EStatusCode status = PARSE_TOP_DICT(cff, "\x1C\xFF\xFF\x11");
+
+	// Assert
+	if(status != eSuccess) {
+		cout << "CFFFileInputTest: ReadCFFFile failed for negative-operand CharStrings key" << endl;
+		return false;
+	}
+	if(cff.GetCharStringsCount(0) != 0) {
+		cout << "CFFFileInputTest: expected 0 charstrings (negative-operand fallback), got "
+		     << cff.GetCharStringsCount(0) << endl;
+		return false;
+	}
+	return true;
+}
+
 // /Private (key 18) with no operands: pre-fix, both front() and back() on
 // the empty list were UB; the resulting garbage was passed to SetOffset
 // and ReadDict. Post-fix, the empty list is rejected with eFailure.
@@ -261,6 +285,7 @@ static bool ReadCFFFile_BrushScriptStd_PopulatesPrivateDict(char* argv[]) {
 int CFFFileInputTest(int argc, char* argv[]) {
 	if(!GetSingleIntegerValueFromDict_EmptyOperandList_FallsBackToDefault()) return 1;
 	if(!GetSingleIntegerValueFromDict_RealOperand_FallsBackToDefault()) return 1;
+	if(!GetSingleIntegerValueFromDict_NegativeOperand_FallsBackToDefault()) return 1;
 	if(!ReadPrivateDict_EmptyOperandList_ReturnsFailure()) return 1;
 	if(!ReadPrivateDict_SingleOperand_ReturnsFailure()) return 1;
 	if(!ReadPrivateDict_NonIntegerOperand_ReturnsFailure()) return 1;

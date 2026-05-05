@@ -643,10 +643,13 @@ long CFFFileInput::GetSingleIntegerValueFromDict(const UShortToDictOperandListMa
 {
 	UShortToDictOperandListMap::const_iterator it = inDict.find(inKey);
 
-	// Reject malformed entries (key with no operands, or a real where an
-	// integer is expected) so garbage from front() / the union doesn't flow
-	// into seek offsets and INDEX read amounts downstream.
-	if(it == inDict.end() || it->second.empty() || !it->second.front().IsInteger)
+	// Every caller treats the returned value as a non-negative quantity
+	// (file offset, intra-dict offset, or enum-like type id). Empty list,
+	// non-integer, or negative integer all fall back to the supplied
+	// default so garbage from front() / the union / a malicious negative
+	// doesn't flow into SetOffset / INDEX read amounts downstream.
+	if(it == inDict.end() || it->second.empty() || !it->second.front().IsInteger
+		|| it->second.front().IntegerValue < 0)
 		return inDefault;
 
 	return it->second.front().IntegerValue;
