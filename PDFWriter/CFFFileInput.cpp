@@ -643,11 +643,16 @@ long CFFFileInput::GetSingleIntegerValueFromDict(const UShortToDictOperandListMa
 {
 	UShortToDictOperandListMap::const_iterator it = inDict.find(inKey);
 
-	if(it != inDict.end())
-		return it->second.front().IntegerValue;
-	else
+	// Every caller treats the returned value as a non-negative quantity
+	// (file offset, intra-dict offset, or enum-like type id). Empty list,
+	// non-integer, or negative integer all fall back to the supplied
+	// default so garbage from front() / the union / a malicious negative
+	// doesn't flow into SetOffset / INDEX read amounts downstream.
+	if(it == inDict.end() || it->second.empty() || !it->second.front().IsInteger
+		|| it->second.front().IntegerValue < 0)
 		return inDefault;
 
+	return it->second.front().IntegerValue;
 }
 
 static const unsigned short scCharstringType = 0x0C06;
@@ -684,13 +689,41 @@ EStatusCode CFFFileInput::ReadPrivateDict(const UShortToDictOperandListMap& inRe
 	}
 	else
 	{
-		outPrivateDict->mPrivateDictStart = (LongFilePositionType)it->second.back().IntegerValue;
-		outPrivateDict->mPrivateDictEnd = (LongFilePositionType)(
-														it->second.back().IntegerValue + 
-														it->second.front().IntegerValue);
+		// /Private operand list is (size, offset) — two integers. Reject
+		// fewer operands or non-integer reals before they flow into
+		// SetOffset and ReadDict's read amount.
+		if(it->second.size() < 2)
+		{
+			TRACE_LOG1("CFFFileInput::ReadPrivateDict, /Private has %lu operands (need at least 2)",
+				(unsigned long)it->second.size());
+			return PDFHummus::eFailure;
+		}
+		const DictOperand& sizeOperand = it->second.front();
+		const DictOperand& offsetOperand = it->second.back();
+		if(!sizeOperand.IsInteger || !offsetOperand.IsInteger)
+		{
+			TRACE_LOG("CFFFileInput::ReadPrivateDict, /Private size and offset must be integers");
+			return PDFHummus::eFailure;
+		}
+		// Negative size would convert to a huge value when passed to
+		// ReadDict's unsigned read amount; negative offset would seek to
+		// junk. Both are malformed for what the spec defines as a byte
+		// position and a byte count.
+		if(sizeOperand.IntegerValue < 0 || offsetOperand.IntegerValue < 0)
+		{
+			TRACE_LOG2("CFFFileInput::ReadPrivateDict, /Private size=%ld and offset=%ld must be non-negative",
+				sizeOperand.IntegerValue, offsetOperand.IntegerValue);
+			return PDFHummus::eFailure;
+		}
 
-		mPrimitivesReader.SetOffset(it->second.back().IntegerValue);
-		status = ReadDict(it->second.front().IntegerValue,outPrivateDict->mPrivateDict);
+		outPrivateDict->mPrivateDictStart = (LongFilePositionType)offsetOperand.IntegerValue;
+		// Add in LongFilePositionType (signed 64-bit) so the sum can't
+		// overflow `long` on platforms where it's 32-bit.
+		outPrivateDict->mPrivateDictEnd = (LongFilePositionType)offsetOperand.IntegerValue +
+		                                  (LongFilePositionType)sizeOperand.IntegerValue;
+
+		mPrimitivesReader.SetOffset(offsetOperand.IntegerValue);
+		status = ReadDict(sizeOperand.IntegerValue,outPrivateDict->mPrivateDict);
 	}
 	return status;
 }

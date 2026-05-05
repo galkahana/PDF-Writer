@@ -15,6 +15,7 @@ create_test_sourcelist (Tests
   CIDSetWritingCFF.cpp
   CIDSetWritingTrueType.cpp
   CIDSetWritingTrueType2.cpp
+  CFFFileInputTest.cpp
   CFFIndexSanity.cpp
   CharStringType1InterpreterTest.cpp
   CharStringType2InterpreterTest.cpp
