@@ -702,11 +702,22 @@ EStatusCode CFFFileInput::ReadPrivateDict(const UShortToDictOperandListMap& inRe
 			TRACE_LOG("CFFFileInput::ReadPrivateDict, /Private size and offset must be integers");
 			return PDFHummus::eFailure;
 		}
+		// Negative size would convert to a huge value when passed to
+		// ReadDict's unsigned read amount; negative offset would seek to
+		// junk. Both are malformed for what the spec defines as a byte
+		// position and a byte count.
+		if(sizeOperand.IntegerValue < 0 || offsetOperand.IntegerValue < 0)
+		{
+			TRACE_LOG2("CFFFileInput::ReadPrivateDict, /Private size=%ld and offset=%ld must be non-negative",
+				sizeOperand.IntegerValue, offsetOperand.IntegerValue);
+			return PDFHummus::eFailure;
+		}
 
 		outPrivateDict->mPrivateDictStart = (LongFilePositionType)offsetOperand.IntegerValue;
-		outPrivateDict->mPrivateDictEnd = (LongFilePositionType)(
-														offsetOperand.IntegerValue +
-														sizeOperand.IntegerValue);
+		// Add in LongFilePositionType (signed 64-bit) so the sum can't
+		// overflow `long` on platforms where it's 32-bit.
+		outPrivateDict->mPrivateDictEnd = (LongFilePositionType)offsetOperand.IntegerValue +
+		                                  (LongFilePositionType)sizeOperand.IntegerValue;
 
 		mPrimitivesReader.SetOffset(offsetOperand.IntegerValue);
 		status = ReadDict(sizeOperand.IntegerValue,outPrivateDict->mPrivateDict);

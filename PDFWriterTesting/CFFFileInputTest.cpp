@@ -47,10 +47,6 @@ using namespace std;
 using namespace PDFHummus;
 using namespace IOBasicTypes;
 
-// CFF spec keys (operator bytes) used to drive the bug paths from a Top DICT.
-static const Byte scOpCharStrings = 0x11;   // CharStrings (key 17)
-static const Byte scOpPrivate     = 0x12;   // Private (key 18)
-
 // Header: major=1, minor=0, hdrSize=4, absOffSize=1.
 static const char scCFFHeader[] = "\x01\x00\x04\x01";
 
@@ -190,6 +186,25 @@ static bool ReadPrivateDict_NonIntegerOperand_ReturnsFailure() {
 	return true;
 }
 
+// /Private with a negative size: passes IsInteger, but as a signed long
+// would convert to a huge unsigned value when fed to ReadDict's unsigned
+// read amount, causing excessive parsing. Post-fix, non-negative checks
+// reject it before the call.
+static bool ReadPrivateDict_NegativeSize_ReturnsFailure() {
+	// Arrange: top dict = [<int -1> <int 0> <op Private>].
+	// -1 in CFF 2-byte signed form: 0x1C 0xFF 0xFF (operand prefix + s16).
+	// 0 in CFF short form: 0x8B (139 - 139).
+	CFFFileInput cff;
+	EStatusCode status = PARSE_TOP_DICT(cff, "\x1C\xFF\xFF\x8B\x12");
+
+	// Assert
+	if(status == eSuccess) {
+		cout << "CFFFileInputTest: negative-size Private was accepted" << endl;
+		return false;
+	}
+	return true;
+}
+
 // Happy path: prove the new validation didn't break parsing of a real CFF
 // font. Asserts exact expected values rather than just "didn't crash" /
 // "size > 0", so a regression that quietly turns the parser into a no-op
@@ -249,6 +264,7 @@ int CFFFileInputTest(int argc, char* argv[]) {
 	if(!ReadPrivateDict_EmptyOperandList_ReturnsFailure()) return 1;
 	if(!ReadPrivateDict_SingleOperand_ReturnsFailure()) return 1;
 	if(!ReadPrivateDict_NonIntegerOperand_ReturnsFailure()) return 1;
+	if(!ReadPrivateDict_NegativeSize_ReturnsFailure()) return 1;
 	if(!ReadCFFFile_BrushScriptStd_PopulatesPrivateDict(argv)) return 1;
 	return 0;
 }
