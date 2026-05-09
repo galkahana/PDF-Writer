@@ -56,8 +56,13 @@ void InputCharStringDecodeStream::InitializeCharStringDecode(unsigned long inLen
 
 EStatusCode InputCharStringDecodeStream::ReadDecodedByte(Byte& outByte)
 {
+	// Initialize before any failure path so callers that ignore the return
+	// code (or that read into a buffer slot the caller will dispatch on)
+	// never observe stale or uninitialized data.
+	outByte = 0;
+
 	Byte buffer;
-	
+
 	if(mReadFrom->Read(&buffer,1) != 1)
 		return PDFHummus::eFailure;
 
@@ -75,14 +80,17 @@ Byte InputCharStringDecodeStream::DecodeByte(Byte inByteToDecode)
 LongBufferSizeType InputCharStringDecodeStream::Read(Byte* inBuffer,LongBufferSizeType inBufferSize)
 {
 	LongBufferSizeType bufferIndex = 0;
-	EStatusCode status = PDFHummus::eSuccess;
 
-	while(NotEnded() && inBufferSize > bufferIndex && PDFHummus::eSuccess == status)
+	while(NotEnded() && inBufferSize > bufferIndex)
 	{
-		status = ReadDecodedByte(inBuffer[bufferIndex]);
+		// Only count the slot as written when the underlying read succeeded;
+		// otherwise the caller would dispatch on an uninitialized byte as
+		// if it were a real CharString opcode.
+		if(ReadDecodedByte(inBuffer[bufferIndex]) != PDFHummus::eSuccess)
+			break;
 		++bufferIndex;
 	}
-	return bufferIndex;	
+	return bufferIndex;
 }
 
 bool InputCharStringDecodeStream::NotEnded()
