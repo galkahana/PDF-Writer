@@ -112,6 +112,7 @@ class IByteReaderWithPosition;
 
 class Type1Input : public Type1InterpreterImplementationAdapter
 {
+
 public:
 	Type1Input(void);
 	~Type1Input(void);
@@ -155,10 +156,8 @@ private:
 	void FreeTables();
 	void FreeSubrs();
 	void FreeCharStrings();
-	bool IsComment(const std::string& inToken);
 	PDFHummus::EStatusCode ReadFontDictionary();
 	PDFHummus::EStatusCode ReadFontInfoDictionary();
-	std::string FromPSName(const std::string& inPostScriptName);
 	PDFHummus::EStatusCode ParseEncoding();
 	PDFHummus::EStatusCode ReadPrivateDictionary();
 	PDFHummus::EStatusCode ParseIntVector(std::vector<int>& inVector);
@@ -166,6 +165,5 @@ private:
 	PDFHummus::EStatusCode ParseSubrs();
 	PDFHummus::EStatusCode ParseCharstrings();
 	PDFHummus::EStatusCode ParseDoubleArray(double* inArray,int inArraySize);
-	std::string FromPSString(const std::string& inPSString);
 	void CalculateReverseEncoding();
 };

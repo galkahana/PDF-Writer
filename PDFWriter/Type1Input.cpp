@@ -25,7 +25,7 @@
 #include "StandardEncoding.h"
 #include "Trace.h"
 #include "CharStringType1Interpreter.h"
-#include <sstream>
+#include "Type1PSTokens.h"
 
 using namespace PDFHummus;
 
@@ -150,7 +150,7 @@ EStatusCode Type1Input::ReadType1File(IByteReaderWithPosition* inType1)
 				continue;
 
 			// skip comments
-			if(IsComment(token.second))
+			if(Type1PSTokens::IsComment(token.second))
 				continue;
 
 			// look for "begin". at this level that would be catching the "begin"
@@ -184,11 +184,6 @@ EStatusCode Type1Input::ReadType1File(IByteReaderWithPosition* inType1)
 	return status;
 }
 
-bool Type1Input::IsComment(const std::string& inToken)
-{
-	return inToken.at(0) == '%';
-}
-
 EStatusCode Type1Input::ReadFontDictionary()
 {
 	EStatusCode status = eSuccess;
@@ -202,7 +197,7 @@ EStatusCode Type1Input::ReadFontDictionary()
 			continue;
 
 		// skip comments
-		if(IsComment(token.second))
+		if(Type1PSTokens::IsComment(token.second))
 			continue;
 
 		// found end, done with dictionary
@@ -216,7 +211,7 @@ EStatusCode Type1Input::ReadFontDictionary()
 		}
 		if(token.second.compare("/FontName") == 0)
 		{
-			mFontDictionary.FontName = FromPSName(mPFBDecoder.GetNextToken().second);
+			mFontDictionary.FontName = Type1PSTokens::FromPSName(mPFBDecoder.GetNextToken().second);
 			continue;
 		}
 		if(token.second.compare("/PaintType") == 0)
@@ -288,7 +283,7 @@ EStatusCode Type1Input::ReadFontInfoDictionary()
 			continue;
 
 		// skip comments
-		if(IsComment(token.second))
+		if(Type1PSTokens::IsComment(token.second))
 			continue;
 
 		// "end" encountered, dictionary finished, return.
@@ -297,32 +292,32 @@ EStatusCode Type1Input::ReadFontInfoDictionary()
 
 		if(token.second.compare("/version") == 0)
 		{
-			mFontInfoDictionary.version = FromPSString(mPFBDecoder.GetNextToken().second);
+			mFontInfoDictionary.version = Type1PSTokens::FromPSString(mPFBDecoder.GetNextToken().second);
 			continue;
 		}
 		if(token.second.compare("/Notice") == 0)
 		{
-			mFontInfoDictionary.Notice = FromPSString(mPFBDecoder.GetNextToken().second);
+			mFontInfoDictionary.Notice = Type1PSTokens::FromPSString(mPFBDecoder.GetNextToken().second);
 			continue;
 		}
 		if(token.second.compare("/Copyright") == 0)
 		{
-			mFontInfoDictionary.Copyright = FromPSString(mPFBDecoder.GetNextToken().second);
+			mFontInfoDictionary.Copyright = Type1PSTokens::FromPSString(mPFBDecoder.GetNextToken().second);
 			continue;
 		}
 		if(token.second.compare("/FullName") == 0)
 		{
-			mFontInfoDictionary.FullName = FromPSString(mPFBDecoder.GetNextToken().second);
+			mFontInfoDictionary.FullName = Type1PSTokens::FromPSString(mPFBDecoder.GetNextToken().second);
 			continue;
 		}
 		if(token.second.compare("/FamilyName") == 0)
 		{
-			mFontInfoDictionary.FamilyName = FromPSString(mPFBDecoder.GetNextToken().second);
+			mFontInfoDictionary.FamilyName = Type1PSTokens::FromPSString(mPFBDecoder.GetNextToken().second);
 			continue;
 		}
 		if(token.second.compare("/Weight") == 0)
 		{
-			mFontInfoDictionary.Weight = FromPSString(mPFBDecoder.GetNextToken().second);
+			mFontInfoDictionary.Weight = Type1PSTokens::FromPSString(mPFBDecoder.GetNextToken().second);
 			continue;
 		}
 		if(token.second.compare("/ItalicAngle") == 0)
@@ -357,11 +352,6 @@ EStatusCode Type1Input::ReadFontInfoDictionary()
 		}
 	}
 	return status;	
-}
-
-std::string Type1Input::FromPSName(const std::string& inPostScriptName)
-{
-	return inPostScriptName.substr(1);
 }
 
 EStatusCode Type1Input::ParseDoubleArray(double* inArray,int inArraySize)
@@ -445,7 +435,7 @@ EStatusCode Type1Input::ParseEncoding()
 		token = mPFBDecoder.GetNextToken();
 		if(!token.first)
 			break;
-		mEncoding.mCustomEncoding[encodingIndex] = FromPSName(token.second);
+		mEncoding.mCustomEncoding[encodingIndex] = Type1PSTokens::FromPSName(token.second);
 
 		// skip the put
 		token = mPFBDecoder.GetNextToken();
@@ -511,7 +501,7 @@ EStatusCode Type1Input::ReadPrivateDictionary()
 			continue;
 
 		// skip comments
-		if(IsComment(token.second))
+		if(Type1PSTokens::IsComment(token.second))
 			continue;
 
 		// "end" encountered, dictionary finished, return.
@@ -813,7 +803,7 @@ EStatusCode Type1Input::ParseCharstrings()
 			if("end" == token.second)
 				break;
 
-			characterName = FromPSName(token.second);
+			characterName = Type1PSTokens::FromPSName(token.second);
 
 			long codeLength;
 			if(!TryParseBoundedLong(mPFBDecoder.GetNextToken().second,1,MAX_TYPE1_CODE_LENGTH,codeLength))
@@ -1012,71 +1002,6 @@ std::string Type1Input::GetGlyphCharStringName(Byte inCharStringIndex)
 
 		return standardEncoding.GetEncodedGlyphName(inCharStringIndex);
 	}
-}
-
-std::string Type1Input::FromPSString(const std::string& inPSString)
-{
-	std::stringbuf stringBuffer;
-	Byte buffer;
-	std::string::const_iterator it = inPSString.begin();
-	size_t i=1;
-	++it; // skip first paranthesis
-	
-	for(; i < inPSString.size()-1;++it,++i)
-	{
-		if(*it == '\\')
-		{
-			++it;
-			if('0' <= *it && *it <= '7')
-			{
-				buffer = (*it - '0') * 64;
-				++it;
-				buffer += (*it - '0') * 8;
-				++it;
-				buffer += (*it - '0');
-			}
-			else
-			{
-				switch(*it)
-				{
-					case 'n':
-						buffer = '\n';
-						break;
-					case 'r':
-						buffer = '\r';
-						break;
-					case 't':
-						buffer = '\t';
-						break;
-					case 'b':
-						buffer = '\b';
-						break;
-					case 'f':
-						buffer = '\f';
-						break;
-					case '\\':
-						buffer = '\\';
-						break;
-					case '(':
-						buffer = '(';
-						break;
-					case ')':
-						buffer = ')';
-						break;
-					default:
-						// error!
-						buffer = 0;
-						break;
-				}
-			}
-		}
-		else
-		{
-			buffer = *it;
-		}
-		stringBuffer.sputn((const char*)&buffer,1);
-	}
-	return stringBuffer.str();
 }
 
 Byte Type1Input::GetEncoding(const std::string& inCharStringName)
