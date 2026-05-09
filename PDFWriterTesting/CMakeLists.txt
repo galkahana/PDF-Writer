@@ -45,6 +45,7 @@ create_test_sourcelist (Tests
   MergeToPDFForm.cpp
   ModifyingEncryptedFile.cpp
   ModifyingExistingFileContent.cpp
+  OpenTypePrimitiveReaderTest.cpp
   OpenTypeTest.cpp
   OutputFileStreamTest.cpp
   PageModifierTest.cpp
