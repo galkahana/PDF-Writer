@@ -47,6 +47,10 @@ void OpenTypePrimitiveReader::SetOpenTypeStream(IByteReaderWithPosition* inOpenT
 
 EStatusCode OpenTypePrimitiveReader::ReadBYTE(unsigned char& outValue)
 {
+	// Initialize before any short-circuit / failure path so callers that
+	// ignore the return code never observe stale or uninitialized data.
+	outValue = 0;
+
 	if(PDFHummus::eFailure == mInternalState)
 		return PDFHummus::eFailure;
 
@@ -54,13 +58,18 @@ EStatusCode OpenTypePrimitiveReader::ReadBYTE(unsigned char& outValue)
 	EStatusCode status = (mOpenTypeFile->Read(&buffer,1) == 1 ? PDFHummus::eSuccess : PDFHummus::eFailure);
 
 	if(PDFHummus::eFailure == status)
+	{
 		mInternalState = PDFHummus::eFailure;
+		return status;
+	}
 	outValue = buffer;
 	return status;
 }
 
 EStatusCode OpenTypePrimitiveReader::ReadCHAR(char& outValue)
 {
+	outValue = 0;
+
 	Byte buffer;
 
 	if(ReadBYTE(buffer) != PDFHummus::eSuccess)
@@ -72,6 +81,8 @@ EStatusCode OpenTypePrimitiveReader::ReadCHAR(char& outValue)
 
 EStatusCode OpenTypePrimitiveReader::ReadUSHORT(unsigned short& outValue)
 {
+	outValue = 0;
+
 	Byte byte1,byte2;
 
 	if(ReadBYTE(byte1) != PDFHummus::eSuccess)
@@ -89,6 +100,8 @@ EStatusCode OpenTypePrimitiveReader::ReadUSHORT(unsigned short& outValue)
 
 EStatusCode OpenTypePrimitiveReader::ReadSHORT(short& outValue)
 {
+	outValue = 0;
+
 	unsigned short buffer;
 
 	if(ReadUSHORT(buffer) != PDFHummus::eSuccess)
@@ -101,6 +114,8 @@ EStatusCode OpenTypePrimitiveReader::ReadSHORT(short& outValue)
 
 EStatusCode OpenTypePrimitiveReader::ReadULONG(unsigned long& outValue)
 {
+	outValue = 0;
+
 	Byte byte1,byte2,byte3,byte4;
 
 	if(ReadBYTE(byte1) != PDFHummus::eSuccess)
@@ -115,7 +130,7 @@ EStatusCode OpenTypePrimitiveReader::ReadULONG(unsigned long& outValue)
 	if(ReadBYTE(byte4) != PDFHummus::eSuccess)
 		return PDFHummus::eFailure;
 
-	outValue = ((unsigned long)byte1 << 24) + ((unsigned long)byte2 << 16) + 
+	outValue = ((unsigned long)byte1 << 24) + ((unsigned long)byte2 << 16) +
 									((unsigned long)byte3 << 8) + byte4;
 
 	return PDFHummus::eSuccess;
@@ -123,6 +138,8 @@ EStatusCode OpenTypePrimitiveReader::ReadULONG(unsigned long& outValue)
 
 EStatusCode OpenTypePrimitiveReader::ReadLONG(long& outValue)
 {
+	outValue = 0;
+
 	unsigned long buffer;
 
 	if(ReadULONG(buffer) != PDFHummus::eSuccess)
@@ -134,6 +151,8 @@ EStatusCode OpenTypePrimitiveReader::ReadLONG(long& outValue)
 
 EStatusCode OpenTypePrimitiveReader::ReadLongDateTime(long long& outValue)
 {
+	outValue = 0;
+
 	Byte byte1,byte2,byte3,byte4,byte5,byte6,byte7,byte8;
 
 	if(ReadBYTE(byte1) != PDFHummus::eSuccess)
@@ -160,11 +179,11 @@ EStatusCode OpenTypePrimitiveReader::ReadLongDateTime(long long& outValue)
 	if(ReadBYTE(byte8) != PDFHummus::eSuccess)
 		return PDFHummus::eFailure;
 
-	outValue =(long long)(	((unsigned long long)byte1 << 56) + ((unsigned long long)byte2 << 48) + 
-							((unsigned long long)byte3 << 40) + ((unsigned long long)byte4 << 32) + 
-							((unsigned long long)byte5 << 24) + ((unsigned long long)byte6 << 16) + 
+	outValue =(long long)(	((unsigned long long)byte1 << 56) + ((unsigned long long)byte2 << 48) +
+							((unsigned long long)byte3 << 40) + ((unsigned long long)byte4 << 32) +
+							((unsigned long long)byte5 << 24) + ((unsigned long long)byte6 << 16) +
 							((unsigned long long)byte7 << 8) + byte8);
-	return PDFHummus::eSuccess;	
+	return PDFHummus::eSuccess;
 }
 
 void OpenTypePrimitiveReader::SetOffset(LongFilePositionType inNewOffset)
@@ -186,6 +205,8 @@ EStatusCode OpenTypePrimitiveReader::GetInternalState()
 
 EStatusCode OpenTypePrimitiveReader::ReadFixed(double& outValue)
 {
+	outValue = 0.0;
+
 	unsigned short integer,fraction;
 
 	if(ReadUSHORT(integer) != PDFHummus::eSuccess)
