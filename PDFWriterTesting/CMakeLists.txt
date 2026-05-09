@@ -77,6 +77,8 @@ create_test_sourcelist (Tests
   TrueTypeAnsiWriteBug.cpp
   TrueTypeTest.cpp
   TTCTest.cpp
+  Type1InputTest.cpp
+  Type1PSTokensTest.cpp
   Type1SubrSanity.cpp
   Type1Test.cpp
   UnicodeTextUsage.cpp

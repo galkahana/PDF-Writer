@@ -166,6 +166,7 @@ TrueTypeDescendentFontWriter.cpp
 TrueTypeEmbeddedFontWriter.cpp
 TrueTypePrimitiveWriter.cpp
 Type1Input.cpp
+Type1PSTokens.cpp
 Type1ToCFFEmbeddedFontWriter.cpp
 Type1ToType2Converter.cpp
 Type2CharStringWriter.cpp
@@ -376,6 +377,7 @@ TrueTypeDescendentFontWriter.h
 TrueTypeEmbeddedFontWriter.h
 TrueTypePrimitiveWriter.h
 Type1Input.h
+Type1PSTokens.h
 Type1ToCFFEmbeddedFontWriter.h
 Type1ToType2Converter.h
 Type2CharStringWriter.h
@@ -927,6 +929,8 @@ PSBool.cpp
 PSBool.h
 Type1Input.cpp
 Type1Input.h
+Type1PSTokens.cpp
+Type1PSTokens.h
 Type1ToCFFEmbeddedFontWriter.cpp
 Type1ToCFFEmbeddedFontWriter.h
 Type1ToType2Converter.cpp
