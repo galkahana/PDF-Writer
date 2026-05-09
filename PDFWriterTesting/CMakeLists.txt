@@ -17,6 +17,7 @@ create_test_sourcelist (Tests
   CIDSetWritingTrueType2.cpp
   CFFFileInputTest.cpp
   CFFIndexSanity.cpp
+  CFFPrimitiveReaderTest.cpp
   CharStringType1InterpreterTest.cpp
   CharStringType2InterpreterTest.cpp
   ColorEmojiColr.cpp
