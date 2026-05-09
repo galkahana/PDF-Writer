@@ -77,6 +77,10 @@ LongFilePositionType CFFPrimitiveReader::GetCurrentPosition()
 
 EStatusCode CFFPrimitiveReader::ReadByte(Byte& outValue)
 {
+	// Initialize before any short-circuit / failure path so callers that
+	// ignore the return code never observe stale or uninitialized data.
+	outValue = 0;
+
 	if(PDFHummus::eFailure == mInternalState)
 		return PDFHummus::eFailure;
 
@@ -84,9 +88,12 @@ EStatusCode CFFPrimitiveReader::ReadByte(Byte& outValue)
 	EStatusCode status = (mCFFFile->Read(&buffer,1) == 1 ? PDFHummus::eSuccess : PDFHummus::eFailure);
 
 	if(PDFHummus::eFailure == status)
+	{
 		mInternalState = PDFHummus::eFailure;
+		return status;
+	}
 	outValue = buffer;
-	return status;	
+	return status;
 }
 
 EStatusCode CFFPrimitiveReader::Read(Byte* ioBuffer,LongBufferSizeType inBufferSize)
@@ -108,6 +115,8 @@ EStatusCode CFFPrimitiveReader::ReadCard8(Byte& outValue)
 
 EStatusCode CFFPrimitiveReader::ReadCard16(unsigned short& outValue)
 {
+	outValue = 0;
+
 	Byte byte1,byte2;
 
 	if(ReadByte(byte1) != PDFHummus::eSuccess)
@@ -124,6 +133,8 @@ EStatusCode CFFPrimitiveReader::ReadCard16(unsigned short& outValue)
 }
 EStatusCode CFFPrimitiveReader::Read2ByteSigned(short& outValue)
 {
+	outValue = 0;
+
 	unsigned short buffer;
 	EStatusCode status = ReadCard16(buffer);
 
@@ -143,6 +154,8 @@ void CFFPrimitiveReader::SetOffSize(Byte inOffSize)
 
 EStatusCode CFFPrimitiveReader::ReadOffset(unsigned long& outValue)
 {
+	outValue = 0;
+
 	EStatusCode status = PDFHummus::eFailure;
 
 	switch(mCurrentOffsize)
@@ -173,6 +186,8 @@ EStatusCode CFFPrimitiveReader::ReadOffset(unsigned long& outValue)
 
 EStatusCode CFFPrimitiveReader::Read3ByteUnsigned(unsigned long& outValue)
 {
+	outValue = 0;
+
 	Byte byte1,byte2,byte3;
 
 	if(ReadByte(byte1) != PDFHummus::eSuccess)
@@ -186,11 +201,13 @@ EStatusCode CFFPrimitiveReader::Read3ByteUnsigned(unsigned long& outValue)
 
 	outValue = ((unsigned long)byte1 << 16) + ((unsigned long)byte2 << 8) + byte3;
 
-	return PDFHummus::eSuccess;	
+	return PDFHummus::eSuccess;
 }
 
 EStatusCode CFFPrimitiveReader::Read4ByteUnsigned(unsigned long& outValue)
 {
+	outValue = 0;
+
 	Byte byte1,byte2,byte3,byte4;
 
 	if(ReadByte(byte1) != PDFHummus::eSuccess)
@@ -205,16 +222,18 @@ EStatusCode CFFPrimitiveReader::Read4ByteUnsigned(unsigned long& outValue)
 	if(ReadByte(byte4) != PDFHummus::eSuccess)
 		return PDFHummus::eFailure;
 
-	outValue = ((unsigned long)byte1 << 24) + 
-				((unsigned long)byte2 << 16) + 
-					((unsigned long)byte3 << 8) + 
+	outValue = ((unsigned long)byte1 << 24) +
+				((unsigned long)byte2 << 16) +
+					((unsigned long)byte3 << 8) +
 											byte4;
 
-	return PDFHummus::eSuccess;	
+	return PDFHummus::eSuccess;
 }
 
 EStatusCode CFFPrimitiveReader::Read4ByteSigned(long& outValue)
 {
+	outValue = 0;
+
 	unsigned long buffer;
 	EStatusCode status = Read4ByteUnsigned(buffer);
 
