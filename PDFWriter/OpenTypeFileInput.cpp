@@ -569,7 +569,7 @@ EStatusCode OpenTypeFileInput::ReadHMtx()
 	// reads mHMtx[NumberOfHMetrics-1], and (unsigned short)0 - 1 promotes to int -1.
 	if(mHHea.NumberOfHMetrics == 0 && mMaxp.NumGlyphs > 0)
 	{
-		TRACE_LOG("OpenTypeFileInput::ReadHMtx, numberOfHMetrics is zero with non-empty glyf");
+		TRACE_LOG("OpenTypeFileInput::ReadHMtx, numberOfHMetrics is zero with non-zero numGlyphs");
 		return PDFHummus::eFailure;
 	}
 
