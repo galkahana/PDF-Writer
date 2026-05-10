@@ -101,6 +101,7 @@ add_executable (PDFWriterTesting
     testing/WindowsPath.cpp
 
     # and test specific additionals
+    CFFSyntheticBuilder.cpp
     PDFComment.cpp
     PDFCommentWriter.cpp
     AnnotationsWriter.cpp

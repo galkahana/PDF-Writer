@@ -98,16 +98,22 @@ typedef std::pair<Byte,unsigned short> ByteAndUShort;
 
 struct EncodingsInfo
 {
-	EncodingsInfo() {mEncoding = NULL;}
+	EncodingsInfo() {
+		mEncodingStart = 0;
+		mEncodingEnd = 0;
+		mType = eEncodingStandard;
+		mEncodingsCount = 0;
+		mEncoding = NULL;
+	}
 
 	LongFilePositionType mEncodingStart;
 	LongFilePositionType mEncodingEnd;
 
 	EEncodingType mType;
-	Byte mEncodingsCount;
+	unsigned short mEncodingsCount;
 	Byte* mEncoding;
 	UShortToByteList mSupplements;
-	
+
 };
 
 struct PrivateDictInfo
@@ -135,6 +141,7 @@ struct TopDictInfo
 {
 	TopDictInfo() {
 					mFDArray = NULL;
+					mFDArrayCount = 0;
 					mFDSelect = NULL;
 					mCharSet = NULL;
 					mEncoding = NULL;
@@ -144,6 +151,7 @@ struct TopDictInfo
 	CharSetInfo* mCharSet;
 	EncodingsInfo* mEncoding;
 	FontDictInfo* mFDArray;
+	unsigned short mFDArrayCount;
 	FontDictInfo** mFDSelect; // size is like glyphsize. each cell references the relevant FontDict
 };
 
@@ -304,7 +312,7 @@ private:
 	PDFHummus::EStatusCode ReadPrivateDicts(unsigned short inFontIndex);
 	PDFHummus::EStatusCode ReadLocalSubrs(unsigned short inFontIndex);
 	PDFHummus::EStatusCode ReadCharsets(unsigned short inFontIndex);
-	void ReadEncoding(EncodingsInfo* inEncoding,LongFilePositionType inEncodingPosition);
+	PDFHummus::EStatusCode ReadEncoding(EncodingsInfo* inEncoding,LongFilePositionType inEncodingPosition);
 	PDFHummus::EStatusCode ReadEncodings(unsigned short inFontIndex);
 	PDFHummus::EStatusCode ReadCIDInformation(unsigned short inFontIndex);
 	PDFHummus::EStatusCode ReadCFFFileByIndexOrName(IByteReaderWithPosition* inCFFFile,const std::string& inFontName,unsigned short inFontIndex);
