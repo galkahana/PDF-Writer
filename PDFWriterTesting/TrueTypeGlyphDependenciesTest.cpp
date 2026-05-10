@@ -1,0 +1,223 @@
+/*
+   Source File : TrueTypeGlyphDependenciesTest.cpp
+
+
+   Copyright 2026 Gal Kahana PDFWriter
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+
+   Regression tests for TrueTypeGlyphDependencies::WalkComponents, the
+   composite-glyph dependency walker extracted from
+   TrueTypeEmbeddedFontWriter so its cycle handling can be tested without
+   a full font-embedding pipeline.
+
+   V-018: pre-fix the walker recursed on `mComponentGlyphs` without
+   tracking visited glyphs, so a malformed TrueType font with a
+   self-referencing composite glyph (or a 2-cycle) drove the call stack
+   until it overflowed. Same bug shape as the /Parent cycle bugs fixed
+   in PRs #346/#347/#348/#349 but on the font-subsetting side. Post-fix
+   the walker recurses only on first-seen components — the visited set
+   doubles as the dedup mechanism.
+*/
+#include "OpenTypeFileInput.h"
+#include "TrueTypeGlyphDependencies.h"
+
+#include <iostream>
+
+using namespace std;
+
+// Build a stack-only glyf table from caller-supplied component lists.
+// inComponents[i] is the list of component IDs for glyph i; pass NULL for
+// simple/zero-length glyphs. Stack-only construction (no new/delete) keeps
+// the tests obvious — every fixture lives in the test function frame.
+struct StaticGlyfTable {
+	GlyphEntry mEntries[8];
+	GlyphEntry* mTable[8];
+	unsigned int mNumGlyphs;
+};
+
+static void initGlyfTable(StaticGlyfTable& outTable, unsigned int inNumGlyphs) {
+	outTable.mNumGlyphs = inNumGlyphs;
+	for(unsigned int i = 0; i < inNumGlyphs; ++i)
+		outTable.mTable[i] = &outTable.mEntries[i];
+}
+
+// Test 1: glyph 1 references itself. Pre-fix the recursion descends into
+// glyph 1 forever; post-fix the second visit to glyph 1 is short-circuited
+// by the visited-set check.
+static bool WalkComponents_SelfReferencingGlyph_TerminatesAndPopulatesSet() {
+	// Arrange: 2 glyphs, glyph 0 simple, glyph 1 -> {1} (self).
+	StaticGlyfTable t;
+	initGlyfTable(t, 2);
+	t.mEntries[1].mComponentGlyphs.push_back(1);
+	UIntSet result;
+
+	// Act
+	bool isComposite = TrueTypeGlyphDependencies::WalkComponents(1, t.mTable, t.mNumGlyphs, result);
+
+	// Assert
+	if(!isComposite) {
+		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::SelfReferencingGlyph_TerminatesAndPopulatesSet]: expected composite, got simple" << endl;
+		return false;
+	}
+	if(result.size() != 1 || result.find(1) == result.end()) {
+		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::SelfReferencingGlyph_TerminatesAndPopulatesSet]: expected {1}, got set of size "
+		     << result.size() << endl;
+		return false;
+	}
+	return true;
+}
+
+// Test 2: glyph 1 -> {2}, glyph 2 -> {1}. Pre-fix mutual recursion never
+// terminates; post-fix the back-edge to 1 is short-circuited.
+static bool WalkComponents_TwoCycleGlyphs_TerminatesAndPopulatesSet() {
+	// Arrange: 3 glyphs, glyph 0 simple, glyph 1 -> {2}, glyph 2 -> {1}.
+	StaticGlyfTable t;
+	initGlyfTable(t, 3);
+	t.mEntries[1].mComponentGlyphs.push_back(2);
+	t.mEntries[2].mComponentGlyphs.push_back(1);
+	UIntSet result;
+
+	// Act
+	bool isComposite = TrueTypeGlyphDependencies::WalkComponents(1, t.mTable, t.mNumGlyphs, result);
+
+	// Assert
+	if(!isComposite) {
+		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::TwoCycleGlyphs_TerminatesAndPopulatesSet]: expected composite, got simple" << endl;
+		return false;
+	}
+	if(result.size() != 2 || result.find(1) == result.end() || result.find(2) == result.end()) {
+		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::TwoCycleGlyphs_TerminatesAndPopulatesSet]: expected {1, 2}, got set of size "
+		     << result.size() << endl;
+		return false;
+	}
+	return true;
+}
+
+// Test 3 (happy path): glyph 1 -> {2}, glyph 2 -> {3}, glyph 3 simple.
+// Proves the visited-set guard didn't accidentally drop the normal
+// transitive-component case (where every component IS new on first visit).
+static bool WalkComponents_LinearDependencyChain_GathersAllTransitive() {
+	// Arrange: 4 glyphs, 0 simple, 1 -> {2}, 2 -> {3}, 3 simple.
+	StaticGlyfTable t;
+	initGlyfTable(t, 4);
+	t.mEntries[1].mComponentGlyphs.push_back(2);
+	t.mEntries[2].mComponentGlyphs.push_back(3);
+	UIntSet result;
+
+	// Act
+	bool isComposite = TrueTypeGlyphDependencies::WalkComponents(1, t.mTable, t.mNumGlyphs, result);
+
+	// Assert
+	if(!isComposite) {
+		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::LinearDependencyChain_GathersAllTransitive]: expected composite, got simple" << endl;
+		return false;
+	}
+	if(result.size() != 2 || result.find(2) == result.end() || result.find(3) == result.end()) {
+		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::LinearDependencyChain_GathersAllTransitive]: expected {2, 3}, got set of size "
+		     << result.size() << endl;
+		return false;
+	}
+	return true;
+}
+
+// Test 4 (happy path): glyph 1 -> {2, 3}, where both 2 and 3 reference
+// glyph 4. The dedup property of the visited set means glyph 4 should
+// appear once even though two siblings independently depend on it.
+static bool WalkComponents_SharedComponentAcrossSiblings_DedupesViaVisitedSet() {
+	// Arrange: 5 glyphs, 0 simple, 1 -> {2, 3}, 2 -> {4}, 3 -> {4}, 4 simple.
+	StaticGlyfTable t;
+	initGlyfTable(t, 5);
+	t.mEntries[1].mComponentGlyphs.push_back(2);
+	t.mEntries[1].mComponentGlyphs.push_back(3);
+	t.mEntries[2].mComponentGlyphs.push_back(4);
+	t.mEntries[3].mComponentGlyphs.push_back(4);
+	UIntSet result;
+
+	// Act
+	bool isComposite = TrueTypeGlyphDependencies::WalkComponents(1, t.mTable, t.mNumGlyphs, result);
+
+	// Assert
+	if(!isComposite) {
+		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::SharedComponentAcrossSiblings_DedupesViaVisitedSet]: expected composite, got simple" << endl;
+		return false;
+	}
+	if(result.size() != 3
+	   || result.find(2) == result.end()
+	   || result.find(3) == result.end()
+	   || result.find(4) == result.end()) {
+		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::SharedComponentAcrossSiblings_DedupesViaVisitedSet]: expected {2, 3, 4}, got set of size "
+		     << result.size() << endl;
+		return false;
+	}
+	return true;
+}
+
+// Test 5: simple glyph (no components) returns false and leaves the
+// caller's set unchanged.
+static bool WalkComponents_SimpleGlyph_ReturnsFalseAndLeavesSetEmpty() {
+	// Arrange: 2 glyphs, both simple.
+	StaticGlyfTable t;
+	initGlyfTable(t, 2);
+	UIntSet result;
+
+	// Act
+	bool isComposite = TrueTypeGlyphDependencies::WalkComponents(0, t.mTable, t.mNumGlyphs, result);
+
+	// Assert
+	if(isComposite) {
+		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::SimpleGlyph_ReturnsFalseAndLeavesSetEmpty]: expected simple, got composite" << endl;
+		return false;
+	}
+	if(!result.empty()) {
+		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::SimpleGlyph_ReturnsFalseAndLeavesSetEmpty]: expected empty set, got size "
+		     << result.size() << endl;
+		return false;
+	}
+	return true;
+}
+
+// Test 6: glyph ID at or beyond the table size returns false and leaves
+// the caller's set unchanged (this is the existing pre-V-018 guard, kept
+// as part of the contract).
+static bool WalkComponents_GlyphIDBeyondTableSize_ReturnsFalse() {
+	// Arrange: 2 glyphs, both simple.
+	StaticGlyfTable t;
+	initGlyfTable(t, 2);
+	UIntSet result;
+
+	// Act: ask for glyph 5 (table only holds 0..1).
+	bool isComposite = TrueTypeGlyphDependencies::WalkComponents(5, t.mTable, t.mNumGlyphs, result);
+
+	// Assert
+	if(isComposite) {
+		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::GlyphIDBeyondTableSize_ReturnsFalse]: out-of-range glyph reported composite" << endl;
+		return false;
+	}
+	if(!result.empty()) {
+		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::GlyphIDBeyondTableSize_ReturnsFalse]: out-of-range glyph populated set" << endl;
+		return false;
+	}
+	return true;
+}
+
+int TrueTypeGlyphDependenciesTest(int argc, char* argv[]) {
+	if(!WalkComponents_SelfReferencingGlyph_TerminatesAndPopulatesSet()) return 1;
+	if(!WalkComponents_TwoCycleGlyphs_TerminatesAndPopulatesSet()) return 1;
+	if(!WalkComponents_LinearDependencyChain_GathersAllTransitive()) return 1;
+	if(!WalkComponents_SharedComponentAcrossSiblings_DedupesViaVisitedSet()) return 1;
+	if(!WalkComponents_SimpleGlyph_ReturnsFalseAndLeavesSetEmpty()) return 1;
+	if(!WalkComponents_GlyphIDBeyondTableSize_ReturnsFalse()) return 1;
+	return 0;
+}

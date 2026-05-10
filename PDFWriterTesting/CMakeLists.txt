@@ -79,6 +79,7 @@ create_test_sourcelist (Tests
   TiffSpecialsTest.cpp
   TimerTest.cpp
   TrueTypeAnsiWriteBug.cpp
+  TrueTypeGlyphDependenciesTest.cpp
   TrueTypeTest.cpp
   TTCTest.cpp
   Type1InputTest.cpp

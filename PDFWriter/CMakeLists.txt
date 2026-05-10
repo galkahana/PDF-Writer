@@ -164,6 +164,7 @@ TrailerInformation.cpp
 TrueTypeANSIFontWriter.cpp
 TrueTypeDescendentFontWriter.cpp
 TrueTypeEmbeddedFontWriter.cpp
+TrueTypeGlyphDependencies.cpp
 TrueTypePrimitiveWriter.cpp
 Type1Input.cpp
 Type1PSTokens.cpp
@@ -375,6 +376,7 @@ TrailerInformation.h
 TrueTypeANSIFontWriter.h
 TrueTypeDescendentFontWriter.h
 TrueTypeEmbeddedFontWriter.h
+TrueTypeGlyphDependencies.h
 TrueTypePrimitiveWriter.h
 Type1Input.h
 Type1PSTokens.h
