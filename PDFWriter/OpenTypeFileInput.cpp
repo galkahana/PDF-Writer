@@ -565,6 +565,14 @@ EStatusCode OpenTypeFileInput::ReadHMtx()
 		return PDFHummus::eFailure;
 	}
 
+	// numberOfHMetrics must be >= 1 when there are glyphs: the second loop below
+	// reads mHMtx[NumberOfHMetrics-1], and (unsigned short)0 - 1 promotes to int -1.
+	if(mHHea.NumberOfHMetrics == 0 && mMaxp.NumGlyphs > 0)
+	{
+		TRACE_LOG("OpenTypeFileInput::ReadHMtx, numberOfHMetrics is zero with non-empty glyf");
+		return PDFHummus::eFailure;
+	}
+
 	mHMtx = new HMtxTableEntry[mMaxp.NumGlyphs];
 
 	unsigned int i=0;
@@ -575,9 +583,10 @@ EStatusCode OpenTypeFileInput::ReadHMtx()
 		mPrimitivesReader.ReadSHORT(mHMtx[i].LeftSideBearing);
 	}
 
+	unsigned short lastAdvanceWidth = (mHHea.NumberOfHMetrics > 0) ? mHMtx[mHHea.NumberOfHMetrics - 1].AdvanceWidth : 0;
 	for(; i < mMaxp.NumGlyphs; ++i)
 	{
-		mHMtx[i].AdvanceWidth = mHMtx[mHHea.NumberOfHMetrics-1].AdvanceWidth;
+		mHMtx[i].AdvanceWidth = lastAdvanceWidth;
 		mPrimitivesReader.ReadSHORT(mHMtx[i].LeftSideBearing);
 	}
 
