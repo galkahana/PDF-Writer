@@ -843,15 +843,20 @@ EStatusCode CFFFileInput::ReadEncodings()
 	LongFilePositionTypeToEncodingsInfoMap offsetToEncoding;
 	LongFilePositionTypeToEncodingsInfoMap::iterator it;
 
-	for(unsigned long i=0; i < mFontsCount && (PDFHummus::eSuccess == status); ++i)
+	for(unsigned long i=0; i < mFontsCount; ++i)
 	{
 		LongFilePositionType encodingPosition = GetEncodingPosition(i);
 		it = offsetToEncoding.find(encodingPosition);
 		if(it == offsetToEncoding.end())
 		{
 			EncodingsInfo* encoding = new EncodingsInfo();
-			ReadEncoding(encoding,encodingPosition);
+			status = ReadEncoding(encoding,encodingPosition);
 			mEncodings.push_back(encoding);
+			if(status != PDFHummus::eSuccess)
+			{
+				TRACE_LOG1("CFFFileInput::ReadEncodings, failed to read encoding for font index %lu", i);
+				break;
+			}
 			it = offsetToEncoding.insert(LongFilePositionTypeToEncodingsInfoMap::value_type(encodingPosition,encoding)).first;
 		}
 		mTopDictIndex[i].mEncoding = it->second;
@@ -864,86 +869,105 @@ EStatusCode CFFFileInput::ReadEncodings()
 
 }
 
-void CFFFileInput::ReadEncoding(EncodingsInfo* inEncoding,LongFilePositionType inEncodingPosition)
+EStatusCode CFFFileInput::ReadEncoding(EncodingsInfo* inEncoding,LongFilePositionType inEncodingPosition)
 {
 	if(inEncodingPosition <= 1)
 	{
 		inEncoding->mEncodingStart = inEncoding->mEncodingEnd = inEncodingPosition;
 		inEncoding->mType = (EEncodingType)inEncodingPosition;
+		return PDFHummus::eSuccess;
 	}
-	else
+
+	inEncoding->mType = eEncodingCustom;
+	Byte encodingFormat = 0;
+	inEncoding->mEncodingStart = inEncodingPosition;
+	mPrimitivesReader.SetOffset(inEncodingPosition);
+	mPrimitivesReader.ReadCard8(encodingFormat);
+
+	if(0 == (encodingFormat & 0x1))
 	{
-		inEncoding->mType = eEncodingCustom;
-		Byte encodingFormat = 0;
-		inEncoding->mEncodingStart = inEncodingPosition;
-		mPrimitivesReader.SetOffset(inEncodingPosition);
-		mPrimitivesReader.ReadCard8(encodingFormat);
-
-		if(0 == (encodingFormat & 0x1))
+		Byte rawCount = 0;
+		mPrimitivesReader.ReadCard8(rawCount);
+		inEncoding->mEncodingsCount = rawCount;
+		if(inEncoding->mEncodingsCount > 0)
 		{
-			mPrimitivesReader.ReadCard8(inEncoding->mEncodingsCount);
-			if(inEncoding->mEncodingsCount > 0)
-			{
-				inEncoding->mEncoding = new Byte[inEncoding->mEncodingsCount];
-				for(Byte i=0; i< inEncoding->mEncodingsCount;++i)
-					mPrimitivesReader.ReadCard8(inEncoding->mEncoding[i]);
-			}
+			inEncoding->mEncoding = new Byte[inEncoding->mEncodingsCount];
+			for(unsigned short i=0; i < inEncoding->mEncodingsCount; ++i)
+				mPrimitivesReader.ReadCard8(inEncoding->mEncoding[i]);
 		}
-		else // format = 1
-		{
-			Byte rangesCount = 0;
-			mPrimitivesReader.ReadCard8(rangesCount);
-			if(rangesCount > 0)
-			{
-				Byte firstCode;
-				Byte left;
-
-				inEncoding->mEncodingsCount = 0;
-				// get the encoding count (yap, reading twice here)				
-				for(Byte i=0; i < rangesCount; ++i)
-				{
-					mPrimitivesReader.ReadCard8(firstCode);
-					mPrimitivesReader.ReadCard8(left);
-					inEncoding->mEncodingsCount+= left;
-				}
-				inEncoding->mEncoding = new Byte[inEncoding->mEncodingsCount];
-				mPrimitivesReader.SetOffset(inEncodingPosition+2); // reset encoding to beginning of range reading
-
-				// now read the encoding array
-				Byte encodingIndex = 0;
-				for(Byte i=0; i < rangesCount; ++i)
-				{
-					mPrimitivesReader.ReadCard8(firstCode);
-					mPrimitivesReader.ReadCard8(left);
-					for(Byte j=0;j < left;++j)
-						inEncoding->mEncoding[encodingIndex+j] = firstCode+j;
-					encodingIndex+=left;
-				}
-			}
-		}
-		if((encodingFormat & 0x80) !=  0) // supplaments exist, need to add to encoding end
-		{
-			mPrimitivesReader.SetOffset(inEncoding->mEncodingEnd); // set position to end of encoding, and start of supplamental, so that can read their count
-			Byte supplamentalsCount = 0;
-			mPrimitivesReader.ReadCard8(supplamentalsCount);
-			if(supplamentalsCount > 0)
-			{
-				Byte encoding;
-				unsigned short SID;
-				for(Byte i=0; i < supplamentalsCount; ++i)
-				{
-					mPrimitivesReader.ReadCard8(encoding);
-					mPrimitivesReader.ReadCard16(SID);
-
-					UShortToByteList::iterator it = inEncoding->mSupplements.find(SID);
-					if(it == inEncoding->mSupplements.end())
-						it = inEncoding->mSupplements.insert(UShortToByteList::value_type(SID,ByteList())).first;
-					it->second.push_back(encoding);
-				}
-			}
-		}
-		inEncoding->mEncodingEnd =  mPrimitivesReader.GetCurrentPosition();
 	}
+	else // format = 1
+	{
+		Byte rangesCount = 0;
+		mPrimitivesReader.ReadCard8(rangesCount);
+		if(rangesCount > 0)
+		{
+			Byte firstCode;
+			Byte left;
+
+			// First pass: sum range lengths into a 16-bit accumulator so the
+			// total can't wrap before we cap it. Encoding covers codes 0..255,
+			// so the spec ceiling on the sum is 256.
+			unsigned short totalCount = 0;
+			for(Byte i=0; i < rangesCount; ++i)
+			{
+				mPrimitivesReader.ReadCard8(firstCode);
+				mPrimitivesReader.ReadCard8(left);
+				totalCount += left;
+			}
+			if(totalCount > 256)
+			{
+				TRACE_LOG1("CFFFileInput::ReadEncoding, format-1 range sum %u exceeds 256-code spec ceiling", totalCount);
+				return PDFHummus::eFailure;
+			}
+			inEncoding->mEncodingsCount = totalCount;
+			inEncoding->mEncoding = new Byte[inEncoding->mEncodingsCount];
+			mPrimitivesReader.SetOffset(inEncodingPosition+2); // reset encoding to beginning of range reading
+
+			// Second pass: encodingIndex must be 16-bit too — Byte += Byte wraps at 256
+			// and the writes would then alias the start of the (correctly-sized) buffer.
+			unsigned short encodingIndex = 0;
+			for(Byte i=0; i < rangesCount; ++i)
+			{
+				mPrimitivesReader.ReadCard8(firstCode);
+				mPrimitivesReader.ReadCard8(left);
+				for(Byte j=0;j < left;++j)
+					inEncoding->mEncoding[encodingIndex+j] = firstCode+j;
+				encodingIndex+=left;
+			}
+		}
+	}
+	// Record the post-base-encoding position before the supplements block.
+	// The supplements block reads from the current position, so anchoring
+	// mEncodingEnd here keeps the struct field meaningful for callers and
+	// also documents the position the previous code was trying to seek
+	// back to (the prior SetOffset(mEncodingEnd) read mEncodingEnd before
+	// it had ever been set on the custom-encoding path).
+	inEncoding->mEncodingEnd = mPrimitivesReader.GetCurrentPosition();
+
+	if((encodingFormat & 0x80) !=  0) // supplements exist, need to add to encoding end
+	{
+		Byte supplementsCount = 0;
+		mPrimitivesReader.ReadCard8(supplementsCount);
+		if(supplementsCount > 0)
+		{
+			Byte encoding;
+			unsigned short SID;
+			for(Byte i=0; i < supplementsCount; ++i)
+			{
+				mPrimitivesReader.ReadCard8(encoding);
+				mPrimitivesReader.ReadCard16(SID);
+
+				UShortToByteList::iterator it = inEncoding->mSupplements.find(SID);
+				if(it == inEncoding->mSupplements.end())
+					it = inEncoding->mSupplements.insert(UShortToByteList::value_type(SID,ByteList())).first;
+				it->second.push_back(encoding);
+			}
+		}
+		inEncoding->mEncodingEnd = mPrimitivesReader.GetCurrentPosition();
+	}
+
+	return mPrimitivesReader.GetInternalState();
 }
 
 void CFFFileInput::SetupSIDToGlyphMapWithStandard(	const unsigned short* inStandardCharSet,
@@ -1342,6 +1366,7 @@ EStatusCode CFFFileInput::ReadFDArray(unsigned short inFontIndex)
 			mPrimitivesReader.Skip(offsets[0] - 1);
 
 		mTopDictIndex[inFontIndex].mFDArray = new FontDictInfo[dictionariesCount];
+		mTopDictIndex[inFontIndex].mFDArrayCount = dictionariesCount;
 
 		for(i = 0; i < dictionariesCount && (PDFHummus::eSuccess == status); ++i)
 		{
@@ -1384,6 +1409,7 @@ EStatusCode CFFFileInput::ReadFDSelect(unsigned short inFontIndex)
 {
 	LongFilePositionType fdSelectLocation = GetFDSelectPosition(inFontIndex);
 	unsigned short glyphCount = mCharStrings[inFontIndex].mCharStringsCount;
+	unsigned short fdArrayCount = mTopDictIndex[inFontIndex].mFDArrayCount;
 	EStatusCode status = PDFHummus::eSuccess;
 	Byte format;
 
@@ -1402,8 +1428,15 @@ EStatusCode CFFFileInput::ReadFDSelect(unsigned short inFontIndex)
 		for(unsigned long i=0; i < glyphCount && PDFHummus::eSuccess == status; ++i)
 		{
 			status = mPrimitivesReader.ReadCard8(fdIndex);
-			if(status != PDFHummus::eFailure)
-				mTopDictIndex[inFontIndex].mFDSelect[i] = mTopDictIndex[inFontIndex].mFDArray+ fdIndex;
+			if(status == PDFHummus::eSuccess)
+			{
+				if(fdIndex >= fdArrayCount)
+				{
+					TRACE_LOG2("CFFFileInput::ReadFDSelect, format 0 fdIndex %u out of range (fdArrayCount=%u)", fdIndex, fdArrayCount);
+					return PDFHummus::eFailure;
+				}
+				mTopDictIndex[inFontIndex].mFDSelect[i] = mTopDictIndex[inFontIndex].mFDArray + fdIndex;
+			}
 		}
 	}
 	else // format 3
@@ -1414,19 +1447,47 @@ EStatusCode CFFFileInput::ReadFDSelect(unsigned short inFontIndex)
 		Byte fdIndex;
 
 		status = mPrimitivesReader.ReadCard16(rangesCount);
-		if(status != PDFHummus::eFailure)
+		if(status == PDFHummus::eSuccess)
 		{
 			status = mPrimitivesReader.ReadCard16(firstGlyphIndex);
+			if(status == PDFHummus::eSuccess && firstGlyphIndex != 0)
+			{
+				// Format 3 must cover every glyph; a non-zero starting index
+				// would leave mFDSelect[0..firstGlyphIndex) uninitialized for
+				// later glyph-interpretation lookups to dereference.
+				TRACE_LOG1("CFFFileInput::ReadFDSelect, format 3 initial firstGlyphIndex %u != 0 leaves leading glyphs unassigned", firstGlyphIndex);
+				return PDFHummus::eFailure;
+			}
 			for(unsigned long i=0; i < rangesCount && PDFHummus::eSuccess == status;++i)
 			{
 				mPrimitivesReader.ReadCard8(fdIndex);
 				mPrimitivesReader.ReadCard16(nextRangeGlyphIndex);
 				status = mPrimitivesReader.GetInternalState();
-				if(status != PDFHummus::eFailure)
-					for(unsigned short j=firstGlyphIndex; j < nextRangeGlyphIndex;++j)
-						mTopDictIndex[inFontIndex].mFDSelect[j] = 
-							mTopDictIndex[inFontIndex].mFDArray + fdIndex;
+				if(status != PDFHummus::eSuccess)
+					break;
+				if(fdIndex >= fdArrayCount)
+				{
+					TRACE_LOG2("CFFFileInput::ReadFDSelect, format 3 fdIndex %u out of range (fdArrayCount=%u)", fdIndex, fdArrayCount);
+					return PDFHummus::eFailure;
+				}
+				if(nextRangeGlyphIndex > glyphCount || nextRangeGlyphIndex <= firstGlyphIndex)
+				{
+					TRACE_LOG2("CFFFileInput::ReadFDSelect, format 3 nextRangeGlyphIndex %u outside (firstGlyphIndex, glyphCount=%u]", nextRangeGlyphIndex, glyphCount);
+					return PDFHummus::eFailure;
+				}
+				for(unsigned short j=firstGlyphIndex; j < nextRangeGlyphIndex;++j)
+					mTopDictIndex[inFontIndex].mFDSelect[j] =
+						mTopDictIndex[inFontIndex].mFDArray + fdIndex;
 				firstGlyphIndex = nextRangeGlyphIndex;
+			}
+			if(status == PDFHummus::eSuccess && firstGlyphIndex != glyphCount)
+			{
+				// After the loop firstGlyphIndex holds the final sentinel
+				// (or the initial value if rangesCount was 0). It must equal
+				// glyphCount; otherwise mFDSelect[firstGlyphIndex..glyphCount)
+				// stays uninitialized.
+				TRACE_LOG2("CFFFileInput::ReadFDSelect, format 3 final sentinel %u != glyphCount %u leaves trailing glyphs unassigned", firstGlyphIndex, glyphCount);
+				return PDFHummus::eFailure;
 			}
 		}
 	}
@@ -1684,16 +1745,22 @@ EStatusCode CFFFileInput::ReadCharsets(unsigned short inFontIndex)
 
 EStatusCode CFFFileInput::ReadEncodings(unsigned short inFontIndex)
 {
-	// read all encodings positions
 	LongFilePositionType encodingPosition = GetEncodingPosition(inFontIndex);
 	EncodingsInfo* encoding = new EncodingsInfo();
 
-	ReadEncoding(encoding,encodingPosition);
+	// Push first so mEncodings owns the buffer regardless of outcome — the
+	// destructor walks it for cleanup. Only assign mTopDictIndex on success
+	// to avoid pinning a partially-initialised encoding as the font's.
+	EStatusCode status = ReadEncoding(encoding, encodingPosition);
 	mEncodings.push_back(encoding);
+	if(status != PDFHummus::eSuccess)
+	{
+		TRACE_LOG1("CFFFileInput::ReadEncodings, failed to read encoding for font index %u", inFontIndex);
+		return status;
+	}
 	mTopDictIndex[inFontIndex].mEncoding = encoding;
 
 	return mPrimitivesReader.GetInternalState();
-
 }
 
 EStatusCode CFFFileInput::ReadCIDInformation(unsigned short inFontIndex)

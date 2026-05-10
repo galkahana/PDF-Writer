@@ -642,9 +642,11 @@ EStatusCode CFFEmbeddedFontWriter::WriteEncodings(const UIntVector& inSubsetGlyp
 		else
 			mPrimitivesWriter.WriteCard8(0);
 
-		// assuming that 0 is in the subset glyphs IDs, which does not require encoding
-		// get the encodings count
-		Byte encodingGlyphsCount = std::min((Byte)(inSubsetGlyphIDs.size()-1),encodingInfo->mEncodingsCount); 
+		// assuming that 0 is in the subset glyphs IDs, which does not require encoding.
+		// Output nCodes is Card8, so anything past 255 cannot be reproduced anyway.
+		unsigned short subsetEncodingCount = (unsigned short)(inSubsetGlyphIDs.size()-1);
+		unsigned short rawCount = std::min<unsigned short>(subsetEncodingCount, encodingInfo->mEncodingsCount);
+		Byte encodingGlyphsCount = (rawCount > 255) ? (Byte)255 : (Byte)rawCount;
 
 		mPrimitivesWriter.WriteCard8(encodingGlyphsCount);
 		for(Byte i=0; i < encodingGlyphsCount;++i)
