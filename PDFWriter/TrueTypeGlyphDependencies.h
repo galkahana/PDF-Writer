@@ -26,17 +26,14 @@
 
 typedef std::set<unsigned int> UIntSet;
 
-// Stateless walker over the composite-glyph dependency graph extracted
-// from a TrueType `glyf` table. Pulled out of TrueTypeEmbeddedFontWriter
-// so the cycle-handling can be unit-tested without spinning up the full
-// embedded-font pipeline.
+// Composite-glyph dependency utilities over a TrueType `glyf` table.
 class TrueTypeGlyphDependencies
 {
 public:
-	// Visit every transitive component referenced by `inGlyphID` and
-	// insert each into `ioComponents`. The initial glyph is NOT added;
-	// only its components (and theirs, transitively) are. Returns true
-	// iff `inGlyphID` is itself composite (has any direct components).
+	// Insert every transitive component referenced by `inGlyphID` into
+	// `ioComponents`. The initial glyph is NOT added; only its components
+	// (and theirs, transitively) are. Returns true iff `inGlyphID` is
+	// itself composite (has any direct components).
 	//
 	// Recursion is guarded by the visited set: a component is recursed
 	// into only when it was newly inserted, so a self-reference or a
@@ -44,7 +41,7 @@ public:
 	//
 	// `inGlyfTable[i]` may be NULL for missing or zero-length glyphs.
 	// `inGlyphID >= inNumGlyphs` returns false without touching the set.
-	static bool WalkComponents(unsigned int inGlyphID,
+	static bool CollectComponentGlyphs(unsigned int inGlyphID,
 		GlyphEntry* const* inGlyfTable,
 		unsigned int inNumGlyphs,
 		UIntSet& ioComponents);

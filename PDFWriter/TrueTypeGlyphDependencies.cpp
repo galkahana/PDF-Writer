@@ -22,14 +22,14 @@
 
 #include "Trace.h"
 
-bool TrueTypeGlyphDependencies::WalkComponents(unsigned int inGlyphID,
+bool TrueTypeGlyphDependencies::CollectComponentGlyphs(unsigned int inGlyphID,
 	GlyphEntry* const* inGlyfTable,
 	unsigned int inNumGlyphs,
 	UIntSet& ioComponents)
 {
 	if(inGlyphID >= inNumGlyphs)
 	{
-		TRACE_LOG2("TrueTypeGlyphDependencies::WalkComponents, error, requested glyph index %u is larger than the maximum glyph index for this font which is %u.",
+		TRACE_LOG2("TrueTypeGlyphDependencies::CollectComponentGlyphs, error, requested glyph index %u is larger than the maximum glyph index for this font which is %u.",
 			inGlyphID, inNumGlyphs - 1);
 		return false;
 	}
@@ -48,7 +48,7 @@ bool TrueTypeGlyphDependencies::WalkComponents(unsigned int inGlyphID,
 		// otherwise drive the call stack until it overflows. The set
 		// doubles as the visited marker for cycle detection.
 		if(ioComponents.insert(*itComponentGlyphs).second)
-			WalkComponents(*itComponentGlyphs, inGlyfTable, inNumGlyphs, ioComponents);
+			CollectComponentGlyphs(*itComponentGlyphs, inGlyfTable, inNumGlyphs, ioComponents);
 	}
 	return true;
 }

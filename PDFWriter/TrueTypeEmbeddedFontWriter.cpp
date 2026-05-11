@@ -299,7 +299,7 @@ void TrueTypeEmbeddedFontWriter::AddDependentGlyphs(UIntVector& ioSubsetGlyphIDs
 	bool hasCompositeGlyphs = false;
 
 	for(;it != ioSubsetGlyphIDs.end(); ++it)
-		hasCompositeGlyphs |= TrueTypeGlyphDependencies::WalkComponents(
+		hasCompositeGlyphs |= TrueTypeGlyphDependencies::CollectComponentGlyphs(
 			*it, mTrueTypeInput.mGlyf, mTrueTypeInput.mMaxp.NumGlyphs, glyphsSet);
 
 	if(hasCompositeGlyphs)

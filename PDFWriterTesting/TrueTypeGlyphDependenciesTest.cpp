@@ -17,7 +17,7 @@
    limitations under the License.
 
 
-   Regression tests for TrueTypeGlyphDependencies::WalkComponents, the
+   Regression tests for TrueTypeGlyphDependencies::CollectComponentGlyphs, the
    composite-glyph dependency walker extracted from
    TrueTypeEmbeddedFontWriter so its cycle handling can be tested without
    a full font-embedding pipeline.
@@ -56,7 +56,7 @@ static void initGlyfTable(StaticGlyfTable& outTable, unsigned int inNumGlyphs) {
 // Test 1: glyph 1 references itself. Pre-fix the recursion descends into
 // glyph 1 forever; post-fix the second visit to glyph 1 is short-circuited
 // by the visited-set check.
-static bool WalkComponents_SelfReferencingGlyph_TerminatesAndPopulatesSet() {
+static bool CollectComponentGlyphs_SelfReferencingGlyph_TerminatesAndPopulatesSet() {
 	// Arrange: 2 glyphs, glyph 0 simple, glyph 1 -> {1} (self).
 	StaticGlyfTable t;
 	initGlyfTable(t, 2);
@@ -64,15 +64,15 @@ static bool WalkComponents_SelfReferencingGlyph_TerminatesAndPopulatesSet() {
 	UIntSet result;
 
 	// Act
-	bool isComposite = TrueTypeGlyphDependencies::WalkComponents(1, t.mTable, t.mNumGlyphs, result);
+	bool isComposite = TrueTypeGlyphDependencies::CollectComponentGlyphs(1, t.mTable, t.mNumGlyphs, result);
 
 	// Assert
 	if(!isComposite) {
-		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::SelfReferencingGlyph_TerminatesAndPopulatesSet]: expected composite, got simple" << endl;
+		cout << "TrueTypeGlyphDependenciesTest [CollectComponentGlyphs::SelfReferencingGlyph_TerminatesAndPopulatesSet]: expected composite, got simple" << endl;
 		return false;
 	}
 	if(result.size() != 1 || result.find(1) == result.end()) {
-		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::SelfReferencingGlyph_TerminatesAndPopulatesSet]: expected {1}, got set of size "
+		cout << "TrueTypeGlyphDependenciesTest [CollectComponentGlyphs::SelfReferencingGlyph_TerminatesAndPopulatesSet]: expected {1}, got set of size "
 		     << result.size() << endl;
 		return false;
 	}
@@ -81,7 +81,7 @@ static bool WalkComponents_SelfReferencingGlyph_TerminatesAndPopulatesSet() {
 
 // Test 2: glyph 1 -> {2}, glyph 2 -> {1}. Pre-fix mutual recursion never
 // terminates; post-fix the back-edge to 1 is short-circuited.
-static bool WalkComponents_TwoCycleGlyphs_TerminatesAndPopulatesSet() {
+static bool CollectComponentGlyphs_TwoCycleGlyphs_TerminatesAndPopulatesSet() {
 	// Arrange: 3 glyphs, glyph 0 simple, glyph 1 -> {2}, glyph 2 -> {1}.
 	StaticGlyfTable t;
 	initGlyfTable(t, 3);
@@ -90,15 +90,15 @@ static bool WalkComponents_TwoCycleGlyphs_TerminatesAndPopulatesSet() {
 	UIntSet result;
 
 	// Act
-	bool isComposite = TrueTypeGlyphDependencies::WalkComponents(1, t.mTable, t.mNumGlyphs, result);
+	bool isComposite = TrueTypeGlyphDependencies::CollectComponentGlyphs(1, t.mTable, t.mNumGlyphs, result);
 
 	// Assert
 	if(!isComposite) {
-		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::TwoCycleGlyphs_TerminatesAndPopulatesSet]: expected composite, got simple" << endl;
+		cout << "TrueTypeGlyphDependenciesTest [CollectComponentGlyphs::TwoCycleGlyphs_TerminatesAndPopulatesSet]: expected composite, got simple" << endl;
 		return false;
 	}
 	if(result.size() != 2 || result.find(1) == result.end() || result.find(2) == result.end()) {
-		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::TwoCycleGlyphs_TerminatesAndPopulatesSet]: expected {1, 2}, got set of size "
+		cout << "TrueTypeGlyphDependenciesTest [CollectComponentGlyphs::TwoCycleGlyphs_TerminatesAndPopulatesSet]: expected {1, 2}, got set of size "
 		     << result.size() << endl;
 		return false;
 	}
@@ -108,7 +108,7 @@ static bool WalkComponents_TwoCycleGlyphs_TerminatesAndPopulatesSet() {
 // Test 3 (happy path): glyph 1 -> {2}, glyph 2 -> {3}, glyph 3 simple.
 // Proves the visited-set guard didn't accidentally drop the normal
 // transitive-component case (where every component IS new on first visit).
-static bool WalkComponents_LinearDependencyChain_GathersAllTransitive() {
+static bool CollectComponentGlyphs_LinearDependencyChain_GathersAllTransitive() {
 	// Arrange: 4 glyphs, 0 simple, 1 -> {2}, 2 -> {3}, 3 simple.
 	StaticGlyfTable t;
 	initGlyfTable(t, 4);
@@ -117,15 +117,15 @@ static bool WalkComponents_LinearDependencyChain_GathersAllTransitive() {
 	UIntSet result;
 
 	// Act
-	bool isComposite = TrueTypeGlyphDependencies::WalkComponents(1, t.mTable, t.mNumGlyphs, result);
+	bool isComposite = TrueTypeGlyphDependencies::CollectComponentGlyphs(1, t.mTable, t.mNumGlyphs, result);
 
 	// Assert
 	if(!isComposite) {
-		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::LinearDependencyChain_GathersAllTransitive]: expected composite, got simple" << endl;
+		cout << "TrueTypeGlyphDependenciesTest [CollectComponentGlyphs::LinearDependencyChain_GathersAllTransitive]: expected composite, got simple" << endl;
 		return false;
 	}
 	if(result.size() != 2 || result.find(2) == result.end() || result.find(3) == result.end()) {
-		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::LinearDependencyChain_GathersAllTransitive]: expected {2, 3}, got set of size "
+		cout << "TrueTypeGlyphDependenciesTest [CollectComponentGlyphs::LinearDependencyChain_GathersAllTransitive]: expected {2, 3}, got set of size "
 		     << result.size() << endl;
 		return false;
 	}
@@ -135,7 +135,7 @@ static bool WalkComponents_LinearDependencyChain_GathersAllTransitive() {
 // Test 4 (happy path): glyph 1 -> {2, 3}, where both 2 and 3 reference
 // glyph 4. The dedup property of the visited set means glyph 4 should
 // appear once even though two siblings independently depend on it.
-static bool WalkComponents_SharedComponentAcrossSiblings_DedupesViaVisitedSet() {
+static bool CollectComponentGlyphs_SharedComponentAcrossSiblings_DedupesViaVisitedSet() {
 	// Arrange: 5 glyphs, 0 simple, 1 -> {2, 3}, 2 -> {4}, 3 -> {4}, 4 simple.
 	StaticGlyfTable t;
 	initGlyfTable(t, 5);
@@ -146,18 +146,18 @@ static bool WalkComponents_SharedComponentAcrossSiblings_DedupesViaVisitedSet() 
 	UIntSet result;
 
 	// Act
-	bool isComposite = TrueTypeGlyphDependencies::WalkComponents(1, t.mTable, t.mNumGlyphs, result);
+	bool isComposite = TrueTypeGlyphDependencies::CollectComponentGlyphs(1, t.mTable, t.mNumGlyphs, result);
 
 	// Assert
 	if(!isComposite) {
-		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::SharedComponentAcrossSiblings_DedupesViaVisitedSet]: expected composite, got simple" << endl;
+		cout << "TrueTypeGlyphDependenciesTest [CollectComponentGlyphs::SharedComponentAcrossSiblings_DedupesViaVisitedSet]: expected composite, got simple" << endl;
 		return false;
 	}
 	if(result.size() != 3
 	   || result.find(2) == result.end()
 	   || result.find(3) == result.end()
 	   || result.find(4) == result.end()) {
-		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::SharedComponentAcrossSiblings_DedupesViaVisitedSet]: expected {2, 3, 4}, got set of size "
+		cout << "TrueTypeGlyphDependenciesTest [CollectComponentGlyphs::SharedComponentAcrossSiblings_DedupesViaVisitedSet]: expected {2, 3, 4}, got set of size "
 		     << result.size() << endl;
 		return false;
 	}
@@ -166,22 +166,22 @@ static bool WalkComponents_SharedComponentAcrossSiblings_DedupesViaVisitedSet() 
 
 // Test 5: simple glyph (no components) returns false and leaves the
 // caller's set unchanged.
-static bool WalkComponents_SimpleGlyph_ReturnsFalseAndLeavesSetEmpty() {
+static bool CollectComponentGlyphs_SimpleGlyph_ReturnsFalseAndLeavesSetEmpty() {
 	// Arrange: 2 glyphs, both simple.
 	StaticGlyfTable t;
 	initGlyfTable(t, 2);
 	UIntSet result;
 
 	// Act
-	bool isComposite = TrueTypeGlyphDependencies::WalkComponents(0, t.mTable, t.mNumGlyphs, result);
+	bool isComposite = TrueTypeGlyphDependencies::CollectComponentGlyphs(0, t.mTable, t.mNumGlyphs, result);
 
 	// Assert
 	if(isComposite) {
-		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::SimpleGlyph_ReturnsFalseAndLeavesSetEmpty]: expected simple, got composite" << endl;
+		cout << "TrueTypeGlyphDependenciesTest [CollectComponentGlyphs::SimpleGlyph_ReturnsFalseAndLeavesSetEmpty]: expected simple, got composite" << endl;
 		return false;
 	}
 	if(!result.empty()) {
-		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::SimpleGlyph_ReturnsFalseAndLeavesSetEmpty]: expected empty set, got size "
+		cout << "TrueTypeGlyphDependenciesTest [CollectComponentGlyphs::SimpleGlyph_ReturnsFalseAndLeavesSetEmpty]: expected empty set, got size "
 		     << result.size() << endl;
 		return false;
 	}
@@ -191,33 +191,33 @@ static bool WalkComponents_SimpleGlyph_ReturnsFalseAndLeavesSetEmpty() {
 // Test 6: glyph ID at or beyond the table size returns false and leaves
 // the caller's set unchanged (this is the existing pre-V-018 guard, kept
 // as part of the contract).
-static bool WalkComponents_GlyphIDBeyondTableSize_ReturnsFalse() {
+static bool CollectComponentGlyphs_GlyphIDBeyondTableSize_ReturnsFalse() {
 	// Arrange: 2 glyphs, both simple.
 	StaticGlyfTable t;
 	initGlyfTable(t, 2);
 	UIntSet result;
 
 	// Act: ask for glyph 5 (table only holds 0..1).
-	bool isComposite = TrueTypeGlyphDependencies::WalkComponents(5, t.mTable, t.mNumGlyphs, result);
+	bool isComposite = TrueTypeGlyphDependencies::CollectComponentGlyphs(5, t.mTable, t.mNumGlyphs, result);
 
 	// Assert
 	if(isComposite) {
-		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::GlyphIDBeyondTableSize_ReturnsFalse]: out-of-range glyph reported composite" << endl;
+		cout << "TrueTypeGlyphDependenciesTest [CollectComponentGlyphs::GlyphIDBeyondTableSize_ReturnsFalse]: out-of-range glyph reported composite" << endl;
 		return false;
 	}
 	if(!result.empty()) {
-		cout << "TrueTypeGlyphDependenciesTest [WalkComponents::GlyphIDBeyondTableSize_ReturnsFalse]: out-of-range glyph populated set" << endl;
+		cout << "TrueTypeGlyphDependenciesTest [CollectComponentGlyphs::GlyphIDBeyondTableSize_ReturnsFalse]: out-of-range glyph populated set" << endl;
 		return false;
 	}
 	return true;
 }
 
 int TrueTypeGlyphDependenciesTest(int argc, char* argv[]) {
-	if(!WalkComponents_SelfReferencingGlyph_TerminatesAndPopulatesSet()) return 1;
-	if(!WalkComponents_TwoCycleGlyphs_TerminatesAndPopulatesSet()) return 1;
-	if(!WalkComponents_LinearDependencyChain_GathersAllTransitive()) return 1;
-	if(!WalkComponents_SharedComponentAcrossSiblings_DedupesViaVisitedSet()) return 1;
-	if(!WalkComponents_SimpleGlyph_ReturnsFalseAndLeavesSetEmpty()) return 1;
-	if(!WalkComponents_GlyphIDBeyondTableSize_ReturnsFalse()) return 1;
+	if(!CollectComponentGlyphs_SelfReferencingGlyph_TerminatesAndPopulatesSet()) return 1;
+	if(!CollectComponentGlyphs_TwoCycleGlyphs_TerminatesAndPopulatesSet()) return 1;
+	if(!CollectComponentGlyphs_LinearDependencyChain_GathersAllTransitive()) return 1;
+	if(!CollectComponentGlyphs_SharedComponentAcrossSiblings_DedupesViaVisitedSet()) return 1;
+	if(!CollectComponentGlyphs_SimpleGlyph_ReturnsFalseAndLeavesSetEmpty()) return 1;
+	if(!CollectComponentGlyphs_GlyphIDBeyondTableSize_ReturnsFalse()) return 1;
 	return 0;
 }
