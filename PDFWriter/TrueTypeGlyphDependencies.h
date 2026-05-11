@@ -35,14 +35,23 @@ public:
 	// (and theirs, transitively) are. Returns true iff `inGlyphID` is
 	// itself composite (has any direct components).
 	//
-	// Recursion is guarded by the visited set: a component is recursed
-	// into only when it was newly inserted, so a self-reference or a
-	// cycle (glyph A -> B -> A) terminates instead of blowing the stack.
+	// Two recursion safeguards:
+	//   * Visited-set guard: a component is recursed into only when it
+	//     was newly inserted, so a self-reference or a cycle (glyph
+	//     A -> B -> A) terminates instead of blowing the stack.
+	//   * Depth cap: cuts off acyclic but very deep chains before they
+	//     overflow the call stack. NumGlyphs is uint16 (max 65535) and
+	//     a chain that long would still overflow typical stacks despite
+	//     the visited-set bound. The exact cap is a private detail of
+	//     the implementation.
 	//
 	// `inGlyfTable[i]` may be NULL for missing or zero-length glyphs.
 	// `inGlyphID >= inNumGlyphs` returns false without touching the set.
+	// `inDepth` is for internal recursion accounting — callers pass 0
+	// (the default).
 	static bool CollectComponentGlyphs(unsigned int inGlyphID,
 		GlyphEntry* const* inGlyfTable,
 		unsigned int inNumGlyphs,
-		UIntSet& ioComponents);
+		UIntSet& ioComponents,
+		unsigned int inDepth = 0);
 };

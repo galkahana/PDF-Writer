@@ -33,21 +33,28 @@
 #include "OpenTypeFileInput.h"
 #include "TrueTypeGlyphDependencies.h"
 
+#include <assert.h>
 #include <iostream>
 
 using namespace std;
 
 // Build a stack-only glyf table from caller-supplied component lists.
-// inComponents[i] is the list of component IDs for glyph i; pass NULL for
-// simple/zero-length glyphs. Stack-only construction (no new/delete) keeps
-// the tests obvious — every fixture lives in the test function frame.
+// Stack-only construction (no new/delete) keeps the tests obvious — every
+// fixture lives in the test function frame. Capacity is sized for the
+// deepest fixture (depth-cap test chain).
+static const unsigned int scStaticGlyfCapacity = 32;
+
 struct StaticGlyfTable {
-	GlyphEntry mEntries[8];
-	GlyphEntry* mTable[8];
+	GlyphEntry mEntries[scStaticGlyfCapacity];
+	GlyphEntry* mTable[scStaticGlyfCapacity];
 	unsigned int mNumGlyphs;
 };
 
 static void initGlyfTable(StaticGlyfTable& outTable, unsigned int inNumGlyphs) {
+	// Refuse silent OOB writes if a future test asks for more glyphs than
+	// the fixture's fixed-size arrays can hold. Bump scStaticGlyfCapacity
+	// rather than relying on this triggering at runtime.
+	assert(inNumGlyphs <= scStaticGlyfCapacity);
 	outTable.mNumGlyphs = inNumGlyphs;
 	for(unsigned int i = 0; i < inNumGlyphs; ++i)
 		outTable.mTable[i] = &outTable.mEntries[i];
@@ -188,7 +195,48 @@ static bool CollectComponentGlyphs_SimpleGlyph_ReturnsFalseAndLeavesSetEmpty() {
 	return true;
 }
 
-// Test 6: glyph ID at or beyond the table size returns false and leaves
+// Test 6: a long acyclic chain of composite glyphs must hit some depth
+// cap and stop, instead of recursing all the way down (which would
+// overflow the stack on a malicious font with thousands of nested
+// composites). Chain is sized comfortably longer than any reasonable
+// cap so the test doesn't break if the exact cap value is later tuned —
+// it just asserts that the tail of the chain wasn't reached.
+static bool CollectComponentGlyphs_DeepAcyclicChain_StopsBeforeChainEnd() {
+	const unsigned int chainLength = 30;             // > any plausible cap
+	const unsigned int numGlyphs = chainLength + 1;  // chain + glyph 0 (simple)
+
+	// Arrange: chain glyph 1 -> 2 -> ... -> chainLength.
+	StaticGlyfTable t;
+	initGlyfTable(t, numGlyphs);
+	for(unsigned int i = 1; i < chainLength; ++i)
+		t.mEntries[i].mComponentGlyphs.push_back(i + 1);
+	UIntSet result;
+
+	// Act
+	bool isComposite = TrueTypeGlyphDependencies::CollectComponentGlyphs(1, t.mTable, t.mNumGlyphs, result);
+
+	// Assert: the starting glyph is composite (so the walk did enter the
+	// chain), but the depth cap stopped descent before the tail was
+	// reached. Whatever the exact cap value is, glyph `chainLength`
+	// sits past it.
+	if(!isComposite) {
+		cout << "TrueTypeGlyphDependenciesTest [CollectComponentGlyphs::DeepAcyclicChain_StopsBeforeChainEnd]: expected composite, got simple" << endl;
+		return false;
+	}
+	if(result.find(chainLength) != result.end()) {
+		cout << "TrueTypeGlyphDependenciesTest [CollectComponentGlyphs::DeepAcyclicChain_StopsBeforeChainEnd]: tail glyph "
+		     << chainLength << " was reached despite depth cap" << endl;
+		return false;
+	}
+	if(result.size() >= chainLength - 1) {
+		cout << "TrueTypeGlyphDependenciesTest [CollectComponentGlyphs::DeepAcyclicChain_StopsBeforeChainEnd]: full chain (" << (chainLength - 1)
+		     << " components) was traversed; depth cap didn't fire" << endl;
+		return false;
+	}
+	return true;
+}
+
+// Test 7: glyph ID at or beyond the table size returns false and leaves
 // the caller's set unchanged (this is the existing pre-V-018 guard, kept
 // as part of the contract).
 static bool CollectComponentGlyphs_GlyphIDBeyondTableSize_ReturnsFalse() {
@@ -213,11 +261,14 @@ static bool CollectComponentGlyphs_GlyphIDBeyondTableSize_ReturnsFalse() {
 }
 
 int TrueTypeGlyphDependenciesTest(int argc, char* argv[]) {
+	(void)argc;
+	(void)argv;
 	if(!CollectComponentGlyphs_SelfReferencingGlyph_TerminatesAndPopulatesSet()) return 1;
 	if(!CollectComponentGlyphs_TwoCycleGlyphs_TerminatesAndPopulatesSet()) return 1;
 	if(!CollectComponentGlyphs_LinearDependencyChain_GathersAllTransitive()) return 1;
 	if(!CollectComponentGlyphs_SharedComponentAcrossSiblings_DedupesViaVisitedSet()) return 1;
 	if(!CollectComponentGlyphs_SimpleGlyph_ReturnsFalseAndLeavesSetEmpty()) return 1;
+	if(!CollectComponentGlyphs_DeepAcyclicChain_StopsBeforeChainEnd()) return 1;
 	if(!CollectComponentGlyphs_GlyphIDBeyondTableSize_ReturnsFalse()) return 1;
 	return 0;
 }
