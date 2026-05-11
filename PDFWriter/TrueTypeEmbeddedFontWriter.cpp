@@ -27,6 +27,7 @@
 #include "OutputStreamTraits.h"
 #include "InputStringBufferStream.h"
 #include "OpenTypeFileInput.h"
+#include "TrueTypeGlyphDependencies.h"
 #include "FSType.h"
 
 #include <sstream>
@@ -298,7 +299,8 @@ void TrueTypeEmbeddedFontWriter::AddDependentGlyphs(UIntVector& ioSubsetGlyphIDs
 	bool hasCompositeGlyphs = false;
 
 	for(;it != ioSubsetGlyphIDs.end(); ++it)
-		hasCompositeGlyphs |= AddComponentGlyphs(*it,glyphsSet);
+		hasCompositeGlyphs |= TrueTypeGlyphDependencies::CollectComponentGlyphs(
+			*it, mTrueTypeInput.mGlyf, mTrueTypeInput.mMaxp.NumGlyphs, glyphsSet);
 
 	if(hasCompositeGlyphs)
 	{
@@ -310,36 +312,9 @@ void TrueTypeEmbeddedFontWriter::AddDependentGlyphs(UIntVector& ioSubsetGlyphIDs
 		ioSubsetGlyphIDs.clear();
 		for(itNewGlyphs = glyphsSet.begin(); itNewGlyphs != glyphsSet.end(); ++itNewGlyphs)
 			ioSubsetGlyphIDs.push_back(*itNewGlyphs);
-		
+
 		sort(ioSubsetGlyphIDs.begin(),ioSubsetGlyphIDs.end());
 	}
-}
-
-bool TrueTypeEmbeddedFontWriter::AddComponentGlyphs(unsigned int inGlyphID,UIntSet& ioComponents)
-{
-	GlyphEntry* glyfTableEntry;
-	UIntList::iterator itComponentGlyphs;
-	bool isComposite = false;
-
-	if(inGlyphID >= mTrueTypeInput.mMaxp.NumGlyphs)
-	{
-		TRACE_LOG2("TrueTypeEmbeddedFontWriter::AddComponentGlyphs, error, requested glyph index %ld is larger than the maximum glyph index for this font which is %ld. ",inGlyphID,mTrueTypeInput.mMaxp.NumGlyphs-1);
-		return false;
-	}
-
-	glyfTableEntry = mTrueTypeInput.mGlyf[inGlyphID];
-	if(glyfTableEntry != NULL && glyfTableEntry->mComponentGlyphs.size() > 0)
-	{
-		isComposite = true;
-		for(itComponentGlyphs = glyfTableEntry->mComponentGlyphs.begin(); 
-				itComponentGlyphs != glyfTableEntry->mComponentGlyphs.end(); 
-				++itComponentGlyphs)
-		{
-				ioComponents.insert(*itComponentGlyphs);
-				AddComponentGlyphs(*itComponentGlyphs,ioComponents);
-		}
-	}
-	return isComposite;
 }
 
 unsigned short TrueTypeEmbeddedFontWriter::GetSmallerPower2(unsigned short inNumber)

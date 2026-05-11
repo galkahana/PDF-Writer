@@ -89,7 +89,6 @@ private:
 										MyStringBuf& outFontProgram);
 
 	void AddDependentGlyphs(UIntVector& ioSubsetGlyphIDs);
-	bool AddComponentGlyphs(unsigned int inGlyphID,UIntSet& ioComponents);
 
 	PDFHummus::EStatusCode WriteTrueTypeHeader();
 	unsigned short GetSmallerPower2(unsigned short inNumber);
