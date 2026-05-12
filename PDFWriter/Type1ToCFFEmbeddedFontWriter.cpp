@@ -28,7 +28,6 @@
 #include "Trace.h"
 #include "Type1ToType2Converter.h"
 #include "FSType.h"
-#include "StandardEncoding.h"
 
 #include <algorithm>
 
@@ -257,7 +256,7 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::CreateCFFSubset(
         // direct glyphs placement put them here)
         TranslateFromFreeTypeToType1(inFontInfo,subsetGlyphIDs,subsetGlyphNames);
 
-		status = AddDependentGlyphs(subsetGlyphNames);
+		status = mType1Input.AddDependentGlyphs(subsetGlyphNames);
 		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, failed to add dependent glyphs");
@@ -352,63 +351,6 @@ void Type1ToCFFEmbeddedFontWriter::FreeTemporaryStructs()
 	mStrings.clear();
 	mNonStandardStringToIndex.clear();
 	delete[] mCharset;
-}
-
-EStatusCode Type1ToCFFEmbeddedFontWriter::AddDependentGlyphs(StringVector& ioSubsetGlyphIDs)
-{
-	EStatusCode status = PDFHummus::eSuccess;
-	StringSet glyphsSet;
-	StringVector::iterator it = ioSubsetGlyphIDs.begin();
-	bool hasCompositeGlyphs = false;
-
-	for(;it != ioSubsetGlyphIDs.end() && PDFHummus::eSuccess == status; ++it)
-	{
-		bool localHasCompositeGlyphs;
-		status = AddComponentGlyphs(*it,glyphsSet,localHasCompositeGlyphs);
-		hasCompositeGlyphs |= localHasCompositeGlyphs;
-	}
-
-	if(hasCompositeGlyphs)
-	{
-		StringSet::iterator itNewGlyphs;
-
-		for(it = ioSubsetGlyphIDs.begin();it != ioSubsetGlyphIDs.end(); ++it)
-			glyphsSet.insert(*it);
-
-		ioSubsetGlyphIDs.clear();
-		for(itNewGlyphs = glyphsSet.begin(); itNewGlyphs != glyphsSet.end(); ++itNewGlyphs)
-			ioSubsetGlyphIDs.push_back(*itNewGlyphs);
-		
-		sort(ioSubsetGlyphIDs.begin(),ioSubsetGlyphIDs.end());
-	}	
-	return status;	
-}
-
-EStatusCode Type1ToCFFEmbeddedFontWriter::AddComponentGlyphs(const std::string& inGlyphID,StringSet& ioComponents,bool &outFoundComponents)
-{
-	CharString1Dependencies dependencies;
-	StandardEncoding standardEncoding;
-	EStatusCode status = mType1Input.CalculateDependenciesForCharIndex(inGlyphID,dependencies);
-
-	if(PDFHummus::eSuccess == status && dependencies.mCharCodes.size() !=0)
-	{
-		ByteSet::iterator it = dependencies.mCharCodes.begin();
-		for(; it != dependencies.mCharCodes.end() && PDFHummus::eSuccess == status; ++it)
-		{
-			bool dummyFound;
-			/*
-				Using standard encoding instead of the font encoding, because SEAC (the only operator to create glyph dependency in type 1)
-				relies on standard encoding indexes by definition.
-			*/
-			std::string glyphName = standardEncoding.GetEncodedGlyphName(*it);
-			ioComponents.insert(glyphName);
-			status = AddComponentGlyphs(glyphName,ioComponents,dummyFound);
-		}
-		outFoundComponents = true;
-	}
-	else
-		outFoundComponents = false;
-	return status;
 }
 
 EStatusCode Type1ToCFFEmbeddedFontWriter::WriteCFFHeader()

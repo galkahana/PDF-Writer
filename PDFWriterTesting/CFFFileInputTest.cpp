@@ -33,6 +33,10 @@
        length and (for format 3) failed to bound nextRangeGlyphIndex
        against glyphCount, yielding a wild-pointer write or a heap write
        past the end of mFDSelect.
+     * V-085: AddDependentGlyphs / CollectComponentGlyphs recursed on the
+       Type 2 seac (4-arg endchar) dependency graph without a visited-set
+       guard or a depth cap, so a self-referencing or cyclic seac chain
+       drove the call stack until it overflowed.
 
    Cases are grouped by the function they exercise (sc<Function>Cases) and
    driven by Run<Function>Cases runners. Each row's label states
@@ -51,6 +55,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 using namespace std;
 using namespace PDFHummus;
@@ -390,11 +395,172 @@ static bool ReadCFFFile_BrushScriptStd_PopulatesPrivateDict(char* argv[]) {
 	return ok;
 }
 
+// V-085 helpers
+//
+// CFFSyntheticBuilder::WithCharStrings produces a non-CID CFF with the
+// ISOAdobe charset (predefined offset 0), so glyph K is assigned SID K =
+// scStandardStrings[K]. StandardEncoding maps code (32 + K - 1) to that
+// same standard string for K in [1..95], so a Type 2 4-arg endchar with
+// bchar = achar = (K + 31) creates a dependency from the issuing glyph
+// to glyph K. That gives us a way to express any directed-graph between
+// glyphs 1..N in self-referencing fixtures.
+
+// Build a 5-byte Type 2 seac-flavored endchar referencing standard
+// encoding code inCode for both bchar and achar: "0 0 code code endchar".
+// Codes <= 107 encode as a single CFF Type 2 integer byte (code + 139).
+static string MakeSelfEndcharReferencingCode(IOBasicTypes::Byte inCode) {
+	const char one = (char)((int)inCode + 139);
+	char bytes[] = { '\x8B', '\x8B', one, one, '\x0E' };
+	return string(bytes, sizeof(bytes));
+}
+
+// Helper to query whether a glyph ID survived the AddDependentGlyphs walk.
+static bool ContainsGlyph(const std::vector<unsigned int>& inGlyphs, unsigned int inID) {
+	for(size_t i = 0; i < inGlyphs.size(); ++i)
+		if(inGlyphs[i] == inID) return true;
+	return false;
+}
+
+// Parses inCFFBytes into outCFF AND keeps the InputByteArrayStream alive in
+// outStream for as long as the caller needs to re-enter the parser (e.g.
+// AddDependentGlyphs / CalculateDependenciesForCharIndex run the Type 2
+// interpreter, which calls back into CFFFileInput::ReadCharString and seeks
+// the underlying stream). ParseAsCFF's stream is local to that call, so it
+// can't be used by tests that interact with the parser after the load.
+static EStatusCode ParseKeepingStream(const string& inCFFBytes,
+                                      InputByteArrayStream& outStream,
+                                      CFFFileInput& outCFF) {
+	outStream.Assign((IOBasicTypes::Byte*)inCFFBytes.data(),
+	                 (LongFilePositionType)inCFFBytes.size());
+	return outCFF.ReadCFFFile(&outStream);
+}
+
+// V-085: glyph 1's CharString seac-refs standard encoding code 32 ("space"),
+// which resolves via ISOAdobe charset back to glyph 1. Pre-fix the recursion
+// had no visited-set guard, so AddDependentGlyphs blew the call stack on
+// this single-glyph self-reference.
+static bool AddDependentGlyphs_SelfReferencingSeac_TerminatesWithSelfDependency() {
+	// Arrange: 1 issued glyph (glyph 1) whose CharString seac-references
+	// standard encoding code 32 -> "space" -> SID 1 -> glyph 1.
+	std::vector<std::string> charStrings;
+	charStrings.push_back(MakeSelfEndcharReferencingCode(32));
+	string bytes = CFFSyntheticBuilder::WithCharStrings(charStrings);
+
+	InputByteArrayStream stream;
+	CFFFileInput cff;
+	if(ParseKeepingStream(bytes, stream, cff) != eSuccess) {
+		cout << "CFFFileInputTest [AddDependentGlyphs::SelfReferencingSeac_TerminatesWithSelfDependency]: synthetic CFF parse failed" << endl;
+		return false;
+	}
+
+	// Act
+	std::vector<unsigned int> subset;
+	subset.push_back(1);
+	EStatusCode status = cff.AddDependentGlyphs(subset);
+
+	// Assert
+	if(status != eSuccess) {
+		cout << "CFFFileInputTest [AddDependentGlyphs::SelfReferencingSeac_TerminatesWithSelfDependency]: status not eSuccess" << endl;
+		return false;
+	}
+	if(subset.size() != 1 || subset[0] != 1) {
+		cout << "CFFFileInputTest [AddDependentGlyphs::SelfReferencingSeac_TerminatesWithSelfDependency]: subset != {1}" << endl;
+		return false;
+	}
+	return true;
+}
+
+// V-085: two glyphs whose seac dependencies form a cycle (1 -> 2, 2 -> 1).
+// Pre-fix the recursion ping-ponged between them until the stack overflowed.
+static bool AddDependentGlyphs_TwoGlyphCycle_TerminatesWithBothDependencies() {
+	// Arrange: glyph 1 references code 33 ("exclam" -> SID 2 -> glyph 2),
+	// glyph 2 references code 32 ("space" -> SID 1 -> glyph 1).
+	std::vector<std::string> charStrings;
+	charStrings.push_back(MakeSelfEndcharReferencingCode(33));
+	charStrings.push_back(MakeSelfEndcharReferencingCode(32));
+	string bytes = CFFSyntheticBuilder::WithCharStrings(charStrings);
+
+	InputByteArrayStream stream;
+	CFFFileInput cff;
+	if(ParseKeepingStream(bytes, stream, cff) != eSuccess) {
+		cout << "CFFFileInputTest [AddDependentGlyphs::TwoGlyphCycle_TerminatesWithBothDependencies]: synthetic CFF parse failed" << endl;
+		return false;
+	}
+
+	// Act
+	std::vector<unsigned int> subset;
+	subset.push_back(1);
+	EStatusCode status = cff.AddDependentGlyphs(subset);
+
+	// Assert
+	if(status != eSuccess) {
+		cout << "CFFFileInputTest [AddDependentGlyphs::TwoGlyphCycle_TerminatesWithBothDependencies]: status not eSuccess" << endl;
+		return false;
+	}
+	if(subset.size() != 2 || subset[0] != 1 || subset[1] != 2) {
+		cout << "CFFFileInputTest [AddDependentGlyphs::TwoGlyphCycle_TerminatesWithBothDependencies]: subset != {1, 2}" << endl;
+		return false;
+	}
+	return true;
+}
+
+// V-085: a 25-deep acyclic seac chain that would push the call stack past
+// reasonable limits without a depth cap. The cap stops the walk before
+// the tail glyph is reached. The test asserts the tail wasn't reached
+// without baking the exact cap value into the assertion so future tuning
+// of scMaxCompositeDepth doesn't break this test.
+static bool AddDependentGlyphs_DeepAcyclicChain_StopsBeforeChainEnd() {
+	// Arrange: glyph K (K=1..24) seac-refs standard encoding code (K+32),
+	// which resolves to glyph K+1. Glyph 25 is a plain endchar (no seac).
+	const unsigned int chainLength = 25;
+	std::vector<std::string> charStrings;
+	for(unsigned int k = 1; k < chainLength; ++k)
+		charStrings.push_back(MakeSelfEndcharReferencingCode((IOBasicTypes::Byte)(k + 32)));
+	charStrings.push_back(string("\x0E", 1));
+
+	string bytes = CFFSyntheticBuilder::WithCharStrings(charStrings);
+	InputByteArrayStream stream;
+	CFFFileInput cff;
+	if(ParseKeepingStream(bytes, stream, cff) != eSuccess) {
+		cout << "CFFFileInputTest [AddDependentGlyphs::DeepAcyclicChain_StopsBeforeChainEnd]: synthetic CFF parse failed" << endl;
+		return false;
+	}
+
+	// Act
+	std::vector<unsigned int> subset;
+	subset.push_back(1);
+	EStatusCode status = cff.AddDependentGlyphs(subset);
+
+	// Assert
+	if(status != eSuccess) {
+		cout << "CFFFileInputTest [AddDependentGlyphs::DeepAcyclicChain_StopsBeforeChainEnd]: status not eSuccess" << endl;
+		return false;
+	}
+	if(!ContainsGlyph(subset, 1)) {
+		cout << "CFFFileInputTest [AddDependentGlyphs::DeepAcyclicChain_StopsBeforeChainEnd]: input glyph 1 missing from subset" << endl;
+		return false;
+	}
+	if(ContainsGlyph(subset, chainLength)) {
+		cout << "CFFFileInputTest [AddDependentGlyphs::DeepAcyclicChain_StopsBeforeChainEnd]: tail glyph "
+		     << chainLength << " was reached; depth cap did not fire" << endl;
+		return false;
+	}
+	return true;
+}
+
+static bool RunAddDependentGlyphsCases() {
+	if(!AddDependentGlyphs_SelfReferencingSeac_TerminatesWithSelfDependency()) return false;
+	if(!AddDependentGlyphs_TwoGlyphCycle_TerminatesWithBothDependencies()) return false;
+	if(!AddDependentGlyphs_DeepAcyclicChain_StopsBeforeChainEnd()) return false;
+	return true;
+}
+
 int CFFFileInputTest(int argc, char* argv[]) {
 	if(!RunGetSingleIntegerValueFromDictCases()) return 1;
 	if(!RunReadPrivateDictCases()) return 1;
 	if(!RunReadEncodingCases()) return 1;
 	if(!RunReadFDSelectCases()) return 1;
+	if(!RunAddDependentGlyphsCases()) return 1;
 	if(!ReadCFFFile_BrushScriptStd_PopulatesPrivateDict(argv)) return 1;
 	return 0;
 }

@@ -95,6 +95,8 @@ struct Type1PrivateDictionary
 
 typedef std::set<Byte> ByteSet;
 typedef std::set<unsigned short> UShortSet;
+typedef std::set<std::string> StringSet;
+typedef std::vector<std::string> StringVector;
 
 struct CharString1Dependencies
 {
@@ -122,6 +124,13 @@ public:
 												  CharString1Dependencies& ioDependenciesInfo);
 	PDFHummus::EStatusCode CalculateDependenciesForCharIndex(const std::string& inCharStringName,
 												  CharString1Dependencies& ioDependenciesInfo);
+
+	// Expand `ioSubsetGlyphIDs` with the transitive set of glyph names
+	// reachable via Type 1 seac dependencies. Safe against cyclic and
+	// deeply nested charstrings: a visited-set guard blocks cycles and a
+	// depth cap blocks long acyclic chains before they overflow the stack.
+	PDFHummus::EStatusCode AddDependentGlyphs(StringVector& ioSubsetGlyphIDs);
+
 	void Reset();
 	Type1CharString* GetGlyphCharString(const std::string& inCharStringName);
 	Type1CharString* GetGlyphCharString(Byte inCharStringIndex);
@@ -152,6 +161,11 @@ private:
 
 	CharString1Dependencies* mCurrentDependencies;
 
+
+	PDFHummus::EStatusCode CollectComponentGlyphs(const std::string& inGlyphID,
+												  StringSet& ioComponents,
+												  bool& outFoundComponents,
+												  unsigned int inDepth = 0);
 
 	void FreeTables();
 	void FreeSubrs();

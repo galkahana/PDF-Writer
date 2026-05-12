@@ -27,6 +27,16 @@
 #include "CharStringType1Interpreter.h"
 #include "Type1PSTokens.h"
 
+#include <algorithm>
+
+// Recursion depth cap for the Type 1 seac dependency walk in
+// CollectComponentGlyphs. Adobe's Type 1 Font Format specification
+// disallows nested seac (bchar/achar must not be seac characters), so
+// 16 is well beyond any conforming font but matches the TrueType
+// composite cap used elsewhere in the codebase. Lenient on malformed-
+// but-benign fonts; still bounds the call stack against attacker input.
+static const unsigned int scMaxCompositeDepth = 16;
+
 using namespace PDFHummus;
 
 // Conservative caps on attacker-controlled Type 1 sizes.
@@ -921,6 +931,77 @@ EStatusCode Type1Input::CalculateDependenciesForCharIndex(const std::string& inC
 	mCurrentDependencies = &ioDependenciesInfo;
 	EStatusCode status = interpreter.Intepret(it->second,this);
 	mCurrentDependencies = NULL;
+	return status;
+}
+
+EStatusCode Type1Input::AddDependentGlyphs(StringVector& ioSubsetGlyphIDs)
+{
+	EStatusCode status = PDFHummus::eSuccess;
+	StringSet glyphsSet;
+	StringVector::iterator it = ioSubsetGlyphIDs.begin();
+	bool hasCompositeGlyphs = false;
+
+	for(; it != ioSubsetGlyphIDs.end() && PDFHummus::eSuccess == status; ++it)
+	{
+		bool localHasCompositeGlyphs;
+		status = CollectComponentGlyphs(*it, glyphsSet, localHasCompositeGlyphs);
+		hasCompositeGlyphs |= localHasCompositeGlyphs;
+	}
+
+	if(hasCompositeGlyphs)
+	{
+		for(it = ioSubsetGlyphIDs.begin(); it != ioSubsetGlyphIDs.end(); ++it)
+			glyphsSet.insert(*it);
+
+		ioSubsetGlyphIDs.clear();
+		for(StringSet::iterator itNewGlyphs = glyphsSet.begin(); itNewGlyphs != glyphsSet.end(); ++itNewGlyphs)
+			ioSubsetGlyphIDs.push_back(*itNewGlyphs);
+
+		std::sort(ioSubsetGlyphIDs.begin(), ioSubsetGlyphIDs.end());
+	}
+	return status;
+}
+
+EStatusCode Type1Input::CollectComponentGlyphs(const std::string& inGlyphID,
+											   StringSet& ioComponents,
+											   bool& outFoundComponents,
+											   unsigned int inDepth)
+{
+	outFoundComponents = false;
+
+	if(inDepth > scMaxCompositeDepth)
+	{
+		// Cycles are blocked by the visited-set guard below, but a malicious
+		// font can still build a deeply nested acyclic seac chain. Cap depth
+		// to keep the call stack bounded.
+		TRACE_LOG2("Type1Input::CollectComponentGlyphs, composite depth %u exceeds cap %u, refusing to recurse further.",
+			inDepth, scMaxCompositeDepth);
+		return PDFHummus::eSuccess;
+	}
+
+	CharString1Dependencies dependencies;
+	StandardEncoding standardEncoding;
+	EStatusCode status = CalculateDependenciesForCharIndex(inGlyphID, dependencies);
+
+	if(PDFHummus::eSuccess == status && dependencies.mCharCodes.size() != 0)
+	{
+		ByteSet::iterator it = dependencies.mCharCodes.begin();
+		for(; it != dependencies.mCharCodes.end() && PDFHummus::eSuccess == status; ++it)
+		{
+			bool dummyFound;
+			// Using standard encoding instead of the font encoding, because
+			// SEAC (the only operator to create glyph dependency in Type 1)
+			// relies on standard encoding indexes by definition.
+			std::string glyphName = standardEncoding.GetEncodedGlyphName(*it);
+			// Recurse only when the component is new to the set. A glyph
+			// referencing itself or two glyphs referencing each other would
+			// otherwise drive the call stack until it overflows. The set
+			// doubles as the visited marker for cycle detection.
+			if(ioComponents.insert(glyphName).second)
+				status = CollectComponentGlyphs(glyphName, ioComponents, dummyFound, inDepth + 1);
+		}
+		outFoundComponents = true;
+	}
 	return status;
 }
 

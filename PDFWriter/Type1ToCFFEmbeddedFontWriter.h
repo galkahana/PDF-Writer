@@ -88,8 +88,6 @@ private:
 								const std::string& inSubsetFontName,
 								bool& outNotEmbedded,
 								MyStringBuf& outFontProgram);
-	PDFHummus::EStatusCode AddDependentGlyphs(StringVector& ioSubsetGlyphIDs);
-	PDFHummus::EStatusCode AddComponentGlyphs(const std::string& inGlyphID,StringSet& ioComponents,bool &outFoundComponents);
 	PDFHummus::EStatusCode WriteCFFHeader();
 	PDFHummus::EStatusCode WriteName(const std::string& inSubsetFontName);
 	Byte GetMostCompressedOffsetSize(unsigned long inOffset);
