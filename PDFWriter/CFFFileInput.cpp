@@ -507,32 +507,34 @@ EStatusCode CFFFileInput::ReadStringIndex()
 		if(status != PDFHummus::eSuccess)
 			break;
 
-		if(0 == mStringsCount)
+		unsigned long i;
+
+		if(mStringsCount > 0)
+		{
+			if(offsets[0] != 1)
+				mPrimitivesReader.Skip(offsets[0] - 1);
+
+			mStrings = new char*[mStringsCount];
+
+			for(i = 0; i < mStringsCount && (PDFHummus::eSuccess == status); ++i)
+			{
+				mStrings[i] = new char[offsets[i+1] - offsets[i]+1];
+				status = mPrimitivesReader.Read((Byte*)mStrings[i],offsets[i+1] - offsets[i]);
+				if(status != PDFHummus::eSuccess)
+					break;
+				mStrings[i][offsets[i+1] - offsets[i]] = 0;
+			}
+
+			// failure case, null all the rest of the strings for later delete to not perofrm errors
+			if(status != PDFHummus::eSuccess)
+			{	
+				for(;i<mStringsCount;++i)
+					mStrings[i] = NULL;
+			}
+		}
+		else
 		{
 			mStrings = NULL;
-			break;
-		}
-
-		if(offsets[0] != 1)
-			mPrimitivesReader.Skip(offsets[0] - 1);
-
-		mStrings = new char*[mStringsCount];
-
-		unsigned long i;
-		for(i = 0; i < mStringsCount && (PDFHummus::eSuccess == status); ++i)
-		{
-			mStrings[i] = new char[offsets[i+1] - offsets[i]+1];
-			status = mPrimitivesReader.Read((Byte*)mStrings[i],offsets[i+1] - offsets[i]);
-			if(status != PDFHummus::eSuccess)
-				break;
-			mStrings[i][offsets[i+1] - offsets[i]] = 0;
-		}
-
-		// failure case, null all the rest of the strings for later delete to not perofrm errors
-		if(status != PDFHummus::eSuccess)
-		{	
-			for(;i<mStringsCount;++i)
-				mStrings[i] = NULL;
 		}
 
 		// now create the string to SID map
