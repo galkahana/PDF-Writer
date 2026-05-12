@@ -34,6 +34,9 @@
 #include <utility>
 #include <vector>
 
+typedef std::set<unsigned int> UIntSet;
+typedef std::vector<unsigned int> UIntVector;
+
 
 
 struct CFFHeader
@@ -205,6 +208,12 @@ public:
 												  unsigned short inCharStringIndex,
 												  CharString2Dependencies& ioDependenciesInfo);
 
+	// Expand `ioSubsetGlyphIDs` with the transitive set of glyphs reachable
+	// via Type 2 seac (4-arg endchar) dependencies. Safe against cyclic and
+	// deeply nested charstrings: a visited-set guard blocks cycles and a
+	// depth cap blocks long acyclic chains before they overflow the stack.
+	PDFHummus::EStatusCode AddDependentGlyphs(UIntVector& ioSubsetGlyphIDs);
+
 	unsigned short GetFontsCount(unsigned short inFontIndex);
 	unsigned short GetCharStringsCount(unsigned short inFontIndex);
 	std::string GetGlyphName(unsigned short inFontIndex,unsigned short inGlyphIndex);
@@ -267,7 +276,12 @@ private:
 	CharStringList mAdditionalGlyphs;
 	CharSetInfo* mCurrentCharsetInfo;
 
-	std::string GetStringForSID(unsigned short inSID);	
+	PDFHummus::EStatusCode CollectComponentGlyphs(unsigned int inGlyphID,
+										UIntSet& ioComponents,
+										bool& outFoundComponents,
+										unsigned int inDepth = 0);
+
+	std::string GetStringForSID(unsigned short inSID);
 	PDFHummus::EStatusCode ReadHeader();
 	PDFHummus::EStatusCode ReadNameIndex();
 	PDFHummus::EStatusCode ReadIndexHeader(unsigned long** outOffsets,unsigned short& outItemsCount);

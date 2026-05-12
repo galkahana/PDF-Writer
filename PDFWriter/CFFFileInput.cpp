@@ -23,8 +23,18 @@
 #include "CharStringType2Interpreter.h"
 #include "StandardEncoding.h"
 
+#include <algorithm>
+
 
 using namespace PDFHummus;
+
+// Recursion depth cap for the Type 2 seac (4-arg endchar) dependency walk
+// in CollectComponentGlyphs. The Adobe Type 2 spec disallows nested seac
+// (bchar/achar must not be seac characters), so 16 is well beyond any
+// conforming font but matches the TrueType composite cap used elsewhere
+// in the codebase. Lenient on malformed-but-benign fonts; still bounds
+// the call stack against attacker input.
+static const unsigned int scMaxCompositeDepth = 16;
 
 #define N_STD_STRINGS 391
 static const char* scStandardStrings[N_STD_STRINGS] = {
@@ -1127,6 +1137,72 @@ EStatusCode CFFFileInput::CalculateDependenciesForCharIndex(unsigned short inFon
 	}
 	else
 		return status;
+}
+
+EStatusCode CFFFileInput::AddDependentGlyphs(UIntVector& ioSubsetGlyphIDs)
+{
+	EStatusCode status = PDFHummus::eSuccess;
+	UIntSet glyphsSet;
+	UIntVector::iterator it = ioSubsetGlyphIDs.begin();
+	bool hasCompositeGlyphs = false;
+
+	for(; it != ioSubsetGlyphIDs.end() && PDFHummus::eSuccess == status; ++it)
+	{
+		bool localHasCompositeGlyphs;
+		status = CollectComponentGlyphs(*it, glyphsSet, localHasCompositeGlyphs);
+		hasCompositeGlyphs |= localHasCompositeGlyphs;
+	}
+
+	if(hasCompositeGlyphs)
+	{
+		for(it = ioSubsetGlyphIDs.begin(); it != ioSubsetGlyphIDs.end(); ++it)
+			glyphsSet.insert(*it);
+
+		ioSubsetGlyphIDs.clear();
+		for(UIntSet::iterator itNewGlyphs = glyphsSet.begin(); itNewGlyphs != glyphsSet.end(); ++itNewGlyphs)
+			ioSubsetGlyphIDs.push_back(*itNewGlyphs);
+
+		std::sort(ioSubsetGlyphIDs.begin(), ioSubsetGlyphIDs.end());
+	}
+	return status;
+}
+
+EStatusCode CFFFileInput::CollectComponentGlyphs(unsigned int inGlyphID,
+												 UIntSet& ioComponents,
+												 bool& outFoundComponents,
+												 unsigned int inDepth)
+{
+	outFoundComponents = false;
+
+	if(inDepth > scMaxCompositeDepth)
+	{
+		// Cycles are blocked by the visited-set guard below, but a malicious
+		// font can still build a deeply nested acyclic seac chain. Cap depth
+		// to keep the call stack bounded.
+		TRACE_LOG2("CFFFileInput::CollectComponentGlyphs, composite depth %u exceeds cap %u, refusing to recurse further.",
+			inDepth, scMaxCompositeDepth);
+		return PDFHummus::eSuccess;
+	}
+
+	CharString2Dependencies dependencies;
+	EStatusCode status = CalculateDependenciesForCharIndex(0, (unsigned short)inGlyphID, dependencies);
+
+	if(PDFHummus::eSuccess == status && dependencies.mCharCodes.size() != 0)
+	{
+		UShortSet::iterator it = dependencies.mCharCodes.begin();
+		for(; it != dependencies.mCharCodes.end() && PDFHummus::eSuccess == status; ++it)
+		{
+			bool dummyFound;
+			// Recurse only when the component is new to the set. A glyph
+			// referencing itself or two glyphs referencing each other would
+			// otherwise drive the call stack until it overflows. The set
+			// doubles as the visited marker for cycle detection.
+			if(ioComponents.insert(*it).second)
+				status = CollectComponentGlyphs(*it, ioComponents, dummyFound, inDepth + 1);
+		}
+		outFoundComponents = true;
+	}
+	return status;
 }
 
 EStatusCode CFFFileInput::PrepareForGlyphIntepretation(	unsigned short inFontIndex,

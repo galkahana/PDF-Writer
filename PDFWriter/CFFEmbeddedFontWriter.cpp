@@ -172,7 +172,7 @@ EStatusCode CFFEmbeddedFontWriter::CreateCFFSubset(
 		if(subsetGlyphIDs.front() != 0) // make sure 0 glyph is in
 			subsetGlyphIDs.insert(subsetGlyphIDs.begin(),0);
 
-		status = AddDependentGlyphs(subsetGlyphIDs);
+		status = mOpenTypeInput.mCFF.AddDependentGlyphs(subsetGlyphIDs);
 		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFEmbeddedFontWriter::CreateCFFSubset, failed to add dependent glyphs");
@@ -277,57 +277,6 @@ EStatusCode CFFEmbeddedFontWriter::CreateCFFSubset(
 	}while(false);
 
 	mOpenTypeFile.CloseFile();
-	return status;
-}
-
-EStatusCode CFFEmbeddedFontWriter::AddDependentGlyphs(UIntVector& ioSubsetGlyphIDs)
-{
-	EStatusCode status = PDFHummus::eSuccess;
-	UIntSet glyphsSet;
-	UIntVector::iterator it = ioSubsetGlyphIDs.begin();
-	bool hasCompositeGlyphs = false;
-
-	for(;it != ioSubsetGlyphIDs.end() && PDFHummus::eSuccess == status; ++it)
-	{
-		bool localHasCompositeGlyphs;
-		status = AddComponentGlyphs(*it,glyphsSet,localHasCompositeGlyphs);
-		hasCompositeGlyphs |= localHasCompositeGlyphs;
-	}
-
-	if(hasCompositeGlyphs)
-	{
-		UIntSet::iterator itNewGlyphs;
-
-		for(it = ioSubsetGlyphIDs.begin();it != ioSubsetGlyphIDs.end(); ++it)
-			glyphsSet.insert(*it);
-
-		ioSubsetGlyphIDs.clear();
-		for(itNewGlyphs = glyphsSet.begin(); itNewGlyphs != glyphsSet.end(); ++itNewGlyphs)
-			ioSubsetGlyphIDs.push_back(*itNewGlyphs);
-		
-		sort(ioSubsetGlyphIDs.begin(),ioSubsetGlyphIDs.end());
-	}	
-	return status;
-}
-
-EStatusCode CFFEmbeddedFontWriter::AddComponentGlyphs(unsigned int inGlyphID,UIntSet& ioComponents,bool &outFoundComponents)
-{
-	CharString2Dependencies dependencies;
-	EStatusCode status = mOpenTypeInput.mCFF.CalculateDependenciesForCharIndex(0,inGlyphID,dependencies);
-
-	if(PDFHummus::eSuccess == status && dependencies.mCharCodes.size() !=0)
-	{
-		UShortSet::iterator it = dependencies.mCharCodes.begin();
-		for(; it != dependencies.mCharCodes.end() && PDFHummus::eSuccess == status; ++it)
-		{
-			bool dummyFound;
-			ioComponents.insert(*it);
-			status = AddComponentGlyphs(*it,ioComponents,dummyFound);
-		}
-		outFoundComponents = true;
-	}
-	else
-		outFoundComponents = false;
 	return status;
 }
 

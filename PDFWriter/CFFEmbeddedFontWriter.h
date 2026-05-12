@@ -120,8 +120,6 @@ private:
 					const std::string& inSubsetFontName,
 					bool& outNotEmbedded,
 					MyStringBuf& outFontProgram);
-	PDFHummus::EStatusCode AddDependentGlyphs(UIntVector& ioSubsetGlyphIDs);
-	PDFHummus::EStatusCode AddComponentGlyphs(unsigned int inGlyphID,UIntSet& ioComponents,bool &outFoundComponents);
 	PDFHummus::EStatusCode WriteCFFHeader();
 	PDFHummus::EStatusCode WriteName(const std::string& inSubsetFontName);
 	PDFHummus::EStatusCode WriteTopIndex();

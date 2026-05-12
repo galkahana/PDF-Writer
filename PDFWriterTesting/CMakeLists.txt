@@ -104,6 +104,7 @@ add_executable (PDFWriterTesting
 
     # and test specific additionals
     CFFSyntheticBuilder.cpp
+    Type1SyntheticBuilder.cpp
     PDFComment.cpp
     PDFCommentWriter.cpp
     AnnotationsWriter.cpp
