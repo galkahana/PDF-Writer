@@ -43,14 +43,14 @@ public:
     // fdIndex / nextRangeGlyphIndex values.
     static std::string WithFDSelect(const char* inFDSelectBytes, size_t inFDSelectLen);
 
-    // Non-CID CFF with ISOAdobe charset (predefined offset 0) and Standard
-    // encoding. Glyph 0 is .notdef (single-byte endchar). Glyphs 1..N take
-    // their CharString bytes verbatim from inGlyphCharStrings. Under
-    // ISOAdobe charset, glyph i is assigned SID i; SID i maps to Adobe
-    // Standard String i, which lines up with StandardEncoding code (i + 31)
-    // for i in [1..149]. That lets Type 2 seac-flavored endchar operands
-    // resolve back to a chosen glyph index, supporting cycle / depth tests
-    // on CFFFileInput::AddDependentGlyphs.
+    // Non-CID CFF with predefined ISOAdobe charset (offset 0) and an empty
+    // String INDEX. Glyph 0 is .notdef (single-byte endchar). Glyphs 1..N take
+    // their CharString bytes verbatim from inGlyphCharStrings. Under ISOAdobe
+    // charset, glyph i is assigned SID i; SID i maps to Adobe Standard String
+    // i, which lines up with StandardEncoding code (i + 31) for i in [1..149].
+    // That lets Type 2 seac-flavored endchar operands resolve back to a chosen
+    // glyph index, supporting cycle / depth tests on
+    // CFFFileInput::AddDependentGlyphs.
     static std::string WithCharStrings(const std::vector<std::string>& inGlyphCharStrings);
 
     // ReadCFFFile shim wrapping the synthesized buffer in an

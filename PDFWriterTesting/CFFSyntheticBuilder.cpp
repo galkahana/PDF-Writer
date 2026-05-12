@@ -128,17 +128,8 @@ static void AppendShortIntDictOperand(string& ioCFF, unsigned short inValue)
 
 string CFFSyntheticBuilder::WithCharStrings(const std::vector<std::string>& inGlyphCharStrings)
 {
-    // Custom charset (format 0) layout: 1 format byte + 2*N SID bytes for
-    // the N non-.notdef glyphs. Use a custom charset rather than the
-    // predefined ISOAdobe offset because SetupSIDToGlyphMapWithStandard
-    // has an off-by-one that points each predefined-glyph SID one slot
-    // too far in the standard-SID table, so cross-referencing via
-    // StandardEncoding -> SID -> glyph would not resolve. The custom
-    // charset writes glyph K's SID explicitly as K.
     const size_t glyphCountNonNotdef = inGlyphCharStrings.size();
     if(glyphCountNonNotdef + 1 > 0xFFFF) return string();
-
-    const size_t charsetSize = 1 + 2 * glyphCountNonNotdef;
 
     string cff;
     cff.append(scCFFHeader, scCFFHeaderSize);
@@ -146,44 +137,21 @@ string CFFSyntheticBuilder::WithCharStrings(const std::vector<std::string>& inGl
     // Name INDEX
     cff.append("\x00\x01\x01\x01\x02\x41", 6);
 
-    // Top DICT INDEX prefix + body. Body is /Charset and /CharStrings,
-    // each as a 3-byte short integer + 1-byte operator (4 bytes per pair,
-    // 8 bytes total). With the constant-width encoding, charset and
-    // charstrings offsets can be pre-computed:
-    //   header(4) + Name(6) + TopDictIndex prefix(5) + body(8)
-    //     + String(6) + GlobalSubrs(2) = 31 -> charsetOffset
-    //   charstringsOffset = 31 + charsetSize
-    const unsigned short charsetOffset = 31;
-    const unsigned short charstringsOffset = (unsigned short)(31 + charsetSize);
-
-    cff.append("\x00\x01\x01\x01\x09", 5); // count=1, offSize=1, offsets=[1, 9]
-    AppendShortIntDictOperand(cff, charsetOffset);
-    cff.push_back('\x0F'); // /Charset
+    // Top DICT INDEX: count=1, offSize=1, offsets=[1, 5], 4-byte body.
+    // Body: /CharStrings only (no /Charset — omitting it defaults to
+    // predefined ISOAdobe offset 0, which SetupSIDToGlyphMapWithStandard
+    // now handles correctly).
+    //   header(4) + Name(6) + TopDictIndex(9) + String(2) + GlobalSubrs(2) = 23
+    const unsigned short charstringsOffset = 23;
+    cff.append("\x00\x01\x01\x01\x05", 5); // count=1, offSize=1, offsets=[1, 5]
     AppendShortIntDictOperand(cff, charstringsOffset);
     cff.push_back('\x11'); // /CharStrings
 
-    // Single-entry String INDEX. mStringToSID is only populated with
-    // standard strings (".notdef", "space", ...) when ReadStringIndex
-    // doesn't take the mStringsCount == 0 early-break, so an empty String
-    // INDEX would leave standard-encoding-based seac lookups broken even
-    // for valid fonts. Real CFFs always carry custom strings; this synth
-    // mirrors that.
-    cff.append("\x00\x01\x01\x01\x02\x58", 6);
-
-    // Empty Global Subrs INDEX
+    // Empty String INDEX and Global Subrs INDEX.
+    // ReadStringIndex now populates mStringToSID with standard strings even
+    // when mStringsCount == 0, so no dummy entry is needed.
     cff.append(scEmptyIndex, scEmptyIndexSize);
-
-    // Custom charset format 0: format byte then (glyphCountNonNotdef)
-    // SIDs, each 2 bytes big-endian. Glyph K (K >= 1) gets SID K so that
-    // StandardEncoding code C (32..126) -> standard string i ->
-    // mStringToSID[i] = i -> mSIDToGlyphMap[i] -> glyph i resolves.
-    cff.push_back('\x00');
-    for(size_t i = 0; i < glyphCountNonNotdef; ++i)
-    {
-        const unsigned short sid = (unsigned short)(i + 1);
-        cff.push_back((char)((sid >> 8) & 0xFF));
-        cff.push_back((char)(sid & 0xFF));
-    }
+    cff.append(scEmptyIndex, scEmptyIndexSize);
 
     // CharStrings INDEX: count = 1 (.notdef) + inGlyphCharStrings.size().
     // Glyph 0 is a single-byte endchar; glyphs 1..N take caller bytes.
