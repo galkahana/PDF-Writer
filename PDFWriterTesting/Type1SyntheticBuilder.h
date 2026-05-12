@@ -28,8 +28,8 @@ public:
     // bytes + operator bytes, no lenIV padding — the builder adds it).
     typedef std::pair<std::string, std::string> NamedCharString;
 
-    // Build the full PFB. Returns empty string on failure (e.g. negative
-    // glyph count, sizes that don't fit in the PFB segment-length field).
+     // Build the full PFB. Returns empty string on failure (e.g. segment
+     // sizes that don't fit in the PFB segment-length field).
     static std::string WithCharStrings(const std::vector<NamedCharString>& inGlyphs);
 
     // ReadType1File shim. After this returns, the parser owns its data
