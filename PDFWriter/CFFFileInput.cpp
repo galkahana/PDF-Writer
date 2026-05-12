@@ -987,10 +987,10 @@ void CFFFileInput::SetupSIDToGlyphMapWithStandard(	const unsigned short* inStand
 {
 	ioCharMap.insert(UShortToCharStringMap::value_type(0,inCharStrings.mCharStringsIndex));
 	unsigned short i;
-	for(i = 1; i < inCharStrings.mCharStringsCount && i < inStandardCharSetLength;++i)
+	for(i = 1; i < inCharStrings.mCharStringsCount && i - 1 < inStandardCharSetLength;++i)
 	{
 		ioCharMap.insert(UShortToCharStringMap::value_type(
-				inStandardCharSet[i],inCharStrings.mCharStringsIndex + i));
+				inStandardCharSet[i - 1],inCharStrings.mCharStringsIndex + i));
 	}
 }
 
