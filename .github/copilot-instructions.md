@@ -44,13 +44,13 @@ Prioritize correctness, regressions, security, and missing tests over style nits
 - Treat the user's requested scope as the highest-priority constraint for implementation.
 
 ## Output Format (always follow)
-Keep output concise. Omit empty or redundant sections.
+Keep output concise. Omit empty or redundant sections. Every review must begin with a clear Decision verdict.
 
 No-actionable-finding mode (strict):
 - When there are zero actionable findings, use only this exact 3-line structure and stop:
-	1. `Decision: Approve`
-	2. `Severity Summary: No findings.`
-	3. `No actionable findings.`
+	1. Decision: Approve
+	2. Severity Summary: No findings.
+	3. No actionable findings.
 - In this mode, do not emit Findings, Testing and Regression Risk, or Final Recommendation sections.
 
 1. Verdict
@@ -95,6 +95,9 @@ No-actionable-finding mode (strict):
 - Before using no-actionable-findings mode, perform a changed-behavior test coverage check:
 	- Map each material behavior change in touched production code to a specific test name/location, or to a documented infeasibility note.
 	- If any material behavior change is unmapped, do not use no-actionable-findings mode; emit a 🟡 Medium testing-gap finding.
+
+## Test Assertion Policy
+- Do not flag exact-value assertions on version-pinned test fixtures as brittle or problematic. This is an intentional and accepted pattern in this repository. Only suggest relaxing assertions if the test is not using a fixed, versioned fixture, or if the assertion is clearly not justified by the repo’s test philosophy.
 
 ## Testing Gap Classification
 - Use this when tests exist in the PR but do not cover all changed behaviors.
