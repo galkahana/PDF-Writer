@@ -58,4 +58,5 @@ private:
 	bool mPSPrivateAvailable;
     bool mIsCustomEncoding;
     Type1Input mType1File;
+    bool mType1Loaded;
 };

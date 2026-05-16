@@ -43,22 +43,28 @@ FreeTypeType1Wrapper::FreeTypeType1Wrapper(FT_Face inFace,const std::string& inF
 	else
 		mPSPrivateAvailable = true;
     
-    T1_EncodingType encodingType;
-    FT_Get_PS_Font_Value(inFace, PS_DICT_ENCODING_TYPE, 0, (void*)&encodingType, sizeof(encodingType));
-    mIsCustomEncoding = encodingType == T1_ENCODING_TYPE_ARRAY;
+    // FT_Get_PS_Font_Value returns the byte count read, <= 0 on error, and need
+    // not write encodingType when it fails
+    T1_EncodingType encodingType = T1_ENCODING_TYPE_NONE;
+    FT_Long encodingTypeRead = FT_Get_PS_Font_Value(inFace, PS_DICT_ENCODING_TYPE, 0, (void*)&encodingType, sizeof(encodingType));
+    mIsCustomEncoding = (encodingTypeRead > 0) && (encodingType == T1_ENCODING_TYPE_ARRAY);
 
 	mPFMFileInfoRelevant = 
 		(inPFMFilePath.size() != 0 && mPFMReader.Read(inPFMFilePath) != PDFHummus::eFailure);
     
     // parse type 1 input file (my own parsing), to get extra info about encoding
+    mType1Loaded = false;
     if(inFontFilePath.size() != 0)
     {
         InputFile type1File;
-    
-        type1File.OpenFile(inFontFilePath);
-        mType1File.ReadType1File(type1File.GetInputStream());
-    
-        type1File.CloseFile();
+
+        if(type1File.OpenFile(inFontFilePath) == PDFHummus::eSuccess)
+        {
+            mType1Loaded = (mType1File.ReadType1File(type1File.GetInputStream()) == PDFHummus::eSuccess);
+            type1File.CloseFile();
+        }
+        else
+            TRACE_LOG("FreeTypeType1Wrapper::FreeTypeType1Wrapper, unable to open the type 1 font file for private encoding parsing");
     }
     
     mFace = inFace;
@@ -141,6 +147,9 @@ unsigned int FreeTypeType1Wrapper::GetGlyphForUnicodeChar(unsigned long inChar)
 
 std::string FreeTypeType1Wrapper::GetPrivateGlyphName(unsigned int inGlyphIndex)
 {
+    // mType1File is only meaningful when the type 1 file actually loaded
+    if(!mType1Loaded)
+        return ".notdef";
     return mType1File.GetGlyphCharStringName(inGlyphIndex);
 }
 

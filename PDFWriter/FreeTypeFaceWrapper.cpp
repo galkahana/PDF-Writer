@@ -68,6 +68,7 @@ void FreeTypeFaceWrapper::ResetPaletteSelectionState() {
 	mPaletteSet = false;
 	mPalette = NULL;
 	mPaletteStatus = FT_Err_Ok;
+	mPaletteData = FT_Palette_Data();
 }
 
 void FreeTypeFaceWrapper::SelectDefaultEncoding() {
@@ -578,8 +579,11 @@ std::string FreeTypeFaceWrapper::GetGlyphName(unsigned int inGlyphIndex, bool sa
     {
         if(inGlyphIndex < (unsigned int)mFace->num_glyphs)
         {
-            char buffer[100];
-            FT_Get_Glyph_Name(mFace,inGlyphIndex,buffer,100);
+            // FT_Get_Glyph_Name may leave buffer unwritten or not NUL-terminated
+            // when the font carries no usable glyph names (e.g. post format 3)
+            char buffer[100] = {0};
+            if(FT_Get_Glyph_Name(mFace,inGlyphIndex,buffer,100) != FT_Err_Ok || buffer[0] == 0)
+                return NotDefGlyphName();
             return std::string(buffer);
         }
         else
@@ -741,18 +745,21 @@ unsigned int FreeTypeFaceWrapper::GetGlyphIndexInFreeTypeIndexes(unsigned int in
 bool FreeTypeFaceWrapper::GetGlyphOutline(unsigned int inGlyphIndex, FreeTypeFaceWrapper::IOutlineEnumerator& inEnumerator)
 {
 	bool status = false;
-	if ( mFace->glyph->format == FT_GLYPH_FORMAT_OUTLINE && !(mFace->face_flags & FT_FACE_FLAG_TRICKY) ) //scaled-font implementation would be needed for 'tricky' fonts
+	if ( !(mFace->face_flags & FT_FACE_FLAG_TRICKY) ) //scaled-font implementation would be needed for 'tricky' fonts
 	{
 		if (!LoadGlyph(inGlyphIndex)) {
-			FT_Outline_Funcs callbacks = { IOutlineEnumerator::outline_moveto,
-			                               IOutlineEnumerator::outline_lineto,
-										   IOutlineEnumerator::outline_conicto,
-										   IOutlineEnumerator::outline_cubicto,
-										   0, 0 }; //0 shift & delta
-			inEnumerator.FTBegin(mFace->units_per_EM);
-			status = ( 0 == FT_Outline_Decompose(&mFace->glyph->outline, &callbacks, &inEnumerator) );
-			inEnumerator.FTEnd();
-			status = true;
+			// glyph->format is the format of the glyph in the face's shared
+			// slot, so it must be read after the glyph is loaded
+			if (mFace->glyph->format == FT_GLYPH_FORMAT_OUTLINE) {
+				FT_Outline_Funcs callbacks = { IOutlineEnumerator::outline_moveto,
+				                               IOutlineEnumerator::outline_lineto,
+											   IOutlineEnumerator::outline_conicto,
+											   IOutlineEnumerator::outline_cubicto,
+											   0, 0 }; //0 shift & delta
+				inEnumerator.FTBegin(mFace->units_per_EM);
+				status = ( 0 == FT_Outline_Decompose(&mFace->glyph->outline, &callbacks, &inEnumerator) );
+				inEnumerator.FTEnd();
+			}
 		}
 	}
 	return status;
@@ -777,16 +784,23 @@ FT_Error FreeTypeFaceWrapper::LoadGlyph(FT_UInt inGlyphIndex, FT_Int32 inFlags)
 
 FT_Error FreeTypeFaceWrapper::SelectDefaultPalette(FT_Color** outPalette, unsigned short* outPaletteSize) {
 	if(!mPaletteSet) {
-		bool statusDataGet = FT_Palette_Data_Get(mFace, &mPaletteData);
-		bool statusSelect = FT_Palette_Select( mFace, 0, &mPalette);
-
-		mPaletteStatus = statusDataGet && statusSelect;
-
-		mPaletteSet = true;		
+		mPaletteSet = true;
+		do {
+			mPaletteStatus = FT_Palette_Data_Get(mFace, &mPaletteData);
+			if(mPaletteStatus != FT_Err_Ok)
+				break;
+			mPaletteStatus = FT_Palette_Select(mFace, 0, &mPalette);
+		} while(false);
 	}
 
-	*outPalette = mPalette;
-	*outPaletteSize = mPaletteData.num_palette_entries;
+	if(mPaletteStatus != FT_Err_Ok) {
+		*outPalette = NULL;
+		*outPaletteSize = 0;
+	}
+	else {
+		*outPalette = mPalette;
+		*outPaletteSize = mPaletteData.num_palette_entries;
+	}
 	return mPaletteStatus;
 }
 
