@@ -246,9 +246,109 @@ static bool RunAddDependentGlyphsCases() {
 	return true;
 }
 
+// V-072: the dictionary parse loops fed GetNextToken().second straight into
+// Int()/Double()/FromPS*() without checking GetNextToken().first. A key whose
+// value token is absent (truncated font) was silently accepted -- the boxed
+// converter yielded 0 / empty and parsing reported eSuccess. Now a missing
+// value token flags failure and the parse returns non-eSuccess.
+
+// Each case feeds a raw ASCII segment ending in a dangling key (no value
+// token, segment then ends) and expects the parse to fail rather than
+// silently accept. The two rows enter the fix through the two top-level
+// dictionary entry points: "begin" -> ReadFontDictionary, "/Private" ->
+// ReadPrivateDictionary.
+struct MissingValueTokenCase {
+	const char* label;       // <Condition>_<Result>
+	const char* ascii;       // raw ASCII segment, dangling key last
+	const char* danglingKey; // for the failure message
+};
+
+static const MissingValueTokenCase scMissingValueTokenCases[] = {
+	{"FontDictionaryPath_Fails",    "12 dict begin\n/PaintType",        "/PaintType"},
+	{"PrivateDictionaryPath_Fails", "/Private 5 dict dup begin\n/lenIV", "/lenIV"},
+};
+
+static bool RunMissingValueTokenCases() {
+	const size_t count = sizeof(scMissingValueTokenCases) / sizeof(scMissingValueTokenCases[0]);
+	for(size_t i = 0; i < count; ++i) {
+		const MissingValueTokenCase& testCase = scMissingValueTokenCases[i];
+
+		// Arrange
+		string pfb = Type1SyntheticBuilder::RawPFBFromAsciiSegment(testCase.ascii);
+
+		// Act
+		Type1Input type1;
+		EStatusCode status = Type1SyntheticBuilder::ParseAsType1(pfb, type1);
+
+		// Assert
+		if(status == eSuccess) {
+			cout << "Type1InputTest [MissingValueToken::" << testCase.label
+			     << "]: missing " << testCase.danglingKey
+			     << " value was silently accepted" << endl;
+			return false;
+		}
+	}
+	return true;
+}
+
+// P3: Reset() did not default Type1FontDictionary::PaintType / FontType /
+// FontBBox. A valid font that omits those keys left them indeterminate.
+// Reset() now seeds them (PaintType 0, FontType 1, FontBBox all 0); a parse
+// that never assigns them must surface exactly those values.
+static bool Reset_OmittedFontDictMetrics_DefaultsApplied() {
+	// Arrange: canned header minus /PaintType, /FontType, /FontBBox.
+	const string headerOmittingMetrics =
+		"%!PS-AdobeFont-1.0: Synth 001.000\n"
+		"12 dict begin\n"
+		"/FontInfo 4 dict dup begin\n"
+		"/version (001.000) readonly def\n"
+		"/FullName (Synth) readonly def\n"
+		"/FamilyName (Synth) readonly def\n"
+		"/Weight (Regular) readonly def\n"
+		"end readonly def\n"
+		"/FontName /Synth def\n"
+		"/FontMatrix [0.001 0 0 0.001 0 0] readonly def\n"
+		"/Encoding StandardEncoding def\n"
+		"currentdict end\n"
+		"currentfile eexec\n";
+	vector<Type1SyntheticBuilder::NamedCharString> noGlyphs;
+	string pfb = Type1SyntheticBuilder::WithCharStrings(noGlyphs, headerOmittingMetrics);
+
+	Type1Input type1;
+	// Act
+	if(Type1SyntheticBuilder::ParseAsType1(pfb, type1) != eSuccess) {
+		cout << "Type1InputTest [Reset::OmittedFontDictMetrics_DefaultsApplied]: "
+		        "valid font omitting the metric keys failed to parse" << endl;
+		return false;
+	}
+
+	// Assert (exact Reset() defaults)
+	if(type1.mFontDictionary.PaintType != 0) {
+		cout << "Type1InputTest [Reset::OmittedFontDictMetrics_DefaultsApplied]: "
+		        "PaintType " << type1.mFontDictionary.PaintType << ", expected 0" << endl;
+		return false;
+	}
+	if(type1.mFontDictionary.FontType != 1) {
+		cout << "Type1InputTest [Reset::OmittedFontDictMetrics_DefaultsApplied]: "
+		        "FontType " << type1.mFontDictionary.FontType << ", expected 1" << endl;
+		return false;
+	}
+	for(int i = 0; i < 4; ++i) {
+		if(type1.mFontDictionary.FontBBox[i] != 0) {
+			cout << "Type1InputTest [Reset::OmittedFontDictMetrics_DefaultsApplied]: "
+			        "FontBBox[" << i << "] " << type1.mFontDictionary.FontBBox[i]
+			     << ", expected 0" << endl;
+			return false;
+		}
+	}
+	return true;
+}
+
 int Type1InputTest(int argc, char* argv[]) {
 	(void) argc;
 	if(!ReadType1File_RealPFB_ParsesFontInfoStrings(argv)) return 1;
 	if(!RunAddDependentGlyphsCases()) return 1;
+	if(!RunMissingValueTokenCases()) return 1;
+	if(!Reset_OmittedFontDictMetrics_DefaultsApplied()) return 1;
 	return 0;
 }

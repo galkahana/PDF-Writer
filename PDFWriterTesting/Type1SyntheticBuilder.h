@@ -32,6 +32,20 @@ public:
      // sizes that don't fit in the PFB segment-length field).
     static std::string WithCharStrings(const std::vector<NamedCharString>& inGlyphs);
 
+     // Same, but supply the ASCII (font dictionary) segment verbatim instead
+     // of the canned one. The override must still end so the parser flows
+     // into the eexec body (the canned header ends with
+     // "currentdict end\ncurrentfile eexec\n"). Used to parse a valid font
+     // that deliberately omits keys.
+    static std::string WithCharStrings(const std::vector<NamedCharString>& inGlyphs,
+                                       const std::string& inAsciiHeaderOverride);
+
+     // A PFB of a single ASCII segment carrying inAscii, then the EOF segment
+     // — nothing after it. GetNextToken returns no token (first = false) once
+     // inAscii is exhausted, so this is the minimal way to feed a dictionary
+     // key whose value token is genuinely absent.
+    static std::string RawPFBFromAsciiSegment(const std::string& inAscii);
+
     // ReadType1File shim. After this returns, the parser owns its data
     // (charstrings are copied into heap buffers, no stream-lifetime
     // dependency), so the caller may discard inBytes immediately.

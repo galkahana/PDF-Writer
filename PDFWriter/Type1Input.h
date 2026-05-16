@@ -170,6 +170,7 @@ private:
 	void FreeTables();
 	void FreeSubrs();
 	void FreeCharStrings();
+	bool ReadNextTokenValue(std::string& outValue,PDFHummus::EStatusCode& outStatus);
 	PDFHummus::EStatusCode ReadFontDictionary();
 	PDFHummus::EStatusCode ReadFontInfoDictionary();
 	PDFHummus::EStatusCode ParseEncoding();

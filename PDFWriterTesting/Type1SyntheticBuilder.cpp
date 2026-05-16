@@ -72,10 +72,10 @@ static string WrapPFBSegment(Byte inType, const string& inData)
 
 string Type1SyntheticBuilder::WithCharStrings(const std::vector<NamedCharString>& inGlyphs)
 {
-    // ASCII header. The Type1Input parser only consults specific tokens, so
-    // values can be minimal/synthetic. `currentfile eexec\n` is the cue for
-    // the (parser-side) PFB decoder to switch to eexec-decrypted reads on
-    // the next segment.
+    // Canned ASCII header. The Type1Input parser only consults specific
+    // tokens, so values can be minimal/synthetic. `currentfile eexec\n` is
+    // the cue for the (parser-side) PFB decoder to switch to eexec-decrypted
+    // reads on the next segment.
     const string asciiHeader =
         "%!PS-AdobeFont-1.0: Synth 001.000\n"
         "12 dict begin\n"
@@ -93,6 +93,25 @@ string Type1SyntheticBuilder::WithCharStrings(const std::vector<NamedCharString>
         "/PaintType 0 def\n"
         "currentdict end\n"
         "currentfile eexec\n";
+
+    return WithCharStrings(inGlyphs, asciiHeader);
+}
+
+string Type1SyntheticBuilder::RawPFBFromAsciiSegment(const string& inAscii)
+{
+    if(inAscii.size() > 0xFFFFFFFF)
+        return string();
+    string pfb;
+    pfb.append(WrapPFBSegment(1, inAscii));
+    pfb.push_back((char)0x80);
+    pfb.push_back((char)3); // EOF segment
+    return pfb;
+}
+
+string Type1SyntheticBuilder::WithCharStrings(const std::vector<NamedCharString>& inGlyphs,
+                                              const std::string& inAsciiHeaderOverride)
+{
+    const string asciiHeader = inAsciiHeaderOverride;
 
     // eexec-encrypted body. Per-charstring binary bytes are wrapped with
     // lenIV padding + charstring cipher; the resulting `<codeLength
