@@ -94,7 +94,7 @@ private:
 	PDFHummus::EStatusCode StoreSegmentLength();
 	PDFHummus::EStatusCode FlushBinarySectionTrailingCode();
 	bool IsPostScriptWhiteSpace(Byte inCharacter);
-	bool IsSegmentNotEnded();
+	bool HasMoreInput();
 	void SaveTokenBuffer(Byte inToSave);
 	bool IsPostScriptEntityBreaker(Byte inCharacter);
 	PDFHummus::EStatusCode InitializeBinaryDecode();
