@@ -292,8 +292,11 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 				while(HasMoreInput())
 				{
 					if(GetNextByteForToken(buffer) != PDFHummus::eSuccess)
-					{	
-						result.first = false;
+					{
+						// a comment is self-delimiting: end of data ends it
+						// cleanly. only a decoder failure is a failed read.
+						if(mInternalState != PDFHummus::eSuccess)
+							result.first = false;
 						break;
 					}
 					if(0xD == buffer|| 0xA == buffer)
@@ -439,8 +442,12 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 				while(HasMoreInput())
 				{
 					if(GetNextByteForToken(buffer) != PDFHummus::eSuccess)
-					{	
-						result.first = false;
+					{
+						// a regular token is self-delimiting: end of data is a
+						// valid terminator, the bytes read are a complete
+						// token. only a decoder failure is a failed read.
+						if(mInternalState != PDFHummus::eSuccess)
+							result.first = false;
 						break;
 					}
 					if(IsPostScriptWhiteSpace(buffer))

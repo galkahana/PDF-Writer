@@ -429,12 +429,41 @@ static bool RunSegmentSplitCases() {
 	return true;
 }
 
+// A regular token is self-delimiting: when its bytes are the literal last
+// content with no trailing whitespace -- the value "7" here ends exactly at
+// the type-3 EOF segment -- GetNextToken must still return it (end of data is
+// a valid token terminator), not report a failed read. Guards against the
+// tokenizer becoming stricter than it was about unterminated trailing tokens.
+static bool GetNextToken_RegularTokenEndedByEndOfData_TokenReturned() {
+	// Arrange: "7" is the final byte, immediately followed by the EOF segment.
+	string pfb = Type1SyntheticBuilder::RawPFBFromAsciiSegment(
+		"12 dict begin\n/PaintType 7");
+
+	// Act
+	Type1Input type1;
+	EStatusCode status = Type1SyntheticBuilder::ParseAsType1(pfb, type1);
+
+	// Assert
+	if(status != eSuccess) {
+		cout << "Type1InputTest [GetNextToken::RegularTokenEndedByEndOfData_TokenReturned]: "
+		        "value token ended by end-of-data was treated as a failed read" << endl;
+		return false;
+	}
+	if(type1.mFontDictionary.PaintType != 7) {
+		cout << "Type1InputTest [GetNextToken::RegularTokenEndedByEndOfData_TokenReturned]: "
+		        "PaintType " << type1.mFontDictionary.PaintType << ", expected 7" << endl;
+		return false;
+	}
+	return true;
+}
+
 int Type1InputTest(int argc, char* argv[]) {
 	(void) argc;
 	if(!ReadType1File_RealPFB_ParsesFontInfoStrings(argv)) return 1;
 	if(!RunAddDependentGlyphsCases()) return 1;
 	if(!RunMissingValueTokenCases()) return 1;
 	if(!RunSegmentSplitCases()) return 1;
+	if(!GetNextToken_RegularTokenEndedByEndOfData_TokenReturned()) return 1;
 	if(!Reset_OmittedFontDictMetrics_DefaultsApplied()) return 1;
 	return 0;
 }
