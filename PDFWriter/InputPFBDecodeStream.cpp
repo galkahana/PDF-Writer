@@ -29,6 +29,13 @@ InputPFBDecodeStream::InputPFBDecodeStream(void)
 	mStreamToDecode = NULL;
 	mDecodeMethod = NULL;
 	mInternalState = PDFHummus::eFailure;
+	mInSegmentReadIndex = 0;
+	mSegmentSize = 0;
+	mCurrentType = 0;
+	mHasTokenBuffer = false;
+	mTokenBuffer = 0;
+	mRandomizer = 0;
+	mFoundEOF = false;
 }
 
 InputPFBDecodeStream::~InputPFBDecodeStream(void)
