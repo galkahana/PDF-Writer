@@ -103,11 +103,16 @@ void Type1Input::Reset()
 		mEncoding.mCustomEncoding[i].clear();
 	mReverseEncoding.clear();
 	mFontDictionary.StrokeWidth = 1;
+	mFontDictionary.PaintType = 0;
+	mFontDictionary.FontType = 1;
+	mFontDictionary.FontBBox[0] = mFontDictionary.FontBBox[1] = mFontDictionary.FontBBox[2] = mFontDictionary.FontBBox[3] = 0;
 	mFontDictionary.FSTypeValid = false;
 	mFontDictionary.fsType = 0;
 
 	mFontInfoDictionary.isFixedPitch = false;
 	mFontInfoDictionary.ItalicAngle = 0;
+	mFontInfoDictionary.UnderlinePosition = 0;
+	mFontInfoDictionary.UnderlineThickness = 0;
 	mFontInfoDictionary.Notice.clear();
 	mFontInfoDictionary.version.clear();
 	mFontInfoDictionary.Weight.clear();
@@ -194,10 +199,37 @@ EStatusCode Type1Input::ReadType1File(IByteReaderWithPosition* inType1)
 	return status;
 }
 
+bool Type1Input::ReadNextTokenValue(std::string& outValue,EStatusCode& outStatus)
+{
+	// GetNextToken returns {false,""} at a PFB segment boundary too, not only
+	// when a value is genuinely missing: a segment whose tail is whitespace
+	// yields no token while the next segment still carries data (the decoder
+	// loads it on the following call). Retry across such benign boundaries;
+	// only a decoder failure or a real end-of-stream means the value is
+	// actually absent.
+	for(;;)
+	{
+		BoolAndString token = mPFBDecoder.GetNextToken();
+		if(token.first)
+		{
+			outValue = token.second;
+			outStatus = eSuccess;
+			return true;
+		}
+		if(mPFBDecoder.GetInternalState() != eSuccess || !mPFBDecoder.NotEnded())
+		{
+			outValue.clear();
+			outStatus = eFailure;
+			return false;
+		}
+	}
+}
+
 EStatusCode Type1Input::ReadFontDictionary()
 {
 	EStatusCode status = eSuccess;
 	BoolAndString token;
+	std::string value;
 
 	while(mPFBDecoder.NotEnded() && eSuccess == status)
 	{
@@ -221,17 +253,23 @@ EStatusCode Type1Input::ReadFontDictionary()
 		}
 		if(token.second.compare("/FontName") == 0)
 		{
-			mFontDictionary.FontName = Type1PSTokens::FromPSName(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mFontDictionary.FontName = Type1PSTokens::FromPSName(value);
 			continue;
 		}
 		if(token.second.compare("/PaintType") == 0)
 		{
-			mFontDictionary.PaintType = Int(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mFontDictionary.PaintType = Int(value);
 			continue;
 		}
 		if(token.second.compare("/FontType") == 0)
 		{
-			mFontDictionary.FontType = Int(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mFontDictionary.FontType = Int(value);
 			continue;
 		}
 		if(token.second.compare("/FontMatrix") == 0)
@@ -248,13 +286,17 @@ EStatusCode Type1Input::ReadFontDictionary()
 
 		if(token.second.compare("/UniqueID") == 0)
 		{
-			mFontDictionary.UniqueID = Int(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mFontDictionary.UniqueID = Int(value);
 			continue;
 		}
 
 		if(token.second.compare("/StrokeWidth") == 0)
 		{
-			mFontDictionary.StrokeWidth = Double(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mFontDictionary.StrokeWidth = Double(value);
 			continue;
 		}
 
@@ -268,7 +310,9 @@ EStatusCode Type1Input::ReadFontDictionary()
 
 		if(token.second.compare("/FSType") == 0)
 		{
-			mFontInfoDictionary.fsType = (unsigned short)Int(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mFontInfoDictionary.fsType = (unsigned short)Int(value);
 			mFontInfoDictionary.FSTypeValid = true;
 		}
 	}
@@ -279,6 +323,7 @@ EStatusCode Type1Input::ReadFontInfoDictionary()
 {
 	EStatusCode status = eSuccess;
 	BoolAndString token;
+	std::string value;
 
   // initialize some values to defaults
   mFontInfoDictionary.ItalicAngle = 0.0;
@@ -302,62 +347,80 @@ EStatusCode Type1Input::ReadFontInfoDictionary()
 
 		if(token.second.compare("/version") == 0)
 		{
-			mFontInfoDictionary.version = Type1PSTokens::FromPSString(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mFontInfoDictionary.version = Type1PSTokens::FromPSString(value);
 			continue;
 		}
 		if(token.second.compare("/Notice") == 0)
 		{
-			mFontInfoDictionary.Notice = Type1PSTokens::FromPSString(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mFontInfoDictionary.Notice = Type1PSTokens::FromPSString(value);
 			continue;
 		}
 		if(token.second.compare("/Copyright") == 0)
 		{
-			mFontInfoDictionary.Copyright = Type1PSTokens::FromPSString(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mFontInfoDictionary.Copyright = Type1PSTokens::FromPSString(value);
 			continue;
 		}
 		if(token.second.compare("/FullName") == 0)
 		{
-			mFontInfoDictionary.FullName = Type1PSTokens::FromPSString(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mFontInfoDictionary.FullName = Type1PSTokens::FromPSString(value);
 			continue;
 		}
 		if(token.second.compare("/FamilyName") == 0)
 		{
-			mFontInfoDictionary.FamilyName = Type1PSTokens::FromPSString(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mFontInfoDictionary.FamilyName = Type1PSTokens::FromPSString(value);
 			continue;
 		}
 		if(token.second.compare("/Weight") == 0)
 		{
-			mFontInfoDictionary.Weight = Type1PSTokens::FromPSString(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mFontInfoDictionary.Weight = Type1PSTokens::FromPSString(value);
 			continue;
 		}
 		if(token.second.compare("/ItalicAngle") == 0)
 		{
-			mFontInfoDictionary.ItalicAngle = 
-				Double(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mFontInfoDictionary.ItalicAngle = Double(value);
 			continue;
 		}
 		if(token.second.compare("/isFixedPitch") == 0)
 		{
-			mFontInfoDictionary.isFixedPitch = 
-				PSBool(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mFontInfoDictionary.isFixedPitch = PSBool(value);
 			continue;
 		}
 		if(token.second.compare("/UnderlinePosition") == 0)
 		{
-			mFontInfoDictionary.UnderlinePosition = 
-				Double(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mFontInfoDictionary.UnderlinePosition = Double(value);
 			continue;
 		}
 		if(token.second.compare("/UnderlineThickness") == 0)
 		{
-			mFontInfoDictionary.UnderlineThickness = 
-				Double(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mFontInfoDictionary.UnderlineThickness = Double(value);
 			continue;
 		}
 
 		if(token.second.compare("/FSType") == 0)
 		{
-			mFontInfoDictionary.fsType = (unsigned short)Int(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mFontInfoDictionary.fsType = (unsigned short)Int(value);
 			mFontInfoDictionary.FSTypeValid = true;
 		}
 	}
@@ -502,6 +565,7 @@ EStatusCode Type1Input::ReadPrivateDictionary()
 	EStatusCode status = eSuccess;
     bool readCharString = false; // don't leave before you read CharStrings. so i'm having a little flag
 	BoolAndString token;
+	std::string value;
 
 	while(mPFBDecoder.NotEnded() && eSuccess == status)
 	{
@@ -520,7 +584,9 @@ EStatusCode Type1Input::ReadPrivateDictionary()
 
 		if(token.second.compare("/UniqueID") == 0)
 		{
-			mPrivateDictionary.UniqueID = Int(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mPrivateDictionary.UniqueID = Int(value);
 			continue;
 		}
 
@@ -546,31 +612,45 @@ EStatusCode Type1Input::ReadPrivateDictionary()
 		}
 		if(token.second.compare("/BlueScale") == 0)
 		{
-			mPrivateDictionary.BlueScale = Double(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mPrivateDictionary.BlueScale = Double(value);
 			continue;
 		}
 		if(token.second.compare("/BlueShift") == 0)
 		{
-			mPrivateDictionary.BlueShift = Int(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mPrivateDictionary.BlueShift = Int(value);
 			continue;
 		}
 		if(token.second.compare("/BlueFuzz") == 0)
 		{
-			mPrivateDictionary.BlueFuzz = Int(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mPrivateDictionary.BlueFuzz = Int(value);
 			continue;
 		}
 		if(token.second.compare("/StdHW") == 0)
 		{
-			mPFBDecoder.GetNextToken(); // skip [
-			mPrivateDictionary.StdHW = Double(mPFBDecoder.GetNextToken().second);
-			mPFBDecoder.GetNextToken(); // skip ]
+			if(!ReadNextTokenValue(value,status)) // skip [
+				break;
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mPrivateDictionary.StdHW = Double(value);
+			if(!ReadNextTokenValue(value,status)) // skip ]
+				break;
 			continue;
 		}
 		if(token.second.compare("/StdVW") == 0)
 		{
-			mPFBDecoder.GetNextToken(); // skip [
-			mPrivateDictionary.StdVW = Double(mPFBDecoder.GetNextToken().second);
-			mPFBDecoder.GetNextToken(); // skip ]
+			if(!ReadNextTokenValue(value,status)) // skip [
+				break;
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mPrivateDictionary.StdVW = Double(value);
+			if(!ReadNextTokenValue(value,status)) // skip ]
+				break;
 			continue;
 		}
 		if(token.second.compare("/StemSnapH") == 0)
@@ -585,22 +665,30 @@ EStatusCode Type1Input::ReadPrivateDictionary()
 		}
 		if(token.second.compare("/ForceBold") == 0)
 		{
-			mPrivateDictionary.ForceBold = PSBool(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mPrivateDictionary.ForceBold = PSBool(value);
 			continue;
 		}
 		if(token.second.compare("/LanguageGroup") == 0)
 		{
-			mPrivateDictionary.LanguageGroup = Int(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mPrivateDictionary.LanguageGroup = Int(value);
 			continue;
 		}
 		if(token.second.compare("/lenIV") == 0)
 		{
-			mPrivateDictionary.lenIV = Int(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mPrivateDictionary.lenIV = Int(value);
 			continue;
 		}
 		if(token.second.compare("/RndStemUp") == 0)
 		{
-			mPrivateDictionary.RndStemUp = PSBool(mPFBDecoder.GetNextToken().second);
+			if(!ReadNextTokenValue(value,status))
+				break;
+			mPrivateDictionary.RndStemUp = PSBool(value);
 			continue;
 		}
 		if(token.second.compare("/Subrs") == 0)
