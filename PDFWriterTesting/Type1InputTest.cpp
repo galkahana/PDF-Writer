@@ -252,11 +252,12 @@ static bool RunAddDependentGlyphsCases() {
 // converter yielded 0 / empty and parsing reported eSuccess. Now a missing
 // value token flags failure and the parse returns non-eSuccess.
 
-// Each case feeds a raw ASCII segment ending in a dangling key (no value
-// token, segment then ends) and expects the parse to fail rather than
-// silently accept. The two rows enter the fix through the two top-level
-// dictionary entry points: "begin" -> ReadFontDictionary, "/Private" ->
-// ReadPrivateDictionary.
+// Each case feeds a raw ASCII segment ending in a dangling key (the key is a
+// well-formed token -- terminated by a newline, as real PFB segments are --
+// but no value token follows before the segment ends) and expects the parse
+// to fail rather than silently accept. The two rows enter the fix through
+// the two top-level dictionary entry points: "begin" -> ReadFontDictionary,
+// "/Private" -> ReadPrivateDictionary.
 struct MissingValueTokenCase {
 	const char* label;       // <Condition>_<Result>
 	const char* ascii;       // raw ASCII segment, dangling key last
@@ -264,8 +265,8 @@ struct MissingValueTokenCase {
 };
 
 static const MissingValueTokenCase scMissingValueTokenCases[] = {
-	{"FontDictionaryPath_Fails",    "12 dict begin\n/PaintType",        "/PaintType"},
-	{"PrivateDictionaryPath_Fails", "/Private 5 dict dup begin\n/lenIV", "/lenIV"},
+	{"FontDictionaryPath_Fails",    "12 dict begin\n/PaintType\n",        "/PaintType"},
+	{"PrivateDictionaryPath_Fails", "/Private 5 dict dup begin\n/lenIV\n", "/lenIV"},
 };
 
 static bool RunMissingValueTokenCases() {
@@ -344,54 +345,105 @@ static bool Reset_OmittedFontDictMetrics_DefaultsApplied() {
 	return true;
 }
 
-// V-072 regression guard: GetNextToken returns {false,""} at a PFB segment
-// boundary (segment tail is whitespace) even though the next segment carries
-// data. ReadNextTokenValue must retry across such a boundary, not reject the
-// font. Here /PaintType is the last token of ASCII segment 1 (a trailing
-// newline makes the value-read's GetNextToken hit the no-token boundary
-// path); its value "7" is the first token of segment 2. The parse must
-// succeed and PaintType must read as 7.
-static bool ReadNextTokenValue_ValueAcrossSegmentBoundary_Succeeds() {
-	// Arrange
-	vector<string> headerSegments;
-	headerSegments.push_back(
-		"%!PS-AdobeFont-1.0: Synth 001.000\n"
-		"12 dict begin\n"
-		"/FontInfo 4 dict dup begin\n"
-		"/version (001.000) readonly def\n"
-		"/FullName (Synth) readonly def\n"
-		"/FamilyName (Synth) readonly def\n"
-		"/Weight (Regular) readonly def\n"
-		"end readonly def\n"
-		"/FontName /Synth def\n"
-		"/FontType 1 def\n"
-		"/FontMatrix [0.001 0 0 0.001 0 0] readonly def\n"
-		"/FontBBox {0 0 1000 1000} readonly def\n"
-		"/Encoding StandardEncoding def\n"
-		"/PaintType\n\n");                     // key + one consumed terminator
-		                                       // + one leftover whitespace, so
-		                                       // the value-read GetNextToken
-		                                       // hits the segment-end no-token
-		                                       // path; value is in segment 2
-	headerSegments.push_back(
-		"7 def\n"
-		"currentdict end\n"
-		"currentfile eexec\n");
-	vector<Type1SyntheticBuilder::NamedCharString> noGlyphs;
-	string pfb = Type1SyntheticBuilder::WithCharStrings(noGlyphs, headerSegments);
+// V-090: GetNextToken now crosses PFB segment boundaries, so a value, a whole
+// token, or inter-token whitespace spanning segments produced by a fixed-size
+// PFB chunker parses correctly instead of being rejected / truncated. Each
+// case splits the font dictionary into multiple type-1 segments at an awkward
+// point; the shared prefix below is prepended to the first segment. All
+// expect the parse to succeed with /PaintType read as 5.
+//
+// Pre-root-fix outcomes (stash-verify): ValueInNextSegment ->
+// ReadNextTokenValue's old retry loop masked it; KeyTokenSplitAcrossSegments
+// -> "/PaintType" tokenized as "/Pai"+"ntType", key never matched, PaintType
+// stays at the Reset() default 0; WhitespaceOnlySegmentBetween -> value read
+// returns no token, parse rejected.
+static const char* const scSplitHeaderPrefix =
+	"%!PS-AdobeFont-1.0: Synth 001.000\n"
+	"12 dict begin\n"
+	"/FontInfo 4 dict dup begin\n"
+	"/version (001.000) readonly def\n"
+	"/FullName (Synth) readonly def\n"
+	"/FamilyName (Synth) readonly def\n"
+	"/Weight (Regular) readonly def\n"
+	"end readonly def\n"
+	"/FontName /Synth def\n"
+	"/FontType 1 def\n"
+	"/FontMatrix [0.001 0 0 0.001 0 0] readonly def\n"
+	"/FontBBox {0 0 1000 1000} readonly def\n"
+	"/Encoding StandardEncoding def\n";
 
-	Type1Input type1;
+struct SegmentSplitCase {
+	const char* label;     // <Condition>_<Result>
+	const char* seg1Tail;  // appended after scSplitHeaderPrefix in segment 1
+	const char* seg2;
+	const char* seg3;      // "" => omitted
+};
+
+static const SegmentSplitCase scSegmentSplitCases[] = {
+	// value token begins in segment 2 (one leftover whitespace in seg 1)
+	{"ValueInNextSegment_Succeeds",          "/PaintType\n\n", "5 def\ncurrentdict end\ncurrentfile eexec\n", ""},
+	// the "/PaintType" token itself straddles the segment boundary
+	{"KeyTokenSplitAcrossSegments_Succeeds", "/Pai",           "ntType 5 def\ncurrentdict end\ncurrentfile eexec\n", ""},
+	// an entirely whitespace segment sits between key and value
+	{"WhitespaceOnlySegmentBetween_Succeeds","/PaintType\n",   "   \n  ", "5 def\ncurrentdict end\ncurrentfile eexec\n"},
+};
+
+static bool RunSegmentSplitCases() {
+	const size_t count = sizeof(scSegmentSplitCases) / sizeof(scSegmentSplitCases[0]);
+	for(size_t i = 0; i < count; ++i) {
+		const SegmentSplitCase& testCase = scSegmentSplitCases[i];
+
+		// Arrange
+		vector<string> headerSegments;
+		headerSegments.push_back(string(scSplitHeaderPrefix) + testCase.seg1Tail);
+		headerSegments.push_back(testCase.seg2);
+		if(testCase.seg3[0] != '\0')
+			headerSegments.push_back(testCase.seg3);
+		vector<Type1SyntheticBuilder::NamedCharString> noGlyphs;
+		string pfb = Type1SyntheticBuilder::WithCharStrings(noGlyphs, headerSegments);
+
+		// Act
+		Type1Input type1;
+		EStatusCode status = Type1SyntheticBuilder::ParseAsType1(pfb, type1);
+
+		// Assert
+		if(status != eSuccess) {
+			cout << "Type1InputTest [SegmentSplit::" << testCase.label
+			     << "]: valid font split across PFB segments was rejected" << endl;
+			return false;
+		}
+		if(type1.mFontDictionary.PaintType != 5) {
+			cout << "Type1InputTest [SegmentSplit::" << testCase.label
+			     << "]: PaintType " << type1.mFontDictionary.PaintType
+			     << ", expected 5 (token/value not reassembled across segments)" << endl;
+			return false;
+		}
+	}
+	return true;
+}
+
+// A regular token is self-delimiting: when its bytes are the literal last
+// content with no trailing whitespace -- the value "7" here ends exactly at
+// the type-3 EOF segment -- GetNextToken must still return it (end of data is
+// a valid token terminator), not report a failed read. Guards against the
+// tokenizer becoming stricter than it was about unterminated trailing tokens.
+static bool GetNextToken_RegularTokenEndedByEndOfData_TokenReturned() {
+	// Arrange: "7" is the final byte, immediately followed by the EOF segment.
+	string pfb = Type1SyntheticBuilder::RawPFBFromAsciiSegment(
+		"12 dict begin\n/PaintType 7");
+
 	// Act
+	Type1Input type1;
 	EStatusCode status = Type1SyntheticBuilder::ParseAsType1(pfb, type1);
 
 	// Assert
 	if(status != eSuccess) {
-		cout << "Type1InputTest [ReadNextTokenValue::ValueAcrossSegmentBoundary_Succeeds]: "
-		        "valid font with /PaintType value in the next segment was rejected" << endl;
+		cout << "Type1InputTest [GetNextToken::RegularTokenEndedByEndOfData_TokenReturned]: "
+		        "value token ended by end-of-data was treated as a failed read" << endl;
 		return false;
 	}
 	if(type1.mFontDictionary.PaintType != 7) {
-		cout << "Type1InputTest [ReadNextTokenValue::ValueAcrossSegmentBoundary_Succeeds]: "
+		cout << "Type1InputTest [GetNextToken::RegularTokenEndedByEndOfData_TokenReturned]: "
 		        "PaintType " << type1.mFontDictionary.PaintType << ", expected 7" << endl;
 		return false;
 	}
@@ -403,7 +455,8 @@ int Type1InputTest(int argc, char* argv[]) {
 	if(!ReadType1File_RealPFB_ParsesFontInfoStrings(argv)) return 1;
 	if(!RunAddDependentGlyphsCases()) return 1;
 	if(!RunMissingValueTokenCases()) return 1;
-	if(!ReadNextTokenValue_ValueAcrossSegmentBoundary_Succeeds()) return 1;
+	if(!RunSegmentSplitCases()) return 1;
+	if(!GetNextToken_RegularTokenEndedByEndOfData_TokenReturned()) return 1;
 	if(!Reset_OmittedFontDictMetrics_DefaultsApplied()) return 1;
 	return 0;
 }

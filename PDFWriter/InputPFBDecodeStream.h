@@ -59,13 +59,17 @@ public:
 
 	// token actions
 
-	// get the next avialable postscript token. return result returns whether
-	// token retreive was successful and the token (if it was).
-	// note that segment end automatically cuts of a token
+	// Get the next PostScript token. The pair's bool is whether a token was
+	// retrieved; the string is the token when so. PFB segment boundaries are
+	// crossed transparently -- a token, and the whitespace between tokens,
+	// may span segments. A false result means a genuine end of data or a
+	// decoder failure (use GetInternalState() to tell which), not a segment
+	// break.
 	BoolAndString GetNextToken();
 
-	// skip white spaces till token or EOF. note that end of segment 
-	// will stop tokenizer as well
+	// Skip whitespace until the next token byte or a genuine end of data,
+	// crossing PFB segment boundaries. The token byte is pushed back for the
+	// following read.
 	void SkipTillToken();
 
 	PDFHummus::EStatusCode GetInternalState();
@@ -94,7 +98,7 @@ private:
 	PDFHummus::EStatusCode StoreSegmentLength();
 	PDFHummus::EStatusCode FlushBinarySectionTrailingCode();
 	bool IsPostScriptWhiteSpace(Byte inCharacter);
-	bool IsSegmentNotEnded();
+	bool HasMoreInput();
 	void SaveTokenBuffer(Byte inToSave);
 	bool IsPostScriptEntityBreaker(Byte inCharacter);
 	PDFHummus::EStatusCode InitializeBinaryDecode();
