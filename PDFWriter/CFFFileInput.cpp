@@ -130,6 +130,8 @@ static const unsigned short scDefaultCharsetsSizes[3] =
 
 CFFFileInput::CFFFileInput(void)
 {
+	mFontsCount = 0;
+	mStringsCount = 0;
 	mTopDictIndex = NULL;
 	mStrings = NULL;
 	mGlobalSubrs.mCharStringsIndex = NULL;
