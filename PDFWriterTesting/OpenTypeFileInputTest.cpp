@@ -39,6 +39,7 @@
 
 #include <iostream>
 #include <string>
+#include <cstring>
 
 using namespace std;
 using namespace PDFHummus;
@@ -156,9 +157,74 @@ static bool ReadOpenTypeFile_ArialTtf_PopulatesHheaMaxp(char* argv[]) {
 	return ok;
 }
 
+// Exercises the name-table path: ReadName allocates mNameEntries with
+// new NameTableEntry[count](), populates every entry, and FreeTables walks
+// mNameEntriesCount deleting each .String. Value-initializing the array means
+// .String is NULL before the populate loop assigns it, so the delete-walk is
+// safe even if a future change leaves an entry unpopulated; the constructor
+// now also zeroes mNameEntriesCount so the FreeTables loop bound is never an
+// indeterminate value. Parse happens on a heap object that is deleted inside
+// the test so the destructor's delete-walk runs under the test, not at
+// process teardown. Asserts exact values (arial.ttf has 58 name entries;
+// entry 1 is the family name "Arial" in UTF-16BE) so a regression that
+// mispopulates the table surfaces rather than a bounds check passing.
+static bool ReadName_ArialTtf_PopulatesNameEntries(char* argv[]) {
+	// Arrange
+	string font;
+	if(!readFileBytes(BuildRelativeInputPath(argv, "fonts/arial.ttf"), font)) {
+		cout << "OpenTypeFileInputTest: failed to read arial.ttf" << endl;
+		return false;
+	}
+
+	// Act
+	InputByteArrayStream stream((Byte*)&font[0], (LongFilePositionType)font.size());
+	OpenTypeFileInput* openType = new OpenTypeFileInput();
+	EStatusCode status = openType->ReadOpenTypeFile(&stream, 0);
+
+	// Assert
+	bool ok = false;
+	do {
+		if(status != eSuccess) {
+			cout << "OpenTypeFileInputTest: ReadOpenTypeFile rejected pristine arial.ttf" << endl;
+			break;
+		}
+		if(openType->mName.mNameEntriesCount != 58) {
+			cout << "OpenTypeFileInputTest: expected 58 name entries, got " << openType->mName.mNameEntriesCount << endl;
+			break;
+		}
+		bool entriesOk = true;
+		for(unsigned short i = 0; i < openType->mName.mNameEntriesCount; ++i) {
+			if(openType->mName.mNameEntries[i].String == NULL) {
+				cout << "OpenTypeFileInputTest: name entry " << i << " has NULL String" << endl;
+				entriesOk = false;
+				break;
+			}
+		}
+		if(!entriesOk)
+			break;
+		const NameTableEntry& family = openType->mName.mNameEntries[1];
+		if(family.PlatformID != 0 || family.EncodingID != 3 || family.NameID != 1 || family.Length != 10) {
+			cout << "OpenTypeFileInputTest: name entry 1 header mismatch (plat " << family.PlatformID
+			     << " enc " << family.EncodingID << " name " << family.NameID
+			     << " len " << family.Length << ")" << endl;
+			break;
+		}
+		const char expectedArial[10] = {0,'A',0,'r',0,'i',0,'a',0,'l'};
+		if(memcmp(family.String, expectedArial, 10) != 0) {
+			cout << "OpenTypeFileInputTest: name entry 1 is not UTF-16BE \"Arial\"" << endl;
+			break;
+		}
+		ok = true;
+	} while(false);
+
+	delete openType;
+	return ok;
+}
+
 int OpenTypeFileInputTest(int argc, char* argv[]) {
 	(void)argc;
 	if(!ReadHMtx_NumberOfHMetricsZero_ReturnsFailure(argv)) return 1;
 	if(!ReadOpenTypeFile_ArialTtf_PopulatesHheaMaxp(argv)) return 1;
+	if(!ReadName_ArialTtf_PopulatesNameEntries(argv)) return 1;
 	return 0;
 }
