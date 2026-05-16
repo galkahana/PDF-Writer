@@ -260,9 +260,6 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 		return result;
 	}
 
-	// Segment advancing (and the per-segment decode-mode switch) is now owned
-	// by GetNextByteForToken, so the tokenizer never has to peek across a
-	// boundary itself.
 	result.first = true;
 
 	do
@@ -270,7 +267,7 @@ BoolAndString InputPFBDecodeStream::GetNextToken()
 		// skip till token
 		SkipTillToken();
 
-		// if segment ended, mark as no token read
+		// end of data reached before any token byte: no token to return
 		if(!HasMoreInput())
 		{
 			result.first = false;
@@ -476,13 +473,12 @@ EStatusCode InputPFBDecodeStream::GetNextByteForToken(Byte& outByte)
 		return PDFHummus::eSuccess;
 	}
 
-	// A PFB segment boundary is transport framing, not a token boundary.
-	// Cross it transparently -- the same way Read() does for binary data --
-	// so a token, or whitespace between tokens, can span segments produced
-	// by fixed-size PFB chunkers. Only a genuine end of input or a decoder
-	// failure yields no byte. InitializeStreamSegment performs the
-	// per-segment decode-mode switch (plaintext / eexec / EOF), so looping
-	// over it preserves those transitions.
+	// A PFB segment boundary is transport framing, not a token boundary:
+	// advance past an exhausted segment so a token or inter-token whitespace
+	// can span chunked segments. InitializeStreamSegment carries the
+	// per-segment decode-mode switch (plaintext / eexec / EOF), so crossing
+	// segments here keeps that intact. No byte is available only at a
+	// genuine end of input or a decoder failure.
 	while(mInSegmentReadIndex >= mSegmentSize && NotEnded() && mInternalState == PDFHummus::eSuccess)
 		mInternalState = InitializeStreamSegment();
 
@@ -503,10 +499,9 @@ void InputPFBDecodeStream::SaveTokenBuffer(Byte inToSave)
 
 bool InputPFBDecodeStream::HasMoreInput()
 {
-	// True while another byte may still be obtained, including from a later
-	// PFB segment -- GetNextByteForToken crosses segment boundaries. False
-	// only at genuine end of input. (Distinct from "current segment has
-	// bytes left", which is no longer the tokenizer's concern.)
+	// True while another byte may still be obtained, possibly from a later
+	// PFB segment (GetNextByteForToken crosses segment boundaries); false
+	// only at a genuine end of input.
 	return mHasTokenBuffer || NotEnded();
 }
 

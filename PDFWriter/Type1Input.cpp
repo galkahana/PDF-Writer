@@ -201,9 +201,6 @@ EStatusCode Type1Input::ReadType1File(IByteReaderWithPosition* inType1)
 
 bool Type1Input::ReadNextTokenValue(std::string& outValue,EStatusCode& outStatus)
 {
-	// GetNextToken now crosses PFB segment boundaries internally, so a
-	// {false} result means the value token is genuinely absent (end of input
-	// or decoder failure), not merely a segment break.
 	BoolAndString token = mPFBDecoder.GetNextToken();
 	outValue = token.second;
 	outStatus = token.first ? eSuccess : eFailure;
