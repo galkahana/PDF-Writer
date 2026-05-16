@@ -43,6 +43,7 @@ FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const std::string& inFon
 	mFontIndex = inFontIndex;
 	mDoesOwn = inDoOwn;
 	mGlyphIsLoaded = false;
+	mCurrentGlyph = 0;
 	ResetPaletteSelectionState();
 	SetupFormatSpecificExtender(inFontFilePath, "");
 	SelectDefaultEncoding();
@@ -55,6 +56,7 @@ FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const std::string& inFon
     mFontIndex = inFontIndex;
 	mDoesOwn = inDoOwn;
 	mGlyphIsLoaded = false;
+	mCurrentGlyph = 0;
 	ResetPaletteSelectionState();
 	std::string fileExtension = GetExtension(inPFMFilePath);
 	if (fileExtension == "PFM" || fileExtension == "pfm") // just don't bother if it's not PFM
