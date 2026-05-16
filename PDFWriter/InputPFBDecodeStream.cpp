@@ -506,9 +506,11 @@ void InputPFBDecodeStream::SaveTokenBuffer(Byte inToSave)
 
 bool InputPFBDecodeStream::HasMoreInput()
 {
-	// True while another byte may still be obtained, possibly from a later
-	// PFB segment (GetNextByteForToken crosses segment boundaries); false
-	// only at a genuine end of input.
+	// Input-framing availability only: true while more bytes remain in the
+	// PFB stream (current or a later segment -- GetNextByteForToken crosses
+	// boundaries), false at the end of that stream. Decoder health is a
+	// separate concern, gated by callers via mInternalState (as NotEnded()
+	// is, e.g. in Read()).
 	return mHasTokenBuffer || NotEnded();
 }
 

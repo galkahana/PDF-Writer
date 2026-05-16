@@ -345,13 +345,6 @@ static bool Reset_OmittedFontDictMetrics_DefaultsApplied() {
 	return true;
 }
 
-// V-072 regression guard: GetNextToken returns {false,""} at a PFB segment
-// boundary (segment tail is whitespace) even though the next segment carries
-// data. ReadNextTokenValue must retry across such a boundary, not reject the
-// font. Here /PaintType is the last token of ASCII segment 1 (a trailing
-// newline makes the value-read's GetNextToken hit the no-token boundary
-// path); its value "7" is the first token of segment 2. The parse must
-// succeed and PaintType must read as 7.
 // V-090: GetNextToken now crosses PFB segment boundaries, so a value, a whole
 // token, or inter-token whitespace spanning segments produced by a fixed-size
 // PFB chunker parses correctly instead of being rejected / truncated. Each
