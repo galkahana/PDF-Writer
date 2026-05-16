@@ -40,6 +40,14 @@ public:
     static std::string WithCharStrings(const std::vector<NamedCharString>& inGlyphs,
                                        const std::string& inAsciiHeaderOverride);
 
+     // As above, but the ASCII header is emitted as one type-1 PFB segment
+     // per vector element (in order). A key at the end of one segment whose
+     // value is in the next exercises GetNextToken's segment-boundary
+     // "no token" return — the case the looping ReadNextTokenValue must
+     // tolerate without rejecting a valid font.
+    static std::string WithCharStrings(const std::vector<NamedCharString>& inGlyphs,
+                                       const std::vector<std::string>& inAsciiHeaderSegments);
+
      // A PFB of a single ASCII segment carrying inAscii, then the EOF segment
      // — nothing after it. GetNextToken returns no token (first = false) once
      // inAscii is exhausted, so this is the minimal way to feed a dictionary

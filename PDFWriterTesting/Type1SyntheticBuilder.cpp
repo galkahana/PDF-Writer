@@ -111,7 +111,12 @@ string Type1SyntheticBuilder::RawPFBFromAsciiSegment(const string& inAscii)
 string Type1SyntheticBuilder::WithCharStrings(const std::vector<NamedCharString>& inGlyphs,
                                               const std::string& inAsciiHeaderOverride)
 {
-    const string asciiHeader = inAsciiHeaderOverride;
+    return WithCharStrings(inGlyphs, std::vector<std::string>(1, inAsciiHeaderOverride));
+}
+
+string Type1SyntheticBuilder::WithCharStrings(const std::vector<NamedCharString>& inGlyphs,
+                                              const std::vector<std::string>& inAsciiHeaderSegments)
+{
 
     // eexec-encrypted body. Per-charstring binary bytes are wrapped with
     // lenIV padding + charstring cipher; the resulting `<codeLength
@@ -158,11 +163,18 @@ string Type1SyntheticBuilder::WithCharStrings(const std::vector<NamedCharString>
     for(int i = 0; i < 512; ++i) trailer.push_back('0');
     trailer.append("\ncleartomark\n");
 
-    if(asciiHeader.size() > 0xFFFFFFFF || encryptedBody.size() > 0xFFFFFFFF || trailer.size() > 0xFFFFFFFF)
+    if(encryptedBody.size() > 0xFFFFFFFF || trailer.size() > 0xFFFFFFFF)
         return string();
+    for(size_t i = 0; i < inAsciiHeaderSegments.size(); ++i)
+        if(inAsciiHeaderSegments[i].size() > 0xFFFFFFFF)
+            return string();
 
+    // Each header chunk becomes its own type-1 segment. A key whose value
+    // lands in the following chunk exercises GetNextToken's segment-boundary
+    // "no token" path.
     string pfb;
-    pfb.append(WrapPFBSegment(1, asciiHeader));
+    for(size_t i = 0; i < inAsciiHeaderSegments.size(); ++i)
+        pfb.append(WrapPFBSegment(1, inAsciiHeaderSegments[i]));
     pfb.append(WrapPFBSegment(2, encryptedBody));
     pfb.append(WrapPFBSegment(1, trailer));
     // EOF segment

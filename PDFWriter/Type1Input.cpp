@@ -201,10 +201,28 @@ EStatusCode Type1Input::ReadType1File(IByteReaderWithPosition* inType1)
 
 bool Type1Input::ReadNextTokenValue(std::string& outValue,EStatusCode& outStatus)
 {
-	BoolAndString token = mPFBDecoder.GetNextToken();
-	outValue = token.second;
-	outStatus = token.first ? eSuccess : eFailure;
-	return token.first;
+	// GetNextToken returns {false,""} at a PFB segment boundary too, not only
+	// when a value is genuinely missing: a segment whose tail is whitespace
+	// yields no token while the next segment still carries data (the decoder
+	// loads it on the following call). Retry across such benign boundaries;
+	// only a decoder failure or a real end-of-stream means the value is
+	// actually absent.
+	for(;;)
+	{
+		BoolAndString token = mPFBDecoder.GetNextToken();
+		if(token.first)
+		{
+			outValue = token.second;
+			outStatus = eSuccess;
+			return true;
+		}
+		if(mPFBDecoder.GetInternalState() != eSuccess || !mPFBDecoder.NotEnded())
+		{
+			outValue.clear();
+			outStatus = eFailure;
+			return false;
+		}
+	}
 }
 
 EStatusCode Type1Input::ReadFontDictionary()
