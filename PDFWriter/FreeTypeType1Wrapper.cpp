@@ -43,13 +43,11 @@ FreeTypeType1Wrapper::FreeTypeType1Wrapper(FT_Face inFace,const std::string& inF
 	else
 		mPSPrivateAvailable = true;
     
-    // FT_Get_PS_Font_Value returns the number of bytes read (<= 0 on error) and
-    // does not guarantee encodingType is written on failure. Default to NONE so
-    // a failed read does not route glyph lookups through the private Type1 path.
+    // FT_Get_PS_Font_Value returns the byte count read, <= 0 on error, and need
+    // not write encodingType when it fails
     T1_EncodingType encodingType = T1_ENCODING_TYPE_NONE;
-    if(FT_Get_PS_Font_Value(inFace, PS_DICT_ENCODING_TYPE, 0, (void*)&encodingType, sizeof(encodingType)) <= 0)
-        encodingType = T1_ENCODING_TYPE_NONE;
-    mIsCustomEncoding = encodingType == T1_ENCODING_TYPE_ARRAY;
+    FT_Long encodingTypeRead = FT_Get_PS_Font_Value(inFace, PS_DICT_ENCODING_TYPE, 0, (void*)&encodingType, sizeof(encodingType));
+    mIsCustomEncoding = (encodingTypeRead > 0) && (encodingType == T1_ENCODING_TYPE_ARRAY);
 
 	mPFMFileInfoRelevant = 
 		(inPFMFilePath.size() != 0 && mPFMReader.Read(inPFMFilePath) != PDFHummus::eFailure);
@@ -149,8 +147,7 @@ unsigned int FreeTypeType1Wrapper::GetGlyphForUnicodeChar(unsigned long inChar)
 
 std::string FreeTypeType1Wrapper::GetPrivateGlyphName(unsigned int inGlyphIndex)
 {
-    // if the type 1 file never loaded, mType1File holds indeterminate state -
-    // return .notdef rather than read glyph names out of it
+    // mType1File is only meaningful when the type 1 file actually loaded
     if(!mType1Loaded)
         return ".notdef";
     return mType1File.GetGlyphCharStringName(inGlyphIndex);

@@ -68,8 +68,6 @@ void FreeTypeFaceWrapper::ResetPaletteSelectionState() {
 	mPaletteSet = false;
 	mPalette = NULL;
 	mPaletteStatus = FT_Err_Ok;
-	// FT_Palette_Data_Get leaves mPaletteData untouched on failure; zero it so
-	// num_palette_entries is a deterministic 0 rather than an uninitialized read
 	mPaletteData = FT_Palette_Data();
 }
 
@@ -581,10 +579,8 @@ std::string FreeTypeFaceWrapper::GetGlyphName(unsigned int inGlyphIndex, bool sa
     {
         if(inGlyphIndex < (unsigned int)mFace->num_glyphs)
         {
-            // FT_Get_Glyph_Name does not guarantee buffer is written or NUL-
-            // terminated on failure (e.g. no post table / post format 3 /
-            // CFF/color fonts); zero-init and fall back to .notdef on error
-            // so an uninitialized stack buffer is never leaked into the PDF
+            // FT_Get_Glyph_Name may leave buffer unwritten or not NUL-terminated
+            // when the font carries no usable glyph names (e.g. post format 3)
             char buffer[100] = {0};
             if(FT_Get_Glyph_Name(mFace,inGlyphIndex,buffer,100) != FT_Err_Ok || buffer[0] == 0)
                 return NotDefGlyphName();
@@ -752,10 +748,8 @@ bool FreeTypeFaceWrapper::GetGlyphOutline(unsigned int inGlyphIndex, FreeTypeFac
 	if ( !(mFace->face_flags & FT_FACE_FLAG_TRICKY) ) //scaled-font implementation would be needed for 'tricky' fonts
 	{
 		if (!LoadGlyph(inGlyphIndex)) {
-			// glyph->format reflects whichever glyph was last loaded into the
-			// face's shared slot, so it is only meaningful after LoadGlyph -
-			// testing it earlier would gate on a stale (or never-set) format
-			// and could feed non-outline slot bytes to FT_Outline_Decompose
+			// glyph->format is the format of the glyph in the face's shared
+			// slot, so it must be read after the glyph is loaded
 			if (mFace->glyph->format == FT_GLYPH_FORMAT_OUTLINE) {
 				FT_Outline_Funcs callbacks = { IOutlineEnumerator::outline_moveto,
 				                               IOutlineEnumerator::outline_lineto,
@@ -790,21 +784,13 @@ FT_Error FreeTypeFaceWrapper::LoadGlyph(FT_UInt inGlyphIndex, FT_Int32 inFlags)
 
 FT_Error FreeTypeFaceWrapper::SelectDefaultPalette(FT_Color** outPalette, unsigned short* outPaletteSize) {
 	if(!mPaletteSet) {
-		// FT_Palette_Data_Get / FT_Palette_Select return FT_Error: 0 (FT_Err_Ok)
-		// on success, nonzero on failure. A failing call leaves its output
-		// untouched, so any single failure makes the palette state unusable and
-		// must be treated as total failure (propagating the first error code).
-		FT_Error errDataGet = FT_Palette_Data_Get(mFace, &mPaletteData);
-		FT_Error errSelect = FT_Palette_Select(mFace, 0, &mPalette);
-
-		if(errDataGet != FT_Err_Ok)
-			mPaletteStatus = errDataGet;
-		else if(errSelect != FT_Err_Ok)
-			mPaletteStatus = errSelect;
-		else
-			mPaletteStatus = FT_Err_Ok;
-
 		mPaletteSet = true;
+		do {
+			mPaletteStatus = FT_Palette_Data_Get(mFace, &mPaletteData);
+			if(mPaletteStatus != FT_Err_Ok)
+				break;
+			mPaletteStatus = FT_Palette_Select(mFace, 0, &mPalette);
+		} while(false);
 	}
 
 	if(mPaletteStatus != FT_Err_Ok) {
