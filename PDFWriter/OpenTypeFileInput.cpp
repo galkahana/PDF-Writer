@@ -28,7 +28,9 @@ OpenTypeFileInput::OpenTypeFileInput(void)
 {
     mHeaderOffset = 0;
     mTableOffset = 0;
+	mTablesCount = 0;
 	mHMtx = NULL;
+	mName.mNameEntriesCount = 0;
 	mName.mNameEntries = NULL;
 	mLoca = NULL;
 	mGlyf = NULL;
@@ -188,7 +190,7 @@ EStatusCode OpenTypeFileInput::ReadOpenTypeFile(IByteReaderWithPosition* inTrueT
 EStatusCode OpenTypeFileInput::ReadOpenTypeHeader()
 {
 	EStatusCode status;
-	TableEntry tableEntry;
+	TableEntry tableEntry = {0};
 	unsigned long tableTag;
 
 	do
@@ -669,7 +671,7 @@ EStatusCode OpenTypeFileInput::ReadName()
 	mPrimitivesReader.SetOffset(it->second.Offset);	
 	mPrimitivesReader.Skip(2);
 	mPrimitivesReader.ReadUSHORT(mName.mNameEntriesCount);
-	mName.mNameEntries = new NameTableEntry[mName.mNameEntriesCount];
+	mName.mNameEntries = new NameTableEntry[mName.mNameEntriesCount]();
 	
 	unsigned short stringOffset;
 	
