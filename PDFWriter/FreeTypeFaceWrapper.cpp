@@ -68,6 +68,9 @@ void FreeTypeFaceWrapper::ResetPaletteSelectionState() {
 	mPaletteSet = false;
 	mPalette = NULL;
 	mPaletteStatus = FT_Err_Ok;
+	// FT_Palette_Data_Get leaves mPaletteData untouched on failure; zero it so
+	// num_palette_entries is a deterministic 0 rather than an uninitialized read
+	mPaletteData = FT_Palette_Data();
 }
 
 void FreeTypeFaceWrapper::SelectDefaultEncoding() {
@@ -578,8 +581,13 @@ std::string FreeTypeFaceWrapper::GetGlyphName(unsigned int inGlyphIndex, bool sa
     {
         if(inGlyphIndex < (unsigned int)mFace->num_glyphs)
         {
-            char buffer[100];
-            FT_Get_Glyph_Name(mFace,inGlyphIndex,buffer,100);
+            // FT_Get_Glyph_Name does not guarantee buffer is written or NUL-
+            // terminated on failure (e.g. no post table / post format 3 /
+            // CFF/color fonts); zero-init and fall back to .notdef on error
+            // so an uninitialized stack buffer is never leaked into the PDF
+            char buffer[100] = {0};
+            if(FT_Get_Glyph_Name(mFace,inGlyphIndex,buffer,100) != FT_Err_Ok || buffer[0] == 0)
+                return NotDefGlyphName();
             return std::string(buffer);
         }
         else
@@ -741,18 +749,23 @@ unsigned int FreeTypeFaceWrapper::GetGlyphIndexInFreeTypeIndexes(unsigned int in
 bool FreeTypeFaceWrapper::GetGlyphOutline(unsigned int inGlyphIndex, FreeTypeFaceWrapper::IOutlineEnumerator& inEnumerator)
 {
 	bool status = false;
-	if ( mFace->glyph->format == FT_GLYPH_FORMAT_OUTLINE && !(mFace->face_flags & FT_FACE_FLAG_TRICKY) ) //scaled-font implementation would be needed for 'tricky' fonts
+	if ( !(mFace->face_flags & FT_FACE_FLAG_TRICKY) ) //scaled-font implementation would be needed for 'tricky' fonts
 	{
 		if (!LoadGlyph(inGlyphIndex)) {
-			FT_Outline_Funcs callbacks = { IOutlineEnumerator::outline_moveto,
-			                               IOutlineEnumerator::outline_lineto,
-										   IOutlineEnumerator::outline_conicto,
-										   IOutlineEnumerator::outline_cubicto,
-										   0, 0 }; //0 shift & delta
-			inEnumerator.FTBegin(mFace->units_per_EM);
-			status = ( 0 == FT_Outline_Decompose(&mFace->glyph->outline, &callbacks, &inEnumerator) );
-			inEnumerator.FTEnd();
-			status = true;
+			// glyph->format reflects whichever glyph was last loaded into the
+			// face's shared slot, so it is only meaningful after LoadGlyph -
+			// testing it earlier would gate on a stale (or never-set) format
+			// and could feed non-outline slot bytes to FT_Outline_Decompose
+			if (mFace->glyph->format == FT_GLYPH_FORMAT_OUTLINE) {
+				FT_Outline_Funcs callbacks = { IOutlineEnumerator::outline_moveto,
+				                               IOutlineEnumerator::outline_lineto,
+											   IOutlineEnumerator::outline_conicto,
+											   IOutlineEnumerator::outline_cubicto,
+											   0, 0 }; //0 shift & delta
+				inEnumerator.FTBegin(mFace->units_per_EM);
+				status = ( 0 == FT_Outline_Decompose(&mFace->glyph->outline, &callbacks, &inEnumerator) );
+				inEnumerator.FTEnd();
+			}
 		}
 	}
 	return status;
@@ -777,16 +790,31 @@ FT_Error FreeTypeFaceWrapper::LoadGlyph(FT_UInt inGlyphIndex, FT_Int32 inFlags)
 
 FT_Error FreeTypeFaceWrapper::SelectDefaultPalette(FT_Color** outPalette, unsigned short* outPaletteSize) {
 	if(!mPaletteSet) {
-		bool statusDataGet = FT_Palette_Data_Get(mFace, &mPaletteData);
-		bool statusSelect = FT_Palette_Select( mFace, 0, &mPalette);
+		// FT_Palette_Data_Get / FT_Palette_Select return FT_Error: 0 (FT_Err_Ok)
+		// on success, nonzero on failure. A failing call leaves its output
+		// untouched, so any single failure makes the palette state unusable and
+		// must be treated as total failure (propagating the first error code).
+		FT_Error errDataGet = FT_Palette_Data_Get(mFace, &mPaletteData);
+		FT_Error errSelect = FT_Palette_Select(mFace, 0, &mPalette);
 
-		mPaletteStatus = statusDataGet && statusSelect;
+		if(errDataGet != FT_Err_Ok)
+			mPaletteStatus = errDataGet;
+		else if(errSelect != FT_Err_Ok)
+			mPaletteStatus = errSelect;
+		else
+			mPaletteStatus = FT_Err_Ok;
 
-		mPaletteSet = true;		
+		mPaletteSet = true;
 	}
 
-	*outPalette = mPalette;
-	*outPaletteSize = mPaletteData.num_palette_entries;
+	if(mPaletteStatus != FT_Err_Ok) {
+		*outPalette = NULL;
+		*outPaletteSize = 0;
+	}
+	else {
+		*outPalette = mPalette;
+		*outPaletteSize = mPaletteData.num_palette_entries;
+	}
 	return mPaletteStatus;
 }
 

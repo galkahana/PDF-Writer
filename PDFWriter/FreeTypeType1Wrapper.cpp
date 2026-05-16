@@ -43,22 +43,30 @@ FreeTypeType1Wrapper::FreeTypeType1Wrapper(FT_Face inFace,const std::string& inF
 	else
 		mPSPrivateAvailable = true;
     
-    T1_EncodingType encodingType;
-    FT_Get_PS_Font_Value(inFace, PS_DICT_ENCODING_TYPE, 0, (void*)&encodingType, sizeof(encodingType));
+    // FT_Get_PS_Font_Value returns the number of bytes read (<= 0 on error) and
+    // does not guarantee encodingType is written on failure. Default to NONE so
+    // a failed read does not route glyph lookups through the private Type1 path.
+    T1_EncodingType encodingType = T1_ENCODING_TYPE_NONE;
+    if(FT_Get_PS_Font_Value(inFace, PS_DICT_ENCODING_TYPE, 0, (void*)&encodingType, sizeof(encodingType)) <= 0)
+        encodingType = T1_ENCODING_TYPE_NONE;
     mIsCustomEncoding = encodingType == T1_ENCODING_TYPE_ARRAY;
 
 	mPFMFileInfoRelevant = 
 		(inPFMFilePath.size() != 0 && mPFMReader.Read(inPFMFilePath) != PDFHummus::eFailure);
     
     // parse type 1 input file (my own parsing), to get extra info about encoding
+    mType1Loaded = false;
     if(inFontFilePath.size() != 0)
     {
         InputFile type1File;
-    
-        type1File.OpenFile(inFontFilePath);
-        mType1File.ReadType1File(type1File.GetInputStream());
-    
-        type1File.CloseFile();
+
+        if(type1File.OpenFile(inFontFilePath) == PDFHummus::eSuccess)
+        {
+            mType1Loaded = (mType1File.ReadType1File(type1File.GetInputStream()) == PDFHummus::eSuccess);
+            type1File.CloseFile();
+        }
+        else
+            TRACE_LOG("FreeTypeType1Wrapper::FreeTypeType1Wrapper, unable to open the type 1 font file for private encoding parsing");
     }
     
     mFace = inFace;
@@ -141,6 +149,10 @@ unsigned int FreeTypeType1Wrapper::GetGlyphForUnicodeChar(unsigned long inChar)
 
 std::string FreeTypeType1Wrapper::GetPrivateGlyphName(unsigned int inGlyphIndex)
 {
+    // if the type 1 file never loaded, mType1File holds indeterminate state -
+    // return .notdef rather than read glyph names out of it
+    if(!mType1Loaded)
+        return ".notdef";
     return mType1File.GetGlyphCharStringName(inGlyphIndex);
 }
 

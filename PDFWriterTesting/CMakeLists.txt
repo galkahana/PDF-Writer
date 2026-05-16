@@ -32,7 +32,9 @@ create_test_sourcelist (Tests
   FlateEncryptionTest.cpp
   FlateObjectDecodeTest.cpp
   FormXObjectTest.cpp
+  FreeTypeFaceWrapperTest.cpp
   FreeTypeInitializationTest.cpp
+  FreeTypeType1WrapperTest.cpp
   HighLevelContentContext.cpp
   HighLevelImages.cpp
   ImagesAndFormsForwardReferenceTest.cpp
