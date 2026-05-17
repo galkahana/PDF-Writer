@@ -80,6 +80,155 @@ static size_t findTableOffset(const string& inFont, const char* inTag) {
 	return (size_t)-1;
 }
 
+static unsigned short readU16BE(const string& inBuf, size_t inPos) {
+	return (unsigned short)(((Byte)inBuf[inPos] << 8) | (Byte)inBuf[inPos+1]);
+}
+
+// Length field of an SFNT table directory entry (entry+12, big-endian u32).
+// Returns (size_t)-1 on missing table or malformed directory.
+static size_t findTableLength(const string& inFont, const char* inTag) {
+	if(inFont.size() < 12)
+		return (size_t)-1;
+	const Byte* p = (const Byte*)inFont.data();
+	unsigned short numTables = (unsigned short)((p[4] << 8) | p[5]);
+	if(inFont.size() < 12u + (size_t)numTables * 16u)
+		return (size_t)-1;
+	for(unsigned short i = 0; i < numTables; ++i) {
+		size_t entry = 12u + (size_t)i * 16u;
+		if(p[entry+0] == (Byte)inTag[0] && p[entry+1] == (Byte)inTag[1]
+		&& p[entry+2] == (Byte)inTag[2] && p[entry+3] == (Byte)inTag[3]) {
+			return ((size_t)p[entry+12] << 24) | ((size_t)p[entry+13] << 16)
+			     | ((size_t)p[entry+14] << 8) | (size_t)p[entry+15];
+		}
+	}
+	return (size_t)-1;
+}
+
+// Pre-fix: ReadOpenTypeSFNT's ttcf branch did mHeaderOffset += offsetTable then
+// recursed unconditionally. An offset-table entry of 0 leaves mHeaderOffset
+// unchanged, so the recursion re-reads the same ttcf header forever until the
+// stack is exhausted. The buffer below is a minimal ttcf header whose single
+// font offset is 0. Post-fix the zero entry is rejected before recursing, so
+// the call returns eFailure instead of crashing. Reaching the assertion at all
+// proves the unbounded recursion is gone.
+static bool ReadOpenTypeSFNT_TtcfZeroOffsetTable_ReturnsFailure(char* argv[]) {
+	(void)argv;
+	// Arrange — 'ttcf', version 1.0, numFonts 1, offsetTable[0] = 0
+	const Byte ttc[16] = {
+		0x74,0x74,0x63,0x66,  0x00,0x01,0x00,0x00,
+		0x00,0x00,0x00,0x01,  0x00,0x00,0x00,0x00
+	};
+
+	// Act
+	InputByteArrayStream stream((Byte*)ttc, (LongFilePositionType)sizeof(ttc));
+	OpenTypeFileInput openType;
+	EStatusCode status = openType.ReadOpenTypeFile(&stream, 0);
+
+	// Assert
+	if(status == eSuccess) {
+		cout << "OpenTypeFileInputTest: zero ttcf offset table was accepted" << endl;
+		return false;
+	}
+	return true;
+}
+
+// Pre-fix: ReadName allocated new char[Length] and Read Length bytes from
+// nameOffset + stringOffset + entryOffset with no check that the range stays
+// inside the name table, so a crafted Length pulled bytes out of an adjacent
+// table into the entry's String (and from there into the produced PDF).
+// Patching name entry 0's Length to 0xFFFF makes its range escape the table.
+// Post-fix that entry is clamped to empty (Length 0) and parsing still
+// succeeds (a malformed sub-entry must not reject the whole font).
+static bool ReadName_StringRangeEscapesNameTable_ClampsEntry(char* argv[]) {
+	// Arrange
+	string font;
+	if(!readFileBytes(BuildRelativeInputPath(argv, "fonts/arial.ttf"), font)) {
+		cout << "OpenTypeFileInputTest: failed to read arial.ttf" << endl;
+		return false;
+	}
+	size_t nameOffset = findTableOffset(font, "name");
+	if(nameOffset == (size_t)-1 || nameOffset + 14 + 2 > font.size()) {
+		cout << "OpenTypeFileInputTest: arial.ttf name table missing or truncated" << endl;
+		return false;
+	}
+	// Header: format(2) count(2) stringOffset(2); entry 0 Length is the 5th
+	// USHORT of the first 6-USHORT record (offset 6 + 8).
+	font[nameOffset + 14] = (char)0xFF;
+	font[nameOffset + 15] = (char)0xFF;
+
+	// Act
+	InputByteArrayStream stream((Byte*)&font[0], (LongFilePositionType)font.size());
+	OpenTypeFileInput* openType = new OpenTypeFileInput();
+	EStatusCode status = openType->ReadOpenTypeFile(&stream, 0);
+
+	// Assert
+	bool ok = false;
+	do {
+		if(status != eSuccess) {
+			cout << "OpenTypeFileInputTest: a single out-of-range name entry rejected the whole font" << endl;
+			break;
+		}
+		if(openType->mName.mNameEntries[0].Length != 0) {
+			cout << "OpenTypeFileInputTest: out-of-range name entry 0 not clamped (Length "
+			     << openType->mName.mNameEntries[0].Length << ")" << endl;
+			break;
+		}
+		ok = true;
+	} while(false);
+
+	delete openType;
+	return ok;
+}
+
+// Pre-fix: ReadGlyfForDependencies used loca offsets as glyf seek positions
+// with no monotonicity / in-table check. The last loca entry is not itself a
+// seek base, so zeroing it leaves a pristine pre-fix parse succeeding while
+// making loca[NumGlyphs] < loca[NumGlyphs-1]. Post-fix the non-monotonic loca
+// is rejected.
+static bool ReadGlyfForDependencies_LocaNotMonotonic_ReturnsFailure(char* argv[]) {
+	// Arrange
+	string font;
+	if(!readFileBytes(BuildRelativeInputPath(argv, "fonts/arial.ttf"), font)) {
+		cout << "OpenTypeFileInputTest: failed to read arial.ttf" << endl;
+		return false;
+	}
+	size_t headOffset = findTableOffset(font, "head");
+	size_t maxpOffset = findTableOffset(font, "maxp");
+	size_t locaOffset = findTableOffset(font, "loca");
+	size_t locaLength = findTableLength(font, "loca");
+	if(headOffset == (size_t)-1 || maxpOffset == (size_t)-1
+	|| locaOffset == (size_t)-1 || locaLength == (size_t)-1
+	|| headOffset + 52 > font.size() || maxpOffset + 6 > font.size()) {
+		cout << "OpenTypeFileInputTest: arial.ttf head/maxp/loca tables missing or truncated" << endl;
+		return false;
+	}
+	unsigned short indexToLocFormat = readU16BE(font, headOffset + 50);
+	unsigned short numGlyphs = readU16BE(font, maxpOffset + 4);
+	// Last loca entry is at index numGlyphs; width 2 (short) or 4 (long).
+	size_t lastEntry = (indexToLocFormat == 0)
+		? locaOffset + (size_t)numGlyphs * 2
+		: locaOffset + (size_t)numGlyphs * 4;
+	size_t entryWidth = (indexToLocFormat == 0) ? 2u : 4u;
+	if(lastEntry + entryWidth > locaOffset + locaLength || lastEntry + entryWidth > font.size()) {
+		cout << "OpenTypeFileInputTest: computed loca last-entry position out of range" << endl;
+		return false;
+	}
+	for(size_t b = 0; b < entryWidth; ++b)
+		font[lastEntry + b] = 0;
+
+	// Act
+	InputByteArrayStream stream((Byte*)&font[0], (LongFilePositionType)font.size());
+	OpenTypeFileInput openType;
+	EStatusCode status = openType.ReadOpenTypeFile(&stream, 0);
+
+	// Assert
+	if(status == eSuccess) {
+		cout << "OpenTypeFileInputTest: non-monotonic loca was accepted" << endl;
+		return false;
+	}
+	return true;
+}
+
 // Pre-fix: the existing > NumGlyphs guard accepted numberOfHMetrics == 0,
 // then the second loop indexed mHMtx[NumberOfHMetrics-1]. (unsigned short)0
 // minus int 1 promotes to int -1, so the access reads one HMtxTableEntry
@@ -224,6 +373,9 @@ static bool ReadName_ArialTtf_PopulatesNameEntries(char* argv[]) {
 int OpenTypeFileInputTest(int argc, char* argv[]) {
 	(void)argc;
 	if(!ReadHMtx_NumberOfHMetricsZero_ReturnsFailure(argv)) return 1;
+	if(!ReadOpenTypeSFNT_TtcfZeroOffsetTable_ReturnsFailure(argv)) return 1;
+	if(!ReadName_StringRangeEscapesNameTable_ClampsEntry(argv)) return 1;
+	if(!ReadGlyfForDependencies_LocaNotMonotonic_ReturnsFailure(argv)) return 1;
 	if(!ReadOpenTypeFile_ArialTtf_PopulatesHheaMaxp(argv)) return 1;
 	if(!ReadName_ArialTtf_PopulatesNameEntries(argv)) return 1;
 	return 0;
