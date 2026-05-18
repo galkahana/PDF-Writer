@@ -199,6 +199,31 @@ string CFFSyntheticBuilder::WithCharStrings(const std::vector<std::string>& inGl
     return cff;
 }
 
+string CFFSyntheticBuilder::WithCharset(const char* inCharsetBytes, size_t inCharsetLen)
+{
+    string cff;
+    cff.append(scCFFHeader, scCFFHeaderSize);
+
+    // Name INDEX
+    cff.append("\x00\x01\x01\x01\x02\x41", 6);
+
+    // Top DICT INDEX: count=1, offSize=1, offsets=[1, 5], 4-byte body.
+    // Body: <short-int 23> 0x0F (/charset @ offset 23). No /CharStrings key,
+    // so GetCharStringsPosition returns 0 and mCharStringsCount stays 0.
+    //   header(4) + Name(6) + TopDictIndex(9) + String(2) + GlobalSubrs(2) = 23
+    const unsigned short charsetOffset = 23;
+    cff.append("\x00\x01\x01\x01\x05", 5);
+    AppendShortIntDictOperand(cff, charsetOffset);
+    cff.push_back('\x0F');
+
+    // Empty String / Global Subrs INDEXes.
+    cff.append(scEmptyIndex, scEmptyIndexSize);
+    cff.append(scEmptyIndex, scEmptyIndexSize);
+
+    cff.append(inCharsetBytes, inCharsetLen);
+    return cff;
+}
+
 EStatusCode CFFSyntheticBuilder::ParseAsCFF(const string& inCFFBytes, CFFFileInput& outCFF)
 {
     // data() is well-defined for empty buffers; &str[0] would be UB pre-C++11.

@@ -53,6 +53,13 @@ public:
     // CFFFileInput::AddDependentGlyphs.
     static std::string WithCharStrings(const std::vector<std::string>& inGlyphCharStrings);
 
+    // Non-CID CFF whose Top DICT references /charset (key 15 -> caller payload
+    // at offset 23) but omits /CharStrings, so GetCharStringsPosition returns 0
+    // and mCharStringsCount stays 0. The charset format readers then run
+    // against an empty CharStrings INDEX. The caller payload is the charset
+    // format byte followed by any format body.
+    static std::string WithCharset(const char* inCharsetBytes, size_t inCharsetLen);
+
     // ReadCFFFile shim wrapping the synthesized buffer in an
     // InputByteArrayStream and returning the parser's status.
     static PDFHummus::EStatusCode ParseAsCFF(const std::string& inCFFBytes, CFFFileInput& outCFF);

@@ -137,6 +137,11 @@ CFFFileInput::CFFFileInput(void)
 	mGlobalSubrs.mCharStringsIndex = NULL;
 	mCharStrings = NULL;
 	mPrivateDicts = NULL;
+	// Set only by PrepareForGlyphIntepretation; the dependency walkers and
+	// GetCharacterFromStandardEncoding rely on NULL meaning "no active
+	// interpretation flow".
+	mCurrentCharsetInfo = NULL;
+	mCurrentDependencies = NULL;
 }
 
 CFFFileInput::~CFFFileInput(void)
@@ -1007,7 +1012,10 @@ EStatusCode CFFFileInput::ReadFormat0Charset(bool inIsCID,
 	if(!inIsCID)
 		ioGlyphMap.insert(UShortToCharStringMap::value_type(0,inCharStrings.mCharStringsIndex));
 	*inSIDArray = new unsigned short[inCharStrings.mCharStringsCount];
-	(*inSIDArray)[0] = 0;
+	// element 0 is in range only when the CharStrings INDEX is non-empty;
+	// new unsigned short[0] is a zero-length buffer.
+	if(inCharStrings.mCharStringsCount > 0)
+		(*inSIDArray)[0] = 0;
 
 	if(inIsCID)
 	{
@@ -1036,7 +1044,10 @@ EStatusCode CFFFileInput::ReadFormat1Charset(bool inIsCID,
 	if(!inIsCID)
 		ioGlyphMap.insert(UShortToCharStringMap::value_type(0,inCharStrings.mCharStringsIndex));
 	*inSIDArray = new unsigned short[inCharStrings.mCharStringsCount];
-	(*inSIDArray)[0] = 0;
+	// element 0 is in range only when the CharStrings INDEX is non-empty;
+	// new unsigned short[0] is a zero-length buffer.
+	if(inCharStrings.mCharStringsCount > 0)
+		(*inSIDArray)[0] = 0;
 	unsigned long glyphIndex = 1;
 	unsigned short sid;
 	Byte left;
@@ -1076,7 +1087,10 @@ EStatusCode CFFFileInput::ReadFormat2Charset(bool inIsCID,
 	if(!inIsCID)
 		ioGlyphMap.insert(UShortToCharStringMap::value_type(0,inCharStrings.mCharStringsIndex));
 	*inSIDArray = new unsigned short[inCharStrings.mCharStringsCount];
-	(*inSIDArray)[0] = 0;
+	// element 0 is in range only when the CharStrings INDEX is non-empty;
+	// new unsigned short[0] is a zero-length buffer.
+	if(inCharStrings.mCharStringsCount > 0)
+		(*inSIDArray)[0] = 0;
 	unsigned short glyphIndex = 1;
 	unsigned short sid;
 	unsigned short left;
@@ -1296,7 +1310,10 @@ EStatusCode CFFFileInput::ReadCharString(	LongFilePositionType inCharStringStart
 	}while(false);
 
 	if(status != PDFHummus::eSuccess && *outCharString)
+	{
 		delete[] *outCharString;
+		*outCharString = NULL;
+	}
 
 	return status;
 }
@@ -1377,6 +1394,9 @@ EStatusCode CFFFileInput::Type2Endchar(const CharStringOperandList& inOperandLis
 
 CharString* CFFFileInput::GetCharacterFromStandardEncoding(Byte inCharacterCode)
 {
+	if(mCurrentCharsetInfo == NULL)
+		return NULL;
+
 	StandardEncoding standardEncoding;
 	const char* glyphName = standardEncoding.GetEncodedGlyphName(inCharacterCode);
 	CharPToUShortMap::iterator itStringToSID = 	mStringToSID.find(glyphName);
