@@ -70,7 +70,7 @@ FreeTypeWrapper::~FreeTypeWrapper(void)
 FT_Face FreeTypeWrapper::NewFace(const std::string& inFilePath,FT_Long inFontIndex)
 {
 	FT_Face face;
-	FT_Open_Args openFaceArguments;
+	FT_Open_Args openFaceArguments = {0};
 
 	do
 	{
@@ -140,7 +140,7 @@ void FreeTypeWrapper::RegisterStreamForFace(FT_Face inFace,FT_Stream inStream)
 
 FT_Face FreeTypeWrapper::NewFace(const std::string& inFilePath,const std::string& inSecondaryFilePath,FT_Long inFontIndex)
 {
-	FT_Open_Args attachStreamArguments;
+	FT_Open_Args attachStreamArguments = {0};
 
 	FT_Face face = NewFace(inFilePath,inFontIndex);
 	if(face)
@@ -192,8 +192,8 @@ void FreeTypeWrapper::CleanStreamsForFace(FT_Face inFace)
 		{
 			delete *itStreams;
 		}
+		mOpenStreams.erase(it);
 	}
-	mOpenStreams.erase(it);
 }
 
 
@@ -227,7 +227,10 @@ FT_Stream FreeTypeWrapper::CreateFTStreamForPath(const std::string& inFilePath)
 	InputFile* inputFile = new InputFile;
 
 	if(inputFile->OpenFile(inFilePath) != PDFHummus::eSuccess)
+	{
+		delete inputFile;
 		return NULL;
+	}
 
 	FT_Stream aStream = new FT_StreamRec();
 
