@@ -128,21 +128,23 @@ FreeTypeFaceWrapper::~FreeTypeFaceWrapper(void)
 static const char* scType1 = "Type 1";
 static const char* scTrueType = "TrueType";
 static const char* scCFF = "CFF";
+static const char* scEmpty="";
 
 void FreeTypeFaceWrapper::SetupFormatSpecificExtender(const std::string& inFontFilePath,const std::string& inPFMFilePath /*pass empty if non existant or irrelevant*/)
 {
 	if(mFace)
 	{
+		// FT_Get_X11_Font_Format returns NULL when the xfree86 driver is not built into FreeType
 		const char* fontFormat = FT_Get_X11_Font_Format(mFace);
 
-		if(strcmp(fontFormat,scType1) == 0)
+		if(fontFormat && strcmp(fontFormat,scType1) == 0)
 			mFormatParticularWrapper = new FreeTypeType1Wrapper(mFace,inFontFilePath,inPFMFilePath);
-		else if(strcmp(fontFormat,scCFF) == 0 || strcmp(fontFormat,scTrueType) == 0)
+		else if(fontFormat && (strcmp(fontFormat,scCFF) == 0 || strcmp(fontFormat,scTrueType) == 0))
 			mFormatParticularWrapper = new FreeTypeOpenTypeWrapper(mFace);
 		else
 		{
 			mFormatParticularWrapper = NULL;
-			TRACE_LOG1("Failure in FreeTypeFaceWrapper::SetupFormatSpecificExtender, could not find format specific implementation for %s",fontFormat);
+			TRACE_LOG1("Failure in FreeTypeFaceWrapper::SetupFormatSpecificExtender, could not find format specific implementation for %s",fontFormat ? fontFormat : scEmpty);
 		}
 	}
 	else
@@ -150,13 +152,13 @@ void FreeTypeFaceWrapper::SetupFormatSpecificExtender(const std::string& inFontF
 		
 }
 
-static const char* scEmpty="";
 const char* FreeTypeFaceWrapper::GetTypeString()
 {
 	if(mFace)
 	{
+		// NULL when the xfree86 driver is not built into FreeType
 		const char* fontFormat = FT_Get_X11_Font_Format(mFace);
-		return fontFormat;
+		return fontFormat ? fontFormat : scEmpty;
 	}
 	else
 	{
@@ -447,25 +449,30 @@ bool FreeTypeFaceWrapper::IsSymbolic()
 
 bool FreeTypeFaceWrapper::IsDefiningCharsNotInAdobeStandardLatin()
 {
-	if(mFace)
-	{
-		// loop charachters in font, till you find a non Adobe Standard Latin. hmm. seems like this method marks all as symbol...
-		// need to think about this...
-		bool hasOnlyAdobeStandard = true;
-		FT_ULong characterCode;
-		FT_UInt glyphIndex;
-		
-		characterCode = FT_Get_First_Char(mFace,&glyphIndex);
-		hasOnlyAdobeStandard = IsCharachterCodeAdobeStandard(characterCode);
-		while(hasOnlyAdobeStandard && glyphIndex != 0)
-		{
-			characterCode = FT_Get_Next_Char(mFace, characterCode, &glyphIndex);
-			hasOnlyAdobeStandard = IsCharachterCodeAdobeStandard(characterCode);
-		}
-		return !hasOnlyAdobeStandard;
-	}
-	else
+	if(!mFace)
 		return false;
+
+	// with no selected charmap (SelectDefaultEncoding exhausted Unicode, MS symbol
+	// and Apple Roman) FT_Get_First_Char/FT_Get_Next_Char return 0 immediately, so
+	// the enumeration cannot confirm the font is limited to Adobe Standard Latin -
+	// classify it as symbolic rather than reporting a vacuous "only standard"
+	if(!mFace->charmap)
+		return true;
+
+	// loop charachters in font, till you find a non Adobe Standard Latin. hmm. seems like this method marks all as symbol...
+	// need to think about this...
+	bool hasOnlyAdobeStandard = true;
+	FT_ULong characterCode;
+	FT_UInt glyphIndex;
+
+	characterCode = FT_Get_First_Char(mFace,&glyphIndex);
+	hasOnlyAdobeStandard = IsCharachterCodeAdobeStandard(characterCode);
+	while(hasOnlyAdobeStandard && glyphIndex != 0)
+	{
+		characterCode = FT_Get_Next_Char(mFace, characterCode, &glyphIndex);
+		hasOnlyAdobeStandard = IsCharachterCodeAdobeStandard(characterCode);
+	}
+	return !hasOnlyAdobeStandard;
 }
 
 bool FreeTypeFaceWrapper::IsCharachterCodeAdobeStandard(FT_ULong inCharacterCode)
@@ -498,13 +505,13 @@ bool FreeTypeFaceWrapper::IsCharachterCodeAdobeStandard(FT_ULong inCharacterCode
 		return true;
 	if(0x192 == inCharacterCode)
 		return true;
-	if(betweenIncluding<FT_ULong>(inCharacterCode,0x2C6,0x1C7))
+	if(betweenIncluding<FT_ULong>(inCharacterCode,0x2C6,0x2C7)) // circumflex, caron
 		return true;
-	if(betweenIncluding<FT_ULong>(inCharacterCode,0x2DA,0x1DB))
+	if(betweenIncluding<FT_ULong>(inCharacterCode,0x2DA,0x2DB)) // ring, ogonek
 		return true;
 	if(0x2DD == inCharacterCode)
 		return true;
-	if(betweenIncluding<FT_ULong>(inCharacterCode,0x2D8,0x1D9))
+	if(betweenIncluding<FT_ULong>(inCharacterCode,0x2D8,0x2D9)) // breve, dotaccent
 		return true;
 	if(betweenIncluding<FT_ULong>(inCharacterCode,0x2013,0x2014))
 		return true;
@@ -512,7 +519,7 @@ bool FreeTypeFaceWrapper::IsCharachterCodeAdobeStandard(FT_ULong inCharacterCode
 		return true;
 	if(betweenIncluding<FT_ULong>(inCharacterCode,0x201C,0x201E))
 		return true;
-	if(betweenIncluding<FT_ULong>(inCharacterCode,0x2022,0x2021))
+	if(betweenIncluding<FT_ULong>(inCharacterCode,0x2020,0x2022)) // dagger, daggerdbl, bullet
 		return true;
 	if(0x2026 == inCharacterCode)
 		return true;
@@ -651,9 +658,10 @@ IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObj
 	if(mFace)
 	{
 		IWrittenFont* result;
+		// NULL when the xfree86 driver is not built into FreeType
 		const char* fontFormat = FT_Get_X11_Font_Format(mFace);
 
-		if(strcmp(fontFormat,scType1) == 0 || strcmp(fontFormat,scCFF) == 0)
+		if(fontFormat && (strcmp(fontFormat,scType1) == 0 || strcmp(fontFormat,scCFF) == 0))
 		{
 			FT_Bool isCID = false;
 			
@@ -663,7 +671,7 @@ IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObj
 
 			result = new WrittenFontCFF(inObjectsContext, this,isCID != 0, inFontIsToBeEmbedded); // CFF fonts should know if font is to be embedded, as the embedding code involves re-encoding of glyphs
 		}
-		else if(strcmp(fontFormat,scTrueType) == 0)
+		else if(fontFormat && strcmp(fontFormat,scTrueType) == 0)
 		{
 			result = new WrittenFontTrueType(inObjectsContext, this);
 		}
@@ -671,7 +679,7 @@ IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObj
 		{
 			result = NULL;
 			TRACE_LOG1("Failure in FreeTypeFaceWrapper::CreateWrittenFontObject, could not find font writer implementation for %s",
-				fontFormat);
+				fontFormat ? fontFormat : scEmpty);
 		}
 		return result;
 	}
