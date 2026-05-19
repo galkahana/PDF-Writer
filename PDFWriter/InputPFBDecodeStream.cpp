@@ -190,7 +190,11 @@ EStatusCode InputPFBDecodeStream::StoreSegmentLength()
 	if(mStreamToDecode->Read(&byte4,1) != 1)
 		return PDFHummus::eFailure;
 
-	mSegmentSize = byte1 | (byte2<<8) | (byte3<<16) | (byte4<<24);
+	mSegmentSize =
+		(LongFilePositionType)byte1 |
+		((LongFilePositionType)byte2 << 8) |
+		((LongFilePositionType)byte3 << 16) |
+		((LongFilePositionType)byte4 << 24);
 	return PDFHummus::eSuccess;
 }
 
