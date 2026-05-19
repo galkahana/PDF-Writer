@@ -24,6 +24,17 @@
    happy-path cases prove the fix didn't turn the operators into no-ops,
    exercising the same code paths with valid operands.
 
+   V-029: InterpretCallSubr / InterpretCallGSubr read .IntegerValue from
+   the CharStringOperand union without checking IsInteger. When the
+   subroutine-index operand was pushed as a real (the 0xFF 16.16
+   fixed-point opcode), .IntegerValue reinterprets the IEEE-754 double's
+   bits as a long, handing the implementation an attacker-controlled
+   junk index. The fix coerces a real operand with (long)RealValue, the
+   same idiom every other operator in this file already uses. The
+   regression cases push a real 5.0 as the subr index and assert the
+   implementation receives exactly 5 (pre-fix it received the
+   reinterpreted bit pattern, a large non-5 value).
+
    Charstrings are synthesised in-process via a minimal
    IType2InterpreterImplementation harness, no font fixtures required.
 */
@@ -153,6 +164,134 @@ static bool InterpretPut_ValidSlotRoundTrip_ReturnsSuccess() {
 	return true;
 }
 
+// Records the index the interpreter passes to GetLocalSubr /
+// GetGlobalSubr so the test can assert the operand was coerced to the
+// integer the charstring actually encoded, not the bit-reinterpretation
+// of a real. Overrides ReadCharString to hand back the synthetic
+// program: Intepret pulls the bytes through ReadCharString, not from
+// the CharString span, so without this the interpreter would never see
+// the program and never reach the subr lookup. Returning NULL from the
+// lookup aborts interpretation right after the recording, which is all
+// the assertion needs.
+class SubrIndexRecorder : public Type2InterpreterImplementationAdapter {
+public:
+	SubrIndexRecorder() : mBytes(NULL), mLen(0),
+	                      mLocalIndex(0), mGlobalIndex(0),
+	                      mLocalCalled(false), mGlobalCalled(false) {}
+	void SetProgram(const char* inBytes, size_t inLen) {
+		mBytes = inBytes;
+		mLen = inLen;
+	}
+	virtual EStatusCode ReadCharString(LongFilePositionType inStart,
+	                                   LongFilePositionType inEnd,
+	                                   Byte** outCharString) {
+		(void) inStart;
+		(void) inEnd;
+		Byte* buf = new Byte[mLen];
+		memcpy(buf, mBytes, mLen);
+		*outCharString = buf;
+		return eSuccess;
+	}
+	virtual CharString* GetLocalSubr(long inSubrIndex) {
+		mLocalIndex = inSubrIndex;
+		mLocalCalled = true;
+		return NULL;
+	}
+	virtual CharString* GetGlobalSubr(long inSubrIndex) {
+		mGlobalIndex = inSubrIndex;
+		mGlobalCalled = true;
+		return NULL;
+	}
+	const char* mBytes;
+	size_t mLen;
+	long mLocalIndex;
+	long mGlobalIndex;
+	bool mLocalCalled;
+	bool mGlobalCalled;
+};
+
+static EStatusCode interpretBytesWith(SubrIndexRecorder& inHelper,
+                                      const char* inBytes, size_t inLen) {
+	inHelper.SetProgram(inBytes, inLen);
+	CharString cs;
+	cs.mStartPosition = 0;
+	cs.mEndPosition = (LongFilePositionType)inLen;
+	CharStringType2Interpreter interp;
+	return interp.Intepret(cs, &inHelper);
+}
+
+#define INTERPRET_WITH(helper, bytes) interpretBytesWith((helper), (bytes), sizeof(bytes) - 1)
+
+// `0xFF 00 05 00 00` pushes the 16.16 real 5.0. `callsubr` (opcode 10)
+// then uses it as the local-subr index. Pre-fix the union's
+// .IntegerValue read reinterpreted 5.0's IEEE-754 bits as a long,
+// handing GetLocalSubr a huge junk value. Post-fix the real is coerced
+// with (long)RealValue, so GetLocalSubr must receive exactly 5.
+static bool InterpretCallSubr_RealIndexOperand_CoercesToInteger() {
+	// Arrange
+	SubrIndexRecorder helper;
+
+	// Act
+	INTERPRET_WITH(helper, "\xFF\x00\x05\x00\x00\x0A");
+
+	// Assert
+	if(!helper.mLocalCalled) {
+		cout << "CharStringType2InterpreterTest: GetLocalSubr was never called" << endl;
+		return false;
+	}
+	if(helper.mLocalIndex != 5) {
+		cout << "CharStringType2InterpreterTest: real subr index not coerced; GetLocalSubr got "
+		     << helper.mLocalIndex << " expected 5" << endl;
+		return false;
+	}
+	return true;
+}
+
+// Same as above but `callgsubr` (opcode 29) routes through
+// GetGlobalSubr.
+static bool InterpretCallGSubr_RealIndexOperand_CoercesToInteger() {
+	// Arrange
+	SubrIndexRecorder helper;
+
+	// Act
+	INTERPRET_WITH(helper, "\xFF\x00\x05\x00\x00\x1D");
+
+	// Assert
+	if(!helper.mGlobalCalled) {
+		cout << "CharStringType2InterpreterTest: GetGlobalSubr was never called" << endl;
+		return false;
+	}
+	if(helper.mGlobalIndex != 5) {
+		cout << "CharStringType2InterpreterTest: real subr index not coerced; GetGlobalSubr got "
+		     << helper.mGlobalIndex << " expected 5" << endl;
+		return false;
+	}
+	return true;
+}
+
+// Happy path: an integer subr-index operand (byte 0x90 = 5 + 139) must
+// still reach GetLocalSubr unchanged. Confirms the coercion didn't
+// disturb the common integer path.
+static bool InterpretCallSubr_IntegerIndexOperand_PassesThrough() {
+	// Arrange
+	SubrIndexRecorder helper;
+
+	// Act
+	INTERPRET_WITH(helper, "\x90\x0A");
+
+	// Assert
+	if(!helper.mLocalCalled) {
+		cout << "CharStringType2InterpreterTest: GetLocalSubr was never called" << endl;
+		return false;
+	}
+	if(helper.mLocalIndex != 5) {
+		cout << "CharStringType2InterpreterTest: integer subr index altered; GetLocalSubr got "
+		     << helper.mLocalIndex << " expected 5" << endl;
+		return false;
+	}
+	return true;
+}
+
 int CharStringType2InterpreterTest(int argc, char* argv[]) {
 	(void) argc;
 	(void) argv;
@@ -160,5 +299,8 @@ int CharStringType2InterpreterTest(int argc, char* argv[]) {
 	if(!InterpretPut_SlotOutOfRange_ReturnsFailure()) return 1;
 	if(!InterpretIndex_ValidOperand_ReturnsSuccess()) return 1;
 	if(!InterpretPut_ValidSlotRoundTrip_ReturnsSuccess()) return 1;
+	if(!InterpretCallSubr_RealIndexOperand_CoercesToInteger()) return 1;
+	if(!InterpretCallGSubr_RealIndexOperand_CoercesToInteger()) return 1;
+	if(!InterpretCallSubr_IntegerIndexOperand_PassesThrough()) return 1;
 	return 0;
 }

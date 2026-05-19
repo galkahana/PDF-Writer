@@ -487,7 +487,8 @@ Byte* CharStringType2Interpreter::InterpretCallSubr(Byte* inProgramCounter, Long
 	}
 
 
-	aCharString = mImplementationHelper->GetLocalSubr(mOperandStack.back().IntegerValue);
+	CharStringOperand subrIndex = mOperandStack.back();
+	aCharString = mImplementationHelper->GetLocalSubr(subrIndex.IsInteger ? subrIndex.IntegerValue : (long)subrIndex.RealValue);
 	mOperandStack.pop_back();
 
 	if(aCharString != NULL)
@@ -678,7 +679,8 @@ Byte* CharStringType2Interpreter::InterpretCallGSubr(Byte* inProgramCounter, Lon
 	}
 
 
-	aCharString = mImplementationHelper->GetGlobalSubr(mOperandStack.back().IntegerValue);
+	CharStringOperand subrIndex = mOperandStack.back();
+	aCharString = mImplementationHelper->GetGlobalSubr(subrIndex.IsInteger ? subrIndex.IntegerValue : (long)subrIndex.RealValue);
 	mOperandStack.pop_back();
 
 	if(aCharString != NULL)

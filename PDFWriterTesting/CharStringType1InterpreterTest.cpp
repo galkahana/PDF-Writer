@@ -25,6 +25,20 @@
    prove the bounds checks didn't turn the operators into no-ops by
    exercising the same code paths with valid operands.
 
+   V-059: InterpretDiv divided without guarding the denominator. A
+   charstring of `<x> 0 div` triggers integer divide-by-zero (SIGFPE,
+   a deterministic process kill), and `<LONG_MIN> -1 div` is
+   signed-overflow UB. The fix rejects both before the division.
+
+   Charstring numbers are at most 32-bit (the 0xFF form reads four
+   bytes), so the overflow guard's LONG_MIN sentinel is only reachable
+   from input where long is 32-bit -- ILP32, or LLP64 such as 64-bit
+   Windows: there INT_MIN == LONG_MIN and INT_MIN/-1 overflows, so the
+   guard must reject it. Where long is 64-bit (LP64) the same operand
+   is -2147483648, INT_MIN/-1 == 2147483648 is representable, no
+   overflow occurs, and the division must succeed. The regression case
+   asserts the correct outcome for the running platform's long width.
+
    Charstrings are synthesised in-process: plaintext opcode/operand
    sequences are encoded through the eexec cipher (mirroring
    InputCharStringDecodeStream::DecodeByte) before being handed to the
@@ -241,6 +255,84 @@ static bool DefaultCallOtherSubr_ValidArgumentsCount_ReturnsSuccess() {
 	return true;
 }
 
+// `5 0 div`: denominator 0. Pre-fix this reached `valueA/valueB` with
+// valueB == 0 -> SIGFPE, killing the process. Post-fix InterpretDiv
+// rejects it with eFailure.
+//
+// Plaintext bytes:
+//   0x90       push 5  (5 = 0x90 - 139)
+//   0x8B       push 0  (0 = 0x8B - 139)
+//   0x0C 0x0C  div
+static bool InterpretDiv_DivisionByZero_ReturnsFailure() {
+	// Arrange + Act
+	Type1TestHelper helper;
+	EStatusCode status = INTERPRET_PLAIN(&helper, "\x90\x8B\x0C\x0C");
+
+	// Assert
+	if(status == eSuccess) {
+		cout << "CharStringType1InterpreterTest: div by zero was accepted" << endl;
+		return false;
+	}
+	return true;
+}
+
+// `-2147483648 -1 div`: INT_MIN / -1. Both operands use the 5-byte
+// signed-32 number form (0xFF b1 b2 b3 b4). The expected outcome
+// depends on the platform's long width (see the file header): where
+// long is 32-bit the division overflows and the guard must reject it;
+// where long is 64-bit the result 2147483648 is representable and the
+// division must succeed.
+//
+// Plaintext bytes:
+//   0xFF 0x80 0x00 0x00 0x00   push -2147483648
+//   0xFF 0xFF 0xFF 0xFF 0xFF   push -1
+//   0x0C 0x0C                  div
+//   0x0E                       endchar (clean terminate on the success path)
+static bool InterpretDiv_IntMinOverNegativeOne_HandledPerLongWidth() {
+	// Arrange + Act
+	Type1TestHelper helper;
+	EStatusCode status = INTERPRET_PLAIN(&helper, "\xFF\x80\x00\x00\x00\xFF\xFF\xFF\xFF\xFF\x0C\x0C\x0E");
+
+	// Assert
+	if(sizeof(long) == 4) {
+		// INT_MIN == LONG_MIN here: INT_MIN / -1 is signed-overflow UB,
+		// the guard must reject it.
+		if(status == eSuccess) {
+			cout << "CharStringType1InterpreterTest: INT_MIN / -1 accepted where long is 32-bit (overflow UB)" << endl;
+			return false;
+		}
+	} else {
+		// long is 64-bit: -2147483648 / -1 == 2147483648 is in range,
+		// no overflow, the guard must not fire and the division succeeds.
+		if(status != eSuccess) {
+			cout << "CharStringType1InterpreterTest: valid INT_MIN / -1 (64-bit long) was rejected" << endl;
+			return false;
+		}
+	}
+	return true;
+}
+
+// Happy path: `10 2 div` leaves 5 on the stack and endchar terminates
+// cleanly. Confirms the denominator guard still admits valid division.
+//
+// Plaintext bytes:
+//   0x95       push 10  (10 = 0x95 - 139)
+//   0x8D       push 2   (2 = 0x8D - 139)
+//   0x0C 0x0C  div
+//   0x0E       endchar
+static bool InterpretDiv_ValidDivision_ReturnsSuccess() {
+	// Arrange + Act
+	Type1TestHelper helper;
+	EStatusCode status = INTERPRET_PLAIN(&helper, "\x95\x8D\x0C\x0C\x0E");
+
+	// Assert
+	if(status != eSuccess) {
+		cout << "CharStringType1InterpreterTest: legitimate `10 2 div` was rejected" << endl;
+		return false;
+	}
+	return true;
+}
+
 int CharStringType1InterpreterTest(int argc, char* argv[]) {
 	(void) argc;
 	(void) argv;
@@ -250,5 +342,8 @@ int CharStringType1InterpreterTest(int argc, char* argv[]) {
 	if(!DefaultCallOtherSubr_NegativeArgumentsCount_ReturnsFailure()) return 1;
 	if(!InterpretCallOtherSubr_ValidArgumentsCount_ReturnsSuccess()) return 1;
 	if(!DefaultCallOtherSubr_ValidArgumentsCount_ReturnsSuccess()) return 1;
+	if(!InterpretDiv_DivisionByZero_ReturnsFailure()) return 1;
+	if(!InterpretDiv_IntMinOverNegativeOne_HandledPerLongWidth()) return 1;
+	if(!InterpretDiv_ValidDivision_ReturnsSuccess()) return 1;
 	return 0;
 }
