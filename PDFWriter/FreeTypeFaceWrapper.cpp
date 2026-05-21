@@ -470,8 +470,6 @@ bool FreeTypeFaceWrapper::IsDefiningCharsNotInAdobeStandardLatin()
 	if(!mFace->charmap)
 		return true;
 
-	// loop charachters in font, till you find a non Adobe Standard Latin. hmm. seems like this method marks all as symbol...
-	// need to think about this...
 	bool hasOnlyAdobeStandard = true;
 	FT_ULong characterCode;
 	FT_UInt glyphIndex;
