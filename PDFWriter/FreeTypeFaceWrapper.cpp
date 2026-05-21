@@ -134,8 +134,8 @@ void FreeTypeFaceWrapper::SetupFormatSpecificExtender(const std::string& inFontF
 {
 	if(mFace)
 	{
-		// FT_Get_X11_Font_Format returns NULL when the xfree86 driver is not built into FreeType
-		const char* fontFormat = FT_Get_X11_Font_Format(mFace);
+		// FT_Get_Font_Format returns NULL on error or when no format service is available
+		const char* fontFormat = FT_Get_Font_Format(mFace);
 
 		if(fontFormat && strcmp(fontFormat,scType1) == 0)
 			mFormatParticularWrapper = new FreeTypeType1Wrapper(mFace,inFontFilePath,inPFMFilePath);
@@ -156,8 +156,8 @@ const char* FreeTypeFaceWrapper::GetTypeString()
 {
 	if(mFace)
 	{
-		// NULL when the xfree86 driver is not built into FreeType
-		const char* fontFormat = FT_Get_X11_Font_Format(mFace);
+		// NULL on error or when no format service is available
+		const char* fontFormat = FT_Get_Font_Format(mFace);
 		return fontFormat ? fontFormat : scEmpty;
 	}
 	else
@@ -658,8 +658,8 @@ IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObj
 	if(mFace)
 	{
 		IWrittenFont* result;
-		// NULL when the xfree86 driver is not built into FreeType
-		const char* fontFormat = FT_Get_X11_Font_Format(mFace);
+		// NULL on error or when no format service is available
+		const char* fontFormat = FT_Get_Font_Format(mFace);
 
 		if(fontFormat && (strcmp(fontFormat,scType1) == 0 || strcmp(fontFormat,scCFF) == 0))
 		{
