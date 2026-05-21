@@ -37,6 +37,22 @@
        Type 2 seac (4-arg endchar) dependency graph without a visited-set
        guard or a depth cap, so a self-referencing or cyclic seac chain
        drove the call stack until it overflowed.
+     * V-044: the three charset format readers wrote (*inSIDArray)[0] = 0
+       unconditionally, but a font that omits /CharStrings has
+       mCharStringsCount == 0, making *inSIDArray a new unsigned short[0]
+       zero-length buffer — element 0 is an out-of-bounds heap write.
+     * V-048: ReadCharString deleted the charstring buffer on a failed read
+       but left *outCharString dangling; every Type 2 interpreter call site
+       then ran an unconditional delete[] on the same pointer (double-free)
+       when the charstring data was truncated past the stream end.
+
+   (V-046 — the format-0 encoding loop's Byte counter — was structurally
+   closed by #364's V-031 widening, which rewrote that loop to use an
+   unsigned short counter; no separate change or case here. V-047 —
+   latent stale mCurrentCharsetInfo deref in Type2Endchar — is a
+   constructor-init + NULL-guard hardening with no attacker-reachable
+   trigger today, so it follows the latent-fix principle: no synthetic
+   no-op case, covered by the existing suite.)
 
    Cases are grouped by the function they exercise (sc<Function>Cases) and
    driven by Run<Function>Cases runners. Each row's label states
@@ -555,11 +571,120 @@ static bool RunAddDependentGlyphsCases() {
 	return true;
 }
 
+// V-044: each charset format reader did (*inSIDArray)[0] = 0 before
+// checking mCharStringsCount. A font that omits /CharStrings has
+// mCharStringsCount == 0, so *inSIDArray is a new unsigned short[0]
+// zero-length buffer and element 0 is an out-of-bounds heap write.
+// WithCharset builds exactly that font (custom /charset, no /CharStrings);
+// the only payload needed is the one-byte charset format selector, since
+// with zero glyphs the per-glyph fill loops never iterate. Post-fix the
+// parse still succeeds (an empty CharStrings INDEX is valid CFF) and a
+// custom charset object is recorded.
+struct CharsetFormatCase {
+	const char* mLabel;
+	const char* mPayload;
+	size_t mPayloadLen;
+};
+
+static const CharsetFormatCase scReadCharsetCases[] = {
+	{"Format0EmptyCharStrings_ParsesWithoutOOBWrite", CFF_BYTES("\x00")},
+	{"Format1EmptyCharStrings_ParsesWithoutOOBWrite", CFF_BYTES("\x01")},
+	{"Format2EmptyCharStrings_ParsesWithoutOOBWrite", CFF_BYTES("\x02")},
+};
+
+static bool RunReadCharsetCases() {
+	bool ok = true;
+	const size_t caseCount = sizeof(scReadCharsetCases) / sizeof(scReadCharsetCases[0]);
+	for(size_t i = 0; i < caseCount; ++i) {
+		const CharsetFormatCase& c = scReadCharsetCases[i];
+
+		// Arrange
+		CFFFileInput cff;
+		string bytes = CFFSyntheticBuilder::WithCharset(c.mPayload, c.mPayloadLen);
+
+		// Act
+		EStatusCode status = CFFSyntheticBuilder::ParseAsCFF(bytes, cff);
+
+		// Assert
+		if(status != eSuccess) {
+			cout << "CFFFileInputTest [ReadCharset::" << c.mLabel
+			     << "]: parse failed; empty-CharStrings custom charset is valid CFF" << endl;
+			ok = false;
+			continue;
+		}
+		if(cff.GetCharStringsCount(0) != 0) {
+			cout << "CFFFileInputTest [ReadCharset::" << c.mLabel
+			     << "]: precondition broken — charstrings count = "
+			     << cff.GetCharStringsCount(0) << ", expected 0" << endl;
+			ok = false;
+			continue;
+		}
+		const CharSetInfo* charSet = cff.mTopDictIndex[0].mCharSet;
+		if(charSet == NULL || charSet->mType != eCharSetCustom) {
+			cout << "CFFFileInputTest [ReadCharset::" << c.mLabel
+			     << "]: custom charset not recorded" << endl;
+			ok = false;
+		}
+	}
+	return ok;
+}
+
+// V-048: ReadCharString allocated *outCharString, and on a failed read
+// deleted it but left the caller's pointer dangling. Every Type 2
+// interpreter call site (CharStringType2Interpreter::Intepret /
+// InterpretCallSubr / InterpretCallGSubr) then ran an unconditional
+// delete[] on that same pointer -> double-free. The CharStrings INDEX
+// offset table is parsed up front but the charstring bytes are read
+// lazily during interpretation, so a buffer truncated after the offset
+// table still parses, then fails the read inside ReadCharString.
+static bool ReadCharString_TruncatedCharStringData_NoDoubleFree() {
+	// Arrange: one glyph with a 4-byte CharString, then drop the last 2
+	// bytes. The offset table still claims 4 bytes for glyph 1, so the
+	// snapshot positions are intact but the data is short by 2.
+	std::vector<std::string> charStrings;
+	charStrings.push_back(string("\x8B\x8B\x8B\x0E", 4));
+	string bytes = CFFSyntheticBuilder::WithCharStrings(charStrings);
+	if(bytes.size() < 2) {
+		cout << "CFFFileInputTest [ReadCharString::TruncatedCharStringData_NoDoubleFree]: builder produced empty CFF" << endl;
+		return false;
+	}
+	bytes.resize(bytes.size() - 2);
+
+	InputByteArrayStream stream;
+	CFFFileInput cff;
+	if(ParseKeepingStream(bytes, stream, cff) != eSuccess) {
+		cout << "CFFFileInputTest [ReadCharString::TruncatedCharStringData_NoDoubleFree]: truncated CFF unexpectedly rejected at parse time" << endl;
+		return false;
+	}
+
+	// Act: interpreting glyph 1 reads its (truncated) charstring; pre-fix
+	// this double-freed the buffer and aborted the process.
+	std::vector<unsigned int> subset;
+	subset.push_back(1);
+	EStatusCode status = cff.AddDependentGlyphs(subset);
+
+	// Assert: the read failure must surface as eFailure, and reaching this
+	// line at all means there was no double-free abort.
+	if(status == eSuccess) {
+		cout << "CFFFileInputTest [ReadCharString::TruncatedCharStringData_NoDoubleFree]: "
+		        "truncated charstring read reported success" << endl;
+		return false;
+	}
+	return true;
+}
+
+static bool RunReadCharStringCases() {
+	if(!ReadCharString_TruncatedCharStringData_NoDoubleFree()) return false;
+	return true;
+}
+
 int CFFFileInputTest(int argc, char* argv[]) {
 	if(!RunGetSingleIntegerValueFromDictCases()) return 1;
 	if(!RunReadPrivateDictCases()) return 1;
 	if(!RunReadEncodingCases()) return 1;
 	if(!RunReadFDSelectCases()) return 1;
+	if(!RunReadCharsetCases()) return 1;
+	if(!RunReadCharStringCases()) return 1;
 	if(!RunAddDependentGlyphsCases()) return 1;
 	if(!ReadCFFFile_BrushScriptStd_PopulatesPrivateDict(argv)) return 1;
 	return 0;
