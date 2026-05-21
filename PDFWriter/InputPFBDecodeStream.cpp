@@ -610,7 +610,8 @@ LongBufferSizeType InputPFBDecodeStream::Read(Byte* inBuffer,LongBufferSizeType 
 				PDFHummus::eSuccess == mInternalState)
 		{
 			mInternalState = mDecodeMethod(this,inBuffer[bufferIndex]);
-			++bufferIndex;
+			if(PDFHummus::eSuccess == mInternalState)
+				++bufferIndex;
 		}
 
 		// segment ended, initialize next segment

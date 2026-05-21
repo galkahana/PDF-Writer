@@ -96,9 +96,7 @@ static bool Read_FreshlyConstructedWithoutAssign_ReturnsZeroAndDisclosesNothing(
 // One row exercises StoreSegmentLength (observed through Read): a type-1
 // ASCII PFB segment whose declared length high byte is mHighByte, carrying a
 // short "abc" payload. The declared length is always far larger than the
-// payload, so Read drains the 3 payload bytes and then makes one more
-// (failing) read attempt that still bumps the returned count -- giving a
-// uniform expected return of 4 with the first 3 bytes "abc". Pre-fix, a
+// payload, so Read drains the 3 payload bytes and returns 3. Pre-fix, a
 // mHighByte >= 0x80 made mSegmentSize negative (signed-shift UB), the inner
 // read loop never ran, and Read returned 0.
 struct StoreSegmentLengthCase {
@@ -150,9 +148,9 @@ static bool RunStoreSegmentLengthCases() {
 			     << "]: Assign returned non-eSuccess" << endl;
 			ok = false;
 		}
-		if(got != 4) {
+		if(got != 3) {
 			cout << "InputPFBDecodeStreamTest[" << testCase.mLabel
-			     << "]: Read returned " << got << ", expected 4 (segment skipped: signed-shift UB?)" << endl;
+			     << "]: Read returned " << got << ", expected 3 (segment skipped: signed-shift UB?)" << endl;
 			ok = false;
 		}
 		if(!(out[0] == 'a' && out[1] == 'b' && out[2] == 'c')) {
