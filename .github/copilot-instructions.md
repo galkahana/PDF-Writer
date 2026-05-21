@@ -92,6 +92,9 @@ No-actionable-finding mode (strict):
 - In no-actionable-findings cases, keep the full response to exactly 3 lines (per strict template above).
 - Do not include "Reviewed changes" or similar boilerplate sections.
 - Do not restate the same conclusion across multiple sections.
+- Never output "Decision: Request changes" unless Findings contains at least one unresolved 🔴 Critical or 🟠 High item.
+- If Decision is "Request changes", Severity Summary must include 🔴 and/or 🟠 with count > 0.
+- If only 🟡 Medium findings exist, Decision must be "Comment".
 - Before using no-actionable-findings mode, perform a changed-behavior test coverage check:
 	- Map each material behavior change in touched production code to a specific test name/location, or to a documented infeasibility note.
 	- If any material behavior change is unmapped, do not use no-actionable-findings mode; emit a 🟡 Medium testing-gap finding.
