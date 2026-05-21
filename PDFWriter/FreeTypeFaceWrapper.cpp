@@ -136,15 +136,21 @@ void FreeTypeFaceWrapper::SetupFormatSpecificExtender(const std::string& inFontF
 	{
 		// FT_Get_Font_Format returns NULL on error or when no format service is available
 		const char* fontFormat = FT_Get_Font_Format(mFace);
+		if(!fontFormat)
+		{
+			mFormatParticularWrapper = NULL;
+			TRACE_LOG("Failure in FreeTypeFaceWrapper::SetupFormatSpecificExtender, FT_Get_Font_Format returned NULL");
+			return;
+		}
 
-		if(fontFormat && strcmp(fontFormat,scType1) == 0)
+		if(strcmp(fontFormat,scType1) == 0)
 			mFormatParticularWrapper = new FreeTypeType1Wrapper(mFace,inFontFilePath,inPFMFilePath);
-		else if(fontFormat && (strcmp(fontFormat,scCFF) == 0 || strcmp(fontFormat,scTrueType) == 0))
+		else if(strcmp(fontFormat,scCFF) == 0 || strcmp(fontFormat,scTrueType) == 0)
 			mFormatParticularWrapper = new FreeTypeOpenTypeWrapper(mFace);
 		else
 		{
 			mFormatParticularWrapper = NULL;
-			TRACE_LOG1("Failure in FreeTypeFaceWrapper::SetupFormatSpecificExtender, could not find format specific implementation for %s",fontFormat ? fontFormat : scEmpty);
+			TRACE_LOG1("Failure in FreeTypeFaceWrapper::SetupFormatSpecificExtender, could not find format specific implementation for %s",fontFormat);
 		}
 	}
 	else
@@ -158,7 +164,12 @@ const char* FreeTypeFaceWrapper::GetTypeString()
 	{
 		// NULL on error or when no format service is available
 		const char* fontFormat = FT_Get_Font_Format(mFace);
-		return fontFormat ? fontFormat : scEmpty;
+		if(!fontFormat)
+		{
+			TRACE_LOG("Failure in FreeTypeFaceWrapper::GetTypeString, FT_Get_Font_Format returned NULL");
+			return scEmpty;
+		}
+		return fontFormat;
 	}
 	else
 	{
@@ -660,18 +671,23 @@ IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObj
 		IWrittenFont* result;
 		// NULL on error or when no format service is available
 		const char* fontFormat = FT_Get_Font_Format(mFace);
+		if(!fontFormat)
+		{
+			TRACE_LOG("Failure in FreeTypeFaceWrapper::CreateWrittenFontObject, FT_Get_Font_Format returned NULL");
+			return NULL;
+		}
 
-		if(fontFormat && (strcmp(fontFormat,scType1) == 0 || strcmp(fontFormat,scCFF) == 0))
+		if(strcmp(fontFormat,scType1) == 0 || strcmp(fontFormat,scCFF) == 0)
 		{
 			FT_Bool isCID = false;
-			
+
 			// CFF written fonts needs to know if the font is originally CID in order to disallow ANSI form in this case
 			if(FT_Get_CID_Is_Internally_CID_Keyed(mFace,&isCID) != 0)
 				isCID = false;	
 
 			result = new WrittenFontCFF(inObjectsContext, this,isCID != 0, inFontIsToBeEmbedded); // CFF fonts should know if font is to be embedded, as the embedding code involves re-encoding of glyphs
 		}
-		else if(fontFormat && strcmp(fontFormat,scTrueType) == 0)
+		else if(strcmp(fontFormat,scTrueType) == 0)
 		{
 			result = new WrittenFontTrueType(inObjectsContext, this);
 		}
@@ -679,7 +695,7 @@ IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObj
 		{
 			result = NULL;
 			TRACE_LOG1("Failure in FreeTypeFaceWrapper::CreateWrittenFontObject, could not find font writer implementation for %s",
-				fontFormat ? fontFormat : scEmpty);
+				fontFormat);
 		}
 		return result;
 	}
