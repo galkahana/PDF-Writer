@@ -244,8 +244,8 @@ private:
 										 // technique some producers use
 
 	PDFHummus::EStatusCode ReadOpenTypeHeader();
-	PDFHummus::EStatusCode ReadOpenTypeSFNT();
-    PDFHummus::EStatusCode ReadOpenTypeSFNTFromDfont();
+	PDFHummus::EStatusCode ReadOpenTypeSFNT(unsigned short inRecursionDepth);
+    PDFHummus::EStatusCode ReadOpenTypeSFNTFromDfont(unsigned short inRecursionDepth);
 	PDFHummus::EStatusCode ReadHead();
 	PDFHummus::EStatusCode ReadMaxP();
 	PDFHummus::EStatusCode ReadHHea();
