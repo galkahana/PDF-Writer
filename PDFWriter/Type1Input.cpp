@@ -136,8 +136,6 @@ void Type1Input::Reset()
 	mPrivateDictionary.StemSnapH.clear();
 	mPrivateDictionary.StemSnapV.clear();
 	mPrivateDictionary.UniqueID = -1;
-
-	Type1PrivateDictionary mPrivateDictionary;
 }
 
 EStatusCode Type1Input::ReadType1File(IByteReaderWithPosition* inType1)
@@ -892,6 +890,7 @@ EStatusCode Type1Input::ParseCharstrings()
 				status = eFailure;
 				break;
 			}
+
 			charString.CodeLength = (int)codeLength;
 
 			charString.Code = new Byte[charString.CodeLength];
@@ -899,8 +898,16 @@ EStatusCode Type1Input::ParseCharstrings()
 			// skip the RD token (will also skip space)
 			mPFBDecoder.GetNextToken();
 
-
-			mPFBDecoder.Read(charString.Code,charString.CodeLength);
+			// Reject a short read: the unwritten tail of Code would
+			// otherwise reach the charstring interpreter as indeterminate data.
+			if(mPFBDecoder.Read(charString.Code,charString.CodeLength) != (LongBufferSizeType)charString.CodeLength)
+			{
+				TRACE_LOG1("Type1Input::ParseCharstrings, truncated charstring data for %s",characterName.c_str());
+				delete[] charString.Code;
+				charString.Code = NULL;
+				status = eFailure;
+				break;
+			}
 
 			// std::map::insert is no-op on duplicate keys; without checking we
 			// would leak charString.Code on a malformed font that names the
@@ -1097,17 +1104,21 @@ EStatusCode Type1Input::Type1Seac(const LongList& inOperandList)
 		return eFailure;		
 	}
 
-	LongList::const_reverse_iterator it = inOperandList.rbegin();
+	if(mCurrentDependencies)
+	{
+		LongList::const_reverse_iterator it = inOperandList.rbegin();
 
-	mCurrentDependencies->mCharCodes.insert((Byte)*it);
-	++it;
-	mCurrentDependencies->mCharCodes.insert((Byte)*it);
+		mCurrentDependencies->mCharCodes.insert((Byte)*it);
+		++it;
+		mCurrentDependencies->mCharCodes.insert((Byte)*it);
+	}
 	return eSuccess;
 }
 
 bool Type1Input::IsOtherSubrSupported(long inOtherSubrsIndex)
 {
-	mCurrentDependencies->mOtherSubrs.insert((unsigned short)inOtherSubrsIndex);
+	if(mCurrentDependencies)
+		mCurrentDependencies->mOtherSubrs.insert((unsigned short)inOtherSubrsIndex);
 	return false;
 }
 
