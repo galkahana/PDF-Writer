@@ -490,59 +490,59 @@ bool FreeTypeFaceWrapper::IsCharachterCodeAdobeStandard(FT_ULong inCharacterCode
 	if(inCharacterCode < 0x20) // ignore control charachters
 		return true;
 
-	if(betweenIncluding<FT_ULong>(inCharacterCode,0x20,0x7E))
+	if(betweenIncluding<FT_ULong>(inCharacterCode,0x20,0x7E)) // ASCII printable (space..tilde)
 		return true;
-	if(betweenIncluding<FT_ULong>(inCharacterCode,0xA1,0xAC))
+	if(betweenIncluding<FT_ULong>(inCharacterCode,0xA1,0xAC)) // exclamdown..logicalnot
 		return true;
-	if(betweenIncluding<FT_ULong>(inCharacterCode,0xAE,0xB2))
+	if(betweenIncluding<FT_ULong>(inCharacterCode,0xAE,0xB2)) // registered..twosuperior
 		return true;
-	if(betweenIncluding<FT_ULong>(inCharacterCode,0xB4,0xBD))
+	if(betweenIncluding<FT_ULong>(inCharacterCode,0xB4,0xBD)) // acute..onehalf
 		return true;
-	if(betweenIncluding<FT_ULong>(inCharacterCode,0xBF,0xFF))
+	if(betweenIncluding<FT_ULong>(inCharacterCode,0xBF,0xFF)) // questiondown..ydieresis
 		return true;
-	if(0x131 == inCharacterCode)
+	if(0x131 == inCharacterCode) // dotlessi
 		return true;
-	if(betweenIncluding<FT_ULong>(inCharacterCode,0x141,0x142))
+	if(betweenIncluding<FT_ULong>(inCharacterCode,0x141,0x142)) // Lslash, lslash
 		return true;
-	if(betweenIncluding<FT_ULong>(inCharacterCode,0x152,0x153))
+	if(betweenIncluding<FT_ULong>(inCharacterCode,0x152,0x153)) // OE, oe
 		return true;
-	if(betweenIncluding<FT_ULong>(inCharacterCode,0x160,0x161))
+	if(betweenIncluding<FT_ULong>(inCharacterCode,0x160,0x161)) // Scaron, scaron
 		return true;
-	if(0x178 == inCharacterCode)
+	if(0x178 == inCharacterCode) // Ydieresis
 		return true;
-	if(betweenIncluding<FT_ULong>(inCharacterCode,0x17D,0x17E))
+	if(betweenIncluding<FT_ULong>(inCharacterCode,0x17D,0x17E)) // Zcaron, zcaron
 		return true;
-	if(0x192 == inCharacterCode)
+	if(0x192 == inCharacterCode) // florin
 		return true;
 	if(betweenIncluding<FT_ULong>(inCharacterCode,0x2C6,0x2C7)) // circumflex, caron
 		return true;
 	if(betweenIncluding<FT_ULong>(inCharacterCode,0x2DA,0x2DB)) // ring, ogonek
 		return true;
-	if(0x2DD == inCharacterCode)
+	if(0x2DD == inCharacterCode) // hungarumlaut
 		return true;
 	if(betweenIncluding<FT_ULong>(inCharacterCode,0x2D8,0x2D9)) // breve, dotaccent
 		return true;
-	if(betweenIncluding<FT_ULong>(inCharacterCode,0x2013,0x2014))
+	if(betweenIncluding<FT_ULong>(inCharacterCode,0x2013,0x2014)) // endash, emdash
 		return true;
-	if(betweenIncluding<FT_ULong>(inCharacterCode,0x2018,0x201A))
+	if(betweenIncluding<FT_ULong>(inCharacterCode,0x2018,0x201A)) // quoteleft, quoteright, quotesinglbase
 		return true;
-	if(betweenIncluding<FT_ULong>(inCharacterCode,0x201C,0x201E))
+	if(betweenIncluding<FT_ULong>(inCharacterCode,0x201C,0x201E)) // quotedblleft, quotedblright, quotedblbase
 		return true;
 	if(betweenIncluding<FT_ULong>(inCharacterCode,0x2020,0x2022)) // dagger, daggerdbl, bullet
 		return true;
-	if(0x2026 == inCharacterCode)
+	if(0x2026 == inCharacterCode) // ellipsis
 		return true;
-	if(0x2030 == inCharacterCode)
+	if(0x2030 == inCharacterCode) // perthousand
 		return true;
-	if(betweenIncluding<FT_ULong>(inCharacterCode,0x2039,0x203A))
+	if(betweenIncluding<FT_ULong>(inCharacterCode,0x2039,0x203A)) // guilsinglleft, guilsinglright
 		return true;
-	if(0x2044 == inCharacterCode)
+	if(0x2044 == inCharacterCode) // fraction
 		return true;
-	if(0x20AC == inCharacterCode)
+	if(0x20AC == inCharacterCode) // Euro
 		return true;
-	if(0x2122 == inCharacterCode)
+	if(0x2122 == inCharacterCode) // trademark
 		return true;
-	if(betweenIncluding<FT_ULong>(inCharacterCode,0xFB01,0xFB02))
+	if(betweenIncluding<FT_ULong>(inCharacterCode,0xFB01,0xFB02)) // fi, fl
 		return true;
 	return false;
 }
