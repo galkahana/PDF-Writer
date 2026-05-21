@@ -22,6 +22,8 @@
 #include "InputByteArrayStream.h"
 #include "Trace.h"
 
+#include <limits.h>
+
 
 using namespace PDFHummus;
 
@@ -512,6 +514,12 @@ EStatusCode CharStringType1Interpreter::InterpretDiv()
 	mOperandStack.pop_back();
 	valueA = mOperandStack.back();
 	mOperandStack.pop_back();
+
+	if(valueB == 0 || (valueA == LONG_MIN && valueB == -1)) {
+		TRACE_LOG2("CharStringType1Interpreter::InterpretDiv, undefined division (numerator %ld, denominator %ld). Aborting", valueA, valueB);
+		return eFailure;
+	}
+
 	mOperandStack.push_back(valueA/valueB);
 	return eSuccess;
 }
