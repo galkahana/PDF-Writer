@@ -27,19 +27,6 @@
 using namespace PDFHummus;
 
 
-#undef __FTERRORS_H__                                           
-#define FT_ERRORDEF( e, v, s )  { e, s },                       
-#define FT_ERROR_START_LIST     {                               
-#define FT_ERROR_END_LIST       { 0, 0 } };                     
-                                                             
-static const struct                                                    
-{                                                               
-int          err_code;                                        
-const char*  err_msg;                                         
-} ft_errors[] =                                                 
-                                                             
-#include FT_ERRORS_H                                            
-
 FreeTypeWrapper::FreeTypeWrapper(void)
 {
 	if(FT_Init_FreeType(&mFreeType))
@@ -70,7 +57,7 @@ FreeTypeWrapper::~FreeTypeWrapper(void)
 FT_Face FreeTypeWrapper::NewFace(const std::string& inFilePath,FT_Long inFontIndex)
 {
 	FT_Face face;
-	FT_Open_Args openFaceArguments;
+	FT_Open_Args openFaceArguments = {0};
 
 	do
 	{
@@ -84,8 +71,10 @@ FT_Face FreeTypeWrapper::NewFace(const std::string& inFilePath,FT_Long inFontInd
 
 		if(ftStatus)
 		{
+			// FT_Error_String returns NULL when FreeType was built without FT_CONFIG_OPTION_ERROR_STRINGS (the bundled build enables it; unbundled may not)
+			const char* errMsg = FT_Error_String(ftStatus);
 			TRACE_LOG2("FreeTypeWrapper::NewFace, unable to load font named %s with index %ld",inFilePath.c_str(),inFontIndex);
-			TRACE_LOG2("FreeTypeWrapper::NewFace, Free Type Error, Code = %d, Message = %s",ft_errors[ftStatus].err_code,ft_errors[ftStatus].err_msg);
+			TRACE_LOG2("FreeTypeWrapper::NewFace, Free Type Error, Code = %d, Message = %s",ftStatus,errMsg ? errMsg : "");
 			face = NULL;
 		}
 
@@ -140,7 +129,7 @@ void FreeTypeWrapper::RegisterStreamForFace(FT_Face inFace,FT_Stream inStream)
 
 FT_Face FreeTypeWrapper::NewFace(const std::string& inFilePath,const std::string& inSecondaryFilePath,FT_Long inFontIndex)
 {
-	FT_Open_Args attachStreamArguments;
+	FT_Open_Args attachStreamArguments = {0};
 
 	FT_Face face = NewFace(inFilePath,inFontIndex);
 	if(face)
@@ -157,8 +146,9 @@ FT_Face FreeTypeWrapper::NewFace(const std::string& inFilePath,const std::string
 			FT_Error ftStatus = FT_Attach_Stream(face,&attachStreamArguments);
 			if(ftStatus != 0)
 			{
+				const char* errMsg = FT_Error_String(ftStatus);
 				TRACE_LOG1("FreeTypeWrapper::NewFace, unable to load secondary file %s",inSecondaryFilePath.c_str());
-				TRACE_LOG2("FreeTypeWrapper::NewFace, Free Type Error, Code = %d, Message = %s",ft_errors[ftStatus].err_code,ft_errors[ftStatus].err_msg);
+				TRACE_LOG2("FreeTypeWrapper::NewFace, Free Type Error, Code = %d, Message = %s",ftStatus,errMsg ? errMsg : "");
 				DoneFace(face);
 				face = NULL;
 			}
@@ -192,8 +182,8 @@ void FreeTypeWrapper::CleanStreamsForFace(FT_Face inFace)
 		{
 			delete *itStreams;
 		}
+		mOpenStreams.erase(it);
 	}
-	mOpenStreams.erase(it);
 }
 
 
@@ -227,7 +217,10 @@ FT_Stream FreeTypeWrapper::CreateFTStreamForPath(const std::string& inFilePath)
 	InputFile* inputFile = new InputFile;
 
 	if(inputFile->OpenFile(inFilePath) != PDFHummus::eSuccess)
+	{
+		delete inputFile;
 		return NULL;
+	}
 
 	FT_Stream aStream = new FT_StreamRec();
 

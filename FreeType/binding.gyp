@@ -5,7 +5,8 @@
             'type': 'static_library',
             'defines': [
                 'FT2_BUILD_LIBRARY=1',
-                'FT_CONFIG_OPTION_SYSTEM_ZLIB=1'
+                'FT_CONFIG_OPTION_SYSTEM_ZLIB=1',
+                'FT_CONFIG_OPTION_ERROR_STRINGS=1'
             ],
             'include_dirs': [
              './include',

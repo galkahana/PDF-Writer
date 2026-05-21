@@ -35,6 +35,7 @@ create_test_sourcelist (Tests
   FreeTypeFaceWrapperTest.cpp
   FreeTypeInitializationTest.cpp
   FreeTypeType1WrapperTest.cpp
+  FreeTypeWrapperTest.cpp
   HighLevelContentContext.cpp
   HighLevelImages.cpp
   ImagesAndFormsForwardReferenceTest.cpp
