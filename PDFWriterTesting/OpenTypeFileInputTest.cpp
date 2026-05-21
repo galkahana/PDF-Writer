@@ -114,13 +114,14 @@ static size_t findTableLength(const string& inFont, const char* inTag) {
 static bool ReadOpenTypeSFNT_TtcfZeroOffsetTable_ReturnsFailure(char* argv[]) {
 	(void)argv;
 	// Arrange — 'ttcf', version 1.0, numFonts 1, offsetTable[0] = 0
-	const Byte ttc[16] = {
+	// (non-const to match InputByteArrayStream's mutable-pointer constructor)
+	Byte ttc[16] = {
 		0x74,0x74,0x63,0x66,  0x00,0x01,0x00,0x00,
 		0x00,0x00,0x00,0x01,  0x00,0x00,0x00,0x00
 	};
 
 	// Act
-	InputByteArrayStream stream((Byte*)ttc, (LongFilePositionType)sizeof(ttc));
+	InputByteArrayStream stream(ttc, (LongFilePositionType)sizeof(ttc));
 	OpenTypeFileInput openType;
 	EStatusCode status = openType.ReadOpenTypeFile(&stream, 0);
 
