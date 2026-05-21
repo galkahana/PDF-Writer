@@ -259,6 +259,53 @@ static bool SelectDefaultPalette_FontWithPalette_ReturnsOkAndExactEntryCount(cha
 	return ok;
 }
 
+// V-079: four Adobe-Standard-Latin ranges in IsCharachterCodeAdobeStandard
+// had their bounds reversed (e.g. betweenIncluding(c,0x2C6,0x1C7)), so the
+// lo>hi test was always false and these accented/punctuation codepoints
+// were misclassified as non-standard -> wrong IsSymbolic -> wrong PDF
+// FontDescriptor /Flags. Each codepoint below must classify as Adobe
+// Standard; pre-fix every one returned false. A CJK codepoint that is
+// genuinely outside the set still returns false, proving the corrected
+// ranges are not blanket-true.
+static bool IsCharachterCodeAdobeStandard_PreviouslyReversedRanges_ReturnsTrue(char* argv[]) {
+	bool ok = false;
+	FreeTypeWrapper ft;
+	FT_Face face = ft.NewFace(BuildRelativeInputPath(argv, "fonts/arial.ttf"), 0);
+	do {
+		// Arrange
+		if(!face) {
+			cout << "FreeTypeFaceWrapperTest [IsCharachterCodeAdobeStandard::PreviouslyReversedRanges_ReturnsTrue]: failed to load arial.ttf" << endl;
+			break;
+		}
+		FreeTypeFaceWrapper wrapper(face, "", 0, false);
+
+		// circumflex/caron, ring/ogonek, breve/dotaccent, dagger/daggerdbl/bullet
+		const FT_ULong inRange[] = { 0x2C6, 0x2C7, 0x2DA, 0x2DB, 0x2D8, 0x2D9,
+		                             0x2020, 0x2021, 0x2022 };
+		const size_t inRangeCount = sizeof(inRange) / sizeof(inRange[0]);
+
+		// Act + Assert
+		bool allStandard = true;
+		for(size_t i = 0; i < inRangeCount; ++i) {
+			if(!wrapper.IsCharachterCodeAdobeStandard(inRange[i])) {
+				cout << "FreeTypeFaceWrapperTest [IsCharachterCodeAdobeStandard::PreviouslyReversedRanges_ReturnsTrue]: 0x"
+				     << hex << inRange[i] << dec << " misclassified as non-standard (reversed-bound range)" << endl;
+				allStandard = false;
+			}
+		}
+		if(!allStandard)
+			break;
+		if(wrapper.IsCharachterCodeAdobeStandard(0x4E00)) {
+			cout << "FreeTypeFaceWrapperTest [IsCharachterCodeAdobeStandard::PreviouslyReversedRanges_ReturnsTrue]: CJK U+4E00 wrongly classified as Adobe Standard" << endl;
+			break;
+		}
+		ok = true;
+	} while(false);
+
+	ft.DoneFace(face);
+	return ok;
+}
+
 int FreeTypeFaceWrapperTest(int argc, char* argv[]) {
 	(void)argc;
 
@@ -267,5 +314,6 @@ int FreeTypeFaceWrapperTest(int argc, char* argv[]) {
 	if(!GetGlyphName_FontWithoutGlyphNames_ReturnsNotDef(argv)) return 1;
 	if(!SelectDefaultPalette_FontWithoutPalette_ReturnsErrorAndZeroedOutputs(argv)) return 1;
 	if(!SelectDefaultPalette_FontWithPalette_ReturnsOkAndExactEntryCount(argv)) return 1;
+	if(!IsCharachterCodeAdobeStandard_PreviouslyReversedRanges_ReturnsTrue(argv)) return 1;
 	return 0;
 }
