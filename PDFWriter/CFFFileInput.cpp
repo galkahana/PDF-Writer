@@ -1322,38 +1322,38 @@ CharString* CFFFileInput::GetLocalSubr(long inSubrIndex)
 {
 	// locate local subr and return. also - push it to the dependendecy stack to start calculating dependencies for it
 	// also - record dependency on this subr.
-	unsigned short biasedIndex = GetBiasedIndex(mCurrentLocalSubrs->mCharStringsCount,inSubrIndex);	
+	long biasedIndex = GetBiasedIndex(mCurrentLocalSubrs->mCharStringsCount,inSubrIndex);
 
-	if(biasedIndex < mCurrentLocalSubrs->mCharStringsCount)
+	if(biasedIndex >= 0 && biasedIndex < (long)mCurrentLocalSubrs->mCharStringsCount)
 	{
 		CharString* returnValue = mCurrentLocalSubrs->mCharStringsIndex + biasedIndex;
 		if(mCurrentDependencies)
-			mCurrentDependencies->mLocalSubrs.insert(biasedIndex);
+			mCurrentDependencies->mLocalSubrs.insert((unsigned short)biasedIndex);
 		return returnValue;
 	}
 	else
 		return NULL;
 }
 
-unsigned short CFFFileInput::GetBiasedIndex(unsigned short inSubroutineCollectionSize, long inSubroutineIndex)
+long CFFFileInput::GetBiasedIndex(unsigned short inSubroutineCollectionSize, long inSubroutineIndex)
 {
 	if(inSubroutineCollectionSize < 1240)
-		return (unsigned short)(107 + inSubroutineIndex);
+		return 107 + inSubroutineIndex;
 	else if(inSubroutineCollectionSize < 33900)
-		return (unsigned short)(1131 + inSubroutineIndex);
+		return 1131 + inSubroutineIndex;
 	else
-		return (unsigned short)(32768 + inSubroutineIndex);
+		return 32768 + inSubroutineIndex;
 }
 
 CharString* CFFFileInput::GetGlobalSubr(long inSubrIndex)
 {
-	unsigned short biasedIndex = GetBiasedIndex(mGlobalSubrs.mCharStringsCount,inSubrIndex);	
+	long biasedIndex = GetBiasedIndex(mGlobalSubrs.mCharStringsCount,inSubrIndex);
 
-	if(biasedIndex < mGlobalSubrs.mCharStringsCount)
+	if(biasedIndex >= 0 && biasedIndex < (long)mGlobalSubrs.mCharStringsCount)
 	{
 		CharString* returnValue = mGlobalSubrs.mCharStringsIndex + biasedIndex;
 		if(mCurrentDependencies)
-			mCurrentDependencies->mGlobalSubrs.insert(biasedIndex);
+			mCurrentDependencies->mGlobalSubrs.insert((unsigned short)biasedIndex);
 		return returnValue;
 	}
 	else
@@ -1370,14 +1370,22 @@ EStatusCode CFFFileInput::Type2Endchar(const CharStringOperandList& inOperandLis
 	if(inOperandList.size() >= 4) // meaning it's got the depracated seac usage. 2 topmost charachters on the stack are charachter codes of off StandardEncoding
 	{
 		CharStringOperandList::const_reverse_iterator it = inOperandList.rbegin();
-		Byte characterCode1,characterCode2;
-
-		characterCode1 = it->IsInteger ? (Byte)it->IntegerValue : (Byte)it->RealValue;
+		// seac character codes index StandardEncoding (0..255). Cast operands
+		// to long first and bound-check before narrowing; an out-of-range
+		// operand from a malformed CharString would otherwise truncate
+		// silently to a different in-range glyph.
+		long charCode1 = it->IsInteger ? it->IntegerValue : (long)it->RealValue;
 		++it;
-		characterCode2 = it->IsInteger ? (Byte)it->IntegerValue : (Byte)it->RealValue;
-	
-		CharString* character1 = GetCharacterFromStandardEncoding(characterCode1);
-		CharString* character2 = GetCharacterFromStandardEncoding(characterCode2);
+		long charCode2 = it->IsInteger ? it->IntegerValue : (long)it->RealValue;
+
+		if(charCode1 < 0 || charCode1 > 255 || charCode2 < 0 || charCode2 > 255)
+		{
+			TRACE_LOG2("CFFFileInput::Type2Endchar, seac character code out of [0,255]: %ld %ld", charCode1, charCode2);
+			return PDFHummus::eFailure;
+		}
+
+		CharString* character1 = GetCharacterFromStandardEncoding((Byte)charCode1);
+		CharString* character2 = GetCharacterFromStandardEncoding((Byte)charCode2);
 
 		if(character1 && character2 && mCurrentDependencies)
 		{

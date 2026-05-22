@@ -61,6 +61,7 @@
 */
 #include "CFFFileInput.h"
 #include "CFFSyntheticBuilder.h"
+#include "CharStringDefinitions.h"
 #include "DictOperand.h"
 #include "EStatusCode.h"
 #include "InputByteArrayStream.h"
@@ -571,6 +572,74 @@ static bool RunAddDependentGlyphsCases() {
 	return true;
 }
 
+// V-038: Type2Endchar (deprecated seac flavor) cast both bchar / achar
+// operands to Byte unconditionally, silently truncating any out-of-range
+// value into [0, 255] and dispatching to the wrong StandardEncoding glyph.
+// The fix bound-checks each operand before narrowing; out-of-range now
+// returns eFailure rather than steering dependency calculation to an
+// attacker-chosen glyph.
+//
+// The bounds check fires before any access to font state, so we can call
+// Type2Endchar on a default-constructed CFFFileInput without a real font.
+struct Type2EndcharBadOperandCase {
+	const char* mLabel;
+	bool        mBcharIsInteger;
+	long        mBcharIntegerValue;
+	double      mBcharRealValue;
+	bool        mAcharIsInteger;
+	long        mAcharIntegerValue;
+	double      mAcharRealValue;
+};
+
+static const Type2EndcharBadOperandCase scType2EndcharBadOperandCases[] = {
+	// Pre-fix shape: 0x1234 truncates to 0x34, picks the wrong glyph.
+	{"BcharIntegerAbove255_ReturnsFailure",      true, 0x1234, 0.0, true, 0,    0.0},
+	{"AcharIntegerAbove255_ReturnsFailure",      true, 0,      0.0, true, 256,  0.0},
+	{"BcharNegativeInteger_ReturnsFailure",      true, -1,     0.0, true, 0,    0.0},
+	{"AcharNegativeInteger_ReturnsFailure",      true, 0,      0.0, true, -42,  0.0},
+	// Real-valued operand also subject to the same narrowing trap.
+	{"BcharRealAbove255_ReturnsFailure",         false, 0,    300.0, true, 0,    0.0},
+	{"AcharRealNegative_ReturnsFailure",         true, 0,      0.0, false, 0, -1.0},
+};
+
+static CharStringOperand MakeOperand(bool inIsInteger, long inIntegerValue, double inRealValue) {
+	CharStringOperand op;
+	op.IsInteger = inIsInteger;
+	if(inIsInteger)
+		op.IntegerValue = inIntegerValue;
+	else
+		op.RealValue = inRealValue;
+	return op;
+}
+
+static bool RunType2EndcharBadOperandCases() {
+	const size_t count = sizeof(scType2EndcharBadOperandCases) / sizeof(scType2EndcharBadOperandCases[0]);
+	for(size_t i = 0; i < count; ++i) {
+		const Type2EndcharBadOperandCase& testCase = scType2EndcharBadOperandCases[i];
+
+		// Arrange: seac wants size >= 4. Push 3 zero operands plus bchar and
+		// achar last (rbegin() reads achar first, then bchar).
+		CFFFileInput cff;
+		CharStringOperandList ops;
+		ops.push_back(MakeOperand(true, 0, 0.0));
+		ops.push_back(MakeOperand(true, 0, 0.0));
+		ops.push_back(MakeOperand(true, 0, 0.0));
+		ops.push_back(MakeOperand(testCase.mBcharIsInteger, testCase.mBcharIntegerValue, testCase.mBcharRealValue));
+		ops.push_back(MakeOperand(testCase.mAcharIsInteger, testCase.mAcharIntegerValue, testCase.mAcharRealValue));
+
+		// Act
+		EStatusCode status = cff.Type2Endchar(ops);
+
+		// Assert
+		if(status == eSuccess) {
+			cout << "CFFFileInputTest [Type2Endchar::" << testCase.mLabel
+			     << "]: out-of-range seac operand silently accepted (V-038 regression)" << endl;
+			return false;
+		}
+	}
+	return true;
+}
+
 // V-044: each charset format reader did (*inSIDArray)[0] = 0 before
 // checking mCharStringsCount. A font that omits /CharStrings has
 // mCharStringsCount == 0, so *inSIDArray is a new unsigned short[0]
@@ -686,6 +755,7 @@ int CFFFileInputTest(int argc, char* argv[]) {
 	if(!RunReadCharsetCases()) return 1;
 	if(!RunReadCharStringCases()) return 1;
 	if(!RunAddDependentGlyphsCases()) return 1;
+	if(!RunType2EndcharBadOperandCases()) return 1;
 	if(!ReadCFFFile_BrushScriptStd_PopulatesPrivateDict(argv)) return 1;
 	return 0;
 }

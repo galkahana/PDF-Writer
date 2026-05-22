@@ -304,7 +304,11 @@ private:
 												 long inDefault);
 	LongFilePositionType GetCharsetPosition(unsigned short inFontIndex);
 	LongFilePositionType GetEncodingPosition(unsigned short inFontIndex);
-	unsigned short GetBiasedIndex(unsigned short inSubroutineCollectionSize, long inSubroutineIndex);
+	// Returns the biased subroutine index as a signed long so callers can
+	// range-check before deref. Returning unsigned short would silently
+	// wrap attacker-controlled inSubroutineIndex values into a valid
+	// in-range subr slot (subset substitution).
+	long GetBiasedIndex(unsigned short inSubroutineCollectionSize, long inSubroutineIndex);
 	PDFHummus::EStatusCode ReadFormat0Charset(bool inIsCID, UShortToCharStringMap& ioCharMap,unsigned short** inSIDArray,const CharStrings& inCharStrings);
 	PDFHummus::EStatusCode ReadFormat1Charset(bool inIsCID,UShortToCharStringMap& ioCharMap,unsigned short** inSIDArray,const CharStrings& inCharStrings);
 	PDFHummus::EStatusCode ReadFormat2Charset(bool inIsCID,UShortToCharStringMap& ioCharMap,unsigned short** inSIDArray,const CharStrings& inCharStrings);
