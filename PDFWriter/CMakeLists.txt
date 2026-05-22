@@ -358,6 +358,7 @@ RefCountObject.h
 RefCountPtr.h
 ResourcesDictionary.h
 SafeBufferMacrosDefs.h
+SafeParse.h
 SimpleGlyphsDrawingContext.h
 SimpleStringTokenizer.h
 Singleton.h
@@ -585,6 +586,7 @@ EPDFVersion.h
 EStatusCode.h
 MyStringBuf.h
 SafeBufferMacrosDefs.h
+SafeParse.h
 )
 
 source_group(Infrastructure\\Encoding FILES

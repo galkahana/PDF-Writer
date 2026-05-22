@@ -33,7 +33,7 @@
 #include "PDFSymbol.h"
 #include "PDFStreamInput.h"
 #include "Trace.h"
-#include "BoxingBase.h"
+#include "SafeParse.h"
 #include "PDFStream.h"
 #include "IByteReader.h"
 #include "RefCountPtr.h"
@@ -563,7 +563,12 @@ PDFObject* PDFObjectParser::ParseNumber(const std::string& inToken)
 {
 	// once we know this is a number, then parsing is easy. just determine if it's a real or integer, so as to separate classes for better accuracy
 	if(inToken.find(scDot) != inToken.npos) {
-		return new PDFReal(Double(inToken));
+		double realValue;
+		if(!PDFHummus::TryParse(inToken, realValue)) {
+			TRACE_LOG1("PDFObjectParser::ParseNumber, real-number token '%s' is not parseable", inToken.c_str());
+			return NULL;
+		}
+		return new PDFReal(realValue);
 	} else {
 		errno = 0;
 		// use strtoll to parse long long with overflow validation

@@ -25,9 +25,8 @@
 #include "PDFInteger.h"
 #include "PDFObject.h"
 #include "PDFSymbol.h"
-#include "BoxingBase.h"
 #include "PDFDictionary.h"
-#include "BoxingBase.h"
+#include "SafeParse.h"
 #include "PDFIndirectObjectReference.h"
 #include "PDFName.h"
 #include "PDFArray.h"
@@ -176,7 +175,12 @@ EStatusCode PDFParser::ParseHeaderLine()
 	{
 		if(tokenizerResult.second.compare(0,scPDFMagic.size(),scPDFMagic) == 0)
 		{
-			mPDFLevel = Double(tokenizerResult.second.substr(scPDFMagic.size()));
+			std::string versionToken = tokenizerResult.second.substr(scPDFMagic.size());
+			if(!PDFHummus::TryParse(versionToken, mPDFLevel))
+			{
+				TRACE_LOG1("PDFParser::ParseHeaderLine, PDF version token '%s' is not a valid number.", versionToken.c_str());
+				return PDFHummus::eFailure;
+			}
 			mStream.SetOffset(mStream.GetCurrentPosition() - tokenizerResult.second.size() - 1);
 			return PDFHummus::eSuccess;
 		}
@@ -552,9 +556,6 @@ EStatusCode PDFParser::InitializeXref()
 	return PDFHummus::eSuccess;
 }
 
-typedef BoxingBaseWithRW<ObjectIDType> ObjectIDTypeBox;
-typedef BoxingBaseWithRW<unsigned long> ULong;
-typedef BoxingBaseWithRW<LongFilePositionType> LongFilePositionTypeBox;
 static const ObjectIDType scMaxObjectIDType = (ObjectIDType)(-1);
 
 static bool ParseObjectIDTypeToken(const std::string& inToken, ObjectIDType& outValue)
@@ -702,8 +703,20 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInputVector& inXrefTable,
 					if (status != eSuccess)
 						break;
 
-					inXrefTable[currentObject].mObjectPosition = LongFilePositionTypeBox(std::string((const char*)entry, 10));
-					inXrefTable[currentObject].mRivision = ULong(std::string((const char*)(entry + 11), 5));
+					std::string positionToken((const char*)entry, 10);
+					std::string revisionToken((const char*)(entry + 11), 5);
+					if(!PDFHummus::TryParse(positionToken, inXrefTable[currentObject].mObjectPosition))
+					{
+						TRACE_LOG1("PDFParser::BuildXrefTableFromTable, xref entry offset '%s' is not numeric.", positionToken.c_str());
+						status = PDFHummus::eFailure;
+						break;
+					}
+					if(!PDFHummus::TryParse(revisionToken, inXrefTable[currentObject].mRivision))
+					{
+						TRACE_LOG1("PDFParser::BuildXrefTableFromTable, xref entry revision '%s' is not numeric.", revisionToken.c_str());
+						status = PDFHummus::eFailure;
+						break;
+					}
 					inXrefTable[currentObject].mType = entry[17] == 'n' ? eXrefEntryExisting:eXrefEntryDelete;
 				}
 				++currentObject;

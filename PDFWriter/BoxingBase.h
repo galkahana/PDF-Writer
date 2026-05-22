@@ -131,6 +131,11 @@ public:
 	BoxingBaseWithRW(const U& inValue);
 	BoxingBaseWithRW(const BoxingBase<U>& inOther);
 	BoxingBaseWithRW(const BoxingBaseWithRW<U,Reader,Writer>& inOther);
+	// DEPRECATED for parsing untrusted input: these constructors cannot
+	// signal parse failure. On a failed extraction, boxedValue is left
+	// uninitialized (pre-C++11) or set to 0 (C++11+) — indistinguishable
+	// from a real "0". Use PDFHummus::TryParse / TryParseOrDefault from
+	// SafeParse.h instead when parsing attacker-controlled strings.
 	BoxingBaseWithRW(const std::wstring& inReadFrom);
 	BoxingBaseWithRW(const std::string& inReadFrom);
 

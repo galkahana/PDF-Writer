@@ -21,7 +21,7 @@
 #include "PDFDate.h"
 #include "SafeBufferMacrosDefs.h"
 #include "Trace.h"
-#include "BoxingBase.h"
+#include "SafeParse.h"
 #if defined (__MWERKS__)
 	// MAC OSX methods for providing UTC difference
 	#include <CoreFoundation/CFDate.h>
@@ -257,8 +257,8 @@ void PDFDate::ParseString(std::string inValue)
         Year = -1;
         return;
     }
-    
-    Year = Int(inValue.substr(2,4));
+
+    PDFHummus::TryParseOrDefault(inValue.substr(2,4), Year, -1);
     Month = -1;
     Day = -1;
     Hour = -1;
@@ -267,35 +267,35 @@ void PDFDate::ParseString(std::string inValue)
     UTC = eUndefined;
     HourFromUTC = -1;
     MinuteFromUTC = -1;
-    
+
     if(inValue.length() < 7)
         return;
-    
-    Month = Int(inValue.substr(6,2));
+
+    PDFHummus::TryParseOrDefault(inValue.substr(6,2), Month, -1);
 
     if(inValue.length() < 9)
         return;
-    
-    Day = Int(inValue.substr(8,2));
-    
+
+    PDFHummus::TryParseOrDefault(inValue.substr(8,2), Day, -1);
+
     if(inValue.length() < 11)
         return;
-    
-    Hour = Int(inValue.substr(10,2));
-    
+
+    PDFHummus::TryParseOrDefault(inValue.substr(10,2), Hour, -1);
+
     if(inValue.length() < 13)
         return;
-    
-    Minute = Int(inValue.substr(12,2));
-    
+
+    PDFHummus::TryParseOrDefault(inValue.substr(12,2), Minute, -1);
+
     if(inValue.length() < 15)
         return;
-    
-    Second = Int(inValue.substr(14,2));
+
+    PDFHummus::TryParseOrDefault(inValue.substr(14,2), Second, -1);
 
     if(inValue.length() < 17)
         return;
-    
+
     if(inValue[16] == 'Z')
     {
         UTC = eSame;
@@ -303,16 +303,16 @@ void PDFDate::ParseString(std::string inValue)
     else if(inValue[16] == '-' || inValue[16] == '+')
     {
         UTC = (inValue[16] == '-') ? eEarlier:eLater;
-        
+
         if(inValue.length() < 18)
             return;
-        
-        HourFromUTC = Int(inValue.substr(17,2));
-        
+
+        PDFHummus::TryParseOrDefault(inValue.substr(17,2), HourFromUTC, -1);
+
         if(inValue.length() < 21) // skipping '
             return;
-        
-        MinuteFromUTC = Int(inValue.substr(20,2));
+
+        PDFHummus::TryParseOrDefault(inValue.substr(20,2), MinuteFromUTC, -1);
     }
-    
+
 }
