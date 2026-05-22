@@ -292,6 +292,86 @@ static bool RunMissingValueTokenCases() {
 	return true;
 }
 
+// V-064: dictionary value tokens were converted with BoxingBase's string ctor,
+// which silently yielded 0 on a non-numeric token. A malformed font with a
+// value like /PaintType ABC was silently accepted with PaintType = 0. The
+// SafeParse::TryParse migration now reports eFailure when the value token
+// won't parse as a number.
+struct BadNumericValueCase {
+	const char* label;       // <Condition>_<Result>
+	const char* ascii;       // raw ASCII segment with a non-numeric value
+	const char* dictKey;     // for the failure message
+};
+
+static const BadNumericValueCase scBadNumericValueCases[] = {
+	{"FontDictionaryPaintType_Fails", "12 dict begin\n/PaintType ABC\n",        "/PaintType"},
+	{"FontDictionaryFontType_Fails",  "12 dict begin\n/FontType ABC\n",         "/FontType"},
+	{"PrivateDictionaryLenIV_Fails",  "/Private 5 dict dup begin\n/lenIV xyz\n", "/lenIV"},
+};
+
+static bool RunBadNumericValueCases() {
+	const size_t count = sizeof(scBadNumericValueCases) / sizeof(scBadNumericValueCases[0]);
+	for(size_t i = 0; i < count; ++i) {
+		const BadNumericValueCase& testCase = scBadNumericValueCases[i];
+
+		// Arrange
+		string pfb = Type1SyntheticBuilder::RawPFBFromAsciiSegment(testCase.ascii);
+
+		// Act
+		Type1Input type1;
+		EStatusCode status = Type1SyntheticBuilder::ParseAsType1(pfb, type1);
+
+		// Assert
+		if(status == eSuccess) {
+			cout << "Type1InputTest [BadNumericValue::" << testCase.label
+			     << "]: non-numeric " << testCase.dictKey
+			     << " value was silently accepted (V-064 regression)" << endl;
+			return false;
+		}
+	}
+	return true;
+}
+
+// V-064 (boolean siblings): /isFixedPitch in FontInfo and /ForceBold /
+// /RndStemUp in Private dict went through PSBool's lenient ctor, which mapped
+// anything that wasn't literally "true" to false silently. The strict
+// SafeParse bool overload now rejects non-"true"/"false" tokens; the
+// migrated call sites surface that as eFailure.
+struct BadBooleanValueCase {
+	const char* label;
+	const char* ascii;
+	const char* dictKey;
+};
+
+static const BadBooleanValueCase scBadBooleanValueCases[] = {
+	{"FontInfoIsFixedPitch_Fails",       "12 dict begin\n/FontInfo 4 dict dup begin\n/isFixedPitch garbage\n", "/isFixedPitch"},
+	{"PrivateDictionaryForceBold_Fails", "/Private 5 dict dup begin\n/ForceBold maybe\n",                      "/ForceBold"},
+	{"PrivateDictionaryRndStemUp_Fails", "/Private 5 dict dup begin\n/RndStemUp truth\n",                      "/RndStemUp"},
+};
+
+static bool RunBadBooleanValueCases() {
+	const size_t count = sizeof(scBadBooleanValueCases) / sizeof(scBadBooleanValueCases[0]);
+	for(size_t i = 0; i < count; ++i) {
+		const BadBooleanValueCase& testCase = scBadBooleanValueCases[i];
+
+		// Arrange
+		string pfb = Type1SyntheticBuilder::RawPFBFromAsciiSegment(testCase.ascii);
+
+		// Act
+		Type1Input type1;
+		EStatusCode status = Type1SyntheticBuilder::ParseAsType1(pfb, type1);
+
+		// Assert
+		if(status == eSuccess) {
+			cout << "Type1InputTest [BadBooleanValue::" << testCase.label
+			     << "]: non-boolean " << testCase.dictKey
+			     << " value was silently accepted (V-064 regression)" << endl;
+			return false;
+		}
+	}
+	return true;
+}
+
 // P3: Reset() did not default Type1FontDictionary::PaintType / FontType /
 // FontBBox. A valid font that omits those keys left them indeterminate.
 // Reset() now seeds them (PaintType 0, FontType 1, FontBBox all 0); a parse
@@ -455,6 +535,8 @@ int Type1InputTest(int argc, char* argv[]) {
 	if(!ReadType1File_RealPFB_ParsesFontInfoStrings(argv)) return 1;
 	if(!RunAddDependentGlyphsCases()) return 1;
 	if(!RunMissingValueTokenCases()) return 1;
+	if(!RunBadNumericValueCases()) return 1;
+	if(!RunBadBooleanValueCases()) return 1;
 	if(!RunSegmentSplitCases()) return 1;
 	if(!GetNextToken_RegularTokenEndedByEndOfData_TokenReturned()) return 1;
 	if(!Reset_OmittedFontDictMetrics_DefaultsApplied()) return 1;

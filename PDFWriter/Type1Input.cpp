@@ -20,8 +20,7 @@
 */
 #include "Type1Input.h"
 #include "IByteReaderWithPosition.h"
-#include "BoxingBase.h"
-#include "PSBool.h"
+#include "SafeParse.h"
 #include "StandardEncoding.h"
 #include "Trace.h"
 #include "CharStringType1Interpreter.h"
@@ -50,7 +49,8 @@ using namespace PDFHummus;
 // they drive allocations or array indexing.
 static bool TryParseBoundedLong(const std::string& inToken,long inMinInclusive,long inMaxInclusive,long& outValue)
 {
-	outValue = Long(inToken);
+	if(!TryParse(inToken, outValue))
+		return false;
 	return outValue >= inMinInclusive && outValue <= inMaxInclusive;
 }
 
@@ -242,14 +242,24 @@ EStatusCode Type1Input::ReadFontDictionary()
 		{
 			if(!ReadNextTokenValue(value,status))
 				break;
-			mFontDictionary.PaintType = Int(value);
+			if(!TryParse(value, mFontDictionary.PaintType))
+			{
+				TRACE_LOG1("Type1Input::ReadFontDictionary, /PaintType has bad numeric value '%s'", value.c_str());
+				status = eFailure;
+				break;
+			}
 			continue;
 		}
 		if(token.second.compare("/FontType") == 0)
 		{
 			if(!ReadNextTokenValue(value,status))
 				break;
-			mFontDictionary.FontType = Int(value);
+			if(!TryParse(value, mFontDictionary.FontType))
+			{
+				TRACE_LOG1("Type1Input::ReadFontDictionary, /FontType has bad numeric value '%s'", value.c_str());
+				status = eFailure;
+				break;
+			}
 			continue;
 		}
 		if(token.second.compare("/FontMatrix") == 0)
@@ -268,7 +278,12 @@ EStatusCode Type1Input::ReadFontDictionary()
 		{
 			if(!ReadNextTokenValue(value,status))
 				break;
-			mFontDictionary.UniqueID = Int(value);
+			if(!TryParse(value, mFontDictionary.UniqueID))
+			{
+				TRACE_LOG1("Type1Input::ReadFontDictionary, /UniqueID has bad numeric value '%s'", value.c_str());
+				status = eFailure;
+				break;
+			}
 			continue;
 		}
 
@@ -276,7 +291,12 @@ EStatusCode Type1Input::ReadFontDictionary()
 		{
 			if(!ReadNextTokenValue(value,status))
 				break;
-			mFontDictionary.StrokeWidth = Double(value);
+			if(!TryParse(value, mFontDictionary.StrokeWidth))
+			{
+				TRACE_LOG1("Type1Input::ReadFontDictionary, /StrokeWidth has bad numeric value '%s'", value.c_str());
+				status = eFailure;
+				break;
+			}
 			continue;
 		}
 
@@ -292,7 +312,12 @@ EStatusCode Type1Input::ReadFontDictionary()
 		{
 			if(!ReadNextTokenValue(value,status))
 				break;
-			mFontInfoDictionary.fsType = (unsigned short)Int(value);
+			if(!TryParse(value, mFontInfoDictionary.fsType))
+			{
+				TRACE_LOG1("Type1Input::ReadFontDictionary, /FSType has bad numeric value '%s'", value.c_str());
+				status = eFailure;
+				break;
+			}
 			mFontInfoDictionary.FSTypeValid = true;
 		}
 	}
@@ -371,28 +396,48 @@ EStatusCode Type1Input::ReadFontInfoDictionary()
 		{
 			if(!ReadNextTokenValue(value,status))
 				break;
-			mFontInfoDictionary.ItalicAngle = Double(value);
+			if(!TryParse(value, mFontInfoDictionary.ItalicAngle))
+			{
+				TRACE_LOG1("Type1Input::ReadFontInfoDictionary, /ItalicAngle has bad numeric value '%s'", value.c_str());
+				status = eFailure;
+				break;
+			}
 			continue;
 		}
 		if(token.second.compare("/isFixedPitch") == 0)
 		{
 			if(!ReadNextTokenValue(value,status))
 				break;
-			mFontInfoDictionary.isFixedPitch = PSBool(value);
+			if(!TryParse(value, mFontInfoDictionary.isFixedPitch))
+			{
+				TRACE_LOG1("Type1Input::ReadFontInfoDictionary, /isFixedPitch has bad boolean value '%s'", value.c_str());
+				status = eFailure;
+				break;
+			}
 			continue;
 		}
 		if(token.second.compare("/UnderlinePosition") == 0)
 		{
 			if(!ReadNextTokenValue(value,status))
 				break;
-			mFontInfoDictionary.UnderlinePosition = Double(value);
+			if(!TryParse(value, mFontInfoDictionary.UnderlinePosition))
+			{
+				TRACE_LOG1("Type1Input::ReadFontInfoDictionary, /UnderlinePosition has bad numeric value '%s'", value.c_str());
+				status = eFailure;
+				break;
+			}
 			continue;
 		}
 		if(token.second.compare("/UnderlineThickness") == 0)
 		{
 			if(!ReadNextTokenValue(value,status))
 				break;
-			mFontInfoDictionary.UnderlineThickness = Double(value);
+			if(!TryParse(value, mFontInfoDictionary.UnderlineThickness))
+			{
+				TRACE_LOG1("Type1Input::ReadFontInfoDictionary, /UnderlineThickness has bad numeric value '%s'", value.c_str());
+				status = eFailure;
+				break;
+			}
 			continue;
 		}
 
@@ -400,11 +445,16 @@ EStatusCode Type1Input::ReadFontInfoDictionary()
 		{
 			if(!ReadNextTokenValue(value,status))
 				break;
-			mFontInfoDictionary.fsType = (unsigned short)Int(value);
+			if(!TryParse(value, mFontInfoDictionary.fsType))
+			{
+				TRACE_LOG1("Type1Input::ReadFontInfoDictionary, /FSType has bad numeric value '%s'", value.c_str());
+				status = eFailure;
+				break;
+			}
 			mFontInfoDictionary.FSTypeValid = true;
 		}
 	}
-	return status;	
+	return status;
 }
 
 EStatusCode Type1Input::ParseDoubleArray(double* inArray,int inArraySize)
@@ -419,8 +469,17 @@ EStatusCode Type1Input::ParseDoubleArray(double* inArray,int inArraySize)
 	for(int i=0; i < inArraySize && eSuccess == status;++i)
 	{
 		token = mPFBDecoder.GetNextToken();
-		status = token.first ? eSuccess:eFailure;
-		inArray[i] = Double(token.second);
+		if(!token.first)
+		{
+			status = eFailure;
+			break;
+		}
+		if(!TryParse(token.second, inArray[i]))
+		{
+			TRACE_LOG1("Type1Input::ParseDoubleArray, bad numeric value '%s'", token.second.c_str());
+			status = eFailure;
+			break;
+		}
 	}
 
 	// skip the last ] or }
@@ -477,7 +536,12 @@ EStatusCode Type1Input::ParseEncoding()
 		token = mPFBDecoder.GetNextToken();
 		if(!token.first)
 			break;
-		encodingIndex = Int(token.second);
+		if(!TryParse(token.second, encodingIndex))
+		{
+			TRACE_LOG1("Type1Input::ParseEncoding, encoding index has bad numeric value '%s'", token.second.c_str());
+			status = eFailure;
+			break;
+		}
 		if(encodingIndex < 0 || encodingIndex > 255)
 		{
 			status = eFailure;
@@ -566,7 +630,12 @@ EStatusCode Type1Input::ReadPrivateDictionary()
 		{
 			if(!ReadNextTokenValue(value,status))
 				break;
-			mPrivateDictionary.UniqueID = Int(value);
+			if(!TryParse(value, mPrivateDictionary.UniqueID))
+			{
+				TRACE_LOG1("Type1Input::ReadPrivateDictionary, /UniqueID has bad numeric value '%s'", value.c_str());
+				status = eFailure;
+				break;
+			}
 			continue;
 		}
 
@@ -594,21 +663,36 @@ EStatusCode Type1Input::ReadPrivateDictionary()
 		{
 			if(!ReadNextTokenValue(value,status))
 				break;
-			mPrivateDictionary.BlueScale = Double(value);
+			if(!TryParse(value, mPrivateDictionary.BlueScale))
+			{
+				TRACE_LOG1("Type1Input::ReadPrivateDictionary, /BlueScale has bad numeric value '%s'", value.c_str());
+				status = eFailure;
+				break;
+			}
 			continue;
 		}
 		if(token.second.compare("/BlueShift") == 0)
 		{
 			if(!ReadNextTokenValue(value,status))
 				break;
-			mPrivateDictionary.BlueShift = Int(value);
+			if(!TryParse(value, mPrivateDictionary.BlueShift))
+			{
+				TRACE_LOG1("Type1Input::ReadPrivateDictionary, /BlueShift has bad numeric value '%s'", value.c_str());
+				status = eFailure;
+				break;
+			}
 			continue;
 		}
 		if(token.second.compare("/BlueFuzz") == 0)
 		{
 			if(!ReadNextTokenValue(value,status))
 				break;
-			mPrivateDictionary.BlueFuzz = Int(value);
+			if(!TryParse(value, mPrivateDictionary.BlueFuzz))
+			{
+				TRACE_LOG1("Type1Input::ReadPrivateDictionary, /BlueFuzz has bad numeric value '%s'", value.c_str());
+				status = eFailure;
+				break;
+			}
 			continue;
 		}
 		if(token.second.compare("/StdHW") == 0)
@@ -617,7 +701,12 @@ EStatusCode Type1Input::ReadPrivateDictionary()
 				break;
 			if(!ReadNextTokenValue(value,status))
 				break;
-			mPrivateDictionary.StdHW = Double(value);
+			if(!TryParse(value, mPrivateDictionary.StdHW))
+			{
+				TRACE_LOG1("Type1Input::ReadPrivateDictionary, /StdHW has bad numeric value '%s'", value.c_str());
+				status = eFailure;
+				break;
+			}
 			if(!ReadNextTokenValue(value,status)) // skip ]
 				break;
 			continue;
@@ -628,7 +717,12 @@ EStatusCode Type1Input::ReadPrivateDictionary()
 				break;
 			if(!ReadNextTokenValue(value,status))
 				break;
-			mPrivateDictionary.StdVW = Double(value);
+			if(!TryParse(value, mPrivateDictionary.StdVW))
+			{
+				TRACE_LOG1("Type1Input::ReadPrivateDictionary, /StdVW has bad numeric value '%s'", value.c_str());
+				status = eFailure;
+				break;
+			}
 			if(!ReadNextTokenValue(value,status)) // skip ]
 				break;
 			continue;
@@ -647,28 +741,48 @@ EStatusCode Type1Input::ReadPrivateDictionary()
 		{
 			if(!ReadNextTokenValue(value,status))
 				break;
-			mPrivateDictionary.ForceBold = PSBool(value);
+			if(!TryParse(value, mPrivateDictionary.ForceBold))
+			{
+				TRACE_LOG1("Type1Input::ReadPrivateDictionary, /ForceBold has bad boolean value '%s'", value.c_str());
+				status = eFailure;
+				break;
+			}
 			continue;
 		}
 		if(token.second.compare("/LanguageGroup") == 0)
 		{
 			if(!ReadNextTokenValue(value,status))
 				break;
-			mPrivateDictionary.LanguageGroup = Int(value);
+			if(!TryParse(value, mPrivateDictionary.LanguageGroup))
+			{
+				TRACE_LOG1("Type1Input::ReadPrivateDictionary, /LanguageGroup has bad numeric value '%s'", value.c_str());
+				status = eFailure;
+				break;
+			}
 			continue;
 		}
 		if(token.second.compare("/lenIV") == 0)
 		{
 			if(!ReadNextTokenValue(value,status))
 				break;
-			mPrivateDictionary.lenIV = Int(value);
+			if(!TryParse(value, mPrivateDictionary.lenIV))
+			{
+				TRACE_LOG1("Type1Input::ReadPrivateDictionary, /lenIV has bad numeric value '%s'", value.c_str());
+				status = eFailure;
+				break;
+			}
 			continue;
 		}
 		if(token.second.compare("/RndStemUp") == 0)
 		{
 			if(!ReadNextTokenValue(value,status))
 				break;
-			mPrivateDictionary.RndStemUp = PSBool(value);
+			if(!TryParse(value, mPrivateDictionary.RndStemUp))
+			{
+				TRACE_LOG1("Type1Input::ReadPrivateDictionary, /RndStemUp has bad boolean value '%s'", value.c_str());
+				status = eFailure;
+				break;
+			}
 			continue;
 		}
 		if(token.second.compare("/Subrs") == 0)
@@ -702,7 +816,13 @@ EStatusCode Type1Input::ParseIntVector(std::vector<int>& inVector)
 		if(token.second.compare("]") == 0 || token.second.compare("}") == 0)
 			break;
 
-		inVector.push_back(Int(token.second));
+		int parsed;
+		if(!TryParse(token.second, parsed))
+		{
+			TRACE_LOG1("Type1Input::ParseIntVector, bad numeric value '%s'", token.second.c_str());
+			return eFailure;
+		}
+		inVector.push_back(parsed);
 	}
 	return token.first ? eSuccess:eFailure;
 }
@@ -721,7 +841,13 @@ EStatusCode Type1Input::ParseDoubleVector(std::vector<double>& inVector)
 		if(token.second.compare("]") == 0 || token.second.compare("}") == 0)
 			break;
 
-		inVector.push_back(Double(token.second));
+		double parsed;
+		if(!TryParse(token.second, parsed))
+		{
+			TRACE_LOG1("Type1Input::ParseDoubleVector, bad numeric value '%s'", token.second.c_str());
+			return eFailure;
+		}
+		inVector.push_back(parsed);
 	}
 	return token.first ? eSuccess:eFailure;
 }

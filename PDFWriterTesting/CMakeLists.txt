@@ -74,6 +74,7 @@ create_test_sourcelist (Tests
   RecryptPDF.cpp
   RefCountTest.cpp
   RotatedPagesPDF.cpp
+  SafeParseTest.cpp
   ShutDownRestartTest.cpp
   SimpleContentPageTest.cpp
   SimpleTextUsage.cpp
