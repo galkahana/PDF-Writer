@@ -24,6 +24,8 @@
 #include "StandardEncoding.h"
 
 #include <algorithm>
+#include <climits>
+#include <stdint.h>
 
 
 using namespace PDFHummus;
@@ -1322,38 +1324,50 @@ CharString* CFFFileInput::GetLocalSubr(long inSubrIndex)
 {
 	// locate local subr and return. also - push it to the dependendecy stack to start calculating dependencies for it
 	// also - record dependency on this subr.
-	unsigned short biasedIndex = GetBiasedIndex(mCurrentLocalSubrs->mCharStringsCount,inSubrIndex);	
+	long biasedIndex = GetBiasedIndex(mCurrentLocalSubrs->mCharStringsCount,inSubrIndex);
 
-	if(biasedIndex < mCurrentLocalSubrs->mCharStringsCount)
+	if(biasedIndex >= 0 && biasedIndex < (long)mCurrentLocalSubrs->mCharStringsCount)
 	{
 		CharString* returnValue = mCurrentLocalSubrs->mCharStringsIndex + biasedIndex;
 		if(mCurrentDependencies)
-			mCurrentDependencies->mLocalSubrs.insert(biasedIndex);
+			mCurrentDependencies->mLocalSubrs.insert((unsigned short)biasedIndex);
 		return returnValue;
 	}
 	else
 		return NULL;
 }
 
-unsigned short CFFFileInput::GetBiasedIndex(unsigned short inSubroutineCollectionSize, long inSubroutineIndex)
+long CFFFileInput::GetBiasedIndex(unsigned short inSubroutineCollectionSize, long inSubroutineIndex)
 {
+	// Compute the bias + index sum in 64-bit so that extreme attacker-
+	// controlled inSubroutineIndex values don't trigger signed-overflow UB
+	// during the addition on platforms where long is 32 bits (LLP64, e.g.
+	// Windows). Saturate to LONG_MIN / LONG_MAX on out-of-range — the
+	// caller's range check will reject either sentinel just like any
+	// other out-of-bounds index.
+	int64_t bias;
 	if(inSubroutineCollectionSize < 1240)
-		return (unsigned short)(107 + inSubroutineIndex);
+		bias = 107;
 	else if(inSubroutineCollectionSize < 33900)
-		return (unsigned short)(1131 + inSubroutineIndex);
+		bias = 1131;
 	else
-		return (unsigned short)(32768 + inSubroutineIndex);
+		bias = 32768;
+
+	int64_t result = bias + (int64_t)inSubroutineIndex;
+	if(result > (int64_t)LONG_MAX) return LONG_MAX;
+	if(result < (int64_t)LONG_MIN) return LONG_MIN;
+	return (long)result;
 }
 
 CharString* CFFFileInput::GetGlobalSubr(long inSubrIndex)
 {
-	unsigned short biasedIndex = GetBiasedIndex(mGlobalSubrs.mCharStringsCount,inSubrIndex);	
+	long biasedIndex = GetBiasedIndex(mGlobalSubrs.mCharStringsCount,inSubrIndex);
 
-	if(biasedIndex < mGlobalSubrs.mCharStringsCount)
+	if(biasedIndex >= 0 && biasedIndex < (long)mGlobalSubrs.mCharStringsCount)
 	{
 		CharString* returnValue = mGlobalSubrs.mCharStringsIndex + biasedIndex;
 		if(mCurrentDependencies)
-			mCurrentDependencies->mGlobalSubrs.insert(biasedIndex);
+			mCurrentDependencies->mGlobalSubrs.insert((unsigned short)biasedIndex);
 		return returnValue;
 	}
 	else
@@ -1370,14 +1384,25 @@ EStatusCode CFFFileInput::Type2Endchar(const CharStringOperandList& inOperandLis
 	if(inOperandList.size() >= 4) // meaning it's got the depracated seac usage. 2 topmost charachters on the stack are charachter codes of off StandardEncoding
 	{
 		CharStringOperandList::const_reverse_iterator it = inOperandList.rbegin();
-		Byte characterCode1,characterCode2;
-
-		characterCode1 = it->IsInteger ? (Byte)it->IntegerValue : (Byte)it->RealValue;
+		// seac character codes index StandardEncoding (0..255). Validate each
+		// operand as a finite double in [0, 255] *before* narrowing — casting
+		// NaN / ±inf / out-of-long-range reals to an integer type is UB in
+		// C++, so the bounds check has to be in the double domain. NaN fails
+		// every comparison, so the negated form rejects it implicitly along
+		// with values outside [0, 255].
+		double codeAsDouble1 = it->IsInteger ? (double)it->IntegerValue : it->RealValue;
 		++it;
-		characterCode2 = it->IsInteger ? (Byte)it->IntegerValue : (Byte)it->RealValue;
-	
-		CharString* character1 = GetCharacterFromStandardEncoding(characterCode1);
-		CharString* character2 = GetCharacterFromStandardEncoding(characterCode2);
+		double codeAsDouble2 = it->IsInteger ? (double)it->IntegerValue : it->RealValue;
+
+		if(!(codeAsDouble1 >= 0.0 && codeAsDouble1 <= 255.0) ||
+		   !(codeAsDouble2 >= 0.0 && codeAsDouble2 <= 255.0))
+		{
+			TRACE_LOG2("CFFFileInput::Type2Endchar, seac character code out of [0,255]: %f %f", codeAsDouble1, codeAsDouble2);
+			return PDFHummus::eFailure;
+		}
+
+		CharString* character1 = GetCharacterFromStandardEncoding((Byte)codeAsDouble1);
+		CharString* character2 = GetCharacterFromStandardEncoding((Byte)codeAsDouble2);
 
 		if(character1 && character2 && mCurrentDependencies)
 		{

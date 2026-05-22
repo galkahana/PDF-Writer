@@ -20,6 +20,7 @@
 */
 #include "CFFPrimitiveReader.h"
 #include <math.h>
+#include <stdint.h>
 
 
 using namespace PDFHummus;
@@ -240,7 +241,10 @@ EStatusCode CFFPrimitiveReader::Read4ByteSigned(long& outValue)
 	if(status != PDFHummus::eSuccess)
 		return PDFHummus::eFailure;
 
-	outValue = (int)buffer; // very important to cast to 32, to get the sign right
+	// Round-trip through int32_t for explicit 32-bit sign extension into long
+	// — `int` is at least 16 bits per the C++ standard, so platforms where it
+	// isn't exactly 32 bits would mis-sign-extend with a plain `(int)` cast.
+	outValue = (int32_t)buffer;
 
 	return PDFHummus::eSuccess;
 }

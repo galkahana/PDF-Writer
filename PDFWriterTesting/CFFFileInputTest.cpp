@@ -571,6 +571,78 @@ static bool RunAddDependentGlyphsCases() {
 	return true;
 }
 
+// V-038: Type2Endchar (deprecated seac flavor) cast both bchar / achar
+// operands to Byte unconditionally, silently truncating any out-of-range
+// value into [0, 255] and dispatching to the wrong StandardEncoding glyph.
+// Post-fix the bounds check rejects out-of-range operands before narrowing.
+//
+// Each case feeds a synthetic 1-glyph CFF whose CharString is "0 0 bchar
+// achar endchar" with one of bchar/achar encoded as Type 2 integer 288.
+// 288 is out of [0, 255], but pre-fix (Byte)288 == 32, which StandardEncoding
+// maps to "space" → SID 1 → glyph 1 (the issuing glyph itself in the
+// synthetic ISOAdobe charset). So pre-fix the lookup found valid glyphs and
+// Type2Endchar returned eSuccess; post-fix the bounds check fires and
+// AddDependentGlyphs surfaces eFailure. This is the discriminating shape —
+// the prior in-process variant returned eFailure on both pre- and post-fix
+// code because mCurrentCharsetInfo was NULL.
+//
+// Type 2 integer encoding (Tech Note #5177):
+//   single byte b in [32,246]  -> value = b - 139         range [-107, 107]
+//   two bytes b0 in [247,250]  -> value = (b0-247)*256 + b1 + 108
+//                                                          range [108, 1131]
+// 32   -> 0xAB    (32 + 139)
+// 288  -> 0xF7 0xB4    ((247-247)*256 + 180 + 108 = 288)
+struct Type2EndcharOOBCase {
+	const char* mLabel;
+	const char* mCharString;
+	size_t      mCharStringLen;
+};
+
+#define CSTR_BYTES(LIT) (LIT), (sizeof(LIT) - 1)
+
+static const Type2EndcharOOBCase scType2EndcharOOBCases[] = {
+	// 4 operands "0 0 bchar=288 achar=32 endchar": bchar OOB, achar in range.
+	{"BcharIntegerAbove255_ReturnsFailure", CSTR_BYTES("\x8B\x8B\xF7\xB4\xAB\x0E")},
+	// 4 operands "0 0 bchar=32 achar=288 endchar": achar OOB.
+	{"AcharIntegerAbove255_ReturnsFailure", CSTR_BYTES("\x8B\x8B\xAB\xF7\xB4\x0E")},
+};
+
+static bool RunType2EndcharOOBCases() {
+	const size_t count = sizeof(scType2EndcharOOBCases) / sizeof(scType2EndcharOOBCases[0]);
+	for(size_t i = 0; i < count; ++i) {
+		const Type2EndcharOOBCase& testCase = scType2EndcharOOBCases[i];
+
+		// Arrange: synthetic 1-glyph CFF whose only CharString is the seac.
+		std::vector<std::string> charStrings;
+		charStrings.push_back(std::string(testCase.mCharString, testCase.mCharStringLen));
+		std::string bytes = CFFSyntheticBuilder::WithCharStrings(charStrings);
+
+		InputByteArrayStream stream;
+		CFFFileInput cff;
+		if(ParseKeepingStream(bytes, stream, cff) != eSuccess) {
+			cout << "CFFFileInputTest [Type2Endchar::" << testCase.mLabel
+			     << "]: synthetic CFF parse failed" << endl;
+			return false;
+		}
+
+		// Act
+		std::vector<unsigned int> subset;
+		subset.push_back(1);
+		EStatusCode status = cff.AddDependentGlyphs(subset);
+
+		// Assert: pre-fix the truncation steered both seac codes to a real
+		// glyph and AddDependentGlyphs returned eSuccess. Post-fix bounds
+		// check fires inside Type2Endchar and the failure propagates.
+		if(status == eSuccess) {
+			cout << "CFFFileInputTest [Type2Endchar::" << testCase.mLabel
+			     << "]: out-of-range seac operand silently accepted "
+			        "(pre-fix truncated to a valid in-range code)" << endl;
+			return false;
+		}
+	}
+	return true;
+}
+
 // V-044: each charset format reader did (*inSIDArray)[0] = 0 before
 // checking mCharStringsCount. A font that omits /CharStrings has
 // mCharStringsCount == 0, so *inSIDArray is a new unsigned short[0]
@@ -686,6 +758,7 @@ int CFFFileInputTest(int argc, char* argv[]) {
 	if(!RunReadCharsetCases()) return 1;
 	if(!RunReadCharStringCases()) return 1;
 	if(!RunAddDependentGlyphsCases()) return 1;
+	if(!RunType2EndcharOOBCases()) return 1;
 	if(!ReadCFFFile_BrushScriptStd_PopulatesPrivateDict(argv)) return 1;
 	return 0;
 }
