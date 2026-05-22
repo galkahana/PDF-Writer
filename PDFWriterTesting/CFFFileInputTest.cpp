@@ -61,7 +61,6 @@
 */
 #include "CFFFileInput.h"
 #include "CFFSyntheticBuilder.h"
-#include "CharStringDefinitions.h"
 #include "DictOperand.h"
 #include "EStatusCode.h"
 #include "InputByteArrayStream.h"
@@ -575,65 +574,69 @@ static bool RunAddDependentGlyphsCases() {
 // V-038: Type2Endchar (deprecated seac flavor) cast both bchar / achar
 // operands to Byte unconditionally, silently truncating any out-of-range
 // value into [0, 255] and dispatching to the wrong StandardEncoding glyph.
-// The fix bound-checks each operand before narrowing; out-of-range now
-// returns eFailure rather than steering dependency calculation to an
-// attacker-chosen glyph.
+// Post-fix the bounds check rejects out-of-range operands before narrowing.
 //
-// The bounds check fires before any access to font state, so we can call
-// Type2Endchar on a default-constructed CFFFileInput without a real font.
-struct Type2EndcharBadOperandCase {
+// Each case feeds a synthetic 1-glyph CFF whose CharString is "0 0 bchar
+// achar endchar" with one of bchar/achar encoded as Type 2 integer 288.
+// 288 is out of [0, 255], but pre-fix (Byte)288 == 32, which StandardEncoding
+// maps to "space" → SID 1 → glyph 1 (the issuing glyph itself in the
+// synthetic ISOAdobe charset). So pre-fix the lookup found valid glyphs and
+// Type2Endchar returned eSuccess; post-fix the bounds check fires and
+// AddDependentGlyphs surfaces eFailure. This is the discriminating shape —
+// the prior in-process variant returned eFailure on both pre- and post-fix
+// code because mCurrentCharsetInfo was NULL.
+//
+// Type 2 integer encoding (Tech Note #5177):
+//   single byte b in [32,246]  -> value = b - 139         range [-107, 107]
+//   two bytes b0 in [247,250]  -> value = (b0-247)*256 + b1 + 108
+//                                                          range [108, 1131]
+// 32   -> 0xAB    (32 + 139)
+// 288  -> 0xF7 0xB4    ((247-247)*256 + 180 + 108 = 288)
+struct Type2EndcharOOBCase {
 	const char* mLabel;
-	bool        mBcharIsInteger;
-	long        mBcharIntegerValue;
-	double      mBcharRealValue;
-	bool        mAcharIsInteger;
-	long        mAcharIntegerValue;
-	double      mAcharRealValue;
+	const char* mCharString;
+	size_t      mCharStringLen;
 };
 
-static const Type2EndcharBadOperandCase scType2EndcharBadOperandCases[] = {
-	// Pre-fix shape: 0x1234 truncates to 0x34, picks the wrong glyph.
-	{"BcharIntegerAbove255_ReturnsFailure",      true, 0x1234, 0.0, true, 0,    0.0},
-	{"AcharIntegerAbove255_ReturnsFailure",      true, 0,      0.0, true, 256,  0.0},
-	{"BcharNegativeInteger_ReturnsFailure",      true, -1,     0.0, true, 0,    0.0},
-	{"AcharNegativeInteger_ReturnsFailure",      true, 0,      0.0, true, -42,  0.0},
-	// Real-valued operand also subject to the same narrowing trap.
-	{"BcharRealAbove255_ReturnsFailure",         false, 0,    300.0, true, 0,    0.0},
-	{"AcharRealNegative_ReturnsFailure",         true, 0,      0.0, false, 0, -1.0},
+#define CSTR_BYTES(LIT) (LIT), (sizeof(LIT) - 1)
+
+static const Type2EndcharOOBCase scType2EndcharOOBCases[] = {
+	// 4 operands "0 0 bchar=288 achar=32 endchar": bchar OOB, achar in range.
+	{"BcharIntegerAbove255_ReturnsFailure", CSTR_BYTES("\x8B\x8B\xF7\xB4\xAB\x0E")},
+	// 4 operands "0 0 bchar=32 achar=288 endchar": achar OOB.
+	{"AcharIntegerAbove255_ReturnsFailure", CSTR_BYTES("\x8B\x8B\xAB\xF7\xB4\x0E")},
 };
 
-static CharStringOperand MakeOperand(bool inIsInteger, long inIntegerValue, double inRealValue) {
-	CharStringOperand op;
-	op.IsInteger = inIsInteger;
-	if(inIsInteger)
-		op.IntegerValue = inIntegerValue;
-	else
-		op.RealValue = inRealValue;
-	return op;
-}
-
-static bool RunType2EndcharBadOperandCases() {
-	const size_t count = sizeof(scType2EndcharBadOperandCases) / sizeof(scType2EndcharBadOperandCases[0]);
+static bool RunType2EndcharOOBCases() {
+	const size_t count = sizeof(scType2EndcharOOBCases) / sizeof(scType2EndcharOOBCases[0]);
 	for(size_t i = 0; i < count; ++i) {
-		const Type2EndcharBadOperandCase& testCase = scType2EndcharBadOperandCases[i];
+		const Type2EndcharOOBCase& testCase = scType2EndcharOOBCases[i];
 
-		// Arrange: seac wants size >= 4. Push 3 zero operands plus bchar and
-		// achar last (rbegin() reads achar first, then bchar).
+		// Arrange: synthetic 1-glyph CFF whose only CharString is the seac.
+		std::vector<std::string> charStrings;
+		charStrings.push_back(std::string(testCase.mCharString, testCase.mCharStringLen));
+		std::string bytes = CFFSyntheticBuilder::WithCharStrings(charStrings);
+
+		InputByteArrayStream stream;
 		CFFFileInput cff;
-		CharStringOperandList ops;
-		ops.push_back(MakeOperand(true, 0, 0.0));
-		ops.push_back(MakeOperand(true, 0, 0.0));
-		ops.push_back(MakeOperand(true, 0, 0.0));
-		ops.push_back(MakeOperand(testCase.mBcharIsInteger, testCase.mBcharIntegerValue, testCase.mBcharRealValue));
-		ops.push_back(MakeOperand(testCase.mAcharIsInteger, testCase.mAcharIntegerValue, testCase.mAcharRealValue));
+		if(ParseKeepingStream(bytes, stream, cff) != eSuccess) {
+			cout << "CFFFileInputTest [Type2Endchar::" << testCase.mLabel
+			     << "]: synthetic CFF parse failed" << endl;
+			return false;
+		}
 
 		// Act
-		EStatusCode status = cff.Type2Endchar(ops);
+		std::vector<unsigned int> subset;
+		subset.push_back(1);
+		EStatusCode status = cff.AddDependentGlyphs(subset);
 
-		// Assert
+		// Assert: pre-fix the truncation steered both seac codes to a real
+		// glyph and AddDependentGlyphs returned eSuccess. Post-fix bounds
+		// check fires inside Type2Endchar and the failure propagates.
 		if(status == eSuccess) {
 			cout << "CFFFileInputTest [Type2Endchar::" << testCase.mLabel
-			     << "]: out-of-range seac operand silently accepted (V-038 regression)" << endl;
+			     << "]: out-of-range seac operand silently accepted "
+			        "(pre-fix truncated to a valid in-range code)" << endl;
 			return false;
 		}
 	}
@@ -755,7 +758,7 @@ int CFFFileInputTest(int argc, char* argv[]) {
 	if(!RunReadCharsetCases()) return 1;
 	if(!RunReadCharStringCases()) return 1;
 	if(!RunAddDependentGlyphsCases()) return 1;
-	if(!RunType2EndcharBadOperandCases()) return 1;
+	if(!RunType2EndcharOOBCases()) return 1;
 	if(!ReadCFFFile_BrushScriptStd_PopulatesPrivateDict(argv)) return 1;
 	return 0;
 }
