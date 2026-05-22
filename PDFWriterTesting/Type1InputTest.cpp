@@ -332,6 +332,46 @@ static bool RunBadNumericValueCases() {
 	return true;
 }
 
+// V-064 (boolean siblings): /isFixedPitch in FontInfo and /ForceBold /
+// /RndStemUp in Private dict went through PSBool's lenient ctor, which mapped
+// anything that wasn't literally "true" to false silently. The strict
+// SafeParse bool overload now rejects non-"true"/"false" tokens; the
+// migrated call sites surface that as eFailure.
+struct BadBooleanValueCase {
+	const char* label;
+	const char* ascii;
+	const char* dictKey;
+};
+
+static const BadBooleanValueCase scBadBooleanValueCases[] = {
+	{"FontInfoIsFixedPitch_Fails",       "12 dict begin\n/FontInfo 4 dict dup begin\n/isFixedPitch garbage\n", "/isFixedPitch"},
+	{"PrivateDictionaryForceBold_Fails", "/Private 5 dict dup begin\n/ForceBold maybe\n",                      "/ForceBold"},
+	{"PrivateDictionaryRndStemUp_Fails", "/Private 5 dict dup begin\n/RndStemUp truth\n",                      "/RndStemUp"},
+};
+
+static bool RunBadBooleanValueCases() {
+	const size_t count = sizeof(scBadBooleanValueCases) / sizeof(scBadBooleanValueCases[0]);
+	for(size_t i = 0; i < count; ++i) {
+		const BadBooleanValueCase& testCase = scBadBooleanValueCases[i];
+
+		// Arrange
+		string pfb = Type1SyntheticBuilder::RawPFBFromAsciiSegment(testCase.ascii);
+
+		// Act
+		Type1Input type1;
+		EStatusCode status = Type1SyntheticBuilder::ParseAsType1(pfb, type1);
+
+		// Assert
+		if(status == eSuccess) {
+			cout << "Type1InputTest [BadBooleanValue::" << testCase.label
+			     << "]: non-boolean " << testCase.dictKey
+			     << " value was silently accepted (V-064 regression)" << endl;
+			return false;
+		}
+	}
+	return true;
+}
+
 // P3: Reset() did not default Type1FontDictionary::PaintType / FontType /
 // FontBBox. A valid font that omits those keys left them indeterminate.
 // Reset() now seeds them (PaintType 0, FontType 1, FontBBox all 0); a parse
@@ -496,6 +536,7 @@ int Type1InputTest(int argc, char* argv[]) {
 	if(!RunAddDependentGlyphsCases()) return 1;
 	if(!RunMissingValueTokenCases()) return 1;
 	if(!RunBadNumericValueCases()) return 1;
+	if(!RunBadBooleanValueCases()) return 1;
 	if(!RunSegmentSplitCases()) return 1;
 	if(!GetNextToken_RegularTokenEndedByEndOfData_TokenReturned()) return 1;
 	if(!Reset_OmittedFontDictMetrics_DefaultsApplied()) return 1;

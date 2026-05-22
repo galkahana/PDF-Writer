@@ -44,21 +44,27 @@
 namespace PDFHummus
 {
 
+// TryParse does NOT log on failure: it returns a bool, so callers carry the
+// context (which field / which token) in their own TRACE_LOG. Adding a log
+// here would only restate the offending value with no context the caller
+// doesn't already have.
+//
+// TryParseOrDefault is fire-and-forget (void return), so callers can't easily
+// log on the failure path. The helper logs there as the sole signal.
+//
+// Note: we deliberately do NOT check stream.eof() after extraction. Trailing
+// non-numeric input is accepted (e.g. "12abc" parses to 12). Callers handle
+// wrong / malicious numbers via range checks; this helper only distinguishes
+// "parsed nothing" from "parsed something".
+
 template <typename T>
 bool TryParse(const std::string& inReadFrom, T& outValue)
 {
-	// Note: we deliberately do NOT check stream.eof() after extraction —
-	// trailing non-numeric input is accepted (e.g. "12abc" parses to 12).
-	// Callers handle wrong/malicious numbers via range checks; this helper
-	// only distinguishes "parsed nothing" from "parsed something".
 	std::stringstream stream(inReadFrom);
 	T tmp;
 	stream >> tmp;
 	if(stream.fail())
-	{
-		TRACE_LOG1("SafeParse::TryParse failed for input '%s'", inReadFrom.c_str());
 		return false;
-	}
 	outValue = tmp;
 	return true;
 }
@@ -66,15 +72,11 @@ bool TryParse(const std::string& inReadFrom, T& outValue)
 template <typename T>
 bool TryParse(const std::wstring& inReadFrom, T& outValue)
 {
-	// See lenient-on-trailing-input note on the std::string overload.
 	std::wstringstream stream(inReadFrom);
 	T tmp;
 	stream >> tmp;
 	if(stream.fail())
-	{
-		TRACE_LOG("SafeParse::TryParse<wstring> failed");
 		return false;
-	}
 	outValue = tmp;
 	return true;
 }
@@ -83,7 +85,6 @@ inline bool TryParse(const std::string& inReadFrom, bool& outValue)
 {
 	if(inReadFrom == "true")  { outValue = true;  return true; }
 	if(inReadFrom == "false") { outValue = false; return true; }
-	TRACE_LOG1("SafeParse::TryParse<bool> failed for input '%s' (expected \"true\" or \"false\")", inReadFrom.c_str());
 	return false;
 }
 
@@ -91,7 +92,6 @@ inline bool TryParse(const std::wstring& inReadFrom, bool& outValue)
 {
 	if(inReadFrom == L"true")  { outValue = true;  return true; }
 	if(inReadFrom == L"false") { outValue = false; return true; }
-	TRACE_LOG("SafeParse::TryParse<bool,wstring> failed (expected \"true\" or \"false\")");
 	return false;
 }
 
@@ -99,14 +99,20 @@ template <typename T>
 void TryParseOrDefault(const std::string& inReadFrom, T& outValue, const T& inDefault)
 {
 	if(!TryParse(inReadFrom, outValue))
+	{
+		TRACE_LOG1("SafeParse::TryParseOrDefault failed for input '%s', falling back to default", inReadFrom.c_str());
 		outValue = inDefault;
+	}
 }
 
 template <typename T>
 void TryParseOrDefault(const std::wstring& inReadFrom, T& outValue, const T& inDefault)
 {
 	if(!TryParse(inReadFrom, outValue))
+	{
+		TRACE_LOG("SafeParse::TryParseOrDefault<wstring> failed, falling back to default");
 		outValue = inDefault;
+	}
 }
 
 }  // namespace PDFHummus

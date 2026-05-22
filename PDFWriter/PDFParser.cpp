@@ -707,13 +707,13 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInputVector& inXrefTable,
 					std::string revisionToken((const char*)(entry + 11), 5);
 					if(!PDFHummus::TryParse(positionToken, inXrefTable[currentObject].mObjectPosition))
 					{
-						TRACE_LOG1("PDFParser::BuildXrefTableFromTable, xref entry offset '%s' is not numeric.", positionToken.c_str());
+						TRACE_LOG1("PDFParser::ParseXrefFromXrefTable, xref entry offset '%s' is not numeric.", positionToken.c_str());
 						status = PDFHummus::eFailure;
 						break;
 					}
 					if(!PDFHummus::TryParse(revisionToken, inXrefTable[currentObject].mRivision))
 					{
-						TRACE_LOG1("PDFParser::BuildXrefTableFromTable, xref entry revision '%s' is not numeric.", revisionToken.c_str());
+						TRACE_LOG1("PDFParser::ParseXrefFromXrefTable, xref entry revision '%s' is not numeric.", revisionToken.c_str());
 						status = PDFHummus::eFailure;
 						break;
 					}
