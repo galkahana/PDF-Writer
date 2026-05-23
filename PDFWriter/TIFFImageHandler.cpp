@@ -133,8 +133,15 @@ typedef enum{
 	T2P_SAMPLE_RGBA_TO_RGB=0x0002, /* The unencoded samples are contiguous RGBA */
 	T2P_SAMPLE_RGBAA_TO_RGB=0x0004, /* The unencoded samples are RGBA with premultiplied alpha */
 	T2P_SAMPLE_YCBCR_TO_RGB=0x0008, 
-	T2P_SAMPLE_YCBCR_TO_LAB=0x0010, 
-	T2P_SAMPLE_REALIZE_PALETTE=0x0020, /* The unencoded samples are indexes into the color map */
+	T2P_SAMPLE_YCBCR_TO_LAB=0x0010,
+	/* 0x0020 reserved — upstream tiff2pdf's T2P_SAMPLE_REALIZE_PALETTE.
+	   Upstream sets this flag only when emitting JPEG-compressed PDF output
+	   (JPEG can't store an indexed colormap, so the palette has to be
+	   realized into raw RGB samples before encoding). This port doesn't
+	   support JPEG output — see t2p_compress_t above, only NONE/G4/ZIP —
+	   so the flag was never assigned and the palette-realize path was
+	   intentionally dropped. Leaving the bit reserved keeps the rest of
+	   the bit assignments aligned with upstream. */
 	T2P_SAMPLE_SIGNED_TO_UNSIGNED=0x0040, /* The unencoded samples are signed instead of unsignd */
 	T2P_SAMPLE_LAB_SIGNED_TO_UNSIGNED=0x0040, /* The L*a*b* samples have a* and b* signed */
 	T2P_SAMPLE_PLANAR_SEPARATE_TO_CONTIG=0x0100 /* The unencoded samples are separate instead of contiguous */
@@ -1117,20 +1124,6 @@ EStatusCode TIFFImageHandler::ReadTIFFPageInformation() //t2p_read_tiff_data
 		if(mT2p->pdf_transcode!=T2P_TRANSCODE_RAW)
 		{
 			mT2p->pdf_compression = mT2p->pdf_defaultcompression;
-		}
-
-		if(mT2p->pdf_sample & T2P_SAMPLE_REALIZE_PALETTE)
-		{
-			if(mT2p->pdf_colorspace & T2P_CS_CMYK)
-			{
-				mT2p->tiff_samplesperpixel=4;
-				mT2p->tiff_photometric=PHOTOMETRIC_SEPARATED;
-			} 
-			else 
-			{
-				mT2p->tiff_samplesperpixel=3;
-				mT2p->tiff_photometric=PHOTOMETRIC_RGB;
-			}
 		}
 
 		if (TIFFGetField(mT2p->input, TIFFTAG_TRANSFERFUNCTION,
@@ -3074,42 +3067,6 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 			if(status != PDFHummus::eSuccess)
 				break;
 
-			if(mT2p->pdf_sample & T2P_SAMPLE_REALIZE_PALETTE)
-			{
-				if(mT2p->tiff_samplesperpixel != 0 &&
-					static_cast<uint64_t>(mT2p->tiff_datasize) >
-						static_cast<uint64_t>(TIFF_TMSIZE_T_MAX) / mT2p->tiff_samplesperpixel)
-				{
-					TRACE_LOG3(
-						"Refusing oversized palette-realize allocation %lldx%u for %s",
-						static_cast<long long>(mT2p->tiff_datasize),
-						mT2p->tiff_samplesperpixel,
-						mT2p->inputFilePath.c_str());
-					status = PDFHummus::eFailure;
-					_TIFFfree(buffer);
-					break;
-				}
-				samplebuffer=(unsigned char*)_TIFFrealloc( 
-					(tdata_t) buffer, 
-					mT2p->tiff_datasize * mT2p->tiff_samplesperpixel);
-				if(samplebuffer==NULL)
-				{
-					TRACE_LOG2( 
-						"Can't allocate %u bytes of memory for t2p_readwrite_pdf_image, %s", 
-						mT2p->tiff_datasize, 
-						mT2p->inputFilePath.c_str());
-					status = PDFHummus::eFailure;
-				  _TIFFfree(buffer);
-					break;
-				} 
-				else 
-				{
-					buffer=samplebuffer;
-					mT2p->tiff_datasize *= mT2p->tiff_samplesperpixel;
-				}
-				SampleRealizePalette(buffer);
-			}
-
 			if(mT2p->pdf_sample & T2P_SAMPLE_RGBA_TO_RGB)
 			{
 				mT2p->tiff_datasize=SampleRGBAToRGB(
@@ -3195,45 +3152,6 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 		}
 	}while(false);
 	return status;
-}
-
-void TIFFImageHandler::SampleRealizePalette(unsigned char* inBuffer)
-{
-	uint32_t sample_count=0;
-	uint16_t component_count=0;
-	uint32_t palette_offset=0;
-	uint32_t sample_offset=0;
-	uint32_t palette_entries=0;
-	uint64_t max_samples=0;
-	uint32_t idx=0;
-	uint32_t i=0;
-	uint32_t j=0;
-	sample_count=mT2p->tiff_width*mT2p->tiff_length;
-	component_count=mT2p->tiff_samplesperpixel;
-
-	// Nothing safe to do without a sized output unit or a populated colormap.
-	if(component_count == 0 || mT2p->pdf_palette == NULL ||
-		(uint32_t)mT2p->pdf_palettesize < component_count)
-		return;
-
-	// Cap to keep expand-in-place writes within tiff_datasize, and clamp
-	// the index against the colormap (which holds 2^bps entries — fewer
-	// than 256 when bps<8 and the input byte aliases a wider value).
-	max_samples = (uint64_t)mT2p->tiff_datasize / component_count;
-	if((uint64_t)sample_count > max_samples)
-		sample_count = (uint32_t)max_samples;
-	palette_entries = (uint32_t)(mT2p->pdf_palettesize / component_count);
-
-	for(i=sample_count;i>0;i--)
-	{
-		idx = inBuffer[i-1];
-		if(idx >= palette_entries)
-			idx = 0;
-		palette_offset = idx * component_count;
-		sample_offset= (i-1) * component_count;
-		for(j=0;j<component_count;j++)
-			inBuffer[sample_offset+j]=mT2p->pdf_palette[palette_offset+j];
-	}
 }
 
 tsize_t TIFFImageHandler::SampleABGRToRGB(tdata_t inData, uint32_t inSampleCount)
