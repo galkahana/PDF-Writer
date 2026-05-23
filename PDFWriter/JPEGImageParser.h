@@ -77,10 +77,12 @@ private:
 									   bool inUseLittleEndian);
 	PDFHummus::EStatusCode ReadRationalValue(double& outDoubleValue,
 								  bool inUseLittleEndian);
-	PDFHummus::EStatusCode ReadExifID();
-	PDFHummus::EStatusCode IsBigEndianExif(bool& outIsBigEndian);
 	PDFHummus::EStatusCode ReadIntValue(	unsigned int& outIntValue,
 								bool inUseLittleEndian = false);
+	TwoLevelStatus ReadIntValue(
+		unsigned long& refReadLimit,
+		unsigned int& outIntValue,
+		bool inUseLittleEndian = false);
 	PDFHummus::EStatusCode SkipTillChar(IOBasicTypes::Byte inSkipUntilValue,unsigned long& refSkipLimit);
 	PDFHummus::EStatusCode ReadLongValue(unsigned long& outLongValue,
 		bool inUseLittleEndian);

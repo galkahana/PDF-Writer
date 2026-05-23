@@ -21,6 +21,7 @@
 #include "JPEGImageParser.h"
 #include "JPEGImageInformation.h"
 #include "IByteReaderWithPosition.h"
+#include "Trace.h"
 
 #include <memory.h>
 
@@ -192,17 +193,22 @@ EStatusCode JPEGImageParser::ReadJpegTag(unsigned int& outTagID)
 
 EStatusCode JPEGImageParser::ReadSOF0Data(JPEGImageInformation& outImageInformation)
 {
-	unsigned int toSkip;
+	unsigned int markerLen;
 	EStatusCode status;
 
 	status = ReadStreamToBuffer(8);
 	if(PDFHummus::eSuccess == status)
 	{
-		toSkip = GetIntValue(mReadBuffer) - 8;
+		markerLen = GetIntValue(mReadBuffer);
+		if (markerLen < 8)
+		{
+			TRACE_LOG1("JPEGImageParser::ReadSOF0Data, SOF marker length %u below the 8-byte fixed header", markerLen);
+			return PDFHummus::eFailure;
+		}
 		outImageInformation.SamplesHeight = GetIntValue(mReadBuffer + 3);
 		outImageInformation.SamplesWidth = GetIntValue(mReadBuffer + 5);
 		outImageInformation.ColorComponentsCount = (unsigned int)mReadBuffer[7];
-		SkipStream(toSkip);
+		SkipStream(markerLen - 8);
 	}
 	return status;
 }
@@ -235,18 +241,23 @@ void JPEGImageParser::SkipStream(unsigned long inSkip)
 
 EStatusCode JPEGImageParser::ReadJFIFData(JPEGImageInformation& outImageInformation)
 {
-	unsigned int toSkip;
+	unsigned int markerLen;
 	EStatusCode status;
 
 	status = ReadStreamToBuffer(14);
 	if(PDFHummus::eSuccess == status)
 	{
+		markerLen = GetIntValue(mReadBuffer);
+		if (markerLen < 14)
+		{
+			TRACE_LOG1("JPEGImageParser::ReadJFIFData, JFIF marker length %u below the 14-byte fixed header", markerLen);
+			return PDFHummus::eFailure;
+		}
 		outImageInformation.JFIFInformationExists = true;
-		toSkip = GetIntValue(mReadBuffer) - 14;
 		outImageInformation.JFIFUnit = (unsigned int)mReadBuffer[9];
 		outImageInformation.JFIFXDensity = GetIntValue(mReadBuffer + 10);
 		outImageInformation.JFIFYDensity = GetIntValue(mReadBuffer + 12);
-		SkipStream(toSkip);
+		SkipStream(markerLen - 14);
 	}
 	return status;
 }
@@ -271,6 +282,20 @@ TwoLevelStatus JPEGImageParser::ReadLongValue(
 	EStatusCode status = ReadLongValue(outLongValue, inUseLittleEndian);
 	if (status == PDFHummus::eSuccess)
 		refReadLimit -= 4;
+	return TwoLevelStatus(status, PDFHummus::eSuccess);
+}
+
+TwoLevelStatus JPEGImageParser::ReadIntValue(
+	unsigned long& refReadLimit,
+	unsigned int& outIntValue,
+	bool inUseLittleEndian)
+{
+	if (refReadLimit < 2)
+		return TwoLevelStatus(PDFHummus::eSuccess, PDFHummus::eFailure);
+
+	EStatusCode status = ReadIntValue(outIntValue, inUseLittleEndian);
+	if (status == PDFHummus::eSuccess)
+		refReadLimit -= 2;
 	return TwoLevelStatus(status, PDFHummus::eSuccess);
 }
 
@@ -301,6 +326,12 @@ EStatusCode JPEGImageParser::ReadPhotoshopData(JPEGImageInformation& outImageInf
 		twoLevelStatus.primary = ReadIntValue(intSkip);
 		if (twoLevelStatus.primary != PDFHummus::eSuccess)
 			break;
+		if (intSkip < 2)
+		{
+			TRACE_LOG1("JPEGImageParser::ReadPhotoshopData, Photoshop marker length %u below the 2-byte length field", intSkip);
+			twoLevelStatus.primary = PDFHummus::eFailure;
+			break;
+		}
 		toSkip = intSkip - 2;
 		twoLevelStatus.primary = SkipTillChar(scEOS, toSkip);
 		if (twoLevelStatus.primary != PDFHummus::eSuccess)
@@ -356,132 +387,208 @@ EStatusCode JPEGImageParser::ReadPhotoshopData(JPEGImageInformation& outImageInf
 
 EStatusCode JPEGImageParser::ReadExifData(JPEGImageInformation& outImageInformation)
 {
-	EStatusCode status;
-	unsigned long ifdOffset;
-	unsigned int ifdDirectorySize, tagID, toSkip;
-	bool isBigEndian;
+	EStatusCode status = PDFHummus::eSuccess;
+	TwoLevelStatus tls(PDFHummus::eSuccess, PDFHummus::eSuccess);
+	unsigned long toSkip = 0;
+	unsigned int markerLen;
+	unsigned long ifdOffset = 0;
+	unsigned int ifdDirectorySize;
+	unsigned int tagID;
+	unsigned int encodingType;
+	bool isBigEndian = false;
 	unsigned long xResolutionOffset = 0;
 	unsigned long yResolutionOffset = 0;
-	unsigned int resolutionUnitValue = 0; 
+	unsigned int resolutionUnitValue = 0;
 
-	do 
+	do
 	{
-		//read Exif Tag size
-		status = ReadIntValue(toSkip);
+		// read Exif Tag size
+		status = ReadIntValue(markerLen);
 		if (status != PDFHummus::eSuccess)
 			break;
-		
-		toSkip -= 2;
+		if (markerLen < 2)
+		{
+			TRACE_LOG1("JPEGImageParser::ReadExifData, APP1 marker length %u below the 2-byte length field", markerLen);
+			status = PDFHummus::eFailure;
+			break;
+		}
+		toSkip = (unsigned long)(markerLen - 2);
 
-		//read Exif ID
-		status = ReadExifID();
-		toSkip -= 6;
-		if (status != PDFHummus::eSuccess)
-        {
-            // might be wrong ID
-            SkipStream(toSkip);
+		// read Exif ID (6 bytes "Exif\0\0" or "Exif\0\xff")
+		tls = ReadStreamToBuffer(6, toSkip);
+		if (tls.primary != PDFHummus::eSuccess)
+		{
+			status = tls.primary;
+			break;
+		}
+		if (tls.secondary != PDFHummus::eSuccess ||
+			(memcmp(mReadBuffer, scAPP1ID_1, 6) != 0 && memcmp(mReadBuffer, scAPP1ID_2, 6) != 0))
+		{
+			// might be wrong ID (XMP / unsupported)
+			TRACE_LOG("JPEGImageParser::ReadExifData, APP1 identifier did not match \"Exif\\0\\0\" or \"Exif\\0\\xff\"");
+			status = PDFHummus::eFailure;
 			break;
 		}
 
-		//read encoding
-		status = IsBigEndianExif(isBigEndian);
+		// read encoding (2 bytes)
+		tls = ReadIntValue(toSkip, encodingType);
+		if (tls.eitherBad())
+		{
+			status = PDFHummus::eFailure;
+			break;
+		}
+		if (encodingType == scAPP1BigEndian)
+			isBigEndian = true;
+		else if (encodingType == scAPP1LittleEndian)
+			isBigEndian = false;
+		else
+		{
+			TRACE_LOG1("JPEGImageParser::ReadExifData, TIFF endianness marker 0x%04x is neither MM nor II", encodingType);
+			status = PDFHummus::eFailure;
+			break;
+		}
+
+		// skip 0x002a magic
+		status = SkipStream(2, toSkip);
 		if (status != PDFHummus::eSuccess)
 			break;
 
-		toSkip -= 2;
+		// read IFD0 offset
+		tls = ReadLongValue(toSkip, ifdOffset, !isBigEndian);
+		if (tls.eitherBad())
+		{
+			status = PDFHummus::eFailure;
+			break;
+		}
 
-		//skip 0x002a
-		SkipStream(2);		
-		toSkip -= 2;
+		// IFD0 offset is relative to the TIFF header start; TIFF header is 8 bytes, so any
+		// in-spec offset is >= 8.
+		if (ifdOffset < 8)
+		{
+			TRACE_LOG1("JPEGImageParser::ReadExifData, IFD0 offset %lu below the 8-byte TIFF header minimum", ifdOffset);
+			status = PDFHummus::eFailure;
+			break;
+		}
 
-		//read IFD0 offset
-		status = ReadLongValue(ifdOffset, !isBigEndian);	
+		// skip to the IFD beginning
+		status = SkipStream(ifdOffset - 8, toSkip);
 		if (status != PDFHummus::eSuccess)
 			break;
 
-		toSkip -= 4;
-
-		//skip to the IFD beginning
-		SkipStream(ifdOffset - 8);
-		toSkip -= (ifdOffset - 8);
-
-		//read IFD size
-		status = ReadIntValue(ifdDirectorySize, !isBigEndian);
-		if (status != PDFHummus::eSuccess)
+		// read IFD size
+		tls = ReadIntValue(toSkip, ifdDirectorySize, !isBigEndian);
+		if (tls.eitherBad())
+		{
+			status = PDFHummus::eFailure;
 			break;
-
-		toSkip -= 2;
+		}
 
 		for (unsigned int i = 0; i < ifdDirectorySize; i++)
-		{			
+		{
 			if (0 != xResolutionOffset && 0 != yResolutionOffset && 0 != resolutionUnitValue)
 			{
-				SkipStream(12 * (ifdDirectorySize - i));
-				toSkip -= (12 * (ifdDirectorySize - i));
+				status = SkipStream(12UL * (ifdDirectorySize - i), toSkip);
 				break;
 			}
 
-			status = ReadIntValue(tagID, !isBigEndian);
-			if (status != PDFHummus::eSuccess)
+			tls = ReadIntValue(toSkip, tagID, !isBigEndian);
+			if (tls.eitherBad())
+			{
+				status = PDFHummus::eFailure;
 				break;
-
-			toSkip -= 2;
+			}
 
 			switch (tagID)
 			{
 				case scAPP1xResolutionTagID:
-					SkipStream(6);					
-					status = ReadLongValue(xResolutionOffset, !isBigEndian);
+					status = SkipStream(6, toSkip);
+					if (status != PDFHummus::eSuccess) break;
+					tls = ReadLongValue(toSkip, xResolutionOffset, !isBigEndian);
+					if (tls.eitherBad()) status = PDFHummus::eFailure;
 					break;
 				case scAPP1yResolutionTagID:
-					SkipStream(6);		
-					status = ReadLongValue(yResolutionOffset, !isBigEndian);
+					status = SkipStream(6, toSkip);
+					if (status != PDFHummus::eSuccess) break;
+					tls = ReadLongValue(toSkip, yResolutionOffset, !isBigEndian);
+					if (tls.eitherBad()) status = PDFHummus::eFailure;
 					break;
 				case scAPP1ResolutionUnitTagID:
-					SkipStream(6);		
-					status = ReadIntValue(resolutionUnitValue, !isBigEndian);
-					SkipStream(2);
+					status = SkipStream(6, toSkip);
+					if (status != PDFHummus::eSuccess) break;
+					tls = ReadIntValue(toSkip, resolutionUnitValue, !isBigEndian);
+					if (tls.eitherBad()) { status = PDFHummus::eFailure; break; }
+					status = SkipStream(2, toSkip);
 					break;
 				default:
-					SkipStream(10);
+					status = SkipStream(10, toSkip);
 					break;
 			}
 
-			toSkip -= 10;
 			if (status != PDFHummus::eSuccess)
 				break;
 		}
-		
-		outImageInformation.ExifInformationExists = true;
-		if (resolutionUnitValue != 0) 
-			outImageInformation.ExifUnit = resolutionUnitValue;		
-		else
-			outImageInformation.ExifUnit = 2;
-
-
-		unsigned long currentOffset = 0;																					
-		if(ifdOffset > 8) 																							
-		{																													
-			// that would be the case where the IFD data appears before thee ifd header. avoid issues with negative skip values by placing
-			// the position before the table
-			mImageStream->SetPosition(mImageStream->GetCurrentPosition() - (ifdOffset + ifdDirectorySize * 12 + 2));		
-			toSkip+=(ifdOffset + ifdDirectorySize * 12 + 2);																
-		}																													
-		else																												
-		{																													
-			currentOffset = ifdOffset + ifdDirectorySize * 12 + 2;
-		}																													
-		unsigned long tempOffset = currentOffset;
-		status = GetResolutionFromExif(outImageInformation, xResolutionOffset, yResolutionOffset, tempOffset, !isBigEndian);
 		if (status != PDFHummus::eSuccess)
 			break;
 
-		toSkip -= (tempOffset - currentOffset);
+		outImageInformation.ExifInformationExists = true;
+		if (resolutionUnitValue != 0)
+			outImageInformation.ExifUnit = resolutionUnitValue;
+		else
+			outImageInformation.ExifUnit = 2;
 
-		if (PDFHummus::eSuccess == status)
-			SkipStream(toSkip);
+		unsigned long currentOffset = 0;
+		unsigned long rewindAmount = ifdOffset + (unsigned long)ifdDirectorySize * 12 + 2;
+		if (ifdOffset > 8)
+		{
+			// the IFD data may appear before the IFD header; rewind to the TIFF header start so
+			// in-Exif offsets can be reached by forward seek
+			LongFilePositionType currentPos = mImageStream->GetCurrentPosition();
+			if (currentPos < 0 || (unsigned long long)currentPos < (unsigned long long)rewindAmount)
+			{
+				TRACE_LOG2("JPEGImageParser::ReadExifData, TIFF-header rewind %lu exceeds current stream position %lld", rewindAmount, (long long)currentPos);
+				status = PDFHummus::eFailure;
+				break;
+			}
+			mImageStream->SetPosition(currentPos - (LongFilePositionType)rewindAmount);
+			toSkip += rewindAmount;
+		}
+		else
+		{
+			currentOffset = rewindAmount;
+		}
+		unsigned long tempOffset = currentOffset;
+		// Measure actual stream consumption rather than relying on
+		// tempOffset: GetResolutionFromExif's inoutOffset only advances on
+		// success, so a partial read leaves it stale.
+		LongFilePositionType posBefore = mImageStream->GetCurrentPosition();
+		EStatusCode getResStatus = GetResolutionFromExif(outImageInformation, xResolutionOffset, yResolutionOffset, tempOffset, !isBigEndian);
+		LongFilePositionType posAfter = mImageStream->GetCurrentPosition();
+		unsigned long consumed = (posAfter > posBefore) ? (unsigned long)(posAfter - posBefore) : 0;
+		if (consumed > toSkip)
+		{
+			TRACE_LOG2("JPEGImageParser::ReadExifData, resolution read consumed %lu bytes, exceeds remaining marker budget %lu", consumed, toSkip);
+			status = PDFHummus::eFailure;
+			toSkip = 0;
+			break;
+		}
+		toSkip -= consumed;
+		if (getResStatus != PDFHummus::eSuccess)
+		{
+			status = getResStatus;
+			break;
+		}
+
+		SkipStream(toSkip);
+		toSkip = 0;
 	}
-	while(false);	
+	while(false);
+
+	// Drain any remaining marker bytes so Parse can locate the next marker
+	// after a partial Exif rejection. Parse treats Exif failure as "not Exif,
+	// try the next APP1" and re-enters the loop.
+	if (toSkip > 0)
+		SkipStream(toSkip);
+
 	return status;
 }
 
@@ -520,11 +627,17 @@ EStatusCode JPEGImageParser::GetResolutionFromExif(
 		if (0 == firstOffset)
 			break;
 
+		if (firstOffset < inoutOffset)
+		{
+			TRACE_LOG2("JPEGImageParser::GetResolutionFromExif, first resolution offset %lu precedes parser position %lu", firstOffset, inoutOffset);
+			status = PDFHummus::eFailure;
+			break;
+		}
 		SkipStream(firstOffset - inoutOffset);
-		inoutOffset += (firstOffset - inoutOffset);
+		inoutOffset = firstOffset;
 
 		status = ReadRationalValue(
-			xResolutionIsFirst? outImageInformation.ExifXDensity : outImageInformation.ExifYDensity, 
+			xResolutionIsFirst? outImageInformation.ExifXDensity : outImageInformation.ExifYDensity,
 			inUseLittleEndian);
 
 		if (status != PDFHummus::eSuccess)
@@ -535,11 +648,17 @@ EStatusCode JPEGImageParser::GetResolutionFromExif(
 		if (0 == secondOffset)
 			break;
 
-		SkipStream(secondOffset - firstOffset - 8);
-		inoutOffset += (secondOffset - firstOffset - 8);
+		if (secondOffset < inoutOffset)
+		{
+			TRACE_LOG2("JPEGImageParser::GetResolutionFromExif, second resolution offset %lu precedes parser position %lu", secondOffset, inoutOffset);
+			status = PDFHummus::eFailure;
+			break;
+		}
+		SkipStream(secondOffset - inoutOffset);
+		inoutOffset = secondOffset;
 
 		status = ReadRationalValue(
-			xResolutionIsFirst? outImageInformation.ExifYDensity : outImageInformation.ExifXDensity, 
+			xResolutionIsFirst? outImageInformation.ExifYDensity : outImageInformation.ExifXDensity,
 			inUseLittleEndian);
 		if (status != PDFHummus::eSuccess)
 			break;
@@ -564,38 +683,14 @@ EStatusCode JPEGImageParser::ReadRationalValue(
 	if (status != PDFHummus::eSuccess)
 		return status;
 
-	outDoubleValue = ((double) numerator) / ((double) denominator); 
+	if (denominator == 0)
+	{
+		TRACE_LOG("JPEGImageParser::ReadRationalValue, rational denominator is zero");
+		return PDFHummus::eFailure;
+	}
+
+	outDoubleValue = ((double) numerator) / ((double) denominator);
 	return status;
-}
-
-EStatusCode JPEGImageParser::ReadExifID()
-{
-	EStatusCode status = ReadStreamToBuffer(6);
-	if (status != PDFHummus::eSuccess)
-		return status;
-
-	if (memcmp(mReadBuffer, scAPP1ID_1, 6) != 0 && memcmp(mReadBuffer, scAPP1ID_2,6) != 0)
-		return PDFHummus::eFailure;
-
-	return PDFHummus::eSuccess;
-}
-
-EStatusCode JPEGImageParser::IsBigEndianExif(bool& outIsBigEndian)
-{	
-	unsigned int encodingType;
-	EStatusCode status = ReadIntValue(encodingType);
-		
-	if (status != PDFHummus::eSuccess)
-		return status;
-	
-	if (encodingType == scAPP1BigEndian)
-		outIsBigEndian = true;
-	else if (encodingType == scAPP1LittleEndian)
-		outIsBigEndian = false;
-	else
-		return PDFHummus::eFailure;
-
-	return PDFHummus::eSuccess;
 }
 
 EStatusCode JPEGImageParser::ReadIntValue(
@@ -678,6 +773,13 @@ EStatusCode JPEGImageParser::SkipTag()
 	status = ReadIntValue(toSkip);
 	// skipping -2 because int was already read
 	if(PDFHummus::eSuccess == status)
+	{
+		if (toSkip < 2)
+		{
+			TRACE_LOG1("JPEGImageParser::SkipTag, marker length %u below the 2-byte length field", toSkip);
+			return PDFHummus::eFailure;
+		}
 		SkipStream(toSkip-2);
+	}
 	return status;
 }
