@@ -704,8 +704,9 @@ EStatusCode TIFFImageHandler::ReadTopLevelTiffInformation()
 			if( (TIFFGetField(mT2p->input, TIFFTAG_PLANARCONFIG, &xuint16_t) != 0)
 				&& (xuint16_t == PLANARCONFIG_SEPARATE ) )
 			{
-					TIFFGetField(mT2p->input, TIFFTAG_SAMPLESPERPIXEL, &xuint16_t);
-					mT2p->tiff_tiles[i].tiles_tilecount/= xuint16_t;
+					TIFFGetFieldDefaulted(mT2p->input, TIFFTAG_SAMPLESPERPIXEL, &xuint16_t);
+					if(xuint16_t != 0)
+						mT2p->tiff_tiles[i].tiles_tilecount/= xuint16_t;
 			}
 			if( mT2p->tiff_tiles[i].tiles_tilecount > 0)
 			{
@@ -2317,15 +2318,24 @@ void TIFFImageHandler::CalculateTiffTileSize(int inTileIndex)
 			// 	TIFFTAG_TILEBYTECOUNTS changed in tiff 4.0.0;
 
 			tsize_t_compat* tbc = NULL;
-			TIFFGetField(mT2p->input, TIFFTAG_TILEBYTECOUNTS, &tbc);
-			mT2p->tiff_datasize=static_cast<tsize_t>(tbc[inTileIndex]);
+			if(TIFFGetField(mT2p->input, TIFFTAG_TILEBYTECOUNTS, &tbc) != 0 && tbc != NULL)
+				mT2p->tiff_datasize=static_cast<tsize_t>(tbc[inTileIndex]);
+			else
+				mT2p->tiff_datasize=0;
 		}
 	}
 	else
 	{
-		mT2p->tiff_datasize=TIFFTileSize(mT2p->input);
-		if(mT2p->tiff_planar==PLANARCONFIG_SEPARATE)
-			mT2p->tiff_datasize*= mT2p->tiff_samplesperpixel;
+		tmsize_t tileSize = TIFFTileSize(mT2p->input);
+		uint64_t totalSize = (tileSize > 0) ? static_cast<uint64_t>(tileSize) : 0;
+		if(mT2p->tiff_planar==PLANARCONFIG_SEPARATE && mT2p->tiff_samplesperpixel != 0)
+		{
+			if(totalSize > static_cast<uint64_t>(TIFF_TMSIZE_T_MAX) / mT2p->tiff_samplesperpixel)
+				totalSize = 0;
+			else
+				totalSize *= mT2p->tiff_samplesperpixel;
+		}
+		mT2p->tiff_datasize = static_cast<tsize_t>(totalSize);
 	}
 }
 
@@ -2417,6 +2427,13 @@ EStatusCode TIFFImageHandler::WriteImageTileData(PDFStream* inImageStream,int in
 
 	do
 	{
+		if(mT2p->tiff_datasize <= 0)
+		{
+			TRACE_LOG1("TIFFImageHandler::WriteImageTileData, invalid tiff_datasize for %s",
+						mT2p->inputFilePath.c_str());
+			status = PDFHummus::eFailure;
+			break;
+		}
 		// if recompression is not required, passthrough the image information and finish
 		if((mT2p->pdf_transcode == T2P_TRANSCODE_RAW) && (edge == 0) &&
 			(mT2p->pdf_compression == T2P_COMPRESS_G4 ||
@@ -2819,14 +2836,29 @@ void TIFFImageHandler::CalculateTiffSizeNoTiles()
 	{
 		// TIFFTAG_STRIPBYTECOUNTS size changed in tiff 4.0.0
 		tsize_t_compat * sbc = NULL;
-		TIFFGetField(mT2p->input, TIFFTAG_STRIPBYTECOUNTS, &sbc);
-		mT2p->tiff_datasize = static_cast<tsize_t>(sbc[0]);
+		if(TIFFGetField(mT2p->input, TIFFTAG_STRIPBYTECOUNTS, &sbc) != 0 && sbc != NULL)
+			mT2p->tiff_datasize = static_cast<tsize_t>(sbc[0]);
+		else
+			mT2p->tiff_datasize = 0;
 	}
 	else
 	{
-		mT2p->tiff_datasize=TIFFScanlineSize(mT2p->input) * mT2p->tiff_length;
-		if(mT2p->tiff_planar==PLANARCONFIG_SEPARATE)
-			mT2p->tiff_datasize*= mT2p->tiff_samplesperpixel;
+		tmsize_t scanline = TIFFScanlineSize(mT2p->input);
+		uint64_t totalSize = 0;
+		if(scanline > 0 && mT2p->tiff_length > 0 &&
+			static_cast<uint64_t>(scanline) <=
+				static_cast<uint64_t>(TIFF_TMSIZE_T_MAX) / mT2p->tiff_length)
+		{
+			totalSize = static_cast<uint64_t>(scanline) * mT2p->tiff_length;
+		}
+		if(mT2p->tiff_planar==PLANARCONFIG_SEPARATE && mT2p->tiff_samplesperpixel != 0)
+		{
+			if(totalSize > static_cast<uint64_t>(TIFF_TMSIZE_T_MAX) / mT2p->tiff_samplesperpixel)
+				totalSize = 0;
+			else
+				totalSize *= mT2p->tiff_samplesperpixel;
+		}
+		mT2p->tiff_datasize = static_cast<tsize_t>(totalSize);
 	}
 }
 
@@ -2851,6 +2883,13 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 
 	do
 	{
+		if(mT2p->tiff_datasize <= 0)
+		{
+			TRACE_LOG1("TIFFImageHandler::WriteImageData, invalid tiff_datasize for %s",
+						mT2p->inputFilePath.c_str());
+			status = PDFHummus::eFailure;
+			break;
+		}
 		if(mT2p->pdf_transcode == T2P_TRANSCODE_RAW)
 		{
 			if(mT2p->pdf_compression == T2P_COMPRESS_G4 ||
@@ -3031,6 +3070,19 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 
 			if(mT2p->pdf_sample & T2P_SAMPLE_REALIZE_PALETTE)
 			{
+				if(mT2p->tiff_samplesperpixel != 0 &&
+					static_cast<uint64_t>(mT2p->tiff_datasize) >
+						static_cast<uint64_t>(TIFF_TMSIZE_T_MAX) / mT2p->tiff_samplesperpixel)
+				{
+					TRACE_LOG3(
+						"Refusing oversized palette-realize allocation %lldx%u for %s",
+						static_cast<long long>(mT2p->tiff_datasize),
+						mT2p->tiff_samplesperpixel,
+						mT2p->inputFilePath.c_str());
+					status = PDFHummus::eFailure;
+					_TIFFfree(buffer);
+					break;
+				}
 				samplebuffer=(unsigned char*)_TIFFrealloc( 
 					(tdata_t) buffer, 
 					mT2p->tiff_datasize * mT2p->tiff_samplesperpixel);
