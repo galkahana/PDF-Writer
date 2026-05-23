@@ -2673,7 +2673,7 @@ tsize_t TIFFImageHandler::SampleRGBAAToRGB(tdata_t inData, uint32_t inSampleCoun
 	uint32_t i;
 	
 	for(i = 0; i < inSampleCount; i++)
-		memcpy((uint8_t*)inData + i * 3, (uint8_t*)inData + i * 4, 3);
+		memmove((uint8_t*)inData + i * 3, (uint8_t*)inData + i * 4, 3);
 
 	return(i * 3);	
 }
@@ -2948,7 +2948,10 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 					break;
 				}
 				bufferoffset+=read;
-				stripsize = (stripsize > mT2p->tiff_datasize - bufferoffset) ? (mT2p->tiff_datasize - bufferoffset) : stripsize;
+				if(bufferoffset >= mT2p->tiff_datasize)
+					break;
+				if(stripsize > mT2p->tiff_datasize - bufferoffset)
+					stripsize = mT2p->tiff_datasize - bufferoffset;
 			}
 			if(status != PDFHummus::eSuccess)
 				break;
@@ -3063,7 +3066,10 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 					break;
 				}
 				bufferoffset+=read;
-				stripsize = (stripsize > mT2p->tiff_datasize - bufferoffset) ? (mT2p->tiff_datasize - bufferoffset) : stripsize;
+				if(bufferoffset >= mT2p->tiff_datasize)
+					break;
+				if(stripsize > mT2p->tiff_datasize - bufferoffset)
+					stripsize = mT2p->tiff_datasize - bufferoffset;
 			}
 			if(status != PDFHummus::eSuccess)
 				break;
@@ -3197,14 +3203,33 @@ void TIFFImageHandler::SampleRealizePalette(unsigned char* inBuffer)
 	uint16_t component_count=0;
 	uint32_t palette_offset=0;
 	uint32_t sample_offset=0;
+	uint32_t palette_entries=0;
+	uint64_t max_samples=0;
+	uint32_t idx=0;
 	uint32_t i=0;
 	uint32_t j=0;
 	sample_count=mT2p->tiff_width*mT2p->tiff_length;
 	component_count=mT2p->tiff_samplesperpixel;
-	
+
+	// Nothing safe to do without a sized output unit or a populated colormap.
+	if(component_count == 0 || mT2p->pdf_palette == NULL ||
+		(uint32_t)mT2p->pdf_palettesize < component_count)
+		return;
+
+	// Cap to keep expand-in-place writes within tiff_datasize, and clamp
+	// the index against the colormap (which holds 2^bps entries — fewer
+	// than 256 when bps<8 and the input byte aliases a wider value).
+	max_samples = (uint64_t)mT2p->tiff_datasize / component_count;
+	if((uint64_t)sample_count > max_samples)
+		sample_count = (uint32_t)max_samples;
+	palette_entries = (uint32_t)(mT2p->pdf_palettesize / component_count);
+
 	for(i=sample_count;i>0;i--)
 	{
-		palette_offset=inBuffer[i-1] * component_count;
+		idx = inBuffer[i-1];
+		if(idx >= palette_entries)
+			idx = 0;
+		palette_offset = idx * component_count;
 		sample_offset= (i-1) * component_count;
 		for(j=0;j<component_count;j++)
 			inBuffer[sample_offset+j]=mT2p->pdf_palette[palette_offset+j];
