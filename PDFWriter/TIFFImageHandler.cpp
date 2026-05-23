@@ -2948,10 +2948,10 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 					break;
 				}
 				bufferoffset+=read;
-				if(bufferoffset < mT2p->tiff_datasize)
-					stripsize = (stripsize > mT2p->tiff_datasize - bufferoffset) ? (mT2p->tiff_datasize - bufferoffset) : stripsize;
-				else
-					stripsize = 0;
+				if(bufferoffset >= mT2p->tiff_datasize)
+					break;
+				if(stripsize > mT2p->tiff_datasize - bufferoffset)
+					stripsize = mT2p->tiff_datasize - bufferoffset;
 			}
 			if(status != PDFHummus::eSuccess)
 				break;
@@ -3066,10 +3066,10 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 					break;
 				}
 				bufferoffset+=read;
-				if(bufferoffset < mT2p->tiff_datasize)
-					stripsize = (stripsize > mT2p->tiff_datasize - bufferoffset) ? (mT2p->tiff_datasize - bufferoffset) : stripsize;
-				else
-					stripsize = 0;
+				if(bufferoffset >= mT2p->tiff_datasize)
+					break;
+				if(stripsize > mT2p->tiff_datasize - bufferoffset)
+					stripsize = mT2p->tiff_datasize - bufferoffset;
 			}
 			if(status != PDFHummus::eSuccess)
 				break;
@@ -3211,16 +3211,18 @@ void TIFFImageHandler::SampleRealizePalette(unsigned char* inBuffer)
 	sample_count=mT2p->tiff_width*mT2p->tiff_length;
 	component_count=mT2p->tiff_samplesperpixel;
 
+	// Nothing safe to do without a sized output unit or a populated colormap.
+	if(component_count == 0 || mT2p->pdf_palette == NULL ||
+		(uint32_t)mT2p->pdf_palettesize < component_count)
+		return;
+
 	// Cap to keep expand-in-place writes within tiff_datasize, and clamp
 	// the index against the colormap (which holds 2^bps entries — fewer
 	// than 256 when bps<8 and the input byte aliases a wider value).
-	if(component_count != 0)
-	{
-		max_samples = (uint32_t)(mT2p->tiff_datasize / component_count);
-		if(sample_count > max_samples)
-			sample_count = max_samples;
-		palette_entries = (uint32_t)(mT2p->pdf_palettesize / component_count);
-	}
+	max_samples = (uint32_t)(mT2p->tiff_datasize / component_count);
+	if(sample_count > max_samples)
+		sample_count = max_samples;
+	palette_entries = (uint32_t)(mT2p->pdf_palettesize / component_count);
 
 	for(i=sample_count;i>0;i--)
 	{
