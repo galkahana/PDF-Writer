@@ -425,6 +425,7 @@ EStatusCode JPEGImageParser::ReadExifData(JPEGImageInformation& outImageInformat
 			(memcmp(mReadBuffer, scAPP1ID_1, 6) != 0 && memcmp(mReadBuffer, scAPP1ID_2, 6) != 0))
 		{
 			// might be wrong ID (XMP / unsupported)
+			TRACE_LOG("JPEGImageParser::ReadExifData, APP1 identifier did not match \"Exif\\0\\0\" or \"Exif\\0\\xff\"");
 			status = PDFHummus::eFailure;
 			break;
 		}
@@ -442,6 +443,7 @@ EStatusCode JPEGImageParser::ReadExifData(JPEGImageInformation& outImageInformat
 			isBigEndian = false;
 		else
 		{
+			TRACE_LOG1("JPEGImageParser::ReadExifData, TIFF endianness marker 0x%04x is neither MM nor II", encodingType);
 			status = PDFHummus::eFailure;
 			break;
 		}

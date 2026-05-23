@@ -234,7 +234,7 @@ static void EmitExifSegment(vector<Byte>& out,
 static EStatusCode RunParse(const vector<Byte>& inBytes, JPEGImageInformation& outInfo)
 {
 	// Arrange
-	InputByteArrayStream stream((Byte*)&inBytes[0], (long long)inBytes.size());
+	InputByteArrayStream stream(const_cast<Byte*>(inBytes.data()), (long long)inBytes.size());
 
 	// Act
 	JPEGImageParser parser;
