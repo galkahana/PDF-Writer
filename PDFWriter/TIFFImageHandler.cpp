@@ -94,6 +94,7 @@
 
 #include <stdlib.h> 
 #include <search.h>
+#include <stdint.h>
 
 using namespace PDFHummus;
 
@@ -3041,6 +3042,7 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 						mT2p->inputFilePath.c_str());
 					status = PDFHummus::eFailure;
 				  _TIFFfree(buffer);
+					break;
 				} 
 				else 
 				{
@@ -3066,6 +3068,18 @@ EStatusCode TIFFImageHandler::WriteImageData(PDFStream* inImageStream)
 
 			if(mT2p->pdf_sample & T2P_SAMPLE_YCBCR_TO_RGB)
 			{
+				if(mT2p->tiff_width != 0 &&
+					mT2p->tiff_length > UINT32_MAX / 4 / mT2p->tiff_width)
+				{
+					TRACE_LOG3(
+						"Refusing oversized RGBA allocation %ux%ux4 for %s",
+						mT2p->tiff_width,
+						mT2p->tiff_length,
+						mT2p->inputFilePath.c_str());
+					status = PDFHummus::eFailure;
+					_TIFFfree(buffer);
+					break;
+				}
 				samplebuffer=(unsigned char*)_TIFFrealloc(
 					(tdata_t)buffer, 
 					mT2p->tiff_width*mT2p->tiff_length*4);
