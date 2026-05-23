@@ -312,12 +312,10 @@ static bool Parse_JfifThenSOF0_RecordsDensity()
 // into JPEGImageInformation BEFORE noticing the length was wrong (the
 // underflow then drove a wild SkipStream call). With the guards in place
 // each per-marker reader rejects the short read before any output field is
-// written, so the discriminating assertion is "the info struct is at its
-// default-constructed state".
-//
-// Parse's outer status is not a discriminator here: the per-marker case-arm
-// flips its "marker not found" flag BEFORE calling the per-marker reader, so
-// Parse may still report success after a per-marker failure.
+// written, and Parse propagates the failure: SOFMarkerNotFound is now only
+// cleared on a successful ReadSOF0Data, so a malformed SOF0 keeps the flag
+// raised and Parse returns eFailure. The other short-marker cases never
+// reach a valid SOF, so they also fail.
 
 static bool IsJpegInfoAtDefaults(const JPEGImageInformation& info)
 {
@@ -376,9 +374,15 @@ static bool RunShortMarkerCases()
 
 		// Act
 		JPEGImageInformation info;
-		(void)RunParse(bytes, info);
+		EStatusCode status = RunParse(bytes, info);
 
-		// Assert
+		// Assert — Parse must report failure (no valid SOF reached) and the
+		// info struct must stay at defaults.
+		if(status == eSuccess) {
+			cout << "JPEGImageParserTest [ShortMarker::" << c.label
+			     << "]: Parse returned eSuccess; expected eFailure" << endl;
+			return false;
+		}
 		if(!IsJpegInfoAtDefaults(info)) {
 			cout << "JPEGImageParserTest [ShortMarker::" << c.label
 			     << "]: info struct was mutated despite short marker length "
