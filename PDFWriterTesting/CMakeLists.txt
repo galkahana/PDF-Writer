@@ -43,6 +43,7 @@ create_test_sourcelist (Tests
   InputFlateDecodeTester.cpp
   InputImagesAsStreamsTest.cpp
   InputPFBDecodeStreamTest.cpp
+  JPEGImageParserTest.cpp
   JpegLibTest.cpp
   JPGImageTest.cpp
   LinksTest.cpp
