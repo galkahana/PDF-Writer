@@ -96,8 +96,9 @@ EStatusCode JPEGImageParser::Parse(IByteReaderWithPosition* inImageStream,JPEGIm
 				case scSOF7TagID : case scSOF9TagID : case scSOF10TagID:
 				case scSOF11TagID : case scSOF13TagID : case scSOF14TagID:
 				case scSOF15TagID :
-					SOFMarkerNotFound = false;
 					status = ReadSOF0Data(outImageInformation);
+					if (status == PDFHummus::eSuccess)
+						SOFMarkerNotFound = false;
 					break;
 				case scAPP0TagID:
 					if(JFIFMarkerNotFound)
