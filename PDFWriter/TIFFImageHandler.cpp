@@ -3204,7 +3204,7 @@ void TIFFImageHandler::SampleRealizePalette(unsigned char* inBuffer)
 	uint32_t palette_offset=0;
 	uint32_t sample_offset=0;
 	uint32_t palette_entries=0;
-	uint32_t max_samples=0;
+	uint64_t max_samples=0;
 	uint32_t idx=0;
 	uint32_t i=0;
 	uint32_t j=0;
@@ -3219,9 +3219,9 @@ void TIFFImageHandler::SampleRealizePalette(unsigned char* inBuffer)
 	// Cap to keep expand-in-place writes within tiff_datasize, and clamp
 	// the index against the colormap (which holds 2^bps entries — fewer
 	// than 256 when bps<8 and the input byte aliases a wider value).
-	max_samples = (uint32_t)(mT2p->tiff_datasize / component_count);
-	if(sample_count > max_samples)
-		sample_count = max_samples;
+	max_samples = (uint64_t)mT2p->tiff_datasize / component_count;
+	if((uint64_t)sample_count > max_samples)
+		sample_count = (uint32_t)max_samples;
 	palette_entries = (uint32_t)(mT2p->pdf_palettesize / component_count);
 
 	for(i=sample_count;i>0;i--)
