@@ -245,7 +245,6 @@ private:
 	void WriteCommonImageDictionaryProperties(DictionaryContext* inImageContext);
 	PDFHummus::EStatusCode WriteImageData(PDFStream* inImageStream);
 	void CalculateTiffSizeNoTiles();
-	void SampleRealizePalette(unsigned char* inBuffer);
 	tsize_t SampleABGRToRGB(tdata_t inData, uint32_t inSampleCount);
 	PDFHummus::EStatusCode WriteImageBufferToStream(	PDFStream* inPDFStream,
 											uint32_t inImageWidth,
