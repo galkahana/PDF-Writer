@@ -2844,7 +2844,13 @@ void TIFFImageHandler::CalculateTiffSizeNoTiles()
 	else
 	{
 		tmsize_t scanline = TIFFScanlineSize(mT2p->input);
-		uint64_t totalSize = (scanline > 0) ? static_cast<uint64_t>(scanline) * mT2p->tiff_length : 0;
+		uint64_t totalSize = 0;
+		if(scanline > 0 && mT2p->tiff_length > 0 &&
+			static_cast<uint64_t>(scanline) <=
+				static_cast<uint64_t>(TIFF_TMSIZE_T_MAX) / mT2p->tiff_length)
+		{
+			totalSize = static_cast<uint64_t>(scanline) * mT2p->tiff_length;
+		}
 		if(mT2p->tiff_planar==PLANARCONFIG_SEPARATE && mT2p->tiff_samplesperpixel != 0)
 		{
 			if(totalSize > static_cast<uint64_t>(TIFF_TMSIZE_T_MAX) / mT2p->tiff_samplesperpixel)
@@ -2852,8 +2858,6 @@ void TIFFImageHandler::CalculateTiffSizeNoTiles()
 			else
 				totalSize *= mT2p->tiff_samplesperpixel;
 		}
-		if(totalSize > static_cast<uint64_t>(TIFF_TMSIZE_T_MAX))
-			totalSize = 0;
 		mT2p->tiff_datasize = static_cast<tsize_t>(totalSize);
 	}
 }
