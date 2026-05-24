@@ -19,6 +19,7 @@
 #include "PDFWriter.h"
 #include "PDFDocumentCopyingContext.h"
 #include "PDFArray.h"
+#include "PDFInteger.h"
 #include "ObjectsContext.h"
 #include "EStatusCode.h"
 
@@ -31,8 +32,11 @@ using namespace std;
 using namespace PDFHummus;
 
 // Build a chain of inDepth nested arrays: [[[...[]]]] with inDepth levels.
+// If inAddScalarLeaf is true, the innermost array holds a single PDFInteger
+// instead of being empty (exercises the dispatcher path for a scalar that
+// sits at the maximum container nesting — must not be rejected by the cap).
 // Caller owns the returned root and must Release it.
-static PDFArray* BuildNestedArrayChain(int inDepth) {
+static PDFArray* BuildNestedArrayChain(int inDepth, bool inAddScalarLeaf) {
 	PDFArray* root = new PDFArray();
 	PDFArray* current = root;
 	for(int d = 1; d < inDepth; ++d) {
@@ -41,24 +45,29 @@ static PDFArray* BuildNestedArrayChain(int inDepth) {
 		child->Release(); // AppendObject AddRef'd, drop our reference
 		current = child;
 	}
+	if(inAddScalarLeaf) {
+		PDFInteger* leaf = new PDFInteger(42);
+		current->AppendObject(leaf);
+		leaf->Release();
+	}
 	return root;
 }
 
 struct WriteObjectByTypeCase {
 	const char* label;
 	int         depth;
+	bool        scalarLeaf;
 	EStatusCode expected;
 };
 
 static const WriteObjectByTypeCase scWriteObjectByTypeCases[] = {
-	// Bug shape: WriteObjectByType is the recursive dispatcher for
-	// CopyDirectObjectAsIs / CopyDirectObjectWithDeepCopy. Without the cap,
-	// a caller-supplied deep synthetic tree would recurse without bound.
-	// MAX_WRITE_OBJECT_DEPTH = 100 mirrors PDFObjectParser's MAX_OBJECT_DEPTH,
-	// so trees at exactly 100 nested arrays must still be accepted; one
-	// level beyond is rejected with eFailure.
-	{ "DepthAtCap_Succeeds",  100, eSuccess },
-	{ "DepthOverCap_Fails",   101, eFailure },
+	// MAX_WRITE_OBJECT_DEPTH = 100 mirrors PDFObjectParser's MAX_OBJECT_DEPTH:
+	// the cap counts container-nesting depth only (arrays/dicts/streams), so
+	// scalars at the deepest container level must still be accepted. One
+	// container level beyond the cap is rejected with eFailure.
+	{ "DepthAtCapEmptyLeaf_Succeeds",   100, false, eSuccess },
+	{ "DepthAtCapScalarLeaf_Succeeds",  100, true,  eSuccess },
+	{ "DepthOverCap_Fails",             101, false, eFailure },
 };
 
 static bool RunWriteObjectByTypeCases(char* argv[], const string& inSourcePath) {
@@ -84,7 +93,7 @@ static bool RunWriteObjectByTypeCases(char* argv[], const string& inSourcePath) 
 			return false;
 		}
 		writer.GetObjectsContext().StartNewIndirectObject();
-		PDFArray* tree = BuildNestedArrayChain(testCase.depth);
+		PDFArray* tree = BuildNestedArrayChain(testCase.depth, testCase.scalarLeaf);
 
 		// Act
 		EStatusCode status = copyingContext->CopyDirectObjectAsIs(tree);

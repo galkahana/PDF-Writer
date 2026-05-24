@@ -1949,12 +1949,6 @@ void OutWritingPolicy::WriteReference(PDFIndirectObjectReference* inReference, E
 
 EStatusCode PDFDocumentHandler::WriteObjectByType(PDFObject* inObject,ETokenSeparator inSeparator, IObjectWritePolicy* inWritePolicy, int inDepth)
 {
-	if(inDepth >= MAX_WRITE_OBJECT_DEPTH)
-	{
-		TRACE_LOG1("PDFDocumentHandler::WriteObjectByType, reached maximum allowed depth of %d", MAX_WRITE_OBJECT_DEPTH);
-		return PDFHummus::eFailure;
-	}
-
 	EStatusCode status = PDFHummus::eSuccess;
 
 	switch(inObject->GetType())
@@ -2025,6 +2019,12 @@ EStatusCode PDFDocumentHandler::WriteObjectByType(PDFObject* inObject,ETokenSepa
 
 EStatusCode PDFDocumentHandler::WriteArrayObject(PDFArray* inArray,ETokenSeparator inSeparator, IObjectWritePolicy* inWritePolicy, int inDepth)
 {
+	if(++inDepth > MAX_WRITE_OBJECT_DEPTH)
+	{
+		TRACE_LOG1("PDFDocumentHandler::WriteArrayObject, reached maximum allowed depth of %d", MAX_WRITE_OBJECT_DEPTH);
+		return PDFHummus::eFailure;
+	}
+
 	SingleValueContainerIterator<PDFObjectVector> it(inArray->GetIterator());
 
 	EStatusCode status = PDFHummus::eSuccess;
@@ -2032,7 +2032,7 @@ EStatusCode PDFDocumentHandler::WriteArrayObject(PDFArray* inArray,ETokenSeparat
 	mObjectsContext->StartArray();
 
 	while(it.MoveNext() && PDFHummus::eSuccess == status)
-		status = WriteObjectByType(it.GetItem(),eTokenSeparatorSpace, inWritePolicy, inDepth + 1);
+		status = WriteObjectByType(it.GetItem(),eTokenSeparatorSpace, inWritePolicy, inDepth);
 
 	if(PDFHummus::eSuccess == status)
 		mObjectsContext->EndArray(inSeparator);
@@ -2042,6 +2042,12 @@ EStatusCode PDFDocumentHandler::WriteArrayObject(PDFArray* inArray,ETokenSeparat
 
 EStatusCode PDFDocumentHandler::WriteDictionaryObject(PDFDictionary* inDictionary, IObjectWritePolicy* inWritePolicy, int inDepth)
 {
+	if(++inDepth > MAX_WRITE_OBJECT_DEPTH)
+	{
+		TRACE_LOG1("PDFDocumentHandler::WriteDictionaryObject, reached maximum allowed depth of %d", MAX_WRITE_OBJECT_DEPTH);
+		return PDFHummus::eFailure;
+	}
+
 	MapIterator<PDFNameToPDFObjectMap> it(inDictionary->GetIterator());
 	EStatusCode status = PDFHummus::eSuccess;
 	DictionaryContext* dictionary = mObjectsContext->StartDictionary();
@@ -2050,7 +2056,7 @@ EStatusCode PDFDocumentHandler::WriteDictionaryObject(PDFDictionary* inDictionar
 	{
 		status = dictionary->WriteKey(it.GetKey()->GetValue());
 		if(PDFHummus::eSuccess == status)
-			status = WriteObjectByType(it.GetValue(),eTokenSeparatorEndLine, inWritePolicy, inDepth + 1);
+			status = WriteObjectByType(it.GetValue(),eTokenSeparatorEndLine, inWritePolicy, inDepth);
 	}
 	
 	if(PDFHummus::eSuccess == status)
@@ -2063,6 +2069,12 @@ EStatusCode PDFDocumentHandler::WriteDictionaryObject(PDFDictionary* inDictionar
 
 EStatusCode PDFDocumentHandler::WriteStreamObject(PDFStreamInput* inStream, IObjectWritePolicy* inWritePolicy, int inDepth)
 {
+	if(++inDepth > MAX_WRITE_OBJECT_DEPTH)
+	{
+		TRACE_LOG1("PDFDocumentHandler::WriteStreamObject, reached maximum allowed depth of %d", MAX_WRITE_OBJECT_DEPTH);
+		return PDFHummus::eFailure;
+	}
+
 	/*
 	1. Create stream dictionary, copy all elements of input stream but Length (which may be the same...but due to internals may not)
 	2. Create PDFStream with this dictionary and use its output stream to write the result
@@ -2096,7 +2108,7 @@ EStatusCode PDFDocumentHandler::WriteStreamObject(PDFStreamInput* inStream, IObj
 		if (it.GetKey()->GetValue() != "Length" && (!readingDecrypted || it.GetKey()->GetValue() != "Filter")) {
 			status = newStreamDictionary->WriteKey(it.GetKey()->GetValue());
 			if (PDFHummus::eSuccess == status)
-				status = WriteObjectByType(it.GetValue(), eTokenSeparatorEndLine, inWritePolicy, inDepth + 1);
+				status = WriteObjectByType(it.GetValue(), eTokenSeparatorEndLine, inWritePolicy, inDepth);
 		}
 	}
 
