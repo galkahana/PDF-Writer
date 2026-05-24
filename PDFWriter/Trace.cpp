@@ -20,7 +20,6 @@
 */
 #include "Trace.h"
 #include "Log.h"
-#include "SafeBufferMacrosDefs.h"
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -87,7 +86,7 @@ void Trace::TraceToLog(const char* inFormat,...)
 		va_list argptr;
 		va_start(argptr, inFormat);
 
-		SAFE_VSPRINTF(mBuffer, MAX_TRACE_SIZE,inFormat,argptr);
+		vsnprintf(mBuffer, MAX_TRACE_SIZE, inFormat, argptr);
 		va_end(argptr);
 
 		mLog->LogEntry(std::string(mBuffer));
@@ -106,7 +105,7 @@ void Trace::TraceToLog(const char* inFormat,va_list inList)
 				mLog = new Log(mLogFilePath,mPlaceUTF8Bom);
 		}
 
-		SAFE_VSPRINTF(mBuffer, MAX_TRACE_SIZE,inFormat,inList);
+		vsnprintf(mBuffer, MAX_TRACE_SIZE, inFormat, inList);
 
 		mLog->LogEntry(std::string(mBuffer));
 	}
