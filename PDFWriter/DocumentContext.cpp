@@ -2456,12 +2456,13 @@ public:
 		// now write all info that's not overriden by this implementation
 		PDFParser* modifiedDocumentParser = mModifiedDocumentCopyingContext->GetSourceDocumentParser();
 		PDFObjectCastPtr<PDFDictionary> catalogDict(modifiedDocumentParser->QueryDictionaryObject(modifiedDocumentParser->GetTrailer(),"Root"));
-		MapIterator<PDFNameToPDFObjectMap>  catalogDictIt = catalogDict->GetIterator();
 
 		if (!catalogDict) {
 			// no catalog. not cool but possible. call quits
 			return eSuccess;
 		}
+
+		MapIterator<PDFNameToPDFObjectMap>  catalogDictIt = catalogDict->GetIterator();
 
 		// copy all elements that were not already written. in other words - overriden
 		while (catalogDictIt.MoveNext())
