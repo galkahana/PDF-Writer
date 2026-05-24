@@ -96,6 +96,7 @@ create_test_sourcelist (Tests
   UppercaseSequanceTest.cpp
   WatermarkTest.cpp
   WatermarkWithContextOpacityTest.cpp
+  WriteObjectRecursionCap.cpp
   XrefStreamsTest.cpp
 )
 
