@@ -1135,7 +1135,9 @@ EStatusCode DocumentContext::EndFormXObjectNoRelease(PDFFormXObject* inFormXObje
 	status = mObjectsContext->StartNewIndirectObject(inFormXObject->GetResourcesDictionaryObjectID());
 	if(status != eSuccess)
 		return status;
-	WriteResourcesDictionary(inFormXObject->GetResourcesDictionary());
+	status = WriteResourcesDictionary(inFormXObject->GetResourcesDictionary());
+	if(status != eSuccess)
+		return status;
 	mObjectsContext->EndIndirectObject();
 
     // now write writing tasks
@@ -1193,7 +1195,10 @@ EStatusCode DocumentContext::EndTiledPattern(PDFTiledPattern* inTiledPattern)
 	if(status != eSuccess) {
 		return status;
 	}
-	WriteResourcesDictionary(inTiledPattern->GetResourcesDictionary());
+	status = WriteResourcesDictionary(inTiledPattern->GetResourcesDictionary());
+	if(status != eSuccess) {
+		return status;
+	}
 	mObjectsContext->EndIndirectObject();
 
 
@@ -1312,6 +1317,8 @@ EStatusCode DocumentContext::WriteResourcesDictionary(ResourcesDictionary& inRes
 
 		// Color space
         status = WriteResourceDictionary(&inResourcesDictionary,resourcesContext,scColorSpaces,inResourcesDictionary.GetColorSpacesIterator());
+        if(status!=eSuccess)
+            break;
 
 		// Patterns
         status = WriteResourceDictionary(&inResourcesDictionary,resourcesContext,scPatterns,inResourcesDictionary.GetPatternsIterator());
@@ -1387,7 +1394,6 @@ EStatusCode DocumentContext::WriteResourceDictionary(ResourcesDictionary* inReso
             }
 
             IDocumentContextExtenderSet::iterator it = mExtenders.begin();
-            EStatusCode status = PDFHummus::eSuccess;
             for(; it != mExtenders.end() && eSuccess == status; ++it)
             {
                 status = (*it)->OnResourceDictionaryWrite(resourceContext,inResourceDictionaryLabel,mObjectsContext,this);
@@ -1826,8 +1832,8 @@ EStatusCode DocumentContext::WritePageTreeState(ObjectsContext* inStateWriter,Ob
 	{
 		ObjectIDTypeList::iterator it = kidsObjectIDs.begin();
 		int i = 0;
-		for(;i < inPageTree->GetNodesCount();++i,++it)
-			WritePageTreeState(inStateWriter,*it,inPageTree->GetPageTreeChild(i));
+		for(;i < inPageTree->GetNodesCount() && eSuccess == status;++i,++it)
+			status = WritePageTreeState(inStateWriter,*it,inPageTree->GetPageTreeChild(i));
 	}
 
 	if(inPageTree == mCatalogInformation.GetCurrentPageTreeNode())
@@ -2322,7 +2328,7 @@ void DocumentContext::Cleanup()
 				delete *itEndWritingTasks;
 
 		}
-		mMoreFormEndTasks.clear();		
+		mMorePageEndTasks.clear();
 	}
 
 
