@@ -100,6 +100,13 @@ using namespace PDFHummus;
 
 #define PS_UNIT_SIZE	72.0F
 
+/* Upper bound on declared decoded-size to declared compressed-size ratio.
+   Defends against malicious TIFFs that declare huge dimensions but ship a tiny
+   strip payload, which would otherwise inflate buffer allocations to gigabytes
+   on a kilobyte input. Generous headroom over worst-case real codecs
+   (G4 fax ~1000-2000:1) so no legitimate TIFF trips it. */
+#define TIFF_MAX_COMPRESSION_RATIO 10000
+
 /* This type is of PDF color spaces. */
 typedef enum {
 	T2P_CS_BILEVEL = 0x01,	/* Bilevel, black and white */
@@ -2328,6 +2335,36 @@ void TIFFImageHandler::CalculateTiffTileSize(int inTileIndex)
 			else
 				totalSize *= mT2p->tiff_samplesperpixel;
 		}
+		// Cross-check declared decoded tile size against the on-disk bytecount.
+		// Reject sparse-payload tiles whose ratio exceeds any real codec.
+		if(totalSize > 0)
+		{
+			tsize_t_compat* tbc = NULL;
+			if(TIFFGetField(mT2p->input, TIFFTAG_TILEBYTECOUNTS, &tbc) != 0 && tbc != NULL)
+			{
+				uint64_t compressed = static_cast<uint64_t>(tbc[inTileIndex]);
+				if(compressed == 0 ||
+					totalSize / compressed > TIFF_MAX_COMPRESSION_RATIO)
+				{
+					TRACE_LOG4("TIFFImageHandler::CalculateTiffTileSize, "
+						"tile %d declared decoded size %llu vs bytecount %llu exceeds "
+						"the maximum allowed compression ratio %d; rejecting input",
+						inTileIndex,
+						(unsigned long long)totalSize,
+						(unsigned long long)compressed,
+						TIFF_MAX_COMPRESSION_RATIO);
+					totalSize = 0;
+				}
+			}
+			else
+			{
+				TRACE_LOG1("TIFFImageHandler::CalculateTiffTileSize, "
+					"tile %d missing TIFFTAG_TILEBYTECOUNTS; cannot sanity-check "
+					"declared decoded size, rejecting input",
+					inTileIndex);
+				totalSize = 0;
+			}
+		}
 		mT2p->tiff_datasize = static_cast<tsize_t>(totalSize);
 	}
 }
@@ -2850,6 +2887,37 @@ void TIFFImageHandler::CalculateTiffSizeNoTiles()
 				totalSize = 0;
 			else
 				totalSize *= mT2p->tiff_samplesperpixel;
+		}
+		// Cross-check declared decoded size against the sum of per-strip on-disk
+		// bytecounts. Reject sparse-payload TIFFs whose ratio exceeds any real codec.
+		if(totalSize > 0)
+		{
+			tsize_t_compat* sbc = NULL;
+			if(TIFFGetField(mT2p->input, TIFFTAG_STRIPBYTECOUNTS, &sbc) != 0 && sbc != NULL)
+			{
+				uint64_t stripcount = TIFFNumberOfStrips(mT2p->input);
+				uint64_t totalCompressed = 0;
+				for(uint64_t i = 0; i < stripcount; ++i)
+					totalCompressed += static_cast<uint64_t>(sbc[i]);
+				if(totalCompressed == 0 ||
+					totalSize / totalCompressed > TIFF_MAX_COMPRESSION_RATIO)
+				{
+					TRACE_LOG3("TIFFImageHandler::CalculateTiffSizeNoTiles, "
+						"declared decoded size %llu vs strip bytecount sum %llu exceeds "
+						"the maximum allowed compression ratio %d; rejecting input",
+						(unsigned long long)totalSize,
+						(unsigned long long)totalCompressed,
+						TIFF_MAX_COMPRESSION_RATIO);
+					totalSize = 0;
+				}
+			}
+			else
+			{
+				TRACE_LOG("TIFFImageHandler::CalculateTiffSizeNoTiles, "
+					"missing TIFFTAG_STRIPBYTECOUNTS; cannot sanity-check declared "
+					"decoded size, rejecting input");
+				totalSize = 0;
+			}
 		}
 		mT2p->tiff_datasize = static_cast<tsize_t>(totalSize);
 	}
