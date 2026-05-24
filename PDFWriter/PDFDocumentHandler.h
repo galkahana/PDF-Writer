@@ -264,10 +264,10 @@ private:
 												ObjectIDType inPredefinedObjectId);
 	PDFHummus::EStatusCode CopyInDirectObject(ObjectIDType inSourceObjectID,ObjectIDType inTargetObjectID);
 
-	PDFHummus::EStatusCode WriteObjectByType(PDFObject* inObject, ETokenSeparator inSeparator,IObjectWritePolicy* inWritePolicy);
-	PDFHummus::EStatusCode WriteArrayObject(PDFArray* inArray, ETokenSeparator inSeparator, IObjectWritePolicy* inWritePolicy);
-	PDFHummus::EStatusCode WriteDictionaryObject(PDFDictionary* inDictionary, IObjectWritePolicy* inWritePolicy);
-	PDFHummus::EStatusCode WriteStreamObject(PDFStreamInput* inStream, IObjectWritePolicy* inWritePolicy);
+	PDFHummus::EStatusCode WriteObjectByType(PDFObject* inObject, ETokenSeparator inSeparator,IObjectWritePolicy* inWritePolicy, int inDepth = 0);
+	PDFHummus::EStatusCode WriteArrayObject(PDFArray* inArray, ETokenSeparator inSeparator, IObjectWritePolicy* inWritePolicy, int inDepth);
+	PDFHummus::EStatusCode WriteDictionaryObject(PDFDictionary* inDictionary, IObjectWritePolicy* inWritePolicy, int inDepth);
+	PDFHummus::EStatusCode WriteStreamObject(PDFStreamInput* inStream, IObjectWritePolicy* inWritePolicy, int inDepth);
 
 
 	EStatusCodeAndObjectIDType CreatePDFPageForPage(unsigned long inPageIndex);
