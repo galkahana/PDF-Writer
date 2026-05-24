@@ -82,6 +82,7 @@ create_test_sourcelist (Tests
   SimpleTextUsage.cpp
   TestMeasurementsTest.cpp
   TextUsageBugs.cpp
+  TIFFImageHandlerTest.cpp
   TIFFImageTest.cpp
   TiffSpecialsTest.cpp
   TimerTest.cpp
@@ -112,6 +113,7 @@ add_executable (PDFWriterTesting
     # and test specific additionals
     CFFSyntheticBuilder.cpp
     Type1SyntheticBuilder.cpp
+    TIFFSyntheticBuilder.cpp
     PDFComment.cpp
     PDFCommentWriter.cpp
     AnnotationsWriter.cpp
