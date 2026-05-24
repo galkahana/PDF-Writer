@@ -2047,7 +2047,7 @@ EStatusCode PDFDocumentHandler::WriteDictionaryObject(PDFDictionary* inDictionar
 		return mObjectsContext->EndDictionary(dictionary);
 	}
 	else
-		return PDFHummus::eSuccess;
+		return status;
 }
 
 EStatusCode PDFDocumentHandler::WriteStreamObject(PDFStreamInput* inStream, IObjectWritePolicy* inWritePolicy)
