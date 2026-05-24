@@ -64,6 +64,7 @@ create_test_sourcelist (Tests
   ParsingFaulty.cpp
   PDFCopyingContextTest.cpp
   PDFDateTest.cpp
+  PDFDocumentHandlerTest.cpp
   PDFEmbedTest.cpp
   PDFObjectCastTest.cpp
   PDFObjectParserTest.cpp
@@ -96,7 +97,6 @@ create_test_sourcelist (Tests
   UppercaseSequanceTest.cpp
   WatermarkTest.cpp
   WatermarkWithContextOpacityTest.cpp
-  WriteObjectRecursionCap.cpp
   XrefStreamsTest.cpp
 )
 
