@@ -13,6 +13,18 @@ option(PDFHUMMUS_NO_TIFF "Whether to drop TIFF Images support (will not use LibT
 option(PDFHUMMUS_NO_PNG "Whether to drop PNG Images support (will not use LibPng)" )
 option(PDFHUMMUS_NO_OPENSSL "Whether to drop OpenSSL Usage, and therefore PDF2.0 encryption support (will not allow encryption or decryption of PDF2.0 files)" )
 
+# Optional sanitizer build (requires clang). Accepts comma-separated -fsanitize= values:
+# address, undefined, address,undefined, thread, memory. Empty (default) = no sanitizer.
+# Flags are applied globally so they also instrument bundled dependencies (zlib, freetype, libpng, libjpeg, libtiff, libaesgm).
+# See wiki: Sanitizer-Builds-Of-PDFWriter
+set(PDFHUMMUS_SANITIZER "" CACHE STRING "Build with the given clang sanitizer (e.g. address, undefined, address,undefined). Empty = off.")
+
+if(PDFHUMMUS_SANITIZER)
+    message(STATUS "Building with sanitizer: ${PDFHUMMUS_SANITIZER}")
+    add_compile_options(-fsanitize=${PDFHUMMUS_SANITIZER} -fno-omit-frame-pointer -g)
+    add_link_options(-fsanitize=${PDFHUMMUS_SANITIZER})
+endif()
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # OpenSSL detection and AES implementation choice - done early to inform all subsequent logic
