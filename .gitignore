@@ -1,5 +1,6 @@
 #all the binaries
-BUILD
+build/
+build-sanitizer/
 # Compiled source #
 ###################
 *.com
