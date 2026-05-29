@@ -154,6 +154,9 @@ if(BUILD_FUZZING_HARNESS)
     set(FUZZING_HARNESSES
         PDFParserFuzzingHarness
         JPEGImageParserFuzzingHarness
+        InputFlateDecodeStreamFuzzingHarness
+        InputLZWDecodeStreamFuzzingHarness
+        InputAESDecodeStreamFuzzingHarness
     )
     if(NOT PDFHUMMUS_NO_TIFF)
         list(APPEND FUZZING_HARNESSES TIFFImageHandlerFuzzingHarness)
@@ -163,6 +166,13 @@ if(BUILD_FUZZING_HARNESS)
         target_link_libraries(${harness} PDFWriter)
         target_link_options(${harness} PRIVATE -fsanitize=fuzzer -fuse-ld=lld)
     endforeach()
+    # The AES harness picks InputAESDecodeStreamSSL or InputAESDecodeStream
+    # based on USE_OPENSSL_AES, mirroring DecryptionHelper. PDFWriter sets
+    # USE_OPENSSL_AES PRIVATE so we need to re-declare it on the harness
+    # target so the harness's TU dispatches to the class actually linked.
+    if(USE_OPENSSL_AES)
+        target_compile_definitions(InputAESDecodeStreamFuzzingHarness PRIVATE USE_OPENSSL_AES=1)
+    endif()
 endif()
 
 
