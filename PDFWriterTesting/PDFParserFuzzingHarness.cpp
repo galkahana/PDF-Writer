@@ -5,6 +5,9 @@
 #include "InputByteArrayStream.h"
 #include "IByteReader.h"
 
+#include <cstddef>
+#include <cstdint>
+
 // Caps protect the fuzzer from runaway inputs (e.g. /Count 999999999) without
 // hiding the underlying parser bug — the production library still validates
 // these fields on its own. We just don't want one fuzz iteration to take
@@ -14,7 +17,7 @@ static const ObjectIDType kMaxObjects = 1000;
 static const IOBasicTypes::LongBufferSizeType kStreamReadChunk = 4096;
 static const IOBasicTypes::LongBufferSizeType kMaxStreamBytes = 1 << 20;
 
-extern "C" int LLVMFuzzerTestOneInput(const u_int8_t *Data, size_t Size) {
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
   InputByteArrayStream stream((IOBasicTypes::Byte*) Data, static_cast<LongFilePositionType>( Size ));
 
   PDFParser parser;

@@ -151,6 +151,9 @@ if(BUILD_FUZZING_HARNESS)
         PDFParserFuzzingHarness
         JPEGImageParserFuzzingHarness
     )
+    if(NOT PDFHUMMUS_NO_TIFF)
+        list(APPEND FUZZING_HARNESSES TIFFImageHandlerFuzzingHarness)
+    endif()
     foreach(harness ${FUZZING_HARNESSES})
         add_executable(${harness} ${harness}.cpp)
         target_compile_options(${harness} PRIVATE -fsanitize=fuzzer,address -g -O2)
