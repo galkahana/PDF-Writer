@@ -24,3 +24,12 @@ PDFWriterTesting export-ignore
 *.TIF binary
 *.tiff binary
 *.TIFF binary
+
+# Font binaries (TTF/OTF/CFF) and the CFF fuzz corpus contain
+# structural byte offsets that autocrlf would corrupt.
+*.ttf binary
+*.TTF binary
+*.otf binary
+*.OTF binary
+*.cff binary
+*.CFF binary
