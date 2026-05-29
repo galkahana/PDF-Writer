@@ -144,10 +144,18 @@ foreach (fuzztestfile ${fuzztestfiles})
 endforeach ()
 
 # fuzz testing with fuzzing harness
+# Each harness is a separate libFuzzer entry point targeting one parser/decoder surface.
+# Source files are named <Subject>FuzzingHarness.cpp and live next to this CMakeLists.
 if(BUILD_FUZZING_HARNESS)
-    add_executable(PDFParserFuzzingHarness PDFParserFuzzingHarness.cpp)
-    target_compile_options(PDFParserFuzzingHarness PRIVATE -fsanitize=fuzzer,address -g -O2)
-    target_link_libraries(PDFParserFuzzingHarness PDFWriter -O2 -fsanitize=fuzzer,address -fuse-ld=lld)
+    set(FUZZING_HARNESSES
+        PDFParserFuzzingHarness
+        JPEGImageParserFuzzingHarness
+    )
+    foreach(harness ${FUZZING_HARNESSES})
+        add_executable(${harness} ${harness}.cpp)
+        target_compile_options(${harness} PRIVATE -fsanitize=fuzzer,address -g -O2)
+        target_link_libraries(${harness} PDFWriter -O2 -fsanitize=fuzzer,address -fuse-ld=lld)
+    endforeach()
 endif()
 
 
