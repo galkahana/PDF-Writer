@@ -1,6 +1,5 @@
-#ifndef PDFHUMMUS_NO_TIFF
-
 #include "PDFWriter.h"
+#include "PDFFormXObject.h"
 #include "InputByteArrayStream.h"
 #include "OutputStringBufferStream.h"
 #include "EStatusCode.h"
@@ -14,17 +13,10 @@ extern "C" int LLVMFuzzerTestOneInput(const u_int8_t *Data, size_t Size) {
   if (writer.StartPDFForStream(&outputSink, ePDFVersion13) != PDFHummus::eSuccess)
     return 0;
 
-  writer.CreateFormXObjectFromTIFFStream(&tiffStream);
+  PDFFormXObject* formXObject = writer.CreateFormXObjectFromTIFFStream(&tiffStream);
+  delete formXObject;
 
   writer.EndPDFForStream();
 
   return 0;
 }
-
-#else
-
-extern "C" int LLVMFuzzerTestOneInput(const u_int8_t* /*Data*/, size_t /*Size*/) {
-  return 0;
-}
-
-#endif
