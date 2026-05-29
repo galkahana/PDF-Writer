@@ -25,6 +25,20 @@ if(PDFHUMMUS_SANITIZER)
     add_link_options(-fsanitize=${PDFHUMMUS_SANITIZER})
 endif()
 
+# Fuzzing harness build (requires LLVM clang + lld + libFuzzer runtime).
+# Declared up here (before the dependency subdirectories) so the instrumentation
+# flag flows into PDFWriter and every bundled dep (zlib, freetype, libpng,
+# libjpeg, libtiff, libaesgm). Without this, libFuzzer only sees ~5 edges
+# (the harness body) and coverage-guided exploration is effectively off.
+# See wiki: Fuzz-Testing
+option(BUILD_FUZZING_HARNESS "Build the fuzzing harnesses, requires LLVM's clang + lld")
+
+if(BUILD_FUZZING_HARNESS)
+    message(STATUS "Building with fuzzing instrumentation: -fsanitize=fuzzer-no-link,address")
+    add_compile_options(-fsanitize=fuzzer-no-link,address -fno-omit-frame-pointer -g -O2)
+    add_link_options(-fsanitize=address)
+endif()
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # OpenSSL detection and AES implementation choice - done early to inform all subsequent logic
@@ -195,9 +209,8 @@ if(PROJECT_IS_TOP_LEVEL AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/PDFWriterTesting)
     # avoid installing the testing lib altogether when included in another project.
     # it's annoying when in parent all, and more annoying to then get the tests added
     # to the parent project ctest.
-
-    # option specific for testing
-    option(BUILD_FUZZING_HARNESS "Build the fuzzing harness, requires LLVM's clang")
+    # BUILD_FUZZING_HARNESS is declared near the top of this file so its
+    # instrumentation flag reaches the bundled-dep subdirectory builds.
 
     enable_testing()
     ADD_SUBDIRECTORY(PDFWriterTesting)

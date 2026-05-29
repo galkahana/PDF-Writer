@@ -146,6 +146,10 @@ endforeach ()
 # fuzz testing with fuzzing harness
 # Each harness is a separate libFuzzer entry point targeting one parser/decoder surface.
 # Source files are named <Subject>FuzzingHarness.cpp and live next to this CMakeLists.
+# Instrumentation (-fsanitize=fuzzer-no-link,address) is applied globally in the
+# top-level CMakeLists.txt so PDFWriter and bundled deps are instrumented too;
+# here we only add the runtime-link flag (-fsanitize=fuzzer) to the harness
+# binaries themselves so they pull in libFuzzer's main + dispatch.
 if(BUILD_FUZZING_HARNESS)
     set(FUZZING_HARNESSES
         PDFParserFuzzingHarness
@@ -156,8 +160,8 @@ if(BUILD_FUZZING_HARNESS)
     endif()
     foreach(harness ${FUZZING_HARNESSES})
         add_executable(${harness} ${harness}.cpp)
-        target_compile_options(${harness} PRIVATE -fsanitize=fuzzer,address -g -O2)
-        target_link_libraries(${harness} PDFWriter -O2 -fsanitize=fuzzer,address -fuse-ld=lld)
+        target_link_libraries(${harness} PDFWriter)
+        target_link_options(${harness} PRIVATE -fsanitize=fuzzer -fuse-ld=lld)
     endforeach()
 endif()
 
