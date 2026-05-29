@@ -2256,8 +2256,7 @@ EStatusCodeAndIByteReader PDFParser::CreateFilterForStream(IByteReader* inStream
 					}
 				}
 			}
-			lzwStream = new InputLZWDecodeStream(early);
-			lzwStream->Assign(inStream);
+			lzwStream = new InputLZWDecodeStream(inStream, early);
 			result = lzwStream;
 			EStatusCodeAndIByteReader createStatus = WrapWithPredictorStream(result, inDecodeParams);
 			if(createStatus.first == eFailure) {

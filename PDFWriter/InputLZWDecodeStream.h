@@ -29,15 +29,18 @@
 class InputLZWDecodeStream : public IByteReader
 {
 public:
-	InputLZWDecodeStream(int early);
+	InputLZWDecodeStream();
 
-	// Note that assigning passes ownership on the stream, use Assign(NULL) to remove ownership
-	InputLZWDecodeStream(IByteReader* inSourceReader);
+	// Note that assigning passes ownership on the stream, use Assign(NULL) to remove ownership.
+	// inEarly is the PDF LZW EarlyChange value (0 or 1, per PDF spec; defaults to 1).
+	InputLZWDecodeStream(IByteReader* inSourceReader, int inEarly = 1);
 	virtual ~InputLZWDecodeStream(void);
 
-	// Assigning passes ownership of the input stream to the decoder stream. 
+	// Assigning passes ownership of the input stream to the decoder stream.
 	// if you don't care for that, then after finishing with the decode, Assign(NULL).
-	void Assign(IByteReader* inSourceReader);
+	// inEarly defaults to 1; pass 0 only for streams whose DecodeParams set
+	// /EarlyChange 0 (rare).
+	void Assign(IByteReader* inSourceReader, int inEarly = 1);
 
 	// IByteReader implementation. note that "inBufferSize" determines how many
 	// bytes will be placed in the Buffer...not how many are actually read from the underlying
