@@ -23,11 +23,11 @@
 #include "Trace.h"
 #include "zlib.h"
 
-InputLZWDecodeStream::InputLZWDecodeStream(int early)
+InputLZWDecodeStream::InputLZWDecodeStream()
 {
 	mSourceStream = NULL;
 	mCurrentlyEncoding = false;
-	mEarly = early;
+	mEarly = 1;
 	inputBuf = 0;
 }
 
@@ -44,17 +44,19 @@ void InputLZWDecodeStream::FinalizeEncoding()
 	mCurrentlyEncoding = false;
 }
 
-InputLZWDecodeStream::InputLZWDecodeStream(IByteReader* inSourceReader)
-{	
+InputLZWDecodeStream::InputLZWDecodeStream(IByteReader* inSourceReader, int inEarly)
+{
 	mSourceStream = NULL;
 	mCurrentlyEncoding = false;
+	inputBuf = 0;
 
-	Assign(inSourceReader);
+	Assign(inSourceReader, inEarly);
 }
 
-void InputLZWDecodeStream::Assign(IByteReader* inSourceReader)
+void InputLZWDecodeStream::Assign(IByteReader* inSourceReader, int inEarly)
 {
 	mSourceStream = inSourceReader;
+	mEarly = inEarly;
 	if(mSourceStream)
 		StartEncoding();
 }
