@@ -10,3 +10,10 @@ PDFWriterTesting export-ignore
 # and length fields would be mangled by autocrlf on Windows.
 *.pfb binary
 *.PFB binary
+
+# JPEG fuzz corpus + image fixtures contain compressed bytes; mark
+# binary so autocrlf doesn't corrupt them.
+*.jpg binary
+*.JPG binary
+*.jpeg binary
+*.JPEG binary
