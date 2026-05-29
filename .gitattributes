@@ -17,3 +17,10 @@ PDFWriterTesting export-ignore
 *.JPG binary
 *.jpeg binary
 *.JPEG binary
+
+# TIFF fuzz corpus + image fixtures contain compressed bytes; mark
+# binary so autocrlf doesn't corrupt them.
+*.tif binary
+*.TIF binary
+*.tiff binary
+*.TIFF binary

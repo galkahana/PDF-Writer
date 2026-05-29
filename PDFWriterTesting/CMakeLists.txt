@@ -150,6 +150,7 @@ if(BUILD_FUZZING_HARNESS)
     set(FUZZING_HARNESSES
         PDFParserFuzzingHarness
         JPEGImageParserFuzzingHarness
+        TIFFImageHandlerFuzzingHarness
     )
     foreach(harness ${FUZZING_HARNESSES})
         add_executable(${harness} ${harness}.cpp)

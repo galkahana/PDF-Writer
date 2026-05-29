@@ -1,0 +1,33 @@
+# JFIF / JPEG marker bytes — these are the structural anchors libFuzzer
+# needs to construct inputs that pass ReadJPEGID() and reach deeper
+# parser code. Without this dict, random byte mutations almost never
+# produce a leading 0xFFD8 SOI marker and the parser bails immediately.
+
+# Start / end markers
+"soi"="\xff\xd8"
+"eoi"="\xff\xd9"
+
+# Application markers (most-used in real JPEGs)
+"app0_jfif"="\xff\xe0"
+"app1_exif"="\xff\xe1"
+"app2"="\xff\xe2"
+"app13_photoshop"="\xff\xed"
+"app14_adobe"="\xff\xee"
+
+# Frame, scan, table markers
+"sof0_baseline"="\xff\xc0"
+"sof2_progressive"="\xff\xc2"
+"dht_huffman"="\xff\xc4"
+"dqt_quant"="\xff\xdb"
+"sos_scan"="\xff\xda"
+"dri_restart"="\xff\xdd"
+"com_comment"="\xff\xfe"
+
+# JFIF magic string inside APP0
+"jfif_id"="JFIF\x00"
+
+# Exif magic inside APP1
+"exif_id"="Exif\x00\x00"
+
+# Photoshop magic inside APP13
+"photoshop_3bim"="8BIM"
