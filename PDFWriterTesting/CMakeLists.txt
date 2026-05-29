@@ -157,6 +157,8 @@ if(BUILD_FUZZING_HARNESS)
         InputFlateDecodeStreamFuzzingHarness
         InputLZWDecodeStreamFuzzingHarness
         InputAESDecodeStreamFuzzingHarness
+        OpenTypeFileInputFuzzingHarness
+        CFFFileInputFuzzingHarness
     )
     if(NOT PDFHUMMUS_NO_TIFF)
         list(APPEND FUZZING_HARNESSES TIFFImageHandlerFuzzingHarness)
