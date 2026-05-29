@@ -4,7 +4,10 @@
 #include "OutputStringBufferStream.h"
 #include "EStatusCode.h"
 
-extern "C" int LLVMFuzzerTestOneInput(const u_int8_t *Data, size_t Size) {
+#include <cstddef>
+#include <cstdint>
+
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
   InputByteArrayStream tiffStream((IOBasicTypes::Byte*) Data, static_cast<LongFilePositionType>( Size ));
 
   OutputStringBufferStream outputSink;
