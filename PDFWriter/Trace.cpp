@@ -51,8 +51,6 @@ void Trace::SetLogSettings(const std::string& inLogFilePath,bool inShouldLog,boo
 	{
 		delete mLog;
 		mLog = NULL;
-		//if(mShouldLog)
-		//	mLog = new Log(mLogFilePath,inPlaceUTF8Bom);
 	}
 }
 
@@ -65,8 +63,6 @@ void Trace::SetLogSettings(IByteWriter* inLogStream,bool inShouldLog)
 	{
 		delete mLog;
 		mLog = NULL;
-		if(mShouldLog)
-			mLog = new Log(mLogStream);
 	}
 }
 

@@ -90,6 +90,7 @@ ObjectsContext.cpp
 OpenTypeFileInput.cpp
 OpenTypePrimitiveReader.cpp
 OutputBufferedStream.cpp
+OutputConsoleStream.cpp
 OutputFile.cpp
 OutputFileStream.cpp
 OutputFlateDecodeStream.cpp
@@ -295,6 +296,7 @@ ObjectsContextExtenderAdapter.h
 OpenTypeFileInput.h
 OpenTypePrimitiveReader.h
 OutputBufferedStream.h
+OutputConsoleStream.h
 OutputFile.h
 OutputFileStream.h
 OutputFlateDecodeStream.h
@@ -666,6 +668,8 @@ IOBasicTypes.h
 IReadPositionProvider.h
 OutputBufferedStream.cpp
 OutputBufferedStream.h
+OutputConsoleStream.cpp
+OutputConsoleStream.h
 OutputFile.cpp
 OutputFile.h
 OutputFileStream.cpp
