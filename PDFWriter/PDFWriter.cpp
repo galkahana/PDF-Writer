@@ -311,6 +311,11 @@ PDFUsedFont* PDFWriter::GetFontForFile(const std::string& inFontFilePath,long in
 	return mDocumentContext.GetFontForFile(inFontFilePath,inFontIndex);
 }
 
+PDFUsedFont* PDFWriter::GetFontForFile(const std::vector<IOBasicTypes::Byte>& inFontBuffer,long inFontIndex)
+{
+	return mDocumentContext.GetFontForFile(inFontBuffer,inFontIndex);
+}
+
 PDFUsedFont* PDFWriter::GetFontForFile(const std::string& inFontFilePath,const std::string& inAdditionalMeticsFilePath,long inFontIndex)
 {
 	return mDocumentContext.GetFontForFile(inFontFilePath,inAdditionalMeticsFilePath,inFontIndex);
