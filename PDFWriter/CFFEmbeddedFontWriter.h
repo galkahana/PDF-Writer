@@ -28,6 +28,7 @@
 #include "CFFPrimitiveWriter.h"
 #include "OutputStringBufferStream.h"
 #include "IOBasicTypes.h"
+#include "InputByteArrayStream.h"
 
 #include <vector>
 #include <string>
@@ -91,6 +92,8 @@ public:
 private:
 	OpenTypeFileInput mOpenTypeInput;
 	InputFile mOpenTypeFile;
+	InputByteArrayStream mMemoryFontStream;
+	IByteReaderWithPosition* mFontStream;
 	CFFPrimitiveWriter mPrimitivesWriter;
 	OutputStringBufferStream mFontFileStream;
 	bool mIsCID;

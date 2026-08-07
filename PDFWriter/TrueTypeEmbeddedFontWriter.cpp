@@ -121,14 +121,23 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 	{
 		UIntVector subsetGlyphIDs = inSubsetGlyphIDs;
 
-		status = mTrueTypeFile.OpenFile(inFontInfo.GetFontFilePath());
-		if(status != PDFHummus::eSuccess)
+		if(inFontInfo.IsMemoryFont())
 		{
-			TRACE_LOG1("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, cannot open true type font file at %s",inFontInfo.GetFontFilePath().c_str());
-			break;
+			mMemoryFontStream.Assign(inFontInfo.GetFontBuffer(), inFontInfo.GetFontBufferLength());
+			mFontStream = &mMemoryFontStream;
+		}
+		else
+		{
+			status = mTrueTypeFile.OpenFile(inFontInfo.GetFontFilePath());
+			if(status != PDFHummus::eSuccess)
+			{
+				TRACE_LOG1("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, cannot open true type font file at %s",inFontInfo.GetFontFilePath().c_str());
+				break;
+			}
+			mFontStream = mTrueTypeFile.GetInputStream();
 		}
 
-		status = mTrueTypeInput.ReadOpenTypeFile(mTrueTypeFile.GetInputStream(),(unsigned short)inFontInfo.GetFontIndex());
+		status = mTrueTypeInput.ReadOpenTypeFile(mFontStream,(unsigned short)inFontInfo.GetFontIndex());
 		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to read true type file");
@@ -415,8 +424,8 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteHead()
 	startTableOffset = mFontFileStream.GetCurrentPosition();
 
 	// copy and save the current position
-	mTrueTypeFile.GetInputStream()->SetPosition(tableEntry->Offset);
-	streamCopier.CopyToOutputStream(mTrueTypeFile.GetInputStream(),tableEntry->Length);
+	mFontStream->SetPosition(tableEntry->Offset);
+	streamCopier.CopyToOutputStream(mFontStream,tableEntry->Length);
 	mPrimitivesWriter.PadTo4();
 	endOfStream = mFontFileStream.GetCurrentPosition();
 
@@ -487,8 +496,8 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteHHea()
 	startTableOffset = mFontFileStream.GetCurrentPosition();
 
 	// copy and save the current position
-	mTrueTypeFile.GetInputStream()->SetPosition(tableEntry->Offset);
-	streamCopier.CopyToOutputStream(mTrueTypeFile.GetInputStream(),tableEntry->Length);
+	mFontStream->SetPosition(tableEntry->Offset);
+	streamCopier.CopyToOutputStream(mFontStream,tableEntry->Length);
 	mPrimitivesWriter.PadTo4();
 	endOfStream = mFontFileStream.GetCurrentPosition();
 
@@ -561,8 +570,8 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteMaxp()
 	startTableOffset = mFontFileStream.GetCurrentPosition();
 
 	// copy and save the current position
-	mTrueTypeFile.GetInputStream()->SetPosition(tableEntry->Offset);
-	streamCopier.CopyToOutputStream(mTrueTypeFile.GetInputStream(),tableEntry->Length);
+	mFontStream->SetPosition(tableEntry->Offset);
+	streamCopier.CopyToOutputStream(mFontStream,tableEntry->Length);
 	mPrimitivesWriter.PadTo4();
 	endOfStream = mFontFileStream.GetCurrentPosition();
 
@@ -624,9 +633,9 @@ EStatusCode TrueTypeEmbeddedFontWriter::WriteGlyf(const UIntVector& inSubsetGlyp
 			inLocaTable[i] = inLocaTable[previousGlyphIndexEnd];
 		if(mTrueTypeInput.mGlyf[glyphIndex] != NULL)
 		{
-			mTrueTypeFile.GetInputStream()->SetPosition(tableEntry->Offset + 
+			mFontStream->SetPosition(tableEntry->Offset + 
 															mTrueTypeInput.mLoca[glyphIndex]);
-			streamCopier.CopyToOutputStream(mTrueTypeFile.GetInputStream(),
+			streamCopier.CopyToOutputStream(mFontStream,
 				mTrueTypeInput.mLoca[(glyphIndex) + 1] - mTrueTypeInput.mLoca[glyphIndex]);
 		}
 		inLocaTable[glyphIndex + 1] = (unsigned long)(mFontFileStream.GetCurrentPosition() - startTableOffset);
@@ -717,8 +726,8 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTableCopy(const char* inTableName,
 	startTableOffset = mFontFileStream.GetCurrentPosition();
 
 	// copy and save the current position
-	mTrueTypeFile.GetInputStream()->SetPosition(tableEntry->Offset);
-	streamCopier.CopyToOutputStream(mTrueTypeFile.GetInputStream(),tableEntry->Length);
+	mFontStream->SetPosition(tableEntry->Offset);
+	streamCopier.CopyToOutputStream(mFontStream,tableEntry->Length);
 	mPrimitivesWriter.PadTo4();
 	endOfStream = mFontFileStream.GetCurrentPosition();
 

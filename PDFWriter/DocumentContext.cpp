@@ -1504,6 +1504,11 @@ PDFUsedFont* DocumentContext::GetFontForFile(const std::string& inFontFilePath,l
 	return mUsedFontsRepository.GetFontForFile(inFontFilePath,inFontIndex);
 }
 
+PDFUsedFont* DocumentContext::GetFontForFile(const std::vector<IOBasicTypes::Byte>& inFontBuffer,long inFontIndex)
+{
+	return mUsedFontsRepository.GetFontForFile(inFontBuffer,inFontIndex);
+}
+
 EStatusCode DocumentContext::WriteUsedFontsDefinitions()
 {
 	return mUsedFontsRepository.WriteUsedFontsDefinitions();
