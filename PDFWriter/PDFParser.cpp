@@ -1937,6 +1937,20 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 		{
 			LongFilePositionType objectPositionInStream = objectStreamHeader[mXrefTable[inObjectId].mRivision].mObjectOffset +
 														  firstStreamObjectPosition->GetValue();
+
+			// the header above was parsed through mObjectParser's own buffered reads, which can pull more raw bytes
+			// from skipperStream than the header's logical size, leaving GetCurrentPosition() past objectPositionInStream
+			// for some later revision. SkipTo() can only move forward, so it would silently no-op instead of seeking,
+			// and the object at objectPositionInStream would be misparsed. reopen the stream from scratch in that case.
+			if(!skipperStream.CanSkipTo(objectPositionInStream))
+			{
+				delete objectSource;
+				objectSource = CreateInputStreamReader(objectStream.GetPtr());
+				skipperStream.Assign(objectSource);
+				MovePositionInStream(objectStream->GetStreamContentStart());
+				mObjectParser.SetReadStream(&skipperStream,&skipperStream);
+			}
+
 			skipperStream.SkipTo(objectPositionInStream);
 			mObjectParser.ResetReadState();
 		}
