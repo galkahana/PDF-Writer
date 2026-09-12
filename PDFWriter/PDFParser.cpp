@@ -1938,14 +1938,22 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 			break;
 		}
 
-		// when parsing the header, should be at position already..so don't skip if already there [using GetCurrentPosition to see if parsed some]
-		if(mXrefTable[inObjectId].mRivision != 0 || skipperStream.GetCurrentPosition() == 0)
+		LongFilePositionType objectPositionInStream = objectStreamHeader[mXrefTable[inObjectId].mRivision].mObjectOffset +
+													  firstStreamObjectPosition->GetValue();
+
+		// header parsing above may have overshot the object's position. if so, reopen the stream from scratch
+		// so we can still reach it, rather than skipping to a position we've already passed.
+		if(!skipperStream.CanSkipTo(objectPositionInStream))
 		{
-			LongFilePositionType objectPositionInStream = objectStreamHeader[mXrefTable[inObjectId].mRivision].mObjectOffset +
-														  firstStreamObjectPosition->GetValue();
-			skipperStream.SkipTo(objectPositionInStream);
-			mObjectParser.ResetReadState();
+			delete objectSource;
+			objectSource = CreateInputStreamReader(objectStream.GetPtr());
+			skipperStream.Assign(objectSource);
+			MovePositionInStream(objectStream->GetStreamContentStart());
+			mObjectParser.SetReadStream(&skipperStream,&skipperStream);
 		}
+
+		skipperStream.SkipTo(objectPositionInStream);
+		mObjectParser.ResetReadState();
 
 		mDecryptionHelper.PauseDecryption(); // objects within objects stream already enjoy the object stream protection, and so are no longer encrypted
 		NotifyIndirectObjectStart(inObjectId,0);
