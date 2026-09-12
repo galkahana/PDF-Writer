@@ -55,6 +55,7 @@ create_test_sourcelist (Tests
   OpenTypeFileInputTest.cpp
   OpenTypePrimitiveReaderTest.cpp
   OpenTypeTest.cpp
+  OutputAESEncodeStreamTest.cpp
   OutputFileStreamTest.cpp
   PageModifierTest.cpp
   PageOrderModification.cpp
@@ -121,6 +122,14 @@ add_executable (PDFWriterTesting
 )
 
 target_link_libraries (PDFWriterTesting PDFWriter)
+
+# OutputAESEncodeStreamTest.cpp picks OutputAESEncodeStreamSSL/InputAESDecodeStreamSSL
+# or OutputAESEncodeStream/InputAESDecodeStream based on USE_OPENSSL_AES, mirroring
+# EncryptionHelper::CreateEncryptionWriter. PDFWriter sets USE_OPENSSL_AES PRIVATE so
+# we need to re-declare it here too, so the test dispatches to the classes actually linked.
+if(USE_OPENSSL_AES)
+    target_compile_definitions(PDFWriterTesting PRIVATE USE_OPENSSL_AES=1)
+endif()
 
 if(APPLE)
 	set(CMAKE_EXE_LINKER_FLAGS "-framework CoreFoundation")

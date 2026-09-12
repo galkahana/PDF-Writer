@@ -18,19 +18,20 @@ limitations under the License.
 */
 
 #include "OutputAESEncodeStream.h"
-#include "MD5Generator.h"
-#include "PDFDate.h"
+#include "BestEffortRandomGenerator.h"
 #include "aescpp.h"
 
 #include <string.h>
 
 using namespace IOBasicTypes;
+using namespace PDFHummus;
 
 OutputAESEncodeStream::OutputAESEncodeStream(void)
 {
 	mTargetStream = NULL;
 	mOwnsStream = false;
 	mWroteIV = false;
+	mFlushed = true;
 }
 
 OutputAESEncodeStream::~OutputAESEncodeStream(void)
@@ -63,8 +64,9 @@ OutputAESEncodeStream::OutputAESEncodeStream(
 	for (; it != inEncryptionKey.end(); ++i, ++it)
 		mEncryptionKey[i] = *it;
 	mEncrypt.key(mEncryptionKey, mEncryptionKeyLength);
-	
+
 	mWroteIV = false;
+	mFlushed = false;
 
 }
 
@@ -83,15 +85,10 @@ LongBufferSizeType OutputAESEncodeStream::Write(const IOBasicTypes::Byte* inBuff
 
 	// write IV if didn't write yet
 	if (!mWroteIV) {
-		// random IV using MD5 of current time
-		MD5Generator md5;
-		// encode current time
-		PDFDate currentTime;
-		currentTime.SetToCurrentTime();
-		md5.Accumulate(currentTime.ToString());
-		memcpy(mIV, (const unsigned char*)md5.ToStringAsString().c_str(), AES_BLOCK_SIZE); // md5 should give us the desired 16 bytes
+		BestEffortRandomGenerator::FillBytes(mIV, AES_BLOCK_SIZE);
 		// write IV to output stream
-		mTargetStream->Write(mIV, AES_BLOCK_SIZE);
+		if (mTargetStream->Write(mIV, AES_BLOCK_SIZE) != AES_BLOCK_SIZE)
+			return 0;
 		mWroteIV = true;
 	}
 
@@ -115,7 +112,8 @@ LongBufferSizeType OutputAESEncodeStream::Write(const IOBasicTypes::Byte* inBuff
 
 			// encrypt
 			mEncrypt.cbc_encrypt(mIn, mOut, AES_BLOCK_SIZE, mIV);
-			mTargetStream->Write(mOut, AES_BLOCK_SIZE);
+			if (mTargetStream->Write(mOut, AES_BLOCK_SIZE) != AES_BLOCK_SIZE)
+				return 0;
 			mInIndex = mIn;
 			left -= remainder;
 		}
@@ -124,18 +122,40 @@ LongBufferSizeType OutputAESEncodeStream::Write(const IOBasicTypes::Byte* inBuff
 	return inSize;
 }
 
-void OutputAESEncodeStream::Flush() {
-	// if there's a full buffer waiting, write it now.
-	if (mInIndex - mIn == AES_BLOCK_SIZE) {
-		mEncrypt.cbc_encrypt(mIn, mOut, AES_BLOCK_SIZE, mIV);
-		mTargetStream->Write(mOut, AES_BLOCK_SIZE);
-		mInIndex = mIn;
-	}
+EStatusCode OutputAESEncodeStream::Flush() {
+	EStatusCode status = eSuccess;
 
-	// fill the last block with padding bytes. if the last block was full and padding is required still, fill it with the block size (AES_BLOCK_SIZE) as padding bytes
-	unsigned char remainder = (unsigned char)(AES_BLOCK_SIZE - (mInIndex - mIn));
-	for (size_t i = 0; i < remainder; ++i)
-		mInIndex[i] = remainder;
-	mEncrypt.cbc_encrypt(mIn, mOut, AES_BLOCK_SIZE, mIV);
-	mTargetStream->Write(mOut, AES_BLOCK_SIZE);
+	do {
+		if (mFlushed)
+			break;
+		mFlushed = true;
+
+		if (!mTargetStream)
+			break;
+
+		// if there's a full buffer waiting, write it now.
+		if (mInIndex - mIn == AES_BLOCK_SIZE) {
+			mEncrypt.cbc_encrypt(mIn, mOut, AES_BLOCK_SIZE, mIV);
+			if (mTargetStream->Write(mOut, AES_BLOCK_SIZE) != AES_BLOCK_SIZE) {
+				status = eFailure;
+				break;
+			}
+			mInIndex = mIn;
+		}
+
+		// fill the last block with padding bytes. if the last block was full and padding is required still, fill it with the block size (AES_BLOCK_SIZE) as padding bytes
+		unsigned char remainder = (unsigned char)(AES_BLOCK_SIZE - (mInIndex - mIn));
+		for (size_t i = 0; i < remainder; ++i)
+			mInIndex[i] = remainder;
+		mEncrypt.cbc_encrypt(mIn, mOut, AES_BLOCK_SIZE, mIV);
+		if (mTargetStream->Write(mOut, AES_BLOCK_SIZE) != AES_BLOCK_SIZE)
+			status = eFailure;
+	} while (false);
+
+	// only cascade into a stream we own - a non-owned target's lifecycle
+	// (including when it gets finalized) is managed by whoever gave it to us.
+	if (mOwnsStream && mTargetStream && mTargetStream->Flush() != eSuccess)
+		status = eFailure;
+
+	return status;
 }

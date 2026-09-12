@@ -25,6 +25,7 @@
 #define BUFFER_SIZE 256*1024
 
 using namespace IOBasicTypes;
+using namespace PDFHummus;
 
 OutputFlateEncodeStream::OutputFlateEncodeStream(void)
 {
@@ -36,18 +37,21 @@ OutputFlateEncodeStream::OutputFlateEncodeStream(void)
 
 OutputFlateEncodeStream::~OutputFlateEncodeStream(void)
 {
-	if(mCurrentlyEncoding)
-		FinalizeEncoding();
+	Flush();
 	if(mTargetStream)
 		delete mTargetStream;
 	delete[] mBuffer;
 	delete mZLibState;
 }
 
-void OutputFlateEncodeStream::FinalizeEncoding()
+EStatusCode OutputFlateEncodeStream::FinalizeEncoding()
 {
+	if(!mCurrentlyEncoding)
+		return eSuccess;
+
 	// flush leftovers by repeatedly calling with Z_FINISH parameter
 	int deflateResult;
+	EStatusCode status = eSuccess;
 
 	mZLibState->avail_in = 0;
 	mZLibState->next_in = NULL;
@@ -60,6 +64,7 @@ void OutputFlateEncodeStream::FinalizeEncoding()
 		if(Z_STREAM_ERROR == deflateResult)
 		{
 			TRACE_LOG1("OutputFlateEncodeStream::FinalizeEncoding, failed to flush zlib information. returned error code = %d",deflateResult);
+			status = eFailure;
 			break;
 		}
 		else
@@ -70,12 +75,27 @@ void OutputFlateEncodeStream::FinalizeEncoding()
 			{
 				TRACE_LOG2("OutputFlateEncodeStream::FinalizeEncoding, Failed to write the desired amount of zlib bytes to underlying stream. supposed to write %lld, wrote %lld",
 								BUFFER_SIZE-mZLibState->avail_out,writtenBytes);
+				status = eFailure;
 				break;
 			}
 		}
 	}while(Z_OK == deflateResult); // waiting for either an error, or Z_STREAM_END
 	deflateEnd(mZLibState);
 	mCurrentlyEncoding = false;
+
+	return status;
+}
+
+EStatusCode OutputFlateEncodeStream::Flush()
+{
+	EStatusCode status = FinalizeEncoding();
+
+	// mTargetStream is owned by this class (deleted in the destructor unless
+	// detached via Assign), so finalize it too.
+	if(mTargetStream && mTargetStream->Flush() != eSuccess)
+		status = eFailure;
+
+	return status;
 }
 
 OutputFlateEncodeStream::OutputFlateEncodeStream(IByteWriterWithPosition* inTargetWriter, bool inInitiallyOn)
@@ -103,9 +123,8 @@ void OutputFlateEncodeStream::StartEncoding()
 
 
 void OutputFlateEncodeStream::Assign(IByteWriterWithPosition* inWriter,bool inInitiallyOn)
-{	
-	if(mCurrentlyEncoding)
-		FinalizeEncoding();
+{
+	Flush();
 	mTargetStream = inWriter;
 	if(inInitiallyOn && mTargetStream)
 		StartEncoding();
@@ -178,6 +197,5 @@ void OutputFlateEncodeStream::TurnOnEncoding()
 
 void OutputFlateEncodeStream::TurnOffEncoding()
 {
-	if(mCurrentlyEncoding)
-		FinalizeEncoding();
+	FinalizeEncoding();
 }

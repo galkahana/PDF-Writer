@@ -27,6 +27,7 @@
 #define BUFFER_SIZE 256*1024
 
 using namespace IOBasicTypes;
+using namespace PDFHummus;
 
 OutputFlateDecodeStream::OutputFlateDecodeStream(void)
 {
@@ -38,19 +39,34 @@ OutputFlateDecodeStream::OutputFlateDecodeStream(void)
 
 OutputFlateDecodeStream::~OutputFlateDecodeStream(void)
 {
-	if(mCurrentlyEncoding)
-		FinalizeEncoding();
+	Flush();
 	if(mTargetStream)
 		delete mTargetStream;
 	delete[] mBuffer;
 	delete mZLibState;
 }
 
-void OutputFlateDecodeStream::FinalizeEncoding()
+EStatusCode OutputFlateDecodeStream::FinalizeEncoding()
 {
+	if(!mCurrentlyEncoding)
+		return eSuccess;
+
 	// no need for flushing here, there's no notion of Z_FINISH. so just end the library work
 	inflateEnd(mZLibState);
 	mCurrentlyEncoding = false;
+	return eSuccess;
+}
+
+EStatusCode OutputFlateDecodeStream::Flush()
+{
+	EStatusCode status = FinalizeEncoding();
+
+	// mTargetStream is owned by this class (deleted in the destructor unless
+	// detached via Assign), so finalize it too.
+	if(mTargetStream && mTargetStream->Flush() != eSuccess)
+		status = eFailure;
+
+	return status;
 }
 
 OutputFlateDecodeStream::OutputFlateDecodeStream(IByteWriter* inTargetWriter, bool inInitiallyOn)
@@ -163,6 +179,5 @@ void OutputFlateDecodeStream::TurnOnEncoding()
 
 void OutputFlateDecodeStream::TurnOffEncoding()
 {
-	if(mCurrentlyEncoding)
-		FinalizeEncoding();
+	FinalizeEncoding();
 }

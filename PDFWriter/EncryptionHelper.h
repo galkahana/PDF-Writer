@@ -85,6 +85,14 @@ public:
 	// encrypt a string (if hex, do the hexing later. if literal do escaping later)
 	std::string EncryptString(const std::string& inStringToEncrypt);
 
+	/*
+		HadEncryptionFailure is currently a method to figure out if any EncryptString failed.
+		failure in this should result in document failure. At some point, i should provide a more immediate means of failing
+		rather than waiting till document end.
+	*/
+	bool HadEncryptionFailure();
+
+
 	// create encryption wrapper for a stream (all stream filter shoud be placed to wrap the encryption wrapper)
 	IByteWriterWithPosition* CreateEncryptionStream(IByteWriterWithPosition* inToWrapStream);
 
@@ -110,6 +118,7 @@ private:
 	bool mIsDocumentEncrypted;
 	int mEncryptionPauseLevel;
 	bool mSupportsEncryption;
+	bool mHadEncryptionFailure;
 
 	IByteWriterWithPosition* CreateEncryptionWriter(IByteWriterWithPosition* inToWrapStream, const ByteList& inEncryptionKey, bool inUsingAES);
 	void Release();

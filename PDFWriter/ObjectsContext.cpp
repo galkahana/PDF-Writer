@@ -249,11 +249,11 @@ DictionaryContext* ObjectsContext::StartDictionary()
 	return newDictionary;
 }
 
-EStatusCode ObjectsContext::EndDictionary(DictionaryContext* ObjectsContext)
+EStatusCode ObjectsContext::EndDictionary(DictionaryContext* inDictionaryContext)
 {
 	if(mDictionaryStack.size() > 0)
 	{
-		if(mDictionaryStack.back() == ObjectsContext)
+		if(mDictionaryStack.back() == inDictionaryContext)
 		{
 			delete mDictionaryStack.back();
 			mDictionaryStack.pop_back();
@@ -492,9 +492,8 @@ PDFStream* ObjectsContext::StartUnfilteredPDFStream(DictionaryContext* inStreamD
 
 EStatusCode ObjectsContext::EndPDFStream(PDFStream* inStream)
 {
-	EStatusCode status = eSuccess;
 	// finalize the stream write to end stream context and calculate length
-	inStream->FinalizeStreamWrite();
+	EStatusCode status = inStream->FinalizeStreamWrite();
 
 	// bring back encryption, if exists
 	if (mEncryptionHelper)
@@ -525,7 +524,8 @@ EStatusCode ObjectsContext::EndPDFStream(PDFStream* inStream)
     {
         WritePDFStreamEndWithoutExtent();
         EndIndirectObject();
-        status = WritePDFStreamExtent(inStream);
+        if (WritePDFStreamExtent(inStream) != eSuccess)
+            status = eFailure;
     }
 
 	return status;
@@ -644,6 +644,11 @@ void ObjectsContext::Cleanup()
 
 	mSubsetFontsNamesSequance.Reset();
 	mReferencesRegistry.Reset();
+
+	DictionaryContextList::iterator it = mDictionaryStack.begin();
+	for(; it != mDictionaryStack.end(); ++it)
+		delete *it;
+	mDictionaryStack.clear();
 }
 
 void ObjectsContext::SetupModifiedFile(PDFParser* inModifiedFileParser)
@@ -765,6 +770,8 @@ EStatusCode ObjectsContext::WriteXrefStream(DictionaryContext* inDictionaryConte
 
     } 
     while (false);
+
+	delete aStream;
 
     return status;
 }

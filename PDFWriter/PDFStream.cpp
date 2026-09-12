@@ -24,6 +24,8 @@
 #include "OutputStreamTraits.h"
 #include "EncryptionHelper.h"
 
+using namespace PDFHummus;
+
 PDFStream::PDFStream(bool inCompressStream,
 					 IByteWriterWithPosition* inOutputStream,
 					 EncryptionHelper* inEncryptionHelper,
@@ -116,17 +118,25 @@ IByteWriter* PDFStream::GetWriteStream()
 	return mWriteStream;
 }
 
-void PDFStream::FinalizeStreamWrite()
+EStatusCode PDFStream::FinalizeStreamWrite()
 {
+	EStatusCode status = eSuccess;
+
 	if(mExtender && mExtender->OverridesStreamCompression() && mCompressStream)
 		mExtender->FinalizeCompressedStreamWrite(mWriteStream);
 	mWriteStream = NULL;
 	if(mCompressStream)
-		mFlateEncodingStream.Assign(NULL);  // this both finished encoding any left buffers and releases ownership from mFlateEncodingStream
+	{
+		if(mFlateEncodingStream.Flush() != eSuccess)
+			status = eFailure;
+		mFlateEncodingStream.Assign(NULL);  // releases ownership from mFlateEncodingStream. encoding already finalized by the Flush() above
+	}
 
 	if (mEncryptionStream) {
 		// safe to delete. encryption stream is not supposed to own the underlying stream in any case. make sure
 		// to delete before measuring output, as flushing may occur at this point
+		if (mEncryptionStream->Flush() != eSuccess)
+			status = eFailure;
 		delete mEncryptionStream;
 		mEncryptionStream = NULL;
 	}
@@ -136,11 +146,13 @@ void PDFStream::FinalizeStreamWrite()
     {
         mStreamLength = mTemporaryStream.GetCurrentWritePosition();
     }
-    else 
+    else
     {
         mStreamLength = mOutputStream->GetCurrentPosition()-mStreamStartPosition;
         mOutputStream = NULL;
     }
+
+	return status;
 }
 
 LongFilePositionType PDFStream::GetLength()

@@ -37,12 +37,14 @@ public:
 
 	virtual IOBasicTypes::LongBufferSizeType Write(const IOBasicTypes::Byte* inBuffer, IOBasicTypes::LongBufferSizeType inSize);
 	virtual IOBasicTypes::LongFilePositionType GetCurrentPosition();
+	virtual PDFHummus::EStatusCode Flush();
 
 private:
 	bool mOwnsStream;
 	IByteWriterWithPosition* mTargetStream;
 
 	bool mWroteIV;
+	bool mFlushed;
 
 	// inEncryptionKey in array form, for aes
 	unsigned char* mEncryptionKey;
@@ -53,6 +55,4 @@ private:
 	unsigned char *mInIndex;
 
 	AESencrypt mEncrypt;
-
-	void Flush();
 };

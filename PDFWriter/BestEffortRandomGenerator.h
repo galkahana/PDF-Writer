@@ -1,5 +1,5 @@
 /*
-   Source File : OutputConsoleStream.cpp
+   Source File : BestEffortRandomGenerator.h
 
 
    Copyright 2026 Gal Kahana PDFWriter
@@ -16,31 +16,19 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 
-   
+
 */
+#pragma once
 
-#include "OutputConsoleStream.h"
-#include <iostream>
+#include "IOBasicTypes.h"
+#include <stddef.h>
 
-using namespace std;
-using namespace PDFHummus;
-
-OutputConsoleStream::OutputConsoleStream()
+// Best-effort random bytes for call sites that cannot rely on OpenSSL.
+// Prefers the platform CSPRNG (BCryptGenRandom on Windows when available, arc4random_buf on
+// Apple/BSD, /dev/urandom elsewhere on POSIX) and falls back to a
+// seeded rand() only when none of those are available.
+class BestEffortRandomGenerator
 {
-}
-
-OutputConsoleStream::~OutputConsoleStream()
-{
-}
-
-IOBasicTypes::LongBufferSizeType OutputConsoleStream::Write(const IOBasicTypes::Byte *inBuffer, IOBasicTypes::LongBufferSizeType inSize)
-{
-    cout.write(reinterpret_cast<const char*>(inBuffer), inSize);
-    return inSize;
-}
-
-EStatusCode OutputConsoleStream::Flush()
-{
-    cout.flush();
-    return cout.fail() ? eFailure : eSuccess;
-}
+public:
+	static void FillBytes(IOBasicTypes::Byte* outBuffer, size_t inSize);
+};

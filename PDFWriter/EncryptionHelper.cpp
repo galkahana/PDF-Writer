@@ -51,6 +51,7 @@ EncryptionHelper::EncryptionHelper(void)
 	mIsDocumentEncrypted = false;
 	mEncryptionPauseLevel = 0;
 	mSupportsEncryption = true;
+	mHadEncryptionFailure = false;
 	mXcryptStreams = NULL;
 	mXcryptStrings = NULL;
 
@@ -94,6 +95,8 @@ void EncryptionHelper::Setup(
 
 	mIsDocumentEncrypted = false;
 	mSupportsEncryption = false;
+	mEncryptionPauseLevel = 0;
+	mHadEncryptionFailure = false;
 
 	// Determine mV (encryption algorithm version),  mRevision (standard security handler revision), and mLength (encryption key length) based on PDF level, using the strongest encryption that the PDF version allows
 	if (inPDFLevel >= 1.4) {
@@ -143,14 +146,30 @@ void EncryptionHelper::Setup(
 #ifndef PDFHUMMUS_NO_OPENSSL
 		XCryptionCommon2_0 xcryptionCommon2_0;
 		fileEncryptionKey = xcryptionCommon2_0.GenerateFileEncryptionKey();
+		if (fileEncryptionKey.empty()) {
+			TRACE_LOG("EncryptionHelper::Setup, failed to generate a secure file encryption key. aborting PDF 2.0 encryption setup.");
+			return;
+		}
 		ByteListPair uAndUE = xcryptionCommon2_0.CreateUandUEValues(userPassword, fileEncryptionKey);
 		mU = uAndUE.first;
 		mUE = uAndUE.second;
+		if (mU.empty() || mUE.empty()) {
+			TRACE_LOG("EncryptionHelper::Setup, failed to generate secure U/UE values. aborting PDF 2.0 encryption setup.");
+			return;
+		}
 		ByteListPair oAndOE = xcryptionCommon2_0.CreateOandOEValues(ownerPassword, fileEncryptionKey, mU);
 		mO = oAndOE.first;
 		mOE = oAndOE.second;
+		if (mO.empty() || mOE.empty()) {
+			TRACE_LOG("EncryptionHelper::Setup, failed to generate secure O/OE values. aborting PDF 2.0 encryption setup.");
+			return;
+		}
 		mPerms = xcryptionCommon2_0.CreatePerms(fileEncryptionKey, mP, mEncryptMetaData);
-#endif		
+		if (mPerms.empty()) {
+			TRACE_LOG("EncryptionHelper::Setup, failed to generate a secure Perms value. aborting PDF 2.0 encryption setup.");
+			return;
+		}
+#endif
 	} else {
 		// Pre PDF 2.0 algos
 		XCryptionCommon xcryptionCommon;
@@ -186,6 +205,8 @@ void EncryptionHelper::SetupNoEncryption()
 {
 	mIsDocumentEncrypted = false;
 	mSupportsEncryption = true;
+	mEncryptionPauseLevel = 0;
+	mHadEncryptionFailure = false;
 }
 
 void EncryptionHelper::Setup(const DecryptionHelper& inDecryptionSource) 
@@ -198,6 +219,8 @@ void EncryptionHelper::Setup(const DecryptionHelper& inDecryptionSource)
 
 	mIsDocumentEncrypted = true;
 	mSupportsEncryption = true;
+	mEncryptionPauseLevel = 0;
+	mHadEncryptionFailure = false;
 
 	mLength = inDecryptionSource.GetLength();
 	mV = inDecryptionSource.GetV();
@@ -238,6 +261,10 @@ bool EncryptionHelper::SupportsEncryption() {
 
 bool EncryptionHelper::IsDocumentEncrypted() {
 	return mIsDocumentEncrypted;
+}
+
+bool EncryptionHelper::HadEncryptionFailure() {
+	return mHadEncryptionFailure;
 }
 
 bool EncryptionHelper::IsEncrypting() {
@@ -281,8 +308,14 @@ std::string EncryptionHelper::EncryptString(const std::string& inStringToEncrypt
 	if (encryptStream) {
 		InputStringStream inputStream(inStringToEncrypt);
 		OutputStreamTraits traits(encryptStream);
-		traits.CopyToOutputStream(&inputStream);
-		delete encryptStream; // free encryption stream (sometimes it will also mean flushing the output stream)
+		EStatusCode copyStatus = traits.CopyToOutputStream(&inputStream);
+		EStatusCode flushStatus = encryptStream->Flush(); // finalizes the encryption stream (e.g. final padded block), before releasing it
+		delete encryptStream;
+
+		if (copyStatus != eSuccess || flushStatus != eSuccess) {
+			TRACE_LOG("EncryptionHelper::EncryptString, failed to write encrypted string content to underlying stream");
+			mHadEncryptionFailure = true;
+		}
 
 		return buffer.ToString();
 	}

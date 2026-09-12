@@ -85,6 +85,7 @@ LayeredGlyphsDrawingContext.cpp
 LinearGradientShadingPatternWritingTask.cpp
 Log.cpp
 MD5Generator.cpp
+BestEffortRandomGenerator.cpp
 RC4.cpp
 ObjectsContext.cpp
 OpenTypeFileInput.cpp
@@ -288,6 +289,7 @@ LinearGradientShadingPatternWritingTask.h
 Log.h
 MapIterator.h
 MD5Generator.h
+BestEffortRandomGenerator.h
 RC4.h
 MyStringBuf.h
 ObjectsBasicTypes.h
@@ -470,6 +472,11 @@ else(PDFHUMMUS_NO_OPENSSL)
     endif()
 endif(PDFHUMMUS_NO_OPENSSL)
 
+if(PDFHUMMUS_HAVE_BCRYPT)
+    target_link_libraries(PDFWriter ${BCRYPT_LIBRARY})
+    target_compile_definitions(PDFWriter PRIVATE PDFHUMMUS_HAVE_BCRYPT=1)
+endif()
+
 target_include_directories(PDFWriter
     INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
@@ -607,6 +614,8 @@ WinAnsiEncoding.h
 source_group(Infrastructure\\Encryption FILES
 MD5Generator.cpp
 MD5Generator.h
+BestEffortRandomGenerator.cpp
+BestEffortRandomGenerator.h
 RC4.cpp
 RC4.h
 )

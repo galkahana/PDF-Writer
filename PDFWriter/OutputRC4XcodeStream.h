@@ -34,6 +34,7 @@ public:
 
 	virtual IOBasicTypes::LongBufferSizeType Write(const IOBasicTypes::Byte* inBuffer, IOBasicTypes::LongBufferSizeType inSize);
 	virtual IOBasicTypes::LongFilePositionType GetCurrentPosition();
+	virtual PDFHummus::EStatusCode Flush();
 
 private:
 	bool mOwnsStream;

@@ -18,19 +18,20 @@ limitations under the License.
 */
 
 #include "OutputAESEncodeStreamSSL.h"
-#include "MD5Generator.h"
-#include "PDFDate.h"
 
 #include <string.h>
 #include <openssl/evp.h>
+#include <openssl/rand.h>
 
 using namespace IOBasicTypes;
+using namespace PDFHummus;
 
 OutputAESEncodeStreamSSL::OutputAESEncodeStreamSSL(void)
 {
 	mTargetStream = NULL;
 	mOwnsStream = false;
 	mWroteIV = false;
+	mFlushed = true;
 	mEncryptCtx = NULL;
 	mEncryptionKey = NULL;
 }
@@ -70,6 +71,7 @@ OutputAESEncodeStreamSSL::OutputAESEncodeStreamSSL(
 	// Create OpenSSL context
 	mEncryptCtx = EVP_CIPHER_CTX_new();
 	mWroteIV = false;
+	mFlushed = false;
 }
 
 LongFilePositionType OutputAESEncodeStreamSSL::GetCurrentPosition()
@@ -87,15 +89,8 @@ LongBufferSizeType OutputAESEncodeStreamSSL::Write(const IOBasicTypes::Byte* inB
 
 	// write IV if didn't write yet
 	if (!mWroteIV) {
-		// random IV using MD5 of current time
-		MD5Generator md5;
-		// encode current time
-		PDFDate currentTime;
-		currentTime.SetToCurrentTime();
-		md5.Accumulate(currentTime.ToString());
-		memcpy(mIV, (const unsigned char*)md5.ToStringAsString().c_str(), AES_BLOCK_SIZE_BYTES); // md5 should give us the desired AES block size bytes
-		// write IV to output stream
-		mTargetStream->Write(mIV, AES_BLOCK_SIZE_BYTES);
+		if (RAND_bytes(mIV, AES_BLOCK_SIZE_BYTES) != 1)
+			return 0;
 
 		// Initialize OpenSSL encryption context with appropriate cipher based on key length
 		const EVP_CIPHER* cipher;
@@ -112,6 +107,10 @@ LongBufferSizeType OutputAESEncodeStreamSSL::Write(const IOBasicTypes::Byte* inB
 
 		// Disable padding as we handle it manually like the original
 		EVP_CIPHER_CTX_set_padding(mEncryptCtx, 0);
+
+		// only commit the IV to output once key validation and cipher init succeeded
+		if (mTargetStream->Write(mIV, AES_BLOCK_SIZE_BYTES) != AES_BLOCK_SIZE_BYTES)
+			return 0;
 
 		mWroteIV = true;
 	}
@@ -138,7 +137,8 @@ LongBufferSizeType OutputAESEncodeStreamSSL::Write(const IOBasicTypes::Byte* inB
 			if (outlen != AES_BLOCK_SIZE_BYTES)
 				return 0; // Should always be AES block size bytes with padding disabled
 
-			mTargetStream->Write(mOut, AES_BLOCK_SIZE_BYTES);
+			if (mTargetStream->Write(mOut, AES_BLOCK_SIZE_BYTES) != AES_BLOCK_SIZE_BYTES)
+				return 0;
 			mInIndex = mIn;
 			left -= remainder;
 		}
@@ -147,26 +147,49 @@ LongBufferSizeType OutputAESEncodeStreamSSL::Write(const IOBasicTypes::Byte* inB
 	return inSize;
 }
 
-void OutputAESEncodeStreamSSL::Flush() {
-	if (!mTargetStream)
-		return;
+EStatusCode OutputAESEncodeStreamSSL::Flush() {
+	EStatusCode status = eSuccess;
 
-	// if there's a full buffer waiting, write it now.
-	if (mInIndex - mIn == AES_BLOCK_SIZE_BYTES) {
-		int outlen;
-		if (EVP_EncryptUpdate(mEncryptCtx, mOut, &outlen, mIn, AES_BLOCK_SIZE_BYTES) == 1 && outlen == AES_BLOCK_SIZE_BYTES) {
-			mTargetStream->Write(mOut, AES_BLOCK_SIZE_BYTES);
+	do {
+		if (mFlushed)
+			break;
+		mFlushed = true;
+
+		if (!mTargetStream)
+			break;
+
+		// if there's a full buffer waiting, write it now.
+		if (mInIndex - mIn == AES_BLOCK_SIZE_BYTES) {
+			int outlen;
+			if (EVP_EncryptUpdate(mEncryptCtx, mOut, &outlen, mIn, AES_BLOCK_SIZE_BYTES) != 1 || outlen != AES_BLOCK_SIZE_BYTES) {
+				status = eFailure;
+				break;
+			}
+			if (mTargetStream->Write(mOut, AES_BLOCK_SIZE_BYTES) != AES_BLOCK_SIZE_BYTES) {
+				status = eFailure;
+				break;
+			}
+			mInIndex = mIn;
 		}
-		mInIndex = mIn;
-	}
 
-	// fill the last block with padding bytes. if the last block was full and padding is required still, fill it with the block size as padding bytes
-	unsigned char remainder = (unsigned char)(AES_BLOCK_SIZE_BYTES - (mInIndex - mIn));
-	for (size_t i = 0; i < remainder; ++i)
-		mInIndex[i] = remainder;
+		// fill the last block with padding bytes. if the last block was full and padding is required still, fill it with the block size as padding bytes
+		unsigned char remainder = (unsigned char)(AES_BLOCK_SIZE_BYTES - (mInIndex - mIn));
+		for (size_t i = 0; i < remainder; ++i)
+			mInIndex[i] = remainder;
 
-	int outlen;
-	if (EVP_EncryptUpdate(mEncryptCtx, mOut, &outlen, mIn, AES_BLOCK_SIZE_BYTES) == 1 && outlen == AES_BLOCK_SIZE_BYTES) {
-		mTargetStream->Write(mOut, AES_BLOCK_SIZE_BYTES);
-	}
+		int outlen;
+		if (EVP_EncryptUpdate(mEncryptCtx, mOut, &outlen, mIn, AES_BLOCK_SIZE_BYTES) != 1 || outlen != AES_BLOCK_SIZE_BYTES) {
+			status = eFailure;
+			break;
+		}
+		if (mTargetStream->Write(mOut, AES_BLOCK_SIZE_BYTES) != AES_BLOCK_SIZE_BYTES)
+			status = eFailure;
+	} while (false);
+
+	// only cascade into a stream we own - a non-owned target's lifecycle
+	// (including when it gets finalized) is managed by whoever gave it to us.
+	if (mOwnsStream && mTargetStream && mTargetStream->Flush() != eSuccess)
+		status = eFailure;
+
+	return status;
 }
