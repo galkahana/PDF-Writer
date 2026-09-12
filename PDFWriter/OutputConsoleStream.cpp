@@ -23,6 +23,7 @@
 #include <iostream>
 
 using namespace std;
+using namespace PDFHummus;
 
 OutputConsoleStream::OutputConsoleStream()
 {
@@ -35,5 +36,11 @@ OutputConsoleStream::~OutputConsoleStream()
 IOBasicTypes::LongBufferSizeType OutputConsoleStream::Write(const IOBasicTypes::Byte *inBuffer, IOBasicTypes::LongBufferSizeType inSize)
 {
     cout.write(reinterpret_cast<const char*>(inBuffer), inSize);
-    return inSize;    
+    return inSize;
+}
+
+EStatusCode OutputConsoleStream::Flush()
+{
+    cout.flush();
+    return cout.fail() ? eFailure : eSuccess;
 }

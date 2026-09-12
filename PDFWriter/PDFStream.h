@@ -65,9 +65,10 @@ public:
 	// Get the output stream of the PDFStream, make sure to use only before calling FinalizeStreamWrite, after which it becomes invalid
 	IByteWriter* GetWriteStream();
 
-	// when done with writing to the stream call FinalizeWriteStream to get all writing resources released and calculate the stream extent. For streams where extent writing is direct object, there is still 
+	// when done with writing to the stream call FinalizeWriteStream to get all writing resources released and calculate the stream extent. For streams where extent writing is direct object, there is still
     // a call needed later, to FlushStreamContentForDirectExtentStream() to actually write it.
-	void FinalizeStreamWrite();
+	// returns eFailure if compression or encryption could not be finalized (e.g. a failed write to the underlying stream)
+	PDFHummus::EStatusCode FinalizeStreamWrite();
 
 	bool IsStreamCompressed();
 	ObjectIDType GetExtentObjectID();

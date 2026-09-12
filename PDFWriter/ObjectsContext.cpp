@@ -492,9 +492,8 @@ PDFStream* ObjectsContext::StartUnfilteredPDFStream(DictionaryContext* inStreamD
 
 EStatusCode ObjectsContext::EndPDFStream(PDFStream* inStream)
 {
-	EStatusCode status = eSuccess;
 	// finalize the stream write to end stream context and calculate length
-	inStream->FinalizeStreamWrite();
+	EStatusCode status = inStream->FinalizeStreamWrite();
 
 	// bring back encryption, if exists
 	if (mEncryptionHelper)
@@ -525,7 +524,8 @@ EStatusCode ObjectsContext::EndPDFStream(PDFStream* inStream)
     {
         WritePDFStreamEndWithoutExtent();
         EndIndirectObject();
-        status = WritePDFStreamExtent(inStream);
+        if (WritePDFStreamExtent(inStream) != eSuccess)
+            status = eFailure;
     }
 
 	return status;

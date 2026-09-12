@@ -37,6 +37,7 @@ public:
 	void Assign(IByteWriter* inWriter,bool inInitiallyOn = true);
 
 	virtual IOBasicTypes::LongBufferSizeType Write(const IOBasicTypes::Byte* inBuffer,IOBasicTypes::LongBufferSizeType inSize);
+	virtual PDFHummus::EStatusCode Flush();
 
 	void TurnOnEncoding();
 	void TurnOffEncoding();
@@ -47,7 +48,8 @@ private:
 	bool mCurrentlyEncoding;
 	z_stream* mZLibState;
 
-	void FinalizeEncoding();
 	void StartEncoding();
+	// ends the current inflate stream and releases zlib state, without touching mTargetStream - more writing to it may follow (e.g. via TurnOnEncoding)
+	PDFHummus::EStatusCode FinalizeEncoding();
 	IOBasicTypes::LongBufferSizeType DecodeBufferAndWrite(const IOBasicTypes::Byte* inBuffer,IOBasicTypes::LongBufferSizeType inSize);
 };

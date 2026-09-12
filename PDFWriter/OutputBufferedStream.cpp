@@ -23,6 +23,7 @@
 #include <memory.h>
 
 using namespace IOBasicTypes;
+using namespace PDFHummus;
 
 OutputBufferedStream::OutputBufferedStream(void)
 {
@@ -81,7 +82,8 @@ LongBufferSizeType OutputBufferedStream::Write(const Byte* inBuffer,LongBufferSi
 			// if not, flush the buffer. if now won't fit in the buffer write directly to underlying stream
 			// all but what size will fit in the buffer - then write to buffer what leftover will fit in.
 			LongBufferSizeType bytesToWriteToBuffer = inSize % mBufferSize;
-			Flush();
+			if (FlushBuffer() != eSuccess)
+				return 0;
 
 			bytesWritten = mTargetStream->Write(inBuffer,inSize-bytesToWriteToBuffer);
 			if((inSize-bytesToWriteToBuffer == bytesWritten) && bytesToWriteToBuffer > 0) // all well, continue
@@ -98,11 +100,29 @@ LongBufferSizeType OutputBufferedStream::Write(const Byte* inBuffer,LongBufferSi
 }
 
 
-void OutputBufferedStream::Flush()
+EStatusCode OutputBufferedStream::FlushBuffer()
 {
 	if(mTargetStream && mCurrentBufferIndex != mBuffer)
-		mTargetStream->Write(mBuffer,mCurrentBufferIndex - mBuffer);
-	mCurrentBufferIndex = mBuffer;
+	{
+		LongBufferSizeType pendingSize = mCurrentBufferIndex - mBuffer;
+		LongBufferSizeType writtenSize = mTargetStream->Write(mBuffer,pendingSize);
+		mCurrentBufferIndex = mBuffer;
+		if (writtenSize != pendingSize)
+			return eFailure;
+	}
+	return eSuccess;
+}
+
+EStatusCode OutputBufferedStream::Flush()
+{
+	EStatusCode status = FlushBuffer();
+
+	// mTargetStream is always owned by this class (deleted in the destructor
+	// unless detached via Assign), so finalize it too.
+	if(mTargetStream && mTargetStream->Flush() != eSuccess)
+		status = eFailure;
+
+	return status;
 }
 
 LongFilePositionType OutputBufferedStream::GetCurrentPosition()

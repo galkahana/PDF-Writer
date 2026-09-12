@@ -49,6 +49,7 @@ public:
 
 	// IByteWriterWithPosition implementation
 	virtual IOBasicTypes::LongFilePositionType GetCurrentPosition();
+	virtual PDFHummus::EStatusCode Flush();
 
 private:
 

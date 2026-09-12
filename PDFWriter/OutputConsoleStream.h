@@ -29,4 +29,5 @@ public:
     virtual ~OutputConsoleStream();
 
     virtual IOBasicTypes::LongBufferSizeType Write(const IOBasicTypes::Byte* inBuffer,IOBasicTypes::LongBufferSizeType inSize);
+    virtual PDFHummus::EStatusCode Flush();
 };

@@ -47,17 +47,17 @@ EStatusCode OutputFileStream::Open(const std::string& inFilePath,bool inAppend)
 	SAFE_FOPEN(mStream,inFilePath.c_str(),inAppend ? "ab":"wb")
 
 	if(!mStream)
-		return PDFHummus::eFailure;
+		return eFailure;
 
 	// seek to end, so position reading gets the correct file position, even before first write
 	SAFE_FSEEK64(mStream,0,SEEK_END);
 
-	return PDFHummus::eSuccess;
+	return eSuccess;
 };
 
 EStatusCode OutputFileStream::Close()
 {
-	EStatusCode result = fclose(mStream) == 0 ? PDFHummus::eSuccess:PDFHummus::eFailure;
+	EStatusCode result = fclose(mStream) == 0 ? eSuccess:eFailure;
 
 	mStream = NULL;
 	return result;
@@ -73,4 +73,11 @@ LongBufferSizeType OutputFileStream::Write(const Byte* inBuffer,LongBufferSizeTy
 LongFilePositionType OutputFileStream::GetCurrentPosition()
 {
 	return mStream ? SAFE_FTELL64(mStream):0;
+}
+
+EStatusCode OutputFileStream::Flush()
+{
+	if (mStream && fflush(mStream) != 0)
+		return eFailure;
+	return eSuccess;
 }

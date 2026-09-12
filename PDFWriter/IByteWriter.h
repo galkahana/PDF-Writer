@@ -25,6 +25,7 @@
 
 */
 #include "IOBasicTypes.h"
+#include "EStatusCode.h"
 
 class IByteWriter
 {
@@ -35,4 +36,10 @@ public:
 		Write inSize bytes of inBuffer, returning the number of written bytes
 	*/
 	virtual IOBasicTypes::LongBufferSizeType Write(const IOBasicTypes::Byte* inBuffer,IOBasicTypes::LongBufferSizeType inSize) = 0;
+
+	// Commits final pending output to underlying target. Where flushing before ending write
+	// is relevant, call this instead flush explicitly to get the status of flush, where relevant.
+	// otherwise destructor is expected to flush. _flush is intended for one time call only before
+	// finishing_. after that no more writing is expected.
+	virtual PDFHummus::EStatusCode Flush() { return PDFHummus::eSuccess; }
 };

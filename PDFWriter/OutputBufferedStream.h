@@ -62,7 +62,7 @@ public:
 	virtual IOBasicTypes::LongFilePositionType GetCurrentPosition();
 
 	// force buffer flush to underlying stream
-	void Flush();
+	virtual PDFHummus::EStatusCode Flush();
 
 private:
 	IOBasicTypes::Byte* mBuffer;
@@ -71,4 +71,6 @@ private:
 	IByteWriterWithPosition* mTargetStream;
 
 	void Initiate(IByteWriterWithPosition* inTargetWriter,IOBasicTypes::LongBufferSizeType inBufferSize);
+	// writes pending buffered bytes to mTargetStream, without finalizing it - more writing may follow
+	PDFHummus::EStatusCode FlushBuffer();
 };

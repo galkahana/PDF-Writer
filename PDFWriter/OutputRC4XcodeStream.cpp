@@ -20,6 +20,7 @@ limitations under the License.
 #include "OutputRC4XcodeStream.h"
 
 using namespace IOBasicTypes;
+using namespace PDFHummus;
 
 
 OutputRC4XcodeStream::OutputRC4XcodeStream(void) 
@@ -28,10 +29,20 @@ OutputRC4XcodeStream::OutputRC4XcodeStream(void)
 	mOwnsStream = false;
 }
 
-OutputRC4XcodeStream::~OutputRC4XcodeStream(void) 
+OutputRC4XcodeStream::~OutputRC4XcodeStream(void)
 {
+	Flush();
 	if (mOwnsStream)
 		delete mTargetStream;
+}
+
+EStatusCode OutputRC4XcodeStream::Flush()
+{
+	// RC4 is a stream cipher with no state of its own to finalize - just
+	// cascade into an owned target, whose lifecycle we're responsible for.
+	if (mOwnsStream && mTargetStream)
+		return mTargetStream->Flush();
+	return eSuccess;
 }
 
 OutputRC4XcodeStream::OutputRC4XcodeStream(IByteWriterWithPosition* inTargetStream, const ByteList& inEncryptionKey, bool inOwnsStream):mRC4(inEncryptionKey) 
