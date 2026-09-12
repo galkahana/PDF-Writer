@@ -1312,7 +1312,9 @@ EStatusCode PDFParser::ParsePreviousFileDirectory(LongFilePositionType inXrefPos
 			if (status != PDFHummus::eSuccess)
 				break;
 
-			bool hasPrev = trailerDictionary->Exists("Prev");
+			RefCountPtr<PDFDictionary> trailer(trailerDictionary);
+
+			bool hasPrev = trailer->Exists("Prev");
 
 			status = ParseXrefFromXrefTable(inXrefTable,inXrefSize,inXrefPosition,!hasPrev,outReadTableSize);
 			if(status != PDFHummus::eSuccess)
@@ -1325,7 +1327,7 @@ EStatusCode PDFParser::ParsePreviousFileDirectory(LongFilePositionType inXrefPos
 
 
 			// For hybrids, check also XRefStm entry
-			PDFObjectCastPtr<PDFInteger> xrefStmReference(trailerDictionary->QueryDirectObject("XRefStm"));
+			PDFObjectCastPtr<PDFInteger> xrefStmReference(trailer->QueryDirectObject("XRefStm"));
 			if(xrefStmReference.GetPtr())
 			{
 				// if exists, merge update xref
@@ -1337,7 +1339,8 @@ EStatusCode PDFParser::ParsePreviousFileDirectory(LongFilePositionType inXrefPos
 				}
 			}
 
-			*outTrailer = trailerDictionary;
+			trailer->AddRef();
+			*outTrailer = trailer.GetPtr();
 		}
 		else if(anObject->GetType() == PDFObject::ePDFObjectInteger && ((PDFInteger*)anObject.GetPtr())->GetValue() > 0)
 		{
@@ -1381,11 +1384,14 @@ EStatusCode PDFParser::ParsePreviousFileDirectory(LongFilePositionType inXrefPos
 
 			NotifyIndirectObjectEnd(xrefStream.GetPtr());
 
-			*outTrailer = xrefStream->QueryStreamDictionary();
+			RefCountPtr<PDFDictionary> trailer(xrefStream->QueryStreamDictionary());
 
 			status = ParseXrefFromXrefStream(inXrefTable,inXrefSize,xrefStream.GetPtr(),outReadTableSize);
 			if(status != PDFHummus::eSuccess)
 				break;
+
+			trailer->AddRef();
+			*outTrailer = trailer.GetPtr();
 		}
 		else
 		{
