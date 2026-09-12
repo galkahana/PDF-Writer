@@ -88,8 +88,6 @@ LongBufferSizeType OutputAESEncodeStreamSSL::Write(const IOBasicTypes::Byte* inB
 	if (!mWroteIV) {
 		if (RAND_bytes(mIV, AES_BLOCK_SIZE_BYTES) != 1)
 			return 0;
-		// write IV to output stream
-		mTargetStream->Write(mIV, AES_BLOCK_SIZE_BYTES);
 
 		// Initialize OpenSSL encryption context with appropriate cipher based on key length
 		const EVP_CIPHER* cipher;
@@ -106,6 +104,10 @@ LongBufferSizeType OutputAESEncodeStreamSSL::Write(const IOBasicTypes::Byte* inB
 
 		// Disable padding as we handle it manually like the original
 		EVP_CIPHER_CTX_set_padding(mEncryptCtx, 0);
+
+		// only commit the IV to output once key validation and cipher init succeeded
+		if (mTargetStream->Write(mIV, AES_BLOCK_SIZE_BYTES) != AES_BLOCK_SIZE_BYTES)
+			return 0;
 
 		mWroteIV = true;
 	}
