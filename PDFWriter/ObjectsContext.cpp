@@ -249,11 +249,11 @@ DictionaryContext* ObjectsContext::StartDictionary()
 	return newDictionary;
 }
 
-EStatusCode ObjectsContext::EndDictionary(DictionaryContext* ObjectsContext)
+EStatusCode ObjectsContext::EndDictionary(DictionaryContext* inDictionaryContext)
 {
 	if(mDictionaryStack.size() > 0)
 	{
-		if(mDictionaryStack.back() == ObjectsContext)
+		if(mDictionaryStack.back() == inDictionaryContext)
 		{
 			delete mDictionaryStack.back();
 			mDictionaryStack.pop_back();
@@ -644,6 +644,11 @@ void ObjectsContext::Cleanup()
 
 	mSubsetFontsNamesSequance.Reset();
 	mReferencesRegistry.Reset();
+
+	DictionaryContextList::iterator it = mDictionaryStack.begin();
+	for(; it != mDictionaryStack.end(); ++it)
+		delete *it;
+	mDictionaryStack.clear();
 }
 
 void ObjectsContext::SetupModifiedFile(PDFParser* inModifiedFileParser)
