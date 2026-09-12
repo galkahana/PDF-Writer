@@ -59,6 +59,17 @@ else()
     message(STATUS "Using LibAesgm for AES encryption")
 endif()
 
+# bcrypt detection for BestEffortRandomGenerator's Windows CSPRNG path
+if(WIN32)
+    find_library(BCRYPT_LIBRARY NAMES bcrypt)
+    if(BCRYPT_LIBRARY)
+        set(PDFHUMMUS_HAVE_BCRYPT TRUE)
+        message(STATUS "Using BCryptGenRandom for Windows pseudo-random fallback")
+    else()
+        message(WARNING "bcrypt not found, will fall back to rand() on Windows")
+    endif()
+endif()
+
 if(NOT USE_BUNDLED)
     # zlib
     if(USE_UNBUNDLED_FALLBACK_BUNDLED)

@@ -18,7 +18,7 @@ limitations under the License.
 */
 
 #include "OutputAESEncodeStream.h"
-#include "PseudoRandomGenerator.h"
+#include "BestEffortRandomGenerator.h"
 #include "aescpp.h"
 
 #include <string.h>
@@ -82,7 +82,7 @@ LongBufferSizeType OutputAESEncodeStream::Write(const IOBasicTypes::Byte* inBuff
 
 	// write IV if didn't write yet
 	if (!mWroteIV) {
-		PseudoRandomGenerator::FillBytes(mIV, AES_BLOCK_SIZE);
+		BestEffortRandomGenerator::FillBytes(mIV, AES_BLOCK_SIZE);
 		// write IV to output stream
 		mTargetStream->Write(mIV, AES_BLOCK_SIZE);
 		mWroteIV = true;

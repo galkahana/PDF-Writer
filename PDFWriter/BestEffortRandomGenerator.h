@@ -1,5 +1,5 @@
 /*
-   Source File : PseudoRandomGenerator.h
+   Source File : BestEffortRandomGenerator.h
 
 
    Copyright 2026 Gal Kahana PDFWriter
@@ -23,11 +23,11 @@
 #include "IOBasicTypes.h"
 #include <stddef.h>
 
-// Not a CSPRNG. Best-effort pseudo-random bytes for call sites that cannot
-// rely on a cryptographic RNG (e.g. builds without OpenSSL). Seeds the C
-// library rand() exactly once, on first use, no matter how many call sites
-// use this class.
-class PseudoRandomGenerator
+// Best-effort random bytes for call sites that cannot rely on OpenSSL.
+// Prefers the platform CSPRNG (BCryptGenRandom on Windows when available, arc4random_buf on
+// Apple/BSD, /dev/urandom elsewhere on POSIX) and falls back to a
+// seeded rand() only when none of those are available.
+class BestEffortRandomGenerator
 {
 public:
 	static void FillBytes(IOBasicTypes::Byte* outBuffer, size_t inSize);
