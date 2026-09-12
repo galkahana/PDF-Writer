@@ -51,6 +51,7 @@ EncryptionHelper::EncryptionHelper(void)
 	mIsDocumentEncrypted = false;
 	mEncryptionPauseLevel = 0;
 	mSupportsEncryption = true;
+	mHadEncryptionFailure = false;
 	mXcryptStreams = NULL;
 	mXcryptStrings = NULL;
 
@@ -95,6 +96,7 @@ void EncryptionHelper::Setup(
 	mIsDocumentEncrypted = false;
 	mSupportsEncryption = false;
 	mEncryptionPauseLevel = 0;
+	mHadEncryptionFailure = false;
 
 	// Determine mV (encryption algorithm version),  mRevision (standard security handler revision), and mLength (encryption key length) based on PDF level, using the strongest encryption that the PDF version allows
 	if (inPDFLevel >= 1.4) {
@@ -204,6 +206,7 @@ void EncryptionHelper::SetupNoEncryption()
 	mIsDocumentEncrypted = false;
 	mSupportsEncryption = true;
 	mEncryptionPauseLevel = 0;
+	mHadEncryptionFailure = false;
 }
 
 void EncryptionHelper::Setup(const DecryptionHelper& inDecryptionSource) 
@@ -217,6 +220,7 @@ void EncryptionHelper::Setup(const DecryptionHelper& inDecryptionSource)
 	mIsDocumentEncrypted = true;
 	mSupportsEncryption = true;
 	mEncryptionPauseLevel = 0;
+	mHadEncryptionFailure = false;
 
 	mLength = inDecryptionSource.GetLength();
 	mV = inDecryptionSource.GetV();
@@ -257,6 +261,10 @@ bool EncryptionHelper::SupportsEncryption() {
 
 bool EncryptionHelper::IsDocumentEncrypted() {
 	return mIsDocumentEncrypted;
+}
+
+bool EncryptionHelper::HadEncryptionFailure() {
+	return mHadEncryptionFailure;
 }
 
 bool EncryptionHelper::IsEncrypting() {
@@ -300,8 +308,14 @@ std::string EncryptionHelper::EncryptString(const std::string& inStringToEncrypt
 	if (encryptStream) {
 		InputStringStream inputStream(inStringToEncrypt);
 		OutputStreamTraits traits(encryptStream);
-		traits.CopyToOutputStream(&inputStream);
-		delete encryptStream; // free encryption stream (sometimes it will also mean flushing the output stream)
+		EStatusCode copyStatus = traits.CopyToOutputStream(&inputStream);
+		EStatusCode flushStatus = encryptStream->Flush(); // finalizes the encryption stream (e.g. final padded block), before releasing it
+		delete encryptStream;
+
+		if (copyStatus != eSuccess || flushStatus != eSuccess) {
+			TRACE_LOG("EncryptionHelper::EncryptString, failed to write encrypted string content to underlying stream");
+			mHadEncryptionFailure = true;
+		}
 
 		return buffer.ToString();
 	}

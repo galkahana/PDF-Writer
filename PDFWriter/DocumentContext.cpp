@@ -259,6 +259,13 @@ EStatusCode	DocumentContext::FinalizeNewPDF()
 		WriteXrefReference(xrefTablePosition);
 		WriteFinalEOF();
 
+		if (mEncryptionHelper.HadEncryptionFailure())
+		{
+			TRACE_LOG("DocumentContext::FinalizeNewPDF, an encryption operation failed to write its output during this document's writing");
+			status = eFailure;
+			break;
+		}
+
 	} while(false);
 
 	return status;
@@ -2593,6 +2600,14 @@ EStatusCode	DocumentContext::FinalizeModifiedPDF(PDFParser* inModifiedFileParser
 
 		WriteXrefReference(xrefTablePosition);
 		WriteFinalEOF();
+
+		if (mEncryptionHelper.HadEncryptionFailure())
+		{
+			TRACE_LOG("DocumentContext::FinalizeModifiedPDF, an encryption operation failed to write its output during this document's writing");
+			status = eFailure;
+			break;
+		}
+
 	} while(false);
 
 	return status;
