@@ -18,8 +18,7 @@ limitations under the License.
 */
 
 #include "OutputAESEncodeStream.h"
-#include "MD5Generator.h"
-#include "PDFDate.h"
+#include "PseudoRandomGenerator.h"
 #include "aescpp.h"
 
 #include <string.h>
@@ -83,13 +82,7 @@ LongBufferSizeType OutputAESEncodeStream::Write(const IOBasicTypes::Byte* inBuff
 
 	// write IV if didn't write yet
 	if (!mWroteIV) {
-		// random IV using MD5 of current time
-		MD5Generator md5;
-		// encode current time
-		PDFDate currentTime;
-		currentTime.SetToCurrentTime();
-		md5.Accumulate(currentTime.ToString());
-		memcpy(mIV, (const unsigned char*)md5.ToStringAsString().c_str(), AES_BLOCK_SIZE); // md5 should give us the desired 16 bytes
+		PseudoRandomGenerator::FillBytes(mIV, AES_BLOCK_SIZE);
 		// write IV to output stream
 		mTargetStream->Write(mIV, AES_BLOCK_SIZE);
 		mWroteIV = true;

@@ -85,6 +85,7 @@ LayeredGlyphsDrawingContext.cpp
 LinearGradientShadingPatternWritingTask.cpp
 Log.cpp
 MD5Generator.cpp
+PseudoRandomGenerator.cpp
 RC4.cpp
 ObjectsContext.cpp
 OpenTypeFileInput.cpp
@@ -288,6 +289,7 @@ LinearGradientShadingPatternWritingTask.h
 Log.h
 MapIterator.h
 MD5Generator.h
+PseudoRandomGenerator.h
 RC4.h
 MyStringBuf.h
 ObjectsBasicTypes.h
@@ -607,6 +609,8 @@ WinAnsiEncoding.h
 source_group(Infrastructure\\Encryption FILES
 MD5Generator.cpp
 MD5Generator.h
+PseudoRandomGenerator.cpp
+PseudoRandomGenerator.h
 RC4.cpp
 RC4.h
 )

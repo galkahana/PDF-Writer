@@ -18,11 +18,10 @@ limitations under the License.
 */
 
 #include "OutputAESEncodeStreamSSL.h"
-#include "MD5Generator.h"
-#include "PDFDate.h"
 
 #include <string.h>
 #include <openssl/evp.h>
+#include <openssl/rand.h>
 
 using namespace IOBasicTypes;
 
@@ -87,13 +86,8 @@ LongBufferSizeType OutputAESEncodeStreamSSL::Write(const IOBasicTypes::Byte* inB
 
 	// write IV if didn't write yet
 	if (!mWroteIV) {
-		// random IV using MD5 of current time
-		MD5Generator md5;
-		// encode current time
-		PDFDate currentTime;
-		currentTime.SetToCurrentTime();
-		md5.Accumulate(currentTime.ToString());
-		memcpy(mIV, (const unsigned char*)md5.ToStringAsString().c_str(), AES_BLOCK_SIZE_BYTES); // md5 should give us the desired AES block size bytes
+		if (RAND_bytes(mIV, AES_BLOCK_SIZE_BYTES) != 1)
+			return 0;
 		// write IV to output stream
 		mTargetStream->Write(mIV, AES_BLOCK_SIZE_BYTES);
 

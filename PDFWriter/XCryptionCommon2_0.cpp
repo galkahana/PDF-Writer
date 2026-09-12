@@ -21,6 +21,7 @@
 #ifndef PDFHUMMUS_NO_OPENSSL
 #include "XCryptionCommon2_0.h"
 #include "AESConstants.h"
+#include "PseudoRandomGenerator.h"
 #include <openssl/sha.h>
 #include <openssl/rand.h>
 #ifdef USE_OPENSSL_AES
@@ -434,11 +435,8 @@ static ByteList generateRandomBytes() {
         return ByteList(buffer, buffer + N);
     } else {
         // fallback (hopefully rare) using simple rand
-        ByteList result;
-        for (size_t i = 0; i < N; ++i) {
-            result.push_back(static_cast<Byte>(rand() % 256));
-        }
-        return result;
+        PseudoRandomGenerator::FillBytes(buffer, N);
+        return ByteList(buffer, buffer + N);
     }
 }
 static ByteList generate32RandomBytes() {
