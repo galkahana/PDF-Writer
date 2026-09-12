@@ -39,10 +39,10 @@ void InputCharStringDecodeStream::Assign(IByteReader* inReadFrom,unsigned long i
 }
 
 
-static const int CONSTANT_1 = 52845;
-static const int CONSTANT_2 = 22719;
-static const int RANDOMIZER_INIT = 4330;
-static const int RANDOMIZER_MODULU_VAL = 65536;
+static const unsigned int CONSTANT_1 = 52845;
+static const unsigned int CONSTANT_2 = 22719;
+static const unsigned int RANDOMIZER_INIT = 4330;
+static const unsigned int RANDOMIZER_MODULU_VAL = 65536;
 
 void InputCharStringDecodeStream::InitializeCharStringDecode(unsigned long inLenIV)
 {
