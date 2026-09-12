@@ -2322,6 +2322,11 @@ EStatusCodeAndIByteReader PDFParser::CreateFilterForStream(IByteReader* inStream
 		}
 	}while(false);
 
+	// null should not be returned in case of success, which means one of the branches actually failed but didn't note so. 
+	// iron this out by verifying that's not null
+	if(NULL == result && eSuccess == status)
+		status = eFailure;
+
 	return EStatusCodeAndIByteReader(status,result);
 
 }
