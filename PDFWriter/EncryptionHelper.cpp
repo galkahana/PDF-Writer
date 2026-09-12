@@ -94,6 +94,7 @@ void EncryptionHelper::Setup(
 
 	mIsDocumentEncrypted = false;
 	mSupportsEncryption = false;
+	mEncryptionPauseLevel = 0;
 
 	// Determine mV (encryption algorithm version),  mRevision (standard security handler revision), and mLength (encryption key length) based on PDF level, using the strongest encryption that the PDF version allows
 	if (inPDFLevel >= 1.4) {
@@ -186,6 +187,7 @@ void EncryptionHelper::SetupNoEncryption()
 {
 	mIsDocumentEncrypted = false;
 	mSupportsEncryption = true;
+	mEncryptionPauseLevel = 0;
 }
 
 void EncryptionHelper::Setup(const DecryptionHelper& inDecryptionSource) 
@@ -198,6 +200,7 @@ void EncryptionHelper::Setup(const DecryptionHelper& inDecryptionSource)
 
 	mIsDocumentEncrypted = true;
 	mSupportsEncryption = true;
+	mEncryptionPauseLevel = 0;
 
 	mLength = inDecryptionSource.GetLength();
 	mV = inDecryptionSource.GetV();
