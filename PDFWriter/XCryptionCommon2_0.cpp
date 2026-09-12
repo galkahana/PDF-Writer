@@ -21,7 +21,7 @@
 #ifndef PDFHUMMUS_NO_OPENSSL
 #include "XCryptionCommon2_0.h"
 #include "AESConstants.h"
-#include "BestEffortRandomGenerator.h"
+#include "Trace.h"
 #include <openssl/sha.h>
 #include <openssl/rand.h>
 #ifdef USE_OPENSSL_AES
@@ -429,15 +429,11 @@ template <size_t N>
 static ByteList generateRandomBytes() {
     unsigned char buffer[N];
 
-    // trying to use openssl ran bytes
-    if (RAND_bytes(buffer, N) == 1) {
-        // awesome. return as a result
+    if (RAND_bytes(buffer, N) == 1)
         return ByteList(buffer, buffer + N);
-    } else {
-        // fallback (hopefully rare) using simple rand
-        BestEffortRandomGenerator::FillBytes(buffer, N);
-        return ByteList(buffer, buffer + N);
-    }
+
+    TRACE_LOG("XCryptionCommon2_0::generateRandomBytes, RAND_bytes failed. aborting PDF 2.0 encryption key material generation.");
+    return ByteList();
 }
 static ByteList generate32RandomBytes() {
     return generateRandomBytes<32>();
@@ -557,6 +553,8 @@ ByteListPair XCryptionCommon2_0::CreateUandUEValues(
 
     // generate U
     ByteList randomBytes = generate16RandomBytes();
+    if (randomBytes.empty())
+        return ByteListPair(ByteList(), ByteList());
     ByteList userValidationSalt = substr(randomBytes, 0, 8);
     ByteList userKeySalt = substr(randomBytes, 8, 8);
     ByteList u = createHash(concat(trimmedPassword, userValidationSalt), trimmedPassword, scEmptyByteList);
@@ -582,6 +580,8 @@ ByteListPair XCryptionCommon2_0::CreateOandOEValues(
 
     // generate O
     ByteList randomBytes = generate16RandomBytes();
+    if (randomBytes.empty())
+        return ByteListPair(ByteList(), ByteList());
     ByteList ownerValidationSalt = substr(randomBytes, 0, 8);
     ByteList ownerKeySalt = substr(randomBytes, 8, 8);
     ByteList o = createHash(concat(concat(trimmedPassword, ownerValidationSalt), inU), trimmedPassword, inU);
@@ -629,6 +629,8 @@ ByteList XCryptionCommon2_0::CreatePerms(
     // 12-15 are intended to be "random data, which will be ignored".
     // i was thinking of using "hmms" but then figured let's leave less traces, so random bytes it is.
     ByteList randomBytes = generate4RandomBytes();
+    if (randomBytes.empty())
+        return ByteList();
     append(perms, randomBytes);
 
 

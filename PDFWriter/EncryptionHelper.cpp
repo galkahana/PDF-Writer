@@ -144,14 +144,30 @@ void EncryptionHelper::Setup(
 #ifndef PDFHUMMUS_NO_OPENSSL
 		XCryptionCommon2_0 xcryptionCommon2_0;
 		fileEncryptionKey = xcryptionCommon2_0.GenerateFileEncryptionKey();
+		if (fileEncryptionKey.empty()) {
+			TRACE_LOG("EncryptionHelper::Setup, failed to generate a secure file encryption key. aborting PDF 2.0 encryption setup.");
+			return;
+		}
 		ByteListPair uAndUE = xcryptionCommon2_0.CreateUandUEValues(userPassword, fileEncryptionKey);
 		mU = uAndUE.first;
 		mUE = uAndUE.second;
+		if (mU.empty() || mUE.empty()) {
+			TRACE_LOG("EncryptionHelper::Setup, failed to generate secure U/UE values. aborting PDF 2.0 encryption setup.");
+			return;
+		}
 		ByteListPair oAndOE = xcryptionCommon2_0.CreateOandOEValues(ownerPassword, fileEncryptionKey, mU);
 		mO = oAndOE.first;
 		mOE = oAndOE.second;
+		if (mO.empty() || mOE.empty()) {
+			TRACE_LOG("EncryptionHelper::Setup, failed to generate secure O/OE values. aborting PDF 2.0 encryption setup.");
+			return;
+		}
 		mPerms = xcryptionCommon2_0.CreatePerms(fileEncryptionKey, mP, mEncryptMetaData);
-#endif		
+		if (mPerms.empty()) {
+			TRACE_LOG("EncryptionHelper::Setup, failed to generate a secure Perms value. aborting PDF 2.0 encryption setup.");
+			return;
+		}
+#endif
 	} else {
 		// Pre PDF 2.0 algos
 		XCryptionCommon xcryptionCommon;
