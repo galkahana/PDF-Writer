@@ -29,6 +29,7 @@
 #include "InputStringBufferStream.h"
 #include "OpenTypePrimitiveReader.h"
 #include "MyStringBuf.h"
+#include "InputByteArrayStream.h"
 
 #include <vector>
 #include <set>
@@ -60,6 +61,8 @@ public:
 private:
 	OpenTypeFileInput mTrueTypeInput;
 	InputFile mTrueTypeFile;
+	InputByteArrayStream mMemoryFontStream;
+	IByteReaderWithPosition* mFontStream;
 	OutputStringBufferStream mFontFileStream;
 	TrueTypePrimitiveWriter mPrimitivesWriter;
 	InputStringBufferStream mFontFileReaderStream; // now this might be confusing - i'm using a reader

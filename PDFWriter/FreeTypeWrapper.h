@@ -21,8 +21,10 @@
 #pragma once
 
 #include "EStatusCode.h"
+#include "IOBasicTypes.h"
 
 #include <string>
+#include <vector>
 #include <map>
 #include <list>
 
@@ -41,6 +43,7 @@ public:
 	~FreeTypeWrapper(void);
 
 	FT_Face NewFace(const std::string& inFilePath,FT_Long inFontIndex);
+	FT_Face NewFace(const std::vector<IOBasicTypes::Byte>& inFontBuffer,FT_Long inFontIndex);
 	FT_Face NewFace(const std::string& inFilePath,const std::string& inSecondaryFilePath,FT_Long inFontIndex);
 	FT_Error DoneFace(FT_Face ioFace);
 
@@ -51,12 +54,14 @@ private:
 
 	FT_Library mFreeType;
 	FTFaceToFTStreamListMap mOpenStreams;
+	std::map<FT_Face,FT_Byte*> mOpenMemoryFaces;
 
 	FT_Stream CreateFTStreamForPath(const std::string& inFilePath);
 	PDFHummus::EStatusCode FillOpenFaceArgumentsForUTF8String(const std::string& inFilePath, FT_Open_Args& ioArgs);
 	void CloseOpenFaceArgumentsStream(FT_Open_Args& ioArgs);
 	void RegisterStreamForFace(FT_Face inFace,FT_Stream inStream);
 	void CleanStreamsForFace(FT_Face inFace);
+    void CleanMemoryFace(FT_Face inFace);
 
 
 };

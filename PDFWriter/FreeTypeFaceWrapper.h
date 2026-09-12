@@ -22,6 +22,7 @@
 
 #include "EFontStretch.h"
 #include "EStatusCode.h"
+#include "IOBasicTypes.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -102,6 +103,11 @@ public:
 
 	const std::string& GetFontFilePath();
     long GetFontIndex();
+
+	// memory streams have read==NULL; file streams always have a read function
+	bool IsMemoryFont() const { return mFace && mFace->stream && mFace->stream->read == NULL; }
+	IOBasicTypes::Byte* GetFontBuffer() const { return (mFace && mFace->stream) ? (IOBasicTypes::Byte*)mFace->stream->base : NULL; }
+	IOBasicTypes::LongFilePositionType GetFontBufferLength() const { return (mFace && mFace->stream) ? (IOBasicTypes::LongFilePositionType)mFace->stream->size : 0; }
 
 
 	// use this method to align measurements from (remember the dreaded point per EM!!!).

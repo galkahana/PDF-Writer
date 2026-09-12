@@ -25,6 +25,8 @@
 #include "PageContentContext.h"
 
 #include <iostream>
+#include <fstream>
+#include <iterator>
 
 #include "testing/TestIO.h"
 
@@ -147,6 +149,90 @@ static EStatusCode RunCNRSTest(char* argv[])
 		for (int i = 2900; i < 2950; i++)
 			glyphs4.push_back(GlyphUnicodeMapping(i, i));
 		contentContext->Tj(glyphs4);
+
+		contentContext->ET();
+
+		status = pdfWriter.EndPageContentContext(contentContext);
+		if (status != PDFHummus::eSuccess) {
+			cout << "failed to end page content context\n";
+			break;
+		}
+
+		status = pdfWriter.WritePageAndRelease(page);
+		if (status != PDFHummus::eSuccess) {
+			cout << "failed to write page\n";
+			break;
+		}
+
+		status = pdfWriter.EndPDF();
+		if (status != PDFHummus::eSuccess) {
+			cout << "failed in end PDF\n";
+			break;
+		}
+	} while (false);
+	return status;
+}
+
+static EStatusCode RunCNRSMemoryFontTest(char* argv[])
+{
+	PDFWriter pdfWriter;
+	EStatusCode status;
+
+	do {
+		std::string fontPath = BuildRelativeInputPath(argv, "fonts/texgyrepagella-math.otf");
+		std::ifstream fontFile(fontPath, std::ios::binary);
+		if (!fontFile) {
+			status = PDFHummus::eFailure;
+			cout << "failed to open font file for memory test\n";
+			break;
+		}
+		std::vector<IOBasicTypes::Byte> fontBuffer(
+			(std::istreambuf_iterator<char>(fontFile)),
+			std::istreambuf_iterator<char>());
+
+		status = pdfWriter.StartPDF(BuildRelativeOutputPath(argv, "TextUsageBugsCNRSMemoryFont.pdf"), ePDFVersion14, LogConfiguration::DefaultLogConfiguration(), PDFCreationSettings(true, true));
+		if (status != PDFHummus::eSuccess) {
+			cout << "failed to start PDF\n";
+			break;
+		}
+		PDFPage* page = new PDFPage();
+		page->SetMediaBox(PDFRectangle(0, 0, 595, 842));
+
+		PageContentContext* contentContext = pdfWriter.StartPageContentContext(page);
+		if (NULL == contentContext) {
+			status = PDFHummus::eFailure;
+			cout << "failed to create content context for page\n";
+			break;
+		}
+
+		PDFUsedFont* font = pdfWriter.GetFontForFile(fontBuffer);
+		if (!font) {
+			status = PDFHummus::eFailure;
+			cout << "failed to create font object from memory buffer\n";
+			break;
+		}
+
+		contentContext->BT();
+		contentContext->k(0, 0, 0, 1);
+		contentContext->Tf(font, 10);
+
+		contentContext->Tm(1, 0, 0, 1, 78, 660);
+		GlyphUnicodeMappingList glyphs1;
+		for (int i = 65; i < 150; i++)
+			glyphs1.push_back(GlyphUnicodeMapping(i, i));
+		contentContext->Tj(glyphs1);
+
+		contentContext->Tm(1, 0, 0, 1, 78, 640);
+		GlyphUnicodeMappingList glyphs2;
+		for (int i = 150; i < 210; i++)
+			glyphs2.push_back(GlyphUnicodeMapping(i, i));
+		contentContext->Tj(glyphs2);
+
+		contentContext->Tm(1, 0, 0, 1, 78, 620);
+		GlyphUnicodeMappingList glyphs3;
+		for (int i = 2900; i < 2950; i++)
+			glyphs3.push_back(GlyphUnicodeMapping(i, i));
+		contentContext->Tj(glyphs3);
 
 		contentContext->ET();
 

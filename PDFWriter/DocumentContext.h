@@ -298,6 +298,7 @@ namespace PDFHummus
 
 		// Font [Text] (font index is for multi-font files. for single file fonts, pass 0)
 		PDFUsedFont* GetFontForFile(const std::string& inFontFilePath,long inFontIndex);
+		PDFUsedFont* GetFontForFile(const std::vector<IOBasicTypes::Byte>& inFontBuffer,long inFontIndex);
 		// second overload is for type 1, when an additional metrics file is available
 		PDFUsedFont* GetFontForFile(const std::string& inFontFilePath,const std::string& inAdditionalMeticsFilePath,long inFontIndex);
 

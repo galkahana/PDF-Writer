@@ -26,6 +26,7 @@
 #include "CFFPrimitiveWriter.h"
 #include "OutputStringBufferStream.h"
 #include "MyStringBuf.h"
+#include "InputByteArrayStream.h"
 
 
 #include <vector>
@@ -63,6 +64,7 @@ public:
 private:
 	Type1Input mType1Input;
 	InputFile mType1File;
+	InputByteArrayStream mMemoryFontStream;
 	CFFPrimitiveWriter mPrimitivesWriter;
 	OutputStringBufferStream mFontFileStream;
 	StringVector mStrings;
