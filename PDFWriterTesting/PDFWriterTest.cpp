@@ -41,6 +41,27 @@ static int AlwaysFailingRandBytes(unsigned char* outBuffer, int inSize)
     return 0;
 }
 
+static bool StartPDF_PDF20EncryptionWithWorkingCSPRNG_Succeeds(char* argv[])
+{
+    // Arrange
+    string outputPath = BuildRelativeOutputPath(argv, "StartPDFCSPRNGSuccess.pdf");
+    PDFWriter pdfWriter;
+    PDFCreationSettings creationSettings(true, true, EncryptionOptions("user", 0, "owner"), false);
+
+    // Act
+    EStatusCode status = pdfWriter.StartPDF(outputPath, ePDFVersion20, LogConfiguration::DefaultLogConfiguration(), creationSettings);
+    if (status == eSuccess)
+        status = pdfWriter.EndPDF();
+
+    // Assert
+    if (status != eSuccess)
+    {
+        cout << "PDFWriterTest [StartPDF_PDF20EncryptionWithWorkingCSPRNG_Succeeds]: StartPDF/EndPDF failed with a working CSPRNG" << endl;
+        return false;
+    }
+    return true;
+}
+
 static bool StartPDF_PDF20EncryptionWithFailingCSPRNG_ReturnsFailure(char* argv[])
 {
     // Arrange
@@ -68,6 +89,7 @@ int PDFWriterTest(int argc, char* argv[])
 {
     (void)argc;
 #ifndef PDFHUMMUS_NO_OPENSSL
+    if (!StartPDF_PDF20EncryptionWithWorkingCSPRNG_Succeeds(argv)) return 1;
     if (!StartPDF_PDF20EncryptionWithFailingCSPRNG_ReturnsFailure(argv)) return 1;
 #else
     (void)argv;
