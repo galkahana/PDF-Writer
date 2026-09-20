@@ -53,6 +53,8 @@ static bool FillWithPlatformCSPRNG(IOBasicTypes::Byte* outBuffer, size_t inSize)
 
 #elif defined(__unix__) || defined(__unix) || defined(unix)
 
+static const int scMaxRetries = 10;
+
 static bool FillWithPlatformCSPRNG(IOBasicTypes::Byte* outBuffer, size_t inSize)
 {
 	int fd = open("/dev/urandom", O_RDONLY | O_CLOEXEC);
@@ -60,12 +62,21 @@ static bool FillWithPlatformCSPRNG(IOBasicTypes::Byte* outBuffer, size_t inSize)
 		return false;
 
 	size_t totalRead = 0;
+	int retries = 0;
 	bool success = true;
 	while (totalRead < inSize)
 	{
 		ssize_t readSize = read(fd, outBuffer + totalRead, inSize - totalRead);
 		if (readSize < 0 && errno == EINTR)
+		{
+			if (++retries > scMaxRetries)
+			{
+				TRACE_LOG("RandomGenerator::FillWithPlatformCSPRNG, exceeded max retries after repeated EINTR on /dev/urandom read");
+				success = false;
+				break;
+			}
 			continue; // interrupted by a signal, not an actual failure - retry
+		}
 
 		if (readSize <= 0)
 		{
