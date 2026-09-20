@@ -1,5 +1,5 @@
 /*
-   Source File : BestEffortRandomGenerator.cpp
+   Source File : RandomGenerator.cpp
 
 
    Copyright 2026 Gal Kahana PDFWriter
@@ -18,34 +18,21 @@
 
 
 */
-#include "BestEffortRandomGenerator.h"
-
-#include <stdlib.h>
-#include <time.h>
+#include "RandomGenerator.h"
+#include "Trace.h"
 
 #if defined(_WIN32) && !defined(PDFHUMMUS_NO_BCRYPT)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <bcrypt.h>
 #elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
-// arc4random_buf comes from stdlib.h, already included above
+#include <stdlib.h> // arc4random_buf
 #elif defined(__unix__) || defined(__unix) || defined(unix)
 #include <fcntl.h>
 #include <unistd.h>
 #endif
 
-static void FillWithSeededRand(IOBasicTypes::Byte* outBuffer, size_t inSize)
-{
-	static bool sSeeded = false;
-	if (!sSeeded)
-	{
-		srand((unsigned int)time(NULL));
-		sSeeded = true;
-	}
-
-	for (size_t i = 0; i < inSize; ++i)
-		outBuffer[i] = (IOBasicTypes::Byte)(rand() % 256);
-}
+using namespace PDFHummus;
 
 #if defined(_WIN32) && !defined(PDFHUMMUS_NO_BCRYPT)
 
@@ -99,12 +86,13 @@ static bool FillWithPlatformCSPRNG(IOBasicTypes::Byte* outBuffer, size_t inSize)
 
 #endif
 
-void BestEffortRandomGenerator::FillBytes(IOBasicTypes::Byte* outBuffer, size_t inSize)
+EStatusCode RandomGenerator::FillBytes(IOBasicTypes::Byte* outBuffer, size_t inSize)
 {
 	if (FillWithPlatformCSPRNG(outBuffer, inSize))
-		return;
+		return eSuccess;
 
-	// no platform CSPRNG detected/available at runtime - degrade to a
-	// seeded rand(). Accepted tradeoff, see BestEffortRandomGenerator.h.
-	FillWithSeededRand(outBuffer, inSize);
+	// Failing if CSPRNG is NOT available. If this is a problem please report an issue, and it'll be considered
+	// to add a softer pseudo random path option.
+	TRACE_LOG("RandomGenerator::FillBytes, no platform CSPRNG available, cannot create true random bytes, failing");
+	return eFailure;
 }

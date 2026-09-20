@@ -18,7 +18,7 @@ limitations under the License.
 */
 
 #include "OutputAESEncodeStream.h"
-#include "BestEffortRandomGenerator.h"
+#include "RandomGenerator.h"
 #include "aescpp.h"
 
 #include <string.h>
@@ -83,7 +83,9 @@ EStatusCode OutputAESEncodeStream::EnsureIVWritten()
 	if (mWroteIV)
 		return eSuccess;
 
-	BestEffortRandomGenerator::FillBytes(mIV, AES_BLOCK_SIZE);
+	if (RandomGenerator::FillBytes(mIV, AES_BLOCK_SIZE) != eSuccess)
+		return eFailure;
+
 	// write IV to output stream
 	if (mTargetStream->Write(mIV, AES_BLOCK_SIZE) != AES_BLOCK_SIZE)
 		return eFailure;

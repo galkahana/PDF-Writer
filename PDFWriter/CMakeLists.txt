@@ -85,7 +85,7 @@ LayeredGlyphsDrawingContext.cpp
 LinearGradientShadingPatternWritingTask.cpp
 Log.cpp
 MD5Generator.cpp
-BestEffortRandomGenerator.cpp
+RandomGenerator.cpp
 RC4.cpp
 ObjectsContext.cpp
 OpenTypeFileInput.cpp
@@ -289,7 +289,7 @@ LinearGradientShadingPatternWritingTask.h
 Log.h
 MapIterator.h
 MD5Generator.h
-BestEffortRandomGenerator.h
+RandomGenerator.h
 RC4.h
 MyStringBuf.h
 ObjectsBasicTypes.h
@@ -472,7 +472,7 @@ else(PDFHUMMUS_NO_OPENSSL)
     endif()
 endif(PDFHUMMUS_NO_OPENSSL)
 
-# bcrypt (Windows CSPRNG fallback for BestEffortRandomGenerator)
+# bcrypt (Windows CSPRNG fallback for RandomGenerator)
 if(WIN32 AND NOT PDFHUMMUS_NO_BCRYPT)
     target_link_libraries(PDFWriter bcrypt)
 else()
@@ -616,8 +616,8 @@ WinAnsiEncoding.h
 source_group(Infrastructure\\Encryption FILES
 MD5Generator.cpp
 MD5Generator.h
-BestEffortRandomGenerator.cpp
-BestEffortRandomGenerator.h
+RandomGenerator.cpp
+RandomGenerator.h
 RC4.cpp
 RC4.h
 )
