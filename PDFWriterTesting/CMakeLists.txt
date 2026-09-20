@@ -73,6 +73,7 @@ create_test_sourcelist (Tests
   PDFParserFuzzSanity.cpp
   PDFParserTest.cpp
   PDFWithPassword.cpp
+  PDFWriterTest.cpp
   PFBStreamTest.cpp
   PNGImageTest.cpp
   RecryptPDF.cpp

@@ -58,4 +58,6 @@ private:
 	unsigned char *mInIndex;
 
 	EVP_CIPHER_CTX *mEncryptCtx;
+
+	PDFHummus::EStatusCode EnsureIVWritten();
 };

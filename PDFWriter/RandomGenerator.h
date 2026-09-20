@@ -1,5 +1,5 @@
 /*
-   Source File : BestEffortRandomGenerator.h
+   Source File : RandomGenerator.h
 
 
    Copyright 2026 Gal Kahana PDFWriter
@@ -20,15 +20,20 @@
 */
 #pragma once
 
+#include "EStatusCode.h"
 #include "IOBasicTypes.h"
 #include <stddef.h>
 
-// Best-effort random bytes for call sites that cannot rely on OpenSSL.
-// Prefers the platform CSPRNG (BCryptGenRandom on Windows when available, arc4random_buf on
-// Apple/BSD, /dev/urandom elsewhere on POSIX) and falls back to a
-// seeded rand() only when none of those are available.
-class BestEffortRandomGenerator
+// Random bytes for cryptographic use (AES IVs, PDF 2.0 key material). Uses RAND_bytes when
+// OpenSSL is available, otherwise the platform CSPRNG (BCryptGenRandom on Windows,
+// arc4random_buf on Apple/BSD, /dev/urandom elsewhere on POSIX).
+class RandomGenerator
 {
 public:
-	static void FillBytes(IOBasicTypes::Byte* outBuffer, size_t inSize);
+	static PDFHummus::EStatusCode FillBytes(IOBasicTypes::Byte* outBuffer, size_t inSize);
+
+#ifndef PDFHUMMUS_NO_OPENSSL
+	// test-only hook to force RAND_bytes failures. pass NULL to restore the real RAND_bytes.
+	static void SetRandBytesFunc(int (*inRandBytesFunc)(unsigned char*, int));
+#endif
 };

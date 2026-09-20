@@ -18,10 +18,10 @@ limitations under the License.
 */
 
 #include "OutputAESEncodeStreamSSL.h"
+#include "RandomGenerator.h"
 
 #include <string.h>
 #include <openssl/evp.h>
-#include <openssl/rand.h>
 
 using namespace IOBasicTypes;
 using namespace PDFHummus;
@@ -82,38 +82,45 @@ LongFilePositionType OutputAESEncodeStreamSSL::GetCurrentPosition()
 		return 0;
 }
 
+EStatusCode OutputAESEncodeStreamSSL::EnsureIVWritten()
+{
+	if (mWroteIV)
+		return eSuccess;
+
+	if (RandomGenerator::FillBytes(mIV, AES_BLOCK_SIZE_BYTES) != eSuccess)
+		return eFailure;
+
+	// Initialize OpenSSL encryption context with appropriate cipher based on key length
+	const EVP_CIPHER* cipher;
+	if (mEncryptionKeyLength == 16) {
+		cipher = EVP_aes_128_cbc();
+	} else if (mEncryptionKeyLength == 32) {
+		cipher = EVP_aes_256_cbc();
+	} else {
+		return eFailure; // Unsupported key length
+	}
+
+	if (EVP_EncryptInit_ex(mEncryptCtx, cipher, NULL, mEncryptionKey, mIV) != 1)
+		return eFailure;
+
+	// Disable padding as we handle it manually like the original
+	EVP_CIPHER_CTX_set_padding(mEncryptCtx, 0);
+
+	// only commit the IV to output once key validation and cipher init succeeded
+	if (mTargetStream->Write(mIV, AES_BLOCK_SIZE_BYTES) != AES_BLOCK_SIZE_BYTES)
+		return eFailure;
+
+	mWroteIV = true;
+	return eSuccess;
+}
+
 LongBufferSizeType OutputAESEncodeStreamSSL::Write(const IOBasicTypes::Byte* inBuffer, IOBasicTypes::LongBufferSizeType inSize)
 {
 	if (!mTargetStream)
 		return 0;
 
-	// write IV if didn't write yet
-	if (!mWroteIV) {
-		if (RAND_bytes(mIV, AES_BLOCK_SIZE_BYTES) != 1)
-			return 0;
-
-		// Initialize OpenSSL encryption context with appropriate cipher based on key length
-		const EVP_CIPHER* cipher;
-		if (mEncryptionKeyLength == 16) {
-			cipher = EVP_aes_128_cbc();
-		} else if (mEncryptionKeyLength == 32) {
-			cipher = EVP_aes_256_cbc();
-		} else {
-			return 0; // Unsupported key length
-		}
-
-		if (EVP_EncryptInit_ex(mEncryptCtx, cipher, NULL, mEncryptionKey, mIV) != 1)
-			return 0;
-
-		// Disable padding as we handle it manually like the original
-		EVP_CIPHER_CTX_set_padding(mEncryptCtx, 0);
-
-		// only commit the IV to output once key validation and cipher init succeeded
-		if (mTargetStream->Write(mIV, AES_BLOCK_SIZE_BYTES) != AES_BLOCK_SIZE_BYTES)
-			return 0;
-
-		mWroteIV = true;
-	}
+	if (EnsureIVWritten() != eSuccess)
+		return 0;
 
 	IOBasicTypes::LongBufferSizeType left = inSize;
 
@@ -157,6 +164,11 @@ EStatusCode OutputAESEncodeStreamSSL::Flush() {
 
 		if (!mTargetStream)
 			break;
+
+		if (EnsureIVWritten() != eSuccess) {
+			status = eFailure;
+			break;
+		}
 
 		// if there's a full buffer waiting, write it now.
 		if (mInIndex - mIn == AES_BLOCK_SIZE_BYTES) {

@@ -12,6 +12,7 @@ option(PDFHUMMUS_NO_DCT  "Whether to drop support for DCT streams parsing (will 
 option(PDFHUMMUS_NO_TIFF "Whether to drop TIFF Images support (will not use LibTiff)" )
 option(PDFHUMMUS_NO_PNG "Whether to drop PNG Images support (will not use LibPng)" )
 option(PDFHUMMUS_NO_OPENSSL "Whether to drop OpenSSL Usage, and therefore PDF2.0 encryption support (will not allow encryption or decryption of PDF2.0 files)" )
+option(PDFHUMMUS_NO_BCRYPT "Whether to drop use of Windows's BCryptGenRandom API as the CSPRNG fallback for pseudo-random generation when OpenSSL is not available (Windows only; falls back to seeded rand())" )
 
 # Optional sanitizer build (requires clang). Accepts comma-separated -fsanitize= values:
 # address, undefined, address,undefined, thread, memory. Empty (default) = no sanitizer.
@@ -59,15 +60,18 @@ else()
     message(STATUS "Using LibAesgm for AES encryption")
 endif()
 
-# bcrypt detection for BestEffortRandomGenerator's Windows CSPRNG path
-if(WIN32)
-    find_library(BCRYPT_LIBRARY NAMES bcrypt)
-    if(BCRYPT_LIBRARY)
-        set(PDFHUMMUS_HAVE_BCRYPT TRUE)
-        message(STATUS "Using BCryptGenRandom for Windows pseudo-random fallback")
-    else()
-        message(WARNING "bcrypt not found, will fall back to rand() on Windows")
-    endif()
+# bcrypt is a standard Windows SDK library. It used here as fallback to create random bytes
+# for AES encryption when OpenSSL is not available.
+if(WIN32 AND NOT PDFHUMMUS_NO_BCRYPT)
+    message(STATUS "Using BCryptGenRandom for Windows pseudo-random fallback")
+endif()
+
+# getentropy() (glibc >= 2.25, BSDs) reads random bytes directly from the kernel with no
+# file descriptor involved - preferred over /dev/urandom on POSIX when declared, since it
+# needs no open/read/close, can't leak a descriptor, and works in containers without /dev.
+if(UNIX)
+    include(CheckSymbolExists)
+    check_symbol_exists(getentropy "unistd.h" PDFHUMMUS_HAVE_GETENTROPY)
 endif()
 
 if(NOT USE_BUNDLED)

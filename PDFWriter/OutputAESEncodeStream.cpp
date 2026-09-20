@@ -18,7 +18,7 @@ limitations under the License.
 */
 
 #include "OutputAESEncodeStream.h"
-#include "BestEffortRandomGenerator.h"
+#include "RandomGenerator.h"
 #include "aescpp.h"
 
 #include <string.h>
@@ -78,20 +78,28 @@ LongFilePositionType OutputAESEncodeStream::GetCurrentPosition()
 		return 0;
 }
 
-LongBufferSizeType OutputAESEncodeStream::Write(const IOBasicTypes::Byte* inBuffer, IOBasicTypes::LongBufferSizeType inSize) 
+EStatusCode OutputAESEncodeStream::EnsureIVWritten()
+{
+	if (mWroteIV)
+		return eSuccess;
+
+	if (RandomGenerator::FillBytes(mIV, AES_BLOCK_SIZE) != eSuccess)
+		return eFailure;
+
+	// write IV to output stream
+	if (mTargetStream->Write(mIV, AES_BLOCK_SIZE) != AES_BLOCK_SIZE)
+		return eFailure;
+	mWroteIV = true;
+	return eSuccess;
+}
+
+LongBufferSizeType OutputAESEncodeStream::Write(const IOBasicTypes::Byte* inBuffer, IOBasicTypes::LongBufferSizeType inSize)
 {
 	if (!mTargetStream)
 		return 0;
 
-	// write IV if didn't write yet
-	if (!mWroteIV) {
-		BestEffortRandomGenerator::FillBytes(mIV, AES_BLOCK_SIZE);
-		// write IV to output stream
-		if (mTargetStream->Write(mIV, AES_BLOCK_SIZE) != AES_BLOCK_SIZE)
-			return 0;
-		mWroteIV = true;
-	}
-
+	if (EnsureIVWritten() != eSuccess)
+		return 0;
 
 	// input and existing buffer sizes smaller than block size, so just copy and return
 
@@ -132,6 +140,11 @@ EStatusCode OutputAESEncodeStream::Flush() {
 
 		if (!mTargetStream)
 			break;
+
+		if (EnsureIVWritten() != eSuccess) {
+			status = eFailure;
+			break;
+		}
 
 		// if there's a full buffer waiting, write it now.
 		if (mInIndex - mIn == AES_BLOCK_SIZE) {
