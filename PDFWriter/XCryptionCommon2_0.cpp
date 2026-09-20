@@ -425,11 +425,17 @@ static bool authenticateOwnerPassword(
 }
 
 
+static int (*sRandBytesFunc)(unsigned char*, int) = RAND_bytes;
+
+void XCryptionCommon2_0::SetRandBytesFunc(int (*inRandBytesFunc)(unsigned char*, int)) {
+    sRandBytesFunc = inRandBytesFunc ? inRandBytesFunc : RAND_bytes;
+}
+
 template <size_t N>
 static ByteList generateRandomBytes() {
     unsigned char buffer[N];
 
-    if (RAND_bytes(buffer, N) == 1)
+    if (sRandBytesFunc(buffer, N) == 1)
         return ByteList(buffer, buffer + N);
 
     TRACE_LOG("XCryptionCommon2_0::generateRandomBytes, RAND_bytes failed. aborting PDF 2.0 encryption key material generation.");
