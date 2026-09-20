@@ -472,9 +472,11 @@ else(PDFHUMMUS_NO_OPENSSL)
     endif()
 endif(PDFHUMMUS_NO_OPENSSL)
 
-if(PDFHUMMUS_HAVE_BCRYPT)
-    target_link_libraries(PDFWriter ${BCRYPT_LIBRARY})
-    target_compile_definitions(PDFWriter PRIVATE PDFHUMMUS_HAVE_BCRYPT=1)
+# bcrypt (Windows CSPRNG fallback for BestEffortRandomGenerator)
+if(WIN32 AND NOT PDFHUMMUS_NO_BCRYPT)
+    target_link_libraries(PDFWriter bcrypt)
+else()
+    target_compile_definitions(PDFWriter PRIVATE PDFHUMMUS_NO_BCRYPT=1)
 endif()
 
 target_include_directories(PDFWriter

@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#if defined(_WIN32) && defined(PDFHUMMUS_HAVE_BCRYPT)
+#if defined(_WIN32) && !defined(PDFHUMMUS_NO_BCRYPT)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <bcrypt.h>
@@ -47,7 +47,7 @@ static void FillWithSeededRand(IOBasicTypes::Byte* outBuffer, size_t inSize)
 		outBuffer[i] = (IOBasicTypes::Byte)(rand() % 256);
 }
 
-#if defined(_WIN32) && defined(PDFHUMMUS_HAVE_BCRYPT)
+#if defined(_WIN32) && !defined(PDFHUMMUS_NO_BCRYPT)
 
 static bool FillWithPlatformCSPRNG(IOBasicTypes::Byte* outBuffer, size_t inSize)
 {
