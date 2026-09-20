@@ -66,6 +66,23 @@ static string EncryptToBuffer(const string& inPlaintext, const ByteList& inKey)
     return outputSink.ToString();
 }
 
+static string DecryptBuffer(const string& inEncrypted, const ByteList& inKey)
+{
+    IByteReader* source = new InputByteArrayStream((Byte*)&inEncrypted[0], (LongFilePositionType)inEncrypted.size());
+    AesDecodeStream decodeStream(source, inKey);
+
+    string recovered;
+    Byte buffer[256];
+    while (decodeStream.NotEnded())
+    {
+        LongBufferSizeType readSize = decodeStream.Read(buffer, sizeof(buffer));
+        if (readSize == 0)
+            break;
+        recovered.append((const char*)buffer, readSize);
+    }
+    return recovered;
+}
+
 static bool Write_MultipleEncryptionsSameKey_ProducesDistinctIVs()
 {
     // Arrange
@@ -98,23 +115,37 @@ static bool Write_EncryptThenDecrypt_RecoversOriginalPlaintext()
 
     // Act
     string encrypted = EncryptToBuffer(plaintext, key);
-    IByteReader* source = new InputByteArrayStream((Byte*)&encrypted[0], (LongFilePositionType)encrypted.size());
-    AesDecodeStream decodeStream(source, key);
-
-    string recovered;
-    Byte buffer[256];
-    while (decodeStream.NotEnded())
-    {
-        LongBufferSizeType readSize = decodeStream.Read(buffer, sizeof(buffer));
-        if (readSize == 0)
-            break;
-        recovered.append((const char*)buffer, readSize);
-    }
+    string recovered = DecryptBuffer(encrypted, key);
 
     // Assert
     if (recovered != plaintext)
     {
         cout << "OutputAESEncodeStreamTest [Write_EncryptThenDecrypt_RecoversOriginalPlaintext]: recovered plaintext does not match original" << endl;
+        return false;
+    }
+    return true;
+}
+
+static bool Flush_NoWriteCalls_EncryptsAndRecoversEmptyPlaintext()
+{
+    // Arrange
+    ByteList key = MakeTestKey();
+    OutputStringBufferStream outputSink;
+    AesEncodeStream* encodeStream = new AesEncodeStream(&outputSink, key, false);
+
+    // Act
+    delete encodeStream; // no Write() calls at all - Flush() must self-initialize the IV/cipher
+    string encrypted = outputSink.ToString();
+
+    // Assert
+    if (encrypted.size() != kIVSize + 16) // IV + one padded block
+    {
+        cout << "OutputAESEncodeStreamTest [Flush_NoWriteCalls_EncryptsAndRecoversEmptyPlaintext]: expected IV plus one padded block, got " << encrypted.size() << " bytes" << endl;
+        return false;
+    }
+    if (DecryptBuffer(encrypted, key) != "")
+    {
+        cout << "OutputAESEncodeStreamTest [Flush_NoWriteCalls_EncryptsAndRecoversEmptyPlaintext]: recovered plaintext is not empty" << endl;
         return false;
     }
     return true;
@@ -126,5 +157,6 @@ int OutputAESEncodeStreamTest(int argc, char* argv[])
     (void)argv;
     if (!Write_MultipleEncryptionsSameKey_ProducesDistinctIVs()) return 1;
     if (!Write_EncryptThenDecrypt_RecoversOriginalPlaintext()) return 1;
+    if (!Flush_NoWriteCalls_EncryptsAndRecoversEmptyPlaintext()) return 1;
     return 0;
 }

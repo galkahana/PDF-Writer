@@ -55,4 +55,6 @@ private:
 	unsigned char *mInIndex;
 
 	AESencrypt mEncrypt;
+
+	PDFHummus::EStatusCode EnsureIVWritten();
 };
