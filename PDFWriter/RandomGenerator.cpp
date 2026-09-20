@@ -28,6 +28,7 @@
 #elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
 #include <stdlib.h> // arc4random_buf
 #elif defined(__unix__) || defined(__unix) || defined(unix)
+#include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
 #endif
@@ -54,7 +55,7 @@ static bool FillWithPlatformCSPRNG(IOBasicTypes::Byte* outBuffer, size_t inSize)
 
 static bool FillWithPlatformCSPRNG(IOBasicTypes::Byte* outBuffer, size_t inSize)
 {
-	int fd = open("/dev/urandom", O_RDONLY);
+	int fd = open("/dev/urandom", O_RDONLY | O_CLOEXEC);
 	if (fd < 0)
 		return false;
 
@@ -63,6 +64,9 @@ static bool FillWithPlatformCSPRNG(IOBasicTypes::Byte* outBuffer, size_t inSize)
 	while (totalRead < inSize)
 	{
 		ssize_t readSize = read(fd, outBuffer + totalRead, inSize - totalRead);
+		if (readSize < 0 && errno == EINTR)
+			continue; // interrupted by a signal, not an actual failure - retry
+
 		if (readSize <= 0)
 		{
 			success = false;
