@@ -479,6 +479,10 @@ else()
     target_compile_definitions(PDFWriter PRIVATE PDFHUMMUS_NO_BCRYPT=1)
 endif()
 
+if(PDFHUMMUS_HAVE_GETENTROPY)
+    target_compile_definitions(PDFWriter PRIVATE PDFHUMMUS_HAVE_GETENTROPY=1)
+endif()
+
 target_include_directories(PDFWriter
     INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>

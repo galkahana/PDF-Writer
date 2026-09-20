@@ -66,6 +66,14 @@ if(WIN32 AND NOT PDFHUMMUS_NO_BCRYPT)
     message(STATUS "Using BCryptGenRandom for Windows pseudo-random fallback")
 endif()
 
+# getentropy() (glibc >= 2.25, BSDs) reads random bytes directly from the kernel with no
+# file descriptor involved - preferred over /dev/urandom on POSIX when declared, since it
+# needs no open/read/close, can't leak a descriptor, and works in containers without /dev.
+if(UNIX)
+    include(CheckSymbolExists)
+    check_symbol_exists(getentropy "unistd.h" PDFHUMMUS_HAVE_GETENTROPY)
+endif()
+
 if(NOT USE_BUNDLED)
     # zlib
     if(USE_UNBUNDLED_FALLBACK_BUNDLED)

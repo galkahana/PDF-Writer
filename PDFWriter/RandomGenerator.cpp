@@ -51,9 +51,11 @@ EStatusCode RandomGenerator::FillBytes(IOBasicTypes::Byte* outBuffer, size_t inS
 #elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
 #include <stdlib.h> // arc4random_buf
 #elif defined(__unix__) || defined(__unix) || defined(unix)
+#include <unistd.h>
+#ifndef PDFHUMMUS_HAVE_GETENTROPY
 #include <errno.h>
 #include <fcntl.h>
-#include <unistd.h>
+#endif
 #endif
 
 using namespace PDFHummus;
@@ -75,6 +77,17 @@ static bool FillWithPlatformCSPRNG(IOBasicTypes::Byte* outBuffer, size_t inSize)
 }
 
 #elif defined(__unix__) || defined(__unix) || defined(unix)
+
+#ifdef PDFHUMMUS_HAVE_GETENTROPY
+
+static bool FillWithPlatformCSPRNG(IOBasicTypes::Byte* outBuffer, size_t inSize)
+{
+	// getentropy() caps at 256 bytes per call - fine here, callers only ever ask for a
+	// handful of bytes (AES IVs, PDF 2.0 key material).
+	return getentropy(outBuffer, inSize) == 0;
+}
+
+#else // PDFHUMMUS_HAVE_GETENTROPY
 
 static const int scMaxRetries = 10;
 
@@ -112,6 +125,8 @@ static bool FillWithPlatformCSPRNG(IOBasicTypes::Byte* outBuffer, size_t inSize)
 	close(fd);
 	return success;
 }
+
+#endif // PDFHUMMUS_HAVE_GETENTROPY
 
 #else
 
