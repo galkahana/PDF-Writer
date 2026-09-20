@@ -21,6 +21,29 @@
 #include "RandomGenerator.h"
 #include "Trace.h"
 
+#ifndef PDFHUMMUS_NO_OPENSSL
+
+#include <openssl/rand.h>
+
+using namespace PDFHummus;
+
+static int (*sRandBytesFunc)(unsigned char*, int) = RAND_bytes;
+
+void RandomGenerator::SetRandBytesFunc(int (*inRandBytesFunc)(unsigned char*, int)) {
+	sRandBytesFunc = inRandBytesFunc ? inRandBytesFunc : RAND_bytes;
+}
+
+EStatusCode RandomGenerator::FillBytes(IOBasicTypes::Byte* outBuffer, size_t inSize)
+{
+	if (sRandBytesFunc(outBuffer, (int)inSize) == 1)
+		return eSuccess;
+
+	TRACE_LOG("RandomGenerator::FillBytes, RAND_bytes failed");
+	return eFailure;
+}
+
+#else // PDFHUMMUS_NO_OPENSSL
+
 #if defined(_WIN32) && !defined(PDFHUMMUS_NO_BCRYPT)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -111,3 +134,5 @@ EStatusCode RandomGenerator::FillBytes(IOBasicTypes::Byte* outBuffer, size_t inS
 	TRACE_LOG("RandomGenerator::FillBytes, no platform CSPRNG available, cannot create true random bytes, failing");
 	return eFailure;
 }
+
+#endif // PDFHUMMUS_NO_OPENSSL

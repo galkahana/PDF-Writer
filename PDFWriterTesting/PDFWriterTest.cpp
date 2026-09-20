@@ -26,7 +26,7 @@
 #include <iostream>
 
 #ifndef PDFHUMMUS_NO_OPENSSL
-#include "XCryptionCommon2_0.h"
+#include "RandomGenerator.h"
 #endif
 
 using namespace std;
@@ -66,13 +66,13 @@ static bool StartPDF_PDF20EncryptionWithFailingCSPRNG_ReturnsFailure(char* argv[
 {
     // Arrange
     string outputPath = BuildRelativeOutputPath(argv, "StartPDFCSPRNGFailure.pdf");
-    XCryptionCommon2_0::SetRandBytesFunc(AlwaysFailingRandBytes);
+    RandomGenerator::SetRandBytesFunc(AlwaysFailingRandBytes);
     PDFWriter pdfWriter;
     PDFCreationSettings creationSettings(true, true, EncryptionOptions("user", 0, "owner"), false);
 
     // Act
     EStatusCode status = pdfWriter.StartPDF(outputPath, ePDFVersion20, LogConfiguration::DefaultLogConfiguration(), creationSettings);
-    XCryptionCommon2_0::SetRandBytesFunc(NULL); // restore real RAND_bytes for any other test in this process
+    RandomGenerator::SetRandBytesFunc(NULL); // restore real RAND_bytes for any other test in this process
 
     // Assert
     if (status == eSuccess)

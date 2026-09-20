@@ -75,9 +75,6 @@ public:
         long long inP,
         bool inEncryptMetadata
     );
-
-    // test-only hook to force RAND_bytes failures. pass NULL to restore the real RAND_bytes.
-    static void SetRandBytesFunc(int (*inRandBytesFunc)(unsigned char*, int));
 };
 
 #endif // PDFHUMMUS_NO_OPENSSL

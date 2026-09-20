@@ -21,9 +21,9 @@
 #ifndef PDFHUMMUS_NO_OPENSSL
 #include "XCryptionCommon2_0.h"
 #include "AESConstants.h"
+#include "RandomGenerator.h"
 #include "Trace.h"
 #include <openssl/sha.h>
-#include <openssl/rand.h>
 #ifdef USE_OPENSSL_AES
 #include <openssl/evp.h>
 #else
@@ -425,20 +425,14 @@ static bool authenticateOwnerPassword(
 }
 
 
-static int (*sRandBytesFunc)(unsigned char*, int) = RAND_bytes;
-
-void XCryptionCommon2_0::SetRandBytesFunc(int (*inRandBytesFunc)(unsigned char*, int)) {
-    sRandBytesFunc = inRandBytesFunc ? inRandBytesFunc : RAND_bytes;
-}
-
 template <size_t N>
 static ByteList generateRandomBytes() {
     unsigned char buffer[N];
 
-    if (sRandBytesFunc(buffer, N) == 1)
+    if (RandomGenerator::FillBytes(buffer, N) == PDFHummus::eSuccess)
         return ByteList(buffer, buffer + N);
 
-    TRACE_LOG("XCryptionCommon2_0::generateRandomBytes, RAND_bytes failed. aborting PDF 2.0 encryption key material generation.");
+    TRACE_LOG("XCryptionCommon2_0::generateRandomBytes, failed to get random bytes. aborting PDF 2.0 encryption key material generation.");
     return ByteList();
 }
 static ByteList generate32RandomBytes() {

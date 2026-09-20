@@ -24,11 +24,16 @@
 #include "IOBasicTypes.h"
 #include <stddef.h>
 
-// Random bytes for call sites that cannot rely on OpenSSL. Uses the platform CSPRNG
-// (BCryptGenRandom on Windows, arc4random_buf on Apple/BSD, /dev/urandom elsewhere on
-// POSIX) and fails rather than degrading to a non-cryptographic source when none is available.
+// Random bytes for cryptographic use (AES IVs, PDF 2.0 key material). Uses RAND_bytes when
+// OpenSSL is available, otherwise the platform CSPRNG (BCryptGenRandom on Windows,
+// arc4random_buf on Apple/BSD, /dev/urandom elsewhere on POSIX).
 class RandomGenerator
 {
 public:
 	static PDFHummus::EStatusCode FillBytes(IOBasicTypes::Byte* outBuffer, size_t inSize);
+
+#ifndef PDFHUMMUS_NO_OPENSSL
+	// test-only hook to force RAND_bytes failures. pass NULL to restore the real RAND_bytes.
+	static void SetRandBytesFunc(int (*inRandBytesFunc)(unsigned char*, int));
+#endif
 };

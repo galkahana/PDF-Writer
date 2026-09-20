@@ -18,10 +18,10 @@ limitations under the License.
 */
 
 #include "OutputAESEncodeStreamSSL.h"
+#include "RandomGenerator.h"
 
 #include <string.h>
 #include <openssl/evp.h>
-#include <openssl/rand.h>
 
 using namespace IOBasicTypes;
 using namespace PDFHummus;
@@ -87,7 +87,7 @@ EStatusCode OutputAESEncodeStreamSSL::EnsureIVWritten()
 	if (mWroteIV)
 		return eSuccess;
 
-	if (RAND_bytes(mIV, AES_BLOCK_SIZE_BYTES) != 1)
+	if (RandomGenerator::FillBytes(mIV, AES_BLOCK_SIZE_BYTES) != eSuccess)
 		return eFailure;
 
 	// Initialize OpenSSL encryption context with appropriate cipher based on key length
