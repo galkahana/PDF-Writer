@@ -47,6 +47,7 @@ ObjectsContext::ObjectsContext(void)
 
 ObjectsContext::~ObjectsContext(void)
 {
+	Cleanup();
 }
 
 

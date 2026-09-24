@@ -54,6 +54,7 @@ PDFWriter::PDFWriter(void)
 
 PDFWriter::~PDFWriter(void)
 {
+	Cleanup();
 }
 
 EPDFVersion thisOrDefaultVersion(EPDFVersion inPDFVersion, bool inWriteXrefAsXrefStream) {

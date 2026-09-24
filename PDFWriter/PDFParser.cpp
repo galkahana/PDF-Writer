@@ -801,9 +801,13 @@ PDFObject* PDFParser::ParseNewObject(ObjectIDType inObjectId)
 
 	// cycle check out
 	if(mNewObjectParsingPath.ExitObject(inObjectId) != eSuccess)
+	{
+		if(result)
+			result->Release();
 		return NULL;
+	}
 
-	return result;	
+	return result;
 }
 
 ObjectIDType PDFParser::GetObjectsCount()
@@ -1015,10 +1019,7 @@ EStatusCode PDFParser::ParsePagesIDs(
 		else if(scPages == objectType->GetValue())
 		{
 			// a Page tree node
-			PDFObject* pKids= inPageNode->QueryDirectObject("Kids");
-			if (pKids && pKids->GetType() == PDFObject::ePDFObjectIndirectObjectReference)
-				pKids= ParseNewObject(((PDFIndirectObjectReference*)pKids)->mObjectID);
-			PDFObjectCastPtr<PDFArray> kidsObject(pKids);
+			PDFObjectCastPtr<PDFArray> kidsObject(QueryDictionaryObject(inPageNode,"Kids"));
 			if(!kidsObject)
 			{
 				TRACE_LOG("PDFParser::ParsePagesIDs, unable to find page kids array");

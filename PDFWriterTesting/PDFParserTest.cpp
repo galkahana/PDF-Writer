@@ -20,6 +20,7 @@
 */
 #include "PDFParser.h"
 #include "InputFile.h"
+#include "InputStringStream.h"
 #include "PDFObject.h"
 #include "PDFDictionary.h"
 #include "PDFObjectCast.h"
@@ -32,6 +33,8 @@
 #include "PrimitiveObjectsWriter.h"
 #include "ObjectsBasicTypes.h"
 
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <set>
 
@@ -39,6 +42,39 @@
 
 using namespace std;
 using namespace PDFHummus;
+
+// Process-wide allocation counter, used only by StartPDFParsing_KidsAsIndirectReference_DoesNotLeak
+// below to prove a parse-and-destroy cycle returns to net zero live allocations -- functional
+// assertions alone (page count, successful parse) can't distinguish a leaked-but-otherwise-correct
+// parse from a clean one.
+static long gLiveAllocationCount = 0;
+
+void* operator new(size_t inSize)
+{
+	void* result = malloc(inSize);
+	if(!result)
+		throw std::bad_alloc();
+	++gLiveAllocationCount;
+	return result;
+}
+
+void operator delete(void* inPointer) noexcept
+{
+	if(inPointer)
+	{
+		--gLiveAllocationCount;
+		free(inPointer);
+	}
+}
+
+void operator delete(void* inPointer, size_t) noexcept
+{
+	if(inPointer)
+	{
+		--gLiveAllocationCount;
+		free(inPointer);
+	}
+}
 
 static const char* scIndirectStart = "Indirect object reference:\r\n";
 static const char* scParsedAlready = "was parsed already\r\n";
@@ -125,6 +161,72 @@ static EStatusCode IterateObjectTypes(PDFObject* inObject,PDFParser& inParser,IB
 	
 }
 
+// Minimal, valid PDF where the Pages node's /Kids is given as an indirect
+// reference ("/Kids 4 0 R") rather than an inline array -- a common, fully
+// legal shape that ParsePagesIDs must resolve via PDFParser::QueryDictionaryObject.
+static string BuildPDFWithIndirectKids()
+{
+	string header = "%PDF-1.4\n";
+	string obj1 = "1 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [ 0 0 100 100 ] /Resources << >> >>\nendobj\n";
+	string obj2 = "2 0 obj\n<< /Type /Pages /Count 1 /Kids 4 0 R >>\nendobj\n";
+	string obj3 = "3 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n";
+	string obj4 = "4 0 obj\n[ 1 0 R ]\nendobj\n";
+
+	size_t offsets[4];
+	offsets[0] = header.size();
+	offsets[1] = offsets[0] + obj1.size();
+	offsets[2] = offsets[1] + obj2.size();
+	offsets[3] = offsets[2] + obj3.size();
+	size_t xrefStart = offsets[3] + obj4.size();
+
+	string xref = "xref\n0 5\n0000000000 65535 f \n";
+	char xrefEntry[32];
+	for(int i = 0; i < 4; ++i)
+	{
+		snprintf(xrefEntry, sizeof(xrefEntry), "%010lu 00000 n \n", (unsigned long)offsets[i]);
+		xref += xrefEntry;
+	}
+
+	char trailer[128];
+	snprintf(trailer, sizeof(trailer), "trailer\n<< /Size 5 /Root 3 0 R >>\nstartxref\n%lu\n%%%%EOF", (unsigned long)xrefStart);
+
+	return header + obj1 + obj2 + obj3 + obj4 + xref + trailer;
+}
+
+static bool StartPDFParsing_KidsAsIndirectReference_DoesNotLeak()
+{
+	// Arrange
+	string pdfBytes = BuildPDFWithIndirectKids();
+	long before = gLiveAllocationCount;
+
+	// Act
+	{
+		InputStringStream inputStream(pdfBytes);
+		PDFParser parser;
+		EStatusCode status = parser.StartPDFParsing(&inputStream);
+		if(status != PDFHummus::eSuccess)
+		{
+			cout << "StartPDFParsing_KidsAsIndirectReference_DoesNotLeak: failed to parse\n";
+			return false;
+		}
+		if(parser.GetPagesCount() != 1)
+		{
+			cout << "StartPDFParsing_KidsAsIndirectReference_DoesNotLeak: expected 1 page, got " << parser.GetPagesCount() << "\n";
+			return false;
+		}
+	}
+	long after = gLiveAllocationCount;
+
+	// Assert
+	if(after != before)
+	{
+		cout << "StartPDFParsing_KidsAsIndirectReference_DoesNotLeak: leaked "
+		     << (after - before) << " allocation(s) resolving an indirect /Kids reference\n";
+		return false;
+	}
+	return true;
+}
+
 int PDFParserTest(int argc, char* argv[])
 {
 	EStatusCode status = PDFHummus::eSuccess;
@@ -189,6 +291,9 @@ int PDFParserTest(int argc, char* argv[])
 		}
 
 	}while(false);
+
+	if(status == PDFHummus::eSuccess && !StartPDFParsing_KidsAsIndirectReference_DoesNotLeak())
+		status = PDFHummus::eFailure;
 
 	return status;
 }
