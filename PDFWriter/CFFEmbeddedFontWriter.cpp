@@ -139,14 +139,23 @@ EStatusCode CFFEmbeddedFontWriter::CreateCFFSubset(
 	do
 	{
 
-		status = mOpenTypeFile.OpenFile(inFontInfo.GetFontFilePath());
-		if(status != PDFHummus::eSuccess)
+		if(inFontInfo.IsMemoryFont())
 		{
-			TRACE_LOG1("CFFEmbeddedFontWriter::CreateCFFSubset, cannot open type font file at %s",inFontInfo.GetFontFilePath().c_str());
-			break;
+			mMemoryFontStream.Assign(inFontInfo.GetFontBuffer(), inFontInfo.GetFontBufferLength());
+			mFontStream = &mMemoryFontStream;
+		}
+		else
+		{
+			status = mOpenTypeFile.OpenFile(inFontInfo.GetFontFilePath());
+			if(status != PDFHummus::eSuccess)
+			{
+				TRACE_LOG1("CFFEmbeddedFontWriter::CreateCFFSubset, cannot open type font file at %s",inFontInfo.GetFontFilePath().c_str());
+				break;
+			}
+			mFontStream = mOpenTypeFile.GetInputStream();
 		}
 
-		status = mOpenTypeInput.ReadOpenTypeFile(mOpenTypeFile.GetInputStream(),(unsigned short)inFontInfo.GetFontIndex());
+		status = mOpenTypeInput.ReadOpenTypeFile(mFontStream,(unsigned short)inFontInfo.GetFontIndex());
 		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("CFFEmbeddedFontWriter::CreateCFFSubset, failed to read true type file");
@@ -293,8 +302,8 @@ EStatusCode CFFEmbeddedFontWriter::WriteCFFHeader()
 	 // i'll probably just set it to something.
 	
 	OutputStreamTraits streamCopier(&mFontFileStream);
-	mOpenTypeFile.GetInputStream()->SetPosition(mOpenTypeInput.mCFF.mCFFOffset);
-	return streamCopier.CopyToOutputStream(mOpenTypeFile.GetInputStream(),mOpenTypeInput.mCFF.mHeader.hdrSize);
+	mFontStream->SetPosition(mOpenTypeInput.mCFF.mCFFOffset);
+	return streamCopier.CopyToOutputStream(mFontStream,mOpenTypeInput.mCFF.mHeader.hdrSize);
 }
 
 EStatusCode CFFEmbeddedFontWriter::WriteName(const std::string& inSubsetFontName)
@@ -492,8 +501,8 @@ EStatusCode CFFEmbeddedFontWriter::WriteStringIndex()
 		// starting position is equal to the strings end position. hence length is...
 
 		OutputStreamTraits streamCopier(&mFontFileStream);
-		mOpenTypeFile.GetInputStream()->SetPosition(mOpenTypeInput.mCFF.mCFFOffset + mOpenTypeInput.mCFF.mStringIndexPosition);
-		return streamCopier.CopyToOutputStream(mOpenTypeFile.GetInputStream(),
+		mFontStream->SetPosition(mOpenTypeInput.mCFF.mCFFOffset + mOpenTypeInput.mCFF.mStringIndexPosition);
+		return streamCopier.CopyToOutputStream(mFontStream,
 												(LongBufferSizeType)(mOpenTypeInput.mCFF.mGlobalSubrsPosition -
 												mOpenTypeInput.mCFF.mStringIndexPosition));
 	}

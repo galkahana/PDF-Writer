@@ -36,6 +36,7 @@
 #include "EncryptionOptions.h"
 
 #include <string>
+#include <vector>
 #include <utility>
 
 typedef std::pair<double,double> DoubleAndDoublePair;
@@ -277,6 +278,7 @@ public:
 	// fonts [text], font index is provided for multi-font file packages (such as dfont and ttc), 0 the default is
     // what should be passed for single-font files
 	PDFUsedFont* GetFontForFile(const std::string& inFontFilePath,long inFontIndex = 0);
+	PDFUsedFont* GetFontForFile(const std::vector<IOBasicTypes::Byte>& inFontBuffer,long inFontIndex = 0);
 	// second overload is for type 1, when an additional metrics file is available
 	PDFUsedFont* GetFontForFile(const std::string& inFontFilePath,const std::string& inAdditionalMeticsFilePath,long inFontIndex = 0);
 

@@ -98,7 +98,7 @@ PDFUsedFont* UsedFontsRepository::GetFontForFile(const std::string& inFontFilePa
 			PDFUsedFont* usedFont = new PDFUsedFont(face,inFontFilePath,inOptionalMetricsFile,inFontIndex,mObjectsContext,mEmbedFonts);
 			if(!usedFont->IsValid())
 			{
-				TRACE_LOG1("UsedFontsRepository::GetFontForFile, Unreckognized font format for font in %s",inFontFilePath.c_str());
+				TRACE_LOG1("UsedFontsRepository::GetFontForFile, Unrecognized font format for font in %s",inFontFilePath.c_str());
 				delete usedFont;
 				usedFont = NULL;
 			}
@@ -125,6 +125,54 @@ EStatusCode UsedFontsRepository::WriteUsedFontsDefinitions()
 PDFUsedFont* UsedFontsRepository::GetFontForFile(const std::string& inFontFilePath,long inFontIndex)
 {
 	return GetFontForFile(inFontFilePath,"",inFontIndex);
+}
+
+PDFUsedFont* UsedFontsRepository::GetFontForFile(const std::vector<IOBasicTypes::Byte>& inFontBuffer,long inFontIndex)
+{
+	if(!mObjectsContext)
+	{
+		TRACE_LOG("UsedFontsRepository::GetFontForFile, exception, not objects context available");
+		return NULL;
+	}
+
+	if(inFontBuffer.size() == 0)
+	{
+		TRACE_LOG("UsedFontsRepository::GetFontForFile, exception, input memory font buffer is NULL or empty");
+		return NULL;
+	}
+
+	if(!mInputFontsInformation)
+		mInputFontsInformation = new FreeTypeWrapper();
+
+	// load face first to derive a stable cache key from the PostScript name
+	FT_Face face = mInputFontsInformation->NewFace(inFontBuffer,inFontIndex);
+	if(!face)
+	{
+		TRACE_LOG("UsedFontsRepository::GetFontForFile, Failed to load memory font");
+		return NULL;
+	}
+
+	const char* psName = FT_Get_Postscript_Name(face);
+	std::string key = std::string("memory-font-") + (psName ? psName : "unknown") + "-" + std::to_string(inFontBuffer.size());
+
+	StringAndLongToPDFUsedFontMap::iterator it = mUsedFonts.find(StringAndLong(key,inFontIndex));
+	if(it != mUsedFonts.end())
+	{
+		mInputFontsInformation->DoneFace(face);
+		return it->second;
+	}
+
+	PDFUsedFont* usedFont = new PDFUsedFont(face,key,"",inFontIndex,mObjectsContext,mEmbedFonts);
+	if(!usedFont->IsValid())
+	{
+		TRACE_LOG1("UsedFontsRepository::GetFontForFile, Unrecognized memory font format for key %s",key.c_str());
+		delete usedFont;
+		usedFont = NULL;
+	}
+	
+	it = mUsedFonts.insert(StringAndLongToPDFUsedFontMap::value_type(StringAndLong(key,inFontIndex),usedFont)).first;
+
+	return it->second;
 }
 
 typedef std::list<ObjectIDType> ObjectIDTypeList;
