@@ -939,15 +939,13 @@ EStatusCode PDFParser::ParsePagesObjectIDs()
 		}
 
 		long long pagesCountValue = totalPagesCount->GetValue();
-		// reject negative counts and counts larger than the actual xref table can hold.
-		// every leaf page is an indirect object that must have an xref entry, so the
-		// declared /Count cannot legitimately exceed the number of entries we read.
-		// note: do NOT compare against mXrefSize directly - that is the trailer /Size
-		// value (attacker-controlled). GetXrefSize() clamps it to mXrefTable.size().
-		ObjectIDType actualXrefSize = GetXrefSize();
-		if(pagesCountValue < 0 || (unsigned long long)pagesCountValue > actualXrefSize)
+		if(!ValidateObjectsCount(pagesCountValue))
 		{
-			TRACE_LOG2("PDFParser::ParsePagesObjectIDs, invalid pages count %lld (actual xref size %lu)", pagesCountValue, actualXrefSize);
+			// every leaf page is an indirect object that must have an xref entry, so the
+			// declared /Count cannot legitimately exceed the number of entries we read.
+			// note: do NOT compare against mXrefSize directly - that is the trailer /Size
+			// value (attacker-controlled). GetXrefSize() clamps it to mXrefTable.size().
+			TRACE_LOG1("PDFParser::ParsePagesObjectIDs, invalid pages count %lld", pagesCountValue);
 			status = PDFHummus::eFailure;
 			break;
 		}
@@ -1857,6 +1855,17 @@ EStatusCode PDFParser::ReadXrefSegmentValue(IByteReader* inSource,int inEntrySiz
 	return status;
 }
 
+bool PDFParser::ValidateObjectsCount(long long inObjectsCount)
+{
+	// Any PDF objects counter cannot be negative or larger than what the actual xref table can hold
+	ObjectIDType actualXrefSize = GetXrefSize();
+	bool valid = inObjectsCount >= 0 && (unsigned long long)inObjectsCount <= actualXrefSize;
+	if (!valid) {
+		TRACE_LOG2("PDFParser::ValidateObjectsCount, invalid objects count %lld (actual xref size %lu)", inObjectsCount, actualXrefSize);
+	}
+	return valid;
+}
+
 PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 {
 	// parsing an object in an object stream requires the following:
@@ -1896,7 +1905,15 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 			status = PDFHummus::eFailure;
 			break;
 		}
-		ObjectIDType objectsCount = (ObjectIDType)streamObjectsCount->GetValue();
+
+		long long objectsCountValue = streamObjectsCount->GetValue();
+		if(!ValidateObjectsCount(objectsCountValue))
+		{
+			TRACE_LOG1("PDFParser::ParseExistingInDirectStreamObject, invalid N key in stream dictionary %ld",objectStreamID);
+			status = PDFHummus::eFailure;
+			break;
+		}
+		ObjectIDType objectsCount = (ObjectIDType)objectsCountValue;
 
 		PDFObjectCastPtr<PDFInteger> firstStreamObjectPosition(QueryDictionaryObject(streamDictionary.GetPtr(),"First"));
 		if(!firstStreamObjectPosition)

@@ -224,6 +224,7 @@ private:
 	PDFObject*  ParseExistingInDirectObject(ObjectIDType inObjectID);
 	PDFHummus::EStatusCode SetupDecryptionHelper(const std::string& inPassword);
 	PDFHummus::EStatusCode ParsePagesObjectIDs();
+	bool ValidateObjectsCount(long long inObjectsCount);
 	PDFHummus::EStatusCode ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID);
 	PDFHummus::EStatusCode ParsePagesIDs(PDFDictionary* inPageNode,ObjectIDType inNodeObjectID,unsigned long& ioCurrentPageIndex, PDFParsingPath& ioParsingPath);
 	PDFHummus::EStatusCode ParsePreviousXrefs(PDFDictionary* inTrailer);
