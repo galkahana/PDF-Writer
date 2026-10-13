@@ -219,14 +219,24 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::CreateCFFSubset(
 		if(subsetGlyphIDs.front() != 0) // make sure 0 glyph is in
 			subsetGlyphIDs.insert(subsetGlyphIDs.begin(),0);
 
-		status = mType1File.OpenFile(inFontInfo.GetFontFilePath());
-		if(status != PDFHummus::eSuccess)
+		IByteReaderWithPosition* fontStream;
+		if(inFontInfo.IsMemoryFont())
 		{
-			TRACE_LOG1("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, cannot open Type 1 font file at %s",inFontInfo.GetFontFilePath().c_str());
-			break;
+			mMemoryFontStream.Assign(inFontInfo.GetFontBuffer(), inFontInfo.GetFontBufferLength());
+			fontStream = &mMemoryFontStream;
+		}
+		else
+		{
+			status = mType1File.OpenFile(inFontInfo.GetFontFilePath());
+			if(status != PDFHummus::eSuccess)
+			{
+				TRACE_LOG1("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, cannot open Type 1 font file at %s",inFontInfo.GetFontFilePath().c_str());
+				break;
+			}
+			fontStream = mType1File.GetInputStream();
 		}
 
-		status = mType1Input.ReadType1File(mType1File.GetInputStream());
+		status = mType1Input.ReadType1File(fontStream);
 		if(status != PDFHummus::eSuccess)
 		{
 			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, failed to read Type 1 file");

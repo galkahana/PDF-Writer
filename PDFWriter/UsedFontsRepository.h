@@ -22,8 +22,10 @@
 
 #include "EStatusCode.h"
 #include "ObjectsBasicTypes.h"
+#include "IOBasicTypes.h"
 
 #include <string>
+#include <vector>
 #include <map>
 #include <utility>
 
@@ -49,6 +51,7 @@ public:
 
 
 	PDFUsedFont* GetFontForFile(const std::string& inFontFilePath,long inFontIndex);
+	PDFUsedFont* GetFontForFile(const std::vector<IOBasicTypes::Byte>& inFontBuffer,long inFontIndex);
 	// second overload is for type 1, when an additional metrics file is available
 	PDFUsedFont* GetFontForFile(const std::string& inFontFilePath,const std::string& inOptionalMetricsFile,long inFontIndex);
 

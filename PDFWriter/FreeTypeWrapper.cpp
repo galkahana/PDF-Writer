@@ -23,6 +23,8 @@
 #include "InputFile.h"
 #include "IByteReaderWithPosition.h"
 
+#include <memory.h>
+
 
 using namespace PDFHummus;
 
@@ -48,6 +50,11 @@ FreeTypeWrapper::~FreeTypeWrapper(void)
 		}
 	}
 	mOpenStreams.clear();
+	for(std::map<FT_Face,FT_Byte*>::iterator itMemory = mOpenMemoryFaces.begin(); itMemory != mOpenMemoryFaces.end(); ++itMemory)
+	{
+		delete[] itMemory->second;
+	}
+	mOpenMemoryFaces.clear();
 	if (mFreeType)
 		FT_Done_FreeType(mFreeType);
 
@@ -84,6 +91,38 @@ FT_Face FreeTypeWrapper::NewFace(const std::string& inFilePath,FT_Long inFontInd
 		CloseOpenFaceArgumentsStream(openFaceArguments);
 	else
 		RegisterStreamForFace(face,openFaceArguments.stream);
+	return face;
+}
+FT_Face FreeTypeWrapper::NewFace(const std::vector<IOBasicTypes::Byte>& inFontBuffer,FT_Long inFontIndex)
+{
+	if(inFontBuffer.size() == 0)
+	{
+		TRACE_LOG("FreeTypeWrapper::NewFace, memory font buffer is NULL or empty");
+		return NULL;
+	}
+
+	if(inFontBuffer.size() > (IOBasicTypes::LongBufferSizeType)0x7fffffff)
+	{
+		TRACE_LOG("FreeTypeWrapper::NewFace, memory font buffer is too large for FreeType FT_Long size");
+		return NULL;
+	}
+
+	FT_Byte* internalBuffer = new FT_Byte[inFontBuffer.size()];
+	memcpy(internalBuffer,inFontBuffer.data(),inFontBuffer.size());
+
+	FT_Face face = NULL;
+	FT_Error ftStatus = FT_New_Memory_Face(mFreeType,internalBuffer,(FT_Long)inFontBuffer.size(),inFontIndex,&face);
+	if(ftStatus)
+	{
+		const char* errMsg = FT_Error_String(ftStatus);
+		TRACE_LOG1("FreeTypeWrapper::NewFace, unable to load memory font with index %ld",inFontIndex);
+		TRACE_LOG2("FreeTypeWrapper::NewFace, Free Type Error, Code = %d, Message = %s",ftStatus,errMsg ? errMsg : "");
+		delete[] internalBuffer;
+		return NULL;
+	}
+
+	mOpenMemoryFaces.insert(std::map<FT_Face,FT_Byte*>::value_type(face,internalBuffer));
+
 	return face;
 }
 
@@ -169,6 +208,7 @@ FT_Error FreeTypeWrapper::DoneFace(FT_Face ioFace)
 {
 	FT_Error status = FT_Done_Face(ioFace);
 	CleanStreamsForFace(ioFace);
+	CleanMemoryFace(ioFace);
 	return status;
 }
 
@@ -186,6 +226,15 @@ void FreeTypeWrapper::CleanStreamsForFace(FT_Face inFace)
 	}
 }
 
+void FreeTypeWrapper::CleanMemoryFace(FT_Face inFace)
+{
+	std::map<FT_Face,FT_Byte*>::iterator it = mOpenMemoryFaces.find(inFace);
+	if(it != mOpenMemoryFaces.end())
+	{
+		delete[] it->second;
+		mOpenMemoryFaces.erase(it);
+	}
+}
 
 FT_Library FreeTypeWrapper::operator->()
 {
