@@ -50,6 +50,7 @@ PDFWriter::PDFWriter(void)
 	// the first decision (level) about the PDF can be the result of parsing
 	mDocumentContext.SetObjectsContext(&mObjectsContext);
     mIsModified = false;
+    mIsStarted = false;
 }
 
 PDFWriter::~PDFWriter(void)
@@ -88,12 +89,16 @@ EStatusCode PDFWriter::StartPDF(
 	}
 
 	mIsModified = false;
+	mIsStarted = true;
 
 	return mDocumentContext.WriteHeader(pdfVersion);
 }
 
 EStatusCode PDFWriter::EndPDF()
 {
+	if(!mIsStarted)
+		return eFailure;
+	mIsStarted = false;
 
 	EStatusCode status;
 	do
@@ -142,6 +147,7 @@ void PDFWriter::Reset()
     mModifiedFileParser.ResetParser();
     mModifiedFile.CloseFile();
 	Cleanup();
+	mIsStarted = false;
 }
 
 EStatusCodeAndObjectIDType PDFWriter::WritePageAndReturnPageID(PDFPage* inPage)
@@ -463,6 +469,7 @@ EStatusCode PDFWriter::ContinuePDF(const std::string& inOutputFilePath,
 	mObjectsContext.SetOutputStream(mOutputFile.GetOutputStream());
 	mDocumentContext.SetOutputFileInformation(&mOutputFile);
 
+	mIsStarted = true;
 	return SetupState(inStateFilePath);
 
 
@@ -525,6 +532,7 @@ EStatusCode PDFWriter::ContinuePDFForStream(IByteWriterWithPosition* inOutputStr
 
 	mObjectsContext.SetOutputStream(inOutputStream);
 
+	mIsStarted = true;
 	return SetupState(inStateFilePath);
 
 }
@@ -570,11 +578,16 @@ EStatusCode PDFWriter::StartPDFForStream(IByteWriterWithPosition* inOutputStream
 
 	mObjectsContext.SetOutputStream(inOutputStream);
     mIsModified = false;
+	mIsStarted = true;
 
 	return mDocumentContext.WriteHeader(pdfVersion);
 }
 EStatusCode PDFWriter::EndPDFForStream()
 {
+	if(!mIsStarted)
+		return eFailure;
+	mIsStarted = false;
+
     EStatusCode status;
 
     if(mIsModified)
@@ -696,6 +709,7 @@ EStatusCode PDFWriter::ModifyPDF(const std::string& inModifiedFile,
 
         // do setup for modification
         mIsModified = true;
+        mIsStarted = true;
         status = SetupStateFromModifiedFile(inModifiedFile, inPDFVersion, inPDFCreationSettings);
     }
     while (false);
@@ -726,8 +740,9 @@ EStatusCode PDFWriter::ModifyPDFForStream(
 
     mObjectsContext.SetOutputStream(inModifiedDestinationStream);
     mObjectsContext.WriteTokenSeparator(eTokenSeparatorEndLine);
-    
+
     mIsModified = true;
+    mIsStarted = true;
 
     return SetupStateFromModifiedStream(inModifiedSourceStream, inPDFVersion, inPDFCreationSettings);
 }
