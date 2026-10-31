@@ -281,9 +281,12 @@ public:
 	// second overload is for type 1, when an additional metrics file is available
 	PDFUsedFont* GetFontForFile(const std::string& inFontFilePath,const std::string& inAdditionalMeticsFilePath,long inFontIndex = 0);
 	// variant for fonts provided as memory buffers (only single file version)
-	// Important! The memory buffer must remain valid for the lifetime of the used font (till end of PDF file writing).
+	// The memory buffer is copied, so it does not need to remain valid after this call.
+	// Note: Each call copies the buffer and loads the font before checking for an existing font, so get the PDFUsedFont once and reuse it,
+	// rather than calling this method repeatedly (e.g. per text run).
 	PDFUsedFont* GetFontForFile(const std::vector<IOBasicTypes::Byte>& inFontBuffer,long inFontIndex = 0);
 	// variant for fonts provided as read streams (only single file version)
+	// The font is expected to start at position 0 of the stream.
 	// Important! The font stream must remain valid for the lifetime of the used font (till end of PDF file writing).
 	// Important 2! The font stream is NOT owned by PDFWriter, it will not be deleted by it. You must delete it when it is no longer needed (which is at least after pdf writing is done).
 	PDFUsedFont* GetFontForStream(IByteReaderWithPosition* inFontStream,long inFontIndex = 0);
