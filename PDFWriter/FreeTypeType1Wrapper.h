@@ -27,10 +27,11 @@
 #include FT_FREETYPE_H
 #include FT_TYPE1_TABLES_H 
 
+class FreeTypeWrapper;
 class FreeTypeType1Wrapper : public IFreeTypeFaceExtender
 {
 public:
-	FreeTypeType1Wrapper(FT_Face inFace,const std::string& inFontFilePath,const std::string& inPFMFilePath);  // NEVER EVER EVER PASS NULL!!!!1 [ok to pass empty string for PFM file]
+	FreeTypeType1Wrapper(FT_Face inFace, FreeTypeWrapper* inInputFontsInformation,const std::string& inPFMFilePath);  // NEVER EVER EVER PASS NULL!!!!1 [ok to pass empty string for PFM file]
 	virtual ~FreeTypeType1Wrapper(void);
 
 	virtual	double GetItalicAngle();
@@ -50,6 +51,7 @@ public:
 
 private:
     FT_Face mFace;
+	FreeTypeWrapper* mInputFontsInformation;
 	bool mPFMFileInfoRelevant;
 	PFMFileReader mPFMReader;
 	PS_FontInfoRec mPSFontInfo;

@@ -22,12 +22,44 @@
 #include "Trace.h"
 #include "InputFile.h"
 #include "IByteReaderWithPosition.h"
+#include "InputOwnedByteArrayStream.h"
+#include "InputBufferedStream.h"
+#include "InputFileStream.h"
 
 #include <memory.h>
 
 
 using namespace PDFHummus;
 
+static void InputStreamClose(FT_Stream  inStream)
+{
+	if(!inStream || !inStream->descriptor.pointer)
+		return;
+
+	inStream->descriptor.pointer = NULL; // just remove the reference to the underlying reader stream. underlying stream lifecycle is managed with mOpenReaders list
+}
+
+static void CleanFtStreamsList(FTStreamList& inStreams)
+{
+	FTStreamList::iterator itStreams = inStreams.begin();
+	for (; itStreams != inStreams.end(); ++itStreams)
+	{
+		InputStreamClose(*itStreams);
+		delete *itStreams;
+	}
+	inStreams.clear();
+}
+
+static void CleanReaderStreamsList(StreamWithOwnershipList& inReaders)
+{
+	StreamWithOwnershipList::iterator itReader = inReaders.begin();
+	for (; itReader != inReaders.end(); ++itReader)
+	{
+		if(itReader->ownsStream && itReader->stream)
+			delete itReader->stream;
+	}
+	inReaders.clear();
+}
 
 FreeTypeWrapper::FreeTypeWrapper(void)
 {
@@ -40,94 +72,133 @@ FreeTypeWrapper::FreeTypeWrapper(void)
 
 FreeTypeWrapper::~FreeTypeWrapper(void)
 {
-	FTFaceToFTStreamListMap::iterator it = mOpenStreams.begin();
-	for (; it != mOpenStreams.end(); ++it)
-	{
-		FTStreamList::iterator itStreams = it->second.begin();
-		for (; itStreams != it->second.end(); ++itStreams)
-		{
-			delete *itStreams;
-		}
-	}
-	mOpenStreams.clear();
-	for(std::map<FT_Face,FT_Byte*>::iterator itMemory = mOpenMemoryFaces.begin(); itMemory != mOpenMemoryFaces.end(); ++itMemory)
-	{
-		delete[] itMemory->second;
-	}
-	mOpenMemoryFaces.clear();
+	// clean open ft streams for all faces
+	FTFaceToFTStreamListMap::iterator it = mOpenFTStreams.begin();
+	for (; it != mOpenFTStreams.end(); ++it)
+		CleanFtStreamsList(it->second);
+	mOpenFTStreams.clear();
+
+	// clean open reader streams for all faces
+	FTFaceToStreamWithOwnershipListMap::iterator itReaders = mOpenReaders.begin();
+	for (; itReaders != mOpenReaders.end(); ++itReaders)
+		CleanReaderStreamsList(itReaders->second);
+	mOpenReaders.clear();
+
 	if (mFreeType)
 		FT_Done_FreeType(mFreeType);
 
 }
 
-// using my own streams, to implement UTF8 paths
-FT_Face FreeTypeWrapper::NewFace(const std::string& inFilePath,FT_Long inFontIndex)
-{
-	FT_Face face;
+
+FT_Face FreeTypeWrapper::NewFace(IByteReaderWithPosition* inStream, bool inOwnsStream, IOBasicTypes::LongFilePositionType inSize, FT_Long inFontIndex) {
+	FT_Face face = NULL;
 	FT_Open_Args openFaceArguments = {0};
 
-	do
-	{
-		if(FillOpenFaceArgumentsForUTF8String(inFilePath,openFaceArguments) != PDFHummus::eSuccess)
-		{
-			face = NULL;
-			break;
-		}
-
-		FT_Error ftStatus =  FT_Open_Face(mFreeType,&openFaceArguments,inFontIndex,&face);
-
-		if(ftStatus)
-		{
-			// FT_Error_String returns NULL when FreeType was built without FT_CONFIG_OPTION_ERROR_STRINGS (the bundled build enables it; unbundled may not)
-			const char* errMsg = FT_Error_String(ftStatus);
-			TRACE_LOG2("FreeTypeWrapper::NewFace, unable to load font named %s with index %ld",inFilePath.c_str(),inFontIndex);
-			TRACE_LOG2("FreeTypeWrapper::NewFace, Free Type Error, Code = %d, Message = %s",ftStatus,errMsg ? errMsg : "");
-			face = NULL;
-		}
-
-	}while(false);
-
-	if(!face)
-		CloseOpenFaceArgumentsStream(openFaceArguments);
-	else
-		RegisterStreamForFace(face,openFaceArguments.stream);
-	return face;
-}
-FT_Face FreeTypeWrapper::NewFace(const std::vector<IOBasicTypes::Byte>& inFontBuffer,FT_Long inFontIndex)
-{
-	if(inFontBuffer.size() == 0)
-	{
-		TRACE_LOG("FreeTypeWrapper::NewFace, memory font buffer is NULL or empty");
+	if(!inStream) {
+		TRACE_LOG("FreeTypeWrapper::NewFace, exception, input stream is NULL");
+		return NULL;
+	}
+	if(inSize == 0) {
+		TRACE_LOG("FreeTypeWrapper::NewFace, exception, input stream size is 0");
+		return NULL;
+	}
+	if(inSize > (IOBasicTypes::LongFilePositionType)0x7fffffff) {
+		TRACE_LOG("FreeTypeWrapper::NewFace, exception, input stream size is too large for FreeType FT_Long");
 		return NULL;
 	}
 
-	if(inFontBuffer.size() > (IOBasicTypes::LongBufferSizeType)0x7fffffff)
-	{
-		TRACE_LOG("FreeTypeWrapper::NewFace, memory font buffer is too large for FreeType FT_Long size");
-		return NULL;
-	}
 
-	FT_Byte* internalBuffer = new FT_Byte[inFontBuffer.size()];
-	memcpy(internalBuffer,inFontBuffer.data(),inFontBuffer.size());
+	FT_Stream ftStream = CreateFTStreamForIByteWriterWithPosition(inStream, (unsigned long)inSize);
+	FillOpenFaceArgumentsForFTStream(ftStream, openFaceArguments);
 
-	FT_Face face = NULL;
-	FT_Error ftStatus = FT_New_Memory_Face(mFreeType,internalBuffer,(FT_Long)inFontBuffer.size(),inFontIndex,&face);
+	FT_Error ftStatus =  FT_Open_Face(mFreeType,&openFaceArguments,inFontIndex,&face);
+
 	if(ftStatus)
 	{
 		const char* errMsg = FT_Error_String(ftStatus);
-		TRACE_LOG1("FreeTypeWrapper::NewFace, unable to load memory font with index %ld",inFontIndex);
+		TRACE_LOG1("FreeTypeWrapper::NewFace, unable to load font from stream with index %ld", inFontIndex);
 		TRACE_LOG2("FreeTypeWrapper::NewFace, Free Type Error, Code = %d, Message = %s",ftStatus,errMsg ? errMsg : "");
-		delete[] internalBuffer;
-		return NULL;
+		face = NULL;
 	}
 
-	mOpenMemoryFaces.insert(std::map<FT_Face,FT_Byte*>::value_type(face,internalBuffer));
-
+	if(!face)
+		ReleaseStreamForFace(ftStream, inStream, inOwnsStream);
+	else
+		RegisterStreamForFace(face,ftStream, inStream, inOwnsStream);
 	return face;
 }
 
-EStatusCode FreeTypeWrapper::FillOpenFaceArgumentsForUTF8String(const std::string& inFilePath, FT_Open_Args& ioArgs)
+void FreeTypeWrapper::ReleaseStreamForFace(FT_Stream inFtStream, IByteReaderWithPosition* inReader, bool inOwnsStream) {
+	// ft stream release
+	if(inFtStream)
+	{
+		InputStreamClose(inFtStream);
+		delete inFtStream;
+	}
+
+	// reader stream release, if owned
+	if(inOwnsStream && inReader)
+		delete inReader;
+}
+
+void FreeTypeWrapper::RegisterStreamForFace(FT_Face inFace,FT_Stream inFtStream, IByteReaderWithPosition* inReader, bool inOwnsStream) {
+
+	FTFaceToFTStreamListMap::iterator it = mOpenFTStreams.find(inFace);
+	if(it == mOpenFTStreams.end())
+		it = mOpenFTStreams.insert(FTFaceToFTStreamListMap::value_type(inFace,FTStreamList())).first;
+	it->second.push_back(inFtStream);
+
+	FTFaceToStreamWithOwnershipListMap::iterator itReaders = mOpenReaders.find(inFace);
+	if(itReaders == mOpenReaders.end())
+		itReaders = mOpenReaders.insert(FTFaceToStreamWithOwnershipListMap::value_type(inFace,StreamWithOwnershipList())).first;
+	StreamWithOwnership swo;
+	swo.stream = inReader;
+	swo.ownsStream = inOwnsStream;
+	itReaders->second.push_back(swo);
+}
+
+
+FT_Face FreeTypeWrapper::NewFace(const std::string& inFilePath,FT_Long inFontIndex)
 {
+	InputBufferedStream* inputBufferedFileReadSteam = InputFile::CreateBufferedReadStream(inFilePath);
+	if(!inputBufferedFileReadSteam) {
+		TRACE_LOG1("FreeTypeWrapper::NewFace,  Cannot Open file for reading %s", inFilePath.c_str());
+		return NULL;
+	}
+
+	return NewFace(inputBufferedFileReadSteam,
+					true, 
+					((InputFileStream*)inputBufferedFileReadSteam->GetSourceStream())->GetFileSize(), 
+					inFontIndex
+	);
+}
+
+
+FT_Face FreeTypeWrapper::NewFace(const std::vector<IOBasicTypes::Byte>& inFontBuffer,FT_Long inFontIndex)
+{
+	InputOwnedByteArrayStream* inputStream = new InputOwnedByteArrayStream(inFontBuffer);
+
+	return NewFace(inputStream,
+		true,
+		inFontBuffer.size(),
+		inFontIndex
+	);
+}
+
+FT_Face FreeTypeWrapper::NewFace(IByteReaderWithPosition* inFontStream,FT_Long inFontIndex)
+{
+	// get total size by seeking to the end and then returning to the original position (we do kinda assume that position 0 is where the font starts in the later embedding readers...)
+	LongFilePositionType originalPosition = inFontStream->GetCurrentPosition();
+	inFontStream->SetPositionFromEnd(0);
+	LongFilePositionType endPosition = inFontStream->GetCurrentPosition();
+
+	LongFilePositionType totalSize = endPosition - originalPosition;
+
+	// stream is NOT owned by FreeTypeWrapper when using this variant of NewFace
+	return NewFace(inFontStream, false, totalSize,inFontIndex);
+}
+
+void FreeTypeWrapper::FillOpenFaceArgumentsForFTStream(FT_Stream inStream, FT_Open_Args& ioArgs) {
 	ioArgs.flags = FT_OPEN_STREAM;
 	ioArgs.memory_base = NULL;
 	ioArgs.memory_size = 0;
@@ -135,105 +206,111 @@ EStatusCode FreeTypeWrapper::FillOpenFaceArgumentsForUTF8String(const std::strin
 	ioArgs.driver = NULL;
 	ioArgs.num_params = 0;
 	ioArgs.params = NULL;
-	ioArgs.stream = CreateFTStreamForPath(inFilePath);
-	
-	if(ioArgs.stream)
-	{
-		return PDFHummus::eSuccess;
-	}
-	else
-	{
-		TRACE_LOG1("FreeTypeWrapper::FillOpenFaceArgumentsForWideString, Cannot Open file for reading %s",inFilePath.c_str());
-		return PDFHummus::eFailure;
-	}
+	ioArgs.stream = inStream;
 }
 
-void FreeTypeWrapper::CloseOpenFaceArgumentsStream(FT_Open_Args& ioArgs)
-{
-	if(ioArgs.stream)
-	{
-		delete (InputFile*)(ioArgs.stream->descriptor.pointer);
-		delete ioArgs.stream;
-	}
-}
+IByteReaderWithPosition* FreeTypeWrapper::GetFontReader(FT_Face inFace) {
+	// get main readers stream for a face. if it  exits it's always the first one (the second in the list, if exists, is additional metrics file)
+	if(!inFace)
+		return NULL;
 
-void FreeTypeWrapper::RegisterStreamForFace(FT_Face inFace,FT_Stream inStream)
-{
-	FTFaceToFTStreamListMap::iterator it = mOpenStreams.find(inFace);
-	if(it == mOpenStreams.end())
-		it = mOpenStreams.insert(FTFaceToFTStreamListMap::value_type(inFace,FTStreamList())).first;
-	it->second.push_back(inStream);
+	FTFaceToStreamWithOwnershipListMap::iterator it = mOpenReaders.find(inFace);
+	if(it == mOpenReaders.end())
+		return NULL;
+
+	if(it->second.empty())
+		return NULL;
+
+	StreamWithOwnership& streamWithOwnership = it->second.front();
+	if(!streamWithOwnership.stream)
+		return NULL;
+
+	return streamWithOwnership.stream;
 }
 
 
 FT_Face FreeTypeWrapper::NewFace(const std::string& inFilePath,const std::string& inSecondaryFilePath,FT_Long inFontIndex)
 {
 	FT_Open_Args attachStreamArguments = {0};
-
 	FT_Face face = NewFace(inFilePath,inFontIndex);
-	if(face)
+	if(!face)
+		return NULL;
+
+	EStatusCode status = eSuccess;
+	InputBufferedStream* inputBufferedFileReadSteam = NULL;
+	FT_Stream attachFTStream = NULL;
+	do
 	{
-		do
+		// secondary file attachment
+		inputBufferedFileReadSteam = InputFile::CreateBufferedReadStream(inSecondaryFilePath);
+		if(!inputBufferedFileReadSteam) {
+			TRACE_LOG1("FreeTypeWrapper::NewFace,  Cannot Open secondary file path for reading %s", inSecondaryFilePath.c_str());
+			status = eFailure;
+			break;
+		}
+		LongFilePositionType totalSize = ((InputFileStream*)inputBufferedFileReadSteam->GetSourceStream())->GetFileSize();
+
+		if(totalSize == 0) {
+			TRACE_LOG("FreeTypeWrapper::NewFace, exception, input secondary stream size is 0");
+			status = eFailure;
+			break;
+		}
+		if(totalSize > (IOBasicTypes::LongFilePositionType)0x7fffffff) {
+			TRACE_LOG("FreeTypeWrapper::NewFace, exception, input secondary stream size is too large for FreeType FT_Long");
+			status = eFailure;
+			break;
+		}		
+
+		attachFTStream = CreateFTStreamForIByteWriterWithPosition(inputBufferedFileReadSteam, (unsigned long)totalSize);
+		FillOpenFaceArgumentsForFTStream(attachFTStream, attachStreamArguments);		
+
+		FT_Error ftStatus = FT_Attach_Stream(face,&attachStreamArguments);
+		if(ftStatus != 0)
 		{
-			if(FillOpenFaceArgumentsForUTF8String(inSecondaryFilePath,attachStreamArguments) != PDFHummus::eSuccess)
-			{
-				DoneFace(face);
-				face = NULL;
-				break;
-			}
+			const char* errMsg = FT_Error_String(ftStatus);
+			TRACE_LOG1("FreeTypeWrapper::NewFace, unable to attache secondary file %s",inSecondaryFilePath.c_str());
+			TRACE_LOG2("FreeTypeWrapper::NewFace, Free Type Error, Code = %d, Message = %s",ftStatus,errMsg ? errMsg : "");
+			status = eFailure;
+			break;
+		}
 
-			FT_Error ftStatus = FT_Attach_Stream(face,&attachStreamArguments);
-			if(ftStatus != 0)
-			{
-				const char* errMsg = FT_Error_String(ftStatus);
-				TRACE_LOG1("FreeTypeWrapper::NewFace, unable to load secondary file %s",inSecondaryFilePath.c_str());
-				TRACE_LOG2("FreeTypeWrapper::NewFace, Free Type Error, Code = %d, Message = %s",ftStatus,errMsg ? errMsg : "");
-				DoneFace(face);
-				face = NULL;
-			}
-		}while(false);
+		RegisterStreamForFace(face, attachFTStream, inputBufferedFileReadSteam, true);
+	}while(false);
 
-		if(!face)
-			CloseOpenFaceArgumentsStream(attachStreamArguments);
-		else
-			RegisterStreamForFace(face,attachStreamArguments.stream);
-
+	if(status != eSuccess)
+	{
+		// release both stream and underlying input stream
+		ReleaseStreamForFace(attachFTStream, inputBufferedFileReadSteam, true);
+		// this should clean up also the original attached streams for the face, and close it
+		DoneFace(face);
+		face = NULL;
 	}
+
 
 	return face;	
 }
 
+void FreeTypeWrapper::CleanStreamsForFace(FT_Face inFace) {
+	// clean readers streams for the face
+	FTFaceToStreamWithOwnershipListMap::iterator it = mOpenReaders.find(inFace);
+	if(it != mOpenReaders.end()) {
+		CleanReaderStreamsList(it->second);
+		mOpenReaders.erase(it);
+	}
+
+	// clean FT streams for the face
+	FTFaceToFTStreamListMap::iterator itFtStream = mOpenFTStreams.find(inFace);
+	if(itFtStream != mOpenFTStreams.end()) {
+		CleanFtStreamsList(itFtStream->second);
+		mOpenFTStreams.erase(itFtStream);
+	}
+}
 
 FT_Error FreeTypeWrapper::DoneFace(FT_Face ioFace)
 {
 	FT_Error status = FT_Done_Face(ioFace);
 	CleanStreamsForFace(ioFace);
-	CleanMemoryFace(ioFace);
 	return status;
-}
-
-void FreeTypeWrapper::CleanStreamsForFace(FT_Face inFace)
-{
-	FTFaceToFTStreamListMap::iterator it = mOpenStreams.find(inFace);
-	if(it != mOpenStreams.end())
-	{
-		FTStreamList::iterator itStreams = it->second.begin();
-		for(; itStreams != it->second.end();++itStreams)
-		{
-			delete *itStreams;
-		}
-		mOpenStreams.erase(it);
-	}
-}
-
-void FreeTypeWrapper::CleanMemoryFace(FT_Face inFace)
-{
-	std::map<FT_Face,FT_Byte*>::iterator it = mOpenMemoryFaces.find(inFace);
-	if(it != mOpenMemoryFaces.end())
-	{
-		delete[] it->second;
-		mOpenMemoryFaces.erase(it);
-	}
 }
 
 FT_Library FreeTypeWrapper::operator->()
@@ -241,12 +318,24 @@ FT_Library FreeTypeWrapper::operator->()
 	return mFreeType;
 }
 
-static unsigned long InputFileReadSeek(	   FT_Stream	   stream,
-										   unsigned long   offset,
-										   unsigned char*  buffer,
-										   unsigned long   count)
+static IByteReaderWithPosition* GetFTStreamReader(FT_Stream inStream) {
+	if(!inStream)
+		return NULL;
+
+	if(!inStream->descriptor.pointer)
+		return NULL;
+
+	return (IByteReaderWithPosition*)(inStream->descriptor.pointer);
+}
+
+static unsigned long InputStreamReadSeek(FT_Stream	   stream,
+										 unsigned long   offset,
+										 unsigned char*  buffer,
+										 unsigned long   count)
 {
-	IByteReaderWithPosition* inputFileStream = ((InputFile*)(stream->descriptor.pointer))->GetInputStream();	
+	IByteReaderWithPosition* inputFileStream = GetFTStreamReader(stream);
+	if(!inputFileStream)
+		return 0;
 	unsigned long readBytes = 0;
 	
 	inputFileStream->SetPosition(offset);
@@ -255,37 +344,22 @@ static unsigned long InputFileReadSeek(	   FT_Stream	   stream,
 	return readBytes;
 }
 
-static void InputFileClose(FT_Stream  stream)
-{
-	delete (InputFile*)(stream->descriptor.pointer);
-	stream->descriptor.pointer = NULL;
-}
-
-FT_Stream FreeTypeWrapper::CreateFTStreamForPath(const std::string& inFilePath)
-{
-	InputFile* inputFile = new InputFile;
-
-	if(inputFile->OpenFile(inFilePath) != PDFHummus::eSuccess)
-	{
-		delete inputFile;
-		return NULL;
-	}
-
+FT_Stream FreeTypeWrapper::CreateFTStreamForIByteWriterWithPosition(IByteReaderWithPosition* inInputStream, unsigned long inSize) {
 	FT_Stream aStream = new FT_StreamRec();
-
 	aStream->base = NULL;
-	aStream->size = (unsigned long)inputFile->GetFileSize();
+	aStream->size = inSize;
 	aStream->pos = 0;
-	aStream->descriptor.pointer = inputFile;
+	aStream->descriptor.pointer =  inInputStream;
 	aStream->pathname.pointer = NULL;
-	aStream->read = InputFileReadSeek;
-	aStream->close = InputFileClose;
+	aStream->read = InputStreamReadSeek;
+	aStream->close = InputStreamClose;
 	aStream->memory = NULL;
 	aStream->cursor = NULL;
 	aStream->limit = NULL;
 
 	return aStream;
 }
+
 
 FreeTypeWrapper::operator FT_Library() const
 {

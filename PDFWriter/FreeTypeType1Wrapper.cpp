@@ -21,11 +21,25 @@
 #include "FreeTypeType1Wrapper.h"
 #include "InputFile.h"
 #include "Trace.h"
+#include "FreeTypeWrapper.h"
 
 
-
-FreeTypeType1Wrapper::FreeTypeType1Wrapper(FT_Face inFace,const std::string& inFontFilePath,const std::string& inPFMFilePath)
+static std::string getExtension(const std::string& inFilePath)
 {
+	std::string::size_type dotPosition = inFilePath.rfind(".");
+
+	if(inFilePath.npos == dotPosition || (inFilePath.size() - 1) == dotPosition)
+		return "";
+	else
+		return inFilePath.substr(dotPosition + 1);
+}
+
+
+
+FreeTypeType1Wrapper::FreeTypeType1Wrapper(FT_Face inFace, FreeTypeWrapper* inInputFontsInformation,const std::string& inPFMFilePath)
+{
+	mInputFontsInformation = inInputFontsInformation;
+
 	if(FT_Get_PS_Font_Info(inFace,&mPSFontInfo) != 0)
 	{
 		TRACE_LOG("Unexpected failure in FreeTypeType1Wrapper::FreeTypeType1Wrapper. could not retrieve PS font info");
@@ -49,23 +63,19 @@ FreeTypeType1Wrapper::FreeTypeType1Wrapper(FT_Face inFace,const std::string& inF
     FT_Long encodingTypeRead = FT_Get_PS_Font_Value(inFace, PS_DICT_ENCODING_TYPE, 0, (void*)&encodingType, sizeof(encodingType));
     mIsCustomEncoding = (encodingTypeRead > 0) && (encodingType == T1_ENCODING_TYPE_ARRAY);
 
+	// read additional metrics from pfm file if available
+	std::string fileExtension = inPFMFilePath.size() == 0 ? "" : getExtension(inPFMFilePath);
 	mPFMFileInfoRelevant = 
-		(inPFMFilePath.size() != 0 && mPFMReader.Read(inPFMFilePath) != PDFHummus::eFailure);
-    
-    // parse type 1 input file (my own parsing), to get extra info about encoding
-    mType1Loaded = false;
-    if(inFontFilePath.size() != 0)
-    {
-        InputFile type1File;
+		(fileExtension == "PFM" || fileExtension == "pfm") && (mPFMReader.Read(inPFMFilePath) != PDFHummus::eFailure);
 
-        if(type1File.OpenFile(inFontFilePath) == PDFHummus::eSuccess)
-        {
-            mType1Loaded = (mType1File.ReadType1File(type1File.GetInputStream()) == PDFHummus::eSuccess);
-            type1File.CloseFile();
-        }
-        else
-            TRACE_LOG("FreeTypeType1Wrapper::FreeTypeType1Wrapper, unable to open the type 1 font file for private encoding parsing");
-    }
+	IByteReaderWithPosition* fontReader = mInputFontsInformation->GetFontReader(inFace);
+
+	if(!fontReader) {
+		mType1Loaded = false;
+	}
+	else {
+		mType1Loaded = (mType1File.ReadType1File(fontReader) == PDFHummus::eSuccess);
+	}
     
     mFace = inFace;
 }

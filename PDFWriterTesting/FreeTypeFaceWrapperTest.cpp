@@ -77,7 +77,7 @@ static bool GetGlyphOutline_FreshFaceValidOutlineGlyph_ReturnsTrueAndEmitsPath(c
 			cout << "FreeTypeFaceWrapperTest [GetGlyphOutline::FreshFaceValidOutlineGlyph_ReturnsTrueAndEmitsPath]: failed to load arial.ttf" << endl;
 			break;
 		}
-		FreeTypeFaceWrapper wrapper(face, "", 0, false);
+		FreeTypeFaceWrapper wrapper(face, &ft,"", 0, false);
 		FT_UInt glyphIndex = FT_Get_Char_Index(face, 'A');
 		if(glyphIndex == 0) {
 			cout << "FreeTypeFaceWrapperTest [GetGlyphOutline::FreshFaceValidOutlineGlyph_ReturnsTrueAndEmitsPath]: no glyph for 'A'" << endl;
@@ -117,7 +117,7 @@ static bool GetGlyphName_FontWithGlyphNames_ReturnsExactName(char* argv[]) {
 			cout << "FreeTypeFaceWrapperTest [GetGlyphName::FontWithGlyphNames_ReturnsExactName]: failed to load arial.ttf" << endl;
 			break;
 		}
-		FreeTypeFaceWrapper wrapper(face, "", 0, false);
+		FreeTypeFaceWrapper wrapper(face,&ft, "", 0, false);
 		FT_UInt glyphIndex = FT_Get_Char_Index(face, 'A');
 		if(glyphIndex == 0) {
 			cout << "FreeTypeFaceWrapperTest [GetGlyphName::FontWithGlyphNames_ReturnsExactName]: no glyph for 'A'" << endl;
@@ -154,7 +154,7 @@ static bool GetGlyphName_FontWithoutGlyphNames_ReturnsNotDef(char* argv[]) {
 			cout << "FreeTypeFaceWrapperTest [GetGlyphName::FontWithoutGlyphNames_ReturnsNotDef]: failed to load noto-glyf_colr_1.ttf" << endl;
 			break;
 		}
-		FreeTypeFaceWrapper wrapper(face, "", 0, false);
+		FreeTypeFaceWrapper wrapper(face, &ft, "", 0, false);
 		if(face->num_glyphs < 2) {
 			cout << "FreeTypeFaceWrapperTest [GetGlyphName::FontWithoutGlyphNames_ReturnsNotDef]: unexpected glyph count" << endl;
 			break;
@@ -191,7 +191,7 @@ static bool SelectDefaultPalette_FontWithoutPalette_ReturnsErrorAndZeroedOutputs
 			cout << "FreeTypeFaceWrapperTest [SelectDefaultPalette::FontWithoutPalette_ReturnsErrorAndZeroedOutputs]: failed to load arial.ttf" << endl;
 			break;
 		}
-		FreeTypeFaceWrapper wrapper(face, "", 0, false);
+		FreeTypeFaceWrapper wrapper(face, &ft, "", 0, false);
 		FT_Color* palette = (FT_Color*)0x1; // poison: must be overwritten to NULL
 		unsigned short paletteSize = 0xBEEF; // poison: must be overwritten to 0
 
@@ -232,7 +232,7 @@ static bool SelectDefaultPalette_FontWithPalette_ReturnsOkAndExactEntryCount(cha
 			cout << "FreeTypeFaceWrapperTest [SelectDefaultPalette::FontWithPalette_ReturnsOkAndExactEntryCount]: failed to load noto-glyf_colr_1.ttf" << endl;
 			break;
 		}
-		FreeTypeFaceWrapper wrapper(face, "", 0, false);
+		FreeTypeFaceWrapper wrapper(face, &ft, "", 0, false);
 		FT_Color* palette = NULL;
 		unsigned short paletteSize = 0;
 
@@ -277,7 +277,7 @@ static bool IsCharachterCodeAdobeStandard_PreviouslyReversedRanges_ReturnsTrue(c
 			cout << "FreeTypeFaceWrapperTest [IsCharachterCodeAdobeStandard::PreviouslyReversedRanges_ReturnsTrue]: failed to load arial.ttf" << endl;
 			break;
 		}
-		FreeTypeFaceWrapper wrapper(face, "", 0, false);
+		FreeTypeFaceWrapper wrapper(face, &ft, "", 0, false);
 
 		// circumflex/caron, ring/ogonek, breve/dotaccent, dagger/daggerdbl/bullet
 		const FT_ULong inRange[] = { 0x2C6, 0x2C7, 0x2DA, 0x2DB, 0x2D8, 0x2D9,

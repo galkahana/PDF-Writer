@@ -27,7 +27,7 @@ InputByteArrayStream::InputByteArrayStream()
 	mByteArray = NULL;
 }
 
-InputByteArrayStream::InputByteArrayStream(Byte* inByteArray,LongFilePositionType inArrayLength)
+InputByteArrayStream::InputByteArrayStream(const Byte* inByteArray,LongFilePositionType inArrayLength)
 {
 	mByteArray = inByteArray;
 	mArrayLength = inArrayLength;
@@ -38,7 +38,7 @@ InputByteArrayStream::~InputByteArrayStream(void)
 {
 }
 
-void InputByteArrayStream::Assign(IOBasicTypes::Byte* inByteArray,IOBasicTypes::LongFilePositionType inArrayLength)
+void InputByteArrayStream::Assign(const IOBasicTypes::Byte* inByteArray,IOBasicTypes::LongFilePositionType inArrayLength)
 {
 	mByteArray = inByteArray;
 	mArrayLength = inArrayLength;

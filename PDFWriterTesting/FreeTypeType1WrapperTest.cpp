@@ -69,7 +69,7 @@ static bool Construct_RealType1Font_ResolvesGlyphName(char* argv[]) {
 			break;
 		}
 		FreeTypeFaceWrapper wrapper(face,
-		                            BuildRelativeInputPath(argv, "fonts/HLB_____.PFB"),
+									&ft,
 		                            BuildRelativeInputPath(argv, "fonts/HLB_____.PFM"),
 		                            0, false);
 		if(!wrapper.IsValid()) {
@@ -97,7 +97,7 @@ static bool Construct_RealType1Font_ResolvesGlyphName(char* argv[]) {
 	return ok;
 }
 
-// V-083: a valid Type 1 FT_Face with a bad font-file path - OpenFile fails
+// V-083: a valid Type 1 FT_Face with a bad pfm font-file path - OpenFile fails
 // while the face is still usable (the race / permission scenario the
 // finding describes). Post-fix mType1Loaded stays false and
 // GetPrivateGlyphName returns .notdef instead of reading an indeterminate
@@ -114,7 +114,7 @@ static bool Construct_BadFontPath_PrivateGlyphNameIsNotDef(char* argv[]) {
 			cout << "FreeTypeType1WrapperTest [Construct::BadFontPath_PrivateGlyphNameIsNotDef]: failed to load HLB_____.PFB" << endl;
 			break;
 		}
-		FreeTypeType1Wrapper wrapper(face, "/no/such/type1/font.pfb", "");
+		FreeTypeType1Wrapper wrapper(face, &ft, "/no/such/type1/font.pfm");
 
 		// Act
 		string name = wrapper.GetPrivateGlyphName(0);
@@ -145,7 +145,7 @@ static bool Construct_NonPostScriptFace_HasPrivateEncodingIsFalse(char* argv[]) 
 			cout << "FreeTypeType1WrapperTest [Construct::NonPostScriptFace_HasPrivateEncodingIsFalse]: failed to load arial.ttf" << endl;
 			break;
 		}
-		FreeTypeType1Wrapper wrapper(face, "", "");
+		FreeTypeType1Wrapper wrapper(face, &ft, "");
 
 		// Act
 		bool hasPrivateEncoding = wrapper.HasPrivateEncoding();

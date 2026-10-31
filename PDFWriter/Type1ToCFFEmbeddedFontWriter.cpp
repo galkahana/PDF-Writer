@@ -219,22 +219,14 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::CreateCFFSubset(
 		if(subsetGlyphIDs.front() != 0) // make sure 0 glyph is in
 			subsetGlyphIDs.insert(subsetGlyphIDs.begin(),0);
 
-		IByteReaderWithPosition* fontStream;
-		if(inFontInfo.IsMemoryFont())
+		IByteReaderWithPosition* fontStream = inFontInfo.GetFontReader();
+		if(!fontStream)
 		{
-			mMemoryFontStream.Assign(inFontInfo.GetFontBuffer(), inFontInfo.GetFontBufferLength());
-			fontStream = &mMemoryFontStream;
+			TRACE_LOG("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, failed to get font stream from FreeTypeFaceWrapper");
+			status = PDFHummus::eFailure;
+			break;
 		}
-		else
-		{
-			status = mType1File.OpenFile(inFontInfo.GetFontFilePath());
-			if(status != PDFHummus::eSuccess)
-			{
-				TRACE_LOG1("Type1ToCFFEmbeddedFontWriter::CreateCFFSubset, cannot open Type 1 font file at %s",inFontInfo.GetFontFilePath().c_str());
-				break;
-			}
-			fontStream = mType1File.GetInputStream();
-		}
+		fontStream->SetPosition(0); // reset stream position to start (more precise would be to save the original position)
 
 		status = mType1Input.ReadType1File(fontStream);
 		if(status != PDFHummus::eSuccess)
@@ -351,7 +343,6 @@ EStatusCode Type1ToCFFEmbeddedFontWriter::CreateCFFSubset(
 		}
 	}while(false);
 
-	mType1File.CloseFile();
 	FreeTemporaryStructs();
 	return status;	
 }

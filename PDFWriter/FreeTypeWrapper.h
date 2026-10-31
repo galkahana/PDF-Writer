@@ -36,32 +36,57 @@
 typedef std::list<FT_Stream> FTStreamList;
 typedef std::map<FT_Face,FTStreamList> FTFaceToFTStreamListMap;
 
+class IByteReaderWithPosition;
+
+struct StreamWithOwnership {
+	IByteReaderWithPosition* stream;
+	bool ownsStream;
+};
+
+typedef std::list<StreamWithOwnership> StreamWithOwnershipList;
+typedef std::map<FT_Face,StreamWithOwnershipList> FTFaceToStreamWithOwnershipListMap;
+
+class IByteReaderWithPosition;
+
 class FreeTypeWrapper
 {
 public:
 	FreeTypeWrapper(void);
 	~FreeTypeWrapper(void);
 
+	// For fonts loaded from file
 	FT_Face NewFace(const std::string& inFilePath,FT_Long inFontIndex);
-	FT_Face NewFace(const std::vector<IOBasicTypes::Byte>& inFontBuffer,FT_Long inFontIndex);
+	// specific for type 1 fonts loaded from file with an additional file (e.g., .afm or .pfm)
 	FT_Face NewFace(const std::string& inFilePath,const std::string& inSecondaryFilePath,FT_Long inFontIndex);
+	// For fonts loaded from memory buffers (1 file variant)
+	FT_Face NewFace(const std::vector<IOBasicTypes::Byte>& inFontBuffer,FT_Long inFontIndex);
+	// For fonts loaded from read streams (1 file variant)
+	FT_Face NewFace(IByteReaderWithPosition* inFontStream,FT_Long inFontIndex);
 	FT_Error DoneFace(FT_Face ioFace);
 
 	FT_Library operator->();
 	operator FT_Library() const;
 
+
+	IByteReaderWithPosition* GetFontReader(FT_Face inFace);
+
 private:
 
 	FT_Library mFreeType;
-	FTFaceToFTStreamListMap mOpenStreams;
-	std::map<FT_Face,FT_Byte*> mOpenMemoryFaces;
+	// Freetype streams. those are provided to FTFace to provide custom reading
+	FTFaceToFTStreamListMap mOpenFTStreams;
+	// Underlying readers that are provided to FreeType streams. 
+	// including ownership information to allow different handling of internal and external streams
+	FTFaceToStreamWithOwnershipListMap mOpenReaders;
 
-	FT_Stream CreateFTStreamForPath(const std::string& inFilePath);
-	PDFHummus::EStatusCode FillOpenFaceArgumentsForUTF8String(const std::string& inFilePath, FT_Open_Args& ioArgs);
-	void CloseOpenFaceArgumentsStream(FT_Open_Args& ioArgs);
-	void RegisterStreamForFace(FT_Face inFace,FT_Stream inStream);
+	FT_Face NewFace(IByteReaderWithPosition* inStream, bool inOwnsStream, IOBasicTypes::LongFilePositionType inSize, FT_Long inFontIndex);
+	FT_Stream CreateFTStreamForIByteWriterWithPosition(IByteReaderWithPosition* inInputStream, unsigned long inSize);
+	void FillOpenFaceArgumentsForFTStream(FT_Stream inStream, FT_Open_Args& ioArgs);
+	void RegisterStreamForFace(FT_Face inFace,FT_Stream inFtStream, IByteReaderWithPosition* inReader, bool inOwnsStream);
+	void ReleaseStreamForFace(FT_Stream inFtStream, IByteReaderWithPosition* inReader, bool inOwnsStream);
+
+
 	void CleanStreamsForFace(FT_Face inFace);
-    void CleanMemoryFace(FT_Face inFace);
 
 
 };

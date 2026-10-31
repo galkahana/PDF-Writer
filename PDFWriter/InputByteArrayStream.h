@@ -26,10 +26,10 @@ class InputByteArrayStream : public IByteReaderWithPosition
 {
 public:
 	InputByteArrayStream();
-	InputByteArrayStream(IOBasicTypes::Byte* inByteArray,LongFilePositionType inArrayLength);
+	InputByteArrayStream(const IOBasicTypes::Byte* inByteArray,LongFilePositionType inArrayLength);
 	~InputByteArrayStream(void);
 
-	void Assign(IOBasicTypes::Byte* inByteArray,LongFilePositionType inArrayLength);
+	void Assign(const IOBasicTypes::Byte* inByteArray,LongFilePositionType inArrayLength);
 
 	// IByteReaderWithPosition implementation
 	virtual LongBufferSizeType Read(IOBasicTypes::Byte* inBuffer,LongBufferSizeType inBufferSize);
@@ -41,7 +41,7 @@ public:
 
 private:
 
-	IOBasicTypes::Byte* mByteArray;
+	const IOBasicTypes::Byte* mByteArray;
 	LongFilePositionType mArrayLength;
 	LongFilePositionType mCurrentPosition;
 

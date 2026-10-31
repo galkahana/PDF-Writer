@@ -36,6 +36,8 @@
 class IFreeTypeFaceExtender;
 class IWrittenFont;
 class ObjectsContext;
+class IByteReaderWithPosition;
+class FreeTypeWrapper;
 
 
 
@@ -51,16 +53,12 @@ class FreeTypeFaceWrapper
 public:
 	class IOutlineEnumerator;
 
-	// first overload - all but type ones. the file path is just given for storage (later queries may want it)
-	FreeTypeFaceWrapper(FT_Face inFace,const std::string& inFontFilePath,long inFontIndex,bool inDoOwn = true);
-
-	// second overload - type 1, to allow passing pfm file path. do not bother
-	// if you don't have a PFM file. no i don't care about the godamn AFM file. just the PFM.
-	// if you don't have a PFM i'll manage. again - i don't need the @#$@#$ AFM file. 
-	// you see. i need to know if the font is serif, script 'n such. AFM - even if there
-	// does not have that kind of info. so @#$@#$ off.
-	// for any case, i'll check the file extension, and only do something about it if it has a pfm extension
-	FreeTypeFaceWrapper(FT_Face inFace,const std::string& inFontFilePath,const std::string& inPFMFilePath,long inFontIndex,bool inDoOwn = true);
+	// inAdditionalMetricsFontFilePath is only relevant for type 1 fonts and only relevant if this is a PFM file.
+	// in other cases, or if you do not possess a PFM file, don't bother passing anything. the library will function well without
+	// a PFM file if one is not available...but if it is...better.
+	// PFM file is required to learn if the font is serif, script 'n such. 	
+	// Note: inFace is OWNED by this wrapper, and will be released when the wrapper is destroyed.
+	FreeTypeFaceWrapper(FT_Face inFace, FreeTypeWrapper* inInputFontsInformation,const std::string& inAdditionalMetricsFontFilePath,long inFontIndex,bool inDoOwn = true);
 	~FreeTypeFaceWrapper(void);
 
 	FT_Error DoneFace();
@@ -101,15 +99,9 @@ public:
 	// will be used externally to determine if font is symbolic or not
 	bool IsCharachterCodeAdobeStandard(FT_ULong inCharacterCode);
 
-	const std::string& GetFontFilePath();
     long GetFontIndex();
 
-	// memory streams have read==NULL; file streams always have a read function
-	bool IsMemoryFont() const { return mFace && mFace->stream && mFace->stream->read == NULL; }
-	IOBasicTypes::Byte* GetFontBuffer() const { return (mFace && mFace->stream) ? (IOBasicTypes::Byte*)mFace->stream->base : NULL; }
-	IOBasicTypes::LongFilePositionType GetFontBufferLength() const { return (mFace && mFace->stream) ? (IOBasicTypes::LongFilePositionType)mFace->stream->size : 0; }
-
-
+	IByteReaderWithPosition* GetFontReader();
 	// use this method to align measurements from (remember the dreaded point per EM!!!).
 	// all measurements in this class are already aligned...so no need to align them
 	FT_Short GetInPDFMeasurements(FT_Short inFontMeasurement);
@@ -133,8 +125,8 @@ private:
 
 	FT_Face mFace;
 	IFreeTypeFaceExtender* mFormatParticularWrapper;
+	FreeTypeWrapper* mInputFontsInformation;
 	bool mHaslowercase;
-	std::string mFontFilePath;
     long mFontIndex;
     std::string mNotDefGlyphName;
 	bool mGlyphIsLoaded;
@@ -151,8 +143,7 @@ private:
 	FT_UShort GetStemVInternal(); 
 
 
-	std::string GetExtension(const std::string& inFilePath);
-	void SetupFormatSpecificExtender(const std::string& inFilePath, const std::string& inPFMFilePath);
+	void SetupFormatSpecificExtender(const std::string& inAdditionalMetricsFontFilePath);
 	BoolAndFTShort CapHeightFromHHeight();
 	BoolAndFTShort XHeightFromLowerXHeight();
 	BoolAndFTShort GetYBearingForUnicodeChar(unsigned short unicodeCharCode);

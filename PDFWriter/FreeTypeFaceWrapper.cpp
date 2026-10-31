@@ -26,6 +26,7 @@
 #include "BetweenIncluding.h"
 #include "WrittenFontCFF.h"
 #include "WrittenFontTrueType.h"
+#include "FreeTypeWrapper.h"
 
 #include <math.h>
 
@@ -36,33 +37,16 @@
 
 using namespace PDFHummus;
 
-FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const std::string& inFontFilePath,long inFontIndex,bool inDoOwn)
-{
-	mFace = inFace;
-	mFontFilePath = inFontFilePath;
-	mFontIndex = inFontIndex;
-	mDoesOwn = inDoOwn;
-	mGlyphIsLoaded = false;
-	mCurrentGlyph = 0;
-	ResetPaletteSelectionState();
-	SetupFormatSpecificExtender(inFontFilePath, "");
-	SelectDefaultEncoding();
-}
-
-FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace,const std::string& inFontFilePath,const std::string& inPFMFilePath,long inFontIndex, bool inDoOwn)
+FreeTypeFaceWrapper::FreeTypeFaceWrapper(FT_Face inFace, FreeTypeWrapper* inInputFontsInformation,const std::string& inAdditionalMetricsFontFilePath,long inFontIndex,bool inDoOwn)
 {
     mFace = inFace;
-	mFontFilePath = inFontFilePath;
+    mInputFontsInformation = inInputFontsInformation;
     mFontIndex = inFontIndex;
-	mDoesOwn = inDoOwn;
 	mGlyphIsLoaded = false;
 	mCurrentGlyph = 0;
+	mDoesOwn = inDoOwn;
 	ResetPaletteSelectionState();
-	std::string fileExtension = GetExtension(inPFMFilePath);
-	if (fileExtension == "PFM" || fileExtension == "pfm") // just don't bother if it's not PFM
-		SetupFormatSpecificExtender(inFontFilePath, inPFMFilePath);
-	else
-		SetupFormatSpecificExtender(inFontFilePath, "");
+	SetupFormatSpecificExtender(inAdditionalMetricsFontFilePath);
 	SelectDefaultEncoding();
 }
 
@@ -108,16 +92,6 @@ std::string FreeTypeFaceWrapper::NotDefGlyphName()
 	return mNotDefGlyphName;
 }
 
-std::string FreeTypeFaceWrapper::GetExtension(const std::string& inFilePath)
-{
-	std::string::size_type dotPosition = inFilePath.rfind(".");
-
-	if(inFilePath.npos == dotPosition || (inFilePath.size() - 1) == dotPosition)
-		return "";
-	else
-		return inFilePath.substr(dotPosition + 1);
-}
-
 FreeTypeFaceWrapper::~FreeTypeFaceWrapper(void)
 {
 	if(mDoesOwn)
@@ -130,7 +104,7 @@ static const char* scTrueType = "TrueType";
 static const char* scCFF = "CFF";
 static const char* scEmpty="";
 
-void FreeTypeFaceWrapper::SetupFormatSpecificExtender(const std::string& inFontFilePath,const std::string& inPFMFilePath /*pass empty if non existant or irrelevant*/)
+void FreeTypeFaceWrapper::SetupFormatSpecificExtender(const std::string& inAdditionalMetricsFontFilePath)
 {
 	if(mFace)
 	{
@@ -143,8 +117,10 @@ void FreeTypeFaceWrapper::SetupFormatSpecificExtender(const std::string& inFontF
 			return;
 		}
 
-		if(strcmp(fontFormat,scType1) == 0)
-			mFormatParticularWrapper = new FreeTypeType1Wrapper(mFace,inFontFilePath,inPFMFilePath);
+		if(strcmp(fontFormat,scType1) == 0) {
+			// create specialized wrapper for type 1 that parses additional info
+			mFormatParticularWrapper = new FreeTypeType1Wrapper(mFace,mInputFontsInformation,inAdditionalMetricsFontFilePath);
+		}
 		else if(strcmp(fontFormat,scCFF) == 0 || strcmp(fontFormat,scTrueType) == 0)
 			mFormatParticularWrapper = new FreeTypeOpenTypeWrapper(mFace);
 		else
@@ -701,14 +677,13 @@ IWrittenFont* FreeTypeFaceWrapper::CreateWrittenFontObject(ObjectsContext* inObj
 		return NULL;	
 }
 
-const std::string& FreeTypeFaceWrapper::GetFontFilePath()
-{
-	return mFontFilePath;
-}
-
 long FreeTypeFaceWrapper::GetFontIndex()
 {
     return mFontIndex;
+}
+
+IByteReaderWithPosition* FreeTypeFaceWrapper::GetFontReader() {
+	return mInputFontsInformation->GetFontReader(mFace);
 }
 
 FT_Short FreeTypeFaceWrapper::GetInPDFMeasurements(FT_Short inFontMeasurement)

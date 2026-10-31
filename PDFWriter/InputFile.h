@@ -38,6 +38,10 @@ public:
 	PDFHummus::EStatusCode OpenFile(const std::string& inFilePath);
 	PDFHummus::EStatusCode CloseFile();
 
+
+    // public method you can use independently to create read stream that's equivalent to what InputFile uses internally
+    static InputBufferedStream* CreateBufferedReadStream(const std::string& inFilePath);
+
 	IByteReaderWithPosition* GetInputStream(); // returns buffered input stream
 	const std::string& GetFilePath();
 	
@@ -46,5 +50,4 @@ public:
 private:
 	std::string mFilePath;
 	InputBufferedStream* mInputStream;
-	InputFileStream* mFileStream;
 };

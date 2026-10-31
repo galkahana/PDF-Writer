@@ -24,7 +24,6 @@
 #include "ObjectsBasicTypes.h"
 #include "OpenTypeFileInput.h"
 #include "MyStringBuf.h"
-#include "InputFile.h"
 #include "CFFPrimitiveWriter.h"
 #include "OutputStringBufferStream.h"
 #include "IOBasicTypes.h"
@@ -91,7 +90,6 @@ public:
 
 private:
 	OpenTypeFileInput mOpenTypeInput;
-	InputFile mOpenTypeFile;
 	InputByteArrayStream mMemoryFontStream;
 	IByteReaderWithPosition* mFontStream;
 	CFFPrimitiveWriter mPrimitivesWriter;

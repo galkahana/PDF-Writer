@@ -298,9 +298,13 @@ namespace PDFHummus
 
 		// Font [Text] (font index is for multi-font files. for single file fonts, pass 0)
 		PDFUsedFont* GetFontForFile(const std::string& inFontFilePath,long inFontIndex);
-		PDFUsedFont* GetFontForFile(const std::vector<IOBasicTypes::Byte>& inFontBuffer,long inFontIndex);
 		// second overload is for type 1, when an additional metrics file is available
 		PDFUsedFont* GetFontForFile(const std::string& inFontFilePath,const std::string& inAdditionalMeticsFilePath,long inFontIndex);
+		// variant for fonts provided as memory buffers (only single file version)
+		PDFUsedFont* GetFontForFile(const std::vector<IOBasicTypes::Byte>& inFontBuffer,long inFontIndex);
+		// variant for fonts provided as read streams (only single file version)
+		PDFUsedFont* GetFontForStream(IByteReaderWithPosition* inFontStream,long inFontIndex);
+
 
 		// URL should be encoded to be a valid URL, ain't gonna be checking that!
 		PDFHummus::EStatusCode AttachURLLinktoCurrentPage(const std::string& inURL,const PDFRectangle& inLinkClickArea);

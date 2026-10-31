@@ -278,9 +278,16 @@ public:
 	// fonts [text], font index is provided for multi-font file packages (such as dfont and ttc), 0 the default is
     // what should be passed for single-font files
 	PDFUsedFont* GetFontForFile(const std::string& inFontFilePath,long inFontIndex = 0);
-	PDFUsedFont* GetFontForFile(const std::vector<IOBasicTypes::Byte>& inFontBuffer,long inFontIndex = 0);
 	// second overload is for type 1, when an additional metrics file is available
 	PDFUsedFont* GetFontForFile(const std::string& inFontFilePath,const std::string& inAdditionalMeticsFilePath,long inFontIndex = 0);
+	// variant for fonts provided as memory buffers (only single file version)
+	// Important! The memory buffer must remain valid for the lifetime of the used font (till end of PDF file writing).
+	PDFUsedFont* GetFontForFile(const std::vector<IOBasicTypes::Byte>& inFontBuffer,long inFontIndex = 0);
+	// variant for fonts provided as read streams (only single file version)
+	// Important! The font stream must remain valid for the lifetime of the used font (till end of PDF file writing).
+	// Important 2! The font stream is NOT owned by PDFWriter, it will not be deleted by it. You must delete it when it is no longer needed (which is at least after pdf writing is done).
+	PDFUsedFont* GetFontForStream(IByteReaderWithPosition* inFontStream,long inFontIndex = 0);
+
 
 	// URL links
 	// URL should be encoded to be a valid URL, ain't gonna be checking that!

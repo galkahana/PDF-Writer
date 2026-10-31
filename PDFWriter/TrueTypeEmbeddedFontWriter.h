@@ -24,7 +24,6 @@
 #include "ObjectsBasicTypes.h"
 #include "OpenTypeFileInput.h"
 #include "OutputStringBufferStream.h"
-#include "InputFile.h"
 #include "TrueTypePrimitiveWriter.h"
 #include "InputStringBufferStream.h"
 #include "OpenTypePrimitiveReader.h"
@@ -60,7 +59,6 @@ public:
 
 private:
 	OpenTypeFileInput mTrueTypeInput;
-	InputFile mTrueTypeFile;
 	InputByteArrayStream mMemoryFontStream;
 	IByteReaderWithPosition* mFontStream;
 	OutputStringBufferStream mFontFileStream;

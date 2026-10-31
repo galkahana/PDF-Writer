@@ -139,21 +139,14 @@ EStatusCode CFFEmbeddedFontWriter::CreateCFFSubset(
 	do
 	{
 
-		if(inFontInfo.IsMemoryFont())
+		mFontStream = inFontInfo.GetFontReader();
+		if(!mFontStream)
 		{
-			mMemoryFontStream.Assign(inFontInfo.GetFontBuffer(), inFontInfo.GetFontBufferLength());
-			mFontStream = &mMemoryFontStream;
+			TRACE_LOG("CFFEmbeddedFontWriter::CreateCFFSubset, failed to get font stream from FreeTypeFaceWrapper");
+			status = PDFHummus::eFailure;
+			break;
 		}
-		else
-		{
-			status = mOpenTypeFile.OpenFile(inFontInfo.GetFontFilePath());
-			if(status != PDFHummus::eSuccess)
-			{
-				TRACE_LOG1("CFFEmbeddedFontWriter::CreateCFFSubset, cannot open type font file at %s",inFontInfo.GetFontFilePath().c_str());
-				break;
-			}
-			mFontStream = mOpenTypeFile.GetInputStream();
-		}
+		mFontStream->SetPosition(0); // reset stream position to start (more precise would be to save the original position)
 
 		status = mOpenTypeInput.ReadOpenTypeFile(mFontStream,(unsigned short)inFontInfo.GetFontIndex());
 		if(status != PDFHummus::eSuccess)
@@ -285,7 +278,6 @@ EStatusCode CFFEmbeddedFontWriter::CreateCFFSubset(
 		}
 	}while(false);
 
-	mOpenTypeFile.CloseFile();
 	return status;
 }
 
