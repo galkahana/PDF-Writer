@@ -1504,8 +1504,6 @@ PDFFormXObject* DocumentContext::CreateFormXObjectFromJPGFile(const std::string&
 }
 
 
-
-
 PDFUsedFont* DocumentContext::GetFontForFile(const std::string& inFontFilePath,long inFontIndex)
 {
 	return mUsedFontsRepository.GetFontForFile(inFontFilePath,inFontIndex);
@@ -1514,6 +1512,11 @@ PDFUsedFont* DocumentContext::GetFontForFile(const std::string& inFontFilePath,l
 PDFUsedFont* DocumentContext::GetFontForFile(const std::vector<IOBasicTypes::Byte>& inFontBuffer,long inFontIndex)
 {
 	return mUsedFontsRepository.GetFontForFile(inFontBuffer,inFontIndex);
+}
+
+PDFUsedFont* DocumentContext::GetFontForStream(IByteReaderWithPosition* inFontStream,long inFontIndex)
+{
+	return mUsedFontsRepository.GetFontForStream(inFontStream,inFontIndex);
 }
 
 EStatusCode DocumentContext::WriteUsedFontsDefinitions()

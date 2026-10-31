@@ -72,40 +72,34 @@ PDFUsedFont* UsedFontsRepository::GetFontForFile(const std::string& inFontFilePa
 	}
 
 	StringAndLongToPDFUsedFontMap::iterator it = mUsedFonts.find(StringAndLong(inFontFilePath,inFontIndex));
-	if(it == mUsedFonts.end())
+	if(it != mUsedFonts.end())
+		return it->second;
+
+	if(!mInputFontsInformation)
+		mInputFontsInformation = new FreeTypeWrapper();
+
+
+	FT_Face face;
+	if(inOptionalMetricsFile.size() > 0)
 	{
-		if(!mInputFontsInformation)
-			mInputFontsInformation = new FreeTypeWrapper();
-
-
-		FT_Face face;
-		if(inOptionalMetricsFile.size() > 0)
-		{
-			face = mInputFontsInformation->NewFace(inFontFilePath,inOptionalMetricsFile,inFontIndex);
-			mOptionaMetricsFiles.insert(StringToStringMap::value_type(inFontFilePath,inOptionalMetricsFile));
-		}
-		else
-			face = mInputFontsInformation->NewFace(inFontFilePath,inFontIndex);
-		if(!face)
-		{
-			TRACE_LOG1("UsedFontsRepository::GetFontForFile, Failed to load font from %s",inFontFilePath.c_str());
-			PDFUsedFont* aNull = NULL;
-			it = mUsedFonts.insert(StringAndLongToPDFUsedFontMap::value_type(StringAndLong(inFontFilePath,inFontIndex),aNull)).first;
-		}
-		else
-		{
-
-			PDFUsedFont* usedFont = new PDFUsedFont(face,inFontFilePath,inOptionalMetricsFile,inFontIndex,mObjectsContext,mEmbedFonts);
-			if(!usedFont->IsValid())
-			{
-				TRACE_LOG1("UsedFontsRepository::GetFontForFile, Unrecognized font format for font in %s",inFontFilePath.c_str());
-				delete usedFont;
-				usedFont = NULL;
-			}
-			it = mUsedFonts.insert(StringAndLongToPDFUsedFontMap::value_type(StringAndLong(inFontFilePath,inFontIndex),usedFont)).first;
-
-		}
+		face = mInputFontsInformation->NewFace(inFontFilePath,inOptionalMetricsFile,inFontIndex);
+		mOptionaMetricsFiles.insert(StringToStringMap::value_type(inFontFilePath,inOptionalMetricsFile));
+	} else {
+		face = mInputFontsInformation->NewFace(inFontFilePath,inFontIndex);
 	}
+	if(!face) {
+		TRACE_LOG1("UsedFontsRepository::GetFontForFile, Failed to load font from %s",inFontFilePath.c_str());
+		return NULL;
+	}
+
+	PDFUsedFont* usedFont = new PDFUsedFont(face, mInputFontsInformation,inOptionalMetricsFile,inFontIndex,mObjectsContext,mEmbedFonts);
+	if(!usedFont->IsValid())
+	{
+		TRACE_LOG1("UsedFontsRepository::GetFontForFile, Unrecognized font format for font in %s",inFontFilePath.c_str());
+		delete usedFont;
+		usedFont = NULL;
+	}
+	it = mUsedFonts.insert(StringAndLongToPDFUsedFontMap::value_type(StringAndLong(inFontFilePath,inFontIndex),usedFont)).first;
 	return it->second;
 }
 
@@ -127,17 +121,13 @@ PDFUsedFont* UsedFontsRepository::GetFontForFile(const std::string& inFontFilePa
 	return GetFontForFile(inFontFilePath,"",inFontIndex);
 }
 
+static std::string scMemoryFontPrefix = "memory-font-";
+
 PDFUsedFont* UsedFontsRepository::GetFontForFile(const std::vector<IOBasicTypes::Byte>& inFontBuffer,long inFontIndex)
 {
 	if(!mObjectsContext)
 	{
 		TRACE_LOG("UsedFontsRepository::GetFontForFile, exception, not objects context available");
-		return NULL;
-	}
-
-	if(inFontBuffer.size() == 0)
-	{
-		TRACE_LOG("UsedFontsRepository::GetFontForFile, exception, input memory font buffer is NULL or empty");
 		return NULL;
 	}
 
@@ -153,16 +143,56 @@ PDFUsedFont* UsedFontsRepository::GetFontForFile(const std::vector<IOBasicTypes:
 	}
 
 	const char* psName = FT_Get_Postscript_Name(face);
-	std::string key = std::string("memory-font-") + (psName ? psName : "unknown") + "-" + std::to_string(inFontBuffer.size());
+	std::string key = scMemoryFontPrefix + (psName ? psName : "unknown") + "-" + std::to_string(inFontBuffer.size());
 
 	StringAndLongToPDFUsedFontMap::iterator it = mUsedFonts.find(StringAndLong(key,inFontIndex));
 	if(it != mUsedFonts.end())
 	{
-		mInputFontsInformation->DoneFace(face);
+		mInputFontsInformation->DoneFace(face); // already got an existing font for this key, cleanup this new instances streams
 		return it->second;
 	}
 
-	PDFUsedFont* usedFont = new PDFUsedFont(face,key,"",inFontIndex,mObjectsContext,mEmbedFonts);
+	PDFUsedFont* usedFont = new PDFUsedFont(face,mInputFontsInformation,"",inFontIndex,mObjectsContext,mEmbedFonts);
+	if(!usedFont->IsValid())
+	{
+		TRACE_LOG1("UsedFontsRepository::GetFontForFile, Unrecognized memory font format for key %s",key.c_str());
+		delete usedFont;
+		usedFont = NULL;
+	}
+	
+	it = mUsedFonts.insert(StringAndLongToPDFUsedFontMap::value_type(StringAndLong(key,inFontIndex),usedFont)).first;
+
+	return it->second;
+}
+
+PDFUsedFont* UsedFontsRepository::GetFontForStream(IByteReaderWithPosition* inFontStream,long inFontIndex) {
+	if(!mObjectsContext)
+	{
+		TRACE_LOG("UsedFontsRepository::GetFontForStream, exception, not objects context available");
+		return NULL;
+	}
+
+	if(!mInputFontsInformation)
+		mInputFontsInformation = new FreeTypeWrapper();
+
+	FT_Face face = mInputFontsInformation->NewFace(inFontStream,inFontIndex);
+	if(!face)
+	{
+		TRACE_LOG("UsedFontsRepository::GetFontForStream, Failed to load memory font");
+		return NULL;
+	}
+
+	const char* psName = FT_Get_Postscript_Name(face);
+	std::string key = scMemoryFontPrefix + (psName ? psName : "unknown");
+
+	StringAndLongToPDFUsedFontMap::iterator it = mUsedFonts.find(StringAndLong(key,inFontIndex));
+	if(it != mUsedFonts.end())
+	{
+		mInputFontsInformation->DoneFace(face); // already got an existing font for this key, cleanup this new instances streams
+		return it->second;
+	}
+
+	PDFUsedFont* usedFont = new PDFUsedFont(face,mInputFontsInformation,"",inFontIndex,mObjectsContext,mEmbedFonts);
 	if(!usedFont->IsValid())
 	{
 		TRACE_LOG1("UsedFontsRepository::GetFontForFile, Unrecognized memory font format for key %s",key.c_str());
@@ -200,6 +230,13 @@ EStatusCode UsedFontsRepository::WriteState(ObjectsContext* inStateWriter,Object
 
 	for(; it != mUsedFonts.end();++it)
 	{
+		std::string key = it->first.first;
+		if(key.substr(scMemoryFontPrefix.size()) == scMemoryFontPrefix) {
+			TRACE_LOG("UsedFontsRepository::WriteState, Memory font detected, not supported for writing state. Only file path fonts are supported for saving and restoring state");
+			status = PDFHummus::eFailure;
+			break;
+		}
+		
 		PDFTextString aTextString(it->first.first);
 		inStateWriter->WriteLiteralString(aTextString.ToString());
         
@@ -209,6 +246,8 @@ EStatusCode UsedFontsRepository::WriteState(ObjectsContext* inStateWriter,Object
 		inStateWriter->WriteNewIndirectObjectReference(usedFontID);
 		usedFontsObjects.push_back(usedFontID);
 	}
+	if(status != eSuccess)
+		return status;
 
 	inStateWriter->EndArray(eTokenSeparatorEndLine);
 
@@ -299,6 +338,14 @@ EStatusCode UsedFontsRepository::ReadState(PDFParser* inStateReader,ObjectIDType
 
 		PDFTextString aTextString(keyStringItem->GetValue());
 		std::string filePath = aTextString.ToUTF8String();
+		if(filePath.substr(scMemoryFontPrefix.size()) == scMemoryFontPrefix) {
+			TRACE_LOG("UsedFontsRepository::ReadState, Memory font detected, not supported for restoring state, used file path fonts only");
+			status = PDFHummus::eFailure;
+			break;
+		}
+			
+
+
         long fontIndex = (long)keyIndexItem->GetValue();
 
 		FT_Face face;
@@ -316,9 +363,9 @@ EStatusCode UsedFontsRepository::ReadState(PDFParser* inStateReader,ObjectIDType
 		
 		StringToStringMap::iterator itOptionlMetricsFile = mOptionaMetricsFiles.find(filePath);
 		if(itOptionlMetricsFile != mOptionaMetricsFiles.end())
-			usedFont = new PDFUsedFont(face,filePath,itOptionlMetricsFile->second,fontIndex,mObjectsContext,mEmbedFonts);
+			usedFont = new PDFUsedFont(face,mInputFontsInformation,itOptionlMetricsFile->second,fontIndex,mObjectsContext,mEmbedFonts);
 		else
-			usedFont = new PDFUsedFont(face,filePath,"",fontIndex,mObjectsContext, mEmbedFonts);
+			usedFont = new PDFUsedFont(face,mInputFontsInformation,"",fontIndex,mObjectsContext, mEmbedFonts);
 		if(!usedFont->IsValid())
 		{
 			TRACE_LOG2("UsedFontsRepository::ReadState, Unreckognized font format for font in %s at index %ld",filePath.c_str(),fontIndex);

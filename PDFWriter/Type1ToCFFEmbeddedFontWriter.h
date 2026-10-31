@@ -22,7 +22,6 @@
 #include "EStatusCode.h"
 #include "ObjectsBasicTypes.h"
 #include "Type1Input.h"
-#include "InputFile.h"
 #include "CFFPrimitiveWriter.h"
 #include "OutputStringBufferStream.h"
 #include "MyStringBuf.h"
@@ -63,7 +62,6 @@ public:
 
 private:
 	Type1Input mType1Input;
-	InputFile mType1File;
 	InputByteArrayStream mMemoryFontStream;
 	CFFPrimitiveWriter mPrimitivesWriter;
 	OutputStringBufferStream mFontFileStream;

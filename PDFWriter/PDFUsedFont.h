@@ -83,7 +83,7 @@ public:
 	};
 
 	PDFUsedFont(FT_Face inInputFace,
-				const std::string& inFontFilePath,
+				FreeTypeWrapper* inInputFontsInformation,
 				const std::string& inAdditionalMetricsFontFilePath,
                 long inFontIndex,
 				ObjectsContext* inObjectsContext,

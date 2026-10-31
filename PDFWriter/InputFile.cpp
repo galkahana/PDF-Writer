@@ -28,7 +28,6 @@ using namespace PDFHummus;
 InputFile::InputFile(void)
 {
 	mInputStream = NULL;
-	mFileStream = NULL;
 }
 
 InputFile::~InputFile(void)
@@ -48,20 +47,29 @@ EStatusCode InputFile::OpenFile(const std::string& inFilePath)
 			break;
 		}
 	
-		InputFileStream* inputFileStream = new InputFileStream();
-		status = inputFileStream->Open(inFilePath); // explicitly open, so status may be retrieved
-		if(status != PDFHummus::eSuccess)
+		mInputStream = CreateBufferedReadStream(inFilePath);
+		if(!mInputStream)
 		{
-			TRACE_LOG1("InputFile::OpenFile, Unexpected Failure. Cannot open file for reading - %s",inFilePath.c_str());
-			delete inputFileStream;
+			TRACE_LOG1("InputFile::OpenFile, Unexpected Failure. Cannot create buffered read stream for file - %s",inFilePath.c_str());
+			status = PDFHummus::eFailure;
 			break;
 		}
-
-		mInputStream = new InputBufferedStream(inputFileStream);
-		mFileStream = inputFileStream;
 		mFilePath = inFilePath;
+		status = PDFHummus::eSuccess;
 	} while(false);
 	return status;
+}
+
+InputBufferedStream* InputFile::CreateBufferedReadStream(const std::string& inFilePath)
+{
+	InputFileStream* inputFileStream = new InputFileStream();
+	if(inputFileStream->Open(inFilePath) != PDFHummus::eSuccess)
+	{
+		TRACE_LOG1("InputFile::CreateBufferedReadStream, Unexpected Failure. Cannot open file for reading - %s",inFilePath.c_str());
+		delete inputFileStream;
+		return NULL;
+	}
+	return new InputBufferedStream(inputFileStream);
 }
 
 EStatusCode InputFile::CloseFile()
@@ -72,11 +80,11 @@ EStatusCode InputFile::CloseFile()
 	}
 	else
 	{
-		EStatusCode status = mFileStream->Close(); // explicitly close, so status may be retrieved
+		InputFileStream* fileStream = (InputFileStream*)mInputStream->GetSourceStream();
+		EStatusCode status = fileStream->Close(); // explicitly close, so status may be retrieved
 
 		delete mInputStream; // will delete the referenced file stream as well
 		mInputStream = NULL;
-		mFileStream = NULL;
 		return status;
 	}
 }

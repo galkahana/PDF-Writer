@@ -121,21 +121,14 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 	{
 		UIntVector subsetGlyphIDs = inSubsetGlyphIDs;
 
-		if(inFontInfo.IsMemoryFont())
+		mFontStream = inFontInfo.GetFontReader();
+		if(!mFontStream)
 		{
-			mMemoryFontStream.Assign(inFontInfo.GetFontBuffer(), inFontInfo.GetFontBufferLength());
-			mFontStream = &mMemoryFontStream;
+			TRACE_LOG("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, failed to get font stream from FreeTypeFaceWrapper");
+			status = PDFHummus::eFailure;
+			break;
 		}
-		else
-		{
-			status = mTrueTypeFile.OpenFile(inFontInfo.GetFontFilePath());
-			if(status != PDFHummus::eSuccess)
-			{
-				TRACE_LOG1("TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset, cannot open true type font file at %s",inFontInfo.GetFontFilePath().c_str());
-				break;
-			}
-			mFontStream = mTrueTypeFile.GetInputStream();
-		}
+		mFontStream->SetPosition(0); // reset stream position to start (more precise would be to save the original position)
 
 		status = mTrueTypeInput.ReadOpenTypeFile(mFontStream,(unsigned short)inFontInfo.GetFontIndex());
 		if(status != PDFHummus::eSuccess)
@@ -297,7 +290,6 @@ EStatusCode TrueTypeEmbeddedFontWriter::CreateTrueTypeSubset(	FreeTypeFaceWrappe
 	}while(false);
 
 	delete[] locaTable;
-	mTrueTypeFile.CloseFile();
 	return status;
 }
 

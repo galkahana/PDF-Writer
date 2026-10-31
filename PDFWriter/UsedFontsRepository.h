@@ -35,6 +35,7 @@ class FreeTypeWrapper;
 class PDFUsedFont;
 class ObjectsContext;
 class PDFParser;
+class IByteReaderWithPosition;
 
 typedef std::pair<std::string,long> StringAndLong;
 typedef std::map<StringAndLong,PDFUsedFont*> StringAndLongToPDFUsedFontMap;
@@ -51,9 +52,12 @@ public:
 
 
 	PDFUsedFont* GetFontForFile(const std::string& inFontFilePath,long inFontIndex);
-	PDFUsedFont* GetFontForFile(const std::vector<IOBasicTypes::Byte>& inFontBuffer,long inFontIndex);
 	// second overload is for type 1, when an additional metrics file is available
 	PDFUsedFont* GetFontForFile(const std::string& inFontFilePath,const std::string& inOptionalMetricsFile,long inFontIndex);
+	// variant for fonts provided as memory buffers (only single file version)
+	PDFUsedFont* GetFontForFile(const std::vector<IOBasicTypes::Byte>& inFontBuffer,long inFontIndex);
+	// variant for fonts provided as read streams (only single file version)
+	PDFUsedFont* GetFontForStream(IByteReaderWithPosition* inFontStream,long inFontIndex);
 
 	PDFHummus::EStatusCode WriteUsedFontsDefinitions();
 

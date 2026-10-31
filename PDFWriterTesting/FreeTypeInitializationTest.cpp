@@ -43,7 +43,7 @@ static EStatusCode ShowGlobalFontProperties(FreeTypeWrapper& inFreeType,FT_Face 
 {
 	EStatusCode status = PDFHummus::eSuccess;
 
-	FreeTypeFaceWrapper face(inFace,"",0,false);
+	FreeTypeFaceWrapper face(inFace,&inFreeType, "",0,false);
 
 	cout<<"Font Family = "<<(face->family_name ? face->family_name : "somefont")<<"\n";
 	cout<<"Font Style = "<<(face->style_name ? face->style_name : "somestyle")<<"\n";
