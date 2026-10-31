@@ -22,7 +22,7 @@
 #include "Trace.h"
 #include "InputFile.h"
 #include "IByteReaderWithPosition.h"
-#include "InputByteArrayStream.h"
+#include "InputOwnedByteArrayStream.h"
 #include "InputBufferedStream.h"
 #include "InputFileStream.h"
 
@@ -176,7 +176,7 @@ FT_Face FreeTypeWrapper::NewFace(const std::string& inFilePath,FT_Long inFontInd
 
 FT_Face FreeTypeWrapper::NewFace(const std::vector<IOBasicTypes::Byte>& inFontBuffer,FT_Long inFontIndex)
 {
-	InputByteArrayStream* inputStream = new InputByteArrayStream(inFontBuffer.data(),inFontBuffer.size());
+	InputOwnedByteArrayStream* inputStream = new InputOwnedByteArrayStream(inFontBuffer);
 
 	return NewFace(inputStream,
 		true,
