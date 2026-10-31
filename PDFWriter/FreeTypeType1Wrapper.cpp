@@ -74,6 +74,7 @@ FreeTypeType1Wrapper::FreeTypeType1Wrapper(FT_Face inFace, FreeTypeWrapper* inIn
 		mType1Loaded = false;
 	}
 	else {
+		fontReader->SetPosition(0); // reader is shared with FreeType, which may have left it anywhere
 		mType1Loaded = (mType1File.ReadType1File(fontReader) == PDFHummus::eSuccess);
 	}
     

@@ -173,7 +173,8 @@ FT_Error FreeTypeFaceWrapper::DoneFace()
 {
 	if(mFace)
 	{
-		FT_Error status = FT_Done_Face(mFace);
+		// go through FreeTypeWrapper when available, so it releases the streams it registered for this face
+		FT_Error status = mInputFontsInformation ? mInputFontsInformation->DoneFace(mFace) : FT_Done_Face(mFace);
 		mFace = NULL;
 		delete mFormatParticularWrapper;
 		mFormatParticularWrapper = NULL;

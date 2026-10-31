@@ -93,38 +93,46 @@ FreeTypeWrapper::~FreeTypeWrapper(void)
 FT_Face FreeTypeWrapper::NewFace(IByteReaderWithPosition* inStream, bool inOwnsStream, IOBasicTypes::LongFilePositionType inSize, FT_Long inFontIndex) {
 	FT_Face face = NULL;
 	FT_Open_Args openFaceArguments = {0};
+	FT_Stream ftStream = NULL;
 
 	if(!inStream) {
 		TRACE_LOG("FreeTypeWrapper::NewFace, exception, input stream is NULL");
 		return NULL;
 	}
-	if(inSize == 0) {
-		TRACE_LOG("FreeTypeWrapper::NewFace, exception, input stream size is 0");
-		return NULL;
-	}
-	if(inSize > (IOBasicTypes::LongFilePositionType)0x7fffffff) {
-		TRACE_LOG("FreeTypeWrapper::NewFace, exception, input stream size is too large for FreeType FT_Long");
-		return NULL;
-	}
 
-
-	FT_Stream ftStream = CreateFTStreamForIByteWriterWithPosition(inStream, (unsigned long)inSize);
-	FillOpenFaceArgumentsForFTStream(ftStream, openFaceArguments);
-
-	FT_Error ftStatus =  FT_Open_Face(mFreeType,&openFaceArguments,inFontIndex,&face);
-
-	if(ftStatus)
+	do
 	{
-		const char* errMsg = FT_Error_String(ftStatus);
-		TRACE_LOG1("FreeTypeWrapper::NewFace, unable to load font from stream with index %ld", inFontIndex);
-		TRACE_LOG2("FreeTypeWrapper::NewFace, Free Type Error, Code = %d, Message = %s",ftStatus,errMsg ? errMsg : "");
-		face = NULL;
-	}
+		if(inSize == 0) {
+			TRACE_LOG("FreeTypeWrapper::NewFace, exception, input stream size is 0");
+			break;
+		}
+		if(inSize > (IOBasicTypes::LongFilePositionType)0x7fffffff) {
+			TRACE_LOG("FreeTypeWrapper::NewFace, exception, input stream size is too large for FreeType FT_Long");
+			break;
+		}
 
-	if(!face)
+		ftStream = CreateFTStreamForIByteWriterWithPosition(inStream, (unsigned long)inSize);
+		FillOpenFaceArgumentsForFTStream(ftStream, openFaceArguments);
+
+		FT_Error ftStatus =  FT_Open_Face(mFreeType,&openFaceArguments,inFontIndex,&face);
+
+		if(ftStatus)
+		{
+			const char* errMsg = FT_Error_String(ftStatus);
+			TRACE_LOG1("FreeTypeWrapper::NewFace, unable to load font from stream with index %ld", inFontIndex);
+			TRACE_LOG2("FreeTypeWrapper::NewFace, Free Type Error, Code = %d, Message = %s",ftStatus,errMsg ? errMsg : "");
+			face = NULL;
+		}
+	}while(false);
+
+	if(!face) {
 		ReleaseStreamForFace(ftStream, inStream, inOwnsStream);
-	else
+	}
+	else {
+		// a face freed without DoneFace may leave entries behind, and FreeType may reuse its address for this new face. clear them, so they are not mistaken for this face's streams
+		CleanStreamsForFace(face);
 		RegisterStreamForFace(face,ftStream, inStream, inOwnsStream);
+	}
 	return face;
 }
 
@@ -187,12 +195,17 @@ FT_Face FreeTypeWrapper::NewFace(const std::vector<IOBasicTypes::Byte>& inFontBu
 
 FT_Face FreeTypeWrapper::NewFace(IByteReaderWithPosition* inFontStream,FT_Long inFontIndex)
 {
-	// get total size by seeking to the end and then returning to the original position (we do kinda assume that position 0 is where the font starts in the later embedding readers...)
+	if(!inFontStream) {
+		TRACE_LOG("FreeTypeWrapper::NewFace, exception, input stream is NULL");
+		return NULL;
+	}
+
+	// font is expected to start at position 0 of the stream (all later reads use absolute positions), so its size is the end position.
+	// restore the original position after measuring
 	LongFilePositionType originalPosition = inFontStream->GetCurrentPosition();
 	inFontStream->SetPositionFromEnd(0);
-	LongFilePositionType endPosition = inFontStream->GetCurrentPosition();
-
-	LongFilePositionType totalSize = endPosition - originalPosition;
+	LongFilePositionType totalSize = inFontStream->GetCurrentPosition();
+	inFontStream->SetPosition(originalPosition);
 
 	// stream is NOT owned by FreeTypeWrapper when using this variant of NewFace
 	return NewFace(inFontStream, false, totalSize,inFontIndex);

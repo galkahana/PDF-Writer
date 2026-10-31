@@ -231,7 +231,7 @@ EStatusCode UsedFontsRepository::WriteState(ObjectsContext* inStateWriter,Object
 	for(; it != mUsedFonts.end();++it)
 	{
 		std::string key = it->first.first;
-		if(key.substr(scMemoryFontPrefix.size()) == scMemoryFontPrefix) {
+		if(key.compare(0,scMemoryFontPrefix.size(),scMemoryFontPrefix) == 0) {
 			TRACE_LOG("UsedFontsRepository::WriteState, Memory font detected, not supported for writing state. Only file path fonts are supported for saving and restoring state");
 			status = PDFHummus::eFailure;
 			break;
@@ -338,7 +338,7 @@ EStatusCode UsedFontsRepository::ReadState(PDFParser* inStateReader,ObjectIDType
 
 		PDFTextString aTextString(keyStringItem->GetValue());
 		std::string filePath = aTextString.ToUTF8String();
-		if(filePath.substr(scMemoryFontPrefix.size()) == scMemoryFontPrefix) {
+		if(filePath.compare(0,scMemoryFontPrefix.size(),scMemoryFontPrefix) == 0) {
 			TRACE_LOG("UsedFontsRepository::ReadState, Memory font detected, not supported for restoring state, used file path fonts only");
 			status = PDFHummus::eFailure;
 			break;
