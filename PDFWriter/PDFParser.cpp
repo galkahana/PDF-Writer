@@ -44,6 +44,7 @@
 #include "IPDFParserExtender.h"
 #include "InputDCTDecodeStream.h"
 #include "ArrayOfInputStreamsStream.h"
+#include "InputCappedStream.h"
 
 #include  <algorithm>
 #include <cerrno>
@@ -60,6 +61,10 @@ PDFParser::PDFParser(void)
 	mTrailer = NULL;
 	mPagesObjectIDs = NULL;
 	mParserExtender = NULL;
+	mMaxStreamReadSize = 0;
+	mTruncatedStreamsCount = 0;
+	mReadInterrupt = NULL;
+	mInterruptedStreamsCount = 0;
     mAllowExtendingSegments = true; // Gal 19.9.2013: here's some policy changer. basically i'm supposed to ignore all segments that declare objects past the trailer
                                     // declared size. but i would like to allow files that do extend. as this is incompatible with the specs, i'll make
                                     // this boolean dendent. i will sometimes make it public so ppl can actually modify this policy. for now, it's internal
@@ -84,6 +89,10 @@ void PDFParser::ResetParser()
 	for(; it != mObjectStreamsCache.end();++it)
 		delete[] it->second;
 	mObjectStreamsCache.clear();
+	mMaxStreamReadSize = 0;
+	mTruncatedStreamsCount = 0;
+	mReadInterrupt = NULL;
+	mInterruptedStreamsCount = 0;
 	mDecryptionHelper.Reset();
 	mParsedXrefs.clear();
 	mNewObjectParsingPath.Reset();
@@ -95,6 +104,8 @@ EStatusCode PDFParser::StartPDFParsing(IByteReaderWithPosition* inSourceStream, 
 	EStatusCode status;
 
 	ResetParser();
+	mMaxStreamReadSize = inOptions.MaxStreamReadSize;
+	mReadInterrupt = inOptions.ReadInterrupt;
 
 	mStream.Assign(inSourceStream);
 	mCurrentPositionProvider.Assign(&mStream);
@@ -2145,7 +2156,21 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 		delete result;
 		result = NULL;
 	}
+	else if(result && (mMaxStreamReadSize > 0 || mReadInterrupt))
+	{
+		result = new InputCappedStream(result,mMaxStreamReadSize,mReadInterrupt,&mTruncatedStreamsCount,&mInterruptedStreamsCount);
+	}
 	return result;
+}
+
+unsigned long PDFParser::GetTruncatedStreamsCount()
+{
+	return mTruncatedStreamsCount;
+}
+
+unsigned long PDFParser::GetInterruptedStreamsCount()
+{
+	return mInterruptedStreamsCount;
 }
 
 
@@ -2387,6 +2412,10 @@ PDFObjectParser* PDFParser::StartReadingObjectsFromStream(PDFStreamInput* inStre
 
 PDFObjectParser* PDFParser::StartReadingObjectsFromStreams(PDFArray* inArrayOfStreams) {
 	IByteReader* readStream = new ArrayOfInputStreamsStream(inArrayOfStreams,this);
+	// each stream's reader is capped on its own. cap the whole array too, so that listing one stream
+	// many times does not read many times the limit
+	if(mMaxStreamReadSize > 0 || mReadInterrupt)
+		readStream = new InputCappedStream(readStream,mMaxStreamReadSize,mReadInterrupt,&mTruncatedStreamsCount,&mInterruptedStreamsCount);
 
 	PDFObjectParser* objectsParser = new PDFObjectParser();
 	InputStreamSkipperStream* source = new InputStreamSkipperStream(readStream);
