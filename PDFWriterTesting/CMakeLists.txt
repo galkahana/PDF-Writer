@@ -39,6 +39,7 @@ create_test_sourcelist (Tests
   HighLevelContentContext.cpp
   HighLevelImages.cpp
   ImagesAndFormsForwardReferenceTest.cpp
+  InheritedLookupCacheTest.cpp
   InputCharStringDecodeStreamTest.cpp
   InputFlateDecodeTester.cpp
   InputImagesAsStreamsTest.cpp

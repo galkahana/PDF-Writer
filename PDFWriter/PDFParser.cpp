@@ -84,6 +84,7 @@ void PDFParser::ResetParser()
 	for(; it != mObjectStreamsCache.end();++it)
 		delete[] it->second;
 	mObjectStreamsCache.clear();
+	mInheritanceParentsCache.clear();
 	mDecryptionHelper.Reset();
 	mParsedXrefs.clear();
 	mNewObjectParsingPath.Reset();
@@ -1180,7 +1181,22 @@ PDFObject* PDFParser::QueryInheritedDictionaryEntry(PDFDictionary* inDictionary,
 			}
 		}
 
-		PDFObjectCastPtr<PDFDictionary> parent(QueryDictionaryObject(inDictionary, scParent));
+		// a page tree node is the parent of many nodes, and their inherited lookups all go through it.
+		// parse it once, rather than on every lookup (which made reading all pages of a flat page tree
+		// quadratic in the page count)
+		RefCountPtr<PDFDictionary> parent;
+		ObjectIDTypeToPDFDictionaryMap::iterator itCached = isIndirectRef ? mInheritanceParentsCache.find(parentID) : mInheritanceParentsCache.end();
+		if(itCached != mInheritanceParentsCache.end())
+		{
+			parent = itCached->second;
+		}
+		else
+		{
+			PDFObjectCastPtr<PDFDictionary> parsedParent(QueryDictionaryObject(inDictionary, scParent));
+			parent = parsedParent;
+			if(isIndirectRef && !!parent)
+				mInheritanceParentsCache.insert(ObjectIDTypeToPDFDictionaryMap::value_type(parentID, parent));
+		}
 
 		PDFObject* result = NULL;
 		if(!!parent)

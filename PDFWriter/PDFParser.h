@@ -79,6 +79,7 @@ struct ObjectStreamHeaderEntry
 };
 
 typedef std::map<ObjectIDType,ObjectStreamHeaderEntry*> ObjectIDTypeToObjectStreamHeaderEntryMap;
+typedef std::map<ObjectIDType,RefCountPtr<PDFDictionary> > ObjectIDTypeToPDFDictionaryMap;
 
 class PDFParser
 {
@@ -196,6 +197,8 @@ private:
 	LongBufferSizeType mLastReadPositionFromEnd;
 	bool mEncounteredFileStart;
 	ObjectIDTypeToObjectStreamHeaderEntryMap mObjectStreamsCache;
+	// indirect /Parent dictionaries parsed by QueryInheritedDictionaryEntry, by object ID
+	ObjectIDTypeToPDFDictionaryMap mInheritanceParentsCache;
 	LongFilePositionTypeSet mParsedXrefs;
 
 	double mPDFLevel;
