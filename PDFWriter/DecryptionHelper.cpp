@@ -289,6 +289,9 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 						unsigned int cryptLength = !lengthObject ? mLength : ComputeByteLength(lengthObject.GetPtr());
 						// setup encryption method (based on cfmName) and key (based on length)
 						string cfmName = cfmNameObject->GetValue();
+						// V2 is the name ISO 32000-1 (Table 25) gives the RC4 method. "RC4" is still accepted
+						if(cfmName == "V2")
+							cfmName = "RC4";
 						if(cfmName != "AESV2" && cfmName != "AESV3" && cfmName != "RC4") {
 							continue; // probably "None"". could also be unsupported. in any case, ignore and this means that this crypt filter will not encrypt
 						}
@@ -511,13 +514,14 @@ XCryptor* DecryptionHelper::GetCryptForStream(PDFStreamInput* inStream) {
 					break;
 			}
 			if (i < filterObjectArray->GetLength()) {
+				// no decode params for the crypt filter means Identity (ISO 32000-1 Table 14), as in CreateFilterForStream
 				PDFObjectCastPtr<PDFArray> decodeParams(mParser->QueryDictionaryObject(streamDictionary.GetPtr(), "DecodeParms"));
 				if (!decodeParams)
-					return mXcryptStreams;
+					return NULL;
 				// got index, look for the name in the decode params array
 				PDFObjectCastPtr<PDFDictionary> decodeParamsItem((mParser->QueryArrayObject(decodeParams.GetPtr(), i)));
 				if (!decodeParamsItem)
-					return mXcryptStreams;
+					return NULL;
 
 				PDFObjectCastPtr<PDFName> cryptFilterName(mParser->QueryDictionaryObject(decodeParamsItem.GetPtr(), "Name"));
 				return GetFilterForName(mXcrypts, cryptFilterName->GetValue());
@@ -531,7 +535,7 @@ XCryptor* DecryptionHelper::GetCryptForStream(PDFStreamInput* inStream) {
 			// has to be crypt filter, look for the name in decode params
 			PDFObjectCastPtr<PDFDictionary> decodeParamsItem((mParser->QueryDictionaryObject(streamDictionary.GetPtr(), "DecodeParms")));
 			if (!decodeParamsItem)
-				return mXcryptStreams;
+				return NULL; // no decode params, Identity
 
 			PDFObjectCastPtr<PDFName> cryptFilterName(mParser->QueryDictionaryObject(decodeParamsItem.GetPtr(), "Name"));
 			return GetFilterForName(mXcrypts, cryptFilterName->GetValue());
