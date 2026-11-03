@@ -468,6 +468,12 @@ std::string DecryptionHelper::DecryptString(const std::string& inStringToDecrypt
 	if (!IsDecrypting() || !mXcryptStrings)
 		return inStringToDecrypt;
 
+	// only strings inside indirect objects are encrypted, with a key derived from the object number.
+	// malformed input can still make the parser read a string when no object started, and then there
+	// is no key (and RC4 would divide by its empty length)
+	if (mXcryptStrings->GetCurrentObjectKey().empty())
+		return inStringToDecrypt;
+
 	IByteReader* decryptStream = CreateDecryptionReader(new InputStringStream(inStringToDecrypt), mXcryptStrings->GetCurrentObjectKey(), mXcryptStrings->GetIsUsingAES());
 	if (decryptStream) {
 		OutputStringBufferStream outputStream;

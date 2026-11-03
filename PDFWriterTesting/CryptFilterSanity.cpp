@@ -29,6 +29,10 @@
      release as above, and the filter was ignored, so the content was not decrypted.
    - CryptStreamWithoutName.pdf: a stream with /Filter /Crypt and /DecodeParms without
      /Name (optional, Identity by default). GetCryptForStream dereferenced the missing name.
+   - EncryptedStringOutsideObject.pdf: an RC4 encrypted document where the xref offset of
+     the page's /Annots object points at a hex string. The string is read before any object
+     started, so there is no object key, and RC4 was initialized with an empty key (division
+     by zero).
 */
 #include "PDFParser.h"
 #include "PDFDictionary.h"
@@ -100,6 +104,7 @@ int CryptFilterSanity(int argc, char* argv[]) {
 	ok = CheckFile(argv, "CryptFilterNotDictionary.pdf") && ok;
 	ok = CheckFile(argv, "CryptFilterIndirect.pdf") && ok;
 	ok = CheckFile(argv, "CryptStreamWithoutName.pdf") && ok;
+	ok = CheckFile(argv, "EncryptedStringOutsideObject.pdf") && ok;
 
 	return ok ? 0 : 1;
 }
