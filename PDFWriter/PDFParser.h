@@ -43,6 +43,7 @@ class PDFStreamInput;
 class PDFDictionary;
 class PDFName;
 class IPDFParserExtender;
+class IReadInterrupt;
 class PDFParsingPath;
 
 typedef std::pair<PDFHummus::EStatusCode,IByteReader*> EStatusCodeAndIByteReader;
@@ -172,6 +173,12 @@ public:
 	// set extender for parser, to enhance parsing capabilities
 	void SetParserExtender(IPDFParserExtender* inParserExtender);
 
+	// number of stream readers that PDFParsingOptions::MaxStreamReadSize ended with more data to give, since StartPDFParsing.
+	// also counts the predictor streams not opened because a single row would be past it
+	unsigned long GetTruncatedStreamsCount();
+	// number of stream readers that PDFParsingOptions::ReadInterrupt stopped, since StartPDFParsing
+	unsigned long GetInterruptedStreamsCount();
+
     // advanced, direct xref access
     ObjectIDType GetXrefSize();
     XrefEntryInput* GetXrefEntry(ObjectIDType inObjectID);   
@@ -196,6 +203,10 @@ private:
 	LongBufferSizeType mLastReadPositionFromEnd;
 	bool mEncounteredFileStart;
 	ObjectIDTypeToObjectStreamHeaderEntryMap mObjectStreamsCache;
+	LongBufferSizeType mMaxStreamReadSize; // 0 for no limit
+	unsigned long mTruncatedStreamsCount;
+	IReadInterrupt* mReadInterrupt; // not owned. NULL for none
+	unsigned long mInterruptedStreamsCount;
 	LongFilePositionTypeSet mParsedXrefs;
 
 	double mPDFLevel;
