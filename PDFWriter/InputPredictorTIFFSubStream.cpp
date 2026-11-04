@@ -68,10 +68,15 @@ LongBufferSizeType InputPredictorTIFFSubStream::Read(Byte* inBuffer,LongBufferSi
 	// now repeatedly read bytes from the input stream, and decode
 	while(readBytes < inBufferSize && mSourceStream->NotEnded())
 	{
-		if(mSourceStream->Read(mRowBuffer,(mColumns*mColors*mBitsPerComponent)/8) != (mColumns*mColors*mBitsPerComponent)/8)
+		// keep the bytes this call already gave when the data ends: a flate source ends belatedly,
+		// with a read of 0 after the last row, and a short row is the end of the data
+		LongBufferSizeType rowSize = (mColumns*mColors*mBitsPerComponent)/8;
+		LongBufferSizeType readFromSource = mSourceStream->Read(mRowBuffer,rowSize);
+		if(readFromSource == 0)
+			break; // a belated end. must be flate
+		if(readFromSource != rowSize)
 		{
-			TRACE_LOG("InputPredictorPNGSubStream::Read, problem, expected columns*colors*bitspercomponent/8 number read. didn't make it");
-			readBytes = 0;
+			TRACE_LOG("InputPredictorTIFFSubStream::Read, problem, expected columns*colors*bitspercomponent/8 number read. didn't make it");
 			break;
 		}
 		DecodeBufferToColors();
