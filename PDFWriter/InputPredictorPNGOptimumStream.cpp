@@ -23,6 +23,7 @@
 #include "Trace.h"
 #include <stdlib.h>
 #include <stdint.h>
+#include <new>
 
 /*
 	Note from Gal: Note that optimum also implements the others. this is because PNG compression requires that the first byte in the line holds the algo -
@@ -209,7 +210,18 @@ void InputPredictorPNGOptimumStream::Assign(IByteReader* inSourceStream,
 	mBufferSize = (totalBits + 7) / 8 + 1;
 	mBuffer = new Byte[mBufferSize];
 	memset(mBuffer,0,mBufferSize);
-	mUpValues = new Byte[mBufferSize];
+	// a constructor that throws runs no destructor: free the first buffer if the second fails
+	try
+	{
+		mUpValues = new Byte[mBufferSize];
+	}
+	catch(std::bad_alloc&)
+	{
+		delete[] mBuffer;
+		mBuffer = NULL;
+		mBufferSize = 0;
+		throw;
+	}
 	memset(mUpValues,0,mBufferSize); // that's less important
 	mIndex = mBuffer + mBufferSize;
 }

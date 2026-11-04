@@ -21,6 +21,7 @@
 #include "InputPredictorTIFFSubStream.h"
 #include "Trace.h"
 #include <stdint.h>
+#include <new>
 
 using namespace IOBasicTypes;
 
@@ -152,10 +153,21 @@ void InputPredictorTIFFSubStream::Assign(IByteReader* inSourceStream,
 	// the defensive bounds check trips. value-initialize in that case so unwritten
 	// cells read as 0 instead of uninitialized heap memory. the 8 and >8 bpc paths
 	// fully overwrite the buffer and don't need the extra zero pass.
-	if(inBitsPerComponent < 8)
-		mReadColors = new unsigned short[mReadColorsCount]();
-	else
-		mReadColors = new unsigned short[mReadColorsCount];
+	// a constructor that throws runs no destructor: free the row buffer if this fails
+	try
+	{
+		if(inBitsPerComponent < 8)
+			mReadColors = new unsigned short[mReadColorsCount]();
+		else
+			mReadColors = new unsigned short[mReadColorsCount];
+	}
+	catch(std::bad_alloc&)
+	{
+		delete[] mRowBuffer;
+		mRowBuffer = NULL;
+		mReadColorsCount = 0;
+		throw;
+	}
 	mReadColorsIndex = mReadColors + mReadColorsCount; // assign to end of array so will know that should read new buffer
 	mIndexInColor = 0;
 

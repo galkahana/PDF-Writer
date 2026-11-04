@@ -173,7 +173,8 @@ public:
 	// set extender for parser, to enhance parsing capabilities
 	void SetParserExtender(IPDFParserExtender* inParserExtender);
 
-	// number of stream readers that PDFParsingOptions::MaxStreamReadSize ended with more data to give, since StartPDFParsing
+	// number of stream readers that PDFParsingOptions::MaxStreamReadSize ended with more data to give, since StartPDFParsing.
+	// also counts the predictor streams not opened because a single row would be past it
 	unsigned long GetTruncatedStreamsCount();
 	// number of stream readers that PDFParsingOptions::ReadInterrupt stopped, since StartPDFParsing
 	unsigned long GetInterruptedStreamsCount();
