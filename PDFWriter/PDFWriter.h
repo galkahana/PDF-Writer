@@ -337,6 +337,7 @@ private:
     PDFParser mModifiedFileParser;
     EPDFVersion mModifiedFileVersion;
     bool mIsModified;
+    bool mIsStarted;
 
 	void SetupLog(const LogConfiguration& inLogConfiguration);
 	void SetupCreationSettings(const PDFCreationSettings& inPDFCreationSettings);
