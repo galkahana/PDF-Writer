@@ -69,8 +69,9 @@ LongBufferSizeType InputPredictorTIFFSubStream::Read(Byte* inBuffer,LongBufferSi
 	while(readBytes < inBufferSize && mSourceStream->NotEnded())
 	{
 		// keep the bytes this call already gave when the data ends: a flate source ends belatedly,
-		// with a read of 0 after the last row, and a short row is the end of the data
-		LongBufferSizeType rowSize = (mColumns*mColors*mBitsPerComponent)/8;
+		// with a read of 0 after the last row, and a short row is the end of the data.
+		// a row is whole bytes, its last one padded, as Assign sizes mRowBuffer
+		LongBufferSizeType rowSize = (mColumns*mColors*mBitsPerComponent + 7)/8;
 		LongBufferSizeType readFromSource = mSourceStream->Read(mRowBuffer,rowSize);
 		if(readFromSource == 0)
 			break; // a belated end. must be flate
@@ -181,8 +182,13 @@ void InputPredictorTIFFSubStream::ReadByteFromColorsArray(Byte& outBuffer)
 		outBuffer = 0;
 		for(Byte i=0;i<(8/mBitsPerComponent);++i)
 		{
-			outBuffer = (outBuffer<<mBitsPerComponent) + (Byte)(*mReadColorsIndex);
-			++mReadColorsIndex;
+			outBuffer = (outBuffer<<mBitsPerComponent);
+			// the last byte of a row that is not whole bytes is padded with 0 bits
+			if((LongBufferSizeType)(mReadColorsIndex - mReadColors) < mReadColorsCount)
+			{
+				outBuffer = outBuffer + (Byte)(*mReadColorsIndex);
+				++mReadColorsIndex;
+			}
 		}
 	}
 	else // 8 < mBitsPerComponent [which is just 16 for now]
@@ -212,25 +218,16 @@ void InputPredictorTIFFSubStream::DecodeBufferToColors()
 	}
 	else if(8 > mBitsPerComponent)
 	{
-		bool stop = false;
-		for(; !stop && i < (mReadColorsCount*mBitsPerComponent/8);++i)
+		// every byte of the row, the last one too when the row is not whole bytes. its low bits
+		// are padding, whose indexes are past the end of mReadColors, and are skipped
+		LongBufferSizeType rowSize = (mReadColorsCount*mBitsPerComponent + 7)/8;
+		for(; i < rowSize;++i)
 		{
 			for(LongBufferSizeType j=0; j < (LongBufferSizeType)(8/mBitsPerComponent); ++j)
 			{
 				LongBufferSizeType writeIndex = (i+1)*8/mBitsPerComponent - j - 1;
-				// defensive bounds check: with non-power-of-two BitsPerComponent or
-				// counts that don't divide evenly, the computed index could in principle
-				// land outside the mReadColors array. break out of both loops, since
-				// writeIndex grows monotonically with i and would keep tripping; unfilled
-				// cells were zero-initialized in Assign(), so downstream reads see 0.
-				if(writeIndex >= mReadColorsCount)
-				{
-					TRACE_LOG3("InputPredictorTIFFSubStream::DecodeBufferToColors, write index %zu out of bounds (count=%zu, bpc=%u), aborting decode",
-						(size_t)writeIndex, (size_t)mReadColorsCount, (unsigned)mBitsPerComponent);
-					stop = true;
-					break;
-				}
-				mReadColors[writeIndex] = mRowBuffer[i] & mBitMask;
+				if(writeIndex < mReadColorsCount)
+					mReadColors[writeIndex] = mRowBuffer[i] & mBitMask;
 				mRowBuffer[i] = mRowBuffer[i]>>mBitsPerComponent;
 			}
 		}

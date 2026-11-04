@@ -41,6 +41,7 @@ using namespace std;
 using namespace PDFHummus;
 
 static const Byte scExpected8Bits[] = {0x0a, 0x14, 0x1e, 0x28, 0x05, 0x05, 0x06, 0xfa, 0x00, 0xff, 0x00, 0xff};
+static const Byte scExpected4Bits[] = {0x12, 0x30, 0xf0, 0x70, 0x89, 0xa0};
 
 static bool CheckStream(PDFParser& inParser, ObjectIDType inObjectID, const Byte* inExpected, size_t inExpectedSize) {
 	PDFObjectCastPtr<PDFStreamInput> stream(inParser.ParseNewObject(inObjectID));
@@ -82,6 +83,7 @@ int TIFFPredictorTest(int argc, char* argv[]) {
 
 	bool ok = true;
 	ok = CheckStream(parser, 4, scExpected8Bits, sizeof(scExpected8Bits)) && ok;
+	ok = CheckStream(parser, 5, scExpected4Bits, sizeof(scExpected4Bits)) && ok;
 
 	return ok ? 0 : 1;
 }
