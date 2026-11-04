@@ -193,7 +193,8 @@ void InputPredictorTIFFSubStream::ReadByteFromColorsArray(Byte& outBuffer)
 	}
 	else // 8 < mBitsPerComponent [which is just 16 for now]
 	{
-		outBuffer =(Byte)(((*mReadColorsIndex)>>(mBitsPerComponent - mIndexInColor*8)) & 0xff);
+		// high byte first
+		outBuffer =(Byte)(((*mReadColorsIndex)>>(mBitsPerComponent - 8 - mIndexInColor*8)) & 0xff);
 		++mIndexInColor;
 		if(mBitsPerComponent/8 == mIndexInColor)
 		{
@@ -238,7 +239,7 @@ void InputPredictorTIFFSubStream::DecodeBufferToColors()
 		{
 			mReadColors[i] = 0;
 			for(Byte j=0;j<mBitsPerComponent/8;++j)
-				mReadColors[i] = (mReadColors[i]<<mBitsPerComponent) + mRowBuffer[i*mBitsPerComponent/8 + j];
+				mReadColors[i] = (mReadColors[i]<<8) + mRowBuffer[i*mBitsPerComponent/8 + j];
 		}
 	}
 
