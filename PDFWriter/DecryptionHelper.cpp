@@ -267,6 +267,11 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 
 		ByteList password = stringToByteList(inPassword);
 
+		// authenticate password, try to determine if user or owner
+		mDidSucceedOwnerPasswordVerification = AuthenticateOwnerPassword(password); // in mv<=4 password will be mutated on successful owner authentication
+		mFailedPasswordVerification = !mDidSucceedOwnerPasswordVerification && !AuthenticateUserPassword(password);
+
+
 		// Setup crypt filters, or a default filter
 		if (mV == 4 || mV == 5) {
 			// multiple xcryptions. read crypt filters, determine which does what
@@ -357,11 +362,6 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 			mXcryptStreams = defaultEncryption;
 			mXcryptStrings = defaultEncryption;
 		}
-
-		// authenticate password, try to determine if user or owner
-		mDidSucceedOwnerPasswordVerification = AuthenticateOwnerPassword(password);
-		mFailedPasswordVerification = !mDidSucceedOwnerPasswordVerification && !AuthenticateUserPassword(password);
-
 
 		mSupportsDecryption = true;
 	}while(false);
@@ -603,7 +603,7 @@ bool DecryptionHelper::AuthenticateUserPassword(const ByteList& inPassword) {
 	}
 }
 
-bool DecryptionHelper::AuthenticateOwnerPassword(const ByteList& inPassword) {
+bool DecryptionHelper::AuthenticateOwnerPassword(ByteList& ioPassword) {
 	if(mV >= 5) {
 #ifdef PDFHUMMUS_NO_OPENSSL
 		TRACE_LOG("DecryptionHelper:AuthenticateOwnerPassword, V value of 5 is only supported with OpenSSL installed. Please install OpenSSL and make sure PDFHUMMUS_NO_OPENSSL is not defined and try again.");
@@ -611,15 +611,15 @@ bool DecryptionHelper::AuthenticateOwnerPassword(const ByteList& inPassword) {
 #else
 		XCryptionCommon2_0 xcryption2_0;
 		return xcryption2_0.AuthenticateOwnerPassword(
-						inPassword,
+						ioPassword,
 						mO,
 						mU
 					);
 #endif
 	} else {
 		XCryptionCommon xcryption;
-		return xcryption.AuthenticateOwnerPassword(
-							inPassword,
+		OwnerAuthenticationResult result = xcryption.AuthenticateOwnerPassword(
+							ioPassword,
 							mRevision,
 							mLength,
 							mO,
@@ -627,7 +627,10 @@ bool DecryptionHelper::AuthenticateOwnerPassword(const ByteList& inPassword) {
 							mFileIDPart1,
 							mEncryptMetaData,
 							mU);
-
+		if(result.didAuth)
+			// update password on successful auth with the user password
+			ioPassword = result.decryptedUserPassword;
+		return result.didAuth;
 	}
 }
 

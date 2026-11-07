@@ -313,7 +313,7 @@ ByteList XCryptionCommon::CreateOValue(
 	return encryptedPassword;
 }
 
-bool XCryptionCommon::AuthenticateOwnerPassword(
+OwnerAuthenticationResult XCryptionCommon::AuthenticateOwnerPassword(
 	const ByteList& inMaybeOwnerPassword,
 	unsigned int inRevision,
 	unsigned int inLength,
@@ -334,15 +334,15 @@ bool XCryptionCommon::AuthenticateOwnerPassword(
 		inLength
 	);
 
-	ByteList decryptedUserPassword;
+	OwnerAuthenticationResult result;
 
 	// Part 2: Decrypt the "user password" from the O value using the maybe owner encryption key.
 	// This is the "reverse" application of similar steps in algorithm 3.3, which created the "O" value.
 	if (inRevision == 2) {
-		decryptedUserPassword = rc4Encode(RC4Key, inO);
+		result.decryptedUserPassword = rc4Encode(RC4Key, inO);
 	}
 	else if (inRevision >= 3) {
-		decryptedUserPassword = inO;
+		result.decryptedUserPassword = inO;
 
 		for (int i = 19; i >= 0; --i) {
 			ByteList newEncryptionKey;
@@ -350,13 +350,13 @@ bool XCryptionCommon::AuthenticateOwnerPassword(
 			for (; it != RC4Key.end(); ++it)
 				newEncryptionKey.push_back((*it) ^ i);
 
-			decryptedUserPassword = rc4Encode(newEncryptionKey, decryptedUserPassword);
+			result.decryptedUserPassword = rc4Encode(newEncryptionKey, result.decryptedUserPassword);
 		}
 	}
 
 	// Part 3: attempt to authenticate the user password, using the decrypted "user password" as the input password.
-	return AuthenticateUserPassword(
-		decryptedUserPassword,
+	result.didAuth = AuthenticateUserPassword(
+		result.decryptedUserPassword,
 		inRevision,
 		inLength,
 		inO,
@@ -365,4 +365,6 @@ bool XCryptionCommon::AuthenticateOwnerPassword(
 		inEncryptMetaData,
 		inU
 	);
+
+	return result;
 }

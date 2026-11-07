@@ -25,6 +25,13 @@ limitations under the License.
 
 #include <list>
 
+
+struct OwnerAuthenticationResult {
+	bool didAuth;
+	ByteList decryptedUserPassword;
+};
+
+
 /**
  * XCryption common implements encryption and decryption functionality for PDF files pre PDF 2.0.
  * It fits encryption dicts where the "V" is either 1, 2 or 4. 
@@ -68,7 +75,9 @@ public:
 		const ByteList& inU
     );
 
-	bool AuthenticateOwnerPassword(
+	// owner password authentication goes through decrypting the user password from the O value and then authenticating it.
+	// the result returns both success indication and the decrypted user password, that is required for building encryption key for the file
+	OwnerAuthenticationResult AuthenticateOwnerPassword(
 		const ByteList& inMaybeOwnerPassword,
 		unsigned int inRevision,
 		unsigned int inLength,

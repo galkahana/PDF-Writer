@@ -136,7 +136,10 @@ private:
 	ByteList mFileIDPart1;
 
 	bool AuthenticateUserPassword(const ByteList& inPassword);
-	bool AuthenticateOwnerPassword(const ByteList& inPassword);
+	// authenticating owner password will update ioPassword with encrypted user password for mV <= 4
+	// where part of auth authentication is decrypting the user password, which is what must be used for creating the file encryption key
+	// in other cases, the password is not modified.
+	bool AuthenticateOwnerPassword(ByteList& ioPassword);
 
 	void Release();
 };
