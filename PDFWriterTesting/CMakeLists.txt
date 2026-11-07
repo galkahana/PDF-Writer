@@ -25,6 +25,7 @@ create_test_sourcelist (Tests
   CopyingAndMergingEmptyPages.cpp
   CustomLogTest.cpp
   DCTDecodeFilterTest.cpp
+  DecryptionHelperTest.cpp
   DFontTest.cpp
   EmptyFileTest.cpp
   EmptyPagesPDF.cpp
