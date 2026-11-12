@@ -23,6 +23,7 @@ create_test_sourcelist (Tests
   ColorEmojiColr.cpp
   ColorEmojiColrV1.cpp
   CopyingAndMergingEmptyPages.cpp
+  CryptFilterSanity.cpp
   CustomLogTest.cpp
   DCTDecodeFilterTest.cpp
   DecryptionHelperTest.cpp
