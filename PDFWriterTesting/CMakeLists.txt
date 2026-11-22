@@ -53,6 +53,7 @@ create_test_sourcelist (Tests
   MergeToPDFForm.cpp
   ModifyingEncryptedFile.cpp
   ModifyingExistingFileContent.cpp
+  NegativeStreamLengthTest.cpp
   ObjectStreamNonFirstIndexLengthTest.cpp
   OpenTypeFileInputTest.cpp
   OpenTypePrimitiveReaderTest.cpp

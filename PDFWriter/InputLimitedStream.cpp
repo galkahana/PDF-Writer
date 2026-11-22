@@ -46,12 +46,17 @@ InputLimitedStream::InputLimitedStream(IByteReader* inSourceStream,LongFilePosit
 void InputLimitedStream::Assign(IByteReader* inSourceStream,LongFilePositionType inReadLimit,bool inOwnsStream)
 {
 	mStream = inSourceStream;
-	mMoreToRead = inReadLimit;
+	// a negative limit (a stream /Length of -1, say) reads nothing
+	mMoreToRead = inReadLimit < 0 ? 0 : inReadLimit;
 	mOwnsStream = inOwnsStream;
 }
 
 LongBufferSizeType InputLimitedStream::Read(Byte* inBuffer,LongBufferSizeType inBufferSize)
 {
+	// nothing left to read. never pass the source a negative size: it takes it as a huge unsigned one
+	if(mMoreToRead <= 0)
+		return 0;
+
 	LongBufferSizeType readBytes = mStream->Read(inBuffer,(LongBufferSizeType)std::min<LongFilePositionType>((LongFilePositionType)inBufferSize,mMoreToRead));
 
 	mMoreToRead -= readBytes;
