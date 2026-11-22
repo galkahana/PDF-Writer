@@ -2194,6 +2194,15 @@ EStatusCodeAndIByteReader PDFParser::WrapWithPredictorStream(IByteReader* inputS
 				break;
 			}
 
+			// a row needs at least one column and one color. the predictors refuse a 0 (and a negative
+			// value, cast to a huge size, whose row size overflows) by keeping no row buffer, so fail here,
+			// and let the caller free the stream chain as on any other failure
+			if((columns.GetPtr() && columns->GetValue() < 1) || (colors.GetPtr() && colors->GetValue() < 1)) {
+				TRACE_LOG("PDFParser::WrapWithPredictorStream, Columns and Colors must be at least 1, failing");
+				status = PDFHummus::eFailure;
+				break;
+			}
+
 
 			switch(predictor->GetValue())
 			{

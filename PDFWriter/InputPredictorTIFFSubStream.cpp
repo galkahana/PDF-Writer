@@ -30,6 +30,12 @@ InputPredictorTIFFSubStream::InputPredictorTIFFSubStream(void)
 	mRowBuffer = NULL;
 	mReadColors = NULL;
 	mReadColorsCount = 0;
+	mReadColorsIndex = NULL;
+	mColors = 0;
+	mBitsPerComponent = 0;
+	mColumns = 0;
+	mIndexInColor = 0;
+	mBitMask = 0;
 }
 
 InputPredictorTIFFSubStream::InputPredictorTIFFSubStream(IByteReader* inSourceStream,
@@ -40,6 +46,14 @@ InputPredictorTIFFSubStream::InputPredictorTIFFSubStream(IByteReader* inSourceSt
 	mSourceStream = NULL;
 	mRowBuffer = NULL;
 	mReadColors = NULL;
+	// Assign leaves the rest as they are when it refuses its parameters
+	mReadColorsCount = 0;
+	mReadColorsIndex = NULL;
+	mColors = 0;
+	mBitsPerComponent = 0;
+	mColumns = 0;
+	mIndexInColor = 0;
+	mBitMask = 0;
 
 	Assign(inSourceStream,inColors,inBitsPerComponent,inColumns);
 }
@@ -53,7 +67,8 @@ InputPredictorTIFFSubStream::~InputPredictorTIFFSubStream(void)
 
 LongBufferSizeType InputPredictorTIFFSubStream::Read(Byte* inBuffer,LongBufferSizeType inBufferSize)
 {
-	if(!mSourceStream)
+	// no row buffer when Assign refused its parameters
+	if(!mSourceStream || !mRowBuffer)
 		return 0;
 
 	LongBufferSizeType readBytes = 0;
@@ -87,7 +102,7 @@ LongBufferSizeType InputPredictorTIFFSubStream::Read(Byte* inBuffer,LongBufferSi
 
 bool InputPredictorTIFFSubStream::NotEnded()
 {
-	if(!mSourceStream)
+	if(!mSourceStream || !mRowBuffer)
 		return false;
 	return mSourceStream->NotEnded() || (LongBufferSizeType)(mReadColorsIndex - mReadColors) < mReadColorsCount;
 }
@@ -107,6 +122,7 @@ void InputPredictorTIFFSubStream::Assign(IByteReader* inSourceStream,
 	delete[] mReadColors;
 	mReadColors = NULL;
 	mReadColorsCount = 0;
+	mReadColorsIndex = NULL;
 
 	// Validate inputs
 	if(inColumns == 0 || inColors == 0 || inBitsPerComponent == 0)

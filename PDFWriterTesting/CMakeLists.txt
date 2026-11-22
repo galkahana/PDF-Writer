@@ -77,6 +77,7 @@ create_test_sourcelist (Tests
   PDFWriterTest.cpp
   PFBStreamTest.cpp
   PNGImageTest.cpp
+  PredictorWithoutSamplesTest.cpp
   RecryptPDF.cpp
   RefCountTest.cpp
   RotatedPagesPDF.cpp

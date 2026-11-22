@@ -168,6 +168,10 @@ void InputPredictorPNGOptimumStream::Assign(IByteReader* inSourceStream,
 	mFunctionType = 0;
 	mBytesPerPixel = 0;
 
+	// take ownership of the source stream first, as the caller hands it over even when
+	// the parameters are refused below (Read then gives nothing)
+	mSourceStream = inSourceStream;
+
 	// Validate inputs to prevent overflow in buffer size calculation
 	if(inColumns == 0 || inColors == 0 || inBitsPerComponent == 0)
 	{
@@ -199,8 +203,6 @@ void InputPredictorPNGOptimumStream::Assign(IByteReader* inSourceStream,
 	}
 
 	// All validation passed - now update member state
-	mSourceStream = inSourceStream;
-
 	mBytesPerPixel = (inColors * inBitsPerComponent + 7) / 8;
 	if(mBytesPerPixel == 0)
 		mBytesPerPixel = 1;
