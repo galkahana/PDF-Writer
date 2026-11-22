@@ -27,6 +27,7 @@ create_test_sourcelist (Tests
   DCTDecodeFilterTest.cpp
   DecryptionHelperTest.cpp
   DFontTest.cpp
+  DoubleEndPDFTest.cpp
   EmptyFileTest.cpp
   EmptyPagesPDF.cpp
   EncryptedPDF.cpp
