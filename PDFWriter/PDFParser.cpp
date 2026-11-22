@@ -44,10 +44,12 @@
 #include "IPDFParserExtender.h"
 #include "InputDCTDecodeStream.h"
 #include "ArrayOfInputStreamsStream.h"
+#include "InputCappedStream.h"
 
 #include  <algorithm>
 #include <cerrno>
 #include <cstdlib>
+#include <new>
 using namespace PDFHummus;
 
 #define MAX_XREF_SIZE 9999999999LL
@@ -60,6 +62,10 @@ PDFParser::PDFParser(void)
 	mTrailer = NULL;
 	mPagesObjectIDs = NULL;
 	mParserExtender = NULL;
+	mMaxStreamReadSize = 0;
+	mTruncatedStreamsCount = 0;
+	mReadInterrupt = NULL;
+	mInterruptedStreamsCount = 0;
     mAllowExtendingSegments = true; // Gal 19.9.2013: here's some policy changer. basically i'm supposed to ignore all segments that declare objects past the trailer
                                     // declared size. but i would like to allow files that do extend. as this is incompatible with the specs, i'll make
                                     // this boolean dendent. i will sometimes make it public so ppl can actually modify this policy. for now, it's internal
@@ -84,6 +90,10 @@ void PDFParser::ResetParser()
 	for(; it != mObjectStreamsCache.end();++it)
 		delete[] it->second;
 	mObjectStreamsCache.clear();
+	mMaxStreamReadSize = 0;
+	mTruncatedStreamsCount = 0;
+	mReadInterrupt = NULL;
+	mInterruptedStreamsCount = 0;
 	mDecryptionHelper.Reset();
 	mParsedXrefs.clear();
 	mNewObjectParsingPath.Reset();
@@ -95,6 +105,8 @@ EStatusCode PDFParser::StartPDFParsing(IByteReaderWithPosition* inSourceStream, 
 	EStatusCode status;
 
 	ResetParser();
+	mMaxStreamReadSize = inOptions.MaxStreamReadSize;
+	mReadInterrupt = inOptions.ReadInterrupt;
 
 	mStream.Assign(inSourceStream);
 	mCurrentPositionProvider.Assign(&mStream);
@@ -2145,7 +2157,21 @@ IByteReader* PDFParser::CreateInputStreamReader(PDFStreamInput* inStream)
 		delete result;
 		result = NULL;
 	}
+	else if(result && (mMaxStreamReadSize > 0 || mReadInterrupt))
+	{
+		result = new InputCappedStream(result,mMaxStreamReadSize,mReadInterrupt,&mTruncatedStreamsCount,&mInterruptedStreamsCount);
+	}
 	return result;
+}
+
+unsigned long PDFParser::GetTruncatedStreamsCount()
+{
+	return mTruncatedStreamsCount;
+}
+
+unsigned long PDFParser::GetInterruptedStreamsCount()
+{
+	return mInterruptedStreamsCount;
 }
 
 
@@ -2194,38 +2220,75 @@ EStatusCodeAndIByteReader PDFParser::WrapWithPredictorStream(IByteReader* inputS
 				break;
 			}
 
-
-			switch(predictor->GetValue())
+			// the predictors allocate their row buffers up front, sized from these values. with a read
+			// limit, refuse a predictor whose buffers are past it: the PNG predictor's row and its tag
+			// byte, the TIFF predictor's row and its row of 16 bit samples. such a predictor could not
+			// give a single row within the limit. the stream does not open, and counts as truncated.
+			// an unsupported predictor is left to fail below
+			bool isTIFFPredictor = predictor->GetValue() == 2;
+			bool isPNGPredictor = predictor->GetValue() >= 10 && predictor->GetValue() <= 15;
+			if(mMaxStreamReadSize > 0 && (isTIFFPredictor || isPNGPredictor))
 			{
-				case 2:
+				LongBufferSizeType maxSize = (LongBufferSizeType)-1;
+				bool rowTooLarge = colorsValue != 0 && columnsValue > maxSize / colorsValue;
+				LongBufferSizeType samplesCount = rowTooLarge ? 0 : columnsValue * colorsValue;
+				rowTooLarge = rowTooLarge || samplesCount > maxSize / bitsPerComponentValue;
+				LongBufferSizeType rowBits = rowTooLarge ? 0 : samplesCount * bitsPerComponentValue;
+				LongBufferSizeType rowSize = rowBits / 8 + (rowBits % 8 != 0 ? 1 : 0);
+				rowTooLarge = rowTooLarge ||
+								(isPNGPredictor && rowSize >= mMaxStreamReadSize) ||
+								(isTIFFPredictor && (rowSize > mMaxStreamReadSize ||
+													 samplesCount > mMaxStreamReadSize / sizeof(unsigned short)));
+				if(rowTooLarge)
 				{
-					result = new InputPredictorTIFFSubStream(inputStream,
-															 colorsValue,
-															 bitsPerComponentValue,
-															 columnsValue);
-					break;
-				}
-				case 10:
-				case 11:
-				case 12:
-				case 13:
-				case 14:
-				case 15:
-				{
-					// Gal: optimum can handle all presets, because non-optimum presets still require a function sign flag
-					// at line start...so optimum can handle them.
-					result =  new InputPredictorPNGOptimumStream(inputStream,
-																 colorsValue,
-																 bitsPerComponentValue,
-																 columnsValue);
-					break;
-				}
-				default:
-				{
-					TRACE_LOG("PDFParser::CreateFilterForStream, supporting only predictor of types 1,2,10,11,12,13,14,15, failing");
+					TRACE_LOG("PDFParser::WrapWithPredictorStream, predictor row is larger than the read limit, failing");
+					++mTruncatedStreamsCount;
 					status = PDFHummus::eFailure;
 					break;
 				}
+			}
+
+			// a predictor that cannot get its buffers fails, so that the caller frees the stream chain
+			try
+			{
+				switch(predictor->GetValue())
+				{
+					case 2:
+					{
+						result = new InputPredictorTIFFSubStream(inputStream,
+																 colorsValue,
+																 bitsPerComponentValue,
+																 columnsValue);
+						break;
+					}
+					case 10:
+					case 11:
+					case 12:
+					case 13:
+					case 14:
+					case 15:
+					{
+						// Gal: optimum can handle all presets, because non-optimum presets still require a function sign flag
+						// at line start...so optimum can handle them.
+						result =  new InputPredictorPNGOptimumStream(inputStream,
+																	 colorsValue,
+																	 bitsPerComponentValue,
+																	 columnsValue);
+						break;
+					}
+					default:
+					{
+						TRACE_LOG("PDFParser::CreateFilterForStream, supporting only predictor of types 1,2,10,11,12,13,14,15, failing");
+						status = PDFHummus::eFailure;
+						break;
+					}
+				}
+			}
+			catch(std::bad_alloc&)
+			{
+				TRACE_LOG("PDFParser::WrapWithPredictorStream, no memory for the predictor's buffers, failing");
+				result = NULL;
+				status = PDFHummus::eFailure;
 			}
 	} while(false);
 
@@ -2387,6 +2450,10 @@ PDFObjectParser* PDFParser::StartReadingObjectsFromStream(PDFStreamInput* inStre
 
 PDFObjectParser* PDFParser::StartReadingObjectsFromStreams(PDFArray* inArrayOfStreams) {
 	IByteReader* readStream = new ArrayOfInputStreamsStream(inArrayOfStreams,this);
+	// each stream's reader is capped on its own. cap the whole array too, so that listing one stream
+	// many times does not read many times the limit
+	if(mMaxStreamReadSize > 0 || mReadInterrupt)
+		readStream = new InputCappedStream(readStream,mMaxStreamReadSize,mReadInterrupt,&mTruncatedStreamsCount,&mInterruptedStreamsCount);
 
 	PDFObjectParser* objectsParser = new PDFObjectParser();
 	InputStreamSkipperStream* source = new InputStreamSkipperStream(readStream);

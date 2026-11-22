@@ -63,6 +63,7 @@ InputAscii85DecodeStream.cpp
 InputAsciiHexDecodeStream.cpp
 InputBufferedStream.cpp
 InputByteArrayStream.cpp
+InputCappedStream.cpp
 InputCharStringDecodeStream.cpp
 InputDCTDecodeStream.cpp
 InputFile.cpp
@@ -257,6 +258,7 @@ InputAscii85DecodeStream.h
 InputAsciiHexDecodeStream.h
 InputBufferedStream.h
 InputByteArrayStream.h
+InputCappedStream.h
 InputCharStringDecodeStream.h
 InputDCTDecodeStream.h
 InputFile.h
@@ -278,6 +280,7 @@ IObjectEndWritingTask.h
 IObjectsContextExtender.h
 IPageEndWritingTask.h
 IPDFParserExtender.h
+IReadInterrupt.h
 IReadPositionProvider.h
 IResourceWritingTask.h
 IType1InterpreterImplementation.h
@@ -658,6 +661,8 @@ InputBufferedStream.cpp
 InputBufferedStream.h
 InputByteArrayStream.cpp
 InputByteArrayStream.h
+InputCappedStream.cpp
+InputCappedStream.h
 InputDCTDecodeStream.cpp
 InputDCTDecodeStream.h
 InputFile.cpp
@@ -684,6 +689,7 @@ InputStringStream.cpp
 InputStringStream.h
 InterpretedGradientStop.h
 IOBasicTypes.h
+IReadInterrupt.h
 IReadPositionProvider.h
 OutputBufferedStream.cpp
 OutputBufferedStream.h

@@ -77,6 +77,7 @@ create_test_sourcelist (Tests
   PDFWriterTest.cpp
   PFBStreamTest.cpp
   PNGImageTest.cpp
+  PredictorRowLimitTest.cpp
   RecryptPDF.cpp
   RefCountTest.cpp
   RotatedPagesPDF.cpp
@@ -84,6 +85,7 @@ create_test_sourcelist (Tests
   ShutDownRestartTest.cpp
   SimpleContentPageTest.cpp
   SimpleTextUsage.cpp
+  StreamReadLimitTest.cpp
   TestMeasurementsTest.cpp
   TextUsageBugs.cpp
   TIFFImageHandlerTest.cpp

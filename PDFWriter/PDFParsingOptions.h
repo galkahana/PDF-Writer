@@ -20,14 +20,27 @@ limitations under the License.
 */
 #pragma once
 
+#include "IOBasicTypes.h"
+
 #include <string>
+
+class IReadInterrupt;
 
 struct PDFParsingOptions
 {
 	std::string Password;
 
-	PDFParsingOptions() {}
-	PDFParsingOptions(std::string inPassword) { Password = inPassword; }
+	// the most bytes a stream reader made by PDFParser::CreateInputStreamReader gives, for any stream, filtered
+	// (the bytes its filters decode to) or not. the stream ends there, and PDFParser::GetTruncatedStreamsCount
+	// counts it. 0, the default, sets no limit
+	IOBasicTypes::LongBufferSizeType MaxStreamReadSize;
+	// asked about once per MiB those readers give whether to stop reading (see IReadInterrupt.h). true ends the
+	// stream, and PDFParser::GetInterruptedStreamsCount counts it. not owned, and must outlive the parser's readers.
+	// NULL, the default, never stops a read
+	IReadInterrupt* ReadInterrupt;
+
+	PDFParsingOptions() { MaxStreamReadSize = 0; ReadInterrupt = NULL; }
+	PDFParsingOptions(std::string inPassword) { Password = inPassword; MaxStreamReadSize = 0; ReadInterrupt = NULL; }
 
 	static const PDFParsingOptions& DefaultPDFParsingOptions();
 };
