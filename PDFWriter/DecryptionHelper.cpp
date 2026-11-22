@@ -283,17 +283,17 @@ EStatusCode DecryptionHelper::Setup(PDFParser* inParser, const string& inPasswor
 				EStatusCode status = eSuccess;
 				while (cryptFiltersIt.MoveNext() && status == eSuccess)
 				{
-					PDFObjectCastPtr<PDFDictionary> cryptFilter;
-					// A little caveat of those smart ptrs need to be handled here
-					// make sure to pass the pointer after init...otherwise cast wont do addref
-					// and object will be released
-					cryptFilter = cryptFiltersIt.GetValue();
+					// query the entry rather than casting the map value. QueryDictionaryObject adds a reference
+					// of its own (a failed cast releases it, and not the one the /CF dictionary owns), and resolves
+					// a crypt filter given by reference
+					PDFObjectCastPtr<PDFDictionary> cryptFilter(inParser->QueryDictionaryObject(cryptFilters.GetPtr(), cryptFiltersIt.GetKey()->GetValue()));
 					if (!!cryptFilter) {
 						PDFObjectCastPtr<PDFName> cfmNameObject(inParser->QueryDictionaryObject(cryptFilter.GetPtr(), "CFM"));
 						RefCountPtr<PDFObject> lengthObject(inParser->QueryDictionaryObject(cryptFilter.GetPtr(), "Length"));
 						unsigned int cryptLength = !lengthObject ? mLength : ComputeByteLength(lengthObject.GetPtr());
 						// setup encryption method (based on cfmName) and key (based on length)
-						string cfmName = cfmNameObject->GetValue();
+						// /CFM is optional, and None by default
+						string cfmName = !cfmNameObject ? "None" : cfmNameObject->GetValue();
 						if(cfmName != "AESV2" && cfmName != "AESV3" && cfmName != "RC4") {
 							continue; // probably "None"". could also be unsupported. in any case, ignore and this means that this crypt filter will not encrypt
 						}
@@ -468,6 +468,12 @@ std::string DecryptionHelper::DecryptString(const std::string& inStringToDecrypt
 	if (!IsDecrypting() || !mXcryptStrings)
 		return inStringToDecrypt;
 
+	// only strings inside indirect objects are encrypted, with a key derived from the object number.
+	// malformed input can still make the parser read a string when no object started, and then there
+	// is no key (and RC4 would divide by its empty length)
+	if (mXcryptStrings->GetCurrentObjectKey().empty())
+		return inStringToDecrypt;
+
 	IByteReader* decryptStream = CreateDecryptionReader(new InputStringStream(inStringToDecrypt), mXcryptStrings->GetCurrentObjectKey(), mXcryptStrings->GetIsUsingAES());
 	if (decryptStream) {
 		OutputStringBufferStream outputStream;
@@ -520,7 +526,8 @@ XCryptor* DecryptionHelper::GetCryptForStream(PDFStreamInput* inStream) {
 					return mXcryptStreams;
 
 				PDFObjectCastPtr<PDFName> cryptFilterName(mParser->QueryDictionaryObject(decodeParamsItem.GetPtr(), "Name"));
-				return GetFilterForName(mXcrypts, cryptFilterName->GetValue());
+				// /Name is optional, and Identity by default
+				return GetFilterForName(mXcrypts, !cryptFilterName ? "Identity" : cryptFilterName->GetValue());
 
 			}
 			else
@@ -534,7 +541,8 @@ XCryptor* DecryptionHelper::GetCryptForStream(PDFStreamInput* inStream) {
 				return mXcryptStreams;
 
 			PDFObjectCastPtr<PDFName> cryptFilterName(mParser->QueryDictionaryObject(decodeParamsItem.GetPtr(), "Name"));
-			return GetFilterForName(mXcrypts, cryptFilterName->GetValue());
+			// /Name is optional, and Identity by default
+			return GetFilterForName(mXcrypts, !cryptFilterName ? "Identity" : cryptFilterName->GetValue());
 		}
 		else
 			return mXcryptStreams; // ???
