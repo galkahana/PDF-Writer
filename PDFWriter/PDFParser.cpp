@@ -573,6 +573,13 @@ static bool ParseObjectIDTypeToken(const std::string& inToken, ObjectIDType& out
 	return true;
 }
 
+static bool IsXrefSegmentInRange(ObjectIDType inSegmentStart, ObjectIDType inSegmentSize)
+{
+	// ObjectIDType is unsigned, so the segment end (start + size) could wrap. a wrap would yield
+	// a small segment end and either skip reading the segment or read into the wrong object slots.
+	return inSegmentSize <= scMaxObjectIDType - inSegmentStart;
+}
+
 
 EStatusCode PDFParser::ExtendXrefToSize(XrefEntryInputVector& inXrefTable, ObjectIDType inXrefSize) {
 	if (inXrefTable.size() >= inXrefSize)
@@ -671,10 +678,7 @@ EStatusCode PDFParser::ParseXrefFromXrefTable(XrefEntryInputVector& inXrefTable,
 			if(segmentSize == 0)
 				continue; // probably will never happen
 
-			// guard against overflow when computing the segment end. ObjectIDType is
-			// unsigned, so a wrap would yield a small firstNonSectionObject and either
-			// skip the entry-reading loop entirely or read into the wrong object slots.
-			if(segmentSize > scMaxObjectIDType - currentObject)
+			if(!IsXrefSegmentInRange(currentObject, segmentSize))
 			{
 				TRACE_LOG2("PDFParser::ParseXref, xref segment overflows object id space (start=%lu size=%lu)", (unsigned long)currentObject, (unsigned long)segmentSize);
 				status = PDFHummus::eFailure;
@@ -1740,6 +1744,12 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInputVector& inXrefTable
 				segmentValue = (PDFInteger*)(segmentsIterator.GetItem());
 
 				ObjectIDType objectsCount = (ObjectIDType)segmentValue->GetValue();
+				if(!IsXrefSegmentInRange(startObject, objectsCount))
+				{
+					TRACE_LOG2("PDFParser::ParseXrefFromXrefStream, xref stream segment overflows object id space (start=%lu size=%lu)", (unsigned long)startObject, (unsigned long)objectsCount);
+					status = PDFHummus::eFailure;
+					break;
+				}
 				ObjectIDType readXrefSize = startObject +  objectsCount;
 
 				// if reading objects past expected range interesting consult policy
