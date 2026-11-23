@@ -102,6 +102,7 @@ create_test_sourcelist (Tests
   UppercaseSequanceTest.cpp
   WatermarkTest.cpp
   WatermarkWithContextOpacityTest.cpp
+  XrefEntryInputTableTest.cpp
   XrefStreamsTest.cpp
 )
 

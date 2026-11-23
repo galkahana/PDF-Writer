@@ -50,6 +50,7 @@ typedef std::vector<XrefEntryInput*> XrefEntryInputPtrVector;
 /*
 	Xref entries by object ID. Entries are stored in fixed size blocks, allocated only when an entry
 	in them is written, so a high object ID does not require allocating all entries below it.
+	Same idea as an OS page table: the object ID splits into a block index and an offset in the block.
 */
 class XrefEntryInputTable
 {
