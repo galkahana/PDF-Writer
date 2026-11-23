@@ -216,7 +216,7 @@ EStatusCode UnicodeString::FromUTF16BE(const unsigned char* inString, unsigned l
 		return PDFHummus::eFailure;
 	}
 
-	for(unsigned long i = 0; i < inLength-1 && PDFHummus::eSuccess == status; i+=2)
+	for(unsigned long i = 0; i + 1 < inLength && PDFHummus::eSuccess == status; i+=2)
 	{
 		unsigned short buffer = (((unsigned short)inString[i])<<8) + inString[i+1];
 
@@ -268,7 +268,7 @@ EStatusCode UnicodeString::FromUTF16LE(const unsigned char* inString, unsigned l
 		return PDFHummus::eFailure;
 	}
 
-	for(unsigned long i = 0; i < inLength-1 && PDFHummus::eSuccess == status; i+=2)
+	for(unsigned long i = 0; i + 1 < inLength && PDFHummus::eSuccess == status; i+=2)
 	{
 		unsigned short buffer = (((unsigned short)inString[i+1])<<8) + inString[i];
 
