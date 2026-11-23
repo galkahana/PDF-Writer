@@ -70,6 +70,7 @@ private:
 	IOBasicTypes::LongBufferSizeType mBufferSize;
 	IOBasicTypes::Byte* mCurrentBufferIndex;
 	IOBasicTypes::Byte* mLastAvailableIndex;
+	IOBasicTypes::LongFilePositionType mBufferStartPosition;
 	IByteReaderWithPosition* mSourceStream;
 
 	void Initiate(IByteReaderWithPosition* inSourceReader,IOBasicTypes::LongBufferSizeType inBufferSize);
