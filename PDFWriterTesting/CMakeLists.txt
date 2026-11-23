@@ -98,6 +98,7 @@ create_test_sourcelist (Tests
   Type1PSTokensTest.cpp
   Type1SubrSanity.cpp
   Type1Test.cpp
+  UnicodeStringTest.cpp
   UnicodeTextUsage.cpp
   UppercaseSequanceTest.cpp
   WatermarkTest.cpp
