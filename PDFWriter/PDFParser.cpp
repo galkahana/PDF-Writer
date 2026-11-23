@@ -50,7 +50,9 @@
 #include <cstdlib>
 using namespace PDFHummus;
 
-#define MAX_XREF_SIZE 9999999999LL
+// ISO 32000-1 Annex C limits indirect objects to 8,388,607, so object numbers
+// run 0..8,388,607 and the xref table holds at most 8,388,608 entries
+#define MAX_XREF_SIZE 8388608
 #define MAX_HEADER_SCAN_POSITION 1024
 
 static const XrefEntryInput scEmptyEntry;
@@ -579,7 +581,7 @@ EStatusCode PDFParser::ExtendXrefToSize(XrefEntryInputVector& inXrefTable, Objec
 		return eSuccess;
 	
 	if(inXrefSize > MAX_XREF_SIZE) {
-		TRACE_LOG("PDFParser::ExtendXrefToSize, invalid value for section length");
+		TRACE_LOG2("PDFParser::ExtendXrefToSize, xref size %lu exceeds maximum supported size %lu", (unsigned long)inXrefSize, (unsigned long)MAX_XREF_SIZE);
 		return eFailure;
 	}
 
@@ -1740,6 +1742,12 @@ EStatusCode PDFParser::ParseXrefFromXrefStream(XrefEntryInputVector& inXrefTable
 				segmentValue = (PDFInteger*)(segmentsIterator.GetItem());
 
 				ObjectIDType objectsCount = (ObjectIDType)segmentValue->GetValue();
+				if(objectsCount > scMaxObjectIDType - startObject)
+				{
+					TRACE_LOG2("PDFParser::ParseXrefFromXrefStream, xref stream segment overflows object id space (start=%lu size=%lu)", (unsigned long)startObject, (unsigned long)objectsCount);
+					status = PDFHummus::eFailure;
+					break;
+				}
 				ObjectIDType readXrefSize = startObject +  objectsCount;
 
 				// if reading objects past expected range interesting consult policy
