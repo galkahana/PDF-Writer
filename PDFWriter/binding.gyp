@@ -204,6 +204,7 @@
                'XCryptionCommon2_0.cpp',
                'XCryptor.cpp',
                'XObjectContentContext.cpp',
+               'XrefEntryInputTable.cpp',
                'AbstractContentContext.h',
                'AbstractWrittenFont.h',
                'AdapterIByteReaderWithPositionToIReadPositionProvider.h',
@@ -415,7 +416,8 @@
                'XCryptionCommon.h',
                'XCryptionCommon2_0.h',
                'XCryptor.h',
-               'XObjectContentContext.h'
+               'XObjectContentContext.h',
+               'XrefEntryInputTable.h'
             ]
         }
     ]        
