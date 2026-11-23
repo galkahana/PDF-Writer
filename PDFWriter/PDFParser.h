@@ -183,6 +183,7 @@ private:
 	RefCountPtr<PDFDictionary> mTrailer;
 	ObjectIDType mXrefSize; // logical size of table (declared). note that mXrefTable keeps its own GetSize() as well.
 	XrefEntryInputTable mXrefTable;
+	ObjectIDType mXrefInUseEntriesCount;
 	unsigned long mPagesCount;
 	ObjectIDType* mPagesObjectIDs;
 	IPDFParserExtender* mParserExtender;
@@ -235,7 +236,7 @@ private:
                                           PDFDictionary** outTrailer,
                                           ObjectIDType* outReadTableSize);
 	PDFObject* ParseExistingInDirectStreamObject(ObjectIDType inObjectId);
-	PDFHummus::EStatusCode ParseObjectStreamHeader(ObjectStreamHeaderEntry* inHeaderInfo,ObjectIDType inObjectsCount);
+	PDFHummus::EStatusCode ParseObjectStreamHeader(ObjectIDType inObjectsCount,ObjectStreamHeaderEntry*& outHeaderInfo);
 	void MovePositionInStream(LongFilePositionType inPosition);
 	EStatusCodeAndIByteReader WrapWithPredictorStream(IByteReader* inputStream, PDFDictionary* inDecodeParams);
 	EStatusCodeAndIByteReader CreateFilterForStream(IByteReader* inStream,PDFName* inFilterName,PDFDictionary* inDecodeParams, PDFStreamInput* inPDFStream);

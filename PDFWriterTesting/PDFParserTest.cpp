@@ -31,9 +31,11 @@
 #include "IByteWriterWithPosition.h"
 #include "PrimitiveObjectsWriter.h"
 #include "ObjectsBasicTypes.h"
+#include "InputByteArrayStream.h"
 
 #include <iostream>
 #include <set>
+#include <stdio.h>
 
 #include "testing/TestIO.h"
 
@@ -125,6 +127,62 @@ static EStatusCode IterateObjectTypes(PDFObject* inObject,PDFParser& inParser,IB
 	
 }
 
+// a classic xref PDF whose catalog and pages are objects 1 and 2, plus one entry at a very high object ID
+static string BuildSparseXrefPDF(unsigned long inPagesCount)
+{
+	char buffer[128];
+	string pdf = "%PDF-1.4\n";
+	size_t catalogPosition = pdf.size();
+	pdf += "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n";
+	size_t pagesPosition = pdf.size();
+	snprintf(buffer, sizeof(buffer), "2 0 obj\n<< /Type /Pages /Kids [] /Count %lu >>\nendobj\n", inPagesCount);
+	pdf += buffer;
+	size_t xrefPosition = pdf.size();
+	snprintf(buffer, sizeof(buffer), "xref\n0 3\n0000000000 65535 f \n%010lu 00000 n \n%010lu 00000 n \n",
+		(unsigned long)catalogPosition, (unsigned long)pagesPosition);
+	pdf += buffer;
+	snprintf(buffer, sizeof(buffer), "2147483646 1\n%010lu 00000 n \n", (unsigned long)catalogPosition);
+	pdf += buffer;
+	snprintf(buffer, sizeof(buffer), "trailer\n<< /Size 3 /Root 1 0 R >>\nstartxref\n%lu\n%%%%EOF\n", (unsigned long)xrefPosition);
+	pdf += buffer;
+	return pdf;
+}
+
+struct SparseXrefPagesCountCase {
+	const char* label;
+	unsigned long pagesCount;
+	EStatusCode expectedStatus;
+};
+
+static const SparseXrefPagesCountCase scStartPDFParsingCases[] = {
+	{"SparseXrefHugePagesCount_ReturnsFailure", 2000000000, eFailure},
+	{"SparseXrefZeroPagesCount_ReturnsSuccess", 0,          eSuccess},
+};
+
+static bool RunStartPDFParsingCases()
+{
+	const size_t count = sizeof(scStartPDFParsingCases) / sizeof(scStartPDFParsingCases[0]);
+
+	for(size_t i = 0; i < count; ++i) {
+		const SparseXrefPagesCountCase& c = scStartPDFParsingCases[i];
+
+		// Arrange
+		string pdf = BuildSparseXrefPDF(c.pagesCount);
+		InputByteArrayStream stream((IOBasicTypes::Byte*)pdf.data(), (LongFilePositionType)pdf.size());
+		PDFParser parser;
+
+		// Act
+		EStatusCode status = parser.StartPDFParsing(&stream);
+
+		// Assert
+		if(status != c.expectedStatus) {
+			cout << "PDFParserTest [StartPDFParsing::" << c.label << "]: expected status " << c.expectedStatus << ", got " << status << endl;
+			return false;
+		}
+	}
+	return true;
+}
+
 int PDFParserTest(int argc, char* argv[])
 {
 	EStatusCode status = PDFHummus::eSuccess;
@@ -189,6 +247,9 @@ int PDFParserTest(int argc, char* argv[])
 		}
 
 	}while(false);
+
+	if(PDFHummus::eSuccess == status && !RunStartPDFParsingCases())
+		status = PDFHummus::eFailure;
 
 	return status;
 }

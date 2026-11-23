@@ -57,6 +57,7 @@ PDFParser::PDFParser(void)
 	mTrailer = NULL;
 	mPagesObjectIDs = NULL;
 	mParserExtender = NULL;
+	mXrefInUseEntriesCount = 0;
     mAllowExtendingSegments = true; // Gal 19.9.2013: here's some policy changer. basically i'm supposed to ignore all segments that declare objects past the trailer
                                     // declared size. but i would like to allow files that do extend. as this is incompatible with the specs, i'll make
                                     // this boolean dendent. i will sometimes make it public so ppl can actually modify this policy. for now, it's internal
@@ -72,6 +73,7 @@ void PDFParser::ResetParser()
 {
 	mTrailer = NULL;
 	mXrefTable.Reset();
+	mXrefInUseEntriesCount = 0;
 	delete[] mPagesObjectIDs;
 	mPagesObjectIDs = NULL;
 	mStream.Assign(NULL);
@@ -932,15 +934,13 @@ EStatusCode PDFParser::ParsePagesObjectIDs()
 		if(!ValidateObjectsCount(pagesCountValue))
 		{
 			// every leaf page is an indirect object that must have an xref entry, so the
-			// declared /Count cannot legitimately exceed the number of entries we read.
-			// note: do NOT compare against mXrefSize directly - that is the trailer /Size
-			// value (attacker-controlled). GetXrefSize() clamps it to mXrefTable.GetSize().
+			// declared /Count cannot legitimately exceed the number of in use entries we read.
 			TRACE_LOG1("PDFParser::ParsePagesObjectIDs, invalid pages count %lld", pagesCountValue);
 			status = PDFHummus::eFailure;
 			break;
 		}
 
-		// safe: bounded above by actualXrefSize (an ObjectIDType) by the check above
+		// safe: bounded above by the in use entries count (an ObjectIDType) by the check above
 		mPagesCount = (unsigned long)pagesCountValue;
 		mPagesObjectIDs = new ObjectIDType[mPagesCount];
 
@@ -1446,11 +1446,12 @@ EStatusCode PDFParser::ParseFileDirectory()
 		{
 			TRACE_LOG("PDFParser::ParseFileDirectory,Unexpected object at xref start");
 			status = eFailure;
+			break;
 		}
 
+		mXrefInUseEntriesCount = mXrefTable.CountInUseEntries();
 
 	}while(false);
-
 
 
 	return status;
@@ -1842,11 +1843,11 @@ EStatusCode PDFParser::ReadXrefSegmentValue(IByteReader* inSource,int inEntrySiz
 
 bool PDFParser::ValidateObjectsCount(long long inObjectsCount)
 {
-	// Any PDF objects counter cannot be negative or larger than what the actual xref table can hold
-	ObjectIDType actualXrefSize = GetXrefSize();
-	bool valid = inObjectsCount >= 0 && (unsigned long long)inObjectsCount <= actualXrefSize;
+	// Any PDF objects counter cannot be negative or larger than the number of objects the xref says exist.
+	// note: not the xref size, which is the highest object ID and may be far above the actual number of objects
+	bool valid = inObjectsCount >= 0 && (unsigned long long)inObjectsCount <= mXrefInUseEntriesCount;
 	if (!valid) {
-		TRACE_LOG2("PDFParser::ValidateObjectsCount, invalid objects count %lld (actual xref size %lu)", inObjectsCount, actualXrefSize);
+		TRACE_LOG2("PDFParser::ValidateObjectsCount, invalid objects count %lld (in use xref entries %lu)", inObjectsCount, (unsigned long)mXrefInUseEntriesCount);
 	}
 	return valid;
 }
@@ -1892,8 +1893,10 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 			break;
 		}
 
+		// Sanity validating N for being a valid object ID type. No need for something stricter as we don't rely on it
+		// for allocation purposes.
 		long long objectsCountValue = streamObjectsCount->GetValue();
-		if(!ValidateObjectsCount(objectsCountValue))
+		if(objectsCountValue < 0 || (unsigned long long)objectsCountValue > (unsigned long long)scMaxObjectIDType)
 		{
 			TRACE_LOG1("PDFParser::ParseExistingInDirectStreamObject, invalid N key in stream dictionary %ld",objectStreamID);
 			status = PDFHummus::eFailure;
@@ -1919,13 +1922,9 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 
 		if(it == mObjectStreamsCache.end())
 		{
-			objectStreamHeader = new ObjectStreamHeaderEntry[objectsCount];
-			status = ParseObjectStreamHeader(objectStreamHeader,objectsCount);
+			status = ParseObjectStreamHeader(objectsCount,objectStreamHeader);
 			if(status != PDFHummus::eSuccess)
-			{
-				delete[] objectStreamHeader;
 				break;
-			}
 			it = mObjectStreamsCache.insert(ObjectIDTypeToObjectStreamHeaderEntryMap::value_type(objectStreamID,objectStreamHeader)).first;
 		}
 		objectStreamHeader = it->second;
@@ -1988,12 +1987,17 @@ void PDFParser::NotifyIndirectObjectEnd(PDFObject* inObject) {
 }
 
 
-EStatusCode PDFParser::ParseObjectStreamHeader(ObjectStreamHeaderEntry* inHeaderInfo,ObjectIDType inObjectsCount)
+typedef std::vector<ObjectStreamHeaderEntry> ObjectStreamHeaderEntryVector;
+
+EStatusCode PDFParser::ParseObjectStreamHeader(ObjectIDType inObjectsCount,ObjectStreamHeaderEntry*& outHeaderInfo)
 {
-	ObjectIDType currentObject = 0;
+	// entries are collected as they are read, rather than allocating inObjectsCount up front,
+	// so memory follows what the stream actually contains and not what its N claims, this way avoiding a potential
+	// attack from very large N.
+	ObjectStreamHeaderEntryVector headerInfo;
 	EStatusCode status = PDFHummus::eSuccess;
 
-	while(currentObject < inObjectsCount && (PDFHummus::eSuccess == status))
+	while(headerInfo.size() < inObjectsCount && (PDFHummus::eSuccess == status))
 	{
 		PDFObjectCastPtr<PDFInteger> objectNumber(mObjectParser.ParseNewObject());
 		if(!objectNumber)
@@ -2010,9 +2014,16 @@ EStatusCode PDFParser::ParseObjectStreamHeader(ObjectStreamHeaderEntry* inHeader
 			status = PDFHummus::eFailure;
 			break;
 		}
-		inHeaderInfo[currentObject].mObjectNumber = (ObjectIDType)(objectNumber->GetValue());
-		inHeaderInfo[currentObject].mObjectOffset = objectPosition->GetValue();
-		++currentObject;
+		ObjectStreamHeaderEntry entry;
+		entry.mObjectNumber = (ObjectIDType)(objectNumber->GetValue());
+		entry.mObjectOffset = objectPosition->GetValue();
+		headerInfo.push_back(entry);
+	}
+
+	if(PDFHummus::eSuccess == status)
+	{
+		outHeaderInfo = new ObjectStreamHeaderEntry[inObjectsCount];
+		std::copy(headerInfo.begin(), headerInfo.end(), outHeaderInfo);
 	}
 	return status;
 }
