@@ -73,5 +73,6 @@ private:
 	IByteReaderWithPosition* mSourceStream;
 
 	void Initiate(IByteReaderWithPosition* inSourceReader,IOBasicTypes::LongBufferSizeType inBufferSize);
+	void MarkEmptyBuffer();
 
 };
