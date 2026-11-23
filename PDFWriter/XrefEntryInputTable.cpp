@@ -56,7 +56,9 @@ XrefEntryInput* XrefEntryInputTable::GetEntry(ObjectIDType inObjectID)
 	if(inObjectID >= mSize)
 		return NULL;
 
-	XrefEntryInput* block = mBlocks[inObjectID >> XREF_BLOCK_SIZE_BITS];
+	// the size may extend past the directory, e.g. after merging a table whose trailing entries are undefined
+	ObjectIDType blockIndex = inObjectID >> XREF_BLOCK_SIZE_BITS;
+	XrefEntryInput* block = blockIndex < mBlocks.size() ? mBlocks[blockIndex] : NULL;
 	return block ? &(block[inObjectID & XREF_BLOCK_INDEX_MASK]) : &scUndefinedEntry;
 }
 

@@ -170,6 +170,32 @@ static bool MergeFrom_EntriesAcrossBlocks_CopiesOnlyDefinedEntries()
     return true;
 }
 
+static bool MergeFrom_SourceWithOnlyUndefinedEntries_UnwrittenEntriesReturnUndefined()
+{
+    // Arrange - source entry 5000 is created but never given a type, so the merge copies no blocks
+    XrefEntryInputTable target;
+    XrefEntryInputTable source;
+    XrefEntryInput* entry;
+    if(source.GetOrCreateEntry(5000, entry) != eSuccess) {
+        cout << "XrefEntryInputTableTest [MergeFrom_SourceWithOnlyUndefinedEntries_UnwrittenEntriesReturnUndefined]: failed to create entry" << endl;
+        return false;
+    }
+    if(target.MergeFrom(source) != eSuccess) {
+        cout << "XrefEntryInputTableTest [MergeFrom_SourceWithOnlyUndefinedEntries_UnwrittenEntriesReturnUndefined]: merge failed" << endl;
+        return false;
+    }
+
+    // Act
+    XrefEntryInput* mergedEntry = target.GetEntry(10);
+
+    // Assert
+    if(target.GetSize() != 5001 || !mergedEntry || mergedEntry->mType != eXrefEntryUndefined) {
+        cout << "XrefEntryInputTableTest [MergeFrom_SourceWithOnlyUndefinedEntries_UnwrittenEntriesReturnUndefined]: expected size 5001 and an undefined entry" << endl;
+        return false;
+    }
+    return true;
+}
+
 // ---- Reset ------------------------------------------------------------------
 
 static bool Reset_TableWithEntries_EmptiesTable()
@@ -203,6 +229,7 @@ int XrefEntryInputTableTest(int argc, char* argv[])
     if(!GetEntry_UnwrittenIDWithinSize_ReturnsUndefinedEntry()) return 1;
     if(!GetEntry_IDAtSize_ReturnsNull()) return 1;
     if(!MergeFrom_EntriesAcrossBlocks_CopiesOnlyDefinedEntries()) return 1;
+    if(!MergeFrom_SourceWithOnlyUndefinedEntries_UnwrittenEntriesReturnUndefined()) return 1;
     if(!Reset_TableWithEntries_EmptiesTable()) return 1;
     return 0;
 }
