@@ -49,7 +49,7 @@ InputBufferedStream::InputBufferedStream(IByteReaderWithPosition* inSourceReader
 void InputBufferedStream::Assign(IByteReaderWithPosition* inReader)
 {
 	mSourceStream = inReader;
-	mCurrentBufferIndex = mBuffer;
+	MarkEmptyBuffer();
 }
 
 LongBufferSizeType InputBufferedStream::Read(Byte* inBuffer,LongBufferSizeType inBufferSize)
@@ -84,6 +84,7 @@ LongBufferSizeType InputBufferedStream::Read(Byte* inBuffer,LongBufferSizeType i
 
 			if(mSourceStream->NotEnded())
 			{
+				MarkEmptyBuffer();
 				inBufferSize -= bytesRead;
 				LongBufferSizeType bytesToReadToBuffer = inBufferSize % mBufferSize;
 
@@ -91,6 +92,7 @@ LongBufferSizeType InputBufferedStream::Read(Byte* inBuffer,LongBufferSizeType i
 		
 				if(mSourceStream->NotEnded())
 				{
+					mBufferStartPosition = mSourceStream->GetCurrentPosition();
 					mLastAvailableIndex = mBuffer + mSourceStream->Read(mBuffer,mBufferSize);
 					mCurrentBufferIndex = mBuffer;
 					bytesToReadToBuffer = std::min<LongBufferSizeType>(bytesToReadToBuffer,mLastAvailableIndex - mBuffer);
@@ -119,7 +121,8 @@ void InputBufferedStream::Initiate(IByteReaderWithPosition* inSourceReader,IOBas
 {
 	mBufferSize = inBufferSize;
 	mBuffer = new Byte[mBufferSize];
-	mLastAvailableIndex = mCurrentBufferIndex = mBuffer;
+	mBufferStartPosition = 0;
+	MarkEmptyBuffer();
 	mSourceStream = inSourceReader;
 }
 
@@ -132,20 +135,37 @@ void InputBufferedStream::Skip(LongBufferSizeType inSkipSize)
 	else
 	{
 		inSkipSize -= (LongBufferSizeType)(mLastAvailableIndex - mCurrentBufferIndex);
-		mCurrentBufferIndex = mLastAvailableIndex;
+		MarkEmptyBuffer();
 		mSourceStream->Skip(inSkipSize);
 	}
 }
 
 void InputBufferedStream::SetPosition(LongFilePositionType inOffsetFromStart)
 {
-	mLastAvailableIndex = mCurrentBufferIndex = mBuffer;
-	mSourceStream->SetPosition(inOffsetFromStart);
+	bool positionInBuffer = false;
+
+	if(mLastAvailableIndex != mBuffer)
+	{
+		// Set position within the buffer if the target is still in its defined range
+		LongFilePositionType bufferEndPosition = mBufferStartPosition + (mLastAvailableIndex - mBuffer);
+
+		if(inOffsetFromStart >= mBufferStartPosition && inOffsetFromStart <= bufferEndPosition)
+		{
+			mCurrentBufferIndex = mBuffer + (inOffsetFromStart - mBufferStartPosition);
+			positionInBuffer = true;
+		}
+	}
+
+	if(!positionInBuffer)
+	{
+		MarkEmptyBuffer();
+		mSourceStream->SetPosition(inOffsetFromStart);
+	}
 }
 
 void InputBufferedStream::SetPositionFromEnd(LongFilePositionType inOffsetFromEnd)
 {
-	mLastAvailableIndex = mCurrentBufferIndex = mBuffer;
+	MarkEmptyBuffer();
 	mSourceStream->SetPositionFromEnd(inOffsetFromEnd);	
 }
 
@@ -159,4 +179,8 @@ LongFilePositionType InputBufferedStream::GetCurrentPosition()
 	// when reading the current position is the current stream position minus how much is left
 	// to read from the buffer
 	return mSourceStream->GetCurrentPosition() - (mLastAvailableIndex - mCurrentBufferIndex);
+}
+void InputBufferedStream::MarkEmptyBuffer()
+{
+	mLastAvailableIndex = mCurrentBufferIndex = mBuffer;
 }
