@@ -236,7 +236,7 @@ private:
                                           PDFDictionary** outTrailer,
                                           ObjectIDType* outReadTableSize);
 	PDFObject* ParseExistingInDirectStreamObject(ObjectIDType inObjectId);
-	PDFHummus::EStatusCode ParseObjectStreamHeader(ObjectStreamHeaderEntry* inHeaderInfo,ObjectIDType inObjectsCount);
+	PDFHummus::EStatusCode ParseObjectStreamHeader(ObjectIDType inObjectsCount,ObjectStreamHeaderEntry*& outHeaderInfo);
 	void MovePositionInStream(LongFilePositionType inPosition);
 	EStatusCodeAndIByteReader WrapWithPredictorStream(IByteReader* inputStream, PDFDictionary* inDecodeParams);
 	EStatusCodeAndIByteReader CreateFilterForStream(IByteReader* inStream,PDFName* inFilterName,PDFDictionary* inDecodeParams, PDFStreamInput* inPDFStream);

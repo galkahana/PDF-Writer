@@ -1893,8 +1893,10 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 			break;
 		}
 
+		// Sanity validating N for being a valid object ID type. No need for something stricter as we don't rely on it
+		// for allocation purposes.
 		long long objectsCountValue = streamObjectsCount->GetValue();
-		if(!ValidateObjectsCount(objectsCountValue))
+		if(objectsCountValue < 0 || (unsigned long long)objectsCountValue > (unsigned long long)scMaxObjectIDType)
 		{
 			TRACE_LOG1("PDFParser::ParseExistingInDirectStreamObject, invalid N key in stream dictionary %ld",objectStreamID);
 			status = PDFHummus::eFailure;
@@ -1920,13 +1922,9 @@ PDFObject* PDFParser::ParseExistingInDirectStreamObject(ObjectIDType inObjectId)
 
 		if(it == mObjectStreamsCache.end())
 		{
-			objectStreamHeader = new ObjectStreamHeaderEntry[objectsCount];
-			status = ParseObjectStreamHeader(objectStreamHeader,objectsCount);
+			status = ParseObjectStreamHeader(objectsCount,objectStreamHeader);
 			if(status != PDFHummus::eSuccess)
-			{
-				delete[] objectStreamHeader;
 				break;
-			}
 			it = mObjectStreamsCache.insert(ObjectIDTypeToObjectStreamHeaderEntryMap::value_type(objectStreamID,objectStreamHeader)).first;
 		}
 		objectStreamHeader = it->second;
@@ -1989,12 +1987,17 @@ void PDFParser::NotifyIndirectObjectEnd(PDFObject* inObject) {
 }
 
 
-EStatusCode PDFParser::ParseObjectStreamHeader(ObjectStreamHeaderEntry* inHeaderInfo,ObjectIDType inObjectsCount)
+typedef std::vector<ObjectStreamHeaderEntry> ObjectStreamHeaderEntryVector;
+
+EStatusCode PDFParser::ParseObjectStreamHeader(ObjectIDType inObjectsCount,ObjectStreamHeaderEntry*& outHeaderInfo)
 {
-	ObjectIDType currentObject = 0;
+	// entries are collected as they are read, rather than allocating inObjectsCount up front,
+	// so memory follows what the stream actually contains and not what its N claims, this way avoiding a potential
+	// attack from very large N.
+	ObjectStreamHeaderEntryVector headerInfo;
 	EStatusCode status = PDFHummus::eSuccess;
 
-	while(currentObject < inObjectsCount && (PDFHummus::eSuccess == status))
+	while(headerInfo.size() < inObjectsCount && (PDFHummus::eSuccess == status))
 	{
 		PDFObjectCastPtr<PDFInteger> objectNumber(mObjectParser.ParseNewObject());
 		if(!objectNumber)
@@ -2011,9 +2014,16 @@ EStatusCode PDFParser::ParseObjectStreamHeader(ObjectStreamHeaderEntry* inHeader
 			status = PDFHummus::eFailure;
 			break;
 		}
-		inHeaderInfo[currentObject].mObjectNumber = (ObjectIDType)(objectNumber->GetValue());
-		inHeaderInfo[currentObject].mObjectOffset = objectPosition->GetValue();
-		++currentObject;
+		ObjectStreamHeaderEntry entry;
+		entry.mObjectNumber = (ObjectIDType)(objectNumber->GetValue());
+		entry.mObjectOffset = objectPosition->GetValue();
+		headerInfo.push_back(entry);
+	}
+
+	if(PDFHummus::eSuccess == status)
+	{
+		outHeaderInfo = new ObjectStreamHeaderEntry[inObjectsCount];
+		std::copy(headerInfo.begin(), headerInfo.end(), outHeaderInfo);
 	}
 	return status;
 }
