@@ -50,7 +50,8 @@
 #include <cstdlib>
 using namespace PDFHummus;
 
-#define MAX_XREF_SIZE 9999999999LL
+// xref size is the trailer /Size, an integer. ISO 32000 Annex C puts integers within 32 bits
+#define MAX_XREF_SIZE 2147483647
 #define MAX_HEADER_SCAN_POSITION 1024
 
 static const XrefEntryInput scEmptyEntry;
