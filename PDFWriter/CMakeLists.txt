@@ -184,6 +184,7 @@ XCryptionCommon.cpp
 XCryptionCommon2_0.cpp
 XCryptor.cpp
 XObjectContentContext.cpp
+XrefEntryInputTable.cpp
 
 #headers
 AbstractContentContext.h
@@ -401,6 +402,7 @@ XCryptionCommon.h
 XCryptionCommon2_0.h
 XCryptor.h
 XObjectContentContext.h
+XrefEntryInputTable.h
 )
 
 
@@ -834,6 +836,8 @@ PDFParsingOptions.cpp
 PDFParsingOptions.h
 SimpleStringTokenizer.cpp
 SimpleStringTokenizer.h
+XrefEntryInputTable.cpp
+XrefEntryInputTable.h
 )
 
 source_group("XCryption" FILES
