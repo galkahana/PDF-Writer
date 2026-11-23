@@ -88,6 +88,25 @@ ObjectIDType XrefEntryInputTable::GetSize()
 	return mSize;
 }
 
+ObjectIDType XrefEntryInputTable::CountInUseEntries()
+{
+	ObjectIDType count = 0;
+
+	XrefEntryInputPtrVector::iterator it = mBlocks.begin();
+	for(; it != mBlocks.end(); ++it)
+	{
+		if(!*it)
+			continue;
+
+		for(ObjectIDType i = 0; i < XREF_BLOCK_SIZE; ++i)
+		{
+			if((*it)[i].mType == eXrefEntryExisting || (*it)[i].mType == eXrefEntryStreamObject)
+				++count;
+		}
+	}
+	return count;
+}
+
 EStatusCode XrefEntryInputTable::MergeFrom(XrefEntryInputTable& inOther)
 {
 	EStatusCode status = eSuccess;

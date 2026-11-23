@@ -68,6 +68,10 @@ public:
 	// One past the highest object ID written
 	ObjectIDType GetSize();
 
+	// Number of entries for objects that exist in the file (in use or in an object stream).
+	// Iterates the whole table, so cache the result rather than calling it repeatedly.
+	ObjectIDType CountInUseEntries();
+
 	// Copies the defined entries of inOther over this table's entries, and extends the size to inOther's size
 	PDFHummus::EStatusCode MergeFrom(XrefEntryInputTable& inOther);
 

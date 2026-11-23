@@ -196,6 +196,36 @@ static bool MergeFrom_SourceWithOnlyUndefinedEntries_UnwrittenEntriesReturnUndef
     return true;
 }
 
+// ---- CountInUseEntries ------------------------------------------------------
+
+static bool CountInUseEntries_MixedTypesAcrossBlocks_CountsExistingAndStreamObjectsOnly()
+{
+    // Arrange - existing at 1, stream object at 2000, deleted at 3000, created but undefined at 4000
+    XrefEntryInputTable table;
+    XrefEntryInput* streamObjectEntry;
+    XrefEntryInput* deletedEntry;
+    XrefEntryInput* undefinedEntry;
+    if(!WriteEntry(table, 1, 100) ||
+       table.GetOrCreateEntry(2000, streamObjectEntry) != eSuccess ||
+       table.GetOrCreateEntry(3000, deletedEntry) != eSuccess ||
+       table.GetOrCreateEntry(4000, undefinedEntry) != eSuccess) {
+        cout << "XrefEntryInputTableTest [CountInUseEntries_MixedTypesAcrossBlocks_CountsExistingAndStreamObjectsOnly]: failed to write entries" << endl;
+        return false;
+    }
+    streamObjectEntry->mType = eXrefEntryStreamObject;
+    deletedEntry->mType = eXrefEntryDelete;
+
+    // Act
+    ObjectIDType count = table.CountInUseEntries();
+
+    // Assert
+    if(count != 2) {
+        cout << "XrefEntryInputTableTest [CountInUseEntries_MixedTypesAcrossBlocks_CountsExistingAndStreamObjectsOnly]: expected 2, got " << count << endl;
+        return false;
+    }
+    return true;
+}
+
 // ---- Reset ------------------------------------------------------------------
 
 static bool Reset_TableWithEntries_EmptiesTable()
@@ -230,6 +260,7 @@ int XrefEntryInputTableTest(int argc, char* argv[])
     if(!GetEntry_IDAtSize_ReturnsNull()) return 1;
     if(!MergeFrom_EntriesAcrossBlocks_CopiesOnlyDefinedEntries()) return 1;
     if(!MergeFrom_SourceWithOnlyUndefinedEntries_UnwrittenEntriesReturnUndefined()) return 1;
+    if(!CountInUseEntries_MixedTypesAcrossBlocks_CountsExistingAndStreamObjectsOnly()) return 1;
     if(!Reset_TableWithEntries_EmptiesTable()) return 1;
     return 0;
 }

@@ -183,6 +183,7 @@ private:
 	RefCountPtr<PDFDictionary> mTrailer;
 	ObjectIDType mXrefSize; // logical size of table (declared). note that mXrefTable keeps its own GetSize() as well.
 	XrefEntryInputTable mXrefTable;
+	ObjectIDType mXrefInUseEntriesCount;
 	unsigned long mPagesCount;
 	ObjectIDType* mPagesObjectIDs;
 	IPDFParserExtender* mParserExtender;

@@ -57,6 +57,7 @@ PDFParser::PDFParser(void)
 	mTrailer = NULL;
 	mPagesObjectIDs = NULL;
 	mParserExtender = NULL;
+	mXrefInUseEntriesCount = 0;
     mAllowExtendingSegments = true; // Gal 19.9.2013: here's some policy changer. basically i'm supposed to ignore all segments that declare objects past the trailer
                                     // declared size. but i would like to allow files that do extend. as this is incompatible with the specs, i'll make
                                     // this boolean dendent. i will sometimes make it public so ppl can actually modify this policy. for now, it's internal
@@ -72,6 +73,7 @@ void PDFParser::ResetParser()
 {
 	mTrailer = NULL;
 	mXrefTable.Reset();
+	mXrefInUseEntriesCount = 0;
 	delete[] mPagesObjectIDs;
 	mPagesObjectIDs = NULL;
 	mStream.Assign(NULL);
@@ -932,15 +934,13 @@ EStatusCode PDFParser::ParsePagesObjectIDs()
 		if(!ValidateObjectsCount(pagesCountValue))
 		{
 			// every leaf page is an indirect object that must have an xref entry, so the
-			// declared /Count cannot legitimately exceed the number of entries we read.
-			// note: do NOT compare against mXrefSize directly - that is the trailer /Size
-			// value (attacker-controlled). GetXrefSize() clamps it to mXrefTable.GetSize().
+			// declared /Count cannot legitimately exceed the number of in use entries we read.
 			TRACE_LOG1("PDFParser::ParsePagesObjectIDs, invalid pages count %lld", pagesCountValue);
 			status = PDFHummus::eFailure;
 			break;
 		}
 
-		// safe: bounded above by actualXrefSize (an ObjectIDType) by the check above
+		// safe: bounded above by the in use entries count (an ObjectIDType) by the check above
 		mPagesCount = (unsigned long)pagesCountValue;
 		mPagesObjectIDs = new ObjectIDType[mPagesCount];
 
@@ -1446,11 +1446,12 @@ EStatusCode PDFParser::ParseFileDirectory()
 		{
 			TRACE_LOG("PDFParser::ParseFileDirectory,Unexpected object at xref start");
 			status = eFailure;
+			break;
 		}
 
+		mXrefInUseEntriesCount = mXrefTable.CountInUseEntries();
 
 	}while(false);
-
 
 
 	return status;
@@ -1842,11 +1843,11 @@ EStatusCode PDFParser::ReadXrefSegmentValue(IByteReader* inSource,int inEntrySiz
 
 bool PDFParser::ValidateObjectsCount(long long inObjectsCount)
 {
-	// Any PDF objects counter cannot be negative or larger than what the actual xref table can hold
-	ObjectIDType actualXrefSize = GetXrefSize();
-	bool valid = inObjectsCount >= 0 && (unsigned long long)inObjectsCount <= actualXrefSize;
+	// Any PDF objects counter cannot be negative or larger than the number of objects the xref says exist.
+	// note: not the xref size, which is the highest object ID and may be far above the actual number of objects
+	bool valid = inObjectsCount >= 0 && (unsigned long long)inObjectsCount <= mXrefInUseEntriesCount;
 	if (!valid) {
-		TRACE_LOG2("PDFParser::ValidateObjectsCount, invalid objects count %lld (actual xref size %lu)", inObjectsCount, actualXrefSize);
+		TRACE_LOG2("PDFParser::ValidateObjectsCount, invalid objects count %lld (in use xref entries %lu)", inObjectsCount, (unsigned long)mXrefInUseEntriesCount);
 	}
 	return valid;
 }
