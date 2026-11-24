@@ -88,6 +88,7 @@ create_test_sourcelist (Tests
   TextUsageBugs.cpp
   TIFFImageHandlerTest.cpp
   TIFFImageTest.cpp
+  TIFFPredictorTest.cpp
   TiffSpecialsTest.cpp
   TimerTest.cpp
   TrueTypeAnsiWriteBug.cpp
